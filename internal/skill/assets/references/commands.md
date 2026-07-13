@@ -75,8 +75,11 @@ fft stock list --facility berlin-warehouse --all --max-items 500
 fft facility list --total
 ```
 
-- The default page is one page. `--all` follows the cursor until the end, which on a real
-  tenant can be a very long time and a great many requests — bound it with `--max-items`.
+- The default is one page. `--all` follows the cursor, stopping at `--max-items` — which
+  **defaults to 10,000**, so `--all` is bounded whether you say so or not. Lower it when the
+  question is exploratory; a real tenant is a great many requests.
+- Hitting that limit is **not an error**: fft warns on stderr and exits 0 with what it got,
+  so the JSON alone cannot tell you the answer was cut short.
 - `--total` asks the API for the count, and prints it **to stderr**, not into the JSON.
 
 ## Core commands

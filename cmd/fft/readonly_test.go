@@ -271,6 +271,17 @@ var _ = Describe("a read-only project", func() {
 		Expect(minted).To(BeFalse(), "a refused write signed in anyway")
 	})
 
+	// A command line that contradicts itself is not a request to write. Reporting it
+	// as a read-only refusal would send whoever read that exit code — a human, or an
+	// agent whose skill says exit 10 means "ask the user" — off to argue about a
+	// permission they do not need, over a command that could never have been sent.
+	It("calls a self-contradictory command line a usage error, not a refused write", func() {
+		code := c.run("api", "addPickJob", "--file", "job.json", "--data", "{}")
+
+		Expect(code).To(Equal(exitcode.Usage))
+		Expect(t.calls).To(BeEmpty())
+	})
+
 	When("--read-only=false tries to loosen it", func() {
 		It("refuses, rather than quietly honouring the flag", func() {
 			code := c.run("facility", "delete", "f1", "--yes", "--read-only=false")

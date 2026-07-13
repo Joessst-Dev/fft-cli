@@ -115,6 +115,16 @@ var _ = Describe("fft skill install", func() {
 		Expect(c.run("skill", "install", "--local", "--dir", root)).To(Equal(exitcode.Usage))
 	})
 
+	// Falling back to the home directory here would install the skill somewhere the
+	// user did not ask for and was not told about.
+	It("refuses an empty --dir rather than choosing for the user", func() {
+		Expect(c.run("skill", "install", "--dir", "")).To(Equal(exitcode.Usage))
+
+		home, err := os.UserHomeDir()
+		Expect(err).NotTo(HaveOccurred())
+		Expect(filepath.Join(home, ".claude")).NotTo(BeADirectory())
+	})
+
 	// A machine with no project is exactly the machine a user most wants to run this
 	// on: the skill is how their agent learns to configure the rest.
 	It("needs no project, and creates no config file", func() {

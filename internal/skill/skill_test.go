@@ -25,6 +25,14 @@ func statuses(plan skill.Plan) map[string]skill.Status {
 	return out
 }
 
+func evaluated(path string) string {
+	GinkgoHelper()
+
+	out, err := filepath.EvalSymlinks(path)
+	Expect(err).NotTo(HaveOccurred())
+	return out
+}
+
 func install(root string) skill.Plan {
 	GinkgoHelper()
 
@@ -200,6 +208,89 @@ var _ = Describe("installing the skill", func() {
 
 			// And takes nothing of fft's with it.
 			Expect(doc(root)).To(BeAnExistingFile())
+		})
+	})
+
+	// The invariant: Apply removes exactly what the plan named. An install that
+	// reports no changes has made none — so nothing may be swept up on the side,
+	// however confident fft is that the user did not want it.
+	When("the user keeps files of their own in the skill directory", func() {
+		var notes, empty string
+
+		BeforeEach(func() {
+			install(root)
+
+			notes = filepath.Join(installed(root), "notes", "mine.md")
+			Expect(os.MkdirAll(filepath.Dir(notes), 0o755)).To(Succeed())
+			Expect(os.WriteFile(notes, []byte("mine\n"), 0o644)).To(Succeed())
+
+			// An empty directory of the user's. Nothing fft ships would put one here, and
+			// that is exactly why fft must not be the one to decide it is rubbish.
+			empty = filepath.Join(installed(root), "scratch")
+			Expect(os.Mkdir(empty, 0o755)).To(Succeed())
+		})
+
+		It("names the file in the plan rather than quietly removing it", func() {
+			plan, err := skill.NewPlan(root)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(plan.Pending()).To(ConsistOf(skill.Change{
+				File:   "notes/mine.md",
+				Status: skill.StatusStale,
+			}))
+		})
+
+		It("leaves their empty directory alone", func() {
+			install(root)
+
+			Expect(empty).To(BeADirectory())
+		})
+
+		It("removes the directory it emptied itself, and no other", func() {
+			install(root)
+
+			Expect(notes).NotTo(BeAnExistingFile())
+			Expect(filepath.Dir(notes)).NotTo(BeADirectory(), "the directory pruning emptied was left behind")
+			Expect(empty).To(BeADirectory())
+			Expect(doc(root)).To(BeAnExistingFile())
+		})
+	})
+
+	// The dotfiles arrangement: ~/.claude/skills/fft is a link to a directory kept
+	// somewhere else. fft installs *through* the link. What it must never do is
+	// mistake the link for a file it does not ship and prune it — writing the skill
+	// correctly and then deleting the only thing that pointed at it.
+	When("the skill directory is a symlink", func() {
+		var target string
+
+		BeforeEach(func() {
+			target = filepath.Join(GinkgoT().TempDir(), "elsewhere")
+			Expect(os.MkdirAll(target, 0o755)).To(Succeed())
+			Expect(os.Symlink(target, installed(root))).To(Succeed())
+		})
+
+		It("installs through it, and does not delete it", func() {
+			done := install(root)
+
+			Expect(filepath.Join(target, skill.Doc)).To(BeAnExistingFile())
+
+			// Compared resolved, because a temp directory is itself behind a symlink on
+			// macOS (/var -> /private/var) and the point here is the directory, not the
+			// spelling of it.
+			Expect(done.Dir).To(Equal(evaluated(target)))
+
+			// The link itself, which pruning came within one bug of removing.
+			link, err := os.Lstat(installed(root))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(link.Mode() & os.ModeSymlink).NotTo(BeZero())
+		})
+
+		It("is idempotent through it", func() {
+			install(root)
+
+			plan, err := skill.NewPlan(root)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(plan.Pending()).To(BeEmpty())
 		})
 	})
 

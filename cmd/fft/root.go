@@ -230,21 +230,27 @@ func newRootCmd(deps *Deps) *cobra.Command {
 			if err := deps.complete(cmd); err != nil {
 				return err
 			}
-			// Before the update check and long before the token: a write refused
-			// against a read-only project must start no goroutine, open no keychain
-			// and sign in to nothing.
-			if err := deps.guard(cmd); err != nil {
-				return err
-			}
-
 			// Cobra checks its own flag groups — but only after this hook, and it
 			// returns the failure straight to the caller rather than through
 			// SetFlagErrorFunc. So `--file` together with `--data` would exit 1, as
 			// though something had gone wrong out in the world, when it is a bad
 			// command line like any other. Caught here, it exits 2 like the rest of
 			// them.
+			//
+			// And before the gate below, because a command line that contradicts
+			// itself is not a request to write. `--file x --data y` against a
+			// read-only project would otherwise exit 10 — sending whoever read that
+			// code, human or agent, to argue about a permission they do not need,
+			// over a command that was never going to be sent either way.
 			if err := cmd.ValidateFlagGroups(); err != nil {
 				return exitcode.UsageError{Err: err}
+			}
+
+			// Before the update check and long before the token: a write refused
+			// against a read-only project must start no goroutine, open no keychain
+			// and sign in to nothing.
+			if err := deps.guard(cmd); err != nil {
+				return err
 			}
 
 			deps.startUpdateCheck(cmd)

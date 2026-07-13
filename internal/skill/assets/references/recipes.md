@@ -56,11 +56,15 @@ Re-sending the whole file after an exit 8 is the mistake to avoid.
 fft stock list --facility BER-01 --size 200 --all --max-items 1000
 ```
 
-`--all` follows the cursor to the end of the result set, which on a real tenant can be a
-great many requests — always bound it with `--max-items` unless the user asked for
-everything. The count from `--total`, and the notice that a result was truncated, are
-printed to **stderr**, so a piped `jq` never sees them: check the exit code and stderr, not
-the JSON, to know whether you got everything.
+`--all` follows the cursor, which on a real tenant can be a great many requests. It stops
+at `--max-items`, and **`--max-items` defaults to 10,000** — so `--all` is already bounded,
+and lowering it is how you keep an exploratory question cheap.
+
+**Being truncated is not an error.** When `--all` hits the limit, fft warns on **stderr**
+and exits **0** with the items it got. So a piped `jq` sees a perfectly good array that is
+not the whole answer, and the exit code will not tell you: if it matters whether you have
+everything, read stderr, or ask for a `--total` (also stderr) and compare it against what
+you received.
 
 ## Ids are not numbers
 

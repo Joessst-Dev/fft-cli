@@ -78,7 +78,11 @@ func NewPlan(root string) (Plan, error) {
 	if err != nil {
 		return Plan{}, fmt.Errorf("resolve %s: %w", root, err)
 	}
-	dir := filepath.Join(abs, Name)
+
+	dir, err := resolve(filepath.Join(abs, Name))
+	if err != nil {
+		return Plan{}, err
+	}
 
 	installed, err := recognise(dir)
 	if err != nil {
@@ -133,6 +137,34 @@ func entry(c Change) int {
 	default:
 		return 1
 	}
+}
+
+// resolve follows a symlinked skill directory to the directory it points at, and
+// works on that instead.
+//
+// A symlinked ~/.claude/skills/fft is an ordinary dotfiles arrangement, and fft
+// should install through it rather than refuse. What fft must never do is treat
+// the *link* as one of the files it manages: a symlink is not a directory, so a
+// walk of the tree reports it as a plain entry that the skill does not ship — and
+// pruning would then delete the user's link, leaving the skill written correctly
+// in a place nothing looks at any more. Resolving it here means everything below
+// only ever sees a real directory.
+func resolve(dir string) (string, error) {
+	info, err := os.Lstat(dir)
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
+		return dir, nil
+	case err != nil:
+		return "", fmt.Errorf("stat %s: %w", dir, err)
+	case info.Mode()&fs.ModeSymlink == 0:
+		return dir, nil
+	}
+
+	target, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		return "", fmt.Errorf("follow %s: %w", dir, err)
+	}
+	return target, nil
 }
 
 // recognise reports whether dir already holds this skill, and refuses to say yes
@@ -201,6 +233,11 @@ func compare(dir, name string) Status {
 }
 
 // strays are the files under dir that fft does not ship, sorted.
+//
+// Everything that is not shipped is a stray, litter from an interrupted write
+// included. Nothing here is quietly swept up on the side: a file fft is going to
+// remove is a file that appears in the plan, is shown to the user, and needs their
+// consent — see [Plan.Apply].
 func strays(dir string, ours []string) ([]string, error) {
 	var out []string
 
@@ -213,12 +250,16 @@ func strays(dir string, ours []string) ([]string, error) {
 		if err != nil {
 			return err
 		}
-		name := filepath.ToSlash(rel)
+		// The root itself, which a walk can only report as a file if it is not a
+		// directory at all. [resolve] and [recognise] between them have already ruled
+		// that out — but a "." here would name the skill's own directory as a file to
+		// delete, and that is not a mistake to leave one refactor away from happening.
+		if rel == "." {
+			return nil
+		}
 
-		// A .tmp-* is an interrupted atomicfile write's litter rather than a document
-		// anybody wrote. It is swept up by Apply, but it is not reported: telling the
-		// user that fft removed a file fft created would explain nothing.
-		if slices.Contains(ours, name) || strings.HasPrefix(filepath.Base(name), ".tmp-") {
+		name := filepath.ToSlash(rel)
+		if slices.Contains(ours, name) {
 			return nil
 		}
 		out = append(out, name)
@@ -248,10 +289,18 @@ func (p Plan) Pending() []Change {
 // Apply writes the skill. By the time it is called, whoever called it has already
 // decided about [Plan.Pending] — so it overwrites and prunes without asking.
 //
+// It removes exactly what the plan named, and nothing else. That is the whole
+// invariant: a file fft deletes is a file the user was shown and agreed to, so an
+// install that reports no changes has made none. Anything swept up on the side —
+// a stray file, an empty directory, fft's own litter — would be a deletion that
+// happened without appearing in the plan that was consented to.
+//
 // An UNCHANGED file is not rewritten. Re-installing on every run of a script must
 // not churn the mtime of a file an editor or a watcher is holding open.
 func (p Plan) Apply() (Plan, error) {
 	done := Plan{Dir: p.Dir, Files: make([]Change, 0, len(p.Files))}
+
+	var emptied []string
 
 	for _, c := range p.Files {
 		path := filepath.Join(p.Dir, filepath.FromSlash(c.File))
@@ -265,6 +314,7 @@ func (p Plan) Apply() (Plan, error) {
 			if err := os.Remove(path); err != nil {
 				return Plan{}, fmt.Errorf("remove %s: %w", path, err)
 			}
+			emptied = append(emptied, filepath.Dir(path))
 			done.Files = append(done.Files, Change{File: c.File, Status: StatusRemoved})
 			continue
 		}
@@ -284,53 +334,23 @@ func (p Plan) Apply() (Plan, error) {
 		done.Files = append(done.Files, Change{File: c.File, Status: status})
 	}
 
-	if err := p.sweep(); err != nil {
-		return Plan{}, err
-	}
+	p.tidy(emptied)
 	return done, nil
 }
 
-// sweep removes the directories the pruning emptied, and the litter of an
-// interrupted write.
+// tidy removes the directories that pruning emptied — and only those.
 //
-// os.Remove refuses a directory that is not empty, which is exactly the guard
-// wanted: a directory still holding anything at all survives, whatever fft thinks
-// of its contents.
-func (p Plan) sweep() error {
-	var dirs, litter []string
-
-	// The walk only looks. Removing a path from inside a WalkDir callback races the
-	// walk itself against anything else touching the tree, so the two are kept apart:
-	// decide here, act below.
-	err := filepath.WalkDir(p.Dir, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		switch {
-		case d.IsDir():
-			if path != p.Dir {
-				dirs = append(dirs, path)
+// It walks up from each pruned file towards the skill's own directory, stopping at
+// the first directory that is not empty. os.Remove refuses a directory that still
+// holds anything, which is the guard rather than a check: a directory with a file
+// of the user's in it survives, and so does one fft never emptied.
+func (p Plan) tidy(emptied []string) {
+	for _, dir := range emptied {
+		for dir != p.Dir && strings.HasPrefix(dir, p.Dir) {
+			if os.Remove(dir) != nil {
+				break
 			}
-		case strings.HasPrefix(d.Name(), ".tmp-"):
-			litter = append(litter, path)
-		}
-		return nil
-	})
-	if err != nil {
-		return fmt.Errorf("sweep %s: %w", p.Dir, err)
-	}
-
-	for _, path := range litter {
-		if err := os.Remove(path); err != nil {
-			return fmt.Errorf("sweep %s: %w", p.Dir, err)
+			dir = filepath.Dir(dir)
 		}
 	}
-
-	// Deepest first, so a directory emptied by the removals above is empty by the
-	// time it is tried.
-	slices.Reverse(dirs)
-	for _, dir := range dirs {
-		_ = os.Remove(dir)
-	}
-	return nil
 }

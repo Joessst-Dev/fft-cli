@@ -51,7 +51,14 @@ func newSkillInstallCmd(deps *Deps) *cobra.Command {
 		Short: "Install the skill for an AI assistant to read",
 		Long:  skillInstallLong,
 		Args:  usageArgs(cobra.NoArgs),
-		RunE: func(*cobra.Command, []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			// --dir "" is a flag given and a directory not named. Falling through to the
+			// home directory would install the skill somewhere the user did not ask for
+			// and did not say, which is the sort of quiet substitution that gets found
+			// out much later.
+			if cmd.Flags().Changed("dir") && dir == "" {
+				return exitcode.UsageError{Err: errors.New("--dir needs a directory")}
+			}
 			return runSkillInstall(deps, local, dir, force)
 		},
 	}
