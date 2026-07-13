@@ -46,6 +46,13 @@ jobs:
           version: "~> v2"
           args: release --clean
         env:
+          # The tag that triggered this run — not whatever `git describe` happens to
+          # resolve to. Without this, a commit carrying two tags (v0.1.0 and the
+          # v0.1.0-rc1 it was cut from, say) is ambiguous: GoReleaser picked the rc,
+          # rebuilt the rc's artifacts, and died uploading them over the ones the rc
+          # release already had. The triggering ref is the only thing that is never
+          # ambiguous.
+          GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
           # Creates the release in *this* repo.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Pushes the cask to Joessst-Dev/homebrew-tap. GITHUB_TOKEN cannot do this:
