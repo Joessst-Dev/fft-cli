@@ -28,7 +28,7 @@ jobs:
           # so it needs the whole history, not just the tagged commit.
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: stable
           cache: true
