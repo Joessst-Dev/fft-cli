@@ -155,7 +155,7 @@ jobs:
       - name: GoReleaser build
         # Compiles all six release targets. Catches a cross-compilation or ldflags
         # break on the PR that introduces it, instead of on the tag.
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           version: "~> v2"
           args: build --snapshot --clean
