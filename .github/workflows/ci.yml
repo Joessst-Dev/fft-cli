@@ -21,8 +21,10 @@ env:
   # tenant, or api.github.com: the specs run against httptest servers and a mocked
   # keyring.
   #
-  # This is a backstop for anything in this workflow that runs the real binary, and
-  # nothing more. The specs do not inherit it — hermeticEnv (cmd/fft) clears every
+  # Nothing in this workflow runs the real binary today — goreleaser only builds
+  # one — so this is a belt-and-braces default for anything that ever does. It also
+  # keeps continuous pressure on hermeticEnv: if the scrub regresses, these jobs go
+  # red. The specs do not inherit it — hermeticEnv (cmd/fft) clears every
   # FFT_* variable the runner exports, because this one used to switch the update
   # check off underneath its own specs: green on a developer's machine, red on all
   # six matrix jobs.
