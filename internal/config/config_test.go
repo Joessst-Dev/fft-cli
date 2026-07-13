@@ -2,6 +2,7 @@ package config_test
 
 import (
 	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 
@@ -92,12 +93,16 @@ var _ = Describe("Store", func() {
 		})
 
 		It("keeps the previous config intact when the write cannot complete", func() {
-			// Make the directory unwritable so that the temp file cannot be created.
-			// The rename never happens, so the old file survives untouched.
+			// Nothing may be created in the directory, so atomicfile's temporary file
+			// cannot be either. The rename never happens, and the old file survives
+			// untouched. Both halves are asserted: that the save failed, and that it
+			// failed at the temporary file rather than somewhere that would have left
+			// the target already truncated.
 			testsupport.MakeUnwritableDir(filepath.Dir(path))
 
 			err := store.Save(config.New())
-			Expect(err).To(HaveOccurred())
+			Expect(err).To(MatchError(fs.ErrPermission))
+			Expect(err).To(MatchError(ContainSubstring("create a temporary file")))
 
 			reloaded, err := config.NewStore(path).Load()
 			Expect(err).NotTo(HaveOccurred())
