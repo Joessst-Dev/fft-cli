@@ -18,7 +18,14 @@ concurrency:
 
 env:
   # No .env file, no tenant credentials, no keychain. CI must never reach a real
-  # tenant: the specs run against httptest servers and a mocked keyring.
+  # tenant, or api.github.com: the specs run against httptest servers and a mocked
+  # keyring.
+  #
+  # This is a backstop for anything in this workflow that runs the real binary, and
+  # nothing more. The specs do not inherit it — hermeticEnv (cmd/fft) clears every
+  # FFT_* variable the runner exports, because this one used to switch the update
+  # check off underneath its own specs: green on a developer's machine, red on all
+  # six matrix jobs.
   FFT_NO_UPDATE_CHECK: "1"
 
 jobs:

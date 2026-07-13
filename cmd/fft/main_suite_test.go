@@ -8,7 +8,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -84,17 +86,66 @@ func newCLI() *cli {
 		},
 	}
 
-	// The environment is process-global and fft reads it through viper, so a spec
-	// that wants FFT_* set has to actually set it. Ginkgo restores it afterwards.
-	// Clearing NO_COLOR keeps a developer's shell from changing the output under
-	// the specs.
-	GinkgoT().Setenv("NO_COLOR", "")
-
-	// No spec may reach the developer's real ~/.cache/fft/update.json, whatever it
-	// does with the update checker.
-	GinkgoT().Setenv("XDG_CACHE_HOME", GinkgoT().TempDir())
+	hermeticEnv()
 
 	return c
+}
+
+// hermeticEnv gives the spec an environment fft has never seen before.
+//
+// The environment is process-global, and fft reads a lot of it: every FFT_*
+// variable through viper's AutomaticEnv, XDG_* for the config, cache and state
+// files, NO_COLOR for the output. Whatever of that the developer has exported —
+// or the CI runner has — is not the spec's, and a spec that inherits it is a spec
+// whose result depends on the machine it runs on.
+//
+// This is not hypothetical. CI exports FFT_NO_UPDATE_CHECK=1 for every job, and
+// [Deps.updateAllowed] honours it: the entire update-notice feature was switched
+// off underneath its own specs, which then failed on all six matrix jobs and on
+// no developer's machine. Clearing one variable would have fixed that one spec.
+// Clearing all of them is what stops the next one.
+//
+// A spec that wants a variable set says so — see [cli.setenv] and [cli.headless].
+func hermeticEnv() {
+	GinkgoHelper()
+
+	// Empty, not unset: an empty NO_COLOR means colour is allowed, which is what
+	// the specs assert against. The FFT_* variables below must be genuinely absent,
+	// because config.FromEnv asks whether they are *set*, not whether they are
+	// non-empty, and a half-empty headless project is worse than none.
+	GinkgoT().Setenv("NO_COLOR", "")
+
+	// Every path fft resolves on its own is a path inside this spec's temp
+	// directory. No spec may read, or write, the developer's real config, cached
+	// release check, or token file — XDG first, since that is what fft consults
+	// first, and HOME behind it for the fallback that follows.
+	for _, name := range []string{"HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_STATE_HOME"} {
+		GinkgoT().Setenv(name, GinkgoT().TempDir())
+	}
+
+	for _, entry := range os.Environ() {
+		if name, _, ok := strings.Cut(entry, "="); ok && strings.HasPrefix(name, "FFT_") {
+			unsetenv(name)
+		}
+	}
+}
+
+// unsetenv removes a variable for the duration of the spec, and puts it back
+// afterwards. Ginkgo's Setenv can only ever set one, and "" is a value: fft asks
+// whether FFT_BASE_URL is *set*, so an empty one would synthesize a headless
+// project pointing at nowhere.
+func unsetenv(name string) {
+	GinkgoHelper()
+
+	previous, existed := os.LookupEnv(name)
+	Expect(os.Unsetenv(name)).To(Succeed())
+
+	DeferCleanup(func() {
+		if !existed {
+			return
+		}
+		Expect(os.Setenv(name, previous)).To(Succeed())
+	})
 }
 
 // setenv sets an environment variable for the duration of the spec.
