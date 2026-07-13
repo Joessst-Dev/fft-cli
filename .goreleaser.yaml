@@ -1,0 +1,169 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+version: 2
+
+project_name: fft
+
+before:
+  hooks:
+    # Fail the release rather than ship a binary built from a stale go.sum.
+    - go mod download
+
+builds:
+  - id: fft
+    main: ./cmd/fft
+    binary: fft
+    # No cgo anywhere: go-keyring reaches the OS keychain through syscalls and
+    # DBus, not C. A static binary is what makes the tarballs portable.
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/Joessst-Dev/fft-cli/internal/buildinfo.Version={{ .Version }}
+      - -X github.com/Joessst-Dev/fft-cli/internal/buildinfo.Commit={{ .FullCommit }}
+      - -X github.com/Joessst-Dev/fft-cli/internal/buildinfo.Date={{ .CommitDate }}
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    # Reproducible: stamp the commit date, not the wall clock of the runner.
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - id: fft
+    ids:
+      - fft
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    files:
+      - README.md
+      - LICENSE
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+sboms:
+  - id: archive
+    artifacts: archive
+
+# Keyless signing via the GitHub OIDC token: no private key exists to leak, and
+# the signature is bound to this repo and this workflow in the public Rekor log.
+# fft handles tenant credentials, so a user must be able to prove a binary is ours.
+#
+#   cosign verify-blob \
+#     --certificate      fft_1.0.0_darwin_arm64.tar.gz.pem \
+#     --signature        fft_1.0.0_darwin_arm64.tar.gz.sig \
+#     --certificate-identity-regexp 'https://github.com/Joessst-Dev/fft-cli/.*' \
+#     --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+#     fft_1.0.0_darwin_arm64.tar.gz
+signs:
+  - id: cosign-keyless
+    cmd: cosign
+    artifacts: checksum
+    certificate: "${artifact}.pem"
+    output: true
+    args:
+      - sign-blob
+      - "--output-certificate=${certificate}"
+      - "--output-signature=${signature}"
+      - "${artifact}"
+      - "--yes"
+
+changelog:
+  # Conventional commits, grouped. `sort: asc` keeps each group in commit order.
+  use: github
+  sort: asc
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: Bug fixes
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: Performance
+      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: Refactoring
+      regexp: '^.*?refactor(\([[:word:]]+\))??!?:.+$'
+      order: 3
+    - title: Other
+      order: 99
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "^ci:"
+      - "^style:"
+      - "merge conflict"
+      - Merge pull request
+      - Merge remote-tracking branch
+      - Merge branch
+
+# Homebrew. Note this is `homebrew_casks`, not `brews`: GoReleaser deprecated the
+# formula pipe, and `goreleaser check` (a CI gate) fails on deprecated properties.
+# Two consequences worth knowing:
+#   - Casks are macOS-only. Linux users install via `go install` or the tarball.
+#   - Casks have no `test do` block; the install is verified by `brew audit` and by
+#     the post-install hook below rather than by running `fft version`.
+homebrew_casks:
+  - name: fft
+    binaries:
+      - fft
+    ids:
+      - fft
+    repository:
+      owner: Joessst-Dev
+      name: homebrew-tap
+      branch: main
+      # A PAT scoped to the tap repo. The workflow's GITHUB_TOKEN cannot be used:
+      # it is scoped to *this* repo and cannot push to Joessst-Dev/homebrew-tap.
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Casks
+    homepage: https://github.com/Joessst-Dev/fft-cli
+    description: A CLI for the fulfillmenttools API — every operation reachable from your shell.
+    license: MIT
+    commit_author:
+      name: goreleaser-bot
+      email: bot@goreleaser.com
+    commit_msg_template: "brew: fft {{ .Tag }}"
+    # A prerelease must never become `brew install fft`.
+    skip_upload: auto
+    # Deliberately no completion stanza. Cobra gives us `fft completion <shell>`, but
+    # wiring it into a *cask* is not obviously safe: `completions:` renders
+    # `bash_completion "..."`, which Homebrew reads as a path to a file inside the
+    # archive (there isn't one), and `generate_completions_from_executable` renders a
+    # Formula-only DSL call into a Cask. Neither can be verified without publishing a
+    # tap. A cask that fails to install is far worse than one without completions, so
+    # the README tells users to run `fft completion <shell>` themselves. Revisit once
+    # the tap exists and `brew audit --cask` can adjudicate.
+    hooks:
+      post:
+        # The binaries are signed with cosign, not with an Apple Developer ID, so
+        # Gatekeeper would quarantine them on first run. Strip the attribute the
+        # way Homebrew itself recommends for unnotarized binaries.
+        install: |
+          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/fft"]
+          end
+
+release:
+  draft: false
+  prerelease: auto
+  footer: |
+    ## Install
+
+    ```sh
+    brew install Joessst-Dev/tap/fft
+    ```
+
+    **Full changelog**: https://github.com/Joessst-Dev/fft-cli/compare/{{ .PreviousTag }}...{{ .Tag }}

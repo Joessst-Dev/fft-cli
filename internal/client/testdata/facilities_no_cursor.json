@@ -1,0 +1,18 @@
+{
+  "facilities": [
+    {
+      "id": "6f1b2c4e-9a3d-4f5e-8b7a-1c2d3e4f5a6b",
+      "name": "Berlin Mitte",
+      "tenantFacilityId": "BER-01",
+      "type": "MANAGED_FACILITY",
+      "status": "ONLINE",
+      "version": 3
+    }
+  ],
+  "pageInfo": {
+    "hasNextPage": true,
+    "hasPreviousPage": false,
+    "startCursor": "cursor-0",
+    "endCursor": ""
+  }
+}

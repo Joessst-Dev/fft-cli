@@ -1,0 +1,222 @@
+# A miniature spec that exercises every rule in the synthesizer, and nothing else.
+#
+# It is hand-written on purpose. The real spec is 86,000 lines and changes upstream
+# without notice, so a golden test against it would break for reasons that have
+# nothing to do with this code. Every construct below is one the real spec actually
+# contains — recursive $refs, allOf with sibling properties, a oneOf routed by a
+# discriminator, and an `example` that contradicts its own `type`.
+openapi: 3.0.1
+info:
+  title: mini
+  version: "1"
+paths:
+  /api/things/{thingId}:
+    get:
+      operationId: getThing
+      summary: Get thing
+      description: 'Fetch a <a href="https://example.com">thing</a>.<br />By id.'
+      x-fft-permissions:
+        - THING_READ
+        - AUDIT_READ
+      tags:
+        - Things (Core)
+      parameters:
+        - in: path
+          name: thingId
+          required: true
+          schema:
+            type: string
+          description: The thing's id
+      responses:
+        '200':
+          description: ok
+
+  /api/things:
+    # A path-level parameter: it applies to every operation on the path.
+    parameters:
+      - in: query
+        name: tenant
+        schema:
+          type: string
+    get:
+      operationId: queryThings
+      summary: List things
+      deprecated: true
+      tags:
+        - Things (Core)
+      parameters:
+        # explode: false — the values are comma-joined into one parameter.
+        - in: query
+          name: status
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [OPEN, CLOSED]
+        # explode: true — the name is repeated, once per value.
+        - in: query
+          name: label
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        # No explode at all: the `form` style's default for a query parameter is
+        # explode: true, and this is where 60 of the real spec's 77 array parameters
+        # land.
+        - in: query
+          name: tag
+          schema:
+            type: array
+            items:
+              type: string
+        - in: query
+          name: size
+          schema:
+            type: integer
+        - in: header
+          name: X-Trace-Id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: addThing
+      summary: Create thing
+      tags:
+        - Things (Core)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThingForCreation'
+      responses:
+        '201':
+          description: created
+
+  /api/shapes:
+    post:
+      operationId: addShape
+      summary: Create shape
+      tags:
+        - Shapes (Core)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/Square'
+                - $ref: '#/components/schemas/Circle'
+              discriminator:
+                propertyName: kind
+                # SQUARE sorts before CIRCLE in the file but not alphabetically. The
+                # branch is chosen by sorted key, so this must resolve to CIRCLE — and
+                # deterministically, run after run.
+                mapping:
+                  SQUARE: '#/components/schemas/Square'
+                  CIRCLE: '#/components/schemas/Circle'
+      responses:
+        '201':
+          description: created
+
+  /api/nodes:
+    post:
+      operationId: addNode
+      summary: Create node
+      tags:
+        - Nodes (Core)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Node'
+      responses:
+        '201':
+          description: created
+
+components:
+  schemas:
+    Named:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: Hamburg NW2
+
+    # allOf with *sibling* properties: both halves are real, and a generator that
+    # keeps only the $ref throws `buffer` and `mode` away.
+    ThingForCreation:
+      allOf:
+        - $ref: '#/components/schemas/Named'
+      required:
+        - mode
+        - tags
+        - child
+      properties:
+        buffer:
+          # The contradiction the real spec is full of: type integer, example '240'.
+          # Copied verbatim it is a string, and the API rejects the body.
+          type: integer
+          example: '240'
+        mode:
+          type: string
+          enum:
+            - FAST
+            - SLOW
+        colour:
+          # Optional with a default: emitted, because the default is the spec telling
+          # us what to send.
+          type: string
+          default: RED
+        note:
+          # Optional with nothing to say about itself: not emitted.
+          type: string
+        stamp:
+          type: string
+          format: date-time
+        tags:
+          # Arrays are capped at one element: a second is the same shape again.
+          type: array
+          items:
+            type: string
+            example: alpha
+        child:
+          $ref: '#/components/schemas/Named'
+
+    Square:
+      type: object
+      required:
+        - side
+      properties:
+        side:
+          type: integer
+          example: 3
+
+    Circle:
+      type: object
+      required:
+        - radius
+      properties:
+        radius:
+          type: integer
+          example: 7
+
+    # A schema that references itself. A walk that follows every $ref does not stop.
+    Node:
+      type: object
+      required:
+        - id
+        - next
+      properties:
+        id:
+          type: string
+          example: n1
+        next:
+          $ref: '#/components/schemas/Node'

@@ -1,0 +1,7 @@
+* text=auto eol=lf
+
+# Generated code: collapse in diffs, exclude from language stats.
+*.gen.go linguist-generated=true -diff
+
+# The vendored upstream spec is a byte-for-byte copy; never let a tool rewrite it.
+api/openapi/fft.api.swagger.yaml -diff linguist-vendored=true

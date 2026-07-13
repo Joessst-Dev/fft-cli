@@ -1,0 +1,161 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Read-only by default. No job here needs to write to the repo; the jobs that do
+# (release) live in their own workflow with their own grant.
+permissions:
+  contents: read
+
+# A new push to a PR makes the previous run's answer worthless. Don't pay for it.
+# `main` is exempt: every commit on it must have a recorded result.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  # No .env file, no tenant credentials, no keychain. CI must never reach a real
+  # tenant: the specs run against httptest servers and a mocked keyring.
+  FFT_NO_UPDATE_CHECK: "1"
+
+jobs:
+  test:
+    name: test (${{ matrix.os }}, go ${{ matrix.go }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        # internal/secrets binds to a different OS API on each platform — Keychain,
+        # Credential Manager, Secret Service. A green Linux run proves nothing about
+        # the other two, so all three are first-class.
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        # "1.25" is the floor declared in go.mod; "stable" catches breakage in the
+        # Go release that users will actually have.
+        go: ["1.25", "stable"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+          # Keys off go.sum: the module cache and the build cache both persist.
+          cache: true
+
+      - name: Build
+        run: go build ./...
+
+      - name: Vet
+        # Runs on every OS on purpose: vet type-checks per-GOOS, so it is the gate
+        # that catches a Windows-only or Darwin-only mistake in internal/secrets.
+        run: go vet ./...
+
+      - name: Test
+        # -race for the token-refresh and pagination goroutines; -shuffle=on so the
+        # specs cannot start depending on each other's order.
+        run: go test -race -shuffle=on -coverprofile=coverage.out ./...
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.os }}-${{ matrix.go }}
+          path: coverage.out
+          retention-days: 7
+
+  # Everything below is platform-independent, so it runs once on Linux rather than
+  # six times across the matrix.
+
+  drift:
+    name: no drift (tidy + codegen)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      - name: go mod tidy leaves no diff
+        run: |
+          go mod tidy
+          git diff --exit-code -- go.mod go.sum \
+            || { echo "::error::go.mod/go.sum are not tidy. Run 'make tidy' and commit."; exit 1; }
+
+      - name: Generated code is reproducible
+        # The upstream swagger is versionless and is regenerated without notice, so
+        # this is the gate that tells us the spec moved under us: if `make generate`
+        # produces a diff, internal/api no longer matches the spec in the tree.
+        # oapi-codegen is a `go tool` directive in go.mod — nothing to install.
+        run: |
+          make generate
+          git diff --exit-code \
+            || { echo "::error::Generated code is stale or non-deterministic. Run 'make generate' and commit the result."; exit 1; }
+
+  lint:
+    name: lint (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        # golangci-lint only analyses the files that build for the current GOOS.
+        # Linting on Linux alone would leave the Windows and macOS keyring code
+        # entirely unlinted, which is exactly the code most likely to rot.
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      - uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.12.2
+
+  vulncheck:
+    name: govulncheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      - uses: golang/govulncheck-action@v1
+        with:
+          go-version-input: stable
+          go-package: ./...
+
+  release-build:
+    name: release build (snapshot)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # GoReleaser reads tags to compute the version; a shallow clone has none.
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      - name: GoReleaser build
+        # Compiles all six release targets. Catches a cross-compilation or ldflags
+        # break on the PR that introduces it, instead of on the tag.
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: "~> v2"
+          args: build --snapshot --clean

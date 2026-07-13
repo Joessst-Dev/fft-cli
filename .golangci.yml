@@ -1,0 +1,135 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  default: none
+  enable:
+    - bodyclose
+    - copyloopvar
+    - errcheck
+    - errorlint
+    - gosec
+    - govet
+    - ineffassign
+    - misspell
+    - revive
+    - staticcheck
+    - unused
+
+  settings:
+    govet:
+      enable-all: true
+      disable:
+        # fieldalignment trades field grouping for a few bytes of struct padding.
+        # This is a CLI, not a hot loop; readability wins.
+        - fieldalignment
+        # shadow fires on the idiomatic `if err := f(); err != nil` nested inside a
+        # scope that already has an `err`.
+        - shadow
+
+    # No `locale:` on purpose. The prose in this repo is en-GB ("behaviour",
+    # "serialised", "colour"); pinning a locale would turn every comment into a
+    # finding. Unset still catches genuine typos ("recieve", "seperate").
+    misspell: {}
+
+    revive:
+      rules:
+        - name: blank-imports
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: dot-imports
+          # Ginkgo and Gomega are dot-imported by design in specs.
+          arguments:
+            - allowed-packages:
+                - github.com/onsi/ginkgo/v2
+                - github.com/onsi/gomega
+        - name: error-naming
+        - name: error-return
+        - name: error-strings
+        - name: exported
+        - name: increment-decrement
+        - name: indent-error-flow
+        - name: package-comments
+        - name: range
+        - name: receiver-naming
+        - name: redefines-builtin-id
+        - name: superfluous-else
+        - name: time-naming
+        - name: unexported-return
+        - name: unreachable-code
+        - name: unused-parameter
+        - name: var-declaration
+        - name: var-naming
+
+    staticcheck:
+      checks:
+        - all
+        # QF* are editor quick-fixes, not correctness checks. QF1002 rewrites an
+        # untagged `switch { case x == "": ... }` into a tagged switch; here the
+        # untagged form sits beside sibling blocks that mix conditions, so taking
+        # the fix would make the code less uniform, not more.
+        - -QF1002
+
+  exclusions:
+    generated: strict
+    presets:
+      - comments
+      - std-error-handling
+    rules:
+      # --- Specs -------------------------------------------------------------
+      # Specs assert on behaviour, not on hardening: subprocesses, file modes and
+      # unchecked teardown inside a test are not security or correctness findings.
+      - path: _test\.go$
+        linters:
+          - gosec
+          - errcheck
+          - bodyclose
+      # Two revive rules that a spec legitimately breaks:
+      #   redefines-builtin-id — shadowing `real`/`cap`/`len` as a local in a spec is
+      #     a readability call the spec author gets to make.
+      #   unused-parameter — a test double must match the signature it is standing in
+      #     for (http.HandlerFunc, an interface method), and is entitled to ignore an
+      #     argument while still naming it for the reader.
+      - path: _test\.go$
+        linters:
+          - revive
+        text: (redefines-builtin-id|unused-parameter)
+
+      # --- gosec false positives, scoped to the files that earn them ----------
+      # G101 flags the *names* of the environment variables, not their values:
+      # `EnvIDToken = "FFT_ID_TOKEN"` is a lookup key. No credential is present.
+      - path: (internal/config/env\.go|internal/secrets/env\.go)$
+        linters:
+          - gosec
+        text: G101
+      # G304 flags os.ReadFile on a variable path. Reading a path the user passed
+      # to --file is the CLI's entire job; there is no confused deputy here.
+      - path: ^cmd/fft/
+        linters:
+          - gosec
+        text: G304
+      # G404 flags math/rand for the retry backoff jitter. Jitter spreads load; it
+      # is not a secret and does not want a CSPRNG.
+      - path: ^internal/client/do\.go$
+        linters:
+          - gosec
+        text: G404
+      # G306 wants 0600 on WriteFile. specgen writes generated *source code*, which
+      # must be readable by the rest of the toolchain.
+      - path: ^tools/specgen/
+        linters:
+          - gosec
+        text: G306
+
+formatters:
+  enable:
+    - gofmt
+  exclusions:
+    generated: strict
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

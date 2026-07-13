@@ -1,0 +1,25 @@
+# Build output.
+#
+# The binary is named `fft` and so is the package directory (cmd/fft), so a bare
+# `fft` pattern would ignore the source tree itself. Both places it actually gets
+# built are listed explicitly instead.
+/dist/
+/fft
+/cmd/fft/fft
+/cmd/fft/fft.exe
+
+# Test and coverage output
+*.out
+*.test
+coverage.*
+
+# Local environment
+.env
+.env.local
+
+# Local AI tooling: agent definitions, vendored skills, and working memory.
+# Not part of the product, and the memory notes reference a private tenant.
+.claude/
+
+# Editor / OS
+.DS_Store
