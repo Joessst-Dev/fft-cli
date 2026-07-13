@@ -16,6 +16,7 @@ import (
 	"github.com/Joessst-Dev/fft-cli/internal/buildinfo"
 	"github.com/Joessst-Dev/fft-cli/internal/config"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
+	"github.com/Joessst-Dev/fft-cli/internal/testsupport"
 	"github.com/Joessst-Dev/fft-cli/internal/update"
 )
 
@@ -228,13 +229,14 @@ var _ = Describe("the update notice", func() {
 		It("writes that cache 0600 — nobody else's business which version you run", func() {
 			Expect(c.run("facility", "delete", "BER-01", "--yes")).To(Equal(exitcode.OK))
 
-			Eventually(func() (os.FileMode, error) {
-				info, err := os.Stat(c.updateCache)
-				if err != nil {
-					return 0, err
-				}
-				return info.Mode().Perm(), nil
-			}).Should(Equal(os.FileMode(0o600)))
+			// The background check writes the cache by rename, so the file appears
+			// already carrying its final mode: waiting for it to exist is enough,
+			// there is no window in which it exists and is still world-readable.
+			Eventually(func() error {
+				_, err := os.Stat(c.updateCache)
+				return err
+			}).Should(Succeed())
+			testsupport.ExpectOwnerOnlyFile(c.updateCache)
 		})
 	})
 
@@ -455,6 +457,51 @@ var _ = Describe("settings.updateCheck in the config file", func() {
 
 		Expect(c.errOut()).NotTo(ContainSubstring("available"))
 		Expect(gh.requests.Load()).To(BeZero())
+	})
+
+	// The setting defaults to true and a missing file is not an error, so a first
+	// run gets the notice. Both halves of that are load-bearing: were a missing
+	// file to fail the load, updateAllowed would read the failure as "no", and
+	// every user would be silently denied the notice until the day they first ran
+	// `fft project add`. There is nothing to see when that breaks — which is why
+	// it is pinned here rather than left to the two specs above, both of which
+	// write a config file first.
+	It("shows the notice on a fresh install, where there is no config file at all", func() {
+		Expect(c.configPath).NotTo(BeAnExistingFile())
+
+		Expect(c.run("project", "list")).To(Equal(exitcode.OK))
+
+		Expect(c.errOut()).To(ContainSubstring(testNotice))
+	})
+})
+
+// The specs run in the developer's environment, or the CI runner's, and fft reads
+// a great deal of it. This pins the harness that takes it away from them.
+var _ = Describe("the spec harness", func() {
+	// FFT_NO_UPDATE_CHECK is the one that bit: CI exports it for every job, so the
+	// update check was switched off underneath its own specs — green locally, red
+	// on all six matrix jobs. FFT_OUTPUT stands for the rest of the FFT_* surface
+	// viper's AutomaticEnv exposes, any of which a developer may have exported.
+	DescribeTable("clears the variables the machine exported, so the specs test fft and not the machine",
+		func(name string) {
+			GinkgoT().Setenv(name, "1")
+
+			newCLI()
+
+			_, set := os.LookupEnv(name)
+			Expect(set).To(BeFalse(), "%s survived newCLI: the spec is reading the machine's environment", name)
+		},
+		Entry("FFT_NO_UPDATE_CHECK, which every CI job exports", "FFT_NO_UPDATE_CHECK"),
+		Entry("FFT_OUTPUT, which viper reads as --output", "FFT_OUTPUT"),
+		Entry("FFT_BASE_URL, which would synthesize a headless project", config.EnvBaseURL),
+	)
+
+	It("points every path fft resolves on its own at a directory of the spec's own", func() {
+		newCLI()
+
+		for _, name := range []string{"XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_STATE_HOME"} {
+			Expect(os.Getenv(name)).To(BeADirectory(), "%s must be the spec's, never the developer's", name)
+		}
 	})
 })
 

@@ -154,8 +154,9 @@ NAME        BASE URL                                        EMAIL               
   no secrets.
 
 No keychain available (headless Linux, a container)? `--no-keyring` / `FFT_NO_KEYRING=1`
-falls back to a `0600` file. In CI, skip projects entirely — see
-[CI and headless use](#ci-and-headless-use).
+falls back to a `0600` file — on Windows that mode buys you less than it looks like, see
+[On Windows, `--no-keyring` protects less than `0600` suggests](#on-windows---no-keyring-protects-less-than-0600-suggests).
+In CI, skip projects entirely — see [CI and headless use](#ci-and-headless-use).
 
 ### Shell completion
 
@@ -248,6 +249,37 @@ Non-secret project data lives in `~/.config/fft/config.yaml`, mode `0600`.
 
 On a Linux box with no Secret Service (a headless server, a bare container), pass
 `--no-keyring` or set `FFT_NO_KEYRING=1` to fall back to a `0600` file.
+
+### On Windows, `--no-keyring` protects less than `0600` suggests
+
+The default on Windows is the **Credential Manager**, and it is the right choice: the OS holds
+each secret per-user, and `config.yaml` never contains a secret. None of what follows applies
+to the default path.
+
+`--no-keyring` is different. It writes `%USERPROFILE%\.local\state\fft\credentials.json`, and
+that file holds your **password and refresh token in cleartext**, exactly as on Linux. What is
+*not* the same is the protection around it:
+
+- Windows has no POSIX mode bits. `fft` asks for mode `0600`, but Go's `os.Chmod` on Windows
+  only toggles the read-only attribute and discards the rest. File security on Windows is an
+  **ACL**, and `fft` sets no ACL of its own.
+- The file is therefore protected by exactly one thing: **the ACL it inherits from its parent
+  directory.** Under the default `%USERPROFILE%` that inheritance is sound — a stock Windows
+  install grants your profile directory to you, `SYSTEM` and `Administrators`, and to no other
+  standard user. There, the file is about as private as `0600` on Linux, where `root` can read
+  it anyway.
+- The weakness is that the protection is *inherited rather than asserted*. Point
+  `XDG_STATE_HOME` (which `fft` honours on Windows too) at a shared directory, a second volume
+  with default permissions, a network share, or a redirected/roaming profile, and the file
+  inherits **that** ACL — which may let every user on the machine read it. On Linux, `0600`
+  would still protect you in all of those places. On Windows, nothing does.
+
+**So:** on Windows, prefer the Credential Manager. If you genuinely need `--no-keyring` — a
+Windows CI container, say — leave `XDG_STATE_HOME` unset so the file stays inside your user
+profile, and assume anyone with local Administrator can read your tenant password.
+
+The specs that assert `0600` are **skipped** on Windows, with that reason printed in the CI
+output, rather than deleted — so this gap stays visible instead of rotting quietly.
 
 ## CI and headless use
 

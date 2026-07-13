@@ -1,7 +1,6 @@
 package secrets_test
 
 import (
-	"os"
 	"path/filepath"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -9,6 +8,7 @@ import (
 	"github.com/zalando/go-keyring"
 
 	"github.com/Joessst-Dev/fft-cli/internal/secrets"
+	"github.com/Joessst-Dev/fft-cli/internal/testsupport"
 )
 
 var _ = Describe("Key", func() {
@@ -116,13 +116,8 @@ var _ = Describe("the file store", func() {
 	It("writes the credentials file with mode 0600 and its directory with 0700", func() {
 		Expect(secrets.NewFile(path).Set("fft:staging:password", "s3cret")).To(Succeed())
 
-		file, err := os.Stat(path)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(file.Mode().Perm()).To(Equal(os.FileMode(0o600)))
-
-		dir, err := os.Stat(filepath.Dir(path))
-		Expect(err).NotTo(HaveOccurred())
-		Expect(dir.Mode().Perm()).To(Equal(os.FileMode(0o700)))
+		testsupport.ExpectOwnerOnlyFile(path)
+		testsupport.ExpectOwnerOnlyDir(filepath.Dir(path))
 	})
 
 	It("survives a new process reading what an old one wrote", func() {
