@@ -41,6 +41,29 @@ const (
 	dirMode  fs.FileMode = 0o700
 )
 
+// Modes fft writes the installed agent skill with. It is documentation, not a
+// secret, and the user's editor and their agent both have to be able to read it —
+// so here the assertion is the opposite one, and it is worth making for the same
+// reason: a skill written 0600 would be a skill that silently does not load.
+const (
+	readableFileMode fs.FileMode = 0o644
+	readableDirMode  fs.FileMode = 0o755
+)
+
+// ExpectReadableFile asserts that path is a file anyone may read — mode 0644. On
+// Windows it skips the calling spec; see the package doc.
+func ExpectReadableFile(path string) {
+	ginkgo.GinkgoHelper()
+	expectPerm(path, readableFileMode)
+}
+
+// ExpectReadableDir asserts that path is a directory anyone may enter — mode
+// 0755. On Windows it skips the calling spec; see the package doc.
+func ExpectReadableDir(path string) {
+	ginkgo.GinkgoHelper()
+	expectPerm(path, readableDirMode)
+}
+
 // ExpectOwnerOnlyFile asserts that path is a file no user but its owner can
 // read — mode 0600. On Windows it skips the calling spec; see the package doc.
 func ExpectOwnerOnlyFile(path string) {

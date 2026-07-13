@@ -25,16 +25,27 @@ const (
 // Write creates path's parent directory if needed and replaces path with data,
 // atomically. The file ends up mode 0600 and the directory mode 0700.
 func Write(path string, data []byte) error {
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, DirMode); err != nil {
-		return fmt.Errorf("create %s: %w", dir, err)
+	return WriteMode(path, data, FileMode, DirMode)
+}
+
+// WriteMode is [Write] with the modes spelled out, for the files that are not
+// secrets.
+//
+// The installed agent skill is documentation: it belongs to the user, other
+// tools may want to read it, and 0600 would be a claim about it that is not
+// true. What it does want is the rest of Write — a SKILL.md truncated by a full
+// disk is a skill that lies to an agent, which is worse than one that is absent.
+func WriteMode(path string, data []byte, file, dir os.FileMode) error {
+	parent := filepath.Dir(path)
+	if err := os.MkdirAll(parent, dir); err != nil {
+		return fmt.Errorf("create %s: %w", parent, err)
 	}
 
 	// The temporary file must share a filesystem with the target, or the rename
 	// below degrades into a copy and stops being atomic. Same directory, then.
-	tmp, err := os.CreateTemp(dir, ".tmp-*")
+	tmp, err := os.CreateTemp(parent, ".tmp-*")
 	if err != nil {
-		return fmt.Errorf("create a temporary file in %s: %w", dir, err)
+		return fmt.Errorf("create a temporary file in %s: %w", parent, err)
 	}
 	tmpName := tmp.Name()
 
@@ -46,9 +57,11 @@ func Write(path string, data []byte) error {
 		_ = os.Remove(tmpName)
 	}()
 
-	// os.CreateTemp already uses 0600, but say so explicitly: this is the line
-	// that keeps the file private, and it should not depend on a default.
-	if err := tmp.Chmod(FileMode); err != nil {
+	// os.CreateTemp always uses 0600, so this is the line — and the only line —
+	// that decides what the file ends up as. For a credential it keeps the file
+	// private and must not depend on a default; for a skill it is what makes the
+	// file readable at all.
+	if err := tmp.Chmod(file); err != nil {
 		return fmt.Errorf("set the mode of %s: %w", tmpName, err)
 	}
 	if _, err := tmp.Write(data); err != nil {

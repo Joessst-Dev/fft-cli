@@ -57,6 +57,13 @@ var commandsWithoutOperation = map[string]string{
 	"fft api list":     "reads the embedded spec table; no network",
 	"fft api describe": "reads the embedded spec table; no network",
 
+	// The skill is documentation compiled into the binary. `install` copies it onto
+	// this machine and `show` prints it: neither reaches the tenant, and neither needs
+	// a project — which is what lets `fft skill install` be the first thing a user
+	// runs, before `fft project add`.
+	"fft skill install": "copies the embedded skill onto the local disk; no network",
+	"fft skill show":    "prints the embedded skill; no network",
+
 	"fft update check": "asks GitHub for the latest release",
 }
 

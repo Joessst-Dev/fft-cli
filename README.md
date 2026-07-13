@@ -221,6 +221,40 @@ It is the answer to "what am I supposed to POST here?"
 
 ---
 
+## Letting an AI agent drive
+
+`fft` ships an **agent skill**: the documentation an AI coding assistant reads before it
+runs `fft` on your behalf. It covers the command surface, how to discover the API's 557
+operations, and the things no `--help` can teach it — that stdout is data and stderr is
+everything else, that a POST is not necessarily a write, that exit 8 means *some* of a bulk
+write landed, and that it must ask you before it changes anything.
+
+```sh
+fft skill install              # ~/.claude/skills/fft — Claude Code, every project
+fft skill install --local      # ./.claude/skills/fft — this project, committable
+fft skill install --dir DIR    # anywhere else
+```
+
+For an assistant that reads a single context file rather than a directory of skills:
+
+```sh
+fft skill show >> AGENTS.md
+```
+
+The skill needs no project, no credentials and no network, so it is a reasonable first
+thing to run on a new machine. Installing twice changes nothing; a file you have edited is
+never replaced without `--force`, or without asking.
+
+You can read it without installing anything:
+[`internal/skill/assets/SKILL.md`](internal/skill/assets/SKILL.md).
+
+**It cannot quietly go stale.** The skill is compiled into the binary, so it always
+describes the commands you actually have — and every `fft` invocation in it is resolved
+against the real command tree by a spec. Rename a flag and `fft`'s own build fails, naming
+the file and line of the snippet that has started lying.
+
+---
+
 ## Authentication, honestly
 
 fulfillmenttools does not authenticate you. **Google Identity Platform (Firebase)
@@ -416,6 +450,10 @@ make test       # go test -race -shuffle=on ./...
 make lint       # go vet + golangci-lint
 make generate   # regenerate everything derived from the swagger
 ```
+
+**Rename a flag and the suite will tell you which snippet of the agent skill you just
+broke**, with its file and line. Fix the snippet in `internal/skill/assets/`, not the spec:
+the skill is documentation an agent acts on, so it is held to the same standard as the code.
 
 **After a swagger update, run `make generate` and commit the result.** The upstream spec
 is versionless and is regenerated without notice, so CI enforces that generated code is

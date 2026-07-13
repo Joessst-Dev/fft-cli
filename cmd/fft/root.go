@@ -236,6 +236,17 @@ func newRootCmd(deps *Deps) *cobra.Command {
 			if err := deps.guard(cmd); err != nil {
 				return err
 			}
+
+			// Cobra checks its own flag groups — but only after this hook, and it
+			// returns the failure straight to the caller rather than through
+			// SetFlagErrorFunc. So `--file` together with `--data` would exit 1, as
+			// though something had gone wrong out in the world, when it is a bad
+			// command line like any other. Caught here, it exits 2 like the rest of
+			// them.
+			if err := cmd.ValidateFlagGroups(); err != nil {
+				return exitcode.UsageError{Err: err}
+			}
+
 			deps.startUpdateCheck(cmd)
 			return nil
 		},
@@ -289,6 +300,7 @@ func newRootCmd(deps *Deps) *cobra.Command {
 		newAuthCmd(deps),
 		newPingCmd(deps),
 		newAPICmd(deps),
+		newSkillCmd(deps),
 		newUpdateCmd(deps),
 	} {
 		c.GroupID = groupCore

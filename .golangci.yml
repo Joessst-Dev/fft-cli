@@ -111,6 +111,13 @@ linters:
         linters:
           - gosec
         text: G304
+      # G304 flags os.ReadFile on a variable path. The path is the skill directory
+      # the user named, and reading what is already there is the whole of the plan
+      # phase: it is what tells a file they edited apart from one fft wrote.
+      - path: ^internal/skill/
+        linters:
+          - gosec
+        text: G304
       # G404 flags math/rand for the retry backoff jitter. Jitter spreads load; it
       # is not a secret and does not want a CSPRNG.
       - path: ^internal/client/do\.go$
