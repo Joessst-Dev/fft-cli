@@ -97,11 +97,14 @@ var _ = Describe("installing the skill", func() {
 	// The skill is documentation, and 0600 is a credential's mode. A file the user's
 	// editor cannot open is not much of a document.
 	It("writes it readable, not private", func() {
-		done := install(root)
+		install(root)
 
+		// Not through the Plan's own Dir: on Windows these assertions skip the spec,
+		// which staticcheck reads as a call that does not return — and a value computed
+		// above it as one that is never used.
 		testsupport.ExpectReadableFile(doc(root))
-		testsupport.ExpectReadableDir(done.Dir)
-		testsupport.ExpectReadableDir(filepath.Join(done.Dir, "references"))
+		testsupport.ExpectReadableDir(installed(root))
+		testsupport.ExpectReadableDir(filepath.Join(installed(root), "references"))
 	})
 
 	It("takes an absolute path from a relative root", func() {
@@ -219,14 +222,25 @@ var _ = Describe("installing the skill", func() {
 		})
 	})
 
-	It("fails, without lying about it, when the directory cannot be written", func() {
-		testsupport.MakeUnwritableDir(root)
+	// atomicfile's contract, through the skill: a write that cannot complete leaves
+	// the file that was there intact. A SKILL.md truncated half way is a skill that
+	// lies to an agent, which is worse than one that was never replaced.
+	It("fails, without destroying what was there, when the directory cannot be written", func() {
+		install(root)
+		Expect(os.WriteFile(doc(root), []byte("mine\n"), 0o644)).To(Succeed())
+
+		// The skill's own directory, not the root above it: creating a subdirectory in
+		// an unwritable directory still succeeds on Windows, so a root made unwritable
+		// would not stop the write — it would only move it.
+		testsupport.MakeUnwritableDir(installed(root))
 
 		plan, err := skill.NewPlan(root)
 		Expect(err).NotTo(HaveOccurred())
+		Expect(plan.Pending()).NotTo(BeEmpty())
 
 		_, err = plan.Apply()
 		Expect(err).To(HaveOccurred())
-		Expect(doc(root)).NotTo(BeAnExistingFile())
+
+		Expect(os.ReadFile(doc(root))).To(BeEquivalentTo("mine\n"))
 	})
 })
