@@ -19,6 +19,14 @@ import (
 // that would not itself have to be stored next to them, so pretending otherwise
 // would be theatre; the honest protection is file mode 0600 and an explicit
 // opt-in (--no-keyring / FFT_NO_KEYRING=1) so nobody lands here by accident.
+//
+// On Windows that first half is weaker than it reads. Windows has no POSIX mode
+// bits: os.Chmod only toggles the read-only attribute, file security is an ACL,
+// and this store sets no ACL of its own — so the file is protected by whatever
+// it inherits from its parent directory. Under the default %USERPROFILE% that
+// inheritance is sound; point XDG_STATE_HOME at a shared directory and it is
+// not, where 0600 on Linux would still hold. See the README section "On Windows,
+// --no-keyring protects less than 0600 suggests".
 type fileStore struct {
 	path string
 

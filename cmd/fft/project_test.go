@@ -13,6 +13,7 @@ import (
 	"github.com/Joessst-Dev/fft-cli/internal/config"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/secrets"
+	"github.com/Joessst-Dev/fft-cli/internal/testsupport"
 )
 
 // addStaging is the canonical non-interactive `project add`: every value as a
@@ -41,10 +42,7 @@ var _ = Describe("fft project add", func() {
 		})
 
 		It("persists the project to a config file only its owner can read", func() {
-			info, err := os.Stat(c.configPath)
-
-			Expect(err).NotTo(HaveOccurred())
-			Expect(info.Mode().Perm()).To(Equal(os.FileMode(0o600)))
+			testsupport.ExpectOwnerOnlyFile(c.configPath)
 		})
 
 		It("stores the base URL verbatim, deriving nothing from the project id", func() {

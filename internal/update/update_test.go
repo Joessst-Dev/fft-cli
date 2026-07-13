@@ -12,6 +12,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/Joessst-Dev/fft-cli/internal/testsupport"
 	"github.com/Joessst-Dev/fft-cli/internal/update"
 )
 
@@ -181,13 +182,8 @@ var _ = Describe("update.Checker", func() {
 				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
 				Expect(err).NotTo(HaveOccurred())
 
-				file, err := os.Stat(cachePath)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(file.Mode().Perm()).To(Equal(os.FileMode(0o600)))
-
-				dir, err := os.Stat(filepath.Dir(cachePath))
-				Expect(err).NotTo(HaveOccurred())
-				Expect(dir.Mode().Perm()).To(Equal(os.FileMode(0o700)))
+				testsupport.ExpectOwnerOnlyFile(cachePath)
+				testsupport.ExpectOwnerOnlyDir(filepath.Dir(cachePath))
 			})
 
 			It("leaves no temporary file behind: the write is a rename, not a truncate", func() {

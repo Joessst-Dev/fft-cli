@@ -11,6 +11,7 @@ import (
 
 	"github.com/Joessst-Dev/fft-cli/internal/config"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
+	"github.com/Joessst-Dev/fft-cli/internal/testsupport"
 )
 
 var _ = Describe("Store", func() {
@@ -59,17 +60,11 @@ var _ = Describe("Store", func() {
 		})
 
 		It("writes the file with mode 0600, so no other user can read the project's email", func() {
-			info, err := os.Stat(path)
-
-			Expect(err).NotTo(HaveOccurred())
-			Expect(info.Mode().Perm()).To(Equal(os.FileMode(0o600)))
+			testsupport.ExpectOwnerOnlyFile(path)
 		})
 
 		It("creates the parent directory with mode 0700", func() {
-			info, err := os.Stat(filepath.Dir(path))
-
-			Expect(err).NotTo(HaveOccurred())
-			Expect(info.Mode().Perm()).To(Equal(os.FileMode(0o700)))
+			testsupport.ExpectOwnerOnlyDir(filepath.Dir(path))
 		})
 
 		It("leaves no temporary file behind, having renamed it into place", func() {
@@ -99,10 +94,7 @@ var _ = Describe("Store", func() {
 		It("keeps the previous config intact when the write cannot complete", func() {
 			// Make the directory unwritable so that the temp file cannot be created.
 			// The rename never happens, so the old file survives untouched.
-			Expect(os.Chmod(filepath.Dir(path), 0o500)).To(Succeed())
-			DeferCleanup(func() {
-				Expect(os.Chmod(filepath.Dir(path), 0o700)).To(Succeed())
-			})
+			testsupport.MakeUnwritableDir(filepath.Dir(path))
 
 			err := store.Save(config.New())
 			Expect(err).To(HaveOccurred())

@@ -16,6 +16,7 @@ import (
 	"github.com/Joessst-Dev/fft-cli/internal/buildinfo"
 	"github.com/Joessst-Dev/fft-cli/internal/config"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
+	"github.com/Joessst-Dev/fft-cli/internal/testsupport"
 	"github.com/Joessst-Dev/fft-cli/internal/update"
 )
 
@@ -228,13 +229,14 @@ var _ = Describe("the update notice", func() {
 		It("writes that cache 0600 — nobody else's business which version you run", func() {
 			Expect(c.run("facility", "delete", "BER-01", "--yes")).To(Equal(exitcode.OK))
 
-			Eventually(func() (os.FileMode, error) {
-				info, err := os.Stat(c.updateCache)
-				if err != nil {
-					return 0, err
-				}
-				return info.Mode().Perm(), nil
-			}).Should(Equal(os.FileMode(0o600)))
+			// The background check writes the cache by rename, so the file appears
+			// already carrying its final mode: waiting for it to exist is enough,
+			// there is no window in which it exists and is still world-readable.
+			Eventually(func() error {
+				_, err := os.Stat(c.updateCache)
+				return err
+			}).Should(Succeed())
+			testsupport.ExpectOwnerOnlyFile(c.updateCache)
 		})
 	})
 
