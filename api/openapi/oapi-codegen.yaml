@@ -1,0 +1,33 @@
+# Codegen contract for the fulfillmenttools API client.
+#
+# The spec has 346 paths and 2,725 schemas. Generating all of it at once
+# produces an unusable amount of code, so we filter to the tags we have
+# commands for and let oapi-codegen prune the unreachable schemas.
+#
+# To widen coverage, add tags to include-tags below and re-run `make generate`.
+# That list is the whole path from v1 to full endpoint coverage.
+package: api
+output: ../../internal/api/fft.gen.go
+
+generate:
+  models: true
+  client: true
+
+output-options:
+  # v1 command surface: facilities, listings, stocks — plus health (fft ping)
+  # and user management (fft auth whoami).
+  include-tags:
+    - Facilities (Core)
+    - Listings (Core)
+    - Stocks (Inventory)
+    - Health (Infrastructure)
+    - User Management (Core)
+
+  # Drop the schemas the included operations cannot reach. Without this the
+  # full 2,725-schema component set is emitted regardless of the tag filter.
+  skip-prune: false
+
+  # The spec is VERSIONLESS and regenerated upstream without notice; keeping
+  # the raw body on responses lets us decode ApiError (a JSON *array*)
+  # ourselves rather than depending on generated error types.
+  skip-fmt: false

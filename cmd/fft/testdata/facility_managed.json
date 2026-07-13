@@ -1,0 +1,22 @@
+{
+  "id": "8f14e45f-ceea-467a-9575-25a1b5c8b3a1",
+  "type": "MANAGED_FACILITY",
+  "name": "Berlin Mitte",
+  "tenantFacilityId": "BER-01",
+  "status": "ONLINE",
+  "locationType": "STORE",
+  "version": 41,
+  "created": "2026-01-04T09:12:33.001Z",
+  "lastModified": "2026-06-30T17:45:02.884Z",
+  "address": {
+    "companyName": "Example Retail GmbH",
+    "street": "Alexanderplatz",
+    "houseNumber": "1",
+    "postalCode": "10178",
+    "city": "Berlin",
+    "country": "DE"
+  },
+  "services": [{ "type": "SHIP_FROM_STORE" }],
+  "capacityEnabled": false,
+  "fulfillmentProcessBuffer": 240
+}

@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: GoReleaser
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      # Create the GitHub Release and upload its artifacts.
+      contents: write
+      # Mint the OIDC token cosign exchanges for a short-lived signing certificate.
+      # This is what makes keyless signing possible: no private key exists to leak.
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # GoReleaser builds the changelog from the commits since the previous tag,
+          # so it needs the whole history, not just the tagged commit.
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      # Signing and SBOM generation are separate binaries GoReleaser shells out to.
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Install syft
+        uses: anchore/sbom-action/download-syft@v0
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: "~> v2"
+          args: release --clean
+        env:
+          # Creates the release in *this* repo.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Pushes the cask to Joessst-Dev/homebrew-tap. GITHUB_TOKEN cannot do this:
+          # it is scoped to this repository only. This must be a PAT with `contents:
+          # write` on the tap repo — see README, "Releasing".
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}

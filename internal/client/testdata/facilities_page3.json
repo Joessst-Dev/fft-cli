@@ -1,0 +1,18 @@
+{
+  "facilities": [
+    {
+      "id": "0d5f6a8c-3e7b-8d9c-2f1e-5a6b7c8d9e0f",
+      "name": "München Zentrum",
+      "tenantFacilityId": "MUC-01",
+      "type": "MANAGED_FACILITY",
+      "status": "OFFLINE",
+      "version": 12
+    }
+  ],
+  "pageInfo": {
+    "hasNextPage": false,
+    "hasPreviousPage": true,
+    "startCursor": "cursor-2",
+    "endCursor": "cursor-3"
+  }
+}

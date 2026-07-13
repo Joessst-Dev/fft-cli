@@ -1,0 +1,26 @@
+{
+  "facilities": [
+    {
+      "id": "6f1b2c4e-9a3d-4f5e-8b7a-1c2d3e4f5a6b",
+      "name": "Berlin Mitte",
+      "tenantFacilityId": "BER-01",
+      "type": "MANAGED_FACILITY",
+      "status": "ONLINE",
+      "version": 3
+    },
+    {
+      "id": "7a2c3d5f-0b4e-5a6f-9c8b-2d3e4f5a6b7c",
+      "name": "Berlin Kreuzberg",
+      "tenantFacilityId": "BER-02",
+      "type": "MANAGED_FACILITY",
+      "status": "ONLINE",
+      "version": 1
+    }
+  ],
+  "pageInfo": {
+    "hasNextPage": true,
+    "hasPreviousPage": false,
+    "startCursor": "cursor-0",
+    "endCursor": "cursor-1"
+  }
+}

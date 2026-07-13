@@ -1,0 +1,16 @@
+{
+  "id": "019c41f1-8f14-7000-9575-25a1b5c8b3a1",
+  "tenantArticleId": "4711",
+  "facilityRef": "8f14e45f-ceea-467a-9575-25a1b5c8b3a1",
+  "facility": { "facilityRef": "8f14e45f-ceea-467a-9575-25a1b5c8b3a1" },
+  "locationRef": "shelf-a-12",
+  "value": 12,
+  "reserved": 2,
+  "available": 10,
+  "facilityWideReserved": 2,
+  "serializedProperties": "{}",
+  "traits": ["PICKABLE"],
+  "created": "2026-01-01T00:00:00Z",
+  "lastModified": "2026-07-01T00:00:00Z",
+  "version": 41
+}

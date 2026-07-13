@@ -1,0 +1,15 @@
+{
+  "id": "019c41f1-8f14-7000-9575-25a1b5c8b3a2",
+  "tenantArticleId": "4712",
+  "facilityRef": "b1946ac9-2492-4ba0-9a6f-2f4f2b2a1f77",
+  "facility": { "facilityRef": "b1946ac9-2492-4ba0-9a6f-2f4f2b2a1f77" },
+  "value": 0,
+  "reserved": 0,
+  "available": 0,
+  "facilityWideReserved": 0,
+  "serializedProperties": "{}",
+  "traits": [],
+  "created": "2026-01-01T00:00:00Z",
+  "lastModified": "2026-07-01T00:00:00Z",
+  "version": 7
+}

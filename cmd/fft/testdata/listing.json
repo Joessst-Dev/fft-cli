@@ -1,0 +1,11 @@
+{
+  "id": "l-019c41f1-0001",
+  "facilityId": "8f14e45f-ceea-467a-9575-25a1b5c8b3a1",
+  "tenantArticleId": "4711",
+  "title": "Adidas Superstar",
+  "status": "ACTIVE",
+  "price": 89.95,
+  "measurementUnitKey": "piece",
+  "imageUrl": "https://example.com/images/4711.jpg",
+  "version": 41
+}
