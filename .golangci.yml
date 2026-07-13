@@ -123,6 +123,16 @@ linters:
         linters:
           - gosec
         text: G306
+      # G204 flags exec.Command with a non-constant argument. The argument is the
+      # temporary directory Ginkgo just handed the spec, and the command is icacls,
+      # the only way to make a directory unwritable on Windows. No user input comes
+      # anywhere near it, and testsupport is imported by _test.go files alone — the
+      # same reasoning as the gosec exclusion for specs above, applied to the helper
+      # package the specs call into.
+      - path: ^internal/testsupport/perm_windows\.go$
+        linters:
+          - gosec
+        text: G204
 
 formatters:
   enable:
