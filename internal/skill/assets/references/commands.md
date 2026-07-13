@@ -29,7 +29,8 @@ fft facility search --file query.json
 ## Listings
 
 **A listing has no id of its own.** It is addressed by the facility it is in *and* the
-article it is for, so every listing command needs `--facility`:
+article it is for, so every command that addresses a single listing needs `--facility`
+(the bulk `upsert` is the exception: it reads the facility from the file):
 
 ```sh
 fft listing list --facility berlin-warehouse
@@ -80,7 +81,8 @@ fft facility list --total
   question is exploratory; a real tenant is a great many requests.
 - Hitting that limit is **not an error**: fft warns on stderr and exits 0 with what it got,
   so the JSON alone cannot tell you the answer was cut short.
-- `--total` asks the API for the count, and prints it **to stderr**, not into the JSON.
+- `--total` counts the matches and prints the count **to stderr**, not into the JSON. It
+  applies to a single page: with `--all` it is not asked for and nothing is printed.
 
 ## Core commands
 

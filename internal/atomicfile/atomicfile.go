@@ -22,6 +22,12 @@ const (
 	DirMode  = 0o700
 )
 
+// TempPrefix is what the temporary file is called before the rename. It is
+// exported because a crash between the two leaves one behind, and a caller
+// cleaning up after itself has to be able to recognise its own litter — which it
+// cannot do from a prefix spelled out twice and free to drift.
+const TempPrefix = ".tmp-"
+
 // Write creates path's parent directory if needed and replaces path with data,
 // atomically. The file ends up mode 0600 and the directory mode 0700.
 func Write(path string, data []byte) error {
@@ -43,7 +49,7 @@ func WriteMode(path string, data []byte, file, dir os.FileMode) error {
 
 	// The temporary file must share a filesystem with the target, or the rename
 	// below degrades into a copy and stops being atomic. Same directory, then.
-	tmp, err := os.CreateTemp(parent, ".tmp-*")
+	tmp, err := os.CreateTemp(parent, TempPrefix+"*")
 	if err != nil {
 		return fmt.Errorf("create a temporary file in %s: %w", parent, err)
 	}

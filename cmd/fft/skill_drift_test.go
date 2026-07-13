@@ -82,13 +82,30 @@ func skillSnippets() []snippet {
 				continue
 			}
 
-			if !inside || lang != "sh" {
+			if !inside || lang != "sh" || strings.HasPrefix(strings.TrimSpace(line), "#") {
 				continue
 			}
 
 			Expect(readable(line)).To(Succeed(), "%s:%d: %s", name, i+1, strings.TrimSpace(line))
 
-			for _, args := range invocations(line) {
+			found := invocations(line)
+
+			// The guard that makes the rest of them redundant, and that no future shape
+			// can slip past: a line that says fft, and out of which the tokenizer found no
+			// fft command, is a line nobody is checking. `sudo fft ...`, `for id in ...;
+			// do fft ...; done`, `(fft ...)` — none of them is in the skill today, and
+			// none of them can be added without this failing. The count guard below cannot
+			// do this job: it counts what was found, and these are lines that are never
+			// found.
+			if len(found) == 0 {
+				tokens, _ := fields(line)
+				Expect(tokens).NotTo(ContainElement("fft"),
+					"%s:%d: %s\n  mentions fft, and the tokenizer found no fft command in it — "+
+						"so nothing here is verified. Rewrite it as a plain command line",
+					name, i+1, strings.TrimSpace(line))
+			}
+
+			for _, args := range found {
 				out = append(out, snippet{file: name, line: i + 1, text: strings.TrimSpace(line), args: args})
 			}
 		}

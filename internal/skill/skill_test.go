@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/Joessst-Dev/fft-cli/internal/atomicfile"
 	"github.com/Joessst-Dev/fft-cli/internal/skill"
 	"github.com/Joessst-Dev/fft-cli/internal/testsupport"
 )
@@ -290,6 +291,78 @@ var _ = Describe("installing the skill", func() {
 
 			plan, err := skill.NewPlan(root)
 			Expect(err).NotTo(HaveOccurred())
+			Expect(plan.Pending()).To(BeEmpty())
+		})
+	})
+
+	// The same bug as the symlinked skill root, one level down — and worse, because it
+	// reported success: the reference files were written *through* the link, and then
+	// the link was pruned as a file fft does not ship. What was left was a SKILL.md
+	// every one of whose links was dead.
+	When("references/ is a symlink", func() {
+		var target string
+
+		BeforeEach(func() {
+			install(root)
+
+			target = filepath.Join(GinkgoT().TempDir(), "refs")
+			Expect(os.MkdirAll(target, 0o755)).To(Succeed())
+			Expect(os.RemoveAll(filepath.Join(installed(root), "references"))).To(Succeed())
+			Expect(os.Symlink(target, filepath.Join(installed(root), "references"))).To(Succeed())
+		})
+
+		It("writes through it, and does not prune it", func() {
+			install(root)
+
+			link, err := os.Lstat(filepath.Join(installed(root), "references"))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(link.Mode()&os.ModeSymlink).NotTo(BeZero(), "the symlinked references/ was pruned")
+
+			Expect(filepath.Join(target, "recipes.md")).To(BeAnExistingFile())
+
+			// The whole point: every link in SKILL.md still resolves.
+			Expect(filepath.Join(installed(root), "references", "recipes.md")).To(BeAnExistingFile())
+		})
+
+		It("plans no removal at all", func() {
+			plan, err := skill.NewPlan(root)
+			Expect(err).NotTo(HaveOccurred())
+
+			for _, c := range plan.Files {
+				Expect(c.Status).NotTo(Equal(skill.StatusStale))
+			}
+		})
+	})
+
+	// A first install killed between the temporary file and the rename leaves a
+	// .tmp-* and no SKILL.md. fft made that file, so fft does not get to call it
+	// evidence of a stranger and refuse the directory for ever — which is what it did,
+	// with no way out but a manual rm of a file the user had never heard of.
+	When("an interrupted install left its temporary file behind", func() {
+		var tmp string
+
+		BeforeEach(func() {
+			Expect(os.MkdirAll(installed(root), 0o755)).To(Succeed())
+
+			tmp = filepath.Join(installed(root), atomicfile.TempPrefix+"123456")
+			Expect(os.WriteFile(tmp, []byte("half\n"), 0o600)).To(Succeed())
+		})
+
+		It("installs over it rather than refusing the directory", func() {
+			done := install(root)
+
+			Expect(doc(root)).To(BeAnExistingFile())
+			Expect(tmp).NotTo(BeAnExistingFile())
+			Expect(statuses(done)).To(HaveKeyWithValue(filepath.Base(tmp), skill.StatusRemoved))
+		})
+
+		// Its removal is reported, but it is not a question: asking the user to consent
+		// to deleting a file they never wrote and cannot identify teaches them only to
+		// say yes without reading.
+		It("does not ask about it", func() {
+			plan, err := skill.NewPlan(root)
+			Expect(err).NotTo(HaveOccurred())
+
 			Expect(plan.Pending()).To(BeEmpty())
 		})
 	})

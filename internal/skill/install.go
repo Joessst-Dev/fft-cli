@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -84,7 +85,7 @@ func NewPlan(root string) (Plan, error) {
 		return Plan{}, err
 	}
 
-	installed, err := recognise(dir)
+	exists, err := recognise(dir)
 	if err != nil {
 		return Plan{}, err
 	}
@@ -109,7 +110,12 @@ func NewPlan(root string) (Plan, error) {
 	// later release would otherwise outlive the release, sitting in the user's home
 	// telling their agent about a command that no longer exists — and an agent has
 	// no way to know which of two documents is the stale one.
-	if installed {
+	//
+	// Asked of any directory that is there, not only one that already holds a skill:
+	// a directory holding nothing but fft's own crash litter is one fft is about to
+	// install into, and the litter should go with the same install rather than wait
+	// to be complained about by the next one.
+	if exists {
 		stale, err := strays(dir, ours)
 		if err != nil {
 			return Plan{}, err
@@ -167,8 +173,12 @@ func resolve(dir string) (string, error) {
 	return target, nil
 }
 
-// recognise reports whether dir already holds this skill, and refuses to say yes
-// about a directory that is not one.
+// recognise reports whether dir is there at all, and refuses — with [ErrNotSkill]
+// — a directory that is there and is not fft's.
+//
+// It answers "is there something to look at", not "is a skill installed": what the
+// caller does with the answer is walk the directory for strays, and a directory
+// holding nothing but fft's own crash litter has strays worth taking away.
 func recognise(dir string) (bool, error) {
 	info, err := os.Stat(dir)
 	switch {
@@ -187,12 +197,12 @@ func recognise(dir string) (bool, error) {
 		// An empty directory is nobody's, and installing into it is the friendly
 		// answer — a user who ran `mkdir -p ~/.claude/skills/fft` first should not be
 		// told off for it.
-		empty, err := isEmpty(dir)
+		empty, err := vacant(dir)
 		if err != nil {
 			return false, err
 		}
 		if empty {
-			return false, nil
+			return true, nil
 		}
 		return false, fmt.Errorf("%s holds files and no %s: %w", dir, Doc, ErrNotSkill)
 	default:
@@ -200,12 +210,29 @@ func recognise(dir string) (bool, error) {
 	}
 }
 
-func isEmpty(dir string) (bool, error) {
+// vacant reports a directory with nothing of anybody's in it.
+//
+// fft's own litter does not count. A first install killed between the temporary
+// file and the rename leaves a .tmp-* and no SKILL.md — and a directory holding
+// only that would otherwise be "somebody else's" forever: install refuses it,
+// --force never gets a say because the refusal comes first, and the way out is for
+// the user to work out on their own that they must delete a file they have never
+// heard of. fft made that file. It does not get to call it evidence of a stranger.
+//
+// The litter is still named in the plan and still removed with consent, like any
+// other stray. This decides only whose directory it is.
+func vacant(dir string) (bool, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return false, fmt.Errorf("read %s: %w", dir, err)
 	}
-	return len(entries) == 0, nil
+
+	for _, e := range entries {
+		if !strings.HasPrefix(e.Name(), atomicfile.TempPrefix) {
+			return false, nil
+		}
+	}
+	return true, nil
 }
 
 // compare says what is at dir/name against what fft ships there.
@@ -262,6 +289,28 @@ func strays(dir string, ours []string) ([]string, error) {
 		if slices.Contains(ours, name) {
 			return nil
 		}
+
+		// A stray is a file, and only a file. WalkDir does not follow a symlink, so it
+		// reports a symlinked references/ as a plain entry that the skill does not ship
+		// — and pruning it would delete the directory the reference files were just
+		// written through, leaving a SKILL.md whose every link is dead. Which is the
+		// same bug as the symlinked skill root, one level down: a link fft did not make
+		// is not a file fft may remove. Following the link here is what tells the two
+		// apart.
+		info, err := os.Stat(p)
+		if err != nil {
+			// Dangling: it points at nothing, so there is nothing it could be shadowing,
+			// and it is litter by any reading. Prune it with the rest.
+			if errors.Is(err, fs.ErrNotExist) {
+				out = append(out, name)
+				return nil
+			}
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+
 		out = append(out, name)
 		return nil
 	})
@@ -276,14 +325,29 @@ func strays(dir string, ours []string) ([]string, error) {
 // Pending are the changes that need the user's blessing: a file of theirs to be
 // overwritten, or one to be removed. Everything else — a new file, a file already
 // correct — needs nobody's permission.
+//
+// fft's own crash litter is not the user's file, and asking them to consent to the
+// removal of something they have never heard of and did not write teaches them
+// only to say yes without reading. It is still in the plan, and still reported
+// when it goes.
 func (p Plan) Pending() []Change {
 	var out []Change
 	for _, c := range p.Files {
-		if c.Status == StatusConflict || c.Status == StatusStale {
-			out = append(out, c)
+		if c.Status != StatusConflict && c.Status != StatusStale {
+			continue
 		}
+		if litter(c.File) {
+			continue
+		}
+		out = append(out, c)
 	}
 	return out
+}
+
+// litter reports a file fft left behind itself: a temporary file from a write that
+// was interrupted between creating it and renaming it over the target.
+func litter(name string) bool {
+	return strings.HasPrefix(path.Base(name), atomicfile.TempPrefix)
 }
 
 // Apply writes the skill. By the time it is called, whoever called it has already
@@ -346,7 +410,7 @@ func (p Plan) Apply() (Plan, error) {
 // of the user's in it survives, and so does one fft never emptied.
 func (p Plan) tidy(emptied []string) {
 	for _, dir := range emptied {
-		for dir != p.Dir && strings.HasPrefix(dir, p.Dir) {
+		for dir != p.Dir && strings.HasPrefix(dir, p.Dir+string(filepath.Separator)) {
 			if os.Remove(dir) != nil {
 				break
 			}

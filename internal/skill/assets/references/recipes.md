@@ -62,9 +62,15 @@ and lowering it is how you keep an exploratory question cheap.
 
 **Being truncated is not an error.** When `--all` hits the limit, fft warns on **stderr**
 and exits **0** with the items it got. So a piped `jq` sees a perfectly good array that is
-not the whole answer, and the exit code will not tell you: if it matters whether you have
-everything, read stderr, or ask for a `--total` (also stderr) and compare it against what
-you received.
+not the whole answer, and the exit code will never tell you otherwise: **the warning on
+stderr is the only signal there is.** If it matters whether you have everything, read it.
+
+To know the size of a result before you fetch it, ask *without* `--all` — `--total` counts
+only on a single page, and prints the count on stderr:
+
+```sh
+fft stock list --facility BER-01 --size 1 --total
+```
 
 ## Ids are not numbers
 
