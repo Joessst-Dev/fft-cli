@@ -71,6 +71,15 @@ func newAPICmd(deps *Deps) *cobra.Command {
 				return printExample(cmd, op)
 			}
 
+			// `fft api` is the one command whose operation is an argument rather than
+			// an annotation, so the gate in root.go cannot see it and it gates itself.
+			// Here, before the body is read: `fft api addPickJob --file -` against a
+			// read-only project should refuse, not sit blocking on a stdin whose
+			// contents it was never going to send.
+			if err := deps.guardOperation(cmd, op); err != nil {
+				return err
+			}
+
 			path, err := pairs("param", params)
 			if err != nil {
 				return err

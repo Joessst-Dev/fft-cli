@@ -168,6 +168,37 @@ var _ = Describe("Store", func() {
 			Expect(string(data)).NotTo(ContainSubstring("password"))
 			Expect(string(data)).NotTo(ContainSubstring("Token"))
 		})
+
+		// The read-only flag is a safety property, so it has to survive the trip to
+		// disk and back — and it has to cost nothing when it is off, or every user's
+		// config file would grow a `readOnly: false` line on their next `project use`.
+		It("writes no readOnly key for a writable project", func() {
+			data, err := os.ReadFile(path)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(string(data)).NotTo(ContainSubstring("readOnly"))
+		})
+
+		It("round-trips a read-only project", func() {
+			cfg := sampleConfig()
+			cfg.Projects[0].ReadOnly = true
+			Expect(store.Save(cfg)).To(Succeed())
+
+			data, err := os.ReadFile(path)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(string(data)).To(ContainSubstring("readOnly: true"))
+
+			reloaded, err := store.Load()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(reloaded.Projects[0].ReadOnly).To(BeTrue())
+		})
+
+		It("loads a config written before the feature existed as writable", func() {
+			cfg, err := store.Load()
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cfg.Projects[0].ReadOnly).To(BeFalse())
+		})
 	})
 
 	Describe("loading a corrupt config", func() {

@@ -93,6 +93,18 @@ type Project struct {
 	ProjectID   string `yaml:"projectId,omitempty"`
 	Environment string `yaml:"environment,omitempty"`
 
+	// ReadOnly refuses every request that would change this tenant. The project
+	// still gets, lists and searches — including the POST-bodied cursor searches,
+	// which are reads — and a refused write is refused before fft signs in, so it
+	// costs no round trip and mints no token.
+	//
+	// It protects the *tenant*, not the config file: `fft project use` and
+	// `fft project remove` still work on a read-only project, because configuring
+	// fft is not changing anything in the tenant.
+	//
+	// omitempty, so that adding this field churns no existing config file.
+	ReadOnly bool `yaml:"readOnly,omitempty"`
+
 	// Ephemeral marks a project synthesized from FFT_* environment variables in
 	// headless mode. It is never written to disk — hence the yaml:"-".
 	Ephemeral bool `yaml:"-"`

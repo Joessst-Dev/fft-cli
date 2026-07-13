@@ -527,3 +527,168 @@ var _ = Describe("fft project current", func() {
 		})
 	})
 })
+
+var _ = Describe("read-only projects in the config file", func() {
+	var c *cli
+
+	BeforeEach(func() {
+		c = newCLI()
+	})
+
+	Describe("fft project add --read-only", func() {
+		It("persists the flag", func() {
+			c.stdin.WriteString("s3cret")
+			code := c.run("project", "add", "staging",
+				"--base-url", "https://acme.api.fulfillmenttools.com",
+				"--api-key", "AIzaSyExample",
+				"--email", "bot@ocff-acme-staging.com",
+				"--password-stdin", "--read-only")
+
+			Expect(code).To(Equal(exitcode.OK))
+			Expect(c.errOut()).To(ContainSubstring("read-only"))
+
+			cfg, err := config.NewStore(c.configPath).Load()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cfg.Projects[0].ReadOnly).To(BeTrue())
+		})
+
+		// --force is for rotating a password. The day it also quietly disarms the
+		// guardrail on prod is the day the guardrail is worth nothing.
+		It("does not clear the flag when the project is overwritten with --force", func() {
+			c.stdin.WriteString("s3cret")
+			Expect(c.run("project", "add", "prod",
+				"--base-url", "https://acme.api.fulfillmenttools.com",
+				"--api-key", "AIzaSyExample",
+				"--email", "bot@ocff-acme-prod.com",
+				"--password-stdin", "--read-only")).To(Equal(exitcode.OK))
+
+			c.stdin.WriteString("rotated")
+			Expect(c.run("project", "add", "prod", "--force",
+				"--base-url", "https://acme.api.fulfillmenttools.com",
+				"--api-key", "AIzaSyExample",
+				"--email", "bot@ocff-acme-prod.com",
+				"--password-stdin")).To(Equal(exitcode.OK))
+
+			cfg, err := config.NewStore(c.configPath).Load()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cfg.Projects[0].ReadOnly).To(BeTrue(), "--force disarmed the guardrail")
+		})
+
+		When("--read-only=false is said out loud", func() {
+			readd := func(extra ...string) int {
+				c.stdin.WriteString("s3cret")
+				args := append([]string{"project", "add", "prod", "--force", "--read-only=false",
+					"--base-url", "https://acme.api.fulfillmenttools.com",
+					"--api-key", "AIzaSyExample",
+					"--email", "bot@ocff-acme-prod.com",
+					"--password-stdin"}, extra...)
+				return c.run(args...)
+			}
+
+			BeforeEach(func() {
+				c.stdin.WriteString("s3cret")
+				Expect(c.run("project", "add", "prod",
+					"--base-url", "https://acme.api.fulfillmenttools.com",
+					"--api-key", "AIzaSyExample",
+					"--email", "bot@ocff-acme-prod.com",
+					"--password-stdin", "--read-only")).To(Equal(exitcode.OK))
+			})
+
+			// Otherwise this is the way around the confirmation on
+			// `project read-only --off`: same irreversible step, no question asked.
+			It("still asks first, exactly as 'project read-only --off' does", func() {
+				Expect(readd()).To(Equal(exitcode.Usage))
+
+				cfg, err := config.NewStore(c.configPath).Load()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(cfg.Projects[0].ReadOnly).To(BeTrue())
+			})
+
+			It("clears the flag when it is confirmed", func() {
+				Expect(readd("--yes")).To(Equal(exitcode.OK))
+
+				cfg, err := config.NewStore(c.configPath).Load()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(cfg.Projects[0].ReadOnly).To(BeFalse())
+			})
+		})
+	})
+
+	Describe("fft project read-only", func() {
+		BeforeEach(func() {
+			Expect(addStaging(c, "s3cret")).To(Equal(exitcode.OK))
+		})
+
+		readOnly := func() bool {
+			cfg, err := config.NewStore(c.configPath).Load()
+			Expect(err).NotTo(HaveOccurred())
+			return cfg.Projects[0].ReadOnly
+		}
+
+		It("marks the project read-only", func() {
+			Expect(c.run("project", "read-only", "staging")).To(Equal(exitcode.OK))
+
+			Expect(readOnly()).To(BeTrue())
+			Expect(c.errOut()).To(ContainSubstring("refuse every request"))
+		})
+
+		It("shows it in the table", func() {
+			Expect(c.run("project", "read-only", "staging")).To(Equal(exitcode.OK))
+			Expect(c.run("project", "list")).To(Equal(exitcode.OK))
+
+			Expect(c.out()).To(ContainSubstring("ACCESS"))
+			Expect(c.out()).To(ContainSubstring("read-only"))
+		})
+
+		It("shows it in the JSON, as false rather than absent when it is off", func() {
+			Expect(c.run("project", "list", "-o", "json")).To(Equal(exitcode.OK))
+
+			var views []map[string]any
+			Expect(json.Unmarshal([]byte(c.out()), &views)).To(Succeed())
+			Expect(views[0]).To(HaveKeyWithValue("readOnly", false))
+		})
+
+		It("is idempotent, and writes nothing when there is nothing to change", func() {
+			Expect(c.run("project", "read-only", "staging")).To(Equal(exitcode.OK))
+			Expect(c.run("project", "read-only", "staging")).To(Equal(exitcode.OK))
+
+			Expect(c.errOut()).To(ContainSubstring("already read-only"))
+			Expect(readOnly()).To(BeTrue())
+		})
+
+		When("switching it back off", func() {
+			BeforeEach(func() {
+				Expect(c.run("project", "read-only", "staging")).To(Equal(exitcode.OK))
+			})
+
+			// Re-arming writes on a protected tenant is the one direction of this
+			// command that can lose data. A script that forgot --yes should be noisy.
+			It("refuses without a terminal to ask on, rather than assuming yes", func() {
+				code := c.run("project", "read-only", "staging", "--off")
+
+				Expect(code).To(Equal(exitcode.Usage))
+				Expect(readOnly()).To(BeTrue())
+			})
+
+			It("allows writes again when confirmed", func() {
+				Expect(c.run("project", "read-only", "staging", "--off", "--yes")).To(Equal(exitcode.OK))
+
+				Expect(readOnly()).To(BeFalse())
+				Expect(c.errOut()).To(ContainSubstring("accepts writes again"))
+			})
+
+			It("aborts on a no, leaving the project protected", func() {
+				c.answer("n")
+
+				Expect(c.run("project", "read-only", "staging", "--off")).To(Equal(exitcode.OK))
+
+				Expect(readOnly()).To(BeTrue())
+				Expect(c.errOut()).To(ContainSubstring("still read-only"))
+			})
+		})
+
+		It("reports an unknown project the way every other command does", func() {
+			Expect(c.run("project", "read-only", "nope")).To(Equal(exitcode.Config))
+		})
+	})
+})

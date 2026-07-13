@@ -19,6 +19,13 @@ const (
 	Conflict    = 7 // optimistic-locking version conflict (409)
 	Partial     = 8 // a bulk operation succeeded for some items and failed for others
 	Unavailable = 9 // upstream is unreachable or erroring (5xx, timeout)
+
+	// ReadOnly is a write refused against a read-only project. It is not a
+	// Forbidden: a 403 means the tenant said no, and this means fft did. Nothing
+	// left the machine, so a script that retries a 5 with other credentials must
+	// not retry this one.
+	ReadOnly = 10
+
 	Interrupted = 130
 )
 
