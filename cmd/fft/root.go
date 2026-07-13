@@ -97,6 +97,24 @@ type Deps struct {
 	// AssumeYes answers every confirmation prompt with yes (-y/--yes).
 	AssumeYes bool
 
+	// ReadOnlyFlag is --read-only as the user gave it, and nil when they did not
+	// give it at all.
+	//
+	// It is a *bool because false is a thing a user can type and a thing fft must
+	// refuse to honour: --read-only=false against a project configured read-only is
+	// an attempt to *loosen*, and the flag can only ever tighten. Absence and false
+	// are different answers, so absence cannot be spelled as the zero value.
+	ReadOnlyFlag *bool
+
+	// ReadOnlyEnv is FFT_READ_ONLY.
+	//
+	// It is read straight from the environment rather than through viper, and that
+	// is the whole point of it. Viper would rank it *below* the flag, as a mere
+	// default — so `--read-only=false` would silently switch off a guardrail a CI
+	// job exported on purpose. Here it is a floor that the flag can raise and
+	// cannot lower.
+	ReadOnlyEnv bool
+
 	// Update is the release checker behind the "a new version is available"
 	// notice, and behind `fft update check`. nil means the real one, reading and
 	// writing ~/.cache/fft/update.json; a spec points it at a fake GitHub.
@@ -212,6 +230,12 @@ func newRootCmd(deps *Deps) *cobra.Command {
 			if err := deps.complete(cmd); err != nil {
 				return err
 			}
+			// Before the update check and long before the token: a write refused
+			// against a read-only project must start no goroutine, open no keychain
+			// and sign in to nothing.
+			if err := deps.guard(cmd); err != nil {
+				return err
+			}
 			deps.startUpdateCheck(cmd)
 			return nil
 		},
@@ -241,6 +265,7 @@ func newRootCmd(deps *Deps) *cobra.Command {
 	pf.Duration("timeout", 30*time.Second, "Timeout for a single command")
 	pf.BoolP("yes", "y", false, "Assume yes for every confirmation prompt")
 	pf.Bool("no-keyring", false, "Store credentials in a 0600 file instead of the OS keychain")
+	pf.Bool("read-only", false, "Refuse any request that would change data (can only tighten, never loosen)")
 
 	if err := cmd.RegisterFlagCompletionFunc("output", completeOutput); err != nil {
 		// The only way this fails is a typo in the flag name above — a
@@ -356,6 +381,21 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 	d.Project = v.GetString("project")
 	d.Timeout = v.GetDuration("timeout")
 	d.AssumeYes = v.GetBool("yes")
+
+	// Assigned on every run, absence included: the spec harness reuses one Deps
+	// across commands, and a --read-only left over from the previous run would be a
+	// gate nobody asked for.
+	//
+	// Read off the *root's* persistent set, never cmd.Flags(): `fft project add`
+	// declares a local --read-only, which cobra lets shadow the global one there,
+	// and reading it here would mistake "the project I am configuring is read-only"
+	// for "block writes in this session". And read off the flag rather than viper,
+	// so that FFT_READ_ONLY cannot be talked down to a default — see [Deps.ReadOnlyEnv].
+	d.ReadOnlyFlag = nil
+	if f := cmd.Root().PersistentFlags().Lookup("read-only"); f != nil && f.Changed {
+		d.ReadOnlyFlag = ptr(f.Value.String() == "true")
+	}
+	d.ReadOnlyEnv = config.ReadOnlyFromEnv(os.LookupEnv)
 
 	// The trace goes to stderr, never to stdout: `fft facility list -o json --debug
 	// | jq` must still be piping JSON and nothing else.

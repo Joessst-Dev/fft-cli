@@ -37,6 +37,7 @@ func newProjectCmd(deps *Deps) *cobra.Command {
 		newProjectUseCmd(deps),
 		newProjectRemoveCmd(deps),
 		newProjectCurrentCmd(deps),
+		newProjectReadOnlyCmd(deps),
 	)
 
 	return cmd
@@ -78,11 +79,17 @@ func credentialStatus(store secrets.Store, project config.Project) string {
 // hand-maintained lists of fields, and so that -o json never leaks a secret: a
 // view has no field to put one in.
 type projectView struct {
-	Name        string `json:"name" yaml:"name"`
-	Active      bool   `json:"active" yaml:"active"`
-	BaseURL     string `json:"baseUrl" yaml:"baseUrl"`
-	Email       string `json:"email" yaml:"email"`
-	Credential  string `json:"credential" yaml:"credential"`
+	Name       string `json:"name" yaml:"name"`
+	Active     bool   `json:"active" yaml:"active"`
+	BaseURL    string `json:"baseUrl" yaml:"baseUrl"`
+	Email      string `json:"email" yaml:"email"`
+	Credential string `json:"credential" yaml:"credential"`
+
+	// ReadOnly is not omitempty, unlike the descriptive fields below it: a script
+	// asking whether a project is protected must be answered false, not answered
+	// with an absent key it has to guess about.
+	ReadOnly bool `json:"readOnly" yaml:"readOnly"`
+
 	Username    string `json:"username,omitempty" yaml:"username,omitempty"`
 	Tenant      string `json:"tenant,omitempty" yaml:"tenant,omitempty"`
 	ProjectID   string `json:"projectId,omitempty" yaml:"projectId,omitempty"`
@@ -97,6 +104,7 @@ func newProjectView(p config.Project, active bool, store secrets.Store) projectV
 		BaseURL:     p.BaseURL,
 		Email:       p.Email,
 		Credential:  credentialStatus(store, p),
+		ReadOnly:    p.ReadOnly,
 		Username:    p.Username,
 		Tenant:      p.Tenant,
 		ProjectID:   p.ProjectID,
@@ -105,16 +113,24 @@ func newProjectView(p config.Project, active bool, store secrets.Store) projectV
 	}
 }
 
-var projectHeaders = []string{"NAME", "BASE URL", "EMAIL", "CREDENTIAL"}
+var projectHeaders = []string{"NAME", "BASE URL", "EMAIL", "CREDENTIAL", "ACCESS"}
 
 func (v projectView) row() []string {
-	// The active project is marked in the NAME column rather than given a column
-	// of its own: one glance, one asterisk, and the table stays four columns wide.
+	// The active project is marked in the NAME column rather than given a column of
+	// its own: one glance, one asterisk. ACCESS does get a column, because a safety
+	// property the user cannot see in the default output is one they will not trust —
+	// and "which of these is the one I must not break?" is the question this table is
+	// most often opened to answer.
 	name := "  " + v.Name
 	if v.Active {
 		name = "* " + v.Name
 	}
-	return []string{name, v.BaseURL, v.Email, v.Credential}
+
+	access := "writable"
+	if v.ReadOnly {
+		access = "read-only"
+	}
+	return []string{name, v.BaseURL, v.Email, v.Credential, access}
 }
 
 func projectRows(views []projectView) output.Rows {

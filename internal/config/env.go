@@ -26,7 +26,42 @@ const (
 	// `fft project add`. A user who wrote --env and then exported the same value
 	// should not have to discover that the variable is spelled differently.
 	EnvEnv = "FFT_ENV"
+
+	// EnvReadOnly refuses every request that would change the tenant, whatever the
+	// project's own configuration says. See [ReadOnlyFromEnv].
+	EnvReadOnly = "FFT_READ_ONLY"
 )
+
+// denials are the only ways to say no to [EnvReadOnly].
+var denials = map[string]bool{"": true, "0": true, "f": true, "false": true, "no": true, "off": true}
+
+// ReadOnlyFromEnv reports whether FFT_READ_ONLY forbids writes.
+//
+// It is deliberately not part of [FromEnv]'s all-or-nothing set. That set is what
+// it takes to *synthesize* a project — a base URL, a key, an address and a
+// credential — and a policy is none of those things. FFT_READ_ONLY alone must not
+// conjure a project out of nothing; it tightens whichever project fft was going to
+// use anyway, configured or synthesized.
+//
+// The parse fails closed. The values above are the only ways to say no; anything
+// else is yes, including a typo. A guardrail that a misspelling silently disarms is
+// not a guardrail — and the cost of being wrong in this direction is a refused write,
+// which the user can see and undo.
+//
+// The empty string is one of the denials, so FFT_READ_ONLY= (set, but to nothing)
+// reads as no. It is the one place where "set" and "yes" come apart, and it is
+// deliberate: `FFT_READ_ONLY=$SOMETHING_UNSET fft …` should behave as though the
+// variable had not been mentioned, not lock the tenant on the strength of a typo in
+// someone else's variable name.
+//
+// lookup may be nil, in which case os.LookupEnv is used.
+func ReadOnlyFromEnv(lookup func(string) (string, bool)) bool {
+	if lookup == nil {
+		lookup = os.LookupEnv
+	}
+	v, _ := lookup(EnvReadOnly)
+	return !denials[strings.ToLower(strings.TrimSpace(v))]
+}
 
 // FromEnv synthesizes an ephemeral project from the environment, reporting
 // whether one was found.
@@ -73,6 +108,12 @@ func FromEnv(lookup func(string) (string, bool)) (Project, bool) {
 		ProjectID:      get(EnvProjectID),
 		Environment:    environment,
 		Ephemeral:      true,
+
+		// Stamped before the all-or-nothing check below, and never part of it: a
+		// headless project that fft refuses to write to must also *say* it is
+		// read-only in `fft project list`, rather than looking writable right up
+		// until the write is refused.
+		ReadOnly: ReadOnlyFromEnv(lookup),
 	}
 	if p.Email == "" {
 		p.Email = CandidateEmail(p.Username, p.ProjectID, p.Environment)

@@ -165,4 +165,79 @@ var _ = Describe("FromEnv", func() {
 			Expect(ok).To(BeFalse())
 		})
 	})
+
+	When("FFT_READ_ONLY is set", func() {
+		It("marks the ephemeral project read-only", func() {
+			env[config.EnvReadOnly] = "1"
+
+			p, ok := config.FromEnv(lookup)
+
+			Expect(ok).To(BeTrue())
+			Expect(p.ReadOnly).To(BeTrue())
+		})
+
+		// The variable is a policy, not a credential. If it were part of the
+		// all-or-nothing set, exporting it in a shell that has no other FFT_*
+		// variable would conjure a project with no base URL and no way to sign in —
+		// and fft would stop reading the config file it should have used.
+		It("does not on its own synthesize a project", func() {
+			env = map[string]string{config.EnvReadOnly: "1"}
+
+			_, ok := config.FromEnv(lookup)
+
+			Expect(ok).To(BeFalse())
+		})
+	})
+
+	It("leaves a project writable when FFT_READ_ONLY is absent", func() {
+		p, ok := config.FromEnv(lookup)
+
+		Expect(ok).To(BeTrue())
+		Expect(p.ReadOnly).To(BeFalse())
+	})
+})
+
+var _ = Describe("ReadOnlyFromEnv", func() {
+	lookup := func(value string) func(string) (string, bool) {
+		return func(name string) (string, bool) {
+			if name != config.EnvReadOnly {
+				return "", false
+			}
+			return value, true
+		}
+	}
+
+	// The parse fails closed, and that asymmetry is the spec: every way of saying
+	// no is enumerated, and everything else — including a typo a user believed was
+	// switching the guardrail off — means yes.
+	DescribeTable("saying no",
+		func(value string) {
+			Expect(config.ReadOnlyFromEnv(lookup(value))).To(BeFalse())
+		},
+		Entry("empty", ""),
+		Entry("zero", "0"),
+		Entry("false", "false"),
+		Entry("FALSE", "FALSE"),
+		Entry("f", "f"),
+		Entry("no", "no"),
+		Entry("off", "off"),
+		Entry("padded", "  false  "),
+	)
+
+	DescribeTable("saying yes",
+		func(value string) {
+			Expect(config.ReadOnlyFromEnv(lookup(value))).To(BeTrue())
+		},
+		Entry("one", "1"),
+		Entry("true", "true"),
+		Entry("TRUE", "TRUE"),
+		Entry("yes", "yes"),
+		Entry("on", "on"),
+		Entry("a typo nobody meant as a yes", "flase"),
+		Entry("anything at all", "banana"),
+	)
+
+	It("is false when the variable is not set", func() {
+		Expect(config.ReadOnlyFromEnv(func(string) (string, bool) { return "", false })).To(BeFalse())
+	})
 })

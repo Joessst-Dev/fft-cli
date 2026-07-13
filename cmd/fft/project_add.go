@@ -53,6 +53,7 @@ type addFlags struct {
 	environment   string
 	passwordStdin bool
 	force         bool
+	readOnly      bool
 }
 
 func newProjectAddCmd(deps *Deps) *cobra.Command {
@@ -83,6 +84,13 @@ func newProjectAddCmd(deps *Deps) *cobra.Command {
 	f.BoolVar(&flags.passwordStdin, "password-stdin", false, "Read the password from stdin")
 	f.BoolVar(&flags.force, "force", false, "Overwrite an existing project of the same name")
 
+	// This local --read-only shadows the root's persistent one on this command, which
+	// cobra allows and which is what we want: on `project add`, --read-only can only
+	// sensibly mean "the project I am configuring is read-only", not "block writes in
+	// this session". It is also why the gate reads the *root's* flag set and never
+	// cmd.Flags() — see [Deps.complete].
+	f.BoolVar(&flags.readOnly, "read-only", false, "Refuse every request that would change this project")
+
 	cmd.MarkFlagsMutuallyExclusive("email", "username")
 
 	return cmd
@@ -108,11 +116,38 @@ func runProjectAdd(cmd *cobra.Command, deps *Deps, flags *addFlags, name string)
 		return err
 	}
 
-	if _, exists := cfg.Find(project.Name); exists && !flags.force {
+	existing, exists := cfg.Find(project.Name)
+	if exists && !flags.force {
 		return config.NewError(
 			fmt.Errorf("project %q is already configured", project.Name),
 			fmt.Sprintf("Pass --force to overwrite it, or 'fft project remove %s' first.", project.Name),
 		)
+	}
+
+	// Overwriting a read-only project does not quietly make it writable. --force is
+	// for rotating a password or fixing a typo in the base URL, and this command
+	// rebuilds the project from its flags — so without this the guardrail on prod
+	// would come off as a side effect of a command that never mentioned it. Saying
+	// --read-only=false is how you take it off, and that has to be said.
+	//
+	// And saying it is not enough on its own: taking the mark off here re-arms writes
+	// against a protected tenant, which is the same irreversible step that
+	// `project read-only --off` asks about, so it asks the same question. Otherwise
+	// the confirmation on that command would be worth nothing — this would be the way
+	// around it.
+	if exists && existing.ReadOnly {
+		if !cmd.Flags().Changed("read-only") {
+			project.ReadOnly = true
+		} else if !project.ReadOnly {
+			confirmed, err := confirmWritable(deps, project.Name)
+			if err != nil {
+				return err
+			}
+			if !confirmed {
+				deps.Printer.Notef("Aborted; %q is unchanged and still read-only.", project.Name)
+				return nil
+			}
+		}
 	}
 
 	// M3 replaces this nil with the real Firebase sign-in. Verification runs
@@ -149,6 +184,7 @@ func gatherProject(deps *Deps, flags *addFlags, name string, interactive bool) (
 		Tenant:         strings.TrimSpace(flags.tenant),
 		ProjectID:      strings.TrimSpace(flags.projectID),
 		Environment:    strings.TrimSpace(flags.environment),
+		ReadOnly:       flags.readOnly,
 	}
 
 	if interactive {
@@ -335,6 +371,10 @@ func renderAdded(deps *Deps, cfg *config.Config, project config.Project) error {
 		deps.Printer.Notef("Project %q added and is now active.", project.Name)
 	} else {
 		deps.Printer.Notef("Project %q added. Run 'fft project use %s' to switch to it.", project.Name, project.Name)
+	}
+
+	if project.ReadOnly {
+		deps.Printer.Notef("It is read-only: fft will refuse every request that would change it.")
 	}
 	return nil
 }

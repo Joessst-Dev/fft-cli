@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/spf13/cobra"
+
+	"github.com/Joessst-Dev/fft-cli/internal/config"
 )
 
 const projectCurrentLong = `Show the project fft would act on.
@@ -30,5 +32,21 @@ func runProjectCurrent(deps *Deps) error {
 	}
 
 	view := newProjectView(project, true, deps.Secrets)
-	return deps.Printer.Render(projectRows([]projectView{view}), view)
+	if err := deps.Printer.Render(projectRows([]projectView{view}), view); err != nil {
+		return err
+	}
+
+	// A session made read-only by FFT_READ_ONLY or --read-only appears nowhere in the
+	// table — the project itself is writable, and the table describes the project. So
+	// it is said out loud, on stderr: otherwise the user reads "writable", watches the
+	// next write get refused, and has nothing to connect the two.
+	if source, blocked := deps.readOnlySource(project); blocked && !view.ReadOnly {
+		switch source {
+		case sourceEnv:
+			deps.Printer.Notef("This session is read-only: %s is set, so writes will be refused.", config.EnvReadOnly)
+		case sourceFlag:
+			deps.Printer.Notef("This session is read-only: --read-only was given, so writes will be refused.")
+		}
+	}
+	return nil
 }
