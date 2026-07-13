@@ -110,16 +110,17 @@ func hermeticEnv() {
 	GinkgoHelper()
 
 	// Empty, not unset: an empty NO_COLOR means colour is allowed, which is what
-	// the specs assert against. The FFT_* variables below must be genuinely absent,
-	// because config.FromEnv asks whether they are *set*, not whether they are
-	// non-empty, and a half-empty headless project is worse than none.
+	// the specs assert against.
 	GinkgoT().Setenv("NO_COLOR", "")
 
 	// Every path fft resolves on its own is a path inside this spec's temp
 	// directory. No spec may read, or write, the developer's real config, cached
 	// release check, or token file — XDG first, since that is what fft consults
-	// first, and HOME behind it for the fallback that follows.
-	for _, name := range []string{"HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_STATE_HOME"} {
+	// first, and the home variable behind it for the fallback that follows.
+	// USERPROFILE is the one Windows reads: os.UserHomeDir does not look at HOME
+	// there, so setting only HOME would leave that fallback pointing at the real
+	// user on exactly one of the three platforms CI runs.
+	for _, name := range []string{"HOME", "USERPROFILE", "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_STATE_HOME"} {
 		GinkgoT().Setenv(name, GinkgoT().TempDir())
 	}
 
@@ -131,9 +132,14 @@ func hermeticEnv() {
 }
 
 // unsetenv removes a variable for the duration of the spec, and puts it back
-// afterwards. Ginkgo's Setenv can only ever set one, and "" is a value: fft asks
-// whether FFT_BASE_URL is *set*, so an empty one would synthesize a headless
-// project pointing at nowhere.
+// afterwards. Ginkgo's Setenv can only ever set one, and "" is a value.
+//
+// Genuinely absent, not "": today every consumer happens to treat an empty value
+// as absent — config.FromEnv trims and compares against "" (internal/config/env.go),
+// secrets.envStore checks `!ok || val == ""`, and viper's AutomaticEnv defaults to
+// allowEmptyEnv=false. Unsetting is what the harness spec below actually asserts
+// (LookupEnv reports the variable as unset), and it does not rest on all three of
+// those staying true.
 func unsetenv(name string) {
 	GinkgoHelper()
 

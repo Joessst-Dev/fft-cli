@@ -232,10 +232,13 @@ var _ = Describe("the update notice", func() {
 			// The background check writes the cache by rename, so the file appears
 			// already carrying its final mode: waiting for it to exist is enough,
 			// there is no window in which it exists and is still world-readable.
+			// 5s, not Gomega's default 1s: the goroutine's own deadline is 1.5s, so
+			// the default is tighter than the thing it is waiting for — a loaded
+			// runner would fail this on timing rather than on behaviour.
 			Eventually(func() error {
 				_, err := os.Stat(c.updateCache)
 				return err
-			}).Should(Succeed())
+			}, 5*time.Second).Should(Succeed())
 			testsupport.ExpectOwnerOnlyFile(c.updateCache)
 		})
 	})
