@@ -28,6 +28,16 @@ env:
   # six matrix jobs.
   FFT_NO_UPDATE_CHECK: "1"
 
+# Every step runs in bash, on Windows too (the runners ship Git Bash). Without
+# this, Windows steps run in PowerShell, which mangles an argument like
+# `-coverprofile=coverage.out` — it hands `.out` to go as a separate argument and
+# the run dies with "no required module provides package .out", after every test
+# has already passed. One shell everywhere means a command that works on a
+# developer's machine works on all three runners.
+defaults:
+  run:
+    shell: bash
+
 jobs:
   test:
     name: test (${{ matrix.os }}, go ${{ matrix.go }})
