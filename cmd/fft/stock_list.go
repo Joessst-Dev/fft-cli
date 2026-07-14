@@ -63,7 +63,7 @@ func newStockListCmd(deps *Deps) *cobra.Command {
 	f.StringSliceVar(&articles, "tenant-article-id", nil, "Only the stocks of these articles")
 	f.StringVar(&sortBy, "sort", "",
 		"Sort by one field, as field:asc or field:desc ("+strings.Join(stockSortFields, ", ")+")")
-	page.register(f, "stocks")
+	page.register(f, "stocks", client.DefaultSize)
 
 	return cmd
 }

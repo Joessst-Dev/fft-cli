@@ -50,6 +50,49 @@ back with a `status`:
 
 Re-sending the whole file after an exit 8 is the mistake to avoid.
 
+## Why did this order route *there*?
+
+The router's answer and the graph it routed over are two different commands, and the join
+between them is the connection id.
+
+Ask the router what it would do. This changes nothing — it reserves no stock and creates no
+order — so it is safe to run against production, and safe under `--read-only`:
+
+```sh
+fft sourcing simulate --example > order.json
+fft sourcing simulate --file order.json --results 3 -o json > options.json
+```
+
+Each option is a graph of `nodes` (the facilities) and `transfers` (the legs between them).
+Every transfer names the edge it travelled along.
+
+**`-o json` is the API's own bytes, and the API does not sort.** The *table* is sorted so
+the best option is first, but `.options[0]` in the JSON is whichever one the router
+happened to emit first. Sort it yourself — and remember `totalPenalty` is a penalty, so
+the best option is the **lowest**:
+
+```sh
+jq -r '.result.options | sort_by(.totalPenalty)[0].transfers[] | .sourceNodeRef + " -> " + .targetNodeRef + "  via " + .facilityConnectionRef' options.json
+```
+
+That `facilityConnectionRef` is a connection id. Look it up to see the carrier, the transit
+time, the costs and the context rules that made the router pick it:
+
+```sh
+fft connection get 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10 --facility berlin-warehouse
+```
+
+**When the answer is empty, read it the other way round.** No options means the order cannot
+be routed *at all* — and the usual cause is a missing edge rather than missing stock. Ask
+what edges the facility actually has:
+
+```sh
+fft connection list --facility berlin-warehouse
+```
+
+A facility with no connection to the customer cannot ship to one, however much stock it is
+holding.
+
 ## Paging a big result
 
 ```sh

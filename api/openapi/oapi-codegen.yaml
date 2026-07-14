@@ -15,13 +15,16 @@ generate:
 
 output-options:
   # v1 command surface: facilities, listings, stocks — plus health (fft ping)
-  # and user management (fft auth whoami).
+  # and user management (fft auth whoami). Sourcing options (fft sourcing) is the
+  # routing engine's answer to "where would this order be fulfilled from"; it
+  # drags in the OrderForCreation schema graph, which is why this file is large.
   include-tags:
     - Facilities (Core)
     - Listings (Core)
     - Stocks (Inventory)
     - Health (Infrastructure)
     - User Management (Core)
+    - Sourcing Options (DOMS)
 
   # Drop the schemas the included operations cannot reach. Without this the
   # full 2,725-schema component set is emitted regardless of the tag filter.

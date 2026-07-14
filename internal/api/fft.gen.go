@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
@@ -137,6 +138,27 @@ func (e AddressPhoneNumbersType) Valid() bool {
 	case AddressPhoneNumbersTypeMOBILE:
 		return true
 	case AddressPhoneNumbersTypePHONE:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AddressType.
+const (
+	AddressTypeINVOICEADDRESS AddressType = "INVOICE_ADDRESS"
+	AddressTypePARCELLOCKER   AddressType = "PARCEL_LOCKER"
+	AddressTypePOSTALADDRESS  AddressType = "POSTAL_ADDRESS"
+)
+
+// Valid indicates whether the value is a known member of the AddressType enum.
+func (e AddressType) Valid() bool {
+	switch e {
+	case AddressTypeINVOICEADDRESS:
+		return true
+	case AddressTypePARCELLOCKER:
+		return true
+	case AddressTypePOSTALADDRESS:
 		return true
 	default:
 		return false
@@ -410,6 +432,72 @@ func (e CarrierStatus) Valid() bool {
 	}
 }
 
+// Defines values for CarrierProductCategory.
+const (
+	EXPRESS    CarrierProductCategory = "EXPRESS"
+	FORWARDING CarrierProductCategory = "FORWARDING"
+	STANDARD   CarrierProductCategory = "STANDARD"
+	VALUE      CarrierProductCategory = "VALUE"
+)
+
+// Valid indicates whether the value is a known member of the CarrierProductCategory enum.
+func (e CarrierProductCategory) Valid() bool {
+	switch e {
+	case EXPRESS:
+		return true
+	case FORWARDING:
+		return true
+	case STANDARD:
+		return true
+	case VALUE:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CarrierServices.
+const (
+	ADDITIONALTRANSPORTATIONINSURANCE CarrierServices = "ADDITIONAL_TRANSPORTATION_INSURANCE"
+	ADULTSIGNATURE                    CarrierServices = "ADULT_SIGNATURE"
+	CUSTOMERSIGNATURE                 CarrierServices = "CUSTOMER_SIGNATURE"
+	HANDOVERTORECIPIENTONLY           CarrierServices = "HANDOVER_TO_RECIPIENT_ONLY"
+	IDENTITYAGECHECK18                CarrierServices = "IDENTITY_AGE_CHECK_18"
+	IDENTITYCHECKCOMPANY              CarrierServices = "IDENTITY_CHECK_COMPANY"
+	IDENTITYCHECKPRIVATE              CarrierServices = "IDENTITY_CHECK_PRIVATE"
+	NONEIGHBORDELIVERY                CarrierServices = "NO_NEIGHBOR_DELIVERY"
+	SATURDAYDELIVERY                  CarrierServices = "SATURDAY_DELIVERY"
+	SIGNATURE                         CarrierServices = "SIGNATURE"
+)
+
+// Valid indicates whether the value is a known member of the CarrierServices enum.
+func (e CarrierServices) Valid() bool {
+	switch e {
+	case ADDITIONALTRANSPORTATIONINSURANCE:
+		return true
+	case ADULTSIGNATURE:
+		return true
+	case CUSTOMERSIGNATURE:
+		return true
+	case HANDOVERTORECIPIENTONLY:
+		return true
+	case IDENTITYAGECHECK18:
+		return true
+	case IDENTITYCHECKCOMPANY:
+		return true
+	case IDENTITYCHECKPRIVATE:
+		return true
+	case NONEIGHBORDELIVERY:
+		return true
+	case SATURDAYDELIVERY:
+		return true
+	case SIGNATURE:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ClosingDayRecurrence.
 const (
 	ClosingDayRecurrenceNONRECURRING ClosingDayRecurrence = "NONRECURRING"
@@ -443,6 +531,24 @@ func (e ConnectionType) Valid() bool {
 	case ConnectionTypeMANAGEDFACILITY:
 		return true
 	case ConnectionTypeSUPPLIER:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ConsumerAddressForSourcingOptionsPhoneNumberType.
+const (
+	ConsumerAddressForSourcingOptionsPhoneNumberTypeMOBILE ConsumerAddressForSourcingOptionsPhoneNumberType = "MOBILE"
+	ConsumerAddressForSourcingOptionsPhoneNumberTypePHONE  ConsumerAddressForSourcingOptionsPhoneNumberType = "PHONE"
+)
+
+// Valid indicates whether the value is a known member of the ConsumerAddressForSourcingOptionsPhoneNumberType enum.
+func (e ConsumerAddressForSourcingOptionsPhoneNumberType) Valid() bool {
+	switch e {
+	case ConsumerAddressForSourcingOptionsPhoneNumberTypeMOBILE:
+		return true
+	case ConsumerAddressForSourcingOptionsPhoneNumberTypePHONE:
 		return true
 	default:
 		return false
@@ -1049,6 +1155,39 @@ func (e CurrencyCode) Valid() bool {
 	case ZMW:
 		return true
 	case ZWL:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for DeliveryEventDeliveryTrigger.
+const (
+	DEFAULT DeliveryEventDeliveryTrigger = "DEFAULT"
+)
+
+// Valid indicates whether the value is a known member of the DeliveryEventDeliveryTrigger enum.
+func (e DeliveryEventDeliveryTrigger) Valid() bool {
+	switch e {
+	case DEFAULT:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for DeliveryPreferencesShippingServiceLevel.
+const (
+	DeliveryPreferencesShippingServiceLevelDELIVERY DeliveryPreferencesShippingServiceLevel = "DELIVERY"
+	DeliveryPreferencesShippingServiceLevelSAMEDAY  DeliveryPreferencesShippingServiceLevel = "SAMEDAY"
+)
+
+// Valid indicates whether the value is a known member of the DeliveryPreferencesShippingServiceLevel enum.
+func (e DeliveryPreferencesShippingServiceLevel) Valid() bool {
+	switch e {
+	case DeliveryPreferencesShippingServiceLevelDELIVERY:
+		return true
+	case DeliveryPreferencesShippingServiceLevelSAMEDAY:
 		return true
 	default:
 		return false
@@ -1777,16 +1916,16 @@ func (e FacilityTypeEnumFilterIn) Valid() bool {
 
 // Defines values for FacilityTypeEnumFilterNotEq.
 const (
-	MANAGEDFACILITY FacilityTypeEnumFilterNotEq = "MANAGED_FACILITY"
-	SUPPLIER        FacilityTypeEnumFilterNotEq = "SUPPLIER"
+	FacilityTypeEnumFilterNotEqMANAGEDFACILITY FacilityTypeEnumFilterNotEq = "MANAGED_FACILITY"
+	FacilityTypeEnumFilterNotEqSUPPLIER        FacilityTypeEnumFilterNotEq = "SUPPLIER"
 )
 
 // Valid indicates whether the value is a known member of the FacilityTypeEnumFilterNotEq enum.
 func (e FacilityTypeEnumFilterNotEq) Valid() bool {
 	switch e {
-	case MANAGEDFACILITY:
+	case FacilityTypeEnumFilterNotEqMANAGEDFACILITY:
 		return true
-	case SUPPLIER:
+	case FacilityTypeEnumFilterNotEqSUPPLIER:
 		return true
 	default:
 		return false
@@ -2753,6 +2892,27 @@ func (e ModifyPartialStockAction) Valid() bool {
 	}
 }
 
+// Defines values for NodeType.
+const (
+	NodeTypeCUSTOMER        NodeType = "CUSTOMER"
+	NodeTypeMANAGEDFACILITY NodeType = "MANAGED_FACILITY"
+	NodeTypeSUPPLIER        NodeType = "SUPPLIER"
+)
+
+// Valid indicates whether the value is a known member of the NodeType enum.
+func (e NodeType) Valid() bool {
+	switch e {
+	case NodeTypeCUSTOMER:
+		return true
+	case NodeTypeMANAGEDFACILITY:
+		return true
+	case NodeTypeSUPPLIER:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for NonDeliveryDaysNonDeliveryType.
 const (
 	RECURRING NonDeliveryDaysNonDeliveryType = "RECURRING"
@@ -3176,6 +3336,33 @@ func (e OrderDeliveryPreferencesShippingDeliveryServiceLevelEnumFilterNotEq) Val
 	case OrderDeliveryPreferencesShippingDeliveryServiceLevelEnumFilterNotEqDELIVERY:
 		return true
 	case OrderDeliveryPreferencesShippingDeliveryServiceLevelEnumFilterNotEqSAMEDAY:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for OrderStatus.
+const (
+	OrderStatusCANCELLED OrderStatus = "CANCELLED"
+	OrderStatusLOCKED    OrderStatus = "LOCKED"
+	OrderStatusOBSOLETE  OrderStatus = "OBSOLETE"
+	OrderStatusOPEN      OrderStatus = "OPEN"
+	OrderStatusPROMISED  OrderStatus = "PROMISED"
+)
+
+// Valid indicates whether the value is a known member of the OrderStatus enum.
+func (e OrderStatus) Valid() bool {
+	switch e {
+	case OrderStatusCANCELLED:
+		return true
+	case OrderStatusLOCKED:
+		return true
+	case OrderStatusOBSOLETE:
+		return true
+	case OrderStatusOPEN:
+		return true
+	case OrderStatusPROMISED:
 		return true
 	default:
 		return false
@@ -8890,19 +9077,19 @@ func (e SimulationOrderConsumerAddressesAddressTypeEnumFilterIn) Valid() bool {
 
 // Defines values for SimulationOrderConsumerAddressesAddressTypeEnumFilterNotEq.
 const (
-	SimulationOrderConsumerAddressesAddressTypeEnumFilterNotEqINVOICEADDRESS SimulationOrderConsumerAddressesAddressTypeEnumFilterNotEq = "INVOICE_ADDRESS"
-	SimulationOrderConsumerAddressesAddressTypeEnumFilterNotEqPARCELLOCKER   SimulationOrderConsumerAddressesAddressTypeEnumFilterNotEq = "PARCEL_LOCKER"
-	SimulationOrderConsumerAddressesAddressTypeEnumFilterNotEqPOSTALADDRESS  SimulationOrderConsumerAddressesAddressTypeEnumFilterNotEq = "POSTAL_ADDRESS"
+	INVOICEADDRESS SimulationOrderConsumerAddressesAddressTypeEnumFilterNotEq = "INVOICE_ADDRESS"
+	PARCELLOCKER   SimulationOrderConsumerAddressesAddressTypeEnumFilterNotEq = "PARCEL_LOCKER"
+	POSTALADDRESS  SimulationOrderConsumerAddressesAddressTypeEnumFilterNotEq = "POSTAL_ADDRESS"
 )
 
 // Valid indicates whether the value is a known member of the SimulationOrderConsumerAddressesAddressTypeEnumFilterNotEq enum.
 func (e SimulationOrderConsumerAddressesAddressTypeEnumFilterNotEq) Valid() bool {
 	switch e {
-	case SimulationOrderConsumerAddressesAddressTypeEnumFilterNotEqINVOICEADDRESS:
+	case INVOICEADDRESS:
 		return true
-	case SimulationOrderConsumerAddressesAddressTypeEnumFilterNotEqPARCELLOCKER:
+	case PARCELLOCKER:
 		return true
-	case SimulationOrderConsumerAddressesAddressTypeEnumFilterNotEqPOSTALADDRESS:
+	case POSTALADDRESS:
 		return true
 	default:
 		return false
@@ -9646,25 +9833,25 @@ func (e StowJobStatusTypeEnumFilterIn) Valid() bool {
 
 // Defines values for StowJobStatusTypeEnumFilterNotEq.
 const (
-	CANCELED   StowJobStatusTypeEnumFilterNotEq = "CANCELED"
-	CLOSED     StowJobStatusTypeEnumFilterNotEq = "CLOSED"
-	INPROGRESS StowJobStatusTypeEnumFilterNotEq = "IN_PROGRESS"
-	OPEN       StowJobStatusTypeEnumFilterNotEq = "OPEN"
-	PAUSED     StowJobStatusTypeEnumFilterNotEq = "PAUSED"
+	StowJobStatusTypeEnumFilterNotEqCANCELED   StowJobStatusTypeEnumFilterNotEq = "CANCELED"
+	StowJobStatusTypeEnumFilterNotEqCLOSED     StowJobStatusTypeEnumFilterNotEq = "CLOSED"
+	StowJobStatusTypeEnumFilterNotEqINPROGRESS StowJobStatusTypeEnumFilterNotEq = "IN_PROGRESS"
+	StowJobStatusTypeEnumFilterNotEqOPEN       StowJobStatusTypeEnumFilterNotEq = "OPEN"
+	StowJobStatusTypeEnumFilterNotEqPAUSED     StowJobStatusTypeEnumFilterNotEq = "PAUSED"
 )
 
 // Valid indicates whether the value is a known member of the StowJobStatusTypeEnumFilterNotEq enum.
 func (e StowJobStatusTypeEnumFilterNotEq) Valid() bool {
 	switch e {
-	case CANCELED:
+	case StowJobStatusTypeEnumFilterNotEqCANCELED:
 		return true
-	case CLOSED:
+	case StowJobStatusTypeEnumFilterNotEqCLOSED:
 		return true
-	case INPROGRESS:
+	case StowJobStatusTypeEnumFilterNotEqINPROGRESS:
 		return true
-	case OPEN:
+	case StowJobStatusTypeEnumFilterNotEqOPEN:
 		return true
-	case PAUSED:
+	case StowJobStatusTypeEnumFilterNotEqPAUSED:
 		return true
 	default:
 		return false
@@ -9673,16 +9860,16 @@ func (e StowJobStatusTypeEnumFilterNotEq) Valid() bool {
 
 // Defines values for StrippedCarrierDeliveryType.
 const (
-	DELIVERY StrippedCarrierDeliveryType = "DELIVERY"
-	SAMEDAY  StrippedCarrierDeliveryType = "SAMEDAY"
+	StrippedCarrierDeliveryTypeDELIVERY StrippedCarrierDeliveryType = "DELIVERY"
+	StrippedCarrierDeliveryTypeSAMEDAY  StrippedCarrierDeliveryType = "SAMEDAY"
 )
 
 // Valid indicates whether the value is a known member of the StrippedCarrierDeliveryType enum.
 func (e StrippedCarrierDeliveryType) Valid() bool {
 	switch e {
-	case DELIVERY:
+	case StrippedCarrierDeliveryTypeDELIVERY:
 		return true
-	case SAMEDAY:
+	case StrippedCarrierDeliveryTypeSAMEDAY:
 		return true
 	default:
 		return false
@@ -9766,16 +9953,16 @@ func (e StrippedManagedFacilityPhoneNumbersType) Valid() bool {
 
 // Defines values for SupplierAddressPhoneNumberType.
 const (
-	MOBILE SupplierAddressPhoneNumberType = "MOBILE"
-	PHONE  SupplierAddressPhoneNumberType = "PHONE"
+	SupplierAddressPhoneNumberTypeMOBILE SupplierAddressPhoneNumberType = "MOBILE"
+	SupplierAddressPhoneNumberTypePHONE  SupplierAddressPhoneNumberType = "PHONE"
 )
 
 // Valid indicates whether the value is a known member of the SupplierAddressPhoneNumberType enum.
 func (e SupplierAddressPhoneNumberType) Valid() bool {
 	switch e {
-	case MOBILE:
+	case SupplierAddressPhoneNumberTypeMOBILE:
 		return true
-	case PHONE:
+	case SupplierAddressPhoneNumberTypePHONE:
 		return true
 	default:
 		return false
@@ -11654,6 +11841,27 @@ func (e GetStockSummariesParamsFacilityStatus) Valid() bool {
 	}
 }
 
+// AbstractArticle AbstractArticle
+type AbstractArticle struct {
+	// CustomAttributes Attributes that can be added to this entity. These attributes **cannot** be used within fulfillment processes, but enable you to attach custom data from your systems to fulfillmenttools entities.
+	CustomAttributes *map[string]interface{} `json:"customAttributes,omitempty"`
+
+	// ImageUrl A web link to a picture of this article. Ensure that no authentication is needed to fetch the image.
+	ImageUrl *string `json:"imageUrl,omitempty"`
+
+	// TenantArticleId This is a reference to an article number
+	TenantArticleId string `json:"tenantArticleId"`
+
+	// Title The title of the product
+	Title string `json:"title"`
+
+	// TitleLocalized The translations for the title of the product
+	TitleLocalized *LocaleString `json:"titleLocalized,omitempty"`
+
+	// Weight Weight value is in gram
+	Weight *float32 `json:"weight,omitempty"`
+}
+
 // AbstractCarrierCredentials AbstractCarrierCredentials
 type AbstractCarrierCredentials struct {
 	// Key The key identifying the carrier credentials type
@@ -11726,6 +11934,9 @@ type Address struct {
 
 // AddressPhoneNumbersType defines model for Address.PhoneNumbers.Type.
 type AddressPhoneNumbersType string
+
+// AddressType Type of this address, used e.g. for communication with the carrier. Use POSTAL_ADDRESS for the address where the order should be shipped to, INVOICE_ADDRESS for the address where the invoice is sent to and PARCEL_LOCKER if a parcel locker is used for this order.
+type AddressType string
 
 // ApiError ApiError
 type ApiError = []ErrorInner
@@ -12002,6 +12213,9 @@ type CarrierPriorityResult struct {
 	RecommendedCarriers []CarrierRecommendationResult `json:"recommendedCarriers"`
 }
 
+// CarrierProductCategory CarrierProductCategory
+type CarrierProductCategory string
+
 // CarrierRecommendationResult CarrierRecommendationResult
 type CarrierRecommendationResult struct {
 	// Carrier Carrier
@@ -12013,6 +12227,9 @@ type CarrierRecommendationResult struct {
 	// Threshold PriceRange
 	Threshold *PriceRange `json:"threshold,omitempty"`
 }
+
+// CarrierServices CarrierServices
+type CarrierServices string
 
 // CarrierTransitTime CarrierTransitTime
 type CarrierTransitTime struct {
@@ -12074,8 +12291,101 @@ type ClosingDay struct {
 // ClosingDayRecurrence defines model for ClosingDay.Recurrence.
 type ClosingDayRecurrence string
 
+// CollectDelivery CollectDelivery
+type CollectDelivery struct {
+	// FacilityRef Reference to the facility where the consumer expects to collect the items
+	FacilityRef *string `json:"facilityRef,omitempty"`
+
+	// Paid Indicates if the order is already paid.
+	Paid *bool `json:"paid,omitempty"`
+
+	// ProvisioningTime The point in time by which the order is supposed to be provisioned.
+	ProvisioningTime *time.Time `json:"provisioningTime,omitempty"`
+
+	// SupplyingFacilities @deprecated Use supplyingFacilitiesConfigurations
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	SupplyingFacilities *[]string `json:"supplyingFacilities,omitempty"`
+
+	// SupplyingFacilitiesConfigurations References of facility that could supply contents of the order to another facility with specific configuration of its usage
+	SupplyingFacilitiesConfigurations *[]SupplyingFacilityConfiguration `json:"supplyingFacilitiesConfigurations,omitempty"`
+
+	// TenantFacilityId Reference to the facility where the consumer expects to collect the items.
+	TenantFacilityId *string `json:"tenantFacilityId,omitempty"`
+	union            json.RawMessage
+}
+
+// CollectDelivery0 defines model for .
+type CollectDelivery0 = interface{}
+
+// CollectDelivery1 defines model for .
+type CollectDelivery1 = interface{}
+
 // ConnectionType ConnectionType
 type ConnectionType string
+
+// ConsumerAddressForSourcingOptions ConsumerAddressForSourcingOptions
+type ConsumerAddressForSourcingOptions struct {
+	AdditionalAddressInfo *string `json:"additionalAddressInfo,omitempty"`
+
+	// AddressType Type of this address, used e.g. for communication with the carrier. Use POSTAL_ADDRESS for the address where the order should be shipped to, INVOICE_ADDRESS for the address where the invoice is sent to and PARCEL_LOCKER if a parcel locker is used for this order.
+	AddressType *AddressType `json:"addressType,omitempty"`
+
+	// City The city of the address.
+	City        *string `json:"city,omitempty"`
+	CompanyName *string `json:"companyName,omitempty"`
+
+	// Coordinates Coordinates of the WGS84 geodetic reference system in Mercator projection, as used e.g. by the Google Maps API
+	Coordinates *Coordinates `json:"coordinates,omitempty"`
+
+	// Country A two-digit country code as per ISO 3166-1 alpha-2
+	Country string `json:"country"`
+
+	// CustomAttributes Attributes that can be added to the address. These attributes cannot be used within fulfillment processes, but it could be useful to have the informations carried here.
+	CustomAttributes *map[string]interface{}                         `json:"customAttributes,omitempty"`
+	Email            *openapi_types.Email                            `json:"email,omitempty"`
+	FirstName        *string                                         `json:"firstName,omitempty"`
+	HouseNumber      *string                                         `json:"houseNumber,omitempty"`
+	LastName         *string                                         `json:"lastName,omitempty"`
+	PersonalTitle    *string                                         `json:"personalTitle,omitempty"`
+	PhoneNumbers     *[]ConsumerAddressForSourcingOptionsPhoneNumber `json:"phoneNumbers,omitempty"`
+
+	// PostalCode The postal code of the address.
+	PostalCode *string `json:"postalCode,omitempty"`
+	Province   *string `json:"province,omitempty"`
+	Salutation *string `json:"salutation,omitempty"`
+
+	// Street The street of the address.
+	Street *string `json:"street,omitempty"`
+}
+
+// ConsumerAddressForSourcingOptionsPhoneNumber ConsumerAddressForSourcingOptionsPhoneNumber
+type ConsumerAddressForSourcingOptionsPhoneNumber struct {
+	// CustomAttributes Attributes that can be added to the phonenumber. These attributes cannot be used within fulfillment processes, but it could be useful to have the informations carried here.
+	CustomAttributes *map[string]interface{} `json:"customAttributes,omitempty"`
+
+	// Label Can be used to give a description for the number, like "private", "business number", etc.
+	Label *string                                          `json:"label,omitempty"`
+	Type  ConsumerAddressForSourcingOptionsPhoneNumberType `json:"type"`
+
+	// Value The number itself. We do not enforce any format (yet).
+	Value string `json:"value"`
+}
+
+// ConsumerAddressForSourcingOptionsPhoneNumberType defines model for ConsumerAddressForSourcingOptionsPhoneNumber.Type.
+type ConsumerAddressForSourcingOptionsPhoneNumberType string
+
+// ConsumerAddressesForSourcingOptions ConsumerAddressesForSourcingOptions
+type ConsumerAddressesForSourcingOptions struct {
+	Addresses *[]ConsumerAddressForSourcingOptions `json:"addresses,omitempty"`
+
+	// ConsumerId The id of the consumer.
+	ConsumerId *string `json:"consumerId,omitempty"`
+
+	// CustomAttributes Attributes that can be added to the consumer. These attributes cannot be used within fulfillment processes, but it could be useful to have the informations carried here.
+	CustomAttributes *map[string]interface{} `json:"customAttributes,omitempty"`
+	FacilityRef      *string                 `json:"facilityRef,omitempty"`
+	TenantFacilityId *string                 `json:"tenantFacilityId,omitempty"`
+}
 
 // ContextLimitation ContextLimitation
 type ContextLimitation struct {
@@ -12169,6 +12479,15 @@ type CustomServiceItemForCreation struct {
 	CustomServiceItems      []CustomServiceItemForCreation `json:"customServiceItems"`
 }
 
+// CustomServiceReferenceForCreation CustomServiceReferenceForCreation
+type CustomServiceReferenceForCreation struct {
+	ArticleItems []ArticleItem `json:"articleItems"`
+
+	// CustomServiceDefinition CustomServiceDefinition
+	CustomServiceDefinition CustomServiceDefinition        `json:"customServiceDefinition"`
+	CustomServiceItems      []CustomServiceItemForCreation `json:"customServiceItems"`
+}
+
 // CutoffTime CutoffTime
 type CutoffTime struct {
 	Hour   float32 `json:"hour"`
@@ -12216,6 +12535,62 @@ type DeliveryArea struct {
 	// Country A two-digit country code as per ISO 3166-1 alpha-2
 	Country    string `json:"country"`
 	PostalCode string `json:"postalCode"`
+}
+
+// DeliveryEvent DeliveryEvent
+type DeliveryEvent struct {
+	// DeliveryTarget The destination for a delivery
+	DeliveryTarget  DeliveryTarget               `json:"deliveryTarget"`
+	DeliveryTrigger DeliveryEventDeliveryTrigger `json:"deliveryTrigger"`
+}
+
+// DeliveryEventDeliveryTrigger defines model for DeliveryEvent.DeliveryTrigger.
+type DeliveryEventDeliveryTrigger string
+
+// DeliveryPreferences DeliveryPreferences
+type DeliveryPreferences struct {
+	Collect *[]CollectDelivery `json:"collect,omitempty"`
+
+	// ReservationPreferences DeliveryReservationPreferences
+	ReservationPreferences *DeliveryReservationPreferences `json:"reservationPreferences,omitempty"`
+
+	// Shipping DeliveryPreferencesShipping
+	Shipping *DeliveryPreferencesShipping `json:"shipping,omitempty"`
+
+	// SourcingOptionRefs Id of the SourcingOptions
+	SourcingOptionRefs *[]string `json:"sourcingOptionRefs,omitempty"`
+
+	// SupplyingFacilities @deprecated Use supplyingFacilities under collect
+	SupplyingFacilities *[]string `json:"supplyingFacilities,omitempty"`
+
+	// TargetTime At which time the result is expected.
+	TargetTime *time.Time `json:"targetTime,omitempty"`
+}
+
+// DeliveryPreferencesShipping DeliveryPreferencesShipping
+type DeliveryPreferencesShipping struct {
+	// CarrierProductCategory CarrierProductCategory
+	CarrierProductCategory       *CarrierProductCategory        `json:"carrierProductCategory,omitempty"`
+	DesiredDeliveryTime          *time.Time                     `json:"desiredDeliveryTime,omitempty"`
+	PreferredCarriers            *[]PreferredCarrier            `json:"preferredCarriers,omitempty"`
+	PreferredCarriersWithProduct *[]PreferredCarrierWithProduct `json:"preferredCarriersWithProduct,omitempty"`
+	PreselectedFacilities        *[]PreselectedFacility         `json:"preselectedFacilities,omitempty"`
+
+	// ServiceLevel DELIVERY: The parcel will reach the recipient according to the cycle time of the carrier, typically 1-3 days when shipping nationaly. SAMEDAY: The parcel will reach the recipient the same day when ordering.
+	ServiceLevel *DeliveryPreferencesShippingServiceLevel `json:"serviceLevel,omitempty"`
+}
+
+// DeliveryPreferencesShippingServiceLevel DELIVERY: The parcel will reach the recipient according to the cycle time of the carrier, typically 1-3 days when shipping nationaly. SAMEDAY: The parcel will reach the recipient the same day when ordering.
+type DeliveryPreferencesShippingServiceLevel string
+
+// DeliveryReservationMode DeliveryReservationMode
+type DeliveryReservationMode = interface{}
+
+// DeliveryReservationPreferences DeliveryReservationPreferences
+type DeliveryReservationPreferences struct {
+	// Mode DeliveryReservationMode
+	Mode            DeliveryReservationMode `json:"mode"`
+	ReservationTime *time.Time              `json:"reservationTime,omitempty"`
 }
 
 // DeliveryTarget The destination for a delivery
@@ -13106,6 +13481,12 @@ type FenceImplementation string
 
 // FenceMode FenceMode
 type FenceMode string
+
+// HandledItem HandledItem
+type HandledItem struct {
+	Quantity        *float32 `json:"quantity,omitempty"`
+	TenantArticleId string   `json:"tenantArticleId"`
+}
 
 // HandoverJobAssignedUsersFilter HandoverJobAssignedUsersFilter
 type HandoverJobAssignedUsersFilter struct {
@@ -14687,6 +15068,21 @@ type ManagedFacilityForReplacement struct {
 	Version int64 `json:"version"`
 }
 
+// MeasurementValidation MeasurementValidation
+type MeasurementValidation struct {
+	// OverPickHardTolerancePercentage Allowed hard over pick deviation tolerance.
+	OverPickHardTolerancePercentage *float32 `json:"overPickHardTolerancePercentage,omitempty"`
+
+	// OverPickSoftTolerancePercentage Allowed soft over pick deviation tolerance.
+	OverPickSoftTolerancePercentage *float32 `json:"overPickSoftTolerancePercentage,omitempty"`
+
+	// ShortPickHardTolerancePercentage Allowed hard short pick deviation tolerance.
+	ShortPickHardTolerancePercentage *float32 `json:"shortPickHardTolerancePercentage,omitempty"`
+
+	// ShortPickSoftTolerancePercentage Allowed soft short pick deviation tolerance.
+	ShortPickSoftTolerancePercentage *float32 `json:"shortPickSoftTolerancePercentage,omitempty"`
+}
+
 // ModifyAddress ModifyAddress
 type ModifyAddress struct {
 	AdditionalAddressInfo *string `json:"additionalAddressInfo,omitempty"`
@@ -14989,10 +15385,21 @@ type ModifyUserPersonalData struct {
 	Locale *SupportedLocale `json:"locale,omitempty"`
 }
 
+// Money Money
+type Money struct {
+	// Currency The currency code is a three-letter code that represents a currency in the ISO 4217 standard.
+	Currency      CurrencyCode `json:"currency"`
+	DecimalPlaces *float32     `json:"decimalPlaces,omitempty"`
+	Value         float32      `json:"value"`
+}
+
 // MoveStockToLocationOptions MoveStockToLocationOptions
 type MoveStockToLocationOptions struct {
 	DeleteFromStockIfZero *bool `json:"deleteFromStockIfZero,omitempty"`
 }
+
+// NodeType NodeType
+type NodeType string
 
 // NonDeliveryDays NonDeliveryDays
 type NonDeliveryDays struct {
@@ -15169,6 +15576,18 @@ type OperativeEntity struct {
 // OperativeEntityEntityType Type of the entity
 type OperativeEntityEntityType string
 
+// OptimizationHints OptimizationHints
+type OptimizationHints struct {
+	// IncludeCalculationHints Should only be used for debugging. Includes more information on how we calculated the response.
+	IncludeCalculationHints *bool `json:"includeCalculationHints,omitempty"`
+
+	// RequestedResultCount Number of different results we calculated
+	RequestedResultCount *int `json:"requestedResultCount,omitempty"`
+}
+
+// OrderArticleAttributeItem ArticleAttributeItem
+type OrderArticleAttributeItem = ArticleAttributeItem
+
 // OrderConsumerAddressesAddressTypeEnumFilter OrderConsumerAddressesAddressTypeEnumFilter
 type OrderConsumerAddressesAddressTypeEnumFilter struct {
 	// Eq Search by addressType
@@ -15295,6 +15714,96 @@ type OrderDeliveryPreferencesShippingFilter struct {
 	ServiceLevel *OrderDeliveryPreferencesShippingDeliveryServiceLevelEnumFilter `json:"serviceLevel,omitempty"`
 }
 
+// OrderForSourcingOptionsRequest OrderForSourcingOptionsRequest
+type OrderForSourcingOptionsRequest struct {
+	// Consumer ConsumerAddressesForSourcingOptions
+	Consumer ConsumerAddressesForSourcingOptions `json:"consumer"`
+
+	// CustomAttributes Attributes that can be added to the order. These attributes cannot be used within fulfillment processes, but it could be useful to have the informations carried here.
+	CustomAttributes *map[string]interface{}              `json:"customAttributes,omitempty"`
+	CustomServices   *[]CustomServiceReferenceForCreation `json:"customServices,omitempty"`
+
+	// DeliveryPreferences DeliveryPreferences
+	DeliveryPreferences *DeliveryPreferences `json:"deliveryPreferences,omitempty"`
+
+	// OrderDate The date this order was created at the supplying system.
+	OrderDate      *time.Time                  `json:"orderDate,omitempty"`
+	OrderLineItems *[]OrderLineItemForCreation `json:"orderLineItems,omitempty"`
+
+	// PaymentInfo OrderPaymentInfoForCreation
+	PaymentInfo *OrderPaymentInfoForCreation `json:"paymentInfo,omitempty"`
+
+	// PromisesOptions OrderPromisesOptions
+	PromisesOptions *OrderPromisesOptions `json:"promisesOptions,omitempty"`
+
+	// Status The state of the order. Initially it is OPEN.
+	Status        *OrderStatus         `json:"status,omitempty"`
+	StatusReasons *[]OrderStatusReason `json:"statusReasons,omitempty"`
+	Stickers      *[]Sticker           `json:"stickers,omitempty"`
+	Tags          *[]TagReference      `json:"tags,omitempty"`
+
+	// TenantOrderId Field can be used as a reference number in foreign systems, for example as a reference to the source system's identifier for this order.
+	TenantOrderId *string `json:"tenantOrderId,omitempty"`
+}
+
+// OrderLineItemArticle defines model for OrderLineItemArticle.
+type OrderLineItemArticle struct {
+	// Attributes Attributes are used in fulfillmenttools to impose a certain degree of customization to a process, such as improving the appearance in the platform and clients.
+	// Details about usage can be found in the<a href="https://docs.fulfillmenttools.com/documentation/by-pillar/global-inventory-hub/articles/article-attributes">article attributes article</a>.
+	Attributes *[]OrderArticleAttributeItem `json:"attributes,omitempty"`
+
+	// CustomAttributes @deprecated Please use customAttributes in OrderLineItem.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	CustomAttributes *map[string]interface{} `json:"customAttributes,omitempty"`
+
+	// ImageUrl A web link to a picture of this article. Ensure that no authentication is needed to fetch the image.
+	ImageUrl *string `json:"imageUrl,omitempty"`
+
+	// TenantArticleId This is a reference to an article number
+	TenantArticleId string `json:"tenantArticleId"`
+
+	// Title The title of the product
+	Title string `json:"title"`
+
+	// TitleLocalized The translations for the title of the product
+	TitleLocalized *LocaleString `json:"titleLocalized,omitempty"`
+
+	// Weight Weight value is in gram
+	Weight *float32 `json:"weight,omitempty"`
+}
+
+// OrderLineItemForCreation OrderLineItemForCreation
+type OrderLineItemForCreation struct {
+	// AllowedSubstitutes Array of allowed substitutes for given orderLineItem. If an empty array is provided, no substitute is allowed for this orderLineItem. If allowedSubstitutes is not provided, this configured substitutes on listing level will be available
+	AllowedSubstitutes *[]Substitute `json:"allowedSubstitutes,omitempty"`
+
+	// Article OrderLineItemArticle
+	Article OrderLineItemArticle `json:"article"`
+
+	// CustomAttributes Attributes that can be added to the orderline. These attributes cannot be used within fulfillment processes, but it could be useful to have the informations carried here.
+	CustomAttributes *map[string]interface{} `json:"customAttributes,omitempty"`
+
+	// MeasurementUnitKey Identifier for items unit of measurement.
+	MeasurementUnitKey *string `json:"measurementUnitKey,omitempty"`
+
+	// MeasurementValidation MeasurementValidation
+	MeasurementValidation *MeasurementValidation `json:"measurementValidation,omitempty"`
+
+	// Quantity quantity of the specific article that has been ordered
+	Quantity       int64     `json:"quantity"`
+	ScannableCodes *[]string `json:"scannableCodes,omitempty"`
+
+	// SecondaryMeasurementUnitKey Secondary identifier for items unit of measurement.
+	SecondaryMeasurementUnitKey *string `json:"secondaryMeasurementUnitKey,omitempty"`
+
+	// SecondaryQuantity Secondary quantity of the specific article that has been ordered
+	SecondaryQuantity *int64 `json:"secondaryQuantity,omitempty"`
+
+	// ShopPrice @deprecated price per piece of this line item Use attributes instead (see: <a href="https://docs.fulfillmenttools.com/documentation/by-pillar/global-inventory-hub/articles/article-attributes">customization by attributes</a>)
+	ShopPrice *float32        `json:"shopPrice,omitempty"`
+	Tags      *[]TagReference `json:"tags,omitempty"`
+}
+
 // OrderOrderLineItemsArticleFilter OrderOrderLineItemsArticleFilter
 type OrderOrderLineItemsArticleFilter struct {
 	// TenantArticleId Search by tenantArticleId
@@ -15343,6 +15852,15 @@ type OrderPaymentInfoFilter struct {
 	MethodLocalized *OrderPaymentInfoMethodLocalizedFilter `json:"methodLocalized,omitempty"`
 }
 
+// OrderPaymentInfoForCreation OrderPaymentInfoForCreation
+type OrderPaymentInfoForCreation struct {
+	// Currency The currency in which the consumer paid with
+	Currency *string `json:"currency,omitempty"`
+
+	// MethodLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	MethodLocalized *LocaleString `json:"methodLocalized,omitempty"`
+}
+
 // OrderPaymentInfoMethodLocalizedFilter OrderPaymentInfoMethodLocalizedFilter
 type OrderPaymentInfoMethodLocalizedFilter struct {
 	// DeDE Search by de_DE
@@ -15353,6 +15871,12 @@ type OrderPaymentInfoMethodLocalizedFilter struct {
 
 	// RuRU Search by ru_RU
 	RuRU *StringFilter `json:"ru_RU,omitempty"`
+}
+
+// OrderPromisesOptions OrderPromisesOptions
+type OrderPromisesOptions struct {
+	// ValidUntil The date and time at which the promised order expires and is automatically cancelled if not converted into an actual order. Must be between 1 minute and 8 hours from now.
+	ValidUntil time.Time `json:"validUntil"`
 }
 
 // OrderRecordConsumerAddressesFilter OrderRecordConsumerAddressesFilter
@@ -15486,6 +16010,9 @@ type OrderSearchQuery_CustomAttributes_AdditionalProperties struct {
 	union json.RawMessage
 }
 
+// OrderStatus The state of the order. Initially it is OPEN.
+type OrderStatus string
+
 // OrderStatusEnumFilter OrderStatusEnumFilter
 type OrderStatusEnumFilter struct {
 	// Eq Search by status
@@ -15506,6 +16033,15 @@ type OrderStatusEnumFilterIn string
 
 // OrderStatusEnumFilterNotEq Search by status
 type OrderStatusEnumFilterNotEq string
+
+// OrderStatusReason Order Status Reason.
+type OrderStatusReason struct {
+	// Reason The reason for setting this order status
+	Reason string `json:"reason"`
+
+	// Status The state of the order. Initially it is OPEN.
+	Status OrderStatus `json:"status"`
+}
 
 // OrderTagsFilter OrderTagsFilter
 type OrderTagsFilter struct {
@@ -15720,6 +16256,15 @@ type PackJobStatusEnumFilterIn string
 
 // PackJobStatusEnumFilterNotEq Search by status
 type PackJobStatusEnumFilterNotEq string
+
+// PackageCost PackageCost
+type PackageCost struct {
+	// CostAmount Money
+	CostAmount Money `json:"costAmount"`
+
+	// PackageName Name of the package
+	PackageName string `json:"packageName"`
+}
 
 // PackagingUnit PackagingUnit
 type PackagingUnit struct {
@@ -16210,6 +16755,32 @@ type PickingTimes struct {
 	Tuesday   *[]TimeRange `json:"tuesday,omitempty"`
 	Wednesday *[]TimeRange `json:"wednesday,omitempty"`
 }
+
+// PreferredCarrier Keys of the preferred carriers to handle out the order
+type PreferredCarrier = string
+
+// PreferredCarrierWithProduct PreferredCarrierWithProduct
+type PreferredCarrierWithProduct struct {
+	CarrierKey      string             `json:"carrierKey"`
+	CarrierProduct  *string            `json:"carrierProduct,omitempty"`
+	CarrierServices *[]CarrierServices `json:"carrierServices,omitempty"`
+}
+
+// PreselectedFacility PreselectedFacility
+type PreselectedFacility struct {
+	// FacilityRef Reference to the facility which is supposed to fulfill the order.
+	FacilityRef *string `json:"facilityRef,omitempty"`
+
+	// TenantFacilityId Reference to the facility which is supposed to fulfill the order.
+	TenantFacilityId *string `json:"tenantFacilityId,omitempty"`
+	union            json.RawMessage
+}
+
+// PreselectedFacility0 defines model for .
+type PreselectedFacility0 = interface{}
+
+// PreselectedFacility1 defines model for .
+type PreselectedFacility1 = interface{}
 
 // PriceRange PriceRange
 type PriceRange struct {
@@ -16844,6 +17415,17 @@ type RatingConfigurationType string
 // RatingImplementation This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
 type RatingImplementation string
 
+// RatingResult RatingResult
+type RatingResult struct {
+	Id                    string  `json:"id"`
+	Name                  string  `json:"name"`
+	Penalty               float32 `json:"penalty"`
+	RoutingStrategyNodeId string  `json:"routingStrategyNodeId"`
+
+	// Type The type of the rating, e.g. 'StandardRating' or 'ToolkitRating'
+	Type string `json:"type"`
+}
+
 // RemoteConfigurationScopesFilter RemoteConfigurationScopesFilter
 type RemoteConfigurationScopesFilter struct {
 	// FacilityRefs Search by facilityRefs
@@ -16908,6 +17490,12 @@ type ReservationSearchQuery struct {
 
 	// TenantArticleId Search by tenantArticleId
 	TenantArticleId *StringFilter `json:"tenantArticleId,omitempty"`
+}
+
+// ResourceInvestment How much resources should be invested during the optimization?
+type ResourceInvestment struct {
+	// Level [abstract values]: how many resources should we invest in optimization. With a higher level the results will be better, nevertheless we need to invest more time for the optimization.
+	Level float32 `json:"level"`
 }
 
 // Role Role
@@ -18165,6 +18753,15 @@ type ShipmentStatusEnumFilterIn string
 // ShipmentStatusEnumFilterNotEq Search by status
 type ShipmentStatusEnumFilterNotEq string
 
+// ShippingCosts ShippingCosts
+type ShippingCosts struct {
+	// PackageCosts Costs of the individual packaging units
+	PackageCosts *[]PackageCost `json:"packageCosts,omitempty"`
+
+	// TotalTransportCostAmount Money
+	TotalTransportCostAmount Money `json:"totalTransportCostAmount"`
+}
+
 // ShippingInformationCarrierRecipientInformationAddressFilter ShippingInformationCarrierRecipientInformationAddressFilter
 type ShippingInformationCarrierRecipientInformationAddressFilter struct {
 	// CompanyName Search by companyName
@@ -18488,6 +19085,207 @@ type SimulationOrderTagsListFilter struct {
 	Contains *SimulationOrderTagsFilter `json:"contains,omitempty"`
 }
 
+// SourcingOption SourcingOption
+type SourcingOption struct {
+	// EstimatedDeliveryDate Estimated delivery date in format YYYY-MM-DD.
+	EstimatedDeliveryDate *openapi_types.Date `json:"estimatedDeliveryDate,omitempty"`
+
+	// EstimatedPickupDate Estimated pickup date in format YYYY-MM-DD.
+	EstimatedPickupDate       *openapi_types.Date             `json:"estimatedPickupDate,omitempty"`
+	Id                        string                          `json:"id"`
+	ListingDetails            *[]SourcingOptionListingDetails `json:"listingDetails,omitempty"`
+	Nodes                     []SourcingOptionNode            `json:"nodes"`
+	NonAssignedOrderLineItems *[]HandledItem                  `json:"nonAssignedOrderLineItems,omitempty"`
+	RatingResults             []RatingResult                  `json:"ratingResults"`
+	RunId                     string                          `json:"runId"`
+
+	// TotalCosts SourcingOptionCosts
+	TotalCosts *SourcingOptionCosts `json:"totalCosts,omitempty"`
+
+	// TotalPenalty The total calculated penalty we calculated for this option
+	TotalPenalty float32                  `json:"totalPenalty"`
+	Transfers    []SourcingOptionTransfer `json:"transfers"`
+
+	// ValidUntil The latest date at which this option is still valid in UTC (ISO8601 format).
+	ValidUntil *string `json:"validUntil,omitempty"`
+}
+
+// SourcingOptionCosts SourcingOptionCosts
+type SourcingOptionCosts struct {
+	// SalesPrices Sales prices and applied discounts of the individual items in the solution. Only present if costComponentRating is enabled.
+	SalesPrices []SourcingOptionSalesPrice `json:"salesPrices"`
+
+	// TotalCosts Money
+	TotalCosts *Money `json:"totalCosts,omitempty"`
+
+	// TotalSalesPriceAmount Money
+	TotalSalesPriceAmount *Money `json:"totalSalesPriceAmount,omitempty"`
+
+	// TotalShippingCosts ShippingCosts
+	TotalShippingCosts *ShippingCosts `json:"totalShippingCosts,omitempty"`
+}
+
+// SourcingOptionListingDetails SourcingOptionListingDetails
+type SourcingOptionListingDetails struct {
+	CustomAttributes *map[string]interface{} `json:"customAttributes,omitempty"`
+	FacilityRef      *string                 `json:"facilityRef,omitempty"`
+	TenantArticleId  *string                 `json:"tenantArticleId,omitempty"`
+}
+
+// SourcingOptionNode SourcingOptionNode
+type SourcingOptionNode struct {
+	FacilityRef *string `json:"facilityRef,omitempty"`
+
+	// Id id of this node, unique for this Sourcing Option Responses
+	Id string `json:"id"`
+
+	// IsPickUpLocation Indicates if this node is a pick up location
+	IsPickUpLocation *bool         `json:"isPickUpLocation,omitempty"`
+	LineItems        []HandledItem `json:"lineItems"`
+	TenantFacilityId *string       `json:"tenantFacilityId,omitempty"`
+
+	// Type NodeType
+	Type NodeType `json:"type"`
+}
+
+// SourcingOptionSalesPrice SourcingOptionSalesPrice
+type SourcingOptionSalesPrice struct {
+	// Amount The amount of the item in the solution
+	Amount   float32                                   `json:"amount"`
+	Discount *[]SourcingOptionSalesPrice_Discount_Item `json:"discount,omitempty"`
+
+	// SalesPricePerUnitWithDiscountAmount Money
+	SalesPricePerUnitWithDiscountAmount *Money `json:"salesPricePerUnitWithDiscountAmount,omitempty"`
+
+	// SalesPricePerUnitWithoutDiscountAmount Money
+	SalesPricePerUnitWithoutDiscountAmount Money `json:"salesPricePerUnitWithoutDiscountAmount"`
+
+	// SourceFacilityRef The facility reference of the source facility
+	SourceFacilityRef string `json:"sourceFacilityRef"`
+
+	// SourceTenantFacilityId The tenant facility id of the source facility
+	SourceTenantFacilityId *string `json:"sourceTenantFacilityId,omitempty"`
+
+	// TenantArticleId The tenant article id of the item
+	TenantArticleId string `json:"tenantArticleId"`
+}
+
+// SourcingOptionSalesPrice_Discount_Item defines model for SourcingOptionSalesPrice.discount.Item.
+type SourcingOptionSalesPrice_Discount_Item struct {
+	union json.RawMessage
+}
+
+// SourcingOptionTransfer SourcingOptionTransfer
+type SourcingOptionTransfer struct {
+	Carrier *struct {
+		CarrierKey  *string `json:"carrierKey,omitempty"`
+		CarrierName *string `json:"carrierName,omitempty"`
+	} `json:"carrier,omitempty"`
+	FacilityConnectionRef *string `json:"facilityConnectionRef,omitempty"`
+
+	// FallbackCosts Money
+	FallbackCosts        *Money                                        `json:"fallbackCosts,omitempty"`
+	LineItems            []HandledItem                                 `json:"lineItems"`
+	PackagingInformation []SourcingOptionsTransferPackagingInformation `json:"packagingInformation"`
+	SourceNodeRef        string                                        `json:"sourceNodeRef"`
+	StrandId             *string                                       `json:"strandId,omitempty"`
+	TargetNodeRef        string                                        `json:"targetNodeRef"`
+
+	// TimeLine TransferTimeLine
+	TimeLine *TransferTimeLine `json:"timeLine,omitempty"`
+}
+
+// SourcingOptionsRequest SourcingOptionsRequest
+type SourcingOptionsRequest struct {
+	// AdditionalInfo SourcingOptionsRequestAdditionalInfo
+	AdditionalInfo *SourcingOptionsRequestAdditionalInfo `json:"additionalInfo,omitempty"`
+
+	// OptimizationHints OptimizationHints
+	OptimizationHints *OptimizationHints `json:"optimizationHints,omitempty"`
+
+	// Order OrderForSourcingOptionsRequest
+	Order OrderForSourcingOptionsRequest `json:"order"`
+
+	// ResourceInvestment How much resources should be invested during the optimization?
+	ResourceInvestment *ResourceInvestment `json:"resourceInvestment,omitempty"`
+}
+
+// SourcingOptionsRequestAdditionalInfo SourcingOptionsRequestAdditionalInfo
+type SourcingOptionsRequestAdditionalInfo struct {
+	// IncludeListingCustomAttributes If true, the listing custom attributes are included in the response. This is useful for debugging purposes.
+	IncludeListingCustomAttributes *bool `json:"includeListingCustomAttributes,omitempty"`
+}
+
+// SourcingOptionsResponse SourcingOptionsResponse
+type SourcingOptionsResponse struct {
+	// Id Id referring optimizations runId
+	Id string `json:"id"`
+
+	// Result SourcingOptionsResult
+	Result SourcingOptionsResult `json:"result"`
+}
+
+// SourcingOptionsResult SourcingOptionsResult
+type SourcingOptionsResult struct {
+	Options []SourcingOption `json:"options"`
+}
+
+// SourcingOptionsTransferDeliverCostCoefficient SourcingOptionsTransferDeliverCostCoefficient
+type SourcingOptionsTransferDeliverCostCoefficient struct {
+	// MeasurementUnit The unit of measurement for the coefficient
+	MeasurementUnit CostCoefficientMeasurementUnit `json:"measurementUnit"`
+	Value           float32                        `json:"value"`
+}
+
+// SourcingOptionsTransferDeliveryCost Money
+type SourcingOptionsTransferDeliveryCost = Money
+
+// SourcingOptionsTransferPackagingInformation SourcingOptionsTransferPackagingInformation
+type SourcingOptionsTransferPackagingInformation struct {
+	// PackagingUnit SourcingOptionsTransferPackagingUnit
+	PackagingUnit SourcingOptionsTransferPackagingUnit `json:"packagingUnit"`
+	PackedItems   []HandledItem                        `json:"packedItems"`
+
+	// TotalCosts Money
+	TotalCosts Money `json:"totalCosts"`
+}
+
+// SourcingOptionsTransferPackagingUnit SourcingOptionsTransferPackagingUnit
+type SourcingOptionsTransferPackagingUnit struct {
+	// Dimensions SourcingOptionsTransferPackagingUnitDimensions
+	Dimensions *SourcingOptionsTransferPackagingUnitDimensions `json:"dimensions,omitempty"`
+
+	// MaxItemQuantity The maximum number of items that can be packed in this packaging unit
+	MaxItemQuantity  *int                                   `json:"maxItemQuantity,omitempty"`
+	Name             string                                 `json:"name"`
+	PackagingUnitRef *string                                `json:"packagingUnitRef,omitempty"`
+	Prices           *[]SourcingOptionsTransferDeliveryCost `json:"prices,omitempty"`
+
+	// Priority The priority of this packaging unit, lower values are preferred
+	Priority              int     `json:"priority"`
+	TenantPackagingUnitId *string `json:"tenantPackagingUnitId,omitempty"`
+
+	// TransitTime SourcingOptionsTransferTransitTime
+	TransitTime *SourcingOptionsTransferTransitTime `json:"transitTime,omitempty"`
+
+	// VolumeBufferInPercent The volume buffer in percent for this packaging unit
+	VolumeBufferInPercent *float32 `json:"volumeBufferInPercent,omitempty"`
+}
+
+// SourcingOptionsTransferPackagingUnitDimensions SourcingOptionsTransferPackagingUnitDimensions
+type SourcingOptionsTransferPackagingUnitDimensions struct {
+	Height          *float32 `json:"height,omitempty"`
+	Length          *float32 `json:"length,omitempty"`
+	MaxWeightInGram *float32 `json:"maxWeightInGram,omitempty"`
+	Width           *float32 `json:"width,omitempty"`
+}
+
+// SourcingOptionsTransferTransitTime SourcingOptionsTransferTransitTime
+type SourcingOptionsTransferTransitTime struct {
+	MaxTransitDays float32 `json:"maxTransitDays"`
+	MinTransitDays float32 `json:"minTransitDays"`
+}
+
 // Status Status
 type Status struct {
 	// Status The current state of the API
@@ -18496,6 +19294,24 @@ type Status struct {
 
 // StatusStatus The current state of the API
 type StatusStatus string
+
+// Sticker Sticker
+type Sticker struct {
+	// Color optional color coding for the sticker
+	Color *string `json:"color,omitempty"`
+
+	// Key unique identifier
+	Key string `json:"key"`
+
+	// Name Translated display name
+	Name *string `json:"name,omitempty"`
+
+	// NameLocalized Dictionary of possible translations, min 1 entry, max 14 characters per description
+	NameLocalized LocaleString `json:"nameLocalized"`
+
+	// Priority priority of the given sticker
+	Priority int64 `json:"priority"`
+}
 
 // Stock Stock
 type Stock struct {
@@ -19594,6 +20410,30 @@ type StrippedManagedFacility struct {
 // StrippedManagedFacilityPhoneNumbersType defines model for StrippedManagedFacility.PhoneNumbers.Type.
 type StrippedManagedFacilityPhoneNumbersType string
 
+// Substitute Substitute
+type Substitute struct {
+	Attributes *[]SubstituteAttributeItem `json:"attributes,omitempty"`
+	ImageUrl   *string                    `json:"imageUrl,omitempty"`
+
+	// MeasurementUnitKey Identifier for items unit of measurement.
+	MeasurementUnitKey *string `json:"measurementUnitKey,omitempty"`
+
+	// MeasurementValidation MeasurementValidation
+	MeasurementValidation *MeasurementValidation `json:"measurementValidation,omitempty"`
+
+	// Priority This field allows you to rank substitutes against each other. The lowest number is the most preferrable substitute.
+	Priority       *float32  `json:"priority,omitempty"`
+	ScannableCodes *[]string `json:"scannableCodes,omitempty"`
+
+	// SecondaryMeasurementUnitKey Identifier for items unit of measurement. E.g. measurementUnitKey is pieces and secondaryQuantity is gram
+	SecondaryMeasurementUnitKey *string `json:"secondaryMeasurementUnitKey,omitempty"`
+	TenantArticleId             string  `json:"tenantArticleId"`
+	Title                       string  `json:"title"`
+}
+
+// SubstituteAttributeItem ArticleAttributeItem
+type SubstituteAttributeItem = ArticleAttributeItem
+
 // Supplier defines model for Supplier.
 type Supplier struct {
 	// Created The date this entity was created at the platform. This value is generated by the service.
@@ -19741,6 +20581,24 @@ type SupplierForReplacement struct {
 	// Version The version of the document to be used in optimistic locking mechanisms.
 	Version int64 `json:"version"`
 }
+
+// SupplyingFacilityConfiguration SupplyingFacilityConfiguration
+type SupplyingFacilityConfiguration struct {
+	DeliveryEvents []DeliveryEvent `json:"deliveryEvents"`
+
+	// FacilityRef ID of the facility.
+	FacilityRef *string `json:"facilityRef,omitempty"`
+
+	// TenantFacilityId Reference to the facility.
+	TenantFacilityId *string `json:"tenantFacilityId,omitempty"`
+	union            json.RawMessage
+}
+
+// SupplyingFacilityConfiguration0 defines model for .
+type SupplyingFacilityConfiguration0 = interface{}
+
+// SupplyingFacilityConfiguration1 defines model for .
+type SupplyingFacilityConfiguration1 = interface{}
 
 // SupportedLocale This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />ISO 3166 conform country code and ISO 639-1 conform language code (de_DE, en_US, ch_FR, etc.)
 type SupportedLocale string
@@ -19975,6 +20833,27 @@ type ToolkitRuleScope string
 
 // ToolkitTransformationType The transformations available to apply on the entity property value before a predicate is evaluated
 type ToolkitTransformationType string
+
+// TransferTimeLine TransferTimeLine
+type TransferTimeLine struct {
+	// CalculationStartPoint The date and time from which all time-related calculations for the corresponding items are based.
+	CalculationStartPoint time.Time `json:"calculationStartPoint"`
+
+	// EarliestPickingStart The earliest date and time when picking for the corresponding items can begin.
+	EarliestPickingStart time.Time `json:"earliestPickingStart"`
+
+	// EarliestPossibleDeliveryTime The earliest date at which the corresponding items can be delivered to the recipient.
+	EarliestPossibleDeliveryTime *time.Time `json:"earliestPossibleDeliveryTime,omitempty"`
+
+	// LatestPickingStart The latest date and time when picking for the corresponding items can begin.
+	LatestPickingStart time.Time `json:"latestPickingStart"`
+
+	// TargetTime The desired date and time by which the corresponding items should be fulfilled.
+	TargetTime time.Time `json:"targetTime"`
+
+	// UsedTransitTimeInDays The raw amount of transit days used for timeline calculation
+	UsedTransitTimeInDays *int `json:"usedTransitTimeInDays,omitempty"`
+}
 
 // UpdateFacilityCoordinatesActionParameter AbstractFacilityActionsParameter
 type UpdateFacilityCoordinatesActionParameter = AbstractFacilityActionsParameter
@@ -20830,6 +21709,9 @@ type PatchRoleJSONRequestBody = RoleForPatch
 // UpdateRoleJSONRequestBody defines body for UpdateRole for application/json ContentType.
 type UpdateRoleJSONRequestBody = RoleForUpdate
 
+// CreateSourcingOptionsRequestJSONRequestBody defines body for CreateSourcingOptionsRequest for application/json ContentType.
+type CreateSourcingOptionsRequestJSONRequestBody = SourcingOptionsRequest
+
 // BulkUpdateSafetyStockJSONRequestBody defines body for BulkUpdateSafetyStock for application/json ContentType.
 type BulkUpdateSafetyStockJSONRequestBody = SafetyStockBulkOperations
 
@@ -21175,6 +22057,172 @@ func (t CategorySearchQuery_NameLocalized_AdditionalProperties) MarshalJSON() ([
 
 func (t *CategorySearchQuery_NameLocalized_AdditionalProperties) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsCollectDelivery0 returns the union data inside the CollectDelivery as a CollectDelivery0
+func (t CollectDelivery) AsCollectDelivery0() (CollectDelivery0, error) {
+	var body CollectDelivery0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCollectDelivery0 overwrites any union data inside the CollectDelivery as the provided CollectDelivery0
+func (t *CollectDelivery) FromCollectDelivery0(v CollectDelivery0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCollectDelivery0 performs a merge with any union data inside the CollectDelivery, using the provided CollectDelivery0
+func (t *CollectDelivery) MergeCollectDelivery0(v CollectDelivery0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsCollectDelivery1 returns the union data inside the CollectDelivery as a CollectDelivery1
+func (t CollectDelivery) AsCollectDelivery1() (CollectDelivery1, error) {
+	var body CollectDelivery1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCollectDelivery1 overwrites any union data inside the CollectDelivery as the provided CollectDelivery1
+func (t *CollectDelivery) FromCollectDelivery1(v CollectDelivery1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCollectDelivery1 performs a merge with any union data inside the CollectDelivery, using the provided CollectDelivery1
+func (t *CollectDelivery) MergeCollectDelivery1(v CollectDelivery1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t CollectDelivery) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	object := make(map[string]json.RawMessage)
+	if t.union != nil {
+		err = json.Unmarshal(b, &object)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if t.FacilityRef != nil {
+		object["facilityRef"], err = json.Marshal(t.FacilityRef)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'facilityRef': %w", err)
+		}
+	}
+
+	if t.Paid != nil {
+		object["paid"], err = json.Marshal(t.Paid)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'paid': %w", err)
+		}
+	}
+
+	if t.ProvisioningTime != nil {
+		object["provisioningTime"], err = json.Marshal(t.ProvisioningTime)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'provisioningTime': %w", err)
+		}
+	}
+
+	if t.SupplyingFacilities != nil {
+		object["supplyingFacilities"], err = json.Marshal(t.SupplyingFacilities)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'supplyingFacilities': %w", err)
+		}
+	}
+
+	if t.SupplyingFacilitiesConfigurations != nil {
+		object["supplyingFacilitiesConfigurations"], err = json.Marshal(t.SupplyingFacilitiesConfigurations)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'supplyingFacilitiesConfigurations': %w", err)
+		}
+	}
+
+	if t.TenantFacilityId != nil {
+		object["tenantFacilityId"], err = json.Marshal(t.TenantFacilityId)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'tenantFacilityId': %w", err)
+		}
+	}
+	b, err = json.Marshal(object)
+	return b, err
+}
+
+func (t *CollectDelivery) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	if err != nil {
+		return err
+	}
+	object := make(map[string]json.RawMessage)
+	err = json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if raw, found := object["facilityRef"]; found {
+		err = json.Unmarshal(raw, &t.FacilityRef)
+		if err != nil {
+			return fmt.Errorf("error reading 'facilityRef': %w", err)
+		}
+	}
+
+	if raw, found := object["paid"]; found {
+		err = json.Unmarshal(raw, &t.Paid)
+		if err != nil {
+			return fmt.Errorf("error reading 'paid': %w", err)
+		}
+	}
+
+	if raw, found := object["provisioningTime"]; found {
+		err = json.Unmarshal(raw, &t.ProvisioningTime)
+		if err != nil {
+			return fmt.Errorf("error reading 'provisioningTime': %w", err)
+		}
+	}
+
+	if raw, found := object["supplyingFacilities"]; found {
+		err = json.Unmarshal(raw, &t.SupplyingFacilities)
+		if err != nil {
+			return fmt.Errorf("error reading 'supplyingFacilities': %w", err)
+		}
+	}
+
+	if raw, found := object["supplyingFacilitiesConfigurations"]; found {
+		err = json.Unmarshal(raw, &t.SupplyingFacilitiesConfigurations)
+		if err != nil {
+			return fmt.Errorf("error reading 'supplyingFacilitiesConfigurations': %w", err)
+		}
+	}
+
+	if raw, found := object["tenantFacilityId"]; found {
+		err = json.Unmarshal(raw, &t.TenantFacilityId)
+		if err != nil {
+			return fmt.Errorf("error reading 'tenantFacilityId': %w", err)
+		}
+	}
+
 	return err
 }
 
@@ -22851,6 +23899,116 @@ func (t *OrderSearchQuery_CustomAttributes_AdditionalProperties) UnmarshalJSON(b
 	return err
 }
 
+// AsPreselectedFacility0 returns the union data inside the PreselectedFacility as a PreselectedFacility0
+func (t PreselectedFacility) AsPreselectedFacility0() (PreselectedFacility0, error) {
+	var body PreselectedFacility0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPreselectedFacility0 overwrites any union data inside the PreselectedFacility as the provided PreselectedFacility0
+func (t *PreselectedFacility) FromPreselectedFacility0(v PreselectedFacility0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePreselectedFacility0 performs a merge with any union data inside the PreselectedFacility, using the provided PreselectedFacility0
+func (t *PreselectedFacility) MergePreselectedFacility0(v PreselectedFacility0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPreselectedFacility1 returns the union data inside the PreselectedFacility as a PreselectedFacility1
+func (t PreselectedFacility) AsPreselectedFacility1() (PreselectedFacility1, error) {
+	var body PreselectedFacility1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPreselectedFacility1 overwrites any union data inside the PreselectedFacility as the provided PreselectedFacility1
+func (t *PreselectedFacility) FromPreselectedFacility1(v PreselectedFacility1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePreselectedFacility1 performs a merge with any union data inside the PreselectedFacility, using the provided PreselectedFacility1
+func (t *PreselectedFacility) MergePreselectedFacility1(v PreselectedFacility1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PreselectedFacility) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	object := make(map[string]json.RawMessage)
+	if t.union != nil {
+		err = json.Unmarshal(b, &object)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if t.FacilityRef != nil {
+		object["facilityRef"], err = json.Marshal(t.FacilityRef)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'facilityRef': %w", err)
+		}
+	}
+
+	if t.TenantFacilityId != nil {
+		object["tenantFacilityId"], err = json.Marshal(t.TenantFacilityId)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'tenantFacilityId': %w", err)
+		}
+	}
+	b, err = json.Marshal(object)
+	return b, err
+}
+
+func (t *PreselectedFacility) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	if err != nil {
+		return err
+	}
+	object := make(map[string]json.RawMessage)
+	err = json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if raw, found := object["facilityRef"]; found {
+		err = json.Unmarshal(raw, &t.FacilityRef)
+		if err != nil {
+			return fmt.Errorf("error reading 'facilityRef': %w", err)
+		}
+	}
+
+	if raw, found := object["tenantFacilityId"]; found {
+		err = json.Unmarshal(raw, &t.TenantFacilityId)
+		if err != nil {
+			return fmt.Errorf("error reading 'tenantFacilityId': %w", err)
+		}
+	}
+
+	return err
+}
+
 // AsBooleanFilter returns the union data inside the RoutingPlanTargetAddressFilter_CustomAttributes_AdditionalProperties as a BooleanFilter
 func (t RoutingPlanTargetAddressFilter_CustomAttributes_AdditionalProperties) AsBooleanFilter() (BooleanFilter, error) {
 	var body BooleanFilter
@@ -23607,6 +24765,68 @@ func (t SimulationOrderSearchQuery_CustomAttributes_AdditionalProperties) Marsha
 }
 
 func (t *SimulationOrderSearchQuery_CustomAttributes_AdditionalProperties) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsFacilityDiscountRelative returns the union data inside the SourcingOptionSalesPrice_Discount_Item as a FacilityDiscountRelative
+func (t SourcingOptionSalesPrice_Discount_Item) AsFacilityDiscountRelative() (FacilityDiscountRelative, error) {
+	var body FacilityDiscountRelative
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFacilityDiscountRelative overwrites any union data inside the SourcingOptionSalesPrice_Discount_Item as the provided FacilityDiscountRelative
+func (t *SourcingOptionSalesPrice_Discount_Item) FromFacilityDiscountRelative(v FacilityDiscountRelative) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFacilityDiscountRelative performs a merge with any union data inside the SourcingOptionSalesPrice_Discount_Item, using the provided FacilityDiscountRelative
+func (t *SourcingOptionSalesPrice_Discount_Item) MergeFacilityDiscountRelative(v FacilityDiscountRelative) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsFacilityDiscountAbsoluteForCreation returns the union data inside the SourcingOptionSalesPrice_Discount_Item as a FacilityDiscountAbsoluteForCreation
+func (t SourcingOptionSalesPrice_Discount_Item) AsFacilityDiscountAbsoluteForCreation() (FacilityDiscountAbsoluteForCreation, error) {
+	var body FacilityDiscountAbsoluteForCreation
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromFacilityDiscountAbsoluteForCreation overwrites any union data inside the SourcingOptionSalesPrice_Discount_Item as the provided FacilityDiscountAbsoluteForCreation
+func (t *SourcingOptionSalesPrice_Discount_Item) FromFacilityDiscountAbsoluteForCreation(v FacilityDiscountAbsoluteForCreation) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeFacilityDiscountAbsoluteForCreation performs a merge with any union data inside the SourcingOptionSalesPrice_Discount_Item, using the provided FacilityDiscountAbsoluteForCreation
+func (t *SourcingOptionSalesPrice_Discount_Item) MergeFacilityDiscountAbsoluteForCreation(v FacilityDiscountAbsoluteForCreation) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t SourcingOptionSalesPrice_Discount_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *SourcingOptionSalesPrice_Discount_Item) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -24667,6 +25887,130 @@ func (t StrippedFacilities_Facilities_Item) MarshalJSON() ([]byte, error) {
 
 func (t *StrippedFacilities_Facilities_Item) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsSupplyingFacilityConfiguration0 returns the union data inside the SupplyingFacilityConfiguration as a SupplyingFacilityConfiguration0
+func (t SupplyingFacilityConfiguration) AsSupplyingFacilityConfiguration0() (SupplyingFacilityConfiguration0, error) {
+	var body SupplyingFacilityConfiguration0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSupplyingFacilityConfiguration0 overwrites any union data inside the SupplyingFacilityConfiguration as the provided SupplyingFacilityConfiguration0
+func (t *SupplyingFacilityConfiguration) FromSupplyingFacilityConfiguration0(v SupplyingFacilityConfiguration0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSupplyingFacilityConfiguration0 performs a merge with any union data inside the SupplyingFacilityConfiguration, using the provided SupplyingFacilityConfiguration0
+func (t *SupplyingFacilityConfiguration) MergeSupplyingFacilityConfiguration0(v SupplyingFacilityConfiguration0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSupplyingFacilityConfiguration1 returns the union data inside the SupplyingFacilityConfiguration as a SupplyingFacilityConfiguration1
+func (t SupplyingFacilityConfiguration) AsSupplyingFacilityConfiguration1() (SupplyingFacilityConfiguration1, error) {
+	var body SupplyingFacilityConfiguration1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSupplyingFacilityConfiguration1 overwrites any union data inside the SupplyingFacilityConfiguration as the provided SupplyingFacilityConfiguration1
+func (t *SupplyingFacilityConfiguration) FromSupplyingFacilityConfiguration1(v SupplyingFacilityConfiguration1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSupplyingFacilityConfiguration1 performs a merge with any union data inside the SupplyingFacilityConfiguration, using the provided SupplyingFacilityConfiguration1
+func (t *SupplyingFacilityConfiguration) MergeSupplyingFacilityConfiguration1(v SupplyingFacilityConfiguration1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t SupplyingFacilityConfiguration) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	object := make(map[string]json.RawMessage)
+	if t.union != nil {
+		err = json.Unmarshal(b, &object)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if t.DeliveryEvents != nil {
+		object["deliveryEvents"], err = json.Marshal(t.DeliveryEvents)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'deliveryEvents': %w", err)
+		}
+	}
+
+	if t.FacilityRef != nil {
+		object["facilityRef"], err = json.Marshal(t.FacilityRef)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'facilityRef': %w", err)
+		}
+	}
+
+	if t.TenantFacilityId != nil {
+		object["tenantFacilityId"], err = json.Marshal(t.TenantFacilityId)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling 'tenantFacilityId': %w", err)
+		}
+	}
+	b, err = json.Marshal(object)
+	return b, err
+}
+
+func (t *SupplyingFacilityConfiguration) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	if err != nil {
+		return err
+	}
+	object := make(map[string]json.RawMessage)
+	err = json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if raw, found := object["deliveryEvents"]; found {
+		err = json.Unmarshal(raw, &t.DeliveryEvents)
+		if err != nil {
+			return fmt.Errorf("error reading 'deliveryEvents': %w", err)
+		}
+	}
+
+	if raw, found := object["facilityRef"]; found {
+		err = json.Unmarshal(raw, &t.FacilityRef)
+		if err != nil {
+			return fmt.Errorf("error reading 'facilityRef': %w", err)
+		}
+	}
+
+	if raw, found := object["tenantFacilityId"]; found {
+		err = json.Unmarshal(raw, &t.TenantFacilityId)
+		if err != nil {
+			return fmt.Errorf("error reading 'tenantFacilityId': %w", err)
+		}
+	}
+
 	return err
 }
 
@@ -26446,6 +27790,14 @@ type ClientInterface interface {
 
 	UpdateRole(ctx context.Context, name string, body UpdateRoleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// CreateSourcingOptionsRequestWithBody request with any body
+	CreateSourcingOptionsRequestWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateSourcingOptionsRequest(ctx context.Context, body CreateSourcingOptionsRequestJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetSourcingOption request
+	GetSourcingOption(ctx context.Context, sourcingOptionsRequestId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetSafetyStocks request
 	GetSafetyStocks(ctx context.Context, params *GetSafetyStocksParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -27361,6 +28713,42 @@ func (c *Client) UpdateRoleWithBody(ctx context.Context, name string, contentTyp
 
 func (c *Client) UpdateRole(ctx context.Context, name string, body UpdateRoleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUpdateRoleRequest(c.Server, name, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateSourcingOptionsRequestWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateSourcingOptionsRequestRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateSourcingOptionsRequest(ctx context.Context, body CreateSourcingOptionsRequestJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateSourcingOptionsRequestRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetSourcingOption(ctx context.Context, sourcingOptionsRequestId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetSourcingOptionRequest(c.Server, sourcingOptionsRequestId)
 	if err != nil {
 		return nil, err
 	}
@@ -30334,6 +31722,80 @@ func NewUpdateRoleRequestWithBody(server string, name string, contentType string
 	return req, nil
 }
 
+// NewCreateSourcingOptionsRequestRequest calls the generic CreateSourcingOptionsRequest builder with application/json body
+func NewCreateSourcingOptionsRequestRequest(server string, body CreateSourcingOptionsRequestJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateSourcingOptionsRequestRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewCreateSourcingOptionsRequestRequestWithBody generates requests for CreateSourcingOptionsRequest with any type of body
+func NewCreateSourcingOptionsRequestRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/routing/sourcingoptions")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetSourcingOptionRequest generates requests for GetSourcingOption
+func NewGetSourcingOptionRequest(server string, sourcingOptionsRequestId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "sourcingOptionsRequestId", sourcingOptionsRequestId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/routing/sourcingoptions/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetSafetyStocksRequest generates requests for GetSafetyStocks
 func NewGetSafetyStocksRequest(server string, params *GetSafetyStocksParams) (*http.Request, error) {
 	var err error
@@ -31788,6 +33250,14 @@ type ClientWithResponsesInterface interface {
 	UpdateRoleWithBodyWithResponse(ctx context.Context, name string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateRoleResponse, error)
 
 	UpdateRoleWithResponse(ctx context.Context, name string, body UpdateRoleJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateRoleResponse, error)
+
+	// CreateSourcingOptionsRequestWithBodyWithResponse request with any body
+	CreateSourcingOptionsRequestWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateSourcingOptionsRequestResponse, error)
+
+	CreateSourcingOptionsRequestWithResponse(ctx context.Context, body CreateSourcingOptionsRequestJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateSourcingOptionsRequestResponse, error)
+
+	// GetSourcingOptionWithResponse request
+	GetSourcingOptionWithResponse(ctx context.Context, sourcingOptionsRequestId string, reqEditors ...RequestEditorFn) (*GetSourcingOptionResponse, error)
 
 	// GetSafetyStocksWithResponse request
 	GetSafetyStocksWithResponse(ctx context.Context, params *GetSafetyStocksParams, reqEditors ...RequestEditorFn) (*GetSafetyStocksResponse, error)
@@ -33426,6 +34896,72 @@ func (r UpdateRoleResponse) ContentType() string {
 	return ""
 }
 
+type CreateSourcingOptionsRequestResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *SourcingOptionsResponse
+	XML201       *SourcingOptionsResponse
+	JSON401      *ApiError
+	JSON403      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateSourcingOptionsRequestResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateSourcingOptionsRequestResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r CreateSourcingOptionsRequestResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetSourcingOptionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *SourcingOptionsResponse
+	XML200       *SourcingOptionsResponse
+	JSON401      *ApiError
+	JSON403      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetSourcingOptionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetSourcingOptionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetSourcingOptionResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
 type GetSafetyStocksResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -34792,6 +36328,32 @@ func (c *ClientWithResponses) UpdateRoleWithResponse(ctx context.Context, name s
 		return nil, err
 	}
 	return ParseUpdateRoleResponse(rsp)
+}
+
+// CreateSourcingOptionsRequestWithBodyWithResponse request with arbitrary body returning *CreateSourcingOptionsRequestResponse
+func (c *ClientWithResponses) CreateSourcingOptionsRequestWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateSourcingOptionsRequestResponse, error) {
+	rsp, err := c.CreateSourcingOptionsRequestWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateSourcingOptionsRequestResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateSourcingOptionsRequestWithResponse(ctx context.Context, body CreateSourcingOptionsRequestJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateSourcingOptionsRequestResponse, error) {
+	rsp, err := c.CreateSourcingOptionsRequest(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateSourcingOptionsRequestResponse(rsp)
+}
+
+// GetSourcingOptionWithResponse request returning *GetSourcingOptionResponse
+func (c *ClientWithResponses) GetSourcingOptionWithResponse(ctx context.Context, sourcingOptionsRequestId string, reqEditors ...RequestEditorFn) (*GetSourcingOptionResponse, error) {
+	rsp, err := c.GetSourcingOption(ctx, sourcingOptionsRequestId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetSourcingOptionResponse(rsp)
 }
 
 // GetSafetyStocksWithResponse request returning *GetSafetyStocksResponse
@@ -37232,6 +38794,100 @@ func ParseUpdateRoleResponse(rsp *http.Response) (*UpdateRoleResponse, error) {
 			return nil, err
 		}
 		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateSourcingOptionsRequestResponse parses an HTTP response from a CreateSourcingOptionsRequestWithResponse call
+func ParseCreateSourcingOptionsRequestResponse(rsp *http.Response) (*CreateSourcingOptionsRequestResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateSourcingOptionsRequestResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest SourcingOptionsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "xml") && rsp.StatusCode == 201:
+		var dest SourcingOptionsResponse
+		if err := xml.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.XML201 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetSourcingOptionResponse parses an HTTP response from a GetSourcingOptionWithResponse call
+func ParseGetSourcingOptionResponse(rsp *http.Response) (*GetSourcingOptionResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetSourcingOptionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest SourcingOptionsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "xml") && rsp.StatusCode == 200:
+		var dest SourcingOptionsResponse
+		if err := xml.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.XML200 = &dest
 
 	}
 

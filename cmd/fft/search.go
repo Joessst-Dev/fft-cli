@@ -39,12 +39,19 @@ type pageFlags struct {
 	maxItems int
 }
 
-// register installs the flags. noun is the plural the help text is phrased with.
-func (p *pageFlags) register(f *pflag.FlagSet, noun string) {
+// register installs the flags. noun is the plural the help text is phrased with, and
+// defaultSize is what the *endpoint* does when --size is absent.
+//
+// The default is a parameter rather than a constant because the API has two of them:
+// a cursor search defaults to 20 ([client.DefaultSize]) and a GET list defaults to 25
+// ([client.DefaultListSize]). fft does not get to average them. A help text that
+// promised 20 to a command that would be given 25 is a small lie, and it is exactly
+// the kind a user only discovers by counting the rows.
+func (p *pageFlags) register(f *pflag.FlagSet, noun string, defaultSize int) {
 	f.IntVar(&p.size, "size", 0,
 		fmt.Sprintf("%s per page, %d–%d (default %d)",
-			strings.ToUpper(noun[:1])+noun[1:], client.MinSize, client.MaxSize, client.DefaultSize))
-	f.BoolVar(&p.all, "all", false, "Follow the cursor and return every match, not just the first page")
+			strings.ToUpper(noun[:1])+noun[1:], client.MinSize, client.MaxSize, defaultSize))
+	f.BoolVar(&p.all, "all", false, "Page to the end and return every match, not just the first page")
 	f.BoolVar(&p.total, "total", false, "Also count the matches, and report the total on stderr")
 	f.IntVar(&p.maxItems, "max-items", client.DefaultMaxItems,
 		fmt.Sprintf("With --all, stop after this many %s", noun))
@@ -138,6 +145,105 @@ func runSearch[Q, S any](cmd *cobra.Command, deps *Deps, op client.Op[json.RawMe
 		return renderAll(ctx, deps, c, op, payload, page, view)
 	}
 	return renderPage(ctx, deps, c, op, payload, view)
+}
+
+// listOpFn produces the ListOp once the client exists.
+//
+// It is [buildFn] for the GET lists, and it exists for the same reason: `fft
+// connection list --target BER-01` has to *resolve* that target to a platform id
+// before it can be a query filter, which takes a request, which takes a client.
+type listOpFn func(ctx context.Context, c *client.Client) (client.ListOp[json.RawMessage], error)
+
+// runList is the body of a `list` backed by a GET that pages by startAfterId.
+//
+// It is [runSearch] for the API's other pagination model: the same flags, the same
+// output contract, the same truncation notice. Only the cursor differs, and
+// internal/client/list.go is where that difference lives.
+func runList(cmd *cobra.Command, deps *Deps, build listOpFn, page pageFlags, view listView) error {
+	if err := checkMaxItems(cmd, page); err != nil {
+		return err
+	}
+
+	c, err := tenantClient(deps)
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := deps.Context(cmd)
+	defer cancel()
+
+	op, err := build(ctx, c)
+	if err != nil {
+		return err
+	}
+
+	// --size 0 is out of range, and letting it fall through as "unset" would silently
+	// give the user the API's default while --size 500 is refused. Both ends of the
+	// range have to fail the same way, so the flag's presence is read off Changed and
+	// not off its value. Same bargain as applyPage.
+	size := 0
+	if cmd.Flags().Changed("size") {
+		size = page.size
+	}
+
+	if page.all {
+		return renderListAll(ctx, deps, c, op, size, page, view)
+	}
+
+	result, err := client.List(ctx, c, op, "", size)
+	if err != nil {
+		return err
+	}
+
+	// This envelope always carries a total, so --total costs nothing extra — but it is
+	// still only printed when it was asked for. A command that started volunteering a
+	// count would be a command whose output changed for everyone who never wanted one.
+	if page.total {
+		deps.Printer.Notef("Total: %d", result.Total)
+	}
+
+	// The total is also how this model knows there is more: there is no hasNextPage to
+	// read, so "did I see all of them?" is a subtraction.
+	if result.Total > len(result.Items) && deps.Printer.Format() == output.Table {
+		deps.Printer.Notef("There are more %s. Pass --all to fetch them.", view.Noun)
+	}
+
+	return renderList(deps, view, result.Items)
+}
+
+func renderListAll(ctx context.Context, deps *Deps, c *client.Client, op client.ListOp[json.RawMessage],
+	size int, page pageFlags, view listView,
+) error {
+	var (
+		items     []json.RawMessage
+		truncated *client.TruncatedError
+	)
+
+	for item, err := range client.ListAll(ctx, c, op, size, client.MaxItems(page.maxItems)) {
+		switch {
+		case errors.As(err, &truncated):
+		case err != nil:
+			return err
+		default:
+			items = append(items, item)
+		}
+		if truncated != nil {
+			break
+		}
+	}
+
+	if truncated != nil {
+		deps.Printer.Warnf("%s. %s", truncated, truncated.Hint())
+	}
+
+	// As with --all over a cursor: the count is the total only if the walk reached the
+	// end. A truncated run knows how many it fetched and nothing about how many it did
+	// not.
+	if page.total && truncated == nil {
+		deps.Printer.Notef("Total: %d", len(items))
+	}
+
+	return renderList(deps, view, items)
 }
 
 func renderPage[Q, S any](ctx context.Context, deps *Deps, c *client.Client, op client.Op[json.RawMessage],

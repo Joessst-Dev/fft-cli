@@ -315,8 +315,10 @@ func newRootCmd(deps *Deps) *cobra.Command {
 
 	for _, c := range []*cobra.Command{
 		newFacilityCmd(deps),
+		newConnectionCmd(deps),
 		newListingCmd(deps),
 		newStockCmd(deps),
+		newSourcingCmd(deps),
 	} {
 		c.GroupID = groupResource
 		cmd.AddCommand(c)

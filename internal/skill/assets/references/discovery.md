@@ -81,3 +81,9 @@ Most of the API's *searches* are POSTs — `fft facility list` sends
 fft knows the difference (that is what makes `--read-only` work on a list command), but if
 you are reasoning about the API yourself, do not infer intent from the verb. `fft api
 describe` will tell you what the operation does.
+
+The clearest case is `fft sourcing simulate`. It POSTs a whole order and gets back the ways
+that order could be fulfilled — and it reserves nothing, creates nothing and moves nothing.
+It is a read, fft classifies it as one, and it runs happily on a read-only project. Refusing
+to run it because "POST means write" would be declining to answer a question that was never
+dangerous.
