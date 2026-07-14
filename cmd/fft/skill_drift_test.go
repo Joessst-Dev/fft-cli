@@ -99,10 +99,11 @@ func skillSnippets() []snippet {
 			// found.
 			if len(found) == 0 {
 				tokens, _ := fields(line)
-				// HaveSuffix, not equality: `./fft` and `$FFT` name the binary too, and a
-				// line that invokes it by one of those spellings would otherwise be a line
-				// the tokenizer skips and nobody checks. `fft.json` and `--data '{"a":"fft"}'`
-				// tokenize to something that ends in neither.
+				// The path spellings too: `./fft` and `/usr/local/bin/fft` name the binary,
+				// and a line that invokes it that way would otherwise be skipped in silence.
+				// (`$FFT` is not caught here and does not need to be — [readable] refuses a
+				// `$` outright.) A `fft.json` or a `--data '{"a":"fft"}'` tokenizes to
+				// something that is neither, so no honest line trips this.
 				Expect(tokens).NotTo(ContainElement(Or(Equal("fft"), HaveSuffix("/fft"))),
 					"%s:%d: %s\n  mentions fft, and the tokenizer found no fft command in it — "+
 						"so nothing here is verified. Rewrite it as a plain command line",
@@ -136,8 +137,16 @@ func skillSnippets() []snippet {
 // this is a line that is never found.
 func readable(line string) error {
 	switch trimmed := strings.TrimSpace(line); {
-	case strings.Contains(line, "$(") || strings.Contains(line, "`"):
+	case strings.Contains(line, "`"):
 		return errors.New("command substitution: the tokenizer cannot see the fft call inside it")
+
+	// Every use of $: a substitution `$(fft ...)` hides the call inside it, and a
+	// `$FFT ...` or `$EDITOR ...` hides what the word even is. Neither is a shape the
+	// tokenizer can reason about, and a snippet it cannot read is one nobody checks —
+	// so the skill does without them. It loses nothing: these are command lines for an
+	// agent to run, and it has no shell variables set.
+	case strings.Contains(line, "$"):
+		return errors.New("a shell variable or substitution: write the command out in full")
 	case strings.HasPrefix(trimmed, "$ "):
 		return errors.New("a `$ ` prompt prefix: the snippets are command lines to run, not a transcript")
 	case strings.HasSuffix(trimmed, "\\"):
@@ -356,6 +365,8 @@ var _ = Describe("the skill's shell tokenizer", func() {
 		Entry("a backquoted command", "ID=`fft facility list`"),
 		Entry("a prompt prefix", "$ fft facility list"),
 		Entry("a line continuation", `fft facility list \`),
+		Entry("the binary behind a variable", "$FFT facility list"),
+		Entry("an argument behind a variable", "fft facility get $ID"),
 	)
 
 	It("reads the lines it does allow", func() {
