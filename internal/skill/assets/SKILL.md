@@ -76,11 +76,14 @@ Rules that are not optional:
 
 - **Show the user the command and the body, and let them confirm, before any write.** They
   can see their tenant; you cannot.
-- Pass `--if-version` with the version of the object you just read. Without it you are
-  overwriting whatever a colleague changed thirty seconds ago.
+- **Versions.** The API locks optimistically, and how you send the version depends on the
+  command. A handful of curated commands take `--if-version` (`facility patch|update`,
+  `facility coordinates set`, `listing patch`, `stock update`) — everywhere else it is a
+  field *in the body*, which the `--example` body already has. Do not add `--if-version` to
+  a command that has no such flag; check `--help`.
 - **Exit 7** is a version conflict: the object changed under you. Re-read it, re-apply the
-  change, re-send. Never retry the same body — you would be undoing someone's work on
-  purpose.
+  change, re-send with the version you just read. Never retry the same body — you would be
+  undoing someone's work on purpose.
 - **Exit 8** is a partial bulk write: some items in the file landed and some did not. Read
   the per-item results and fix those items. Do not re-send the whole file blindly.
 

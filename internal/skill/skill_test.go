@@ -334,6 +334,54 @@ var _ = Describe("installing the skill", func() {
 		})
 	})
 
+	// The blast radius of a prune. A stray that is a symlink is removed — it is not a
+	// file fft ships — but what it *points at* is none of fft's business, and may be
+	// anywhere at all. This is what the os.Remove in Apply buys, and what an os.RemoveAll
+	// or a resolve-then-delete would quietly take away.
+	When("a stray is a symlink to a file outside the skill", func() {
+		var link, outside string
+
+		BeforeEach(func() {
+			install(root)
+
+			outside = filepath.Join(GinkgoT().TempDir(), "secret.txt")
+			Expect(os.WriteFile(outside, []byte("SECRET\n"), 0o600)).To(Succeed())
+
+			link = filepath.Join(installed(root), "notes.md")
+			Expect(os.Symlink(outside, link)).To(Succeed())
+		})
+
+		It("removes the link and not the file it points at", func() {
+			done := install(root)
+
+			Expect(statuses(done)).To(HaveKeyWithValue("notes.md", skill.StatusRemoved))
+			Expect(link).NotTo(BeAnExistingFile())
+
+			Expect(os.ReadFile(outside)).To(BeEquivalentTo("SECRET\n"))
+		})
+
+		It("asks first: it is a file of theirs, wherever it really lives", func() {
+			plan, err := skill.NewPlan(root)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(plan.Pending()).To(ConsistOf(skill.Change{File: "notes.md", Status: skill.StatusStale}))
+		})
+	})
+
+	// It points at nothing, so there is nothing it could be shadowing and nothing to
+	// lose by taking it away.
+	It("prunes a dangling symlink", func() {
+		install(root)
+
+		link := filepath.Join(installed(root), "gone.md")
+		Expect(os.Symlink(filepath.Join(root, "nowhere"), link)).To(Succeed())
+
+		done := install(root)
+
+		Expect(statuses(done)).To(HaveKeyWithValue("gone.md", skill.StatusRemoved))
+		Expect(doc(root)).To(BeAnExistingFile())
+	})
+
 	// A first install killed between the temporary file and the rename leaves a
 	// .tmp-* and no SKILL.md. fft made that file, so fft does not get to call it
 	// evidence of a stranger and refuse the directory for ever — which is what it did,

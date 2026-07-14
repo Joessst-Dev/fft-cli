@@ -39,11 +39,13 @@ fft listing patch --facility berlin-warehouse ARTICLE-123 --status ACTIVE
 fft listing delete --facility berlin-warehouse ARTICLE-123
 ```
 
-- `fft listing set --facility <id> --file listings.json` is a **PUT**: it replaces the
-  facility's listings, all or nothing. It is not an upsert, and what is not in the file is
-  gone.
+- `fft listing set --facility <id> --file listings.json` is a **PUT**, and *all or nothing*:
+  one bad listing rejects the whole file. But it is not a replacement of the catalog —
+  listings the file does not mention are **left alone**. You do not have to send a catalog
+  back to keep it.
 - `fft listing upsert --file listings.json` is the bulk path, and the one you almost always
-  want. It is chunked, and it reports per item — so it can exit 8 with some items written.
+  want. It is chunked, and it reports per item — so it can exit 8 with some items written,
+  where `set` would have written none.
 - `fft listing purge --facility <id>` deletes every listing in a facility. There is no
   narrower way to say "I meant that".
 
@@ -81,8 +83,9 @@ fft facility list --total
   question is exploratory; a real tenant is a great many requests.
 - Hitting that limit is **not an error**: fft warns on stderr and exits 0 with what it got,
   so the JSON alone cannot tell you the answer was cut short.
-- `--total` counts the matches and prints the count **to stderr**, not into the JSON. It
-  applies to a single page: with `--all` it is not asked for and nothing is printed.
+- `--total` prints the count **to stderr**, never into the JSON. Only on a single page does
+  it ask the API to count: under `--all` fft prints the number it actually fetched, and — if
+  the run was truncated — prints nothing at all, because then it cannot know the total.
 
 ## Core commands
 

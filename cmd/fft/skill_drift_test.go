@@ -99,7 +99,11 @@ func skillSnippets() []snippet {
 			// found.
 			if len(found) == 0 {
 				tokens, _ := fields(line)
-				Expect(tokens).NotTo(ContainElement("fft"),
+				// HaveSuffix, not equality: `./fft` and `$FFT` name the binary too, and a
+				// line that invokes it by one of those spellings would otherwise be a line
+				// the tokenizer skips and nobody checks. `fft.json` and `--data '{"a":"fft"}'`
+				// tokenize to something that ends in neither.
+				Expect(tokens).NotTo(ContainElement(Or(Equal("fft"), HaveSuffix("/fft"))),
 					"%s:%d: %s\n  mentions fft, and the tokenizer found no fft command in it — "+
 						"so nothing here is verified. Rewrite it as a plain command line",
 					name, i+1, strings.TrimSpace(line))

@@ -65,8 +65,9 @@ and exits **0** with the items it got. So a piped `jq` sees a perfectly good arr
 not the whole answer, and the exit code will never tell you otherwise: **the warning on
 stderr is the only signal there is.** If it matters whether you have everything, read it.
 
-To know the size of a result before you fetch it, ask *without* `--all` — `--total` counts
-only on a single page, and prints the count on stderr:
+To know the size of a result before you fetch it, ask *without* `--all`: only then does
+`--total` make the API count. (Under `--all`, `--total` reports the number fft fetched,
+which tells you nothing you did not already have.)
 
 ```sh
 fft stock list --facility BER-01 --size 1 --total

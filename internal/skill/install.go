@@ -219,8 +219,14 @@ func recognise(dir string) (bool, error) {
 // the user to work out on their own that they must delete a file they have never
 // heard of. fft made that file. It does not get to call it evidence of a stranger.
 //
-// The litter is still named in the plan and still removed with consent, like any
-// other stray. This decides only whose directory it is.
+// The converse is the price, and it is worth naming: a file of the user's that
+// happens to begin with .tmp- is one fft will take for its own and remove without
+// asking. The prefix is fft's, the blast radius is this one directory, and a
+// document nobody could distinguish from crash debris is not one an install can be
+// expected to preserve — but it is a trade, not a free lunch.
+//
+// The litter is still named in the plan and still reported when it goes. This
+// decides only whose directory it is, and whose consent removing it needs.
 func vacant(dir string) (bool, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -353,11 +359,11 @@ func litter(name string) bool {
 // Apply writes the skill. By the time it is called, whoever called it has already
 // decided about [Plan.Pending] — so it overwrites and prunes without asking.
 //
-// It removes exactly what the plan named, and nothing else. That is the whole
-// invariant: a file fft deletes is a file the user was shown and agreed to, so an
-// install that reports no changes has made none. Anything swept up on the side —
-// a stray file, an empty directory, fft's own litter — would be a deletion that
-// happened without appearing in the plan that was consented to.
+// It removes exactly the files the plan named — plus the directories that removing
+// them emptied, which held nothing to consent to. That is the invariant: every file
+// fft deletes appeared in the plan, and every one of them but fft's own litter was
+// shown to the user and agreed to ([Plan.Pending] is where that distinction is
+// drawn, and why). So an install that reports no changes has made none.
 //
 // An UNCHANGED file is not rewritten. Re-installing on every run of a script must
 // not churn the mtime of a file an editor or a watcher is holding open.
@@ -367,7 +373,7 @@ func (p Plan) Apply() (Plan, error) {
 	var emptied []string
 
 	for _, c := range p.Files {
-		path := filepath.Join(p.Dir, filepath.FromSlash(c.File))
+		target := filepath.Join(p.Dir, filepath.FromSlash(c.File))
 
 		switch c.Status {
 		case StatusUnchanged:
@@ -375,10 +381,13 @@ func (p Plan) Apply() (Plan, error) {
 			continue
 
 		case StatusStale:
-			if err := os.Remove(path); err != nil {
-				return Plan{}, fmt.Errorf("remove %s: %w", path, err)
+			// os.Remove, never os.RemoveAll: a stray that is a symlink must lose the link
+			// and not whatever it points at, which may be a file of the user's somewhere
+			// else entirely. strays() has already ruled out a directory.
+			if err := os.Remove(target); err != nil {
+				return Plan{}, fmt.Errorf("remove %s: %w", target, err)
 			}
-			emptied = append(emptied, filepath.Dir(path))
+			emptied = append(emptied, filepath.Dir(target))
 			done.Files = append(done.Files, Change{File: c.File, Status: StatusRemoved})
 			continue
 		}
@@ -387,7 +396,7 @@ func (p Plan) Apply() (Plan, error) {
 		if err != nil {
 			return Plan{}, fmt.Errorf("read the embedded %s: %w", c.File, err)
 		}
-		if err := atomicfile.WriteMode(path, data, fileMode, dirMode); err != nil {
+		if err := atomicfile.WriteMode(target, data, fileMode, dirMode); err != nil {
 			return Plan{}, err
 		}
 
