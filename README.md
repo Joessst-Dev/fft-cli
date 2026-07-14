@@ -180,6 +180,8 @@ readable tables.
 fft facility list --status ACTIVE
 fft stock get 7f3c…
 fft listing list --facility my-warehouse-berlin
+fft connection list --facility my-warehouse-berlin
+fft sourcing simulate --file order.json
 ```
 
 **Tier 2 — generated.** Every remaining operation, auto-registered from the spec.

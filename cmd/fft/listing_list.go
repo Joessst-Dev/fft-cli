@@ -86,7 +86,7 @@ func newListingListCmd(deps *Deps) *cobra.Command {
 	f.StringSliceVar(&articles, "tenant-article-id", nil, "Only the listings of these articles")
 	f.StringVar(&sortBy, "sort", "",
 		"Sort by one field, as field:asc or field:desc ("+strings.Join(listingSortFields, ", ")+")")
-	page.register(f, "listings")
+	page.register(f, "listings", client.DefaultSize)
 
 	registerEnumCompletion(cmd, "status", listingStatuses())
 

@@ -1,6 +1,6 @@
 # The curated commands
 
-Hand-written commands for the three entities most people touch, plus the core commands that
+Hand-written commands for the entities most people touch, plus the core commands that
 have nothing to do with the API. Everything else lives in
 [discovery.md](discovery.md).
 
@@ -25,6 +25,60 @@ fft facility search --file query.json
 - `patch` changes named fields; `update` replaces the whole object from a file. Prefer
   `patch` — it cannot silently drop a field you did not know about.
 - `delete` is destructive and irreversible. Ask first, every time.
+
+## Connections
+
+A connection is an **edge of the fulfillment graph**: an outbound lane from one facility
+to a `SUPPLIER`, to another `MANAGED_FACILITY`, or to the `CUSTOMER`. The router can only
+source along an edge that exists, so this is the first place to look when an order routes
+somewhere surprising — or refuses to route at all.
+
+A connection belongs to the facility it leaves, so every command needs `--facility` as
+well as the connection's own id:
+
+```sh
+fft connection list --facility berlin-warehouse
+fft connection list --facility berlin-warehouse --target frankfurt-warehouse
+fft connection get 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10 --facility berlin-warehouse
+fft connection create --facility berlin-warehouse --example --type SUPPLIER
+fft connection delete 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10 --facility berlin-warehouse
+```
+
+- **`update` is a PUT and there is no `patch`.** The connection becomes what the file says
+  and loses anything the file omits — so unlike a facility, you cannot reach for the safer
+  verb. Read the whole thing, edit it, send it back. fft supplies the `version`.
+- The connection the API *returns* carries its type only inside `target`; the body it
+  *accepts* wants one at the top level too. fft fills that in, so `fft connection get … -o
+  json` piped back into `--file` works. Do not hand-edit it in.
+- `--example` prints a body per type: `--type SUPPLIER`, `MANAGED_FACILITY` or `CUSTOMER`.
+  A `CUSTOMER` target names no facility, and is not missing one.
+- **`delete` removes a routing edge.** Orders stop being sourced along it immediately, and
+  if it was the only way to reach a target, that target becomes unreachable. Ask first.
+
+## Sourcing
+
+**`fft sourcing simulate` changes nothing.** It is a POST, and it is a *read*: it runs the
+router against a hypothetical order and hands back the ways it could be fulfilled. No order
+is created, no stock is reserved, nothing moves. It works on a read-only project, and fft
+knows it does — so do not refuse to run it on the grounds that POST means write.
+
+```sh
+fft sourcing simulate --example > order.json
+fft sourcing simulate --file order.json --results 3
+fft sourcing get 284f32cc-b106-487d-b633-f90d93d8c251
+```
+
+- **An empty answer is not "no matches".** It means the router could not fulfil the order
+  at all, from anywhere. Say that, rather than reporting that the search came back empty.
+- **The penalty is a penalty: lower is better.** The table is sorted so the router's
+  favourite is first. Never present it as a score.
+- **`UNSOURCED` is the partial-failure column.** An option can look healthy and still have
+  quietly dropped items. If it is not zero, that option will not fulfil the whole order.
+- `--results` defaults to 3 because the *API's* default is 1 — one option is an answer, not
+  a set of options.
+- Every transfer carries a `facilityConnectionRef`. That is the join to `fft connection get`,
+  and it is how you answer "why *there*?" — see the recipe in
+  [recipes.md](recipes.md).
 
 ## Listings
 
@@ -78,9 +132,13 @@ fft stock list --facility berlin-warehouse --all --max-items 500
 fft facility list --total
 ```
 
-- The default is one page. `--all` follows the cursor, stopping at `--max-items` — which
+- The default is one page. `--all` pages to the end, stopping at `--max-items` — which
   **defaults to 10,000**, so `--all` is bounded whether you say so or not. Lower it when the
   question is exploratory; a real tenant is a great many requests.
+- The API has **two** paging models and they have different page sizes. The searches behind
+  `facility`, `listing` and `stock` default to **20** per page; `fft connection list` is a
+  plain GET and defaults to **25**. `--size` overrides either. Do not assume a page size —
+  count the rows, or pass `--size`.
 - Hitting that limit is **not an error**: fft warns on stderr and exits 0 with what it got,
   so the JSON alone cannot tell you the answer was cut short.
 - `--total` prints the count **to stderr**, never into the JSON. Only on a single page does

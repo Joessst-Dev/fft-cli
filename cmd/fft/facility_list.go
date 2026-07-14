@@ -70,7 +70,7 @@ func newFacilityListCmd(deps *Deps) *cobra.Command {
 	f.StringVar(&tenantID, "tenant-facility-id", "", "Only the facility with this tenantFacilityId")
 	f.StringVar(&sortBy, "sort", "",
 		"Sort by one field, as field:asc or field:desc ("+strings.Join(facilitySortFields, ", ")+")")
-	page.register(f, "facilities")
+	page.register(f, "facilities", client.DefaultSize)
 
 	registerEnumCompletion(cmd, "status", facilityStatuses())
 	registerEnumCompletion(cmd, "type", facilityTypes())

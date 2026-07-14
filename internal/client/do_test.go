@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"slices"
 	"sync"
 	"sync/atomic"
@@ -54,6 +55,7 @@ type tenant struct {
 	methods []string
 	tokens  []string
 	bodies  [][]byte
+	queries []url.Values
 	handler func(w http.ResponseWriter, r *http.Request, n int)
 }
 
@@ -67,6 +69,7 @@ func newTenant(handler func(w http.ResponseWriter, r *http.Request, n int)) *ten
 		t.methods = append(t.methods, r.Method)
 		t.tokens = append(t.tokens, r.Header.Get("Authorization"))
 		t.bodies = append(t.bodies, body)
+		t.queries = append(t.queries, r.URL.Query())
 		n := len(t.methods)
 		t.mu.Unlock()
 
@@ -74,6 +77,20 @@ func newTenant(handler func(w http.ResponseWriter, r *http.Request, n int)) *ten
 	}))
 	DeferCleanup(t.Close)
 	return t
+}
+
+// asked returns the query string of the nth request (counting from zero). A cursor
+// search carries its paging in the body and a GET list carries it in the query, so
+// the pagination specs of list.go assert on this where the search specs assert on
+// [tenant.sent].
+func (t *tenant) asked(n int) url.Values {
+	GinkgoHelper()
+
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	Expect(n).To(BeNumerically("<", len(t.queries)), "the tenant was not sent that many requests")
+	return t.queries[n]
 }
 
 func (t *tenant) hits() int { return len(t.seen()) }
