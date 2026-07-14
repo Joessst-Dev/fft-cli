@@ -19,6 +19,18 @@ var _ = Describe("fft api", func() {
 		c = newCLI()
 	})
 
+	// Two ways of giving the same body is a bad command line, and a bad command line
+	// exits 2 — cobra validates its flag groups after PersistentPreRunE and returns
+	// the failure past SetFlagErrorFunc, so without the check in root.go this exits 1
+	// and a script cannot tell it from a tenant that fell over.
+	It("exits 2 when two mutually exclusive flags are given, and sends nothing", func() {
+		t := c.fakeTenant(func(http.ResponseWriter, *http.Request, []byte) {})
+
+		Expect(c.run("api", "addPickJob", "--file", "job.json", "--data", "{}")).To(Equal(exitcode.Usage))
+
+		Expect(t.calls).To(BeEmpty())
+	})
+
 	// answers is a tenant that returns body to every request.
 	answers := func(body string) *tenant {
 		return c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {

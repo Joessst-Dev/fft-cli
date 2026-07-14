@@ -57,6 +57,13 @@ var commandsWithoutOperation = map[string]string{
 	"fft api list":     "reads the embedded spec table; no network",
 	"fft api describe": "reads the embedded spec table; no network",
 
+	// The skill is documentation compiled into the binary. `install` copies it onto
+	// this machine and `show` prints it: neither reaches the tenant, and neither needs
+	// a project — which is what lets `fft skill install` be the first thing a user
+	// runs, before `fft project add`.
+	"fft skill install": "copies the embedded skill onto the local disk; no network",
+	"fft skill show":    "prints the embedded skill; no network",
+
 	"fft update check": "asks GitHub for the latest release",
 }
 
@@ -262,6 +269,17 @@ var _ = Describe("a read-only project", func() {
 
 		Expect(c.run("facility", "delete", "f1", "--yes")).To(Equal(exitcode.ReadOnly))
 		Expect(minted).To(BeFalse(), "a refused write signed in anyway")
+	})
+
+	// A command line that contradicts itself is not a request to write. Reporting it
+	// as a read-only refusal would send whoever read that exit code — a human, or an
+	// agent whose skill says exit 10 means "ask the user" — off to argue about a
+	// permission they do not need, over a command that could never have been sent.
+	It("calls a self-contradictory command line a usage error, not a refused write", func() {
+		code := c.run("api", "addPickJob", "--file", "job.json", "--data", "{}")
+
+		Expect(code).To(Equal(exitcode.Usage))
+		Expect(t.calls).To(BeEmpty())
 	})
 
 	When("--read-only=false tries to loosen it", func() {
