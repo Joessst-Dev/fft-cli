@@ -243,8 +243,11 @@ paths:
         - Stocks (Inventory)
   /api/audits:
     get:
-      deprecated: false
-      description: ''
+      deprecated: true
+      description: >-
+        This part of the API is deprecated. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br />
       operationId: getAudits
       parameters:
         - in: query
@@ -317,6 +320,51 @@ paths:
         - AUDIT_READ
       tags:
         - Audits (Core)
+  /api/audits/search:
+    post:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Search for Audit
+      operationId: searchAudit
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuditSearchPayload'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditPaginatedResult'
+          description: Your search result
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+      summary: List audits (search)
+      x-fft-permissions:
+        - AUDIT_READ
+      tags:
+        - Audits (Core)
+      x-badges:
+        - color: red
+          label: ALPHA
   /api/availabilitychannels:
     get:
       deprecated: true
@@ -13600,7 +13648,7 @@ paths:
             endpoint
       summary: Create label
       x-fft-permissions:
-        - LABEL_WRITE
+        - ADMIN_MODULES_WRITE
       tags:
         - Label (Operations)
   /api/labels/{id}:
@@ -13647,7 +13695,7 @@ paths:
           description: The requested entity was not found
       summary: Get label
       x-fft-permissions:
-        - LABEL_READ
+        - ADMIN_MODULES_READ
       tags:
         - Label (Operations)
       x-badges:
@@ -13710,7 +13758,7 @@ paths:
           description: A version conflict occurred.
       summary: Update label
       x-fft-permissions:
-        - LABEL_WRITE
+        - ADMIN_MODULES_WRITE
       tags:
         - Label (Operations)
       x-badges:
@@ -13775,7 +13823,7 @@ paths:
           description: A version conflict occurred.
       summary: Performs provided labelAction
       x-fft-permissions:
-        - LABEL_WRITE
+        - ADMIN_MODULES_WRITE
       tags:
         - Label (Operations)
       x-badges:
@@ -18579,7 +18627,7 @@ paths:
             endpoint
       summary: List parcel information
       x-fft-permissions:
-        - PARCEL_INFORMATION_READ
+        - ADMIN_MODULES_READ
       tags:
         - Parcel Information (Operations)
       x-badges:
@@ -18623,7 +18671,7 @@ paths:
             endpoint
       summary: Create a parcel information
       x-fft-permissions:
-        - PARCEL_INFORMATION_WRITE
+        - ADMIN_MODULES_WRITE
       tags:
         - Parcel Information (Operations)
       x-badges:
@@ -18673,7 +18721,7 @@ paths:
           description: The requested entity was not found
       summary: Get a parcel information by its ID
       x-fft-permissions:
-        - PARCEL_INFORMATION_READ
+        - ADMIN_MODULES_READ
       tags:
         - Parcel Information (Operations)
       x-badges:
@@ -18718,7 +18766,7 @@ paths:
             endpoint
       summary: List ParcelInformation (search)
       x-fft-permissions:
-        - PARCEL_INFORMATION_READ
+        - ADMIN_MODULES_READ
       tags:
         - Parcel Information (Operations)
       x-badges:
@@ -19196,14 +19244,8 @@ paths:
               - ROUTING_WRITE
               - PARCEL_READ
               - PARCEL_WRITE
-              - SHIPPING_INFORMATION_READ
-              - SHIPPING_INFORMATION_WRITE
               - SHIPMENT_READ
               - SHIPMENT_WRITE
-              - LABEL_READ
-              - LABEL_WRITE
-              - PARCEL_INFORMATION_READ
-              - PARCEL_INFORMATION_WRITE
               - HANDOVERJOB_READ
               - HANDOVERJOB_WRITE
               - PICKJOB_READ
@@ -19296,6 +19338,8 @@ paths:
               - ORDER_RECORD_WRITE
               - PACKAGING_UNITS_READ
               - PACKAGING_UNITS_WRITE
+              - EXPORT_READ
+              - EXPORT_WRITE
               - STOCK_AVAILABILITIES_READ
               - LISTING_READ
               - LISTING_WRITE
@@ -23967,6 +24011,8 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: No more elements available
       summary: List routing strategies
+      x-fft-permissions:
+        - ROUTING_CONFIG_READ
       tags:
         - Routing Strategy (DOMS)
     post:
@@ -24007,6 +24053,8 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Create routing strategy
+      x-fft-permissions:
+        - ROUTING_CONFIG_WRITE
       tags:
         - Routing Strategy (DOMS)
   /api/routing/strategies/{strategyId}:
@@ -24048,6 +24096,8 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Get routing strategy
+      x-fft-permissions:
+        - ROUTING_CONFIG_READ
       tags:
         - Routing Strategy (DOMS)
     put:
@@ -24095,6 +24145,8 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Update routing strategy
+      x-fft-permissions:
+        - ROUTING_CONFIG_WRITE
       tags:
         - Routing Strategy (DOMS)
   /api/routing/strategies/{strategyId}/actions:
@@ -24141,6 +24193,8 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Call routing strategy action
+      x-fft-permissions:
+        - ROUTING_CONFIG_WRITE
       tags:
         - Routing Strategy (DOMS)
   /api/routing/strategies/{strategyId}/evaluation:
@@ -24193,6 +24247,8 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: The routing strategy does not exist
       summary: Evaluate routing strategy
+      x-fft-permissions:
+        - ROUTING_CONFIG_READ
       tags:
         - Routing Strategy (DOMS)
   /api/routing/strategies/{strategyId}/nodes/{nodeId}/evaluation:
@@ -24246,6 +24302,8 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: The routing strategy node does not exist
       summary: Evaluate routing strategy node
+      x-fft-permissions:
+        - ROUTING_CONFIG_READ
       tags:
         - Routing Strategy (DOMS)
   /api/routingplans:
@@ -26014,7 +26072,7 @@ paths:
             endpoint
       summary: Get shippingInformation
       x-fft-permissions:
-        - SHIPPING_INFORMATION_READ
+        - ADMIN_MODULES_READ
       tags:
         - ShippingInformation (carrier)
       x-badges:
@@ -26058,7 +26116,7 @@ paths:
             endpoint
       summary: Create a shippingInformation
       x-fft-permissions:
-        - SHIPPING_INFORMATION_WRITE
+        - ADMIN_MODULES_WRITE
       tags:
         - ShippingInformation (carrier)
       x-badges:
@@ -26108,7 +26166,7 @@ paths:
           description: The requested entity was not found
       summary: Get a shippingInformation by its ID
       x-fft-permissions:
-        - SHIPPING_INFORMATION_READ
+        - ADMIN_MODULES_READ
       tags:
         - ShippingInformation (carrier)
       x-badges:
@@ -26153,7 +26211,7 @@ paths:
             endpoint
       summary: List ShippingInformation (search)
       x-fft-permissions:
-        - SHIPPING_INFORMATION_READ
+        - ADMIN_MODULES_READ
       tags:
         - ShippingInformation (carrier)
       x-badges:
@@ -28975,22 +29033,6 @@ components:
         - version
       title: AbstractFacilityActionsParameter
       description: AbstractFacilityActionsParameter
-    AbstractFulfillabilityConstraintType:
-      properties:
-        type:
-          description: >-
-            Type of the constraint (must be supported by the fulfillmenttools
-            platform).
-          enum:
-            - ITEMS
-          example: ITEMS
-          type: string
-        value:
-          description: Additional parameters needed for the referenced type of constraint.
-          type: object
-      type: object
-      title: AbstractFulfillabilityConstraintType
-      description: AbstractFulfillabilityConstraintType
     AbstractModificationAction:
       discriminator:
         propertyName: action
@@ -30024,21 +30066,6 @@ components:
       title: ArticleAttributeItemContext
       type: object
       description: ArticleAttributeItemContext
-    ArticleAvailability:
-      properties:
-        availabilityTimeframe:
-          $ref: '#/components/schemas/AvailabilityTimeframe'
-        availableStock:
-          type: number
-        outOfStockBehaviour:
-          $ref: '#/components/schemas/OutOfStockBehaviour'
-        tenantArticleId:
-          type: string
-      required:
-        - tenantArticleId
-        - availableStock
-      title: ArticleAvailability
-      description: ArticleAvailability
     ArticleAvailabilityStockValues:
       properties:
         availableForPicking:
@@ -30486,6 +30513,77 @@ components:
       title: AuditClient
       type: object
       description: AuditClient
+    AuditedEntityTypeEnumFilter:
+      properties:
+        eq:
+          description: Search by entityType
+          enum:
+            - PACK_JOB
+            - PICK_JOB
+            - PICK_RUN
+            - HANDOVER_JOB
+            - SHIPMENT
+            - PARCEL
+            - CUSTOM_SERVICE
+            - SERVICE_JOB
+            - LINKED_SERVICE_JOBS
+            - ORDER
+            - ROUTING_PLAN
+            - FACILITY
+            - FACILITY_GROUP
+            - FACILITY_CARRIER_CONNECTION
+            - FACILITY_CUSTOM_SERVICE
+            - ROUTING_STRATEGY
+            - STOW_JOB
+          type: string
+        in:
+          description: Search by entityType
+          items:
+            enum:
+              - PACK_JOB
+              - PICK_JOB
+              - PICK_RUN
+              - HANDOVER_JOB
+              - SHIPMENT
+              - PARCEL
+              - CUSTOM_SERVICE
+              - SERVICE_JOB
+              - LINKED_SERVICE_JOBS
+              - ORDER
+              - ROUTING_PLAN
+              - FACILITY
+              - FACILITY_GROUP
+              - FACILITY_CARRIER_CONNECTION
+              - FACILITY_CUSTOM_SERVICE
+              - ROUTING_STRATEGY
+              - STOW_JOB
+            type: string
+          maxItems: 500
+          type: array
+        notEq:
+          description: Search by entityType
+          enum:
+            - PACK_JOB
+            - PICK_JOB
+            - PICK_RUN
+            - HANDOVER_JOB
+            - SHIPMENT
+            - PARCEL
+            - CUSTOM_SERVICE
+            - SERVICE_JOB
+            - LINKED_SERVICE_JOBS
+            - ORDER
+            - ROUTING_PLAN
+            - FACILITY
+            - FACILITY_GROUP
+            - FACILITY_CARRIER_CONNECTION
+            - FACILITY_CUSTOM_SERVICE
+            - ROUTING_STRATEGY
+            - STOW_JOB
+          type: string
+      title: AuditedEntityTypeEnumFilter
+      type: object
+      description: AuditedEntityTypeEnumFilter
     AuditOperation:
       properties:
         name:
@@ -30499,6 +30597,116 @@ components:
       title: AuditOperation
       type: object
       description: AuditOperation
+    AuditPaginatedResult:
+      properties:
+        audits:
+          items:
+            $ref: '#/components/schemas/Audit'
+          type: array
+        pageInfo:
+          allOf:
+            - $ref: '#/components/schemas/PageInfo'
+          description: Pagination information for the search result.
+        total:
+          description: >-
+            The total number of items matching the search criteria. Only filled,
+            if withTotal is set to true in the search options.
+          minimum: 0
+          type: number
+      required:
+        - pageInfo
+        - audits
+      title: AuditPaginatedResult
+      type: object
+      description: AuditPaginatedResult
+    AuditSearchPayload:
+      properties:
+        after:
+          deprecated: false
+          description: >-
+            The cursor to start after for forward pagination. The value is
+            provided in the `pageInfo.endCursor` field of the response. Cannot
+            be used with `before` or `last`.
+          type: string
+        before:
+          description: >-
+            The cursor to start before for backward pagination. The value is
+            provided in the `pageInfo.startCursor` field of the response. Cannot
+            be used with `after` or `size` (first).
+          type: string
+        last:
+          description: >-
+            Number of items to return for backward pagination. Cannot be used
+            with 'size' (first). Default: 20.
+          maximum: 250
+          minimum: 1
+          type: number
+        options:
+          $ref: '#/components/schemas/SearchOptions'
+        query:
+          $ref: '#/components/schemas/AuditSearchQuery'
+        size:
+          description: >-
+            Number of items to return for forward pagination. Cannot be used
+            with 'last'. Default: 20.
+          maximum: 250
+          minimum: 1
+          type: number
+        sort:
+          description: Use for sorting the result.
+          items:
+            $ref: '#/components/schemas/AuditSort'
+          maxItems: 1
+          minItems: 1
+          type: array
+        startAfterId:
+          deprecated: true
+          description: >-
+            The ID to start after. Deprecated, use `after` with the value
+            provided in `pageInfo.endCursor` instead.
+          type: string
+      required:
+        - query
+      title: AuditSearchPayload
+      type: object
+      description: AuditSearchPayload
+    AuditSearchQuery:
+      properties:
+        and:
+          items:
+            $ref: '#/components/schemas/AuditSearchQuery'
+          maxItems: 500
+          type: array
+        entityRef:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by entityRef
+        entityType:
+          allOf:
+            - $ref: '#/components/schemas/AuditedEntityTypeEnumFilter'
+          description: Search by entityType
+        or:
+          items:
+            $ref: '#/components/schemas/AuditSearchQuery'
+          maxItems: 500
+          type: array
+        trace:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by trace
+      title: AuditSearchQuery
+      type: object
+      description: AuditSearchQuery
+    AuditSort:
+      properties:
+        created:
+          enum:
+            - ASC
+            - DESC
+          type: string
+      title: AuditSort
+      type: object
+      description: AuditSort
     AuditsResult:
       properties:
         audits:
@@ -36442,6 +36650,407 @@ components:
       type: object
       title: ExpiryWebHookEvent
       description: ExpiryWebHookEvent
+    ExportContainer:
+      properties:
+        created:
+          description: Timestamp when the export container was created.
+          format: date-time
+          type: string
+        customAttributes:
+          description: >-
+            Arbitrary key-value pairs for storing additional metadata on the
+            container.
+          type: object
+        description:
+          description: >-
+            Optional description providing additional context about the
+            container's purpose.
+          type: string
+        id:
+          description: Unique identifier of the export container.
+          type: string
+        lastModified:
+          description: Timestamp when the export container was last modified.
+          format: date-time
+          type: string
+        name:
+          description: Human-readable name of the export container.
+          type: string
+        tenantExportContainerId:
+          description: >-
+            Caller-supplied identifier to correlate this container with an
+            external system.
+          type: string
+        version:
+          description: >-
+            Version number incremented on each update. Used for optimistic
+            concurrency control.
+          type: number
+      required:
+        - id
+        - created
+        - lastModified
+        - version
+        - name
+      title: ExportContainer
+      type: object
+      description: ExportContainer
+    ExportContainerForCreation:
+      properties:
+        customAttributes:
+          description: >-
+            Arbitrary key-value pairs for storing additional metadata on the
+            container.
+          type: object
+        description:
+          description: >-
+            Optional description providing additional context about the
+            container's purpose.
+          type: string
+        name:
+          description: Human-readable name of the export container.
+          type: string
+        tenantExportContainerId:
+          description: >-
+            Caller-supplied identifier to correlate this container with an
+            external system.
+          type: string
+      required:
+        - name
+      title: ExportContainerForCreation
+      type: object
+      description: ExportContainerForCreation
+    ExportContainerForUpdate:
+      properties:
+        customAttributes:
+          description: >-
+            Arbitrary key-value pairs for storing additional metadata on the
+            container.
+          nullable: true
+          type: object
+        description:
+          description: >-
+            Optional description providing additional context about the
+            container's purpose.
+          nullable: true
+          type: string
+        name:
+          description: Human-readable name of the export container.
+          type: string
+        tenantExportContainerId:
+          description: >-
+            Caller-supplied identifier to correlate this container with an
+            external system.
+          nullable: true
+          type: string
+        version:
+          description: >-
+            Current version of the export container. Must match the stored
+            version to prevent concurrent update conflicts.
+          type: number
+      required:
+        - version
+      title: ExportContainerForUpdate
+      type: object
+      description: ExportContainerForUpdate
+    ExportOperation:
+      properties:
+        created:
+          description: Timestamp when the export operation was created.
+          format: date-time
+          type: string
+        dataFormat:
+          description: Format of the exported data, e.g. JSONL.
+          enum:
+            - JSONL
+          type: string
+        error:
+          allOf:
+            - $ref: '#/components/schemas/ExportOperationError'
+          description: Error details if the export operation failed.
+          nullable: true
+          type: object
+        exportRequestRef:
+          description: Reference to the export request that this operation belongs to.
+          type: string
+        files:
+          description: >-
+            Files produced by this export operation, each with a download URL
+            and its expiry.
+          items:
+            $ref: '#/components/schemas/ExportOperationFile'
+          type: array
+        filesDeletionDate:
+          description: Timestamp when the exported files are scheduled to be deleted.
+          format: date-time
+          type: string
+        filesExpired:
+          description: >-
+            Whether the exported files have already been deleted and are no
+            longer accessible.
+          type: boolean
+        finishedAt:
+          description: >-
+            Timestamp when the export operation finished, either successfully or
+            with an error.
+          format: date-time
+          type: string
+        id:
+          description: Unique identifier of the export operation.
+          type: string
+        lastModified:
+          description: Timestamp when the export operation was last modified.
+          format: date-time
+          type: string
+        sourceType:
+          description: Type of the data source that is exported, e.g. FACILITY.
+          type: string
+        startedAt:
+          description: Timestamp when the export operation started.
+          format: date-time
+          type: string
+        status:
+          description: Current status of the export operation.
+          enum:
+            - RUNNING
+            - COMPLETED
+            - FAILED
+          type: string
+        trigger:
+          description: How the export operation was triggered.
+          enum:
+            - MANUAL
+          type: string
+        version:
+          description: >-
+            Version number incremented on each update. Used for optimistic
+            concurrency control.
+          type: number
+      required:
+        - id
+        - created
+        - lastModified
+        - version
+        - exportRequestRef
+        - sourceType
+        - trigger
+        - status
+        - startedAt
+        - filesExpired
+        - dataFormat
+        - files
+      title: ExportOperation
+      type: object
+      description: ExportOperation
+    ExportOperationError:
+      properties:
+        message:
+          description: >-
+            Error message describing the reason for the export operation
+            failure.
+          type: string
+      required:
+        - message
+      title: ExportOperationError
+      type: object
+      description: ExportOperationError
+    ExportOperationFile:
+      properties:
+        id:
+          description: >-
+            Unique identifier of the exported file, used to access it via the
+            file download endpoint.
+          type: string
+        name:
+          description: Name of the exported file.
+          type: string
+        sizeBytes:
+          description: Size of the exported file in bytes.
+          type: number
+        uri:
+          description: Download URI of the exported file.
+          type: string
+      required:
+        - id
+        - name
+        - uri
+        - sizeBytes
+      title: ExportOperationFile
+      type: object
+      description: ExportOperationFile
+    ExportRequest:
+      properties:
+        created:
+          description: Timestamp when the export container was created.
+          format: date-time
+          type: string
+        customAttributes:
+          description: >-
+            Arbitrary key-value pairs for storing additional metadata on the
+            container.
+          type: object
+        dataFormat:
+          description: Data format of the export request.
+          enum:
+            - JSONL
+          type: string
+        exportContainerRef:
+          description: Reference to the export container.
+          type: string
+        id:
+          description: Unique identifier of the export container.
+          type: string
+        lastModified:
+          description: Timestamp when the export container was last modified.
+          format: date-time
+          type: string
+        source:
+          allOf:
+            - $ref: '#/components/schemas/ExportRequestSource'
+          description: Source of the export request.
+        state:
+          allOf:
+            - $ref: '#/components/schemas/ExportRequestState'
+          description: State of the export request.
+        tenantExportRequestId:
+          description: ID of the tenant export request associated with this container.
+          type: string
+        version:
+          description: >-
+            Version number incremented on each update. Used for optimistic
+            concurrency control.
+          type: number
+      required:
+        - id
+        - created
+        - lastModified
+        - version
+        - exportContainerRef
+        - source
+        - dataFormat
+        - state
+      title: ExportRequest
+      type: object
+      description: ExportRequest
+    ExportRequestAction:
+      properties:
+        name:
+          description: Name of the action to perform on the export request.
+          enum:
+            - TRIGGER_EXPORT
+          type: string
+      required:
+        - name
+      title: ExportRequestAction
+      type: object
+      description: ExportRequestAction
+    ExportRequestActionResult:
+      properties:
+        name:
+          description: Name of the action that was performed.
+          enum:
+            - TRIGGER_EXPORT
+          type: string
+        result:
+          description: Result of the action performed on the export request.
+          oneOf:
+            - $ref: '#/components/schemas/ExportOperation'
+      required:
+        - name
+        - result
+      title: ExportRequestActionResult
+      type: object
+      description: ExportRequestActionResult
+    ExportRequestForCreation:
+      properties:
+        customAttributes:
+          description: >-
+            Arbitrary key-value pairs for storing additional metadata on the
+            container.
+          type: object
+        dataFormat:
+          description: Data format of the export request.
+          enum:
+            - JSONL
+          type: string
+        source:
+          allOf:
+            - $ref: '#/components/schemas/ExportRequestSource'
+          description: Source of the export request.
+        tenantExportRequestId:
+          description: ID of the tenant export request associated with this container.
+          type: string
+      required:
+        - source
+        - dataFormat
+      title: ExportRequestForCreation
+      type: object
+      description: ExportRequestForCreation
+    ExportRequestForUpdate:
+      properties:
+        customAttributes:
+          description: >-
+            Arbitrary key-value pairs for storing additional metadata on the
+            request.
+          nullable: true
+          type: object
+        source:
+          allOf:
+            - $ref: '#/components/schemas/ExportRequestSource'
+          description: Source of the export request.
+        tenantExportRequestId:
+          description: ID of the tenant export request associated with this request.
+          nullable: true
+          type: string
+        version:
+          description: >-
+            Current version of the export request. Must match the stored version
+            to prevent concurrent update conflicts.
+          type: number
+      required:
+        - version
+      title: ExportRequestForUpdate
+      type: object
+      description: ExportRequestForUpdate
+    ExportRequestSource:
+      properties:
+        type:
+          description: Type of the export request source.
+          enum:
+            - STOCK_SUMMARY
+          type: string
+      required:
+        - type
+      title: ExportRequestSource
+      type: object
+      description: ExportRequestSource
+    ExportRequestState:
+      properties:
+        lastOperationFinishedAt:
+          description: Timestamp when the last operation on the export request finished.
+          format: date-time
+          type: string
+        lastOperationId:
+          description: ID of the last operation performed on the export request.
+          type: string
+        lastOperationStatus:
+          description: Status of the last operation performed on the export request.
+          enum:
+            - RUNNING
+            - COMPLETED
+            - FAILED
+          type: string
+        status:
+          description: Status of the export request.
+          enum:
+            - IDLE
+            - RUNNING
+          type: string
+      required:
+        - status
+      title: ExportRequestState
+      type: object
+      description: ExportRequestState
     ExpressionGuardCondition:
       properties:
         entity:
@@ -39745,257 +40354,6 @@ components:
           type: number
       title: FloatValidation
       type: object
-    Fulfillability:
-      description: The response to a fulfillability request.
-      properties:
-        collect:
-          properties:
-            facilities:
-              items:
-                $ref: '#/components/schemas/FulfillabilityFacility'
-              type: array
-          type: object
-        shipping:
-          description: >-
-            Results for the fulfillment of a shipping order for the parameters
-            provided in the query
-          properties:
-            DELIVERY:
-              description: Depicts wether the servicelevel DELIVERY is available.
-              properties:
-                available:
-                  description: Depicts wether the servicelevel DELIVERY is available
-                  example: false
-                  type: boolean
-              required:
-                - available
-              type: object
-            SAMEDAY:
-              description: >-
-                This service level means, that the consumer expects a package
-                the same day.
-              properties:
-                available:
-                  description: Depicts wether the servicelevel SAMEDAY is available
-                  example: true
-                  type: boolean
-                validUntil:
-                  description: >-
-                    This information is most likely valid until this date (there
-                    are circumstances when this information becomes stale
-                    earlier).
-                  example: 2020-02-03T08:45:50.525Z
-                  format: date-time
-                  type: string
-              required:
-                - available
-              type: object
-          type: object
-      type: object
-      title: Fulfillability
-    FulfillabilityClickAndCollectQuery:
-      description: >-
-        Provides the paramters you are interested in. You must supply at least
-        the articles you are interested in
-      properties:
-        articles:
-          items:
-            properties:
-              quantity:
-                type: number
-              tenantArticleId:
-                type: string
-            required:
-              - tenantArticleId
-            type: object
-          minItems: 1
-          type: array
-        deliveryCountry:
-          description: A two-digit country code as per ISO 3166-1 alpha-2
-          example: DE
-          pattern: ^[A-Z]{2}$
-          type: string
-        deliveryPostalCode:
-          type: string
-        deliveryPreferences:
-          $ref: '#/components/schemas/DeliveryPreferences'
-        facilityRefs:
-          items:
-            type: string
-          type: array
-        geoFence:
-          $ref: '#/components/schemas/GeoFence'
-      required:
-        - articles
-      title: FulfillabilityClickAndCollectQuery
-    FulfillabilityDetail:
-      properties:
-        address:
-          $ref: '#/components/schemas/FacilityAddress'
-        articleAvailabilities:
-          items:
-            $ref: '#/components/schemas/ArticleAvailability'
-          type: array
-        closingDays:
-          items:
-            $ref: '#/components/schemas/ClosingDay'
-          type: array
-        facilityName:
-          type: string
-        facilityRef:
-          type: string
-        pickingTimes:
-          $ref: '#/components/schemas/PickingTimes'
-        targetTime:
-          format: date-time
-          type: string
-        tenantFacilityId:
-          type: string
-      required:
-        - facilityRef
-        - facilityName
-        - address
-        - articleAvailabilities
-      title: FulfillabilityDetail
-      description: FulfillabilityDetail
-    FulfillabilityFacility:
-      allOf:
-        - $ref: '#/components/schemas/StrippedManagedFacility'
-      title: FulfillabilityFacility
-      description: FulfillabilityFacility
-    FulfillabilityItemsConstraintValue:
-      properties:
-        items:
-          description: >-
-            The shortened description of an article, that would be part of the
-            order.
-          items:
-            properties:
-              amount:
-                description: The required amount
-                example: 5
-                type: integer
-              tenantArticleId:
-                description: The article ID, that is used in corresponding listings.
-                example: RO-57665956-6-XL
-                type: string
-            type: object
-          type: array
-        mode:
-          description: >-
-            The mode this constraint is evaluated in. ITEMS_COMPLETE means, that
-            all the items in the desired quantities have to be listed in a
-            resulting facility.
-          enum:
-            - ITEMS_COMPLETE
-          example: ITEMS_COMPLETE
-          type: string
-      required:
-        - mode
-        - items
-      type: object
-      title: FulfillabilityItemsConstraintValue
-      description: FulfillabilityItemsConstraintValue
-    FulfillabilityQuery:
-      description: >-
-        Provides the paramters you are interested in. You must supply at least
-        either the shipping or the collect attribute as the description of the
-        last mile expectation.
-      properties:
-        collect:
-          description: >-
-            The geofence (a gps coordinate and a radius around that coordinate)
-            for considered facilities to collect the goods.
-          properties:
-            geoFence:
-              $ref: '#/components/schemas/GeoFence'
-          required:
-            - geoFence
-          type: object
-        constraints:
-          description: >-
-            Constraints can be used to further cut down the list of resulting
-            facilities. Important: ALL of the given constraints will be matched
-            against the resulting list of facilities!
-          items:
-            $ref: '#/components/schemas/AbstractFulfillabilityConstraintType'
-          type: array
-        estimatedOrderDate:
-          description: >-
-            The point in time when the order estimated to be supplied to
-            fulfillmenttools platform, e.g. calling this endpoint during
-            checkout, you would most likely put the timestamp for 'now' in here.
-          example: 2020-02-03T08:45:50.525Z
-          format: date-time
-          type: string
-        shipping:
-          description: >-
-            You want information about the shipping possibility - more detailed
-            parameters  can be described here.
-          properties:
-            serviceLevels:
-              description: >-
-                The kind of servicelevel you want to query as being part of the
-                consumer expectation of delivery
-              items:
-                $ref: '#/components/schemas/CarrierDeliveryType'
-              minItems: 1
-              type: array
-            targetAddress:
-              $ref: '#/components/schemas/StrippedShippingTargetAddress'
-          required:
-            - serviceLevels
-            - targetAddress
-          type: object
-      required:
-        - estimatedOrderDate
-      type: object
-      title: FulfillabilityQuery
-    FulfillabilityResult:
-      properties:
-        fulfillability:
-          items:
-            $ref: '#/components/schemas/FulfillabilityDetail'
-          type: array
-      required:
-        - details
-      title: FulfillabilityResult
-      description: FulfillabilityResult
-    FulfillabilityShipFromStoreQuery:
-      description: >-
-        Provides the paramters you are interested in. You must supply at least
-        the articles you are interested in
-      properties:
-        articles:
-          items:
-            properties:
-              quantity:
-                type: number
-              tenantArticleId:
-                type: string
-            required:
-              - tenantArticleId
-            type: object
-          minItems: 1
-          type: array
-        deliveryCountry:
-          description: A two-digit country code as per ISO 3166-1 alpha-2
-          example: DE
-          pattern: ^[A-Z]{2}$
-          type: string
-        deliveryPostalCode:
-          type: string
-        deliveryPreferences:
-          $ref: '#/components/schemas/DeliveryPreferences'
-        facilityRefs:
-          items:
-            type: string
-          type: array
-        geoFence:
-          $ref: '#/components/schemas/GeoFence'
-      required:
-        - articles
-      title: FulfillabilityShipFromStoreQuery
     FulfillmentProcessBufferConfiguration:
       allOf:
         - $ref: '#/components/schemas/VersionedResource'
@@ -40562,7 +40920,9 @@ components:
           example: 17ebfdfb-e1b4-4913-9962-3aef2b49f16f
           type: string
         measurementUnitKey:
-          description: Identifier for items unit of measurement.
+          description: Measurement unit key of the item, for example "pcs" or "kg"
+          example: pcs
+          minLength: 1
           type: string
         quantity:
           description: Amount per line item
@@ -40579,6 +40939,20 @@ components:
           items:
             type: string
           type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 42
+          minimum: 0
+          type: number
       required:
         - id
         - article
@@ -40643,7 +41017,9 @@ components:
             item of other operational entities.
           type: string
         measurementUnitKey:
-          description: Identifier for items unit of measurement.
+          description: Measurement unit key of the item, for example "pcs" or "kg"
+          example: pcs
+          minLength: 1
           type: string
         quantity:
           description: Amount per line item
@@ -40662,6 +41038,20 @@ components:
             type: string
           maxItems: 50
           type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 42
+          minimum: 0
+          type: number
       required:
         - article
         - quantity
@@ -43653,6 +44043,11 @@ components:
           example: 41d43211-g5a1-gg22-a716-ba095e30ds1d
           minLength: 1
           type: string
+        measurementUnitKey:
+          description: Measurement unit key of the item, for example "pcs" or "kg"
+          example: pcs
+          minLength: 1
+          type: string
         quantity:
           description: Quantity of the items
           example: 12
@@ -43670,6 +44065,20 @@ components:
           items:
             type: string
           type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 42
+          minimum: 0
+          type: number
         serviceJobRef:
           description: Reference to the service job this line item was inherited from
           example: 41d43211-g5a1-gg22-a716-ba095e30ds1d
@@ -46061,19 +46470,6 @@ components:
         - searchPaths
       title: ItemReturnsWithSearchPaths
       description: ItemReturnsWithSearchPaths
-    ItemsFulfillabilityConstraintType:
-      allOf:
-        - $ref: '#/components/schemas/AbstractFulfillabilityConstraintType'
-      properties:
-        type:
-          enum:
-            - ITEMS
-          type: string
-        value:
-          $ref: '#/components/schemas/FulfillabilityItemsConstraintValue'
-      type: object
-      title: ItemsFulfillabilityConstraintType
-      description: ItemsFulfillabilityConstraintType
     KeyExistsFilter:
       properties:
         exists:
@@ -46611,6 +47007,11 @@ components:
           description: ID of the recordable attribute
           example: 17ebfdfb-e1b4-4913-9962-3aef2b49f16f
           type: string
+        measurementUnitKey:
+          description: Measurement unit key of the item, for example "pcs" or "kg"
+          example: pcs
+          minLength: 1
+          type: string
         quantity:
           description: The quantity of the lineItem
           type: number
@@ -46626,6 +47027,20 @@ components:
           items:
             type: string
           type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 42
+          minimum: 0
+          type: number
       required:
         - id
       title: LineItem
@@ -46692,6 +47107,11 @@ components:
             This ID is used to identify if this line item is related to the line
             item of other operational entities.
           type: string
+        measurementUnitKey:
+          description: Measurement unit key of the item, for example "pcs" or "kg"
+          example: pcs
+          minLength: 1
+          type: string
         quantity:
           description: The quantity of the lineItem
           type: number
@@ -46707,6 +47127,20 @@ components:
           items:
             type: string
           type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 42
+          minimum: 0
+          type: number
       title: LineItemForCreation
       type: object
       description: LineItemForCreation
@@ -48444,6 +48878,20 @@ components:
             type: string
           maxItems: 100
           type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 1
+          minimum: 0
+          type: number
       required:
         - id
         - article
@@ -48517,6 +48965,20 @@ components:
             type: string
           maxItems: 100
           type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 1
+          minimum: 0
+          type: number
       required:
         - article
       title: LoadUnitLineItemForCreation
@@ -49463,6 +49925,11 @@ components:
           description: ID of the recordable attribute
           example: 17ebfdfb-e1b4-4913-9962-3aef2b49f16f
           type: string
+        measurementUnitKey:
+          description: Measurement unit key of the item, for example "pcs" or "kg"
+          example: pcs
+          minLength: 1
+          type: string
         quantity:
           description: The quantity of the lineItem
           type: number
@@ -49478,6 +49945,20 @@ components:
           items:
             type: string
           type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 42
+          minimum: 0
+          type: number
       required:
         - id
         - article
@@ -49500,6 +49981,11 @@ components:
             This ID is used to identify if this line item is related to the line
             item of other operational entities.
           type: string
+        measurementUnitKey:
+          description: Measurement unit key of the item, for example "pcs" or "kg"
+          example: pcs
+          minLength: 1
+          type: string
         quantity:
           description: The quantity of the lineItem
           type: number
@@ -49517,6 +50003,20 @@ components:
             type: string
           maxItems: 50
           type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 42
+          minimum: 0
+          type: number
       required:
         - article
         - quantity
@@ -53152,11 +53652,16 @@ components:
                 $ref: '#/components/schemas/OrderUpdateDetail'
               minItems: 1
               type: array
+            workflowInformation:
+              oneOf:
+                - $ref: '#/components/schemas/WorkflowInformation'
+                - $ref: '#/components/schemas/WorkflowUnavailable'
           required:
             - id
             - status
             - orderLineItems
             - processId
+            - workflowInformation
           type: object
       xml:
         name: Order
@@ -54280,16 +54785,25 @@ components:
         name:
           description: Name of the discount
           type: string
+        percentage:
+          description: >-
+            Discount percentage (-100 to 0). Required when type is PERCENTAGE.
+            Must be negative or zero (e.g. -10 for 10% off).
+          format: float
+          type: number
         tenantDiscountId:
           description: Tenant-specific discount identifier
           type: string
         type:
-          description: Type of the discount
+          description: >-
+            Type of the discount. ABSOLUTE requires value, PERCENTAGE requires
+            percentage.
+          enum:
+            - ABSOLUTE
+            - PERCENTAGE
           type: string
         value:
           $ref: '#/components/schemas/MonetaryValue'
-      required:
-        - value
       type: object
       title: OrderPricingDiscount
       description: >-
@@ -54409,7 +54923,7 @@ components:
           type: object
         totalDiscounts:
           allOf:
-            - $ref: '#/components/schemas/MonetaryValue'
+            - $ref: '#/components/schemas/OrderTotalDiscounts'
           nullable: true
           type: object
         totalFees:
@@ -54850,6 +55364,9 @@ components:
         name:
           description: Name of the discount
           type: string
+        percentage:
+          description: Discount percentage (0-100). Required when type is PERCENTAGE.
+          type: number
         tenantDiscountId:
           description: Tenant-specific discount identifier
           type: string
@@ -54859,12 +55376,30 @@ components:
         value:
           allOf:
             - $ref: '#/components/schemas/OrderRecordMonetaryValue'
-          description: Discount value
-      required:
-        - value
+          description: Discount value. Required when type is ABSOLUTE.
       title: OrderRecordDiscount
       type: object
       description: OrderRecordDiscount
+    OrderRecordDiscountBreakdown:
+      properties:
+        lineItemDiscounts:
+          allOf:
+            - $ref: '#/components/schemas/OrderRecordMonetaryValue'
+          description: Discounts originating from line items
+          nullable: true
+          type: object
+        orderDiscounts:
+          allOf:
+            - $ref: '#/components/schemas/OrderRecordMonetaryValue'
+          description: Discounts applied at order level
+          nullable: true
+          type: object
+      required:
+        - lineItemDiscounts
+        - orderDiscounts
+      title: OrderRecordDiscountBreakdown
+      type: object
+      description: OrderRecordDiscountBreakdown
     OrderRecordFee:
       properties:
         name:
@@ -55728,6 +56263,24 @@ components:
       title: OrderRecordTax
       type: object
       description: OrderRecordTax
+    OrderRecordTotalDiscounts:
+      properties:
+        breakdown:
+          allOf:
+            - $ref: '#/components/schemas/OrderRecordDiscountBreakdown'
+          description: Total discounts broken down by source
+        value:
+          allOf:
+            - $ref: '#/components/schemas/OrderRecordMonetaryValue'
+          description: Aggregate total discounts applied
+          nullable: true
+          type: object
+      required:
+        - value
+        - breakdown
+      title: OrderRecordTotalDiscounts
+      type: object
+      description: OrderRecordTotalDiscounts
     OrderRecordTotals:
       properties:
         subTotal:
@@ -55744,8 +56297,8 @@ components:
           type: object
         totalDiscounts:
           allOf:
-            - $ref: '#/components/schemas/OrderRecordMonetaryValue'
-          description: Total discounts applied
+            - $ref: '#/components/schemas/OrderRecordTotalDiscounts'
+          description: Total discounts applied, with breakdown by source
           nullable: true
           type: object
         totalFees:
@@ -56171,6 +56724,37 @@ components:
       title: OrderTagsListFilter
       type: object
       description: OrderTagsListFilter
+    OrderTotalDiscounts:
+      description: >
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Aggregate discount total with a breakdown by source. Values follow the
+        negative-or-zero discount convention.
+      properties:
+        breakdown:
+          properties:
+            lineItemDiscounts:
+              allOf:
+                - $ref: '#/components/schemas/MonetaryValue'
+              nullable: true
+              type: object
+            orderDiscounts:
+              allOf:
+                - $ref: '#/components/schemas/MonetaryValue'
+              nullable: true
+              type: object
+          type: object
+        value:
+          allOf:
+            - $ref: '#/components/schemas/MonetaryValue'
+          nullable: true
+          type: object
+      type: object
+      title: OrderTotalDiscounts
+      x-badges:
+        - color: red
+          label: ALPHA
     OrderUnlockActionParameter:
       allOf:
         - $ref: '#/components/schemas/AbstractOrderActionsParameter'
@@ -57163,7 +57747,8 @@ components:
             secondaryMeasurementUnitKey:
               description: >-
                 Identifier for items unit of measurement. E.g.
-                measurementUnitKey is pieces and secondaryQuantity is gram
+                measurementUnitKey is pieces and secondaryMeasurementUnitKey is
+                gram
               example: gram
               type: string
             secondaryQuantity:
@@ -57219,7 +57804,8 @@ components:
             secondaryMeasurementUnitKey:
               description: >-
                 Identifier for items unit of measurement. E.g.
-                measurementUnitKey is pieces and secondaryQuantity is gram
+                measurementUnitKey is pieces and secondaryMeasurementUnitKey is
+                gram
               example: gram
               type: string
             secondaryQuantity:
@@ -57420,7 +58006,8 @@ components:
             secondaryMeasurementUnitKey:
               description: >-
                 Identifier for items unit of measurement. E.g.
-                measurementUnitKey is pieces and secondaryQuantity is gram
+                measurementUnitKey is pieces and secondaryMeasurementUnitKey is
+                gram
               example: gram
               type: string
             secondaryQuantity:
@@ -57487,7 +58074,8 @@ components:
             secondaryMeasurementUnitKey:
               description: >-
                 Identifier for items unit of measurement. E.g.
-                measurementUnitKey is pieces and secondaryQuantity is gram
+                measurementUnitKey is pieces and secondaryMeasurementUnitKey is
+                gram
               example: gram
               type: string
             secondaryQuantity:
@@ -60739,14 +61327,8 @@ components:
             - ROUTING_WRITE
             - PARCEL_READ
             - PARCEL_WRITE
-            - SHIPPING_INFORMATION_READ
-            - SHIPPING_INFORMATION_WRITE
             - SHIPMENT_READ
             - SHIPMENT_WRITE
-            - LABEL_READ
-            - LABEL_WRITE
-            - PARCEL_INFORMATION_READ
-            - PARCEL_INFORMATION_WRITE
             - HANDOVERJOB_READ
             - HANDOVERJOB_WRITE
             - PICKJOB_READ
@@ -60839,6 +61421,8 @@ components:
             - ORDER_RECORD_WRITE
             - PACKAGING_UNITS_READ
             - PACKAGING_UNITS_WRITE
+            - EXPORT_READ
+            - EXPORT_WRITE
             - STOCK_AVAILABILITIES_READ
             - LISTING_READ
             - LISTING_WRITE
@@ -60894,10 +61478,7 @@ components:
             - CARRIER
             - RETURN
             - PARCEL
-            - SHIPPING_INFORMATION
             - SHIPMENT
-            - LABEL
-            - PARCEL_INFORMATION
             - HANDOVERJOB
             - HANDOVER_JOB
             - PICKJOB
@@ -60958,6 +61539,7 @@ components:
             - LOOKUP_RECORD
             - ORDER_RECORD
             - PACKAGING_UNITS
+            - EXPORT
             - STOCK_AVAILABILITIES
             - LISTING
             - PURCHASE_PRICE
@@ -61392,6 +61974,7 @@ components:
         - $ref: '#/components/schemas/PickJobPickedActionParameter'
         - $ref: '#/components/schemas/ModifyPickLineItemsActionParameter'
         - $ref: '#/components/schemas/PickJobAddTargetTimeActionParameter'
+        - $ref: '#/components/schemas/PickJobCancelActionParameter'
       title: PickJobActionsParameter
       description: PickJobActionsParameter
     PickJobAddTargetTimeActionEnum:
@@ -61422,6 +62005,27 @@ components:
         - version
         - targetTime
       title: PickJobAddTargetTimeActionParameter
+    PickJobCancelActionEnum:
+      enum:
+        - CANCEL
+      type: string
+      title: PickJobCancelActionEnum
+      description: PickJobCancelActionEnum
+    PickJobCancelActionParameter:
+      additionalProperties: false
+      description: 'Action to cancel a Pickjob. '
+      properties:
+        name:
+          $ref: '#/components/schemas/PickJobCancelActionEnum'
+        version:
+          description: Version of the entity to be changed
+          minimum: 0
+          type: integer
+      required:
+        - name
+        - version
+      title: PickJobCancelActionParameter
+      type: object
     PickjobDeliveryInformation:
       allOf:
         - $ref: '#/components/schemas/PickjobDeliveryInformationForCreation'
@@ -67589,6 +68193,20 @@ components:
             type: string
           maxItems: 50
           type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 1
+          minimum: 0
+          type: number
       required:
         - id
         - article
@@ -67620,6 +68238,20 @@ components:
             type: string
           maxItems: 50
           type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 1
+          minimum: 0
+          type: number
       required:
         - article
         - quantity
@@ -69043,14 +69675,8 @@ components:
               - ROUTING_WRITE
               - PARCEL_READ
               - PARCEL_WRITE
-              - SHIPPING_INFORMATION_READ
-              - SHIPPING_INFORMATION_WRITE
               - SHIPMENT_READ
               - SHIPMENT_WRITE
-              - LABEL_READ
-              - LABEL_WRITE
-              - PARCEL_INFORMATION_READ
-              - PARCEL_INFORMATION_WRITE
               - HANDOVERJOB_READ
               - HANDOVERJOB_WRITE
               - PICKJOB_READ
@@ -69143,6 +69769,8 @@ components:
               - ORDER_RECORD_WRITE
               - PACKAGING_UNITS_READ
               - PACKAGING_UNITS_WRITE
+              - EXPORT_READ
+              - EXPORT_WRITE
               - STOCK_AVAILABILITIES_READ
               - LISTING_READ
               - LISTING_WRITE
@@ -69275,14 +69903,8 @@ components:
               - ROUTING_WRITE
               - PARCEL_READ
               - PARCEL_WRITE
-              - SHIPPING_INFORMATION_READ
-              - SHIPPING_INFORMATION_WRITE
               - SHIPMENT_READ
               - SHIPMENT_WRITE
-              - LABEL_READ
-              - LABEL_WRITE
-              - PARCEL_INFORMATION_READ
-              - PARCEL_INFORMATION_WRITE
               - HANDOVERJOB_READ
               - HANDOVERJOB_WRITE
               - PICKJOB_READ
@@ -69375,6 +69997,8 @@ components:
               - ORDER_RECORD_WRITE
               - PACKAGING_UNITS_READ
               - PACKAGING_UNITS_WRITE
+              - EXPORT_READ
+              - EXPORT_WRITE
               - STOCK_AVAILABILITIES_READ
               - LISTING_READ
               - LISTING_WRITE
@@ -69499,14 +70123,8 @@ components:
               - ROUTING_WRITE
               - PARCEL_READ
               - PARCEL_WRITE
-              - SHIPPING_INFORMATION_READ
-              - SHIPPING_INFORMATION_WRITE
               - SHIPMENT_READ
               - SHIPMENT_WRITE
-              - LABEL_READ
-              - LABEL_WRITE
-              - PARCEL_INFORMATION_READ
-              - PARCEL_INFORMATION_WRITE
               - HANDOVERJOB_READ
               - HANDOVERJOB_WRITE
               - PICKJOB_READ
@@ -69599,6 +70217,8 @@ components:
               - ORDER_RECORD_WRITE
               - PACKAGING_UNITS_READ
               - PACKAGING_UNITS_WRITE
+              - EXPORT_READ
+              - EXPORT_WRITE
               - STOCK_AVAILABILITIES_READ
               - LISTING_READ
               - LISTING_WRITE
@@ -69728,14 +70348,8 @@ components:
               - ROUTING_WRITE
               - PARCEL_READ
               - PARCEL_WRITE
-              - SHIPPING_INFORMATION_READ
-              - SHIPPING_INFORMATION_WRITE
               - SHIPMENT_READ
               - SHIPMENT_WRITE
-              - LABEL_READ
-              - LABEL_WRITE
-              - PARCEL_INFORMATION_READ
-              - PARCEL_INFORMATION_WRITE
               - HANDOVERJOB_READ
               - HANDOVERJOB_WRITE
               - PICKJOB_READ
@@ -69828,6 +70442,8 @@ components:
               - ORDER_RECORD_WRITE
               - PACKAGING_UNITS_READ
               - PACKAGING_UNITS_WRITE
+              - EXPORT_READ
+              - EXPORT_WRITE
               - STOCK_AVAILABILITIES_READ
               - LISTING_READ
               - LISTING_WRITE
@@ -70188,6 +70804,7 @@ components:
             - INITIAL
             - PROCESS_REROUTE
             - PROCESS_MANUAL_ASSIGNED
+            - TASK_MANUAL_REROUTED
           type: string
         created:
           description: Creation date of this routing journal entry
@@ -71898,6 +72515,12 @@ components:
           type: string
         timeTriggered:
           $ref: '#/components/schemas/RoutingStrategyRerouteTimeTriggeredConfig'
+        timeTriggeredByContext:
+          items:
+            $ref: '#/components/schemas/TimeTriggeredConfigurationContext'
+          maxItems: 500
+          minItems: 1
+          type: array
       required:
         - defaultPrice
       type: object
@@ -73334,11 +73957,11 @@ components:
           type: string
         secondaryQuantity:
           description: >-
-            secondary quantity of this item, E.g. quantity is the count and
+            secondary quantity of this item, e.g. quantity is the count and
             secondaryQuantity is the weight
-          example: 500
+          example: 42
           minimum: 0
-          type: integer
+          type: number
         stickers:
           items:
             $ref: '#/components/schemas/Sticker'
@@ -73496,6 +74119,20 @@ components:
           items:
             type: string
           type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 42
+          minimum: 0
+          type: number
       required:
         - id
         - article
@@ -73566,6 +74203,20 @@ components:
             type: string
           maxItems: 50
           type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 42
+          minimum: 0
+          type: number
       required:
         - article
         - quantity
@@ -74310,6 +74961,20 @@ components:
           items:
             type: string
           type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 42
+          minimum: 0
+          type: number
       required:
         - id
         - article
@@ -74397,6 +75062,20 @@ components:
           items:
             type: string
           type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 42
+          minimum: 0
+          type: number
       title: ServiceJobLineItemForCreation
       type: object
       description: ServiceJobLineItemForCreation
@@ -77607,6 +78286,8 @@ components:
             carrierName:
               type: string
           type: object
+        existenceReason:
+          $ref: '#/components/schemas/SourcingOptionTransferExistenceReason'
         facilityConnectionRef:
           example: f439e7b6-119e-47cc-a263-05a31baea0de
           type: string
@@ -77639,6 +78320,12 @@ components:
       type: object
       title: SourcingOptionTransfer
       description: SourcingOptionTransfer
+    SourcingOptionTransferExistenceReason:
+      enum:
+        - KEPT_FROM_LAST_RUN
+      type: string
+      title: SourcingOptionTransferExistenceReason
+      description: SourcingOptionTransferExistenceReason
     SplitInformation:
       properties:
         splitCount:
@@ -81955,7 +82642,7 @@ components:
         secondaryMeasurementUnitKey:
           description: >-
             Identifier for items unit of measurement. E.g. measurementUnitKey is
-            pieces and secondaryQuantity is gram
+            pieces and secondaryMeasurementUnitKey is gram
           example: gram
           type: string
         tenantArticleId:
@@ -82033,7 +82720,7 @@ components:
         secondaryMeasurementUnitKey:
           description: >-
             Identifier for items unit of measurement. E.g. measurementUnitKey is
-            pieces and secondaryQuantity is gram
+            pieces and secondaryMeasurementUnitKey is gram
           example: gram
           type: string
         secondaryPicked:
@@ -83049,6 +83736,40 @@ components:
       type: object
       title: TimeStamp
       description: TimeStamp
+    TimeTriggeredConfigContextType:
+      enum:
+        - FACILITY
+        - FACILITY_GROUP
+      type: string
+      title: TimeTriggeredConfigContextType
+      description: TimeTriggeredConfigContextType
+    TimeTriggeredConfigurationContext:
+      additionalProperties: false
+      properties:
+        priority:
+          minimum: 0
+          type: integer
+        timeTriggered:
+          $ref: '#/components/schemas/RoutingStrategyRerouteTimeTriggeredConfig'
+        type:
+          $ref: '#/components/schemas/TimeTriggeredConfigContextType'
+        values:
+          description: >-
+            The id of the context values. For example, if the type is FACILITY,
+            then the values are the ids of the facilities.
+          items:
+            format: uuid
+            type: string
+          maxItems: 500
+          type: array
+      required:
+        - priority
+        - type
+        - values
+        - timeTriggered
+      type: object
+      title: TimeTriggeredConfigurationContext
+      description: TimeTriggeredConfigurationContext
     TimeZone:
       description: Timezone for information retrieved e.g. by the Google Maps API
       properties:
@@ -85124,14 +85845,8 @@ components:
               - ROUTING_WRITE
               - PARCEL_READ
               - PARCEL_WRITE
-              - SHIPPING_INFORMATION_READ
-              - SHIPPING_INFORMATION_WRITE
               - SHIPMENT_READ
               - SHIPMENT_WRITE
-              - LABEL_READ
-              - LABEL_WRITE
-              - PARCEL_INFORMATION_READ
-              - PARCEL_INFORMATION_WRITE
               - HANDOVERJOB_READ
               - HANDOVERJOB_WRITE
               - PICKJOB_READ
@@ -85224,6 +85939,8 @@ components:
               - ORDER_RECORD_WRITE
               - PACKAGING_UNITS_READ
               - PACKAGING_UNITS_WRITE
+              - EXPORT_READ
+              - EXPORT_WRITE
               - STOCK_AVAILABILITIES_READ
               - LISTING_READ
               - LISTING_WRITE
