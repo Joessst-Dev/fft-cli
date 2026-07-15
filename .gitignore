@@ -17,9 +17,12 @@ coverage.*
 .env
 .env.local
 
-# Local AI tooling: agent definitions, vendored skills, and working memory.
-# Not part of the product, and the memory notes reference a private tenant.
-.claude/
+# Local AI tooling. Track shared agents and skills so cloud routines (which run
+# off a fresh clone) can use them; keep working memory out — the notes reference
+# a private tenant — along with any local settings.
+.claude/*
+!.claude/agents/
+!.claude/skills/
 
 # Editor / OS
 .DS_Store
