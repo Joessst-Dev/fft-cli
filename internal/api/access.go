@@ -72,6 +72,7 @@ func (o Operation) Mutates() bool {
 //     write" is not otherwise. A read-scoped token would be refused it anyway.
 var readPOSTs = map[string]bool{
 	// Cursor searches.
+	"searchAudit":                    true,
 	"searchCategory":                 true,
 	"searchFacility":                 true,
 	"searchFacilityGroup":            true,

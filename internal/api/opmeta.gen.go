@@ -56,6 +56,7 @@ var operations = []Operation{
 		Tags:        []string{"Routing Strategy (DOMS)"},
 		Summary:     "Call routing strategy action",
 		Description: "Performs an action on a routing strategy.",
+		Permissions: []string{"ROUTING_CONFIG_WRITE"},
 		Params: []Param{
 			{Name: "strategyId", In: InPath, Type: TypeString, Required: true, Description: "Id of the routing strategy"},
 		},
@@ -205,7 +206,7 @@ var operations = []Operation{
 		Tags:         []string{"Label (Operations)"},
 		Summary:      "Create label",
 		Description:  "Create label",
-		Permissions:  []string{"LABEL_WRITE"},
+		Permissions:  []string{"ADMIN_MODULES_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
 		SampleBody:   "{\n  \"additionalDocuments\": [\n    {\n      \"nameLocalized\": {},\n      \"url\": \"string\"\n    }\n  ],\n  \"carrierData\": {\n    \"carrierRef\": \"string\"\n  },\n  \"recipientAddress\": [\n    {\n      \"city\": \"string\",\n      \"country\": \"DE\",\n      \"postalCode\": \"string\",\n      \"street\": \"string\"\n    }\n  ],\n  \"senderAddress\": {\n    \"city\": \"string\",\n    \"companyName\": \"string\",\n    \"country\": \"DE\",\n    \"postalCode\": \"string\",\n    \"street\": \"string\"\n  },\n  \"status\": \"WAITING_FOR_INPUT\",\n  \"type\": \"SEND_LABEL\"\n}\n",
@@ -258,7 +259,7 @@ var operations = []Operation{
 		Summary:      "Create pack job",
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"facilityRef\": \"Esb50gpH7794X5NdMp3C\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21\n    }\n  ],\n  \"orderDate\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRef\": \"Pic50gpH7794X5NdMp3C\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleBody:   "{\n  \"facilityRef\": \"Esb50gpH7794X5NdMp3C\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"orderDate\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRef\": \"Pic50gpH7794X5NdMp3C\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:           "addPackingContainerType",
@@ -790,7 +791,7 @@ var operations = []Operation{
 		Permissions:  []string{"HANDOVER_CONTAINER_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"handoverJobRef\": \"string\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"quantity\": 1\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  }\n}\n",
+		SampleBody:   "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"handoverJobRef\": \"string\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"pcs\",\n      \"quantity\": 1,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  }\n}\n",
 	},
 	{
 		ID:           "createInboundProcess",
@@ -923,7 +924,7 @@ var operations = []Operation{
 		Tags:         []string{"Parcel Information (Operations)"},
 		Summary:      "Create a parcel information",
 		Description:  "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Creates a new parcel information.",
-		Permissions:  []string{"PARCEL_INFORMATION_WRITE"},
+		Permissions:  []string{"ADMIN_MODULES_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
 		SampleBody:   "{\n  \"anonymized\": false,\n  \"parcelInformationLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019eefb2-0001-7000-9000-200000000002\",\n      \"quantity\": 2,\n      \"scannableCodes\": [\n        \"4006381333931\"\n      ]\n    }\n  ],\n  \"shippingInformationRef\": \"019eefb2-0001-7000-9000-100000000001\",\n  \"shortId\": \"FT-01\"\n}\n",
@@ -997,7 +998,7 @@ var operations = []Operation{
 		Permissions:  []string{"SERVICE_JOB_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"iconUrl\": \"https://example.com/icon.png\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 5,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 500\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"scannableCodes\": [\n    \"AB-123456\"\n  ],\n  \"serviceJobRefs\": [\n    \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n  ],\n  \"stackRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"storageLocationRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"weightLimitInG\": 5000\n}\n",
+		SampleBody:   "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"iconUrl\": \"https://example.com/icon.png\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 5,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"scannableCodes\": [\n    \"AB-123456\"\n  ],\n  \"serviceJobRefs\": [\n    \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n  ],\n  \"stackRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"storageLocationRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"weightLimitInG\": 5000\n}\n",
 	},
 	{
 		ID:           "createServiceJob",
@@ -1018,7 +1019,7 @@ var operations = []Operation{
 		Tags:         []string{"ShippingInformation (carrier)"},
 		Summary:      "Create a shippingInformation",
 		Description:  "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Creates a new shippingInformation.",
-		Permissions:  []string{"SHIPPING_INFORMATION_WRITE"},
+		Permissions:  []string{"ADMIN_MODULES_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
 		SampleBody:   "{\n  \"anonymized\": false,\n  \"carrierRecipientInformation\": [\n    {\n      \"address\": [\n        {\n          \"city\": \"string\",\n          \"country\": \"DE\",\n          \"postalCode\": \"string\",\n          \"street\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"facilityRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"operativeProcessRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"processRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"senderAddress\": {\n    \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n    \"city\": \"Langenfeld\",\n    \"companyName\": \"Speedy Boxales Ltd.\",\n    \"country\": \"DE\",\n    \"houseNumber\": \"42a\",\n    \"postalCode\": \"40764\",\n    \"province\": \"NRW\",\n    \"street\": \"Hauptstr.\"\n  },\n  \"shippingInformationLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"quantity\": 1,\n      \"scannableCodes\": [\n        \"ABC-12345\"\n      ]\n    }\n  ],\n  \"shortId\": \"ABC123\",\n  \"tenantOrderId\": \"ORDER-12345\"\n}\n",
@@ -1722,6 +1723,7 @@ var operations = []Operation{
 		Tags:        []string{"Routing Strategy (DOMS)"},
 		Summary:     "Evaluate routing strategy",
 		Description: "Evaluates a routing strategy against a given order",
+		Permissions: []string{"ROUTING_CONFIG_READ"},
 		Params: []Param{
 			{Name: "strategyId", In: InPath, Type: TypeString, Required: true, Description: "Id of the routing strategy"},
 		},
@@ -1735,6 +1737,7 @@ var operations = []Operation{
 		Tags:        []string{"Routing Strategy (DOMS)"},
 		Summary:     "Evaluate routing strategy node",
 		Description: "Evaluates a routing strategy node and return the path.",
+		Permissions: []string{"ROUTING_CONFIG_READ"},
 		Params: []Param{
 			{Name: "nodeId", In: InPath, Type: TypeString, Required: true, Description: "Id of the node"},
 			{Name: "strategyId", In: InPath, Type: TypeString, Required: true, Description: "Id of the routing strategy"},
@@ -2148,6 +2151,7 @@ var operations = []Operation{
 		Path:        "/api/audits",
 		Tags:        []string{"Audits (Core)"},
 		Summary:     "List audits",
+		Description: "This part of the API is deprecated. For details, see the API release lifecycle documentation.",
 		Permissions: []string{"AUDIT_READ"},
 		Params: []Param{
 			{Name: "entityRef", In: InQuery, Type: TypeString},
@@ -2156,6 +2160,7 @@ var operations = []Operation{
 			{Name: "startAfterId", In: InQuery, Type: TypeString},
 			{Name: "trace", In: InQuery, Type: TypeString},
 		},
+		Deprecated: true,
 	},
 	{
 		ID:          "getAvailabilityChannelById",
@@ -3017,7 +3022,7 @@ var operations = []Operation{
 		Tags:        []string{"Label (Operations)"},
 		Summary:     "Get label",
 		Description: "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Get label",
-		Permissions: []string{"LABEL_READ"},
+		Permissions: []string{"ADMIN_MODULES_READ"},
 		Params: []Param{
 			{Name: "id", In: InPath, Type: TypeString, Required: true},
 		},
@@ -3597,7 +3602,7 @@ var operations = []Operation{
 		Tags:        []string{"Parcel Information (Operations)"},
 		Summary:     "List parcel information",
 		Description: "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Returns all parcel information that match the given query parameters.",
-		Permissions: []string{"PARCEL_INFORMATION_READ"},
+		Permissions: []string{"ADMIN_MODULES_READ"},
 		Params: []Param{
 			{Name: "facilityRefs", In: InQuery, Type: TypeArray, Item: TypeString, Explode: true, Description: "filter by facilityRefs"},
 			{Name: "orderBy", In: InQuery, Type: TypeString, Description: "the value by which results should be ordered by. If nothing is passed return values are sorted by id"},
@@ -3614,7 +3619,7 @@ var operations = []Operation{
 		Tags:        []string{"Parcel Information (Operations)"},
 		Summary:     "Get a parcel information by its ID",
 		Description: "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Retrieves a single parcel information using its unique identifier.",
-		Permissions: []string{"PARCEL_INFORMATION_READ"},
+		Permissions: []string{"ADMIN_MODULES_READ"},
 		Params: []Param{
 			{Name: "parcelInformationId", In: InPath, Type: TypeString, Required: true},
 		},
@@ -3658,7 +3663,7 @@ var operations = []Operation{
 		Permissions: []string{"PERMISSION_READ"},
 		Params: []Param{
 			{Name: "group", In: InQuery, Type: TypeString, Enum: []string{"INVENTORY", "ORDER_MANAGEMENT", "SYSTEM_ADMINISTRATION", "FOUNDATION", "USER_MANAGEMENT", "OPERATIONS", "ADMIN", "CORE"}, Description: "The group of the permission to filter by"},
-			{Name: "key", In: InQuery, Type: TypeString, Enum: []string{"USER_READ", "USERS_READ", "USER_WRITE", "USER_MODIFY", "CURRENT_USER_READ", "CURRENT_USER_MODIFY", "ROLE_READ", "ROLE_WRITE", "FACILITY_READ", "FACILITY_WRITE", "FACILITY_CREATE", "FACILITY_DELETE", "FACILITY_GROUP_READ", "FACILITY_GROUP_WRITE", "ORDER_READ", "ORDER_WRITE", "ORDER_FORCE_CANCEL", "ORDER_UNLOCK", "ORDER_CANCEL", "ORDER_CONSUMER_WRITE", "ORDER_CUSTOM_ATTRIBUTES_WRITE", "ORDER_LINEITEM_WRITE", "ORDER_TOTAL_READ", "LINE_ITEM_PRICING_READ", "LINE_ITEM_QUANTITY_INCREASE", "LINE_ITEM_ADD", "LINE_ITEM_QUANTITY_DECREASE", "LINE_ITEM_DELETE", "SIMULATION_ORDER_READ", "SIMULATION_ORDER_WRITE", "AUDIT_READ", "NOTIFICATION_READ", "NOTIFICATION_WRITE", "EXPIRIES_READ", "EXPIRIES_WRITE", "CONFIG_READ", "CONFIG_WRITE", "ROUTING_CONFIG_READ", "ROUTING_CONFIG_WRITE", "PROMISES_CONFIG_READ", "PROMISES_CONFIG_WRITE", "OIDC_PROVIDERS_CONFIG_READ", "OIDC_PROVIDERS_CONFIG_WRITE", "LOCALE_WRITE", "CARRIER_READ", "CARRIER_WRITE", "RETURN_WRITE", "RETURN_READ", "ROUTING_READ", "ROUTING_WRITE", "PARCEL_READ", "PARCEL_WRITE", "SHIPPING_INFORMATION_READ", "SHIPPING_INFORMATION_WRITE", "SHIPMENT_READ", "SHIPMENT_WRITE", "LABEL_READ", "LABEL_WRITE", "PARCEL_INFORMATION_READ", "PARCEL_INFORMATION_WRITE", "HANDOVERJOB_READ", "HANDOVERJOB_WRITE", "PICKJOB_READ", "PICKJOB_WRITE", "PICKJOB_REROUTE", "REMOTE_CONFIG_READ", "REMOTE_CONFIG_WRITE", "PICKRUN_READ", "PICKRUN_WRITE", "LOADUNITTYPE_READ", "LOADUNITTYPE_WRITE", "LOADUNIT_READ", "LOADUNIT_WRITE", "MEASUREMENTUNIT_READ", "MEASUREMENTUNIT_WRITE", "EVENT_READ", "SUBSCRIPTION_READ", "SUBSCRIPTION_WRITE", "SUBSTITUTE_READ", "SUBSTITUTE_WRITE", "PROCESS_READ", "PROCESS_WRITE", "PROCESS_REROUTE", "EXTERNAL_ACTIONS_READ", "EXTERNAL_ACTIONS_WRITE", "PROCESS_LOG_READ", "OPERATIVE_PROCESS_READ", "OPERATIVE_PROCESS_WRITE", "DELIVERYNOTE_WRITE", "PACKJOB_READ", "PACKJOB_WRITE", "PACKINGCONTAINER_TYPE_WRITE", "PACKING_SOURCE_CONTAINER_READ", "PACKING_SOURCE_CONTAINER_WRITE", "RESTOW_ITEM_READ", "RESTOW_ITEM_WRITE", "TAG_READ", "TAG_WRITE", "STOCK_READ", "STOCK_WRITE", "EXTERNAL_STOCK_CHANGE_REASONS_READ", "EXTERNAL_STOCK_CHANGE_REASONS_WRITE", "STORAGE_LOCATION_READ", "STORAGE_LOCATION_WRITE", "STOW_JOB_READ", "STOW_JOB_OPERATIVE_WRITE", "STOW_JOB_FULL_WRITE", "NOTIFICATION_CENTER_CONFIG_READ", "NOTIFICATION_CENTER_CONFIG_WRITE", "DOMS_TOOLKIT_READ", "DOMS_TOOLKIT_WRITE", "ANALYTICS_DASHBOARD_READ", "DOCUMENT_SET_READ", "DOCUMENT_SET_WRITE", "INBOUND_PROCESS_READ", "INBOUND_PROCESS_WRITE", "ADMIN_DATA_RESET", "ADMIN_MODULES_READ", "ADMIN_MODULES_WRITE", "TENANT_CONNECTOR_CONFIG_READ", "CUSTOM_SERVICE_WRITE", "CUSTOM_SERVICE_READ", "VALIDATIONS_READ", "SERVICE_JOB_READ", "SERVICE_JOB_WRITE", "LINKED_SERVICE_JOBS_READ", "LINKED_SERVICE_JOBS_WRITE", "OPERATION_STATISTICS_READ", "DOMS_STATISTICS_READ", "AVAILABILITY_CHANNEL_READ", "AVAILABILITY_CHANNEL_WRITE", "HANDOVER_CONTAINER_READ", "HANDOVER_CONTAINER_WRITE", "STACKS_READ", "STACKS_WRITE", "CATEGORY_READ", "CATEGORY_WRITE", "PERMISSION_READ", "KPI_READ", "AI_ASSISTANT_ACCESS", "RESERVATION_WRITE", "RESERVATION_READ", "FILTER_ENTITY_READ", "BRAND_READ", "WORKFLOW_DEFINITION_READ", "WORKFLOW_DEFINITION_WRITE", "LOOKUP_RECORD_READ", "LOOKUP_RECORD_WRITE", "ORDER_RECORD_READ", "ORDER_RECORD_WRITE", "PACKAGING_UNITS_READ", "PACKAGING_UNITS_WRITE", "STOCK_AVAILABILITIES_READ", "LISTING_READ", "LISTING_WRITE", "LISTING_DELETE", "PURCHASE_PRICE_READ", "ZONE_READ", "ZONE_WRITE", "SAFETY_STOCK_READ", "SAFETY_STOCK_WRITE"}, Description: "The key of the permission to filter by"},
+			{Name: "key", In: InQuery, Type: TypeString, Enum: []string{"USER_READ", "USERS_READ", "USER_WRITE", "USER_MODIFY", "CURRENT_USER_READ", "CURRENT_USER_MODIFY", "ROLE_READ", "ROLE_WRITE", "FACILITY_READ", "FACILITY_WRITE", "FACILITY_CREATE", "FACILITY_DELETE", "FACILITY_GROUP_READ", "FACILITY_GROUP_WRITE", "ORDER_READ", "ORDER_WRITE", "ORDER_FORCE_CANCEL", "ORDER_UNLOCK", "ORDER_CANCEL", "ORDER_CONSUMER_WRITE", "ORDER_CUSTOM_ATTRIBUTES_WRITE", "ORDER_LINEITEM_WRITE", "ORDER_TOTAL_READ", "LINE_ITEM_PRICING_READ", "LINE_ITEM_QUANTITY_INCREASE", "LINE_ITEM_ADD", "LINE_ITEM_QUANTITY_DECREASE", "LINE_ITEM_DELETE", "SIMULATION_ORDER_READ", "SIMULATION_ORDER_WRITE", "AUDIT_READ", "NOTIFICATION_READ", "NOTIFICATION_WRITE", "EXPIRIES_READ", "EXPIRIES_WRITE", "CONFIG_READ", "CONFIG_WRITE", "ROUTING_CONFIG_READ", "ROUTING_CONFIG_WRITE", "PROMISES_CONFIG_READ", "PROMISES_CONFIG_WRITE", "OIDC_PROVIDERS_CONFIG_READ", "OIDC_PROVIDERS_CONFIG_WRITE", "LOCALE_WRITE", "CARRIER_READ", "CARRIER_WRITE", "RETURN_WRITE", "RETURN_READ", "ROUTING_READ", "ROUTING_WRITE", "PARCEL_READ", "PARCEL_WRITE", "SHIPMENT_READ", "SHIPMENT_WRITE", "HANDOVERJOB_READ", "HANDOVERJOB_WRITE", "PICKJOB_READ", "PICKJOB_WRITE", "PICKJOB_REROUTE", "REMOTE_CONFIG_READ", "REMOTE_CONFIG_WRITE", "PICKRUN_READ", "PICKRUN_WRITE", "LOADUNITTYPE_READ", "LOADUNITTYPE_WRITE", "LOADUNIT_READ", "LOADUNIT_WRITE", "MEASUREMENTUNIT_READ", "MEASUREMENTUNIT_WRITE", "EVENT_READ", "SUBSCRIPTION_READ", "SUBSCRIPTION_WRITE", "SUBSTITUTE_READ", "SUBSTITUTE_WRITE", "PROCESS_READ", "PROCESS_WRITE", "PROCESS_REROUTE", "EXTERNAL_ACTIONS_READ", "EXTERNAL_ACTIONS_WRITE", "PROCESS_LOG_READ", "OPERATIVE_PROCESS_READ", "OPERATIVE_PROCESS_WRITE", "DELIVERYNOTE_WRITE", "PACKJOB_READ", "PACKJOB_WRITE", "PACKINGCONTAINER_TYPE_WRITE", "PACKING_SOURCE_CONTAINER_READ", "PACKING_SOURCE_CONTAINER_WRITE", "RESTOW_ITEM_READ", "RESTOW_ITEM_WRITE", "TAG_READ", "TAG_WRITE", "STOCK_READ", "STOCK_WRITE", "EXTERNAL_STOCK_CHANGE_REASONS_READ", "EXTERNAL_STOCK_CHANGE_REASONS_WRITE", "STORAGE_LOCATION_READ", "STORAGE_LOCATION_WRITE", "STOW_JOB_READ", "STOW_JOB_OPERATIVE_WRITE", "STOW_JOB_FULL_WRITE", "NOTIFICATION_CENTER_CONFIG_READ", "NOTIFICATION_CENTER_CONFIG_WRITE", "DOMS_TOOLKIT_READ", "DOMS_TOOLKIT_WRITE", "ANALYTICS_DASHBOARD_READ", "DOCUMENT_SET_READ", "DOCUMENT_SET_WRITE", "INBOUND_PROCESS_READ", "INBOUND_PROCESS_WRITE", "ADMIN_DATA_RESET", "ADMIN_MODULES_READ", "ADMIN_MODULES_WRITE", "TENANT_CONNECTOR_CONFIG_READ", "CUSTOM_SERVICE_WRITE", "CUSTOM_SERVICE_READ", "VALIDATIONS_READ", "SERVICE_JOB_READ", "SERVICE_JOB_WRITE", "LINKED_SERVICE_JOBS_READ", "LINKED_SERVICE_JOBS_WRITE", "OPERATION_STATISTICS_READ", "DOMS_STATISTICS_READ", "AVAILABILITY_CHANNEL_READ", "AVAILABILITY_CHANNEL_WRITE", "HANDOVER_CONTAINER_READ", "HANDOVER_CONTAINER_WRITE", "STACKS_READ", "STACKS_WRITE", "CATEGORY_READ", "CATEGORY_WRITE", "PERMISSION_READ", "KPI_READ", "AI_ASSISTANT_ACCESS", "RESERVATION_WRITE", "RESERVATION_READ", "FILTER_ENTITY_READ", "BRAND_READ", "WORKFLOW_DEFINITION_READ", "WORKFLOW_DEFINITION_WRITE", "LOOKUP_RECORD_READ", "LOOKUP_RECORD_WRITE", "ORDER_RECORD_READ", "ORDER_RECORD_WRITE", "PACKAGING_UNITS_READ", "PACKAGING_UNITS_WRITE", "EXPORT_READ", "EXPORT_WRITE", "STOCK_AVAILABILITIES_READ", "LISTING_READ", "LISTING_WRITE", "LISTING_DELETE", "PURCHASE_PRICE_READ", "ZONE_READ", "ZONE_WRITE", "SAFETY_STOCK_READ", "SAFETY_STOCK_WRITE"}, Description: "The key of the permission to filter by"},
 			{Name: "size", In: InQuery, Type: TypeNumber},
 			{Name: "startAfterId", In: InQuery, Type: TypeString},
 		},
@@ -4000,6 +4005,7 @@ var operations = []Operation{
 		Tags:        []string{"Routing Strategy (DOMS)"},
 		Summary:     "List routing strategies",
 		Description: "List all existing routing strategies",
+		Permissions: []string{"ROUTING_CONFIG_READ"},
 		Params: []Param{
 			{Name: "size", In: InQuery, Type: TypeInteger, Description: "Number of entities to show"},
 			{Name: "startAfterId", In: InQuery, Type: TypeString, Description: "All entities"},
@@ -4012,6 +4018,7 @@ var operations = []Operation{
 		Tags:        []string{"Routing Strategy (DOMS)"},
 		Summary:     "Get routing strategy",
 		Description: "Returns the routing strategy.",
+		Permissions: []string{"ROUTING_CONFIG_READ"},
 		Params: []Param{
 			{Name: "strategyId", In: InPath, Type: TypeString, Required: true, Description: "ID of the routing strategy you wish to retrieve"},
 		},
@@ -4166,7 +4173,7 @@ var operations = []Operation{
 		Tags:        []string{"ShippingInformation (carrier)"},
 		Summary:     "Get shippingInformation",
 		Description: "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Retrieves shippingInformation entities based on provided search criteria.",
-		Permissions: []string{"SHIPPING_INFORMATION_READ"},
+		Permissions: []string{"ADMIN_MODULES_READ"},
 		Params: []Param{
 			{Name: "facilityRefs", In: InQuery, Type: TypeArray, Item: TypeString, Explode: true, Description: "filter by facilityRefs"},
 			{Name: "orderBy", In: InQuery, Type: TypeString, Description: "the value by which results should be ordered by. If nothing is passed return values are sorted by id"},
@@ -4183,7 +4190,7 @@ var operations = []Operation{
 		Tags:        []string{"ShippingInformation (carrier)"},
 		Summary:     "Get a shippingInformation by its ID",
 		Description: "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Retrieves a single shippingInformation using its unique identifier.",
-		Permissions: []string{"SHIPPING_INFORMATION_READ"},
+		Permissions: []string{"ADMIN_MODULES_READ"},
 		Params: []Param{
 			{Name: "shippingInformationId", In: InPath, Type: TypeString, Required: true},
 		},
@@ -4775,7 +4782,7 @@ var operations = []Operation{
 		Tags:        []string{"Label (Operations)"},
 		Summary:     "Update label",
 		Description: "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Update label",
-		Permissions: []string{"LABEL_WRITE"},
+		Permissions: []string{"ADMIN_MODULES_WRITE"},
 		Params: []Param{
 			{Name: "id", In: InPath, Type: TypeString, Required: true},
 		},
@@ -4796,7 +4803,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"actions\": [\n    {\n      \"action\": \"ReplaceLoadUnitLineItems\",\n      \"loadUnitLineItems\": [\n        {\n          \"article\": {},\n          \"id\": \"string\",\n          \"measurementUnitKey\": \"liter\",\n          \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\"\n        }\n      ]\n    }\n  ],\n  \"version\": 42\n}\n",
+		SampleBody:   "{\n  \"actions\": [\n    {\n      \"action\": \"ReplaceLoadUnitLineItems\",\n      \"loadUnitLineItems\": [\n        {\n          \"article\": {},\n          \"id\": \"string\",\n          \"measurementUnitKey\": \"liter\",\n          \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n          \"secondaryMeasurementUnitKey\": \"g\",\n          \"secondaryQuantity\": 1\n        }\n      ]\n    }\n  ],\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "patchOidcProvider",
@@ -5032,7 +5039,7 @@ var operations = []Operation{
 		Tags:        []string{"Label (Operations)"},
 		Summary:     "Performs provided labelAction",
 		Description: "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Performs provided labelAction",
-		Permissions: []string{"LABEL_WRITE"},
+		Permissions: []string{"ADMIN_MODULES_WRITE"},
 		Params: []Param{
 			{Name: "id", In: InPath, Type: TypeString, Required: true},
 		},
@@ -5214,6 +5221,7 @@ var operations = []Operation{
 		Tags:         []string{"Routing Strategy (DOMS)"},
 		Summary:      "Create routing strategy",
 		Description:  "Creates a new revision of the routing strategy.",
+		Permissions:  []string{"ROUTING_CONFIG_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
 		SampleBody:   "{\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  }\n}\n",
@@ -5685,6 +5693,7 @@ var operations = []Operation{
 		Tags:        []string{"Routing Strategy (DOMS)"},
 		Summary:     "Update routing strategy",
 		Description: "Updates a routing strategy",
+		Permissions: []string{"ROUTING_CONFIG_WRITE"},
 		Params: []Param{
 			{Name: "strategyId", In: InPath, Type: TypeString, Required: true, Description: "Id of the routing strategy you wish to update"},
 		},
@@ -6019,6 +6028,18 @@ var operations = []Operation{
 		SampleBody: "{\n  \"name\": \"RESTOW\",\n  \"version\": 1\n}\n",
 	},
 	{
+		ID:           "searchAudit",
+		Method:       "POST",
+		Path:         "/api/audits/search",
+		Tags:         []string{"Audits (Core)"},
+		Summary:      "List audits (search)",
+		Description:  "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Search for Audit",
+		Permissions:  []string{"AUDIT_READ"},
+		HasBody:      true,
+		BodyRequired: true,
+		SampleBody:   "{\n  \"query\": {}\n}\n",
+	},
+	{
 		ID:           "searchCategory",
 		Method:       "POST",
 		Path:         "/api/categories/search",
@@ -6181,7 +6202,7 @@ var operations = []Operation{
 		Tags:         []string{"Parcel Information (Operations)"},
 		Summary:      "List ParcelInformation (search)",
 		Description:  "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Search for ParcelInformation",
-		Permissions:  []string{"PARCEL_INFORMATION_READ"},
+		Permissions:  []string{"ADMIN_MODULES_READ"},
 		HasBody:      true,
 		BodyRequired: true,
 		SampleBody:   "{\n  \"query\": {}\n}\n",
@@ -6289,7 +6310,7 @@ var operations = []Operation{
 		Tags:         []string{"ShippingInformation (carrier)"},
 		Summary:      "List ShippingInformation (search)",
 		Description:  "This part of the API is in Beta status. For details, see the API release lifecycle documentation. Search for ShippingInformation",
-		Permissions:  []string{"SHIPPING_INFORMATION_READ"},
+		Permissions:  []string{"ADMIN_MODULES_READ"},
 		HasBody:      true,
 		BodyRequired: true,
 		SampleBody:   "{\n  \"query\": {}\n}\n",

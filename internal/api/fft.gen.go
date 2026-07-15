@@ -288,6 +288,195 @@ func (e ArticleStockForecastPeriod) Valid() bool {
 	}
 }
 
+// Defines values for AuditedEntityTypeEnumFilterEq.
+const (
+	AuditedEntityTypeEnumFilterEqCUSTOMSERVICE             AuditedEntityTypeEnumFilterEq = "CUSTOM_SERVICE"
+	AuditedEntityTypeEnumFilterEqFACILITY                  AuditedEntityTypeEnumFilterEq = "FACILITY"
+	AuditedEntityTypeEnumFilterEqFACILITYCARRIERCONNECTION AuditedEntityTypeEnumFilterEq = "FACILITY_CARRIER_CONNECTION"
+	AuditedEntityTypeEnumFilterEqFACILITYCUSTOMSERVICE     AuditedEntityTypeEnumFilterEq = "FACILITY_CUSTOM_SERVICE"
+	AuditedEntityTypeEnumFilterEqFACILITYGROUP             AuditedEntityTypeEnumFilterEq = "FACILITY_GROUP"
+	AuditedEntityTypeEnumFilterEqHANDOVERJOB               AuditedEntityTypeEnumFilterEq = "HANDOVER_JOB"
+	AuditedEntityTypeEnumFilterEqLINKEDSERVICEJOBS         AuditedEntityTypeEnumFilterEq = "LINKED_SERVICE_JOBS"
+	AuditedEntityTypeEnumFilterEqORDER                     AuditedEntityTypeEnumFilterEq = "ORDER"
+	AuditedEntityTypeEnumFilterEqPACKJOB                   AuditedEntityTypeEnumFilterEq = "PACK_JOB"
+	AuditedEntityTypeEnumFilterEqPARCEL                    AuditedEntityTypeEnumFilterEq = "PARCEL"
+	AuditedEntityTypeEnumFilterEqPICKJOB                   AuditedEntityTypeEnumFilterEq = "PICK_JOB"
+	AuditedEntityTypeEnumFilterEqPICKRUN                   AuditedEntityTypeEnumFilterEq = "PICK_RUN"
+	AuditedEntityTypeEnumFilterEqROUTINGPLAN               AuditedEntityTypeEnumFilterEq = "ROUTING_PLAN"
+	AuditedEntityTypeEnumFilterEqROUTINGSTRATEGY           AuditedEntityTypeEnumFilterEq = "ROUTING_STRATEGY"
+	AuditedEntityTypeEnumFilterEqSERVICEJOB                AuditedEntityTypeEnumFilterEq = "SERVICE_JOB"
+	AuditedEntityTypeEnumFilterEqSHIPMENT                  AuditedEntityTypeEnumFilterEq = "SHIPMENT"
+	AuditedEntityTypeEnumFilterEqSTOWJOB                   AuditedEntityTypeEnumFilterEq = "STOW_JOB"
+)
+
+// Valid indicates whether the value is a known member of the AuditedEntityTypeEnumFilterEq enum.
+func (e AuditedEntityTypeEnumFilterEq) Valid() bool {
+	switch e {
+	case AuditedEntityTypeEnumFilterEqCUSTOMSERVICE:
+		return true
+	case AuditedEntityTypeEnumFilterEqFACILITY:
+		return true
+	case AuditedEntityTypeEnumFilterEqFACILITYCARRIERCONNECTION:
+		return true
+	case AuditedEntityTypeEnumFilterEqFACILITYCUSTOMSERVICE:
+		return true
+	case AuditedEntityTypeEnumFilterEqFACILITYGROUP:
+		return true
+	case AuditedEntityTypeEnumFilterEqHANDOVERJOB:
+		return true
+	case AuditedEntityTypeEnumFilterEqLINKEDSERVICEJOBS:
+		return true
+	case AuditedEntityTypeEnumFilterEqORDER:
+		return true
+	case AuditedEntityTypeEnumFilterEqPACKJOB:
+		return true
+	case AuditedEntityTypeEnumFilterEqPARCEL:
+		return true
+	case AuditedEntityTypeEnumFilterEqPICKJOB:
+		return true
+	case AuditedEntityTypeEnumFilterEqPICKRUN:
+		return true
+	case AuditedEntityTypeEnumFilterEqROUTINGPLAN:
+		return true
+	case AuditedEntityTypeEnumFilterEqROUTINGSTRATEGY:
+		return true
+	case AuditedEntityTypeEnumFilterEqSERVICEJOB:
+		return true
+	case AuditedEntityTypeEnumFilterEqSHIPMENT:
+		return true
+	case AuditedEntityTypeEnumFilterEqSTOWJOB:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AuditedEntityTypeEnumFilterIn.
+const (
+	AuditedEntityTypeEnumFilterInCUSTOMSERVICE             AuditedEntityTypeEnumFilterIn = "CUSTOM_SERVICE"
+	AuditedEntityTypeEnumFilterInFACILITY                  AuditedEntityTypeEnumFilterIn = "FACILITY"
+	AuditedEntityTypeEnumFilterInFACILITYCARRIERCONNECTION AuditedEntityTypeEnumFilterIn = "FACILITY_CARRIER_CONNECTION"
+	AuditedEntityTypeEnumFilterInFACILITYCUSTOMSERVICE     AuditedEntityTypeEnumFilterIn = "FACILITY_CUSTOM_SERVICE"
+	AuditedEntityTypeEnumFilterInFACILITYGROUP             AuditedEntityTypeEnumFilterIn = "FACILITY_GROUP"
+	AuditedEntityTypeEnumFilterInHANDOVERJOB               AuditedEntityTypeEnumFilterIn = "HANDOVER_JOB"
+	AuditedEntityTypeEnumFilterInLINKEDSERVICEJOBS         AuditedEntityTypeEnumFilterIn = "LINKED_SERVICE_JOBS"
+	AuditedEntityTypeEnumFilterInORDER                     AuditedEntityTypeEnumFilterIn = "ORDER"
+	AuditedEntityTypeEnumFilterInPACKJOB                   AuditedEntityTypeEnumFilterIn = "PACK_JOB"
+	AuditedEntityTypeEnumFilterInPARCEL                    AuditedEntityTypeEnumFilterIn = "PARCEL"
+	AuditedEntityTypeEnumFilterInPICKJOB                   AuditedEntityTypeEnumFilterIn = "PICK_JOB"
+	AuditedEntityTypeEnumFilterInPICKRUN                   AuditedEntityTypeEnumFilterIn = "PICK_RUN"
+	AuditedEntityTypeEnumFilterInROUTINGPLAN               AuditedEntityTypeEnumFilterIn = "ROUTING_PLAN"
+	AuditedEntityTypeEnumFilterInROUTINGSTRATEGY           AuditedEntityTypeEnumFilterIn = "ROUTING_STRATEGY"
+	AuditedEntityTypeEnumFilterInSERVICEJOB                AuditedEntityTypeEnumFilterIn = "SERVICE_JOB"
+	AuditedEntityTypeEnumFilterInSHIPMENT                  AuditedEntityTypeEnumFilterIn = "SHIPMENT"
+	AuditedEntityTypeEnumFilterInSTOWJOB                   AuditedEntityTypeEnumFilterIn = "STOW_JOB"
+)
+
+// Valid indicates whether the value is a known member of the AuditedEntityTypeEnumFilterIn enum.
+func (e AuditedEntityTypeEnumFilterIn) Valid() bool {
+	switch e {
+	case AuditedEntityTypeEnumFilterInCUSTOMSERVICE:
+		return true
+	case AuditedEntityTypeEnumFilterInFACILITY:
+		return true
+	case AuditedEntityTypeEnumFilterInFACILITYCARRIERCONNECTION:
+		return true
+	case AuditedEntityTypeEnumFilterInFACILITYCUSTOMSERVICE:
+		return true
+	case AuditedEntityTypeEnumFilterInFACILITYGROUP:
+		return true
+	case AuditedEntityTypeEnumFilterInHANDOVERJOB:
+		return true
+	case AuditedEntityTypeEnumFilterInLINKEDSERVICEJOBS:
+		return true
+	case AuditedEntityTypeEnumFilterInORDER:
+		return true
+	case AuditedEntityTypeEnumFilterInPACKJOB:
+		return true
+	case AuditedEntityTypeEnumFilterInPARCEL:
+		return true
+	case AuditedEntityTypeEnumFilterInPICKJOB:
+		return true
+	case AuditedEntityTypeEnumFilterInPICKRUN:
+		return true
+	case AuditedEntityTypeEnumFilterInROUTINGPLAN:
+		return true
+	case AuditedEntityTypeEnumFilterInROUTINGSTRATEGY:
+		return true
+	case AuditedEntityTypeEnumFilterInSERVICEJOB:
+		return true
+	case AuditedEntityTypeEnumFilterInSHIPMENT:
+		return true
+	case AuditedEntityTypeEnumFilterInSTOWJOB:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for AuditedEntityTypeEnumFilterNotEq.
+const (
+	AuditedEntityTypeEnumFilterNotEqCUSTOMSERVICE             AuditedEntityTypeEnumFilterNotEq = "CUSTOM_SERVICE"
+	AuditedEntityTypeEnumFilterNotEqFACILITY                  AuditedEntityTypeEnumFilterNotEq = "FACILITY"
+	AuditedEntityTypeEnumFilterNotEqFACILITYCARRIERCONNECTION AuditedEntityTypeEnumFilterNotEq = "FACILITY_CARRIER_CONNECTION"
+	AuditedEntityTypeEnumFilterNotEqFACILITYCUSTOMSERVICE     AuditedEntityTypeEnumFilterNotEq = "FACILITY_CUSTOM_SERVICE"
+	AuditedEntityTypeEnumFilterNotEqFACILITYGROUP             AuditedEntityTypeEnumFilterNotEq = "FACILITY_GROUP"
+	AuditedEntityTypeEnumFilterNotEqHANDOVERJOB               AuditedEntityTypeEnumFilterNotEq = "HANDOVER_JOB"
+	AuditedEntityTypeEnumFilterNotEqLINKEDSERVICEJOBS         AuditedEntityTypeEnumFilterNotEq = "LINKED_SERVICE_JOBS"
+	AuditedEntityTypeEnumFilterNotEqORDER                     AuditedEntityTypeEnumFilterNotEq = "ORDER"
+	AuditedEntityTypeEnumFilterNotEqPACKJOB                   AuditedEntityTypeEnumFilterNotEq = "PACK_JOB"
+	AuditedEntityTypeEnumFilterNotEqPARCEL                    AuditedEntityTypeEnumFilterNotEq = "PARCEL"
+	AuditedEntityTypeEnumFilterNotEqPICKJOB                   AuditedEntityTypeEnumFilterNotEq = "PICK_JOB"
+	AuditedEntityTypeEnumFilterNotEqPICKRUN                   AuditedEntityTypeEnumFilterNotEq = "PICK_RUN"
+	AuditedEntityTypeEnumFilterNotEqROUTINGPLAN               AuditedEntityTypeEnumFilterNotEq = "ROUTING_PLAN"
+	AuditedEntityTypeEnumFilterNotEqROUTINGSTRATEGY           AuditedEntityTypeEnumFilterNotEq = "ROUTING_STRATEGY"
+	AuditedEntityTypeEnumFilterNotEqSERVICEJOB                AuditedEntityTypeEnumFilterNotEq = "SERVICE_JOB"
+	AuditedEntityTypeEnumFilterNotEqSHIPMENT                  AuditedEntityTypeEnumFilterNotEq = "SHIPMENT"
+	AuditedEntityTypeEnumFilterNotEqSTOWJOB                   AuditedEntityTypeEnumFilterNotEq = "STOW_JOB"
+)
+
+// Valid indicates whether the value is a known member of the AuditedEntityTypeEnumFilterNotEq enum.
+func (e AuditedEntityTypeEnumFilterNotEq) Valid() bool {
+	switch e {
+	case AuditedEntityTypeEnumFilterNotEqCUSTOMSERVICE:
+		return true
+	case AuditedEntityTypeEnumFilterNotEqFACILITY:
+		return true
+	case AuditedEntityTypeEnumFilterNotEqFACILITYCARRIERCONNECTION:
+		return true
+	case AuditedEntityTypeEnumFilterNotEqFACILITYCUSTOMSERVICE:
+		return true
+	case AuditedEntityTypeEnumFilterNotEqFACILITYGROUP:
+		return true
+	case AuditedEntityTypeEnumFilterNotEqHANDOVERJOB:
+		return true
+	case AuditedEntityTypeEnumFilterNotEqLINKEDSERVICEJOBS:
+		return true
+	case AuditedEntityTypeEnumFilterNotEqORDER:
+		return true
+	case AuditedEntityTypeEnumFilterNotEqPACKJOB:
+		return true
+	case AuditedEntityTypeEnumFilterNotEqPARCEL:
+		return true
+	case AuditedEntityTypeEnumFilterNotEqPICKJOB:
+		return true
+	case AuditedEntityTypeEnumFilterNotEqPICKRUN:
+		return true
+	case AuditedEntityTypeEnumFilterNotEqROUTINGPLAN:
+		return true
+	case AuditedEntityTypeEnumFilterNotEqROUTINGSTRATEGY:
+		return true
+	case AuditedEntityTypeEnumFilterNotEqSERVICEJOB:
+		return true
+	case AuditedEntityTypeEnumFilterNotEqSHIPMENT:
+		return true
+	case AuditedEntityTypeEnumFilterNotEqSTOWJOB:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for AuthenticationProviderTypeEnum.
 const (
 	AuthenticationProviderTypeEnumEMAILPASSWORD AuthenticationProviderTypeEnum = "EMAIL_PASSWORD"
@@ -3771,6 +3960,8 @@ const (
 	PermissionKeyEVENTREAD                       PermissionKey = "EVENT_READ"
 	PermissionKeyEXPIRIESREAD                    PermissionKey = "EXPIRIES_READ"
 	PermissionKeyEXPIRIESWRITE                   PermissionKey = "EXPIRIES_WRITE"
+	PermissionKeyEXPORTREAD                      PermissionKey = "EXPORT_READ"
+	PermissionKeyEXPORTWRITE                     PermissionKey = "EXPORT_WRITE"
 	PermissionKeyEXTERNALACTIONSREAD             PermissionKey = "EXTERNAL_ACTIONS_READ"
 	PermissionKeyEXTERNALACTIONSWRITE            PermissionKey = "EXTERNAL_ACTIONS_WRITE"
 	PermissionKeyEXTERNALSTOCKCHANGEREASONSREAD  PermissionKey = "EXTERNAL_STOCK_CHANGE_REASONS_READ"
@@ -3789,8 +3980,6 @@ const (
 	PermissionKeyINBOUNDPROCESSREAD              PermissionKey = "INBOUND_PROCESS_READ"
 	PermissionKeyINBOUNDPROCESSWRITE             PermissionKey = "INBOUND_PROCESS_WRITE"
 	PermissionKeyKPIREAD                         PermissionKey = "KPI_READ"
-	PermissionKeyLABELREAD                       PermissionKey = "LABEL_READ"
-	PermissionKeyLABELWRITE                      PermissionKey = "LABEL_WRITE"
 	PermissionKeyLINEITEMADD                     PermissionKey = "LINE_ITEM_ADD"
 	PermissionKeyLINEITEMDELETE                  PermissionKey = "LINE_ITEM_DELETE"
 	PermissionKeyLINEITEMPRICINGREAD             PermissionKey = "LINE_ITEM_PRICING_READ"
@@ -3837,8 +4026,6 @@ const (
 	PermissionKeyPACKINGSOURCECONTAINERWRITE     PermissionKey = "PACKING_SOURCE_CONTAINER_WRITE"
 	PermissionKeyPACKJOBREAD                     PermissionKey = "PACKJOB_READ"
 	PermissionKeyPACKJOBWRITE                    PermissionKey = "PACKJOB_WRITE"
-	PermissionKeyPARCELINFORMATIONREAD           PermissionKey = "PARCEL_INFORMATION_READ"
-	PermissionKeyPARCELINFORMATIONWRITE          PermissionKey = "PARCEL_INFORMATION_WRITE"
 	PermissionKeyPARCELREAD                      PermissionKey = "PARCEL_READ"
 	PermissionKeyPARCELWRITE                     PermissionKey = "PARCEL_WRITE"
 	PermissionKeyPERMISSIONREAD                  PermissionKey = "PERMISSION_READ"
@@ -3874,8 +4061,6 @@ const (
 	PermissionKeySERVICEJOBWRITE                 PermissionKey = "SERVICE_JOB_WRITE"
 	PermissionKeySHIPMENTREAD                    PermissionKey = "SHIPMENT_READ"
 	PermissionKeySHIPMENTWRITE                   PermissionKey = "SHIPMENT_WRITE"
-	PermissionKeySHIPPINGINFORMATIONREAD         PermissionKey = "SHIPPING_INFORMATION_READ"
-	PermissionKeySHIPPINGINFORMATIONWRITE        PermissionKey = "SHIPPING_INFORMATION_WRITE"
 	PermissionKeySIMULATIONORDERREAD             PermissionKey = "SIMULATION_ORDER_READ"
 	PermissionKeySIMULATIONORDERWRITE            PermissionKey = "SIMULATION_ORDER_WRITE"
 	PermissionKeySTACKSREAD                      PermissionKey = "STACKS_READ"
@@ -3965,6 +4150,10 @@ func (e PermissionKey) Valid() bool {
 		return true
 	case PermissionKeyEXPIRIESWRITE:
 		return true
+	case PermissionKeyEXPORTREAD:
+		return true
+	case PermissionKeyEXPORTWRITE:
+		return true
 	case PermissionKeyEXTERNALACTIONSREAD:
 		return true
 	case PermissionKeyEXTERNALACTIONSWRITE:
@@ -4000,10 +4189,6 @@ func (e PermissionKey) Valid() bool {
 	case PermissionKeyINBOUNDPROCESSWRITE:
 		return true
 	case PermissionKeyKPIREAD:
-		return true
-	case PermissionKeyLABELREAD:
-		return true
-	case PermissionKeyLABELWRITE:
 		return true
 	case PermissionKeyLINEITEMADD:
 		return true
@@ -4097,10 +4282,6 @@ func (e PermissionKey) Valid() bool {
 		return true
 	case PermissionKeyPACKJOBWRITE:
 		return true
-	case PermissionKeyPARCELINFORMATIONREAD:
-		return true
-	case PermissionKeyPARCELINFORMATIONWRITE:
-		return true
 	case PermissionKeyPARCELREAD:
 		return true
 	case PermissionKeyPARCELWRITE:
@@ -4170,10 +4351,6 @@ func (e PermissionKey) Valid() bool {
 	case PermissionKeySHIPMENTREAD:
 		return true
 	case PermissionKeySHIPMENTWRITE:
-		return true
-	case PermissionKeySHIPPINGINFORMATIONREAD:
-		return true
-	case PermissionKeySHIPPINGINFORMATIONWRITE:
 		return true
 	case PermissionKeySIMULATIONORDERREAD:
 		return true
@@ -4325,6 +4502,7 @@ const (
 	PermissionSubGroupDOMSTOOLKIT                PermissionSubGroup = "DOMS_TOOLKIT"
 	PermissionSubGroupEVENT                      PermissionSubGroup = "EVENT"
 	PermissionSubGroupEXPIRY                     PermissionSubGroup = "EXPIRY"
+	PermissionSubGroupEXPORT                     PermissionSubGroup = "EXPORT"
 	PermissionSubGroupEXTERNALACTIONS            PermissionSubGroup = "EXTERNAL_ACTIONS"
 	PermissionSubGroupEXTERNALSTOCKCHANGEREASONS PermissionSubGroup = "EXTERNAL_STOCK_CHANGE_REASONS"
 	PermissionSubGroupFACILITY                   PermissionSubGroup = "FACILITY"
@@ -4335,7 +4513,6 @@ const (
 	PermissionSubGroupHANDOVERJOB1               PermissionSubGroup = "HANDOVER_JOB"
 	PermissionSubGroupINBOUNDPROCESS             PermissionSubGroup = "INBOUND_PROCESS"
 	PermissionSubGroupKPI                        PermissionSubGroup = "KPI"
-	PermissionSubGroupLABEL                      PermissionSubGroup = "LABEL"
 	PermissionSubGroupLINEITEM                   PermissionSubGroup = "LINE_ITEM"
 	PermissionSubGroupLINKEDSERVICEJOBS          PermissionSubGroup = "LINKED_SERVICE_JOBS"
 	PermissionSubGroupLISTING                    PermissionSubGroup = "LISTING"
@@ -4360,7 +4537,6 @@ const (
 	PermissionSubGroupPACKJOB                    PermissionSubGroup = "PACKJOB"
 	PermissionSubGroupPACKJOB1                   PermissionSubGroup = "PACK_JOB"
 	PermissionSubGroupPARCEL                     PermissionSubGroup = "PARCEL"
-	PermissionSubGroupPARCELINFORMATION          PermissionSubGroup = "PARCEL_INFORMATION"
 	PermissionSubGroupPERMISSION                 PermissionSubGroup = "PERMISSION"
 	PermissionSubGroupPICKJOB                    PermissionSubGroup = "PICKJOB"
 	PermissionSubGroupPICKJOB1                   PermissionSubGroup = "PICK_JOB"
@@ -4380,7 +4556,6 @@ const (
 	PermissionSubGroupSAFETYSTOCK                PermissionSubGroup = "SAFETY_STOCK"
 	PermissionSubGroupSERVICEJOB                 PermissionSubGroup = "SERVICE_JOB"
 	PermissionSubGroupSHIPMENT                   PermissionSubGroup = "SHIPMENT"
-	PermissionSubGroupSHIPPINGINFORMATION        PermissionSubGroup = "SHIPPING_INFORMATION"
 	PermissionSubGroupSIMULATIONORDER            PermissionSubGroup = "SIMULATION_ORDER"
 	PermissionSubGroupSTACKS                     PermissionSubGroup = "STACKS"
 	PermissionSubGroupSTOCK                      PermissionSubGroup = "STOCK"
@@ -4436,6 +4611,8 @@ func (e PermissionSubGroup) Valid() bool {
 		return true
 	case PermissionSubGroupEXPIRY:
 		return true
+	case PermissionSubGroupEXPORT:
+		return true
 	case PermissionSubGroupEXTERNALACTIONS:
 		return true
 	case PermissionSubGroupEXTERNALSTOCKCHANGEREASONS:
@@ -4455,8 +4632,6 @@ func (e PermissionSubGroup) Valid() bool {
 	case PermissionSubGroupINBOUNDPROCESS:
 		return true
 	case PermissionSubGroupKPI:
-		return true
-	case PermissionSubGroupLABEL:
 		return true
 	case PermissionSubGroupLINEITEM:
 		return true
@@ -4506,8 +4681,6 @@ func (e PermissionSubGroup) Valid() bool {
 		return true
 	case PermissionSubGroupPARCEL:
 		return true
-	case PermissionSubGroupPARCELINFORMATION:
-		return true
 	case PermissionSubGroupPERMISSION:
 		return true
 	case PermissionSubGroupPICKJOB:
@@ -4545,8 +4718,6 @@ func (e PermissionSubGroup) Valid() bool {
 	case PermissionSubGroupSERVICEJOB:
 		return true
 	case PermissionSubGroupSHIPMENT:
-		return true
-	case PermissionSubGroupSHIPPINGINFORMATION:
 		return true
 	case PermissionSubGroupSIMULATIONORDER:
 		return true
@@ -6102,6 +6273,8 @@ const (
 	RolePermissionsEVENTREAD                       RolePermissions = "EVENT_READ"
 	RolePermissionsEXPIRIESREAD                    RolePermissions = "EXPIRIES_READ"
 	RolePermissionsEXPIRIESWRITE                   RolePermissions = "EXPIRIES_WRITE"
+	RolePermissionsEXPORTREAD                      RolePermissions = "EXPORT_READ"
+	RolePermissionsEXPORTWRITE                     RolePermissions = "EXPORT_WRITE"
 	RolePermissionsEXTERNALACTIONSREAD             RolePermissions = "EXTERNAL_ACTIONS_READ"
 	RolePermissionsEXTERNALACTIONSWRITE            RolePermissions = "EXTERNAL_ACTIONS_WRITE"
 	RolePermissionsEXTERNALSTOCKCHANGEREASONSREAD  RolePermissions = "EXTERNAL_STOCK_CHANGE_REASONS_READ"
@@ -6120,8 +6293,6 @@ const (
 	RolePermissionsINBOUNDPROCESSREAD              RolePermissions = "INBOUND_PROCESS_READ"
 	RolePermissionsINBOUNDPROCESSWRITE             RolePermissions = "INBOUND_PROCESS_WRITE"
 	RolePermissionsKPIREAD                         RolePermissions = "KPI_READ"
-	RolePermissionsLABELREAD                       RolePermissions = "LABEL_READ"
-	RolePermissionsLABELWRITE                      RolePermissions = "LABEL_WRITE"
 	RolePermissionsLINEITEMADD                     RolePermissions = "LINE_ITEM_ADD"
 	RolePermissionsLINEITEMDELETE                  RolePermissions = "LINE_ITEM_DELETE"
 	RolePermissionsLINEITEMPRICINGREAD             RolePermissions = "LINE_ITEM_PRICING_READ"
@@ -6168,8 +6339,6 @@ const (
 	RolePermissionsPACKINGSOURCECONTAINERWRITE     RolePermissions = "PACKING_SOURCE_CONTAINER_WRITE"
 	RolePermissionsPACKJOBREAD                     RolePermissions = "PACKJOB_READ"
 	RolePermissionsPACKJOBWRITE                    RolePermissions = "PACKJOB_WRITE"
-	RolePermissionsPARCELINFORMATIONREAD           RolePermissions = "PARCEL_INFORMATION_READ"
-	RolePermissionsPARCELINFORMATIONWRITE          RolePermissions = "PARCEL_INFORMATION_WRITE"
 	RolePermissionsPARCELREAD                      RolePermissions = "PARCEL_READ"
 	RolePermissionsPARCELWRITE                     RolePermissions = "PARCEL_WRITE"
 	RolePermissionsPERMISSIONREAD                  RolePermissions = "PERMISSION_READ"
@@ -6205,8 +6374,6 @@ const (
 	RolePermissionsSERVICEJOBWRITE                 RolePermissions = "SERVICE_JOB_WRITE"
 	RolePermissionsSHIPMENTREAD                    RolePermissions = "SHIPMENT_READ"
 	RolePermissionsSHIPMENTWRITE                   RolePermissions = "SHIPMENT_WRITE"
-	RolePermissionsSHIPPINGINFORMATIONREAD         RolePermissions = "SHIPPING_INFORMATION_READ"
-	RolePermissionsSHIPPINGINFORMATIONWRITE        RolePermissions = "SHIPPING_INFORMATION_WRITE"
 	RolePermissionsSIMULATIONORDERREAD             RolePermissions = "SIMULATION_ORDER_READ"
 	RolePermissionsSIMULATIONORDERWRITE            RolePermissions = "SIMULATION_ORDER_WRITE"
 	RolePermissionsSTACKSREAD                      RolePermissions = "STACKS_READ"
@@ -6296,6 +6463,10 @@ func (e RolePermissions) Valid() bool {
 		return true
 	case RolePermissionsEXPIRIESWRITE:
 		return true
+	case RolePermissionsEXPORTREAD:
+		return true
+	case RolePermissionsEXPORTWRITE:
+		return true
 	case RolePermissionsEXTERNALACTIONSREAD:
 		return true
 	case RolePermissionsEXTERNALACTIONSWRITE:
@@ -6331,10 +6502,6 @@ func (e RolePermissions) Valid() bool {
 	case RolePermissionsINBOUNDPROCESSWRITE:
 		return true
 	case RolePermissionsKPIREAD:
-		return true
-	case RolePermissionsLABELREAD:
-		return true
-	case RolePermissionsLABELWRITE:
 		return true
 	case RolePermissionsLINEITEMADD:
 		return true
@@ -6428,10 +6595,6 @@ func (e RolePermissions) Valid() bool {
 		return true
 	case RolePermissionsPACKJOBWRITE:
 		return true
-	case RolePermissionsPARCELINFORMATIONREAD:
-		return true
-	case RolePermissionsPARCELINFORMATIONWRITE:
-		return true
 	case RolePermissionsPARCELREAD:
 		return true
 	case RolePermissionsPARCELWRITE:
@@ -6501,10 +6664,6 @@ func (e RolePermissions) Valid() bool {
 	case RolePermissionsSHIPMENTREAD:
 		return true
 	case RolePermissionsSHIPMENTWRITE:
-		return true
-	case RolePermissionsSHIPPINGINFORMATIONREAD:
-		return true
-	case RolePermissionsSHIPPINGINFORMATIONWRITE:
 		return true
 	case RolePermissionsSIMULATIONORDERREAD:
 		return true
@@ -6597,6 +6756,8 @@ const (
 	RoleForCreationPermissionsEVENTREAD                       RoleForCreationPermissions = "EVENT_READ"
 	RoleForCreationPermissionsEXPIRIESREAD                    RoleForCreationPermissions = "EXPIRIES_READ"
 	RoleForCreationPermissionsEXPIRIESWRITE                   RoleForCreationPermissions = "EXPIRIES_WRITE"
+	RoleForCreationPermissionsEXPORTREAD                      RoleForCreationPermissions = "EXPORT_READ"
+	RoleForCreationPermissionsEXPORTWRITE                     RoleForCreationPermissions = "EXPORT_WRITE"
 	RoleForCreationPermissionsEXTERNALACTIONSREAD             RoleForCreationPermissions = "EXTERNAL_ACTIONS_READ"
 	RoleForCreationPermissionsEXTERNALACTIONSWRITE            RoleForCreationPermissions = "EXTERNAL_ACTIONS_WRITE"
 	RoleForCreationPermissionsEXTERNALSTOCKCHANGEREASONSREAD  RoleForCreationPermissions = "EXTERNAL_STOCK_CHANGE_REASONS_READ"
@@ -6615,8 +6776,6 @@ const (
 	RoleForCreationPermissionsINBOUNDPROCESSREAD              RoleForCreationPermissions = "INBOUND_PROCESS_READ"
 	RoleForCreationPermissionsINBOUNDPROCESSWRITE             RoleForCreationPermissions = "INBOUND_PROCESS_WRITE"
 	RoleForCreationPermissionsKPIREAD                         RoleForCreationPermissions = "KPI_READ"
-	RoleForCreationPermissionsLABELREAD                       RoleForCreationPermissions = "LABEL_READ"
-	RoleForCreationPermissionsLABELWRITE                      RoleForCreationPermissions = "LABEL_WRITE"
 	RoleForCreationPermissionsLINEITEMADD                     RoleForCreationPermissions = "LINE_ITEM_ADD"
 	RoleForCreationPermissionsLINEITEMDELETE                  RoleForCreationPermissions = "LINE_ITEM_DELETE"
 	RoleForCreationPermissionsLINEITEMPRICINGREAD             RoleForCreationPermissions = "LINE_ITEM_PRICING_READ"
@@ -6663,8 +6822,6 @@ const (
 	RoleForCreationPermissionsPACKINGSOURCECONTAINERWRITE     RoleForCreationPermissions = "PACKING_SOURCE_CONTAINER_WRITE"
 	RoleForCreationPermissionsPACKJOBREAD                     RoleForCreationPermissions = "PACKJOB_READ"
 	RoleForCreationPermissionsPACKJOBWRITE                    RoleForCreationPermissions = "PACKJOB_WRITE"
-	RoleForCreationPermissionsPARCELINFORMATIONREAD           RoleForCreationPermissions = "PARCEL_INFORMATION_READ"
-	RoleForCreationPermissionsPARCELINFORMATIONWRITE          RoleForCreationPermissions = "PARCEL_INFORMATION_WRITE"
 	RoleForCreationPermissionsPARCELREAD                      RoleForCreationPermissions = "PARCEL_READ"
 	RoleForCreationPermissionsPARCELWRITE                     RoleForCreationPermissions = "PARCEL_WRITE"
 	RoleForCreationPermissionsPERMISSIONREAD                  RoleForCreationPermissions = "PERMISSION_READ"
@@ -6700,8 +6857,6 @@ const (
 	RoleForCreationPermissionsSERVICEJOBWRITE                 RoleForCreationPermissions = "SERVICE_JOB_WRITE"
 	RoleForCreationPermissionsSHIPMENTREAD                    RoleForCreationPermissions = "SHIPMENT_READ"
 	RoleForCreationPermissionsSHIPMENTWRITE                   RoleForCreationPermissions = "SHIPMENT_WRITE"
-	RoleForCreationPermissionsSHIPPINGINFORMATIONREAD         RoleForCreationPermissions = "SHIPPING_INFORMATION_READ"
-	RoleForCreationPermissionsSHIPPINGINFORMATIONWRITE        RoleForCreationPermissions = "SHIPPING_INFORMATION_WRITE"
 	RoleForCreationPermissionsSIMULATIONORDERREAD             RoleForCreationPermissions = "SIMULATION_ORDER_READ"
 	RoleForCreationPermissionsSIMULATIONORDERWRITE            RoleForCreationPermissions = "SIMULATION_ORDER_WRITE"
 	RoleForCreationPermissionsSTACKSREAD                      RoleForCreationPermissions = "STACKS_READ"
@@ -6791,6 +6946,10 @@ func (e RoleForCreationPermissions) Valid() bool {
 		return true
 	case RoleForCreationPermissionsEXPIRIESWRITE:
 		return true
+	case RoleForCreationPermissionsEXPORTREAD:
+		return true
+	case RoleForCreationPermissionsEXPORTWRITE:
+		return true
 	case RoleForCreationPermissionsEXTERNALACTIONSREAD:
 		return true
 	case RoleForCreationPermissionsEXTERNALACTIONSWRITE:
@@ -6826,10 +6985,6 @@ func (e RoleForCreationPermissions) Valid() bool {
 	case RoleForCreationPermissionsINBOUNDPROCESSWRITE:
 		return true
 	case RoleForCreationPermissionsKPIREAD:
-		return true
-	case RoleForCreationPermissionsLABELREAD:
-		return true
-	case RoleForCreationPermissionsLABELWRITE:
 		return true
 	case RoleForCreationPermissionsLINEITEMADD:
 		return true
@@ -6923,10 +7078,6 @@ func (e RoleForCreationPermissions) Valid() bool {
 		return true
 	case RoleForCreationPermissionsPACKJOBWRITE:
 		return true
-	case RoleForCreationPermissionsPARCELINFORMATIONREAD:
-		return true
-	case RoleForCreationPermissionsPARCELINFORMATIONWRITE:
-		return true
 	case RoleForCreationPermissionsPARCELREAD:
 		return true
 	case RoleForCreationPermissionsPARCELWRITE:
@@ -6996,10 +7147,6 @@ func (e RoleForCreationPermissions) Valid() bool {
 	case RoleForCreationPermissionsSHIPMENTREAD:
 		return true
 	case RoleForCreationPermissionsSHIPMENTWRITE:
-		return true
-	case RoleForCreationPermissionsSHIPPINGINFORMATIONREAD:
-		return true
-	case RoleForCreationPermissionsSHIPPINGINFORMATIONWRITE:
 		return true
 	case RoleForCreationPermissionsSIMULATIONORDERREAD:
 		return true
@@ -7092,6 +7239,8 @@ const (
 	RoleForPatchPermissionsEVENTREAD                       RoleForPatchPermissions = "EVENT_READ"
 	RoleForPatchPermissionsEXPIRIESREAD                    RoleForPatchPermissions = "EXPIRIES_READ"
 	RoleForPatchPermissionsEXPIRIESWRITE                   RoleForPatchPermissions = "EXPIRIES_WRITE"
+	RoleForPatchPermissionsEXPORTREAD                      RoleForPatchPermissions = "EXPORT_READ"
+	RoleForPatchPermissionsEXPORTWRITE                     RoleForPatchPermissions = "EXPORT_WRITE"
 	RoleForPatchPermissionsEXTERNALACTIONSREAD             RoleForPatchPermissions = "EXTERNAL_ACTIONS_READ"
 	RoleForPatchPermissionsEXTERNALACTIONSWRITE            RoleForPatchPermissions = "EXTERNAL_ACTIONS_WRITE"
 	RoleForPatchPermissionsEXTERNALSTOCKCHANGEREASONSREAD  RoleForPatchPermissions = "EXTERNAL_STOCK_CHANGE_REASONS_READ"
@@ -7110,8 +7259,6 @@ const (
 	RoleForPatchPermissionsINBOUNDPROCESSREAD              RoleForPatchPermissions = "INBOUND_PROCESS_READ"
 	RoleForPatchPermissionsINBOUNDPROCESSWRITE             RoleForPatchPermissions = "INBOUND_PROCESS_WRITE"
 	RoleForPatchPermissionsKPIREAD                         RoleForPatchPermissions = "KPI_READ"
-	RoleForPatchPermissionsLABELREAD                       RoleForPatchPermissions = "LABEL_READ"
-	RoleForPatchPermissionsLABELWRITE                      RoleForPatchPermissions = "LABEL_WRITE"
 	RoleForPatchPermissionsLINEITEMADD                     RoleForPatchPermissions = "LINE_ITEM_ADD"
 	RoleForPatchPermissionsLINEITEMDELETE                  RoleForPatchPermissions = "LINE_ITEM_DELETE"
 	RoleForPatchPermissionsLINEITEMPRICINGREAD             RoleForPatchPermissions = "LINE_ITEM_PRICING_READ"
@@ -7158,8 +7305,6 @@ const (
 	RoleForPatchPermissionsPACKINGSOURCECONTAINERWRITE     RoleForPatchPermissions = "PACKING_SOURCE_CONTAINER_WRITE"
 	RoleForPatchPermissionsPACKJOBREAD                     RoleForPatchPermissions = "PACKJOB_READ"
 	RoleForPatchPermissionsPACKJOBWRITE                    RoleForPatchPermissions = "PACKJOB_WRITE"
-	RoleForPatchPermissionsPARCELINFORMATIONREAD           RoleForPatchPermissions = "PARCEL_INFORMATION_READ"
-	RoleForPatchPermissionsPARCELINFORMATIONWRITE          RoleForPatchPermissions = "PARCEL_INFORMATION_WRITE"
 	RoleForPatchPermissionsPARCELREAD                      RoleForPatchPermissions = "PARCEL_READ"
 	RoleForPatchPermissionsPARCELWRITE                     RoleForPatchPermissions = "PARCEL_WRITE"
 	RoleForPatchPermissionsPERMISSIONREAD                  RoleForPatchPermissions = "PERMISSION_READ"
@@ -7195,8 +7340,6 @@ const (
 	RoleForPatchPermissionsSERVICEJOBWRITE                 RoleForPatchPermissions = "SERVICE_JOB_WRITE"
 	RoleForPatchPermissionsSHIPMENTREAD                    RoleForPatchPermissions = "SHIPMENT_READ"
 	RoleForPatchPermissionsSHIPMENTWRITE                   RoleForPatchPermissions = "SHIPMENT_WRITE"
-	RoleForPatchPermissionsSHIPPINGINFORMATIONREAD         RoleForPatchPermissions = "SHIPPING_INFORMATION_READ"
-	RoleForPatchPermissionsSHIPPINGINFORMATIONWRITE        RoleForPatchPermissions = "SHIPPING_INFORMATION_WRITE"
 	RoleForPatchPermissionsSIMULATIONORDERREAD             RoleForPatchPermissions = "SIMULATION_ORDER_READ"
 	RoleForPatchPermissionsSIMULATIONORDERWRITE            RoleForPatchPermissions = "SIMULATION_ORDER_WRITE"
 	RoleForPatchPermissionsSTACKSREAD                      RoleForPatchPermissions = "STACKS_READ"
@@ -7286,6 +7429,10 @@ func (e RoleForPatchPermissions) Valid() bool {
 		return true
 	case RoleForPatchPermissionsEXPIRIESWRITE:
 		return true
+	case RoleForPatchPermissionsEXPORTREAD:
+		return true
+	case RoleForPatchPermissionsEXPORTWRITE:
+		return true
 	case RoleForPatchPermissionsEXTERNALACTIONSREAD:
 		return true
 	case RoleForPatchPermissionsEXTERNALACTIONSWRITE:
@@ -7321,10 +7468,6 @@ func (e RoleForPatchPermissions) Valid() bool {
 	case RoleForPatchPermissionsINBOUNDPROCESSWRITE:
 		return true
 	case RoleForPatchPermissionsKPIREAD:
-		return true
-	case RoleForPatchPermissionsLABELREAD:
-		return true
-	case RoleForPatchPermissionsLABELWRITE:
 		return true
 	case RoleForPatchPermissionsLINEITEMADD:
 		return true
@@ -7418,10 +7561,6 @@ func (e RoleForPatchPermissions) Valid() bool {
 		return true
 	case RoleForPatchPermissionsPACKJOBWRITE:
 		return true
-	case RoleForPatchPermissionsPARCELINFORMATIONREAD:
-		return true
-	case RoleForPatchPermissionsPARCELINFORMATIONWRITE:
-		return true
 	case RoleForPatchPermissionsPARCELREAD:
 		return true
 	case RoleForPatchPermissionsPARCELWRITE:
@@ -7491,10 +7630,6 @@ func (e RoleForPatchPermissions) Valid() bool {
 	case RoleForPatchPermissionsSHIPMENTREAD:
 		return true
 	case RoleForPatchPermissionsSHIPMENTWRITE:
-		return true
-	case RoleForPatchPermissionsSHIPPINGINFORMATIONREAD:
-		return true
-	case RoleForPatchPermissionsSHIPPINGINFORMATIONWRITE:
 		return true
 	case RoleForPatchPermissionsSIMULATIONORDERREAD:
 		return true
@@ -7587,6 +7722,8 @@ const (
 	RoleForUpdatePermissionsEVENTREAD                       RoleForUpdatePermissions = "EVENT_READ"
 	RoleForUpdatePermissionsEXPIRIESREAD                    RoleForUpdatePermissions = "EXPIRIES_READ"
 	RoleForUpdatePermissionsEXPIRIESWRITE                   RoleForUpdatePermissions = "EXPIRIES_WRITE"
+	RoleForUpdatePermissionsEXPORTREAD                      RoleForUpdatePermissions = "EXPORT_READ"
+	RoleForUpdatePermissionsEXPORTWRITE                     RoleForUpdatePermissions = "EXPORT_WRITE"
 	RoleForUpdatePermissionsEXTERNALACTIONSREAD             RoleForUpdatePermissions = "EXTERNAL_ACTIONS_READ"
 	RoleForUpdatePermissionsEXTERNALACTIONSWRITE            RoleForUpdatePermissions = "EXTERNAL_ACTIONS_WRITE"
 	RoleForUpdatePermissionsEXTERNALSTOCKCHANGEREASONSREAD  RoleForUpdatePermissions = "EXTERNAL_STOCK_CHANGE_REASONS_READ"
@@ -7605,8 +7742,6 @@ const (
 	RoleForUpdatePermissionsINBOUNDPROCESSREAD              RoleForUpdatePermissions = "INBOUND_PROCESS_READ"
 	RoleForUpdatePermissionsINBOUNDPROCESSWRITE             RoleForUpdatePermissions = "INBOUND_PROCESS_WRITE"
 	RoleForUpdatePermissionsKPIREAD                         RoleForUpdatePermissions = "KPI_READ"
-	RoleForUpdatePermissionsLABELREAD                       RoleForUpdatePermissions = "LABEL_READ"
-	RoleForUpdatePermissionsLABELWRITE                      RoleForUpdatePermissions = "LABEL_WRITE"
 	RoleForUpdatePermissionsLINEITEMADD                     RoleForUpdatePermissions = "LINE_ITEM_ADD"
 	RoleForUpdatePermissionsLINEITEMDELETE                  RoleForUpdatePermissions = "LINE_ITEM_DELETE"
 	RoleForUpdatePermissionsLINEITEMPRICINGREAD             RoleForUpdatePermissions = "LINE_ITEM_PRICING_READ"
@@ -7653,8 +7788,6 @@ const (
 	RoleForUpdatePermissionsPACKINGSOURCECONTAINERWRITE     RoleForUpdatePermissions = "PACKING_SOURCE_CONTAINER_WRITE"
 	RoleForUpdatePermissionsPACKJOBREAD                     RoleForUpdatePermissions = "PACKJOB_READ"
 	RoleForUpdatePermissionsPACKJOBWRITE                    RoleForUpdatePermissions = "PACKJOB_WRITE"
-	RoleForUpdatePermissionsPARCELINFORMATIONREAD           RoleForUpdatePermissions = "PARCEL_INFORMATION_READ"
-	RoleForUpdatePermissionsPARCELINFORMATIONWRITE          RoleForUpdatePermissions = "PARCEL_INFORMATION_WRITE"
 	RoleForUpdatePermissionsPARCELREAD                      RoleForUpdatePermissions = "PARCEL_READ"
 	RoleForUpdatePermissionsPARCELWRITE                     RoleForUpdatePermissions = "PARCEL_WRITE"
 	RoleForUpdatePermissionsPERMISSIONREAD                  RoleForUpdatePermissions = "PERMISSION_READ"
@@ -7690,8 +7823,6 @@ const (
 	RoleForUpdatePermissionsSERVICEJOBWRITE                 RoleForUpdatePermissions = "SERVICE_JOB_WRITE"
 	RoleForUpdatePermissionsSHIPMENTREAD                    RoleForUpdatePermissions = "SHIPMENT_READ"
 	RoleForUpdatePermissionsSHIPMENTWRITE                   RoleForUpdatePermissions = "SHIPMENT_WRITE"
-	RoleForUpdatePermissionsSHIPPINGINFORMATIONREAD         RoleForUpdatePermissions = "SHIPPING_INFORMATION_READ"
-	RoleForUpdatePermissionsSHIPPINGINFORMATIONWRITE        RoleForUpdatePermissions = "SHIPPING_INFORMATION_WRITE"
 	RoleForUpdatePermissionsSIMULATIONORDERREAD             RoleForUpdatePermissions = "SIMULATION_ORDER_READ"
 	RoleForUpdatePermissionsSIMULATIONORDERWRITE            RoleForUpdatePermissions = "SIMULATION_ORDER_WRITE"
 	RoleForUpdatePermissionsSTACKSREAD                      RoleForUpdatePermissions = "STACKS_READ"
@@ -7781,6 +7912,10 @@ func (e RoleForUpdatePermissions) Valid() bool {
 		return true
 	case RoleForUpdatePermissionsEXPIRIESWRITE:
 		return true
+	case RoleForUpdatePermissionsEXPORTREAD:
+		return true
+	case RoleForUpdatePermissionsEXPORTWRITE:
+		return true
 	case RoleForUpdatePermissionsEXTERNALACTIONSREAD:
 		return true
 	case RoleForUpdatePermissionsEXTERNALACTIONSWRITE:
@@ -7816,10 +7951,6 @@ func (e RoleForUpdatePermissions) Valid() bool {
 	case RoleForUpdatePermissionsINBOUNDPROCESSWRITE:
 		return true
 	case RoleForUpdatePermissionsKPIREAD:
-		return true
-	case RoleForUpdatePermissionsLABELREAD:
-		return true
-	case RoleForUpdatePermissionsLABELWRITE:
 		return true
 	case RoleForUpdatePermissionsLINEITEMADD:
 		return true
@@ -7913,10 +8044,6 @@ func (e RoleForUpdatePermissions) Valid() bool {
 		return true
 	case RoleForUpdatePermissionsPACKJOBWRITE:
 		return true
-	case RoleForUpdatePermissionsPARCELINFORMATIONREAD:
-		return true
-	case RoleForUpdatePermissionsPARCELINFORMATIONWRITE:
-		return true
 	case RoleForUpdatePermissionsPARCELREAD:
 		return true
 	case RoleForUpdatePermissionsPARCELWRITE:
@@ -7986,10 +8113,6 @@ func (e RoleForUpdatePermissions) Valid() bool {
 	case RoleForUpdatePermissionsSHIPMENTREAD:
 		return true
 	case RoleForUpdatePermissionsSHIPMENTWRITE:
-		return true
-	case RoleForUpdatePermissionsSHIPPINGINFORMATIONREAD:
-		return true
-	case RoleForUpdatePermissionsSHIPPINGINFORMATIONWRITE:
 		return true
 	case RoleForUpdatePermissionsSIMULATIONORDERREAD:
 		return true
@@ -9144,6 +9267,21 @@ func (e SimulationOrderDeliveryPreferencesShippingServiceLevelEnumFilterNotEq) V
 	case SimulationOrderDeliveryPreferencesShippingServiceLevelEnumFilterNotEqDELIVERY:
 		return true
 	case SimulationOrderDeliveryPreferencesShippingServiceLevelEnumFilterNotEqSAMEDAY:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for SourcingOptionTransferExistenceReason.
+const (
+	KEPTFROMLASTRUN SourcingOptionTransferExistenceReason = "KEPT_FROM_LAST_RUN"
+)
+
+// Valid indicates whether the value is a known member of the SourcingOptionTransferExistenceReason enum.
+func (e SourcingOptionTransferExistenceReason) Valid() bool {
+	switch e {
+	case KEPTFROMLASTRUN:
 		return true
 	default:
 		return false
@@ -10415,25 +10553,25 @@ func (e UserAssignedRolesContextLimitationsContextTypesEnumFilterIn) Valid() boo
 
 // Defines values for UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq.
 const (
-	UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqFACILITY      UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "FACILITY"
-	UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqFACILITYGROUP UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "FACILITY_GROUP"
-	UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqROLE          UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "ROLE"
-	UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqUSERROLE      UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "USER_ROLE"
-	UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqZONE          UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "ZONE"
+	FACILITY      UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "FACILITY"
+	FACILITYGROUP UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "FACILITY_GROUP"
+	ROLE          UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "ROLE"
+	USERROLE      UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "USER_ROLE"
+	ZONE          UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "ZONE"
 )
 
 // Valid indicates whether the value is a known member of the UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq enum.
 func (e UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq) Valid() bool {
 	switch e {
-	case UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqFACILITY:
+	case FACILITY:
 		return true
-	case UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqFACILITYGROUP:
+	case FACILITYGROUP:
 		return true
-	case UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqROLE:
+	case ROLE:
 		return true
-	case UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqUSERROLE:
+	case USERROLE:
 		return true
-	case UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqZONE:
+	case ZONE:
 		return true
 	default:
 		return false
@@ -10632,6 +10770,8 @@ const (
 	UserRoleWithPermissionsPermissionsEVENTREAD                       UserRoleWithPermissionsPermissions = "EVENT_READ"
 	UserRoleWithPermissionsPermissionsEXPIRIESREAD                    UserRoleWithPermissionsPermissions = "EXPIRIES_READ"
 	UserRoleWithPermissionsPermissionsEXPIRIESWRITE                   UserRoleWithPermissionsPermissions = "EXPIRIES_WRITE"
+	UserRoleWithPermissionsPermissionsEXPORTREAD                      UserRoleWithPermissionsPermissions = "EXPORT_READ"
+	UserRoleWithPermissionsPermissionsEXPORTWRITE                     UserRoleWithPermissionsPermissions = "EXPORT_WRITE"
 	UserRoleWithPermissionsPermissionsEXTERNALACTIONSREAD             UserRoleWithPermissionsPermissions = "EXTERNAL_ACTIONS_READ"
 	UserRoleWithPermissionsPermissionsEXTERNALACTIONSWRITE            UserRoleWithPermissionsPermissions = "EXTERNAL_ACTIONS_WRITE"
 	UserRoleWithPermissionsPermissionsEXTERNALSTOCKCHANGEREASONSREAD  UserRoleWithPermissionsPermissions = "EXTERNAL_STOCK_CHANGE_REASONS_READ"
@@ -10650,8 +10790,6 @@ const (
 	UserRoleWithPermissionsPermissionsINBOUNDPROCESSREAD              UserRoleWithPermissionsPermissions = "INBOUND_PROCESS_READ"
 	UserRoleWithPermissionsPermissionsINBOUNDPROCESSWRITE             UserRoleWithPermissionsPermissions = "INBOUND_PROCESS_WRITE"
 	UserRoleWithPermissionsPermissionsKPIREAD                         UserRoleWithPermissionsPermissions = "KPI_READ"
-	UserRoleWithPermissionsPermissionsLABELREAD                       UserRoleWithPermissionsPermissions = "LABEL_READ"
-	UserRoleWithPermissionsPermissionsLABELWRITE                      UserRoleWithPermissionsPermissions = "LABEL_WRITE"
 	UserRoleWithPermissionsPermissionsLINEITEMADD                     UserRoleWithPermissionsPermissions = "LINE_ITEM_ADD"
 	UserRoleWithPermissionsPermissionsLINEITEMDELETE                  UserRoleWithPermissionsPermissions = "LINE_ITEM_DELETE"
 	UserRoleWithPermissionsPermissionsLINEITEMPRICINGREAD             UserRoleWithPermissionsPermissions = "LINE_ITEM_PRICING_READ"
@@ -10698,8 +10836,6 @@ const (
 	UserRoleWithPermissionsPermissionsPACKINGSOURCECONTAINERWRITE     UserRoleWithPermissionsPermissions = "PACKING_SOURCE_CONTAINER_WRITE"
 	UserRoleWithPermissionsPermissionsPACKJOBREAD                     UserRoleWithPermissionsPermissions = "PACKJOB_READ"
 	UserRoleWithPermissionsPermissionsPACKJOBWRITE                    UserRoleWithPermissionsPermissions = "PACKJOB_WRITE"
-	UserRoleWithPermissionsPermissionsPARCELINFORMATIONREAD           UserRoleWithPermissionsPermissions = "PARCEL_INFORMATION_READ"
-	UserRoleWithPermissionsPermissionsPARCELINFORMATIONWRITE          UserRoleWithPermissionsPermissions = "PARCEL_INFORMATION_WRITE"
 	UserRoleWithPermissionsPermissionsPARCELREAD                      UserRoleWithPermissionsPermissions = "PARCEL_READ"
 	UserRoleWithPermissionsPermissionsPARCELWRITE                     UserRoleWithPermissionsPermissions = "PARCEL_WRITE"
 	UserRoleWithPermissionsPermissionsPERMISSIONREAD                  UserRoleWithPermissionsPermissions = "PERMISSION_READ"
@@ -10735,8 +10871,6 @@ const (
 	UserRoleWithPermissionsPermissionsSERVICEJOBWRITE                 UserRoleWithPermissionsPermissions = "SERVICE_JOB_WRITE"
 	UserRoleWithPermissionsPermissionsSHIPMENTREAD                    UserRoleWithPermissionsPermissions = "SHIPMENT_READ"
 	UserRoleWithPermissionsPermissionsSHIPMENTWRITE                   UserRoleWithPermissionsPermissions = "SHIPMENT_WRITE"
-	UserRoleWithPermissionsPermissionsSHIPPINGINFORMATIONREAD         UserRoleWithPermissionsPermissions = "SHIPPING_INFORMATION_READ"
-	UserRoleWithPermissionsPermissionsSHIPPINGINFORMATIONWRITE        UserRoleWithPermissionsPermissions = "SHIPPING_INFORMATION_WRITE"
 	UserRoleWithPermissionsPermissionsSIMULATIONORDERREAD             UserRoleWithPermissionsPermissions = "SIMULATION_ORDER_READ"
 	UserRoleWithPermissionsPermissionsSIMULATIONORDERWRITE            UserRoleWithPermissionsPermissions = "SIMULATION_ORDER_WRITE"
 	UserRoleWithPermissionsPermissionsSTACKSREAD                      UserRoleWithPermissionsPermissions = "STACKS_READ"
@@ -10826,6 +10960,10 @@ func (e UserRoleWithPermissionsPermissions) Valid() bool {
 		return true
 	case UserRoleWithPermissionsPermissionsEXPIRIESWRITE:
 		return true
+	case UserRoleWithPermissionsPermissionsEXPORTREAD:
+		return true
+	case UserRoleWithPermissionsPermissionsEXPORTWRITE:
+		return true
 	case UserRoleWithPermissionsPermissionsEXTERNALACTIONSREAD:
 		return true
 	case UserRoleWithPermissionsPermissionsEXTERNALACTIONSWRITE:
@@ -10861,10 +10999,6 @@ func (e UserRoleWithPermissionsPermissions) Valid() bool {
 	case UserRoleWithPermissionsPermissionsINBOUNDPROCESSWRITE:
 		return true
 	case UserRoleWithPermissionsPermissionsKPIREAD:
-		return true
-	case UserRoleWithPermissionsPermissionsLABELREAD:
-		return true
-	case UserRoleWithPermissionsPermissionsLABELWRITE:
 		return true
 	case UserRoleWithPermissionsPermissionsLINEITEMADD:
 		return true
@@ -10958,10 +11092,6 @@ func (e UserRoleWithPermissionsPermissions) Valid() bool {
 		return true
 	case UserRoleWithPermissionsPermissionsPACKJOBWRITE:
 		return true
-	case UserRoleWithPermissionsPermissionsPARCELINFORMATIONREAD:
-		return true
-	case UserRoleWithPermissionsPermissionsPARCELINFORMATIONWRITE:
-		return true
 	case UserRoleWithPermissionsPermissionsPARCELREAD:
 		return true
 	case UserRoleWithPermissionsPermissionsPARCELWRITE:
@@ -11031,10 +11161,6 @@ func (e UserRoleWithPermissionsPermissions) Valid() bool {
 	case UserRoleWithPermissionsPermissionsSHIPMENTREAD:
 		return true
 	case UserRoleWithPermissionsPermissionsSHIPMENTWRITE:
-		return true
-	case UserRoleWithPermissionsPermissionsSHIPPINGINFORMATIONREAD:
-		return true
-	case UserRoleWithPermissionsPermissionsSHIPPINGINFORMATIONWRITE:
 		return true
 	case UserRoleWithPermissionsPermissionsSIMULATIONORDERREAD:
 		return true
@@ -11301,6 +11427,8 @@ const (
 	EVENTREAD                       GetPermissionsParamsKey = "EVENT_READ"
 	EXPIRIESREAD                    GetPermissionsParamsKey = "EXPIRIES_READ"
 	EXPIRIESWRITE                   GetPermissionsParamsKey = "EXPIRIES_WRITE"
+	EXPORTREAD                      GetPermissionsParamsKey = "EXPORT_READ"
+	EXPORTWRITE                     GetPermissionsParamsKey = "EXPORT_WRITE"
 	EXTERNALACTIONSREAD             GetPermissionsParamsKey = "EXTERNAL_ACTIONS_READ"
 	EXTERNALACTIONSWRITE            GetPermissionsParamsKey = "EXTERNAL_ACTIONS_WRITE"
 	EXTERNALSTOCKCHANGEREASONSREAD  GetPermissionsParamsKey = "EXTERNAL_STOCK_CHANGE_REASONS_READ"
@@ -11319,8 +11447,6 @@ const (
 	INBOUNDPROCESSREAD              GetPermissionsParamsKey = "INBOUND_PROCESS_READ"
 	INBOUNDPROCESSWRITE             GetPermissionsParamsKey = "INBOUND_PROCESS_WRITE"
 	KPIREAD                         GetPermissionsParamsKey = "KPI_READ"
-	LABELREAD                       GetPermissionsParamsKey = "LABEL_READ"
-	LABELWRITE                      GetPermissionsParamsKey = "LABEL_WRITE"
 	LINEITEMADD                     GetPermissionsParamsKey = "LINE_ITEM_ADD"
 	LINEITEMDELETE                  GetPermissionsParamsKey = "LINE_ITEM_DELETE"
 	LINEITEMPRICINGREAD             GetPermissionsParamsKey = "LINE_ITEM_PRICING_READ"
@@ -11367,8 +11493,6 @@ const (
 	PACKINGSOURCECONTAINERWRITE     GetPermissionsParamsKey = "PACKING_SOURCE_CONTAINER_WRITE"
 	PACKJOBREAD                     GetPermissionsParamsKey = "PACKJOB_READ"
 	PACKJOBWRITE                    GetPermissionsParamsKey = "PACKJOB_WRITE"
-	PARCELINFORMATIONREAD           GetPermissionsParamsKey = "PARCEL_INFORMATION_READ"
-	PARCELINFORMATIONWRITE          GetPermissionsParamsKey = "PARCEL_INFORMATION_WRITE"
 	PARCELREAD                      GetPermissionsParamsKey = "PARCEL_READ"
 	PARCELWRITE                     GetPermissionsParamsKey = "PARCEL_WRITE"
 	PERMISSIONREAD                  GetPermissionsParamsKey = "PERMISSION_READ"
@@ -11404,8 +11528,6 @@ const (
 	SERVICEJOBWRITE                 GetPermissionsParamsKey = "SERVICE_JOB_WRITE"
 	SHIPMENTREAD                    GetPermissionsParamsKey = "SHIPMENT_READ"
 	SHIPMENTWRITE                   GetPermissionsParamsKey = "SHIPMENT_WRITE"
-	SHIPPINGINFORMATIONREAD         GetPermissionsParamsKey = "SHIPPING_INFORMATION_READ"
-	SHIPPINGINFORMATIONWRITE        GetPermissionsParamsKey = "SHIPPING_INFORMATION_WRITE"
 	SIMULATIONORDERREAD             GetPermissionsParamsKey = "SIMULATION_ORDER_READ"
 	SIMULATIONORDERWRITE            GetPermissionsParamsKey = "SIMULATION_ORDER_WRITE"
 	STACKSREAD                      GetPermissionsParamsKey = "STACKS_READ"
@@ -11495,6 +11617,10 @@ func (e GetPermissionsParamsKey) Valid() bool {
 		return true
 	case EXPIRIESWRITE:
 		return true
+	case EXPORTREAD:
+		return true
+	case EXPORTWRITE:
+		return true
 	case EXTERNALACTIONSREAD:
 		return true
 	case EXTERNALACTIONSWRITE:
@@ -11530,10 +11656,6 @@ func (e GetPermissionsParamsKey) Valid() bool {
 	case INBOUNDPROCESSWRITE:
 		return true
 	case KPIREAD:
-		return true
-	case LABELREAD:
-		return true
-	case LABELWRITE:
 		return true
 	case LINEITEMADD:
 		return true
@@ -11627,10 +11749,6 @@ func (e GetPermissionsParamsKey) Valid() bool {
 		return true
 	case PACKJOBWRITE:
 		return true
-	case PARCELINFORMATIONREAD:
-		return true
-	case PARCELINFORMATIONWRITE:
-		return true
 	case PARCELREAD:
 		return true
 	case PARCELWRITE:
@@ -11700,10 +11818,6 @@ func (e GetPermissionsParamsKey) Valid() bool {
 	case SHIPMENTREAD:
 		return true
 	case SHIPMENTWRITE:
-		return true
-	case SHIPPINGINFORMATIONREAD:
-		return true
-	case SHIPPINGINFORMATIONWRITE:
 		return true
 	case SIMULATIONORDERREAD:
 		return true
@@ -12038,6 +12152,42 @@ type AssignedRoles struct {
 	// Ref The id of the assigned role
 	Ref string `json:"ref"`
 }
+
+// AuditSearchQuery AuditSearchQuery
+type AuditSearchQuery struct {
+	And *[]AuditSearchQuery `json:"and,omitempty"`
+
+	// EntityRef Search by entityRef
+	EntityRef *StringFilter `json:"entityRef,omitempty"`
+
+	// EntityType Search by entityType
+	EntityType *AuditedEntityTypeEnumFilter `json:"entityType,omitempty"`
+	Or         *[]AuditSearchQuery          `json:"or,omitempty"`
+
+	// Trace Search by trace
+	Trace *StringFilter `json:"trace,omitempty"`
+}
+
+// AuditedEntityTypeEnumFilter AuditedEntityTypeEnumFilter
+type AuditedEntityTypeEnumFilter struct {
+	// Eq Search by entityType
+	Eq *AuditedEntityTypeEnumFilterEq `json:"eq,omitempty"`
+
+	// In Search by entityType
+	In *[]AuditedEntityTypeEnumFilterIn `json:"in,omitempty"`
+
+	// NotEq Search by entityType
+	NotEq *AuditedEntityTypeEnumFilterNotEq `json:"notEq,omitempty"`
+}
+
+// AuditedEntityTypeEnumFilterEq Search by entityType
+type AuditedEntityTypeEnumFilterEq string
+
+// AuditedEntityTypeEnumFilterIn defines model for AuditedEntityTypeEnumFilter.In.
+type AuditedEntityTypeEnumFilterIn string
+
+// AuditedEntityTypeEnumFilterNotEq Search by entityType
+type AuditedEntityTypeEnumFilterNotEq string
 
 // AuthenticationProvider AuthenticationProvider
 type AuthenticationProvider struct {
@@ -19181,7 +19331,10 @@ type SourcingOptionTransfer struct {
 		CarrierKey  *string `json:"carrierKey,omitempty"`
 		CarrierName *string `json:"carrierName,omitempty"`
 	} `json:"carrier,omitempty"`
-	FacilityConnectionRef *string `json:"facilityConnectionRef,omitempty"`
+
+	// ExistenceReason SourcingOptionTransferExistenceReason
+	ExistenceReason       *SourcingOptionTransferExistenceReason `json:"existenceReason,omitempty"`
+	FacilityConnectionRef *string                                `json:"facilityConnectionRef,omitempty"`
 
 	// FallbackCosts Money
 	FallbackCosts        *Money                                        `json:"fallbackCosts,omitempty"`
@@ -19194,6 +19347,9 @@ type SourcingOptionTransfer struct {
 	// TimeLine TransferTimeLine
 	TimeLine *TransferTimeLine `json:"timeLine,omitempty"`
 }
+
+// SourcingOptionTransferExistenceReason SourcingOptionTransferExistenceReason
+type SourcingOptionTransferExistenceReason string
 
 // SourcingOptionsRequest SourcingOptionsRequest
 type SourcingOptionsRequest struct {
@@ -20425,7 +20581,7 @@ type Substitute struct {
 	Priority       *float32  `json:"priority,omitempty"`
 	ScannableCodes *[]string `json:"scannableCodes,omitempty"`
 
-	// SecondaryMeasurementUnitKey Identifier for items unit of measurement. E.g. measurementUnitKey is pieces and secondaryQuantity is gram
+	// SecondaryMeasurementUnitKey Identifier for items unit of measurement. E.g. measurementUnitKey is pieces and secondaryMeasurementUnitKey is gram
 	SecondaryMeasurementUnitKey *string `json:"secondaryMeasurementUnitKey,omitempty"`
 	TenantArticleId             string  `json:"tenantArticleId"`
 	Title                       string  `json:"title"`

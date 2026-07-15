@@ -230,7 +230,7 @@ var _ = Describe("Mutates", func() {
 			}
 		})
 
-		It("accounts for all 152 of the spec's POSTs", func() {
+		It("accounts for all 153 of the spec's POSTs", func() {
 			var posts int
 			for _, op := range Operations() {
 				if op.Method == http.MethodPost {
