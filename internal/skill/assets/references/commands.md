@@ -7,6 +7,36 @@ have nothing to do with the API. Everything else lives in
 Run `--help` on any of them. It tells you the endpoint, the permission it needs, and a
 sample body. The notes below are the things `--help` will *not* tell you.
 
+## Orders
+
+An order is the demand the platform fulfills, addressed by its platform id (the one
+`list`, `search` and `get` print — orders have no tenantFacilityId-style shorthand).
+
+```sh
+fft order list --consumer-id C-4711
+fft order get 7f3ce2a4-1f00-4c6a-9a2b-5d1f0b7a1c33
+fft order search --status OPEN --sort orderDate:desc
+fft order search --since 2026-07-01 --until 2026-07-15
+fft order create --example > order.json
+fft order create --file order.json
+fft order update 7f3ce2a4-1f00-4c6a-9a2b-5d1f0b7a1c33 --file order.json
+fft order cancel 7f3ce2a4-1f00-4c6a-9a2b-5d1f0b7a1c33 --reason-id out-of-stock
+fft order unlock 7f3ce2a4-1f00-4c6a-9a2b-5d1f0b7a1c33
+```
+
+- `list` is the plain GET: it returns a *stripped* order (id, status, orderDate, line
+  count, version) and filters only on `--tenant-order-id` and `--consumer-id`. For status,
+  a date range or a sort, use `search`.
+- `search` is a **BETA** endpoint guarded by `ADMIN_MODULES_READ`, not `ORDER_READ` — a
+  token that lists orders fine may be refused here. Give it a narrow `--since`/`--until`; it
+  pages far faster when the date range is bounded.
+- Neither `list` nor `search` filters by facility. An order routes to a facility through its
+  pickjobs, so filter pickjobs by facility instead.
+- `update` is a PATCH, but `orderLineItems` is a **full replacement**: send them all or the
+  ones you omit are deleted. Read the order, edit, send it back.
+- `cancel --force` sends FORCE_CANCEL, which only works if the tenant permits it; it takes no
+  `--reason-id`. Cancelling cannot be undone, so fft asks first (`--yes` answers).
+
 ## Facilities
 
 A facility is addressed by its id.
