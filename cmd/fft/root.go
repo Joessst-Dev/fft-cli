@@ -319,6 +319,7 @@ func newRootCmd(deps *Deps) *cobra.Command {
 		newListingCmd(deps),
 		newStockCmd(deps),
 		newSourcingCmd(deps),
+		newOrderCmd(deps),
 	} {
 		c.GroupID = groupResource
 		cmd.AddCommand(c)

@@ -1,6 +1,6 @@
 ---
 name: fft
-description: Drive the fft CLI against a fulfillmenttools tenant - read and change facilities, interfacility connections, listings, stock, pick jobs, pack jobs and handovers, simulate how an order would be routed, and reach any of the API's 557 operations. Use whenever the user mentions fulfillmenttools, fft, a pickjob or packjob, a handover, a listing, stock levels, or a facility or warehouse in that system - and whenever they ask why an order was routed or sourced the way it was, or where an order would be fulfilled from.
+description: Drive the fft CLI against a fulfillmenttools tenant - read and change orders, facilities, interfacility connections, listings, stock, pick jobs, pack jobs and handovers, simulate how an order would be routed, and reach any of the API's 557 operations. Use whenever the user mentions fulfillmenttools, fft, an order, a pickjob or packjob, a handover, a listing, stock levels, or a facility or warehouse in that system - and whenever they ask why an order was routed or sourced the way it was, or where an order would be fulfilled from.
 ---
 
 # Driving fft
@@ -53,7 +53,7 @@ fastest route from a word the user said to a command line you can run:
 fft api list --search handover -o json
 ```
 
-1. **Curated** — `fft facility`, `fft connection`, `fft listing`, `fft stock`, `fft sourcing`.
+1. **Curated** — `fft order`, `fft facility`, `fft connection`, `fft listing`, `fft stock`, `fft sourcing`.
    Typed flags, real tables. Use these when they fit; see [commands](references/commands.md).
 2. **Generated** — every other operation, as `fft <group> <operation>`, e.g.
    `fft picking get-pick-job`.

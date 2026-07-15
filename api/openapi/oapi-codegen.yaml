@@ -25,6 +25,7 @@ output-options:
     - Health (Infrastructure)
     - User Management (Core)
     - Sourcing Options (DOMS)
+    - Orders (DOMS)
 
   # Drop the schemas the included operations cannot reach. Without this the
   # full 2,725-schema component set is emitted regardless of the tag filter.
