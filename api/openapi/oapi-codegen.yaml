@@ -30,6 +30,16 @@ output-options:
   # full 2,725-schema component set is emitted regardless of the tag filter.
   skip-prune: false
 
+  # Prune misses self-referential schemas: it removes components by ref count,
+  # and a schema that references itself (here AuditSearchQuery via its and/or
+  # arrays) never reaches zero, so it survives even though no included operation
+  # reaches it — dragging its filter graph in with it. Audits (Core) is not an
+  # included tag, so exclude the two roots by hand. Extend this list if a future
+  # spec sync leaks another recursive, unreachable schema.
+  exclude-schemas:
+    - AuditSearchQuery
+    - AuditedEntityTypeEnumFilter
+
   # The spec is VERSIONLESS and regenerated upstream without notice; keeping
   # the raw body on responses lets us decode ApiError (a JSON *array*)
   # ourselves rather than depending on generated error types.

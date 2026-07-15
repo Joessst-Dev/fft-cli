@@ -288,195 +288,6 @@ func (e ArticleStockForecastPeriod) Valid() bool {
 	}
 }
 
-// Defines values for AuditedEntityTypeEnumFilterEq.
-const (
-	AuditedEntityTypeEnumFilterEqCUSTOMSERVICE             AuditedEntityTypeEnumFilterEq = "CUSTOM_SERVICE"
-	AuditedEntityTypeEnumFilterEqFACILITY                  AuditedEntityTypeEnumFilterEq = "FACILITY"
-	AuditedEntityTypeEnumFilterEqFACILITYCARRIERCONNECTION AuditedEntityTypeEnumFilterEq = "FACILITY_CARRIER_CONNECTION"
-	AuditedEntityTypeEnumFilterEqFACILITYCUSTOMSERVICE     AuditedEntityTypeEnumFilterEq = "FACILITY_CUSTOM_SERVICE"
-	AuditedEntityTypeEnumFilterEqFACILITYGROUP             AuditedEntityTypeEnumFilterEq = "FACILITY_GROUP"
-	AuditedEntityTypeEnumFilterEqHANDOVERJOB               AuditedEntityTypeEnumFilterEq = "HANDOVER_JOB"
-	AuditedEntityTypeEnumFilterEqLINKEDSERVICEJOBS         AuditedEntityTypeEnumFilterEq = "LINKED_SERVICE_JOBS"
-	AuditedEntityTypeEnumFilterEqORDER                     AuditedEntityTypeEnumFilterEq = "ORDER"
-	AuditedEntityTypeEnumFilterEqPACKJOB                   AuditedEntityTypeEnumFilterEq = "PACK_JOB"
-	AuditedEntityTypeEnumFilterEqPARCEL                    AuditedEntityTypeEnumFilterEq = "PARCEL"
-	AuditedEntityTypeEnumFilterEqPICKJOB                   AuditedEntityTypeEnumFilterEq = "PICK_JOB"
-	AuditedEntityTypeEnumFilterEqPICKRUN                   AuditedEntityTypeEnumFilterEq = "PICK_RUN"
-	AuditedEntityTypeEnumFilterEqROUTINGPLAN               AuditedEntityTypeEnumFilterEq = "ROUTING_PLAN"
-	AuditedEntityTypeEnumFilterEqROUTINGSTRATEGY           AuditedEntityTypeEnumFilterEq = "ROUTING_STRATEGY"
-	AuditedEntityTypeEnumFilterEqSERVICEJOB                AuditedEntityTypeEnumFilterEq = "SERVICE_JOB"
-	AuditedEntityTypeEnumFilterEqSHIPMENT                  AuditedEntityTypeEnumFilterEq = "SHIPMENT"
-	AuditedEntityTypeEnumFilterEqSTOWJOB                   AuditedEntityTypeEnumFilterEq = "STOW_JOB"
-)
-
-// Valid indicates whether the value is a known member of the AuditedEntityTypeEnumFilterEq enum.
-func (e AuditedEntityTypeEnumFilterEq) Valid() bool {
-	switch e {
-	case AuditedEntityTypeEnumFilterEqCUSTOMSERVICE:
-		return true
-	case AuditedEntityTypeEnumFilterEqFACILITY:
-		return true
-	case AuditedEntityTypeEnumFilterEqFACILITYCARRIERCONNECTION:
-		return true
-	case AuditedEntityTypeEnumFilterEqFACILITYCUSTOMSERVICE:
-		return true
-	case AuditedEntityTypeEnumFilterEqFACILITYGROUP:
-		return true
-	case AuditedEntityTypeEnumFilterEqHANDOVERJOB:
-		return true
-	case AuditedEntityTypeEnumFilterEqLINKEDSERVICEJOBS:
-		return true
-	case AuditedEntityTypeEnumFilterEqORDER:
-		return true
-	case AuditedEntityTypeEnumFilterEqPACKJOB:
-		return true
-	case AuditedEntityTypeEnumFilterEqPARCEL:
-		return true
-	case AuditedEntityTypeEnumFilterEqPICKJOB:
-		return true
-	case AuditedEntityTypeEnumFilterEqPICKRUN:
-		return true
-	case AuditedEntityTypeEnumFilterEqROUTINGPLAN:
-		return true
-	case AuditedEntityTypeEnumFilterEqROUTINGSTRATEGY:
-		return true
-	case AuditedEntityTypeEnumFilterEqSERVICEJOB:
-		return true
-	case AuditedEntityTypeEnumFilterEqSHIPMENT:
-		return true
-	case AuditedEntityTypeEnumFilterEqSTOWJOB:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for AuditedEntityTypeEnumFilterIn.
-const (
-	AuditedEntityTypeEnumFilterInCUSTOMSERVICE             AuditedEntityTypeEnumFilterIn = "CUSTOM_SERVICE"
-	AuditedEntityTypeEnumFilterInFACILITY                  AuditedEntityTypeEnumFilterIn = "FACILITY"
-	AuditedEntityTypeEnumFilterInFACILITYCARRIERCONNECTION AuditedEntityTypeEnumFilterIn = "FACILITY_CARRIER_CONNECTION"
-	AuditedEntityTypeEnumFilterInFACILITYCUSTOMSERVICE     AuditedEntityTypeEnumFilterIn = "FACILITY_CUSTOM_SERVICE"
-	AuditedEntityTypeEnumFilterInFACILITYGROUP             AuditedEntityTypeEnumFilterIn = "FACILITY_GROUP"
-	AuditedEntityTypeEnumFilterInHANDOVERJOB               AuditedEntityTypeEnumFilterIn = "HANDOVER_JOB"
-	AuditedEntityTypeEnumFilterInLINKEDSERVICEJOBS         AuditedEntityTypeEnumFilterIn = "LINKED_SERVICE_JOBS"
-	AuditedEntityTypeEnumFilterInORDER                     AuditedEntityTypeEnumFilterIn = "ORDER"
-	AuditedEntityTypeEnumFilterInPACKJOB                   AuditedEntityTypeEnumFilterIn = "PACK_JOB"
-	AuditedEntityTypeEnumFilterInPARCEL                    AuditedEntityTypeEnumFilterIn = "PARCEL"
-	AuditedEntityTypeEnumFilterInPICKJOB                   AuditedEntityTypeEnumFilterIn = "PICK_JOB"
-	AuditedEntityTypeEnumFilterInPICKRUN                   AuditedEntityTypeEnumFilterIn = "PICK_RUN"
-	AuditedEntityTypeEnumFilterInROUTINGPLAN               AuditedEntityTypeEnumFilterIn = "ROUTING_PLAN"
-	AuditedEntityTypeEnumFilterInROUTINGSTRATEGY           AuditedEntityTypeEnumFilterIn = "ROUTING_STRATEGY"
-	AuditedEntityTypeEnumFilterInSERVICEJOB                AuditedEntityTypeEnumFilterIn = "SERVICE_JOB"
-	AuditedEntityTypeEnumFilterInSHIPMENT                  AuditedEntityTypeEnumFilterIn = "SHIPMENT"
-	AuditedEntityTypeEnumFilterInSTOWJOB                   AuditedEntityTypeEnumFilterIn = "STOW_JOB"
-)
-
-// Valid indicates whether the value is a known member of the AuditedEntityTypeEnumFilterIn enum.
-func (e AuditedEntityTypeEnumFilterIn) Valid() bool {
-	switch e {
-	case AuditedEntityTypeEnumFilterInCUSTOMSERVICE:
-		return true
-	case AuditedEntityTypeEnumFilterInFACILITY:
-		return true
-	case AuditedEntityTypeEnumFilterInFACILITYCARRIERCONNECTION:
-		return true
-	case AuditedEntityTypeEnumFilterInFACILITYCUSTOMSERVICE:
-		return true
-	case AuditedEntityTypeEnumFilterInFACILITYGROUP:
-		return true
-	case AuditedEntityTypeEnumFilterInHANDOVERJOB:
-		return true
-	case AuditedEntityTypeEnumFilterInLINKEDSERVICEJOBS:
-		return true
-	case AuditedEntityTypeEnumFilterInORDER:
-		return true
-	case AuditedEntityTypeEnumFilterInPACKJOB:
-		return true
-	case AuditedEntityTypeEnumFilterInPARCEL:
-		return true
-	case AuditedEntityTypeEnumFilterInPICKJOB:
-		return true
-	case AuditedEntityTypeEnumFilterInPICKRUN:
-		return true
-	case AuditedEntityTypeEnumFilterInROUTINGPLAN:
-		return true
-	case AuditedEntityTypeEnumFilterInROUTINGSTRATEGY:
-		return true
-	case AuditedEntityTypeEnumFilterInSERVICEJOB:
-		return true
-	case AuditedEntityTypeEnumFilterInSHIPMENT:
-		return true
-	case AuditedEntityTypeEnumFilterInSTOWJOB:
-		return true
-	default:
-		return false
-	}
-}
-
-// Defines values for AuditedEntityTypeEnumFilterNotEq.
-const (
-	AuditedEntityTypeEnumFilterNotEqCUSTOMSERVICE             AuditedEntityTypeEnumFilterNotEq = "CUSTOM_SERVICE"
-	AuditedEntityTypeEnumFilterNotEqFACILITY                  AuditedEntityTypeEnumFilterNotEq = "FACILITY"
-	AuditedEntityTypeEnumFilterNotEqFACILITYCARRIERCONNECTION AuditedEntityTypeEnumFilterNotEq = "FACILITY_CARRIER_CONNECTION"
-	AuditedEntityTypeEnumFilterNotEqFACILITYCUSTOMSERVICE     AuditedEntityTypeEnumFilterNotEq = "FACILITY_CUSTOM_SERVICE"
-	AuditedEntityTypeEnumFilterNotEqFACILITYGROUP             AuditedEntityTypeEnumFilterNotEq = "FACILITY_GROUP"
-	AuditedEntityTypeEnumFilterNotEqHANDOVERJOB               AuditedEntityTypeEnumFilterNotEq = "HANDOVER_JOB"
-	AuditedEntityTypeEnumFilterNotEqLINKEDSERVICEJOBS         AuditedEntityTypeEnumFilterNotEq = "LINKED_SERVICE_JOBS"
-	AuditedEntityTypeEnumFilterNotEqORDER                     AuditedEntityTypeEnumFilterNotEq = "ORDER"
-	AuditedEntityTypeEnumFilterNotEqPACKJOB                   AuditedEntityTypeEnumFilterNotEq = "PACK_JOB"
-	AuditedEntityTypeEnumFilterNotEqPARCEL                    AuditedEntityTypeEnumFilterNotEq = "PARCEL"
-	AuditedEntityTypeEnumFilterNotEqPICKJOB                   AuditedEntityTypeEnumFilterNotEq = "PICK_JOB"
-	AuditedEntityTypeEnumFilterNotEqPICKRUN                   AuditedEntityTypeEnumFilterNotEq = "PICK_RUN"
-	AuditedEntityTypeEnumFilterNotEqROUTINGPLAN               AuditedEntityTypeEnumFilterNotEq = "ROUTING_PLAN"
-	AuditedEntityTypeEnumFilterNotEqROUTINGSTRATEGY           AuditedEntityTypeEnumFilterNotEq = "ROUTING_STRATEGY"
-	AuditedEntityTypeEnumFilterNotEqSERVICEJOB                AuditedEntityTypeEnumFilterNotEq = "SERVICE_JOB"
-	AuditedEntityTypeEnumFilterNotEqSHIPMENT                  AuditedEntityTypeEnumFilterNotEq = "SHIPMENT"
-	AuditedEntityTypeEnumFilterNotEqSTOWJOB                   AuditedEntityTypeEnumFilterNotEq = "STOW_JOB"
-)
-
-// Valid indicates whether the value is a known member of the AuditedEntityTypeEnumFilterNotEq enum.
-func (e AuditedEntityTypeEnumFilterNotEq) Valid() bool {
-	switch e {
-	case AuditedEntityTypeEnumFilterNotEqCUSTOMSERVICE:
-		return true
-	case AuditedEntityTypeEnumFilterNotEqFACILITY:
-		return true
-	case AuditedEntityTypeEnumFilterNotEqFACILITYCARRIERCONNECTION:
-		return true
-	case AuditedEntityTypeEnumFilterNotEqFACILITYCUSTOMSERVICE:
-		return true
-	case AuditedEntityTypeEnumFilterNotEqFACILITYGROUP:
-		return true
-	case AuditedEntityTypeEnumFilterNotEqHANDOVERJOB:
-		return true
-	case AuditedEntityTypeEnumFilterNotEqLINKEDSERVICEJOBS:
-		return true
-	case AuditedEntityTypeEnumFilterNotEqORDER:
-		return true
-	case AuditedEntityTypeEnumFilterNotEqPACKJOB:
-		return true
-	case AuditedEntityTypeEnumFilterNotEqPARCEL:
-		return true
-	case AuditedEntityTypeEnumFilterNotEqPICKJOB:
-		return true
-	case AuditedEntityTypeEnumFilterNotEqPICKRUN:
-		return true
-	case AuditedEntityTypeEnumFilterNotEqROUTINGPLAN:
-		return true
-	case AuditedEntityTypeEnumFilterNotEqROUTINGSTRATEGY:
-		return true
-	case AuditedEntityTypeEnumFilterNotEqSERVICEJOB:
-		return true
-	case AuditedEntityTypeEnumFilterNotEqSHIPMENT:
-		return true
-	case AuditedEntityTypeEnumFilterNotEqSTOWJOB:
-		return true
-	default:
-		return false
-	}
-}
-
 // Defines values for AuthenticationProviderTypeEnum.
 const (
 	AuthenticationProviderTypeEnumEMAILPASSWORD AuthenticationProviderTypeEnum = "EMAIL_PASSWORD"
@@ -10553,25 +10364,25 @@ func (e UserAssignedRolesContextLimitationsContextTypesEnumFilterIn) Valid() boo
 
 // Defines values for UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq.
 const (
-	FACILITY      UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "FACILITY"
-	FACILITYGROUP UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "FACILITY_GROUP"
-	ROLE          UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "ROLE"
-	USERROLE      UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "USER_ROLE"
-	ZONE          UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "ZONE"
+	UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqFACILITY      UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "FACILITY"
+	UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqFACILITYGROUP UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "FACILITY_GROUP"
+	UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqROLE          UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "ROLE"
+	UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqUSERROLE      UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "USER_ROLE"
+	UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqZONE          UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "ZONE"
 )
 
 // Valid indicates whether the value is a known member of the UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq enum.
 func (e UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq) Valid() bool {
 	switch e {
-	case FACILITY:
+	case UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqFACILITY:
 		return true
-	case FACILITYGROUP:
+	case UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqFACILITYGROUP:
 		return true
-	case ROLE:
+	case UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqROLE:
 		return true
-	case USERROLE:
+	case UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqUSERROLE:
 		return true
-	case ZONE:
+	case UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqZONE:
 		return true
 	default:
 		return false
@@ -12152,42 +11963,6 @@ type AssignedRoles struct {
 	// Ref The id of the assigned role
 	Ref string `json:"ref"`
 }
-
-// AuditSearchQuery AuditSearchQuery
-type AuditSearchQuery struct {
-	And *[]AuditSearchQuery `json:"and,omitempty"`
-
-	// EntityRef Search by entityRef
-	EntityRef *StringFilter `json:"entityRef,omitempty"`
-
-	// EntityType Search by entityType
-	EntityType *AuditedEntityTypeEnumFilter `json:"entityType,omitempty"`
-	Or         *[]AuditSearchQuery          `json:"or,omitempty"`
-
-	// Trace Search by trace
-	Trace *StringFilter `json:"trace,omitempty"`
-}
-
-// AuditedEntityTypeEnumFilter AuditedEntityTypeEnumFilter
-type AuditedEntityTypeEnumFilter struct {
-	// Eq Search by entityType
-	Eq *AuditedEntityTypeEnumFilterEq `json:"eq,omitempty"`
-
-	// In Search by entityType
-	In *[]AuditedEntityTypeEnumFilterIn `json:"in,omitempty"`
-
-	// NotEq Search by entityType
-	NotEq *AuditedEntityTypeEnumFilterNotEq `json:"notEq,omitempty"`
-}
-
-// AuditedEntityTypeEnumFilterEq Search by entityType
-type AuditedEntityTypeEnumFilterEq string
-
-// AuditedEntityTypeEnumFilterIn defines model for AuditedEntityTypeEnumFilter.In.
-type AuditedEntityTypeEnumFilterIn string
-
-// AuditedEntityTypeEnumFilterNotEq Search by entityType
-type AuditedEntityTypeEnumFilterNotEq string
 
 // AuthenticationProvider AuthenticationProvider
 type AuthenticationProvider struct {
