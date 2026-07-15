@@ -20,6 +20,12 @@ NO Claude/AI attribution** (no `Co-Authored-By`, no "Generated with" footer).
 
 GOAL: turn a `spec-drift` issue into a **mechanical** spec-sync pull request.
 
+This repo ships project agents (`.claude/agents/`) and skills (`.claude/skills/`) in your checkout — use them
+via the Task and Skill tools: consult **`fulfillment-tools-consultant`** to decide a new POST's read-vs-write
+classification (step 3) against the real API semantics; lean on **`go-cli-developer`** and the **`golang-*`**
+skills for any Go edits; and run **`code-reviewer`** on your diff before opening the PR. These are aids — they
+do not widen the mechanical scope in step 4.
+
 1. **ELIGIBILITY GATE** — from the webhook payload determine the issue number and operate on ONLY that issue.
    Exit early (do nothing, report why) unless ALL hold:
    - the event action is `opened` or `labeled` (ignore edited/closed/commented/etc.);
@@ -37,8 +43,9 @@ GOAL: turn a `spec-drift` issue into a **mechanical** spec-sync pull request.
    - Classify every POST now in the spec that is in neither `readPOSTs` (`internal/api/access.go`) nor
      `knownMutatingPOSTs` (the fixture in `internal/api/access_test.go`): pure searches / promise calculators /
      `simulate`-style operations that reserve nothing go in `readPOSTs`; everything else goes in
-     `knownMutatingPOSTs`. **Fail closed** — if unsure, treat it as a write. Remove ids for POSTs that no
-     longer exist in the spec. Update the pinned POST total in `access_test.go`.
+     `knownMutatingPOSTs`. Consult the **`fulfillment-tools-consultant`** agent to confirm the endpoint's real
+     semantics before deciding. **Fail closed** — if still unsure, treat it as a write. Remove ids for POSTs
+     that no longer exist in the spec. Update the pinned POST total in `access_test.go`.
    - `make fmt`, then iterate `make test` (`go test -race -shuffle=on ./...`) and `make lint` until both are
      clean. **Do not weaken or edit a guard test to make it pass** — fix the classification/count instead.
 
