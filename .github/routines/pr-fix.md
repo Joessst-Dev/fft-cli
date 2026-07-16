@@ -9,13 +9,15 @@ routine when the prompt changes.
 > `pull_request_review` event (a review being *submitted*), but the routines platform does not
 > offer it. And `review_requested` is wrong: it fires when a reviewer is *assigned*, which never
 > happens here — the `pr-review` bot submits via the API and assigns no one. So the reviewer hands
-> off explicitly: after a `changes_requested` review it adds the **`auto-review-fix`** label, whose
-> `labeled` event wakes this routine. Because that payload carries no review id, step 1 looks the
-> review up. This routine consumes the signal by removing the label when it is done.
+> off explicitly: when it has findings it adds the **`auto-review-fix`** label, whose `labeled` event
+> wakes this routine. The label — not the review verdict — is the signal: the reviewer can only
+> submit a `COMMENT` on a PR its own account authored (GitHub forbids self-`REQUEST_CHANGES`), so the
+> label is what carries "there is work to do". Because the `labeled` payload has no review id, step 1
+> looks the review up. This routine consumes the signal by removing the label when it is done.
 
-Companion routine: [`pr-review`](./pr-review.md) files the `changes_requested` review this one acts
-on and adds the `auto-review-fix` label to hand off. Your push emits a `synchronize` event that
-re-fires `pr-review`, closing the loop.
+Companion routine: [`pr-review`](./pr-review.md) files the review this one acts on and adds the
+`auto-review-fix` label to hand off. Your push emits a `synchronize` event that re-fires `pr-review`,
+closing the loop.
 
 Prerequisite: the Claude GitHub App must cover `Joessst-Dev/fft-cli` and deliver `pull_request`
 events (as it does for `pr-review`). If this routine never fires, add fft-cli to the app
@@ -33,10 +35,12 @@ generated from a **vendored, versionless** copy of the fulfillmenttools OpenAPI 
 **Commits carry NO Claude/AI attribution** (no `Co-Authored-By`, no "Generated with" footer). You
 start with zero context; everything you need is below.
 
-GOAL: take the findings from a companion [`pr-review`](./pr-review.md) `changes_requested` review
-and turn them into fixing commits on the PR branch. This is one half of a bounded review→fix loop:
-you fix and push; the push re-fires `pr-review`, which re-reviews and either approves (a human then
-merges) or requests more changes. **Never merge, never push to `main`.**
+GOAL: take the findings from the companion [`pr-review`](./pr-review.md) review that armed the
+`auto-review-fix` label and turn them into fixing commits on the PR branch. This is one half of a
+bounded review→fix loop:
+you fix and push; the push re-fires `pr-review`, which re-reviews and either finds it clean and
+leaves the label off (a human then merges) or re-arms the label with more findings. **Never merge,
+never push to `main`.**
 
 This repo ships project agents (`.claude/agents/`) and skills (`.claude/skills/`) in your
 checkout — use them via the Task and Skill tools: lean on **`go-cli-developer`** and the
@@ -62,10 +66,13 @@ PR's issue comments (`gh api repos/Joessst-Dev/fft-cli/issues/<n>/comments`) for
      **`auto-review-stalled`** absent;
    - the control comment's `round` is **≤ 6**;
    - **find the review to act on** — the `labeled` payload carries none, so list the PR's reviews
-     (`gh api repos/Joessst-Dev/fft-cli/pulls/<n>/reviews`) and take the **most recent** one whose
-     `state` is **`changes_requested`** and whose author is the **companion `pr-review` bot / Claude
-     GitHub App account** (ignore human reviews — this routine only closes the loop with its
-     companion). If there is none, exit;
+     (`gh api repos/Joessst-Dev/fft-cli/pulls/<n>/reviews`) and take the **most recent** one authored
+     by the **companion `pr-review` bot account** whose `state` is `CHANGES_REQUESTED` **or**
+     `COMMENTED` — the reviewer downgrades to a `COMMENTED` verdict on a PR its own account authored
+     (GitHub forbids self-`REQUEST_CHANGES`), so the state is not a reliable filter; the
+     `auto-review-fix` label you triggered on is the real signal that this review carries findings.
+     Ignore human reviews — this routine only closes the loop with its companion. If there is none,
+     or it has no inline findings, remove the label and exit;
    - that review's id is **not** equal to `last_fixed_review_id` in the control comment (you already
      addressed this review — don't double-process a retried `labeled` webhook, and don't re-run on a
      stale label add).
@@ -99,8 +106,9 @@ PR's issue comments (`gh api repos/Joessst-Dev/fft-cli/issues/<n>/comments`) for
    to `<id>`, and **remove the `auto-review-fix` label**, then stop. With no `synchronize`, the loop
    ends cleanly and a human takes over.
 
-**Guardrails:** act only on the companion reviewer's `changes_requested` reviews. Idempotent on the
-review id (skip if `last_fixed_review_id` already matches). Always remove the `auto-review-fix`
+**Guardrails:** act only on the companion reviewer's reviews (a `CHANGES_REQUESTED` or, on a
+self-authored PR, a `COMMENTED` one carrying findings), and only when its `auto-review-fix` label
+armed you. Idempotent on the review id (skip if `last_fixed_review_id` already matches). Always remove the `auto-review-fix`
 label before you finish — leaving it on means the next round's add fires nothing. Never weaken a
 guard test. **Never merge, never push to `main`, never remove the `auto-review` label** (that is the
 opt-in; only `auto-review-fix` is yours to remove). Finish by summarizing: the PR, the findings
