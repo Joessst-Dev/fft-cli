@@ -24,5 +24,12 @@ coverage.*
 !.claude/agents/
 !.claude/skills/
 
+# Documentation site (VitePress). The generated Markdown under docs/guide and
+# docs/reference is committed and drift-gated; only the Node install and the build
+# output are transient. Scoped to docs/ so nothing here can catch the source tree.
+docs/node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
 # Editor / OS
 .DS_Store

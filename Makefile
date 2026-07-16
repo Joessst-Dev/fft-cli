@@ -15,6 +15,11 @@ build: ## Build the fft binary
 generate: ## Regenerate the API client and the operation metadata from the OpenAPI spec
 	go generate ./...
 
+.PHONY: docs
+docs: ## Regenerate the documentation-site sources (guide pages + CLI reference)
+	go run ./tools/docsgen -out docs/guide
+	go run $(PKG) gen-docs docs/reference/commands
+
 .PHONY: test
 test: ## Run all specs with the race detector
 	go test -race -shuffle=on ./...

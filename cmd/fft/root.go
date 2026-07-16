@@ -308,6 +308,7 @@ func newRootCmd(deps *Deps) *cobra.Command {
 		newAPICmd(deps),
 		newSkillCmd(deps),
 		newUpdateCmd(deps),
+		newGenDocsCmd(deps),
 	} {
 		c.GroupID = groupCore
 		cmd.AddCommand(c)
