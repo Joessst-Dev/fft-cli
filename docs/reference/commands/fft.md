@@ -49,6 +49,7 @@ fft
 - [fft connection](./fft_connection.md) — Manage interfacility connections
 - [fft facility](./fft_facility.md) — Manage facilities
 - [fft listing](./fft_listing.md) — Manage listings (the article-at-facility catalog entry)
+- [fft order](./fft_order.md) — Manage orders
 - [fft ping](./fft_ping.md) — Check that the tenant is reachable
 - [fft project](./fft_project.md) — Manage projects
 - [fft skill](./fft_skill.md) — Install the agent skill that teaches an AI to use fft

@@ -52,7 +52,7 @@ fastest route from a word the user said to a command line you can run:
 fft api list --search handover -o json
 ```
 
-1. **Curated** — `fft facility`, `fft connection`, `fft listing`, `fft stock`, `fft sourcing`.
+1. **Curated** — `fft order`, `fft facility`, `fft connection`, `fft listing`, `fft stock`, `fft sourcing`.
    Typed flags, real tables. Use these when they fit; see [commands](./commands.md).
 2. **Generated** — every other operation, as `fft <group> <operation>`, e.g.
    `fft picking get-pick-job`.
