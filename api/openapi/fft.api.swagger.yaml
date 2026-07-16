@@ -24011,8 +24011,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: No more elements available
       summary: List routing strategies
-      x-fft-permissions:
-        - ROUTING_CONFIG_READ
       tags:
         - Routing Strategy (DOMS)
     post:
@@ -24053,8 +24051,6 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Create routing strategy
-      x-fft-permissions:
-        - ROUTING_CONFIG_WRITE
       tags:
         - Routing Strategy (DOMS)
   /api/routing/strategies/{strategyId}:
@@ -24096,8 +24092,6 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Get routing strategy
-      x-fft-permissions:
-        - ROUTING_CONFIG_READ
       tags:
         - Routing Strategy (DOMS)
     put:
@@ -24145,8 +24139,6 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Update routing strategy
-      x-fft-permissions:
-        - ROUTING_CONFIG_WRITE
       tags:
         - Routing Strategy (DOMS)
   /api/routing/strategies/{strategyId}/actions:
@@ -24193,8 +24185,6 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Call routing strategy action
-      x-fft-permissions:
-        - ROUTING_CONFIG_WRITE
       tags:
         - Routing Strategy (DOMS)
   /api/routing/strategies/{strategyId}/evaluation:
@@ -24247,8 +24237,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: The routing strategy does not exist
       summary: Evaluate routing strategy
-      x-fft-permissions:
-        - ROUTING_CONFIG_READ
       tags:
         - Routing Strategy (DOMS)
   /api/routing/strategies/{strategyId}/nodes/{nodeId}/evaluation:
@@ -24302,8 +24290,6 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: The routing strategy node does not exist
       summary: Evaluate routing strategy node
-      x-fft-permissions:
-        - ROUTING_CONFIG_READ
       tags:
         - Routing Strategy (DOMS)
   /api/routingplans:
@@ -33907,6 +33893,8 @@ components:
             If set to true, the total shipping costs of the order line items are
             used for the calculation of the rating."
           type: boolean
+        type:
+          $ref: '#/components/schemas/RatingConfigurationType'
       title: CombinedCostRatingConfiguration
     CompanyAddress:
       properties:
@@ -72519,7 +72507,6 @@ components:
           items:
             $ref: '#/components/schemas/TimeTriggeredConfigurationContext'
           maxItems: 500
-          minItems: 1
           type: array
       required:
         - defaultPrice
@@ -83748,7 +83735,7 @@ components:
       properties:
         priority:
           minimum: 0
-          type: integer
+          type: number
         timeTriggered:
           $ref: '#/components/schemas/RoutingStrategyRerouteTimeTriggeredConfig'
         type:
