@@ -55,6 +55,8 @@ widen the scope of what you fix.
 the hidden marker `<!-- fft-auto-review-loop -->` followed by a fenced JSON block holding
 `{ "round": N, "last_reviewed_sha": "...", "last_fixed_review_id": "..." }`. Find it by scanning the
 PR's issue comments (`gh api repos/Joessst-Dev/fft-cli/issues/<n>/comments`) for the marker.
+`pr-review` owns `round` and `last_reviewed_sha` — preserve them exactly when you rewrite this
+block; you own only `last_fixed_review_id`.
 
 1. **ELIGIBILITY GATE** — from the webhook payload determine the PR number; operate on ONLY that PR.
    These checks make the run idempotent — webhooks retry and re-fire. Exit early (do nothing, report
@@ -98,18 +100,25 @@ PR's issue comments (`gh api repos/Joessst-Dev/fft-cli/issues/<n>/comments`) for
    collect all such items under a **"Needs human follow-up"** list.
 7. **Commit + push:** conventional-commit message (e.g. `fix: address automated review findings`),
    **no attribution**, push to the PR branch. The push emits `synchronize` and re-fires
-   `pr-review`. Reply to each addressed inline review comment stating what you changed. Then set the
-   control comment's `last_fixed_review_id` to `<id>`, and **remove the handoff label** so the next
-   round's re-add can wake you again: `gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix`.
+   `pr-review`. Reply to each addressed inline review comment stating what you changed. Then
+   rewrite the control comment, carrying `round` and `last_reviewed_sha` forward **unchanged** from
+   what `pr-review` last set and updating only `last_fixed_review_id` to `<id>`, and **remove the
+   handoff label** so the next round's re-add can wake you again:
+   `gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix`.
 8. **Nothing to fix mechanically** — if every finding is a human-follow-up item, push NOTHING (no
-   empty commit): post one comment with the "Needs human follow-up" list, set `last_fixed_review_id`
-   to `<id>`, and **remove the `auto-review-fix` label**, then stop. With no `synchronize`, the loop
+   empty commit): post one comment with the "Needs human follow-up" list, rewrite the control
+   comment the same way (`round`/`last_reviewed_sha` unchanged, `last_fixed_review_id` set to
+   `<id>`), and **remove the `auto-review-fix` label**, then stop. With no `synchronize`, the loop
    ends cleanly and a human takes over.
 
 **Guardrails:** act only on the companion reviewer's reviews (a `CHANGES_REQUESTED` or, on a
 self-authored PR, a `COMMENTED` one carrying findings), and only when its `auto-review-fix` label
 armed you. Idempotent on the review id (skip if `last_fixed_review_id` already matches). Always remove the `auto-review-fix`
-label before you finish — leaving it on means the next round's add fires nothing. Never weaken a
-guard test. **Never merge, never push to `main`, never remove the `auto-review` label** (that is the
+label before you finish, so its presence keeps accurately signalling "work pending" — `pr-review`'s
+own remove-then-add already guarantees the next round's `labeled` event regardless of whether you
+leave the label on or off. Do this removal promptly: your push (step 7) emits `synchronize` and can
+spawn a concurrent `pr-review` run before you reach this step; if that run re-arms the label first,
+a bare removal here would clear a freshly-armed signal rather than the stale one you meant to clear.
+Never weaken a guard test. **Never merge, never push to `main`, never remove the `auto-review` label** (that is the
 opt-in; only `auto-review-fix` is yours to remove). Finish by summarizing: the PR, the findings
 fixed vs. deferred to humans, and the SHA you pushed (or why you pushed nothing).

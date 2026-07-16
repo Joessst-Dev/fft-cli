@@ -62,8 +62,10 @@ comment.
    - the event action is one of `opened`, `synchronize`, `reopened`, `ready_for_review`,
      `labeled` (ignore closed/edited/etc.);
    - if the action is `labeled`, the label just added is **not** `auto-review-fix` — that label is
-     your handoff signal to `pr-fix`, not a trigger for yourself (the head-SHA check below would
-     bounce it anyway; this exits sooner);
+     your handoff signal to `pr-fix`, not a trigger for yourself. This explicit check is what
+     actually prevents self-retriggering: `last_reviewed_sha` is only persisted in step 7, after
+     you arm the label in step 5, so a same-SHA `labeled` event from your own hand-off could reach
+     step 1 before that write lands and slip past the head-SHA check below;
    - `gh pr view <n> --repo Joessst-Dev/fft-cli --json state,isDraft,labels,headRefOid` shows
      state **OPEN** and `isDraft` **false**;
    - the **`auto-review`** label is present and the **`auto-review-stalled`** label is absent;
