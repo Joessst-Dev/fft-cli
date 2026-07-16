@@ -53,10 +53,15 @@ widen the scope of what you fix.
 
 **Loop state lives in a sticky control comment** authored by the reviewer: one PR comment carrying
 the hidden marker `<!-- fft-auto-review-loop -->` followed by a fenced JSON block holding
-`{ "round": N, "last_reviewed_sha": "...", "last_fixed_review_id": "..." }`. Find it by scanning the
-PR's issue comments (`gh api repos/Joessst-Dev/fft-cli/issues/<n>/comments`) for the marker.
-`pr-review` owns `round` and `last_reviewed_sha` — preserve them exactly when you rewrite this
-block; you own only `last_fixed_review_id`.
+`{ "round": N, "last_reviewed_sha": "...", "last_fixed_review_id": "..." }`. Find its **id** by
+listing the PR's issue comments
+(`gh api repos/Joessst-Dev/fft-cli/issues/<n>/comments --jq '.[] | select(.body|test("fft-auto-review-loop")) | {id, updated_at}'`;
+if several match, the newest `updated_at` is authoritative). **Edit that comment in place** —
+`gh api --method PATCH repos/Joessst-Dev/fft-cli/issues/comments/<comment_id> -f body=@newbody.md`
+rewrites it. **Never append a new comment** (that is not "no edit tool available" — `gh api --method
+PATCH` is the edit tool; a second block corrupts the state machine). `pr-review` owns `round` and
+`last_reviewed_sha` — preserve them exactly when you rewrite this block; you own only
+`last_fixed_review_id`.
 
 1. **ELIGIBILITY GATE** — from the webhook payload determine the PR number; operate on ONLY that PR.
    These checks make the run idempotent — webhooks retry and re-fire. Exit early (do nothing, report

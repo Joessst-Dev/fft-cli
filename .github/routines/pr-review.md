@@ -49,12 +49,16 @@ side-effect scope above.
 
 **Loop state lives in a sticky control comment.** Exactly one bot-authored PR comment carries the
 hidden marker `<!-- fft-auto-review-loop -->` followed by a fenced JSON block holding
-`{ "round": N, "last_reviewed_sha": "...", "last_fixed_review_id": "..." }`. Find it by scanning the
-PR's issue comments (`gh api repos/Joessst-Dev/fft-cli/issues/<n>/comments --jq '.[].body'`) for
-the marker. If none exists, treat state as `{ "round": 0, "last_reviewed_sha": "", "last_fixed_review_id": "" }`
-and create the comment when you first write state. You own `round` and `last_reviewed_sha`; `pr-fix`
-owns `last_fixed_review_id` — preserve it when you rewrite the block. Never open a second control
-comment.
+`{ "round": N, "last_reviewed_sha": "...", "last_fixed_review_id": "..." }`. Find it by listing the
+PR's issue comments **with their ids** (`gh api repos/Joessst-Dev/fft-cli/issues/<n>/comments --jq '.[] | select(.body|test("fft-auto-review-loop")) | {id, updated_at}'`).
+**Edit the comment in place, never append a new one** — `gh api --method PATCH repos/Joessst-Dev/fft-cli/issues/comments/<comment_id> -f body=@newbody.md`
+rewrites it; that is the tool, and appending a second block is a bug that corrupts the state
+machine. If none exists, treat state as `{ "round": 0, "last_reviewed_sha": "", "last_fixed_review_id": "" }`
+and create it once (`gh api ... /issues/<n>/comments`). If **more than one** marker comment exists (a
+prior run appended instead of editing), the one with the newest `updated_at` is authoritative — edit
+that one from now on and delete the rest
+(`gh api --method DELETE repos/Joessst-Dev/fft-cli/issues/comments/<id>`). You own `round` and
+`last_reviewed_sha`; `pr-fix` owns `last_fixed_review_id` — preserve it when you rewrite the block.
 
 1. **ELIGIBILITY GATE** — from the webhook payload determine the PR number and operate on ONLY
    that PR. These checks make the run idempotent — webhooks retry and re-fire on every push.
