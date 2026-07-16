@@ -56,7 +56,6 @@ var operations = []Operation{
 		Tags:        []string{"Routing Strategy (DOMS)"},
 		Summary:     "Call routing strategy action",
 		Description: "Performs an action on a routing strategy.",
-		Permissions: []string{"ROUTING_CONFIG_WRITE"},
 		Params: []Param{
 			{Name: "strategyId", In: InPath, Type: TypeString, Required: true, Description: "Id of the routing strategy"},
 		},
@@ -1723,7 +1722,6 @@ var operations = []Operation{
 		Tags:        []string{"Routing Strategy (DOMS)"},
 		Summary:     "Evaluate routing strategy",
 		Description: "Evaluates a routing strategy against a given order",
-		Permissions: []string{"ROUTING_CONFIG_READ"},
 		Params: []Param{
 			{Name: "strategyId", In: InPath, Type: TypeString, Required: true, Description: "Id of the routing strategy"},
 		},
@@ -1737,7 +1735,6 @@ var operations = []Operation{
 		Tags:        []string{"Routing Strategy (DOMS)"},
 		Summary:     "Evaluate routing strategy node",
 		Description: "Evaluates a routing strategy node and return the path.",
-		Permissions: []string{"ROUTING_CONFIG_READ"},
 		Params: []Param{
 			{Name: "nodeId", In: InPath, Type: TypeString, Required: true, Description: "Id of the node"},
 			{Name: "strategyId", In: InPath, Type: TypeString, Required: true, Description: "Id of the routing strategy"},
@@ -4005,7 +4002,6 @@ var operations = []Operation{
 		Tags:        []string{"Routing Strategy (DOMS)"},
 		Summary:     "List routing strategies",
 		Description: "List all existing routing strategies",
-		Permissions: []string{"ROUTING_CONFIG_READ"},
 		Params: []Param{
 			{Name: "size", In: InQuery, Type: TypeInteger, Description: "Number of entities to show"},
 			{Name: "startAfterId", In: InQuery, Type: TypeString, Description: "All entities"},
@@ -4018,7 +4014,6 @@ var operations = []Operation{
 		Tags:        []string{"Routing Strategy (DOMS)"},
 		Summary:     "Get routing strategy",
 		Description: "Returns the routing strategy.",
-		Permissions: []string{"ROUTING_CONFIG_READ"},
 		Params: []Param{
 			{Name: "strategyId", In: InPath, Type: TypeString, Required: true, Description: "ID of the routing strategy you wish to retrieve"},
 		},
@@ -5221,7 +5216,6 @@ var operations = []Operation{
 		Tags:         []string{"Routing Strategy (DOMS)"},
 		Summary:      "Create routing strategy",
 		Description:  "Creates a new revision of the routing strategy.",
-		Permissions:  []string{"ROUTING_CONFIG_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
 		SampleBody:   "{\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  }\n}\n",
@@ -5693,7 +5687,6 @@ var operations = []Operation{
 		Tags:        []string{"Routing Strategy (DOMS)"},
 		Summary:     "Update routing strategy",
 		Description: "Updates a routing strategy",
-		Permissions: []string{"ROUTING_CONFIG_WRITE"},
 		Params: []Param{
 			{Name: "strategyId", In: InPath, Type: TypeString, Required: true, Description: "Id of the routing strategy you wish to update"},
 		},
