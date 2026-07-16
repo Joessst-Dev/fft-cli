@@ -57,4 +57,32 @@ var _ = Describe("linkRewriter", func() {
 		Expect(rewrite("see [c](https://sigstore.dev)")).
 			To(Equal("see [c](https://sigstore.dev)"))
 	})
+
+	It("does not rewrite a literal '](...)' inside a fenced code block", func() {
+		body := "see [x](#authentication-honestly)\n```\n[not a link](#exit-codes)\n```\nsee [x](#authentication-honestly)"
+		Expect(rewrite(body)).To(Equal(
+			"see [x](./auth.md)\n```\n[not a link](#exit-codes)\n```\nsee [x](./auth.md)",
+		))
+	})
+})
+
+var _ = Describe("indexReadme", func() {
+	It("does not read a '## '-shaped line inside a ~~~ fence as a real heading", func() {
+		readme := "# fft\n\n" +
+			"## Setting up a project\n\n" +
+			"~~~\n## not a real heading\n~~~\n" +
+			"body\n"
+		_, sections, err := indexReadme(readme)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(sections["Setting up a project"]).To(ContainSubstring("## not a real heading"))
+	})
+})
+
+var _ = Describe("shiftHeadings", func() {
+	It("leaves a '##'-shaped line inside a ~~~ fence untouched", func() {
+		in := "## Real Heading\n\n~~~\n## looks like a heading\n~~~\n"
+		Expect(shiftHeadings(in)).To(Equal(
+			"# Real Heading\n\n~~~\n## looks like a heading\n~~~\n",
+		))
+	})
 })

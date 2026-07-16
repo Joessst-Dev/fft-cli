@@ -44,4 +44,9 @@ var _ = Describe("EscapeAngles", func() {
 		Expect(docsmd.EscapeAngles("plain text, nothing to do")).
 			To(Equal("plain text, nothing to do"))
 	})
+
+	It("spares a double-backtick code span, which may itself contain a single backtick", func() {
+		Expect(docsmd.EscapeAngles("the ``<id>`` placeholder, or `` a`b `` with a literal backtick")).
+			To(Equal("the ``<id>`` placeholder, or `` a`b `` with a literal backtick"))
+	})
 })

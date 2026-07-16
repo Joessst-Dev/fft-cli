@@ -166,7 +166,7 @@ func indexReadme(src string) (map[string]anchorTarget, map[string]string, error)
 	}
 
 	for line := range strings.SplitSeq(src, "\n") {
-		if strings.HasPrefix(line, "```") {
+		if docsmd.IsFenceDelimiter(line) {
 			inFence = !inFence
 		}
 		if !inFence && strings.HasPrefix(line, "## ") {
@@ -229,7 +229,7 @@ func shiftHeadings(s string) string {
 	var out []string
 	inFence := false
 	for line := range strings.SplitSeq(s, "\n") {
-		if strings.HasPrefix(line, "```") {
+		if docsmd.IsFenceDelimiter(line) {
 			inFence = !inFence
 		}
 		if !inFence && strings.HasPrefix(line, "##") {
@@ -285,11 +285,26 @@ func linkRewriter(anchors map[string]anchorTarget, repo string) func(string) str
 		return target
 	}
 
-	return func(body string) string {
-		return linkRE.ReplaceAllStringFunc(body, func(m string) string {
+	rewriteLine := func(line string) string {
+		return linkRE.ReplaceAllStringFunc(line, func(m string) string {
 			target := linkRE.FindStringSubmatch(m)[1]
 			return "](" + resolve(target) + ")"
 		})
+	}
+
+	return func(body string) string {
+		lines := strings.Split(body, "\n")
+		inFence := false
+		for i, line := range lines {
+			if docsmd.IsFenceDelimiter(line) {
+				inFence = !inFence
+				continue
+			}
+			if !inFence {
+				lines[i] = rewriteLine(line)
+			}
+		}
+		return strings.Join(lines, "\n")
 	}
 }
 

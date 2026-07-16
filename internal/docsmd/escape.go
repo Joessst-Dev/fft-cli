@@ -18,8 +18,7 @@ func EscapeAngles(md string) string {
 	lines := strings.Split(md, "\n")
 	inFence := false
 	for i, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if strings.HasPrefix(trimmed, "```") || strings.HasPrefix(trimmed, "~~~") {
+		if IsFenceDelimiter(line) {
 			inFence = !inFence
 			continue
 		}
@@ -30,20 +29,53 @@ func EscapeAngles(md string) string {
 	return strings.Join(lines, "\n")
 }
 
+// IsFenceDelimiter reports whether a line opens or closes a fenced code block —
+// a (possibly indented) run of at least three backticks or tildes. Both this
+// package and tools/docsgen walk Markdown line-by-line tracking fence state, and
+// must agree on what a fence looks like or one of them will silently process
+// text the other treats as code.
+func IsFenceDelimiter(line string) bool {
+	trimmed := strings.TrimSpace(line)
+	return strings.HasPrefix(trimmed, "```") || strings.HasPrefix(trimmed, "~~~")
+}
+
 // escapeLine escapes '<' outside inline code spans on a single line.
+//
+// A code span opens on a run of one or more backticks and closes on the next
+// run of the same length — the CommonMark rule that lets a span delimited by
+// two backticks wrap content containing a literal single backtick. Toggling on
+// every single backtick would read that opening run as open-then-immediately-
+// close, leaving the content in between unprotected.
 func escapeLine(line string) string {
 	var b strings.Builder
+	runes := []rune(line)
 	inCode := false
-	for _, r := range line {
-		switch {
-		case r == '`':
-			inCode = !inCode
-			b.WriteRune(r)
-		case r == '<' && !inCode:
-			b.WriteString("&lt;")
-		default:
-			b.WriteRune(r)
+	codeDelim := 0
+	for i := 0; i < len(runes); {
+		if runes[i] == '`' {
+			j := i
+			for j < len(runes) && runes[j] == '`' {
+				j++
+			}
+			run := j - i
+			b.WriteString(string(runes[i:j]))
+			switch {
+			case !inCode:
+				inCode = true
+				codeDelim = run
+			case run == codeDelim:
+				inCode = false
+				codeDelim = 0
+			}
+			i = j
+			continue
 		}
+		if runes[i] == '<' && !inCode {
+			b.WriteString("&lt;")
+		} else {
+			b.WriteRune(runes[i])
+		}
+		i++
 	}
 	return b.String()
 }
