@@ -5,12 +5,15 @@ https://claude.ai/code/routines). Trigger: **GitHub `pull_request` webhook** (no
 Claude GitHub App. Actions: `opened`, `synchronize`, `reopened`, `ready_for_review`, `labeled`.
 Environment: Default. Edit this file and re-register the routine when the prompt changes.
 
-Companion routine: [`pr-fix`](./pr-fix.md) picks up the `changes_requested` review this one
-files and pushes fixes; its push re-fires this routine, closing the loop.
+Companion routine: [`pr-fix`](./pr-fix.md) picks up the `changes_requested` review this one files
+and pushes fixes; its push re-fires this routine, closing the loop. The handoff is a label: when you
+request changes you add **`auto-review-fix`**, whose `labeled` event is the only trigger the
+routines platform gives `pr-fix` (it exposes neither `pull_request_review` nor a usable
+`review_requested`). `pr-fix` removes the label when it is done.
 
 Prerequisite: the Claude GitHub App must cover `Joessst-Dev/fft-cli` and deliver `pull_request`
-and `pull_request_review` events (as it does for the `spec-drift-implement` issue→PR routine). If
-this routine never fires, add fft-cli to the app installation.
+events (including the `labeled` action, which both this routine and `pr-fix` rely on). If this
+routine never fires, add fft-cli to the app installation.
 
 ---
 
@@ -39,16 +42,21 @@ side-effect scope above.
 
 **Loop state lives in a sticky control comment.** Exactly one bot-authored PR comment carries the
 hidden marker `<!-- fft-auto-review-loop -->` followed by a fenced JSON block holding
-`{ "round": N, "last_reviewed_sha": "...", "last_fixed_sha": "..." }`. Find it by scanning the
+`{ "round": N, "last_reviewed_sha": "...", "last_fixed_review_id": "..." }`. Find it by scanning the
 PR's issue comments (`gh api repos/Joessst-Dev/fft-cli/issues/<n>/comments --jq '.[].body'`) for
-the marker. If none exists, treat state as `{ "round": 0, "last_reviewed_sha": "", "last_fixed_sha": "" }`
-and create the comment when you first write state. Never open a second control comment.
+the marker. If none exists, treat state as `{ "round": 0, "last_reviewed_sha": "", "last_fixed_review_id": "" }`
+and create the comment when you first write state. You own `round` and `last_reviewed_sha`; `pr-fix`
+owns `last_fixed_review_id` — preserve it when you rewrite the block. Never open a second control
+comment.
 
 1. **ELIGIBILITY GATE** — from the webhook payload determine the PR number and operate on ONLY
    that PR. These checks make the run idempotent — webhooks retry and re-fire on every push.
    Exit early (do nothing, report why) unless ALL hold:
    - the event action is one of `opened`, `synchronize`, `reopened`, `ready_for_review`,
      `labeled` (ignore closed/edited/etc.);
+   - if the action is `labeled`, the label just added is **not** `auto-review-fix` — that label is
+     your handoff signal to `pr-fix`, not a trigger for yourself (the head-SHA check below would
+     bounce it anyway; this exits sooner);
    - `gh pr view <n> --repo Joessst-Dev/fft-cli --json state,isDraft,labels,headRefOid` shows
      state **OPEN** and `isDraft` **false**;
    - the **`auto-review`** label is present and the **`auto-review-stalled`** label is absent;
@@ -56,9 +64,10 @@ and create the comment when you first write state. Never open a second control c
      comment (you already reviewed this exact commit);
    - the control comment's `round` is **≤ 6**.
 2. Ensure the labels exist (idempotent):
-   `gh label create auto-review --color 0E8A16 --description "Opt this PR into the automated review→fix loop" || true`
-   and
-   `gh label create auto-review-stalled --color B60205 --description "Automated review loop hit its round bound; needs a human" || true`.
+   `gh label create auto-review --color 0E8A16 --description "Opt this PR into the automated review→fix loop" || true`,
+   `gh label create auto-review-stalled --color B60205 --description "Automated review loop hit its round bound; needs a human" || true`,
+   and the handoff label
+   `gh label create auto-review-fix --color FBCA04 --description "Reviewer signals pr-fix to address the changes-requested review" || true`.
 3. Read the change: `gh pr view <n> --json title,body,author,baseRefName,headRefOid`,
    `gh pr diff <n>`, and the current check status `gh pr checks <n>` (so your summary can note
    whether the required CI checks — test, no-drift, lint, govulncheck, CodeQL — are green).
@@ -78,21 +87,30 @@ and create the comment when you first write state. Never open a second control c
    entry per finding, anchored to a changed line) and call
    `gh api repos/Joessst-Dev/fft-cli/pulls/<n>/reviews -f event=<EVENT> -f body=<SUMMARY> --input comments.json`:
    - **Findings present** → `event=REQUEST_CHANGES`. The summary groups findings by severity and
-     states what must change. Then increment `round` in the control comment. (The companion
-     `pr-fix` routine will act on this review.)
+     states what must change. Then increment `round` in the control comment, and **hand off to the
+     fixer** by (re-)arming the label. Adding a label that is already present emits no event, so
+     remove then add, which always produces the `labeled` event that wakes `pr-fix`:
+     `gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix || true` then
+     `gh pr edit <n> --repo Joessst-Dev/fft-cli --add-label auto-review-fix`. Without that event the
+     fixer never runs. (Your own `labeled` trigger re-fires on the add and exits at step 1.)
    - **No findings** → `event=APPROVE`. The summary says all automated findings are resolved and
-     the PR is ready for a human to merge; note the CI check status. **Do not merge.** This is how
-     the loop converges.
+     the PR is ready for a human to merge; note the CI check status. Remove the handoff label if it
+     lingers (`gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix || true`).
+     **Do not merge.** This is how the loop converges.
 6. **Round-bound escalation.** If step 1 admitted the PR but submitting `REQUEST_CHANGES` would
    push `round` **past 6**, do NOT request changes (that would re-arm the fixer and never
    terminate). Instead: post one comment tagging the PR author summarizing the still-open
-   findings and that the automated loop is exhausted, add the **`auto-review-stalled`** label, and
-   stop. A human takes it from here.
+   findings and that the automated loop is exhausted, add the **`auto-review-stalled`** label,
+   remove the `auto-review-fix` handoff label so the fixer cannot re-arm
+   (`gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix || true`), and stop. A
+   human takes it from here.
 7. Update the sticky control comment: set `last_reviewed_sha` to the head SHA and persist the
    current `round`. Leave your working tree clean; you made no code changes.
 
 **Guardrails:** one review per head SHA (idempotent — skip if `last_reviewed_sha` already matches).
-One sticky control comment. At most 6 rounds, then escalate via `auto-review-stalled`. Approve-only
-on convergence — **never merge, never push, no writes to the repo's code of any kind.** Finish by
-summarizing: the PR, the verdict you submitted (approve / request-changes / escalated), the finding
-count, and the round number.
+One sticky control comment; preserve the fixer's `last_fixed_review_id` when you rewrite it. On
+`REQUEST_CHANGES`, re-arm the `auto-review-fix` handoff label (remove-then-add) — that event is the
+only thing that wakes `pr-fix`. At most 6 rounds, then escalate via `auto-review-stalled`.
+Approve-only on convergence — **never merge, never push, no writes to the repo's code of any kind.**
+Finish by summarizing: the PR, the verdict you submitted (approve / request-changes / escalated),
+the finding count, and the round number.

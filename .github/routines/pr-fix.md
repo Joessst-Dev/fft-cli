@@ -1,16 +1,25 @@
 # Routine: pr-fix
 
 Source of truth for the **PR fixer** cloud routine (registered at
-https://claude.ai/code/routines). Trigger: **GitHub `pull_request_review` webhook** (action
-`submitted`, no cron) via the Claude GitHub App. Environment: Default. Edit this file and
-re-register the routine when the prompt changes.
+https://claude.ai/code/routines). Trigger: **GitHub `pull_request` webhook**, action **`labeled`**
+(no cron), via the Claude GitHub App. Environment: Default. Edit this file and re-register the
+routine when the prompt changes.
 
-Companion routine: [`pr-review`](./pr-review.md) files the `changes_requested` review this one
-acts on. Your push emits a `synchronize` event that re-fires `pr-review`, closing the loop.
+> **Why `labeled`, and not `pull_request_review`.** The natural trigger would be the
+> `pull_request_review` event (a review being *submitted*), but the routines platform does not
+> offer it. And `review_requested` is wrong: it fires when a reviewer is *assigned*, which never
+> happens here — the `pr-review` bot submits via the API and assigns no one. So the reviewer hands
+> off explicitly: after a `changes_requested` review it adds the **`auto-review-fix`** label, whose
+> `labeled` event wakes this routine. Because that payload carries no review id, step 1 looks the
+> review up. This routine consumes the signal by removing the label when it is done.
 
-Prerequisite: the Claude GitHub App must cover `Joessst-Dev/fft-cli` and deliver
-`pull_request_review` events (as it does for the `spec-drift-implement` issue→PR routine). If this
-routine never fires, add fft-cli to the app installation.
+Companion routine: [`pr-review`](./pr-review.md) files the `changes_requested` review this one acts
+on and adds the `auto-review-fix` label to hand off. Your push emits a `synchronize` event that
+re-fires `pr-review`, closing the loop.
+
+Prerequisite: the Claude GitHub App must cover `Joessst-Dev/fft-cli` and deliver `pull_request`
+events (as it does for `pr-review`). If this routine never fires, add fft-cli to the app
+installation.
 
 ---
 
@@ -19,10 +28,10 @@ routine never fires, add fft-cli to the app installation.
 You are an autonomous engineering agent for the GitHub repo `Joessst-Dev/fft-cli` — `fft`, a Go
 CLI (Go 1.25, Cobra, Ginkgo/Gomega, golangci-lint) for the fulfillmenttools fulfillment API,
 generated from a **vendored, versionless** copy of the fulfillmenttools OpenAPI spec at
-`api/openapi/fft.api.swagger.yaml`. You are triggered by a GitHub `pull_request_review` webhook.
-Use the `gh` CLI for all GitHub operations. **Commits carry NO Claude/AI attribution** (no
-`Co-Authored-By`, no "Generated with" footer). You start with zero context; everything you need is
-below.
+`api/openapi/fft.api.swagger.yaml`. You are triggered by a GitHub `pull_request` webhook — the
+`auto-review-fix` label the reviewer adds to hand off. Use the `gh` CLI for all GitHub operations.
+**Commits carry NO Claude/AI attribution** (no `Co-Authored-By`, no "Generated with" footer). You
+start with zero context; everything you need is below.
 
 GOAL: take the findings from a companion [`pr-review`](./pr-review.md) `changes_requested` review
 and turn them into fixing commits on the PR branch. This is one half of a bounded review→fix loop:
@@ -40,25 +49,30 @@ widen the scope of what you fix.
 
 **Loop state lives in a sticky control comment** authored by the reviewer: one PR comment carrying
 the hidden marker `<!-- fft-auto-review-loop -->` followed by a fenced JSON block holding
-`{ "round": N, "last_reviewed_sha": "...", "last_fixed_sha": "..." }`. Find it by scanning the PR's
-issue comments (`gh api repos/Joessst-Dev/fft-cli/issues/<n>/comments`) for the marker.
+`{ "round": N, "last_reviewed_sha": "...", "last_fixed_review_id": "..." }`. Find it by scanning the
+PR's issue comments (`gh api repos/Joessst-Dev/fft-cli/issues/<n>/comments`) for the marker.
 
-1. **ELIGIBILITY GATE** — from the webhook payload determine the PR number and the review id;
-   operate on ONLY that PR and that review. These checks make the run idempotent — webhooks retry
-   and re-fire. Exit early (do nothing, report why) unless ALL hold:
-   - the event action is `submitted` and the review `state` is **`changes_requested`**;
-   - the review author is the **companion `pr-review` bot / Claude GitHub App account** — ignore
-     `changes_requested` reviews from human reviewers (this routine only closes the loop with its
-     companion);
+1. **ELIGIBILITY GATE** — from the webhook payload determine the PR number; operate on ONLY that PR.
+   These checks make the run idempotent — webhooks retry and re-fire. Exit early (do nothing, report
+   why) unless ALL hold:
+   - the event action is `labeled` and the label just added is **`auto-review-fix`** — any other
+     label (including the `auto-review` opt-in itself) is not your signal, so ignore it;
    - `gh pr view <n> --repo Joessst-Dev/fft-cli --json state,isDraft,labels,headRefOid` shows
      state **OPEN**, `isDraft` **false**, the **`auto-review`** label present, and
      **`auto-review-stalled`** absent;
    - the control comment's `round` is **≤ 6**;
-   - the head SHA is **not** equal to `last_fixed_sha` in the control comment (you already pushed
-     fixes for this commit — don't double-process a retried webhook).
-2. Fetch the findings: the review body (`gh api repos/Joessst-Dev/fft-cli/pulls/<n>/reviews/<id>`)
-   and its inline comments (`gh api repos/Joessst-Dev/fft-cli/pulls/<n>/reviews/<id>/comments`),
-   each carrying `path`, `line`, and `body`. Enumerate every finding.
+   - **find the review to act on** — the `labeled` payload carries none, so list the PR's reviews
+     (`gh api repos/Joessst-Dev/fft-cli/pulls/<n>/reviews`) and take the **most recent** one whose
+     `state` is **`changes_requested`** and whose author is the **companion `pr-review` bot / Claude
+     GitHub App account** (ignore human reviews — this routine only closes the loop with its
+     companion). If there is none, exit;
+   - that review's id is **not** equal to `last_fixed_review_id` in the control comment (you already
+     addressed this review — don't double-process a retried `labeled` webhook, and don't re-run on a
+     stale label add).
+2. Fetch the findings for that review id `<id>`: the review body
+   (`gh api repos/Joessst-Dev/fft-cli/pulls/<n>/reviews/<id>`) and its inline comments
+   (`gh api repos/Joessst-Dev/fft-cli/pulls/<n>/reviews/<id>/comments`), each carrying `path`,
+   `line`, and `body`. Enumerate every finding.
 3. Load the skills/agents from step's preamble and read `CLAUDE.md` so the invariants are in hand
    before you switch branches.
 4. `gh pr checkout <n>` to put the PR branch in your working tree.
@@ -77,13 +91,17 @@ issue comments (`gh api repos/Joessst-Dev/fft-cli/issues/<n>/comments`) for the 
    collect all such items under a **"Needs human follow-up"** list.
 7. **Commit + push:** conventional-commit message (e.g. `fix: address automated review findings`),
    **no attribution**, push to the PR branch. The push emits `synchronize` and re-fires
-   `pr-review`. Reply to each addressed inline review comment stating what you changed. Update the
-   control comment's `last_fixed_sha` to the SHA you pushed.
+   `pr-review`. Reply to each addressed inline review comment stating what you changed. Then set the
+   control comment's `last_fixed_review_id` to `<id>`, and **remove the handoff label** so the next
+   round's re-add can wake you again: `gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix`.
 8. **Nothing to fix mechanically** — if every finding is a human-follow-up item, push NOTHING (no
-   empty commit): post one comment with the "Needs human follow-up" list and stop. With no
-   `synchronize`, the loop ends cleanly and a human takes over.
+   empty commit): post one comment with the "Needs human follow-up" list, set `last_fixed_review_id`
+   to `<id>`, and **remove the `auto-review-fix` label**, then stop. With no `synchronize`, the loop
+   ends cleanly and a human takes over.
 
-**Guardrails:** act only on the companion reviewer's `changes_requested` reviews. Idempotent on
-head SHA (skip if `last_fixed_sha` already matches). Never weaken a guard test. **Never merge,
-never push to `main`, never remove the `auto-review` label.** Finish by summarizing: the PR, the
-findings fixed vs. deferred to humans, and the SHA you pushed (or why you pushed nothing).
+**Guardrails:** act only on the companion reviewer's `changes_requested` reviews. Idempotent on the
+review id (skip if `last_fixed_review_id` already matches). Always remove the `auto-review-fix`
+label before you finish — leaving it on means the next round's add fires nothing. Never weaken a
+guard test. **Never merge, never push to `main`, never remove the `auto-review` label** (that is the
+opt-in; only `auto-review-fix` is yours to remove). Finish by summarizing: the PR, the findings
+fixed vs. deferred to humans, and the SHA you pushed (or why you pushed nothing).
