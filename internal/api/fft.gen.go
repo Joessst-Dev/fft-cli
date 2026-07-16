@@ -614,547 +614,547 @@ func (e CostCoefficientMeasurementUnit) Valid() bool {
 
 // Defines values for CurrencyCode.
 const (
-	AED CurrencyCode = "AED"
-	AFN CurrencyCode = "AFN"
-	ALL CurrencyCode = "ALL"
-	AMD CurrencyCode = "AMD"
-	ANG CurrencyCode = "ANG"
-	AOA CurrencyCode = "AOA"
-	ARS CurrencyCode = "ARS"
-	AUD CurrencyCode = "AUD"
-	AWG CurrencyCode = "AWG"
-	AZN CurrencyCode = "AZN"
-	BAM CurrencyCode = "BAM"
-	BBD CurrencyCode = "BBD"
-	BDT CurrencyCode = "BDT"
-	BGN CurrencyCode = "BGN"
-	BHD CurrencyCode = "BHD"
-	BIF CurrencyCode = "BIF"
-	BMD CurrencyCode = "BMD"
-	BND CurrencyCode = "BND"
-	BOB CurrencyCode = "BOB"
-	BOV CurrencyCode = "BOV"
-	BRL CurrencyCode = "BRL"
-	BSD CurrencyCode = "BSD"
-	BTN CurrencyCode = "BTN"
-	BWP CurrencyCode = "BWP"
-	BYN CurrencyCode = "BYN"
-	BZD CurrencyCode = "BZD"
-	CAD CurrencyCode = "CAD"
-	CDF CurrencyCode = "CDF"
-	CHE CurrencyCode = "CHE"
-	CHF CurrencyCode = "CHF"
-	CHW CurrencyCode = "CHW"
-	CLF CurrencyCode = "CLF"
-	CLP CurrencyCode = "CLP"
-	CNY CurrencyCode = "CNY"
-	COP CurrencyCode = "COP"
-	COU CurrencyCode = "COU"
-	CRC CurrencyCode = "CRC"
-	CUC CurrencyCode = "CUC"
-	CUP CurrencyCode = "CUP"
-	CVE CurrencyCode = "CVE"
-	CZK CurrencyCode = "CZK"
-	DJF CurrencyCode = "DJF"
-	DKK CurrencyCode = "DKK"
-	DOP CurrencyCode = "DOP"
-	DZD CurrencyCode = "DZD"
-	EGP CurrencyCode = "EGP"
-	ERN CurrencyCode = "ERN"
-	ETB CurrencyCode = "ETB"
-	EUR CurrencyCode = "EUR"
-	FJD CurrencyCode = "FJD"
-	FKP CurrencyCode = "FKP"
-	GBP CurrencyCode = "GBP"
-	GEL CurrencyCode = "GEL"
-	GHS CurrencyCode = "GHS"
-	GIP CurrencyCode = "GIP"
-	GMD CurrencyCode = "GMD"
-	GNF CurrencyCode = "GNF"
-	GTQ CurrencyCode = "GTQ"
-	GYD CurrencyCode = "GYD"
-	HKD CurrencyCode = "HKD"
-	HNL CurrencyCode = "HNL"
-	HTG CurrencyCode = "HTG"
-	HUF CurrencyCode = "HUF"
-	IDR CurrencyCode = "IDR"
-	ILS CurrencyCode = "ILS"
-	INR CurrencyCode = "INR"
-	IQD CurrencyCode = "IQD"
-	IRR CurrencyCode = "IRR"
-	ISK CurrencyCode = "ISK"
-	JMD CurrencyCode = "JMD"
-	JOD CurrencyCode = "JOD"
-	JPY CurrencyCode = "JPY"
-	KES CurrencyCode = "KES"
-	KGS CurrencyCode = "KGS"
-	KHR CurrencyCode = "KHR"
-	KMF CurrencyCode = "KMF"
-	KPW CurrencyCode = "KPW"
-	KRW CurrencyCode = "KRW"
-	KWD CurrencyCode = "KWD"
-	KYD CurrencyCode = "KYD"
-	KZT CurrencyCode = "KZT"
-	LAK CurrencyCode = "LAK"
-	LBP CurrencyCode = "LBP"
-	LKR CurrencyCode = "LKR"
-	LRD CurrencyCode = "LRD"
-	LSL CurrencyCode = "LSL"
-	LYD CurrencyCode = "LYD"
-	MAD CurrencyCode = "MAD"
-	MDL CurrencyCode = "MDL"
-	MGA CurrencyCode = "MGA"
-	MKD CurrencyCode = "MKD"
-	MMK CurrencyCode = "MMK"
-	MNT CurrencyCode = "MNT"
-	MOP CurrencyCode = "MOP"
-	MRU CurrencyCode = "MRU"
-	MUR CurrencyCode = "MUR"
-	MVR CurrencyCode = "MVR"
-	MWK CurrencyCode = "MWK"
-	MXN CurrencyCode = "MXN"
-	MXV CurrencyCode = "MXV"
-	MYR CurrencyCode = "MYR"
-	MZN CurrencyCode = "MZN"
-	NAD CurrencyCode = "NAD"
-	NGN CurrencyCode = "NGN"
-	NIO CurrencyCode = "NIO"
-	NOK CurrencyCode = "NOK"
-	NPR CurrencyCode = "NPR"
-	NZD CurrencyCode = "NZD"
-	OMR CurrencyCode = "OMR"
-	PAB CurrencyCode = "PAB"
-	PEN CurrencyCode = "PEN"
-	PGK CurrencyCode = "PGK"
-	PHP CurrencyCode = "PHP"
-	PKR CurrencyCode = "PKR"
-	PLN CurrencyCode = "PLN"
-	PYG CurrencyCode = "PYG"
-	QAR CurrencyCode = "QAR"
-	RON CurrencyCode = "RON"
-	RSD CurrencyCode = "RSD"
-	RUB CurrencyCode = "RUB"
-	RWF CurrencyCode = "RWF"
-	SAR CurrencyCode = "SAR"
-	SBD CurrencyCode = "SBD"
-	SCR CurrencyCode = "SCR"
-	SDG CurrencyCode = "SDG"
-	SEK CurrencyCode = "SEK"
-	SGD CurrencyCode = "SGD"
-	SHP CurrencyCode = "SHP"
-	SLE CurrencyCode = "SLE"
-	SOS CurrencyCode = "SOS"
-	SRD CurrencyCode = "SRD"
-	SSP CurrencyCode = "SSP"
-	STN CurrencyCode = "STN"
-	SVC CurrencyCode = "SVC"
-	SYP CurrencyCode = "SYP"
-	SZL CurrencyCode = "SZL"
-	THB CurrencyCode = "THB"
-	TJS CurrencyCode = "TJS"
-	TMT CurrencyCode = "TMT"
-	TND CurrencyCode = "TND"
-	TOP CurrencyCode = "TOP"
-	TRY CurrencyCode = "TRY"
-	TTD CurrencyCode = "TTD"
-	TWD CurrencyCode = "TWD"
-	TZS CurrencyCode = "TZS"
-	UAH CurrencyCode = "UAH"
-	UGX CurrencyCode = "UGX"
-	USD CurrencyCode = "USD"
-	USN CurrencyCode = "USN"
-	UYI CurrencyCode = "UYI"
-	UYU CurrencyCode = "UYU"
-	UYW CurrencyCode = "UYW"
-	UZS CurrencyCode = "UZS"
-	VED CurrencyCode = "VED"
-	VES CurrencyCode = "VES"
-	VND CurrencyCode = "VND"
-	VUV CurrencyCode = "VUV"
-	WST CurrencyCode = "WST"
-	XAF CurrencyCode = "XAF"
-	XAG CurrencyCode = "XAG"
-	XAU CurrencyCode = "XAU"
-	XBA CurrencyCode = "XBA"
-	XBB CurrencyCode = "XBB"
-	XBC CurrencyCode = "XBC"
-	XBD CurrencyCode = "XBD"
-	XCD CurrencyCode = "XCD"
-	XDR CurrencyCode = "XDR"
-	XOF CurrencyCode = "XOF"
-	XPD CurrencyCode = "XPD"
-	XPF CurrencyCode = "XPF"
-	XPT CurrencyCode = "XPT"
-	XSU CurrencyCode = "XSU"
-	XTS CurrencyCode = "XTS"
-	XUA CurrencyCode = "XUA"
-	XXX CurrencyCode = "XXX"
-	YER CurrencyCode = "YER"
-	ZAR CurrencyCode = "ZAR"
-	ZMW CurrencyCode = "ZMW"
-	ZWL CurrencyCode = "ZWL"
+	CurrencyCodeAED CurrencyCode = "AED"
+	CurrencyCodeAFN CurrencyCode = "AFN"
+	CurrencyCodeALL CurrencyCode = "ALL"
+	CurrencyCodeAMD CurrencyCode = "AMD"
+	CurrencyCodeANG CurrencyCode = "ANG"
+	CurrencyCodeAOA CurrencyCode = "AOA"
+	CurrencyCodeARS CurrencyCode = "ARS"
+	CurrencyCodeAUD CurrencyCode = "AUD"
+	CurrencyCodeAWG CurrencyCode = "AWG"
+	CurrencyCodeAZN CurrencyCode = "AZN"
+	CurrencyCodeBAM CurrencyCode = "BAM"
+	CurrencyCodeBBD CurrencyCode = "BBD"
+	CurrencyCodeBDT CurrencyCode = "BDT"
+	CurrencyCodeBGN CurrencyCode = "BGN"
+	CurrencyCodeBHD CurrencyCode = "BHD"
+	CurrencyCodeBIF CurrencyCode = "BIF"
+	CurrencyCodeBMD CurrencyCode = "BMD"
+	CurrencyCodeBND CurrencyCode = "BND"
+	CurrencyCodeBOB CurrencyCode = "BOB"
+	CurrencyCodeBOV CurrencyCode = "BOV"
+	CurrencyCodeBRL CurrencyCode = "BRL"
+	CurrencyCodeBSD CurrencyCode = "BSD"
+	CurrencyCodeBTN CurrencyCode = "BTN"
+	CurrencyCodeBWP CurrencyCode = "BWP"
+	CurrencyCodeBYN CurrencyCode = "BYN"
+	CurrencyCodeBZD CurrencyCode = "BZD"
+	CurrencyCodeCAD CurrencyCode = "CAD"
+	CurrencyCodeCDF CurrencyCode = "CDF"
+	CurrencyCodeCHE CurrencyCode = "CHE"
+	CurrencyCodeCHF CurrencyCode = "CHF"
+	CurrencyCodeCHW CurrencyCode = "CHW"
+	CurrencyCodeCLF CurrencyCode = "CLF"
+	CurrencyCodeCLP CurrencyCode = "CLP"
+	CurrencyCodeCNY CurrencyCode = "CNY"
+	CurrencyCodeCOP CurrencyCode = "COP"
+	CurrencyCodeCOU CurrencyCode = "COU"
+	CurrencyCodeCRC CurrencyCode = "CRC"
+	CurrencyCodeCUC CurrencyCode = "CUC"
+	CurrencyCodeCUP CurrencyCode = "CUP"
+	CurrencyCodeCVE CurrencyCode = "CVE"
+	CurrencyCodeCZK CurrencyCode = "CZK"
+	CurrencyCodeDJF CurrencyCode = "DJF"
+	CurrencyCodeDKK CurrencyCode = "DKK"
+	CurrencyCodeDOP CurrencyCode = "DOP"
+	CurrencyCodeDZD CurrencyCode = "DZD"
+	CurrencyCodeEGP CurrencyCode = "EGP"
+	CurrencyCodeERN CurrencyCode = "ERN"
+	CurrencyCodeETB CurrencyCode = "ETB"
+	CurrencyCodeEUR CurrencyCode = "EUR"
+	CurrencyCodeFJD CurrencyCode = "FJD"
+	CurrencyCodeFKP CurrencyCode = "FKP"
+	CurrencyCodeGBP CurrencyCode = "GBP"
+	CurrencyCodeGEL CurrencyCode = "GEL"
+	CurrencyCodeGHS CurrencyCode = "GHS"
+	CurrencyCodeGIP CurrencyCode = "GIP"
+	CurrencyCodeGMD CurrencyCode = "GMD"
+	CurrencyCodeGNF CurrencyCode = "GNF"
+	CurrencyCodeGTQ CurrencyCode = "GTQ"
+	CurrencyCodeGYD CurrencyCode = "GYD"
+	CurrencyCodeHKD CurrencyCode = "HKD"
+	CurrencyCodeHNL CurrencyCode = "HNL"
+	CurrencyCodeHTG CurrencyCode = "HTG"
+	CurrencyCodeHUF CurrencyCode = "HUF"
+	CurrencyCodeIDR CurrencyCode = "IDR"
+	CurrencyCodeILS CurrencyCode = "ILS"
+	CurrencyCodeINR CurrencyCode = "INR"
+	CurrencyCodeIQD CurrencyCode = "IQD"
+	CurrencyCodeIRR CurrencyCode = "IRR"
+	CurrencyCodeISK CurrencyCode = "ISK"
+	CurrencyCodeJMD CurrencyCode = "JMD"
+	CurrencyCodeJOD CurrencyCode = "JOD"
+	CurrencyCodeJPY CurrencyCode = "JPY"
+	CurrencyCodeKES CurrencyCode = "KES"
+	CurrencyCodeKGS CurrencyCode = "KGS"
+	CurrencyCodeKHR CurrencyCode = "KHR"
+	CurrencyCodeKMF CurrencyCode = "KMF"
+	CurrencyCodeKPW CurrencyCode = "KPW"
+	CurrencyCodeKRW CurrencyCode = "KRW"
+	CurrencyCodeKWD CurrencyCode = "KWD"
+	CurrencyCodeKYD CurrencyCode = "KYD"
+	CurrencyCodeKZT CurrencyCode = "KZT"
+	CurrencyCodeLAK CurrencyCode = "LAK"
+	CurrencyCodeLBP CurrencyCode = "LBP"
+	CurrencyCodeLKR CurrencyCode = "LKR"
+	CurrencyCodeLRD CurrencyCode = "LRD"
+	CurrencyCodeLSL CurrencyCode = "LSL"
+	CurrencyCodeLYD CurrencyCode = "LYD"
+	CurrencyCodeMAD CurrencyCode = "MAD"
+	CurrencyCodeMDL CurrencyCode = "MDL"
+	CurrencyCodeMGA CurrencyCode = "MGA"
+	CurrencyCodeMKD CurrencyCode = "MKD"
+	CurrencyCodeMMK CurrencyCode = "MMK"
+	CurrencyCodeMNT CurrencyCode = "MNT"
+	CurrencyCodeMOP CurrencyCode = "MOP"
+	CurrencyCodeMRU CurrencyCode = "MRU"
+	CurrencyCodeMUR CurrencyCode = "MUR"
+	CurrencyCodeMVR CurrencyCode = "MVR"
+	CurrencyCodeMWK CurrencyCode = "MWK"
+	CurrencyCodeMXN CurrencyCode = "MXN"
+	CurrencyCodeMXV CurrencyCode = "MXV"
+	CurrencyCodeMYR CurrencyCode = "MYR"
+	CurrencyCodeMZN CurrencyCode = "MZN"
+	CurrencyCodeNAD CurrencyCode = "NAD"
+	CurrencyCodeNGN CurrencyCode = "NGN"
+	CurrencyCodeNIO CurrencyCode = "NIO"
+	CurrencyCodeNOK CurrencyCode = "NOK"
+	CurrencyCodeNPR CurrencyCode = "NPR"
+	CurrencyCodeNZD CurrencyCode = "NZD"
+	CurrencyCodeOMR CurrencyCode = "OMR"
+	CurrencyCodePAB CurrencyCode = "PAB"
+	CurrencyCodePEN CurrencyCode = "PEN"
+	CurrencyCodePGK CurrencyCode = "PGK"
+	CurrencyCodePHP CurrencyCode = "PHP"
+	CurrencyCodePKR CurrencyCode = "PKR"
+	CurrencyCodePLN CurrencyCode = "PLN"
+	CurrencyCodePYG CurrencyCode = "PYG"
+	CurrencyCodeQAR CurrencyCode = "QAR"
+	CurrencyCodeRON CurrencyCode = "RON"
+	CurrencyCodeRSD CurrencyCode = "RSD"
+	CurrencyCodeRUB CurrencyCode = "RUB"
+	CurrencyCodeRWF CurrencyCode = "RWF"
+	CurrencyCodeSAR CurrencyCode = "SAR"
+	CurrencyCodeSBD CurrencyCode = "SBD"
+	CurrencyCodeSCR CurrencyCode = "SCR"
+	CurrencyCodeSDG CurrencyCode = "SDG"
+	CurrencyCodeSEK CurrencyCode = "SEK"
+	CurrencyCodeSGD CurrencyCode = "SGD"
+	CurrencyCodeSHP CurrencyCode = "SHP"
+	CurrencyCodeSLE CurrencyCode = "SLE"
+	CurrencyCodeSOS CurrencyCode = "SOS"
+	CurrencyCodeSRD CurrencyCode = "SRD"
+	CurrencyCodeSSP CurrencyCode = "SSP"
+	CurrencyCodeSTN CurrencyCode = "STN"
+	CurrencyCodeSVC CurrencyCode = "SVC"
+	CurrencyCodeSYP CurrencyCode = "SYP"
+	CurrencyCodeSZL CurrencyCode = "SZL"
+	CurrencyCodeTHB CurrencyCode = "THB"
+	CurrencyCodeTJS CurrencyCode = "TJS"
+	CurrencyCodeTMT CurrencyCode = "TMT"
+	CurrencyCodeTND CurrencyCode = "TND"
+	CurrencyCodeTOP CurrencyCode = "TOP"
+	CurrencyCodeTRY CurrencyCode = "TRY"
+	CurrencyCodeTTD CurrencyCode = "TTD"
+	CurrencyCodeTWD CurrencyCode = "TWD"
+	CurrencyCodeTZS CurrencyCode = "TZS"
+	CurrencyCodeUAH CurrencyCode = "UAH"
+	CurrencyCodeUGX CurrencyCode = "UGX"
+	CurrencyCodeUSD CurrencyCode = "USD"
+	CurrencyCodeUSN CurrencyCode = "USN"
+	CurrencyCodeUYI CurrencyCode = "UYI"
+	CurrencyCodeUYU CurrencyCode = "UYU"
+	CurrencyCodeUYW CurrencyCode = "UYW"
+	CurrencyCodeUZS CurrencyCode = "UZS"
+	CurrencyCodeVED CurrencyCode = "VED"
+	CurrencyCodeVES CurrencyCode = "VES"
+	CurrencyCodeVND CurrencyCode = "VND"
+	CurrencyCodeVUV CurrencyCode = "VUV"
+	CurrencyCodeWST CurrencyCode = "WST"
+	CurrencyCodeXAF CurrencyCode = "XAF"
+	CurrencyCodeXAG CurrencyCode = "XAG"
+	CurrencyCodeXAU CurrencyCode = "XAU"
+	CurrencyCodeXBA CurrencyCode = "XBA"
+	CurrencyCodeXBB CurrencyCode = "XBB"
+	CurrencyCodeXBC CurrencyCode = "XBC"
+	CurrencyCodeXBD CurrencyCode = "XBD"
+	CurrencyCodeXCD CurrencyCode = "XCD"
+	CurrencyCodeXDR CurrencyCode = "XDR"
+	CurrencyCodeXOF CurrencyCode = "XOF"
+	CurrencyCodeXPD CurrencyCode = "XPD"
+	CurrencyCodeXPF CurrencyCode = "XPF"
+	CurrencyCodeXPT CurrencyCode = "XPT"
+	CurrencyCodeXSU CurrencyCode = "XSU"
+	CurrencyCodeXTS CurrencyCode = "XTS"
+	CurrencyCodeXUA CurrencyCode = "XUA"
+	CurrencyCodeXXX CurrencyCode = "XXX"
+	CurrencyCodeYER CurrencyCode = "YER"
+	CurrencyCodeZAR CurrencyCode = "ZAR"
+	CurrencyCodeZMW CurrencyCode = "ZMW"
+	CurrencyCodeZWL CurrencyCode = "ZWL"
 )
 
 // Valid indicates whether the value is a known member of the CurrencyCode enum.
 func (e CurrencyCode) Valid() bool {
 	switch e {
-	case AED:
+	case CurrencyCodeAED:
 		return true
-	case AFN:
+	case CurrencyCodeAFN:
 		return true
-	case ALL:
+	case CurrencyCodeALL:
 		return true
-	case AMD:
+	case CurrencyCodeAMD:
 		return true
-	case ANG:
+	case CurrencyCodeANG:
 		return true
-	case AOA:
+	case CurrencyCodeAOA:
 		return true
-	case ARS:
+	case CurrencyCodeARS:
 		return true
-	case AUD:
+	case CurrencyCodeAUD:
 		return true
-	case AWG:
+	case CurrencyCodeAWG:
 		return true
-	case AZN:
+	case CurrencyCodeAZN:
 		return true
-	case BAM:
+	case CurrencyCodeBAM:
 		return true
-	case BBD:
+	case CurrencyCodeBBD:
 		return true
-	case BDT:
+	case CurrencyCodeBDT:
 		return true
-	case BGN:
+	case CurrencyCodeBGN:
 		return true
-	case BHD:
+	case CurrencyCodeBHD:
 		return true
-	case BIF:
+	case CurrencyCodeBIF:
 		return true
-	case BMD:
+	case CurrencyCodeBMD:
 		return true
-	case BND:
+	case CurrencyCodeBND:
 		return true
-	case BOB:
+	case CurrencyCodeBOB:
 		return true
-	case BOV:
+	case CurrencyCodeBOV:
 		return true
-	case BRL:
+	case CurrencyCodeBRL:
 		return true
-	case BSD:
+	case CurrencyCodeBSD:
 		return true
-	case BTN:
+	case CurrencyCodeBTN:
 		return true
-	case BWP:
+	case CurrencyCodeBWP:
 		return true
-	case BYN:
+	case CurrencyCodeBYN:
 		return true
-	case BZD:
+	case CurrencyCodeBZD:
 		return true
-	case CAD:
+	case CurrencyCodeCAD:
 		return true
-	case CDF:
+	case CurrencyCodeCDF:
 		return true
-	case CHE:
+	case CurrencyCodeCHE:
 		return true
-	case CHF:
+	case CurrencyCodeCHF:
 		return true
-	case CHW:
+	case CurrencyCodeCHW:
 		return true
-	case CLF:
+	case CurrencyCodeCLF:
 		return true
-	case CLP:
+	case CurrencyCodeCLP:
 		return true
-	case CNY:
+	case CurrencyCodeCNY:
 		return true
-	case COP:
+	case CurrencyCodeCOP:
 		return true
-	case COU:
+	case CurrencyCodeCOU:
 		return true
-	case CRC:
+	case CurrencyCodeCRC:
 		return true
-	case CUC:
+	case CurrencyCodeCUC:
 		return true
-	case CUP:
+	case CurrencyCodeCUP:
 		return true
-	case CVE:
+	case CurrencyCodeCVE:
 		return true
-	case CZK:
+	case CurrencyCodeCZK:
 		return true
-	case DJF:
+	case CurrencyCodeDJF:
 		return true
-	case DKK:
+	case CurrencyCodeDKK:
 		return true
-	case DOP:
+	case CurrencyCodeDOP:
 		return true
-	case DZD:
+	case CurrencyCodeDZD:
 		return true
-	case EGP:
+	case CurrencyCodeEGP:
 		return true
-	case ERN:
+	case CurrencyCodeERN:
 		return true
-	case ETB:
+	case CurrencyCodeETB:
 		return true
-	case EUR:
+	case CurrencyCodeEUR:
 		return true
-	case FJD:
+	case CurrencyCodeFJD:
 		return true
-	case FKP:
+	case CurrencyCodeFKP:
 		return true
-	case GBP:
+	case CurrencyCodeGBP:
 		return true
-	case GEL:
+	case CurrencyCodeGEL:
 		return true
-	case GHS:
+	case CurrencyCodeGHS:
 		return true
-	case GIP:
+	case CurrencyCodeGIP:
 		return true
-	case GMD:
+	case CurrencyCodeGMD:
 		return true
-	case GNF:
+	case CurrencyCodeGNF:
 		return true
-	case GTQ:
+	case CurrencyCodeGTQ:
 		return true
-	case GYD:
+	case CurrencyCodeGYD:
 		return true
-	case HKD:
+	case CurrencyCodeHKD:
 		return true
-	case HNL:
+	case CurrencyCodeHNL:
 		return true
-	case HTG:
+	case CurrencyCodeHTG:
 		return true
-	case HUF:
+	case CurrencyCodeHUF:
 		return true
-	case IDR:
+	case CurrencyCodeIDR:
 		return true
-	case ILS:
+	case CurrencyCodeILS:
 		return true
-	case INR:
+	case CurrencyCodeINR:
 		return true
-	case IQD:
+	case CurrencyCodeIQD:
 		return true
-	case IRR:
+	case CurrencyCodeIRR:
 		return true
-	case ISK:
+	case CurrencyCodeISK:
 		return true
-	case JMD:
+	case CurrencyCodeJMD:
 		return true
-	case JOD:
+	case CurrencyCodeJOD:
 		return true
-	case JPY:
+	case CurrencyCodeJPY:
 		return true
-	case KES:
+	case CurrencyCodeKES:
 		return true
-	case KGS:
+	case CurrencyCodeKGS:
 		return true
-	case KHR:
+	case CurrencyCodeKHR:
 		return true
-	case KMF:
+	case CurrencyCodeKMF:
 		return true
-	case KPW:
+	case CurrencyCodeKPW:
 		return true
-	case KRW:
+	case CurrencyCodeKRW:
 		return true
-	case KWD:
+	case CurrencyCodeKWD:
 		return true
-	case KYD:
+	case CurrencyCodeKYD:
 		return true
-	case KZT:
+	case CurrencyCodeKZT:
 		return true
-	case LAK:
+	case CurrencyCodeLAK:
 		return true
-	case LBP:
+	case CurrencyCodeLBP:
 		return true
-	case LKR:
+	case CurrencyCodeLKR:
 		return true
-	case LRD:
+	case CurrencyCodeLRD:
 		return true
-	case LSL:
+	case CurrencyCodeLSL:
 		return true
-	case LYD:
+	case CurrencyCodeLYD:
 		return true
-	case MAD:
+	case CurrencyCodeMAD:
 		return true
-	case MDL:
+	case CurrencyCodeMDL:
 		return true
-	case MGA:
+	case CurrencyCodeMGA:
 		return true
-	case MKD:
+	case CurrencyCodeMKD:
 		return true
-	case MMK:
+	case CurrencyCodeMMK:
 		return true
-	case MNT:
+	case CurrencyCodeMNT:
 		return true
-	case MOP:
+	case CurrencyCodeMOP:
 		return true
-	case MRU:
+	case CurrencyCodeMRU:
 		return true
-	case MUR:
+	case CurrencyCodeMUR:
 		return true
-	case MVR:
+	case CurrencyCodeMVR:
 		return true
-	case MWK:
+	case CurrencyCodeMWK:
 		return true
-	case MXN:
+	case CurrencyCodeMXN:
 		return true
-	case MXV:
+	case CurrencyCodeMXV:
 		return true
-	case MYR:
+	case CurrencyCodeMYR:
 		return true
-	case MZN:
+	case CurrencyCodeMZN:
 		return true
-	case NAD:
+	case CurrencyCodeNAD:
 		return true
-	case NGN:
+	case CurrencyCodeNGN:
 		return true
-	case NIO:
+	case CurrencyCodeNIO:
 		return true
-	case NOK:
+	case CurrencyCodeNOK:
 		return true
-	case NPR:
+	case CurrencyCodeNPR:
 		return true
-	case NZD:
+	case CurrencyCodeNZD:
 		return true
-	case OMR:
+	case CurrencyCodeOMR:
 		return true
-	case PAB:
+	case CurrencyCodePAB:
 		return true
-	case PEN:
+	case CurrencyCodePEN:
 		return true
-	case PGK:
+	case CurrencyCodePGK:
 		return true
-	case PHP:
+	case CurrencyCodePHP:
 		return true
-	case PKR:
+	case CurrencyCodePKR:
 		return true
-	case PLN:
+	case CurrencyCodePLN:
 		return true
-	case PYG:
+	case CurrencyCodePYG:
 		return true
-	case QAR:
+	case CurrencyCodeQAR:
 		return true
-	case RON:
+	case CurrencyCodeRON:
 		return true
-	case RSD:
+	case CurrencyCodeRSD:
 		return true
-	case RUB:
+	case CurrencyCodeRUB:
 		return true
-	case RWF:
+	case CurrencyCodeRWF:
 		return true
-	case SAR:
+	case CurrencyCodeSAR:
 		return true
-	case SBD:
+	case CurrencyCodeSBD:
 		return true
-	case SCR:
+	case CurrencyCodeSCR:
 		return true
-	case SDG:
+	case CurrencyCodeSDG:
 		return true
-	case SEK:
+	case CurrencyCodeSEK:
 		return true
-	case SGD:
+	case CurrencyCodeSGD:
 		return true
-	case SHP:
+	case CurrencyCodeSHP:
 		return true
-	case SLE:
+	case CurrencyCodeSLE:
 		return true
-	case SOS:
+	case CurrencyCodeSOS:
 		return true
-	case SRD:
+	case CurrencyCodeSRD:
 		return true
-	case SSP:
+	case CurrencyCodeSSP:
 		return true
-	case STN:
+	case CurrencyCodeSTN:
 		return true
-	case SVC:
+	case CurrencyCodeSVC:
 		return true
-	case SYP:
+	case CurrencyCodeSYP:
 		return true
-	case SZL:
+	case CurrencyCodeSZL:
 		return true
-	case THB:
+	case CurrencyCodeTHB:
 		return true
-	case TJS:
+	case CurrencyCodeTJS:
 		return true
-	case TMT:
+	case CurrencyCodeTMT:
 		return true
-	case TND:
+	case CurrencyCodeTND:
 		return true
-	case TOP:
+	case CurrencyCodeTOP:
 		return true
-	case TRY:
+	case CurrencyCodeTRY:
 		return true
-	case TTD:
+	case CurrencyCodeTTD:
 		return true
-	case TWD:
+	case CurrencyCodeTWD:
 		return true
-	case TZS:
+	case CurrencyCodeTZS:
 		return true
-	case UAH:
+	case CurrencyCodeUAH:
 		return true
-	case UGX:
+	case CurrencyCodeUGX:
 		return true
-	case USD:
+	case CurrencyCodeUSD:
 		return true
-	case USN:
+	case CurrencyCodeUSN:
 		return true
-	case UYI:
+	case CurrencyCodeUYI:
 		return true
-	case UYU:
+	case CurrencyCodeUYU:
 		return true
-	case UYW:
+	case CurrencyCodeUYW:
 		return true
-	case UZS:
+	case CurrencyCodeUZS:
 		return true
-	case VED:
+	case CurrencyCodeVED:
 		return true
-	case VES:
+	case CurrencyCodeVES:
 		return true
-	case VND:
+	case CurrencyCodeVND:
 		return true
-	case VUV:
+	case CurrencyCodeVUV:
 		return true
-	case WST:
+	case CurrencyCodeWST:
 		return true
-	case XAF:
+	case CurrencyCodeXAF:
 		return true
-	case XAG:
+	case CurrencyCodeXAG:
 		return true
-	case XAU:
+	case CurrencyCodeXAU:
 		return true
-	case XBA:
+	case CurrencyCodeXBA:
 		return true
-	case XBB:
+	case CurrencyCodeXBB:
 		return true
-	case XBC:
+	case CurrencyCodeXBC:
 		return true
-	case XBD:
+	case CurrencyCodeXBD:
 		return true
-	case XCD:
+	case CurrencyCodeXCD:
 		return true
-	case XDR:
+	case CurrencyCodeXDR:
 		return true
-	case XOF:
+	case CurrencyCodeXOF:
 		return true
-	case XPD:
+	case CurrencyCodeXPD:
 		return true
-	case XPF:
+	case CurrencyCodeXPF:
 		return true
-	case XPT:
+	case CurrencyCodeXPT:
 		return true
-	case XSU:
+	case CurrencyCodeXSU:
 		return true
-	case XTS:
+	case CurrencyCodeXTS:
 		return true
-	case XUA:
+	case CurrencyCodeXUA:
 		return true
-	case XXX:
+	case CurrencyCodeXXX:
 		return true
-	case YER:
+	case CurrencyCodeYER:
 		return true
-	case ZAR:
+	case CurrencyCodeZAR:
 		return true
-	case ZMW:
+	case CurrencyCodeZMW:
 		return true
-	case ZWL:
+	case CurrencyCodeZWL:
 		return true
 	default:
 		return false
@@ -2892,6 +2892,555 @@ func (e ModifyPartialStockAction) Valid() bool {
 	}
 }
 
+// Defines values for MonetaryValueCurrency.
+const (
+	MonetaryValueCurrencyAED MonetaryValueCurrency = "AED"
+	MonetaryValueCurrencyAFN MonetaryValueCurrency = "AFN"
+	MonetaryValueCurrencyALL MonetaryValueCurrency = "ALL"
+	MonetaryValueCurrencyAMD MonetaryValueCurrency = "AMD"
+	MonetaryValueCurrencyANG MonetaryValueCurrency = "ANG"
+	MonetaryValueCurrencyAOA MonetaryValueCurrency = "AOA"
+	MonetaryValueCurrencyARS MonetaryValueCurrency = "ARS"
+	MonetaryValueCurrencyAUD MonetaryValueCurrency = "AUD"
+	MonetaryValueCurrencyAWG MonetaryValueCurrency = "AWG"
+	MonetaryValueCurrencyAZN MonetaryValueCurrency = "AZN"
+	MonetaryValueCurrencyBAM MonetaryValueCurrency = "BAM"
+	MonetaryValueCurrencyBBD MonetaryValueCurrency = "BBD"
+	MonetaryValueCurrencyBDT MonetaryValueCurrency = "BDT"
+	MonetaryValueCurrencyBGN MonetaryValueCurrency = "BGN"
+	MonetaryValueCurrencyBHD MonetaryValueCurrency = "BHD"
+	MonetaryValueCurrencyBIF MonetaryValueCurrency = "BIF"
+	MonetaryValueCurrencyBMD MonetaryValueCurrency = "BMD"
+	MonetaryValueCurrencyBND MonetaryValueCurrency = "BND"
+	MonetaryValueCurrencyBOB MonetaryValueCurrency = "BOB"
+	MonetaryValueCurrencyBOV MonetaryValueCurrency = "BOV"
+	MonetaryValueCurrencyBRL MonetaryValueCurrency = "BRL"
+	MonetaryValueCurrencyBSD MonetaryValueCurrency = "BSD"
+	MonetaryValueCurrencyBTN MonetaryValueCurrency = "BTN"
+	MonetaryValueCurrencyBWP MonetaryValueCurrency = "BWP"
+	MonetaryValueCurrencyBYN MonetaryValueCurrency = "BYN"
+	MonetaryValueCurrencyBZD MonetaryValueCurrency = "BZD"
+	MonetaryValueCurrencyCAD MonetaryValueCurrency = "CAD"
+	MonetaryValueCurrencyCDF MonetaryValueCurrency = "CDF"
+	MonetaryValueCurrencyCHE MonetaryValueCurrency = "CHE"
+	MonetaryValueCurrencyCHF MonetaryValueCurrency = "CHF"
+	MonetaryValueCurrencyCHW MonetaryValueCurrency = "CHW"
+	MonetaryValueCurrencyCLF MonetaryValueCurrency = "CLF"
+	MonetaryValueCurrencyCLP MonetaryValueCurrency = "CLP"
+	MonetaryValueCurrencyCNY MonetaryValueCurrency = "CNY"
+	MonetaryValueCurrencyCOP MonetaryValueCurrency = "COP"
+	MonetaryValueCurrencyCOU MonetaryValueCurrency = "COU"
+	MonetaryValueCurrencyCRC MonetaryValueCurrency = "CRC"
+	MonetaryValueCurrencyCUC MonetaryValueCurrency = "CUC"
+	MonetaryValueCurrencyCUP MonetaryValueCurrency = "CUP"
+	MonetaryValueCurrencyCVE MonetaryValueCurrency = "CVE"
+	MonetaryValueCurrencyCZK MonetaryValueCurrency = "CZK"
+	MonetaryValueCurrencyDJF MonetaryValueCurrency = "DJF"
+	MonetaryValueCurrencyDKK MonetaryValueCurrency = "DKK"
+	MonetaryValueCurrencyDOP MonetaryValueCurrency = "DOP"
+	MonetaryValueCurrencyDZD MonetaryValueCurrency = "DZD"
+	MonetaryValueCurrencyEGP MonetaryValueCurrency = "EGP"
+	MonetaryValueCurrencyERN MonetaryValueCurrency = "ERN"
+	MonetaryValueCurrencyETB MonetaryValueCurrency = "ETB"
+	MonetaryValueCurrencyEUR MonetaryValueCurrency = "EUR"
+	MonetaryValueCurrencyFJD MonetaryValueCurrency = "FJD"
+	MonetaryValueCurrencyFKP MonetaryValueCurrency = "FKP"
+	MonetaryValueCurrencyGBP MonetaryValueCurrency = "GBP"
+	MonetaryValueCurrencyGEL MonetaryValueCurrency = "GEL"
+	MonetaryValueCurrencyGHS MonetaryValueCurrency = "GHS"
+	MonetaryValueCurrencyGIP MonetaryValueCurrency = "GIP"
+	MonetaryValueCurrencyGMD MonetaryValueCurrency = "GMD"
+	MonetaryValueCurrencyGNF MonetaryValueCurrency = "GNF"
+	MonetaryValueCurrencyGTQ MonetaryValueCurrency = "GTQ"
+	MonetaryValueCurrencyGYD MonetaryValueCurrency = "GYD"
+	MonetaryValueCurrencyHKD MonetaryValueCurrency = "HKD"
+	MonetaryValueCurrencyHNL MonetaryValueCurrency = "HNL"
+	MonetaryValueCurrencyHTG MonetaryValueCurrency = "HTG"
+	MonetaryValueCurrencyHUF MonetaryValueCurrency = "HUF"
+	MonetaryValueCurrencyIDR MonetaryValueCurrency = "IDR"
+	MonetaryValueCurrencyILS MonetaryValueCurrency = "ILS"
+	MonetaryValueCurrencyINR MonetaryValueCurrency = "INR"
+	MonetaryValueCurrencyIQD MonetaryValueCurrency = "IQD"
+	MonetaryValueCurrencyIRR MonetaryValueCurrency = "IRR"
+	MonetaryValueCurrencyISK MonetaryValueCurrency = "ISK"
+	MonetaryValueCurrencyJMD MonetaryValueCurrency = "JMD"
+	MonetaryValueCurrencyJOD MonetaryValueCurrency = "JOD"
+	MonetaryValueCurrencyJPY MonetaryValueCurrency = "JPY"
+	MonetaryValueCurrencyKES MonetaryValueCurrency = "KES"
+	MonetaryValueCurrencyKGS MonetaryValueCurrency = "KGS"
+	MonetaryValueCurrencyKHR MonetaryValueCurrency = "KHR"
+	MonetaryValueCurrencyKMF MonetaryValueCurrency = "KMF"
+	MonetaryValueCurrencyKPW MonetaryValueCurrency = "KPW"
+	MonetaryValueCurrencyKRW MonetaryValueCurrency = "KRW"
+	MonetaryValueCurrencyKWD MonetaryValueCurrency = "KWD"
+	MonetaryValueCurrencyKYD MonetaryValueCurrency = "KYD"
+	MonetaryValueCurrencyKZT MonetaryValueCurrency = "KZT"
+	MonetaryValueCurrencyLAK MonetaryValueCurrency = "LAK"
+	MonetaryValueCurrencyLBP MonetaryValueCurrency = "LBP"
+	MonetaryValueCurrencyLKR MonetaryValueCurrency = "LKR"
+	MonetaryValueCurrencyLRD MonetaryValueCurrency = "LRD"
+	MonetaryValueCurrencyLSL MonetaryValueCurrency = "LSL"
+	MonetaryValueCurrencyLYD MonetaryValueCurrency = "LYD"
+	MonetaryValueCurrencyMAD MonetaryValueCurrency = "MAD"
+	MonetaryValueCurrencyMDL MonetaryValueCurrency = "MDL"
+	MonetaryValueCurrencyMGA MonetaryValueCurrency = "MGA"
+	MonetaryValueCurrencyMKD MonetaryValueCurrency = "MKD"
+	MonetaryValueCurrencyMMK MonetaryValueCurrency = "MMK"
+	MonetaryValueCurrencyMNT MonetaryValueCurrency = "MNT"
+	MonetaryValueCurrencyMOP MonetaryValueCurrency = "MOP"
+	MonetaryValueCurrencyMRU MonetaryValueCurrency = "MRU"
+	MonetaryValueCurrencyMUR MonetaryValueCurrency = "MUR"
+	MonetaryValueCurrencyMVR MonetaryValueCurrency = "MVR"
+	MonetaryValueCurrencyMWK MonetaryValueCurrency = "MWK"
+	MonetaryValueCurrencyMXN MonetaryValueCurrency = "MXN"
+	MonetaryValueCurrencyMXV MonetaryValueCurrency = "MXV"
+	MonetaryValueCurrencyMYR MonetaryValueCurrency = "MYR"
+	MonetaryValueCurrencyMZN MonetaryValueCurrency = "MZN"
+	MonetaryValueCurrencyNAD MonetaryValueCurrency = "NAD"
+	MonetaryValueCurrencyNGN MonetaryValueCurrency = "NGN"
+	MonetaryValueCurrencyNIO MonetaryValueCurrency = "NIO"
+	MonetaryValueCurrencyNOK MonetaryValueCurrency = "NOK"
+	MonetaryValueCurrencyNPR MonetaryValueCurrency = "NPR"
+	MonetaryValueCurrencyNZD MonetaryValueCurrency = "NZD"
+	MonetaryValueCurrencyOMR MonetaryValueCurrency = "OMR"
+	MonetaryValueCurrencyPAB MonetaryValueCurrency = "PAB"
+	MonetaryValueCurrencyPEN MonetaryValueCurrency = "PEN"
+	MonetaryValueCurrencyPGK MonetaryValueCurrency = "PGK"
+	MonetaryValueCurrencyPHP MonetaryValueCurrency = "PHP"
+	MonetaryValueCurrencyPKR MonetaryValueCurrency = "PKR"
+	MonetaryValueCurrencyPLN MonetaryValueCurrency = "PLN"
+	MonetaryValueCurrencyPYG MonetaryValueCurrency = "PYG"
+	MonetaryValueCurrencyQAR MonetaryValueCurrency = "QAR"
+	MonetaryValueCurrencyRON MonetaryValueCurrency = "RON"
+	MonetaryValueCurrencyRSD MonetaryValueCurrency = "RSD"
+	MonetaryValueCurrencyRUB MonetaryValueCurrency = "RUB"
+	MonetaryValueCurrencyRWF MonetaryValueCurrency = "RWF"
+	MonetaryValueCurrencySAR MonetaryValueCurrency = "SAR"
+	MonetaryValueCurrencySBD MonetaryValueCurrency = "SBD"
+	MonetaryValueCurrencySCR MonetaryValueCurrency = "SCR"
+	MonetaryValueCurrencySDG MonetaryValueCurrency = "SDG"
+	MonetaryValueCurrencySEK MonetaryValueCurrency = "SEK"
+	MonetaryValueCurrencySGD MonetaryValueCurrency = "SGD"
+	MonetaryValueCurrencySHP MonetaryValueCurrency = "SHP"
+	MonetaryValueCurrencySLE MonetaryValueCurrency = "SLE"
+	MonetaryValueCurrencySOS MonetaryValueCurrency = "SOS"
+	MonetaryValueCurrencySRD MonetaryValueCurrency = "SRD"
+	MonetaryValueCurrencySSP MonetaryValueCurrency = "SSP"
+	MonetaryValueCurrencySTN MonetaryValueCurrency = "STN"
+	MonetaryValueCurrencySVC MonetaryValueCurrency = "SVC"
+	MonetaryValueCurrencySYP MonetaryValueCurrency = "SYP"
+	MonetaryValueCurrencySZL MonetaryValueCurrency = "SZL"
+	MonetaryValueCurrencyTHB MonetaryValueCurrency = "THB"
+	MonetaryValueCurrencyTJS MonetaryValueCurrency = "TJS"
+	MonetaryValueCurrencyTMT MonetaryValueCurrency = "TMT"
+	MonetaryValueCurrencyTND MonetaryValueCurrency = "TND"
+	MonetaryValueCurrencyTOP MonetaryValueCurrency = "TOP"
+	MonetaryValueCurrencyTRY MonetaryValueCurrency = "TRY"
+	MonetaryValueCurrencyTTD MonetaryValueCurrency = "TTD"
+	MonetaryValueCurrencyTWD MonetaryValueCurrency = "TWD"
+	MonetaryValueCurrencyTZS MonetaryValueCurrency = "TZS"
+	MonetaryValueCurrencyUAH MonetaryValueCurrency = "UAH"
+	MonetaryValueCurrencyUGX MonetaryValueCurrency = "UGX"
+	MonetaryValueCurrencyUSD MonetaryValueCurrency = "USD"
+	MonetaryValueCurrencyUSN MonetaryValueCurrency = "USN"
+	MonetaryValueCurrencyUYI MonetaryValueCurrency = "UYI"
+	MonetaryValueCurrencyUYU MonetaryValueCurrency = "UYU"
+	MonetaryValueCurrencyUYW MonetaryValueCurrency = "UYW"
+	MonetaryValueCurrencyUZS MonetaryValueCurrency = "UZS"
+	MonetaryValueCurrencyVED MonetaryValueCurrency = "VED"
+	MonetaryValueCurrencyVES MonetaryValueCurrency = "VES"
+	MonetaryValueCurrencyVND MonetaryValueCurrency = "VND"
+	MonetaryValueCurrencyVUV MonetaryValueCurrency = "VUV"
+	MonetaryValueCurrencyWST MonetaryValueCurrency = "WST"
+	MonetaryValueCurrencyXAF MonetaryValueCurrency = "XAF"
+	MonetaryValueCurrencyXAG MonetaryValueCurrency = "XAG"
+	MonetaryValueCurrencyXAU MonetaryValueCurrency = "XAU"
+	MonetaryValueCurrencyXBA MonetaryValueCurrency = "XBA"
+	MonetaryValueCurrencyXBB MonetaryValueCurrency = "XBB"
+	MonetaryValueCurrencyXBC MonetaryValueCurrency = "XBC"
+	MonetaryValueCurrencyXBD MonetaryValueCurrency = "XBD"
+	MonetaryValueCurrencyXCD MonetaryValueCurrency = "XCD"
+	MonetaryValueCurrencyXDR MonetaryValueCurrency = "XDR"
+	MonetaryValueCurrencyXOF MonetaryValueCurrency = "XOF"
+	MonetaryValueCurrencyXPD MonetaryValueCurrency = "XPD"
+	MonetaryValueCurrencyXPF MonetaryValueCurrency = "XPF"
+	MonetaryValueCurrencyXPT MonetaryValueCurrency = "XPT"
+	MonetaryValueCurrencyXSU MonetaryValueCurrency = "XSU"
+	MonetaryValueCurrencyXTS MonetaryValueCurrency = "XTS"
+	MonetaryValueCurrencyXUA MonetaryValueCurrency = "XUA"
+	MonetaryValueCurrencyXXX MonetaryValueCurrency = "XXX"
+	MonetaryValueCurrencyYER MonetaryValueCurrency = "YER"
+	MonetaryValueCurrencyZAR MonetaryValueCurrency = "ZAR"
+	MonetaryValueCurrencyZMW MonetaryValueCurrency = "ZMW"
+	MonetaryValueCurrencyZWL MonetaryValueCurrency = "ZWL"
+)
+
+// Valid indicates whether the value is a known member of the MonetaryValueCurrency enum.
+func (e MonetaryValueCurrency) Valid() bool {
+	switch e {
+	case MonetaryValueCurrencyAED:
+		return true
+	case MonetaryValueCurrencyAFN:
+		return true
+	case MonetaryValueCurrencyALL:
+		return true
+	case MonetaryValueCurrencyAMD:
+		return true
+	case MonetaryValueCurrencyANG:
+		return true
+	case MonetaryValueCurrencyAOA:
+		return true
+	case MonetaryValueCurrencyARS:
+		return true
+	case MonetaryValueCurrencyAUD:
+		return true
+	case MonetaryValueCurrencyAWG:
+		return true
+	case MonetaryValueCurrencyAZN:
+		return true
+	case MonetaryValueCurrencyBAM:
+		return true
+	case MonetaryValueCurrencyBBD:
+		return true
+	case MonetaryValueCurrencyBDT:
+		return true
+	case MonetaryValueCurrencyBGN:
+		return true
+	case MonetaryValueCurrencyBHD:
+		return true
+	case MonetaryValueCurrencyBIF:
+		return true
+	case MonetaryValueCurrencyBMD:
+		return true
+	case MonetaryValueCurrencyBND:
+		return true
+	case MonetaryValueCurrencyBOB:
+		return true
+	case MonetaryValueCurrencyBOV:
+		return true
+	case MonetaryValueCurrencyBRL:
+		return true
+	case MonetaryValueCurrencyBSD:
+		return true
+	case MonetaryValueCurrencyBTN:
+		return true
+	case MonetaryValueCurrencyBWP:
+		return true
+	case MonetaryValueCurrencyBYN:
+		return true
+	case MonetaryValueCurrencyBZD:
+		return true
+	case MonetaryValueCurrencyCAD:
+		return true
+	case MonetaryValueCurrencyCDF:
+		return true
+	case MonetaryValueCurrencyCHE:
+		return true
+	case MonetaryValueCurrencyCHF:
+		return true
+	case MonetaryValueCurrencyCHW:
+		return true
+	case MonetaryValueCurrencyCLF:
+		return true
+	case MonetaryValueCurrencyCLP:
+		return true
+	case MonetaryValueCurrencyCNY:
+		return true
+	case MonetaryValueCurrencyCOP:
+		return true
+	case MonetaryValueCurrencyCOU:
+		return true
+	case MonetaryValueCurrencyCRC:
+		return true
+	case MonetaryValueCurrencyCUC:
+		return true
+	case MonetaryValueCurrencyCUP:
+		return true
+	case MonetaryValueCurrencyCVE:
+		return true
+	case MonetaryValueCurrencyCZK:
+		return true
+	case MonetaryValueCurrencyDJF:
+		return true
+	case MonetaryValueCurrencyDKK:
+		return true
+	case MonetaryValueCurrencyDOP:
+		return true
+	case MonetaryValueCurrencyDZD:
+		return true
+	case MonetaryValueCurrencyEGP:
+		return true
+	case MonetaryValueCurrencyERN:
+		return true
+	case MonetaryValueCurrencyETB:
+		return true
+	case MonetaryValueCurrencyEUR:
+		return true
+	case MonetaryValueCurrencyFJD:
+		return true
+	case MonetaryValueCurrencyFKP:
+		return true
+	case MonetaryValueCurrencyGBP:
+		return true
+	case MonetaryValueCurrencyGEL:
+		return true
+	case MonetaryValueCurrencyGHS:
+		return true
+	case MonetaryValueCurrencyGIP:
+		return true
+	case MonetaryValueCurrencyGMD:
+		return true
+	case MonetaryValueCurrencyGNF:
+		return true
+	case MonetaryValueCurrencyGTQ:
+		return true
+	case MonetaryValueCurrencyGYD:
+		return true
+	case MonetaryValueCurrencyHKD:
+		return true
+	case MonetaryValueCurrencyHNL:
+		return true
+	case MonetaryValueCurrencyHTG:
+		return true
+	case MonetaryValueCurrencyHUF:
+		return true
+	case MonetaryValueCurrencyIDR:
+		return true
+	case MonetaryValueCurrencyILS:
+		return true
+	case MonetaryValueCurrencyINR:
+		return true
+	case MonetaryValueCurrencyIQD:
+		return true
+	case MonetaryValueCurrencyIRR:
+		return true
+	case MonetaryValueCurrencyISK:
+		return true
+	case MonetaryValueCurrencyJMD:
+		return true
+	case MonetaryValueCurrencyJOD:
+		return true
+	case MonetaryValueCurrencyJPY:
+		return true
+	case MonetaryValueCurrencyKES:
+		return true
+	case MonetaryValueCurrencyKGS:
+		return true
+	case MonetaryValueCurrencyKHR:
+		return true
+	case MonetaryValueCurrencyKMF:
+		return true
+	case MonetaryValueCurrencyKPW:
+		return true
+	case MonetaryValueCurrencyKRW:
+		return true
+	case MonetaryValueCurrencyKWD:
+		return true
+	case MonetaryValueCurrencyKYD:
+		return true
+	case MonetaryValueCurrencyKZT:
+		return true
+	case MonetaryValueCurrencyLAK:
+		return true
+	case MonetaryValueCurrencyLBP:
+		return true
+	case MonetaryValueCurrencyLKR:
+		return true
+	case MonetaryValueCurrencyLRD:
+		return true
+	case MonetaryValueCurrencyLSL:
+		return true
+	case MonetaryValueCurrencyLYD:
+		return true
+	case MonetaryValueCurrencyMAD:
+		return true
+	case MonetaryValueCurrencyMDL:
+		return true
+	case MonetaryValueCurrencyMGA:
+		return true
+	case MonetaryValueCurrencyMKD:
+		return true
+	case MonetaryValueCurrencyMMK:
+		return true
+	case MonetaryValueCurrencyMNT:
+		return true
+	case MonetaryValueCurrencyMOP:
+		return true
+	case MonetaryValueCurrencyMRU:
+		return true
+	case MonetaryValueCurrencyMUR:
+		return true
+	case MonetaryValueCurrencyMVR:
+		return true
+	case MonetaryValueCurrencyMWK:
+		return true
+	case MonetaryValueCurrencyMXN:
+		return true
+	case MonetaryValueCurrencyMXV:
+		return true
+	case MonetaryValueCurrencyMYR:
+		return true
+	case MonetaryValueCurrencyMZN:
+		return true
+	case MonetaryValueCurrencyNAD:
+		return true
+	case MonetaryValueCurrencyNGN:
+		return true
+	case MonetaryValueCurrencyNIO:
+		return true
+	case MonetaryValueCurrencyNOK:
+		return true
+	case MonetaryValueCurrencyNPR:
+		return true
+	case MonetaryValueCurrencyNZD:
+		return true
+	case MonetaryValueCurrencyOMR:
+		return true
+	case MonetaryValueCurrencyPAB:
+		return true
+	case MonetaryValueCurrencyPEN:
+		return true
+	case MonetaryValueCurrencyPGK:
+		return true
+	case MonetaryValueCurrencyPHP:
+		return true
+	case MonetaryValueCurrencyPKR:
+		return true
+	case MonetaryValueCurrencyPLN:
+		return true
+	case MonetaryValueCurrencyPYG:
+		return true
+	case MonetaryValueCurrencyQAR:
+		return true
+	case MonetaryValueCurrencyRON:
+		return true
+	case MonetaryValueCurrencyRSD:
+		return true
+	case MonetaryValueCurrencyRUB:
+		return true
+	case MonetaryValueCurrencyRWF:
+		return true
+	case MonetaryValueCurrencySAR:
+		return true
+	case MonetaryValueCurrencySBD:
+		return true
+	case MonetaryValueCurrencySCR:
+		return true
+	case MonetaryValueCurrencySDG:
+		return true
+	case MonetaryValueCurrencySEK:
+		return true
+	case MonetaryValueCurrencySGD:
+		return true
+	case MonetaryValueCurrencySHP:
+		return true
+	case MonetaryValueCurrencySLE:
+		return true
+	case MonetaryValueCurrencySOS:
+		return true
+	case MonetaryValueCurrencySRD:
+		return true
+	case MonetaryValueCurrencySSP:
+		return true
+	case MonetaryValueCurrencySTN:
+		return true
+	case MonetaryValueCurrencySVC:
+		return true
+	case MonetaryValueCurrencySYP:
+		return true
+	case MonetaryValueCurrencySZL:
+		return true
+	case MonetaryValueCurrencyTHB:
+		return true
+	case MonetaryValueCurrencyTJS:
+		return true
+	case MonetaryValueCurrencyTMT:
+		return true
+	case MonetaryValueCurrencyTND:
+		return true
+	case MonetaryValueCurrencyTOP:
+		return true
+	case MonetaryValueCurrencyTRY:
+		return true
+	case MonetaryValueCurrencyTTD:
+		return true
+	case MonetaryValueCurrencyTWD:
+		return true
+	case MonetaryValueCurrencyTZS:
+		return true
+	case MonetaryValueCurrencyUAH:
+		return true
+	case MonetaryValueCurrencyUGX:
+		return true
+	case MonetaryValueCurrencyUSD:
+		return true
+	case MonetaryValueCurrencyUSN:
+		return true
+	case MonetaryValueCurrencyUYI:
+		return true
+	case MonetaryValueCurrencyUYU:
+		return true
+	case MonetaryValueCurrencyUYW:
+		return true
+	case MonetaryValueCurrencyUZS:
+		return true
+	case MonetaryValueCurrencyVED:
+		return true
+	case MonetaryValueCurrencyVES:
+		return true
+	case MonetaryValueCurrencyVND:
+		return true
+	case MonetaryValueCurrencyVUV:
+		return true
+	case MonetaryValueCurrencyWST:
+		return true
+	case MonetaryValueCurrencyXAF:
+		return true
+	case MonetaryValueCurrencyXAG:
+		return true
+	case MonetaryValueCurrencyXAU:
+		return true
+	case MonetaryValueCurrencyXBA:
+		return true
+	case MonetaryValueCurrencyXBB:
+		return true
+	case MonetaryValueCurrencyXBC:
+		return true
+	case MonetaryValueCurrencyXBD:
+		return true
+	case MonetaryValueCurrencyXCD:
+		return true
+	case MonetaryValueCurrencyXDR:
+		return true
+	case MonetaryValueCurrencyXOF:
+		return true
+	case MonetaryValueCurrencyXPD:
+		return true
+	case MonetaryValueCurrencyXPF:
+		return true
+	case MonetaryValueCurrencyXPT:
+		return true
+	case MonetaryValueCurrencyXSU:
+		return true
+	case MonetaryValueCurrencyXTS:
+		return true
+	case MonetaryValueCurrencyXUA:
+		return true
+	case MonetaryValueCurrencyXXX:
+		return true
+	case MonetaryValueCurrencyYER:
+		return true
+	case MonetaryValueCurrencyZAR:
+		return true
+	case MonetaryValueCurrencyZMW:
+		return true
+	case MonetaryValueCurrencyZWL:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for NodeType.
 const (
 	NodeTypeCUSTOMER        NodeType = "CUSTOMER"
@@ -3336,6 +3885,60 @@ func (e OrderDeliveryPreferencesShippingDeliveryServiceLevelEnumFilterNotEq) Val
 	case OrderDeliveryPreferencesShippingDeliveryServiceLevelEnumFilterNotEqDELIVERY:
 		return true
 	case OrderDeliveryPreferencesShippingDeliveryServiceLevelEnumFilterNotEqSAMEDAY:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for OrderPricingDiscountType.
+const (
+	ABSOLUTE   OrderPricingDiscountType = "ABSOLUTE"
+	PERCENTAGE OrderPricingDiscountType = "PERCENTAGE"
+)
+
+// Valid indicates whether the value is a known member of the OrderPricingDiscountType enum.
+func (e OrderPricingDiscountType) Valid() bool {
+	switch e {
+	case ABSOLUTE:
+		return true
+	case PERCENTAGE:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for OrderSortOrderDate.
+const (
+	OrderSortOrderDateASC  OrderSortOrderDate = "ASC"
+	OrderSortOrderDateDESC OrderSortOrderDate = "DESC"
+)
+
+// Valid indicates whether the value is a known member of the OrderSortOrderDate enum.
+func (e OrderSortOrderDate) Valid() bool {
+	switch e {
+	case OrderSortOrderDateASC:
+		return true
+	case OrderSortOrderDateDESC:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for OrderSortStatus.
+const (
+	OrderSortStatusASC  OrderSortStatus = "ASC"
+	OrderSortStatusDESC OrderSortStatus = "DESC"
+)
+
+// Valid indicates whether the value is a known member of the OrderSortStatus enum.
+func (e OrderSortStatus) Valid() bool {
+	switch e {
+	case OrderSortStatusASC:
+		return true
+	case OrderSortStatusDESC:
 		return true
 	default:
 		return false
@@ -11154,6 +11757,36 @@ func (e WeekDay) Valid() bool {
 	}
 }
 
+// Defines values for WorkflowInformationIsAvailable.
+const (
+	True WorkflowInformationIsAvailable = true
+)
+
+// Valid indicates whether the value is a known member of the WorkflowInformationIsAvailable enum.
+func (e WorkflowInformationIsAvailable) Valid() bool {
+	switch e {
+	case True:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for WorkflowUnavailableIsAvailable.
+const (
+	False WorkflowUnavailableIsAvailable = false
+)
+
+// Valid indicates whether the value is a known member of the WorkflowUnavailableIsAvailable enum.
+func (e WorkflowUnavailableIsAvailable) Valid() bool {
+	switch e {
+	case False:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for GetForecastsForArticleParamsPeriod.
 const (
 	GetForecastsForArticleParamsPeriodDAILY GetForecastsForArticleParamsPeriod = "DAILY"
@@ -11787,6 +12420,27 @@ type AbstractArticle struct {
 	Weight *float32 `json:"weight,omitempty"`
 }
 
+// AbstractArticleForCreation AbstractArticleForCreation
+type AbstractArticleForCreation struct {
+	// CustomAttributes Attributes that can be added to this entity. These attributes **cannot** be used within fulfillment processes, but enable you to attach custom data from your systems to fulfillmenttools entities.
+	CustomAttributes *map[string]interface{} `json:"customAttributes,omitempty"`
+
+	// ImageUrl A web link to a picture of this article. Ensure that no authentication is needed to fetch the image.
+	ImageUrl *string `json:"imageUrl,omitempty"`
+
+	// TenantArticleId This is a reference to an article number
+	TenantArticleId *string `json:"tenantArticleId,omitempty"`
+
+	// Title The title of the product
+	Title string `json:"title"`
+
+	// TitleLocalized The translations for the title of the product
+	TitleLocalized *LocaleString `json:"titleLocalized,omitempty"`
+
+	// Weight Weight value is in gram
+	Weight *float32 `json:"weight,omitempty"`
+}
+
 // AbstractCarrierCredentials AbstractCarrierCredentials
 type AbstractCarrierCredentials struct {
 	// Key The key identifying the carrier credentials type
@@ -11809,10 +12463,53 @@ type AbstractModificationAction struct {
 // AbstractModificationActionAction defines model for AbstractModificationAction.Action.
 type AbstractModificationActionAction string
 
+// AbstractOrderActionsParameter AbstractOrderActionsParameter
+type AbstractOrderActionsParameter struct {
+	Name string `json:"name"`
+
+	// Version Version of the entity to be changed
+	Version int `json:"version"`
+}
+
+// AbstractOrderLineItemActionsParameter AbstractOrderLineItemActionsParameter
+type AbstractOrderLineItemActionsParameter struct {
+	Name string `json:"name"`
+
+	// Version Version of the order to be changed
+	Version int `json:"version"`
+}
+
 // AbstractRatingConfiguration Base configuration for ratings. See documentation for details.
 type AbstractRatingConfiguration struct {
 	// Type This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Identifies the rating configuration variant and determines which properties are applicable.
 	Type *RatingConfigurationType `json:"type,omitempty"`
+}
+
+// AbstractReason defines model for AbstractReason.
+type AbstractReason struct {
+	// Created The date this entity was created at the platform. This value is generated by the service.
+	Created *time.Time `json:"created,omitempty"`
+
+	// LastModified The date this entity was modified last. This value is generated by the service.
+	LastModified *time.Time `json:"lastModified,omitempty"`
+
+	// Reason Text explaining the reason for a supported action.
+	Reason string `json:"reason"`
+
+	// ReasonLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	ReasonLocalized LocaleString `json:"reasonLocalized"`
+
+	// Version The version of the document to be used in optimistic locking mechanisms.
+	Version int64 `json:"version"`
+}
+
+// AbstractReasonForCreation AbstractReasonForCreation
+type AbstractReasonForCreation struct {
+	// Reason Text explaining the reason for a supported action.
+	Reason string `json:"reason"`
+
+	// ReasonLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	ReasonLocalized LocaleString `json:"reasonLocalized"`
 }
 
 // ActivationTimeFrame ActivationTimeFrame
@@ -11998,6 +12695,25 @@ type AvailableUntilDefinition struct {
 	Modifier *string `json:"modifier,omitempty"`
 }
 
+// Backordered Backordered
+type Backordered struct {
+	LineItems []DeliveryPromiseLineItem `json:"lineItems"`
+}
+
+// BasicDeliveryPromiseShipment BasicDeliveryPromiseShipment
+type BasicDeliveryPromiseShipment struct {
+	// Facility BasicDeliveryPromiseShipmentFacility
+	Facility  BasicDeliveryPromiseShipmentFacility `json:"facility"`
+	LineItems []DeliveryPromiseLineItem            `json:"lineItems"`
+}
+
+// BasicDeliveryPromiseShipmentFacility BasicDeliveryPromiseShipmentFacility
+type BasicDeliveryPromiseShipmentFacility struct {
+	FacilityName     string  `json:"facilityName"`
+	FacilityRef      string  `json:"facilityRef"`
+	TenantFacilityId *string `json:"tenantFacilityId,omitempty"`
+}
+
 // BooleanFilter BooleanFilter
 type BooleanFilter struct {
 	Eq    *bool `json:"eq,omitempty"`
@@ -12033,6 +12749,9 @@ type ByTrait struct {
 	ACCESSIBLE float32 `json:"ACCESSIBLE"`
 	PICKABLE   float32 `json:"PICKABLE"`
 }
+
+// CancelationReason AbstractReason
+type CancelationReason = AbstractReason
 
 // Carrier Carrier
 type Carrier struct {
@@ -12248,6 +12967,9 @@ type CollectDelivery1 = interface{}
 // ConnectionType ConnectionType
 type ConnectionType string
 
+// ConsumerAddress Address
+type ConsumerAddress = Address
+
 // ConsumerAddressForSourcingOptions ConsumerAddressForSourcingOptions
 type ConsumerAddressForSourcingOptions struct {
 	AdditionalAddressInfo *string `json:"additionalAddressInfo,omitempty"`
@@ -12404,6 +13126,16 @@ type CustomServiceItemForCreation struct {
 	CustomServiceItems      []CustomServiceItemForCreation `json:"customServiceItems"`
 }
 
+// CustomServiceReference CustomServiceReference
+type CustomServiceReference struct {
+	ArticleItems []ArticleItem `json:"articleItems"`
+
+	// CustomServiceDefinition CustomServiceDefinition
+	CustomServiceDefinition CustomServiceDefinition `json:"customServiceDefinition"`
+	CustomServiceItems      []CustomServiceItem     `json:"customServiceItems"`
+	Id                      string                  `json:"id"`
+}
+
 // CustomServiceReferenceForCreation CustomServiceReferenceForCreation
 type CustomServiceReferenceForCreation struct {
 	ArticleItems []ArticleItem `json:"articleItems"`
@@ -12462,6 +13194,15 @@ type DeliveryArea struct {
 	PostalCode string `json:"postalCode"`
 }
 
+// DeliveryCost DeliveryCost
+type DeliveryCost struct {
+	// Cost The cost of sending with a carrier
+	Cost float32 `json:"cost"`
+
+	// Currency The currency of the price as an ISO 4217 code.
+	Currency string `json:"currency"`
+}
+
 // DeliveryEvent DeliveryEvent
 type DeliveryEvent struct {
 	// DeliveryTarget The destination for a delivery
@@ -12508,6 +13249,26 @@ type DeliveryPreferencesShipping struct {
 // DeliveryPreferencesShippingServiceLevel DELIVERY: The parcel will reach the recipient according to the cycle time of the carrier, typically 1-3 days when shipping nationaly. SAMEDAY: The parcel will reach the recipient the same day when ordering.
 type DeliveryPreferencesShippingServiceLevel string
 
+// DeliveryPromiseCollect BasicDeliveryPromiseShipment
+type DeliveryPromiseCollect = BasicDeliveryPromiseShipment
+
+// DeliveryPromiseLineItem DeliveryPromiseLineItem
+type DeliveryPromiseLineItem struct {
+	// AvailabilityTimeframe AvailabilityTimeframe
+	AvailabilityTimeframe *AvailabilityTimeframe `json:"availabilityTimeframe,omitempty"`
+	Available             *float32               `json:"available,omitempty"`
+
+	// OutOfStockBehaviour The PREORDER and RESTOCK can be only set, when the depending outOfStockConfig is provided.
+	// Also PREORDER and RESTOCK values are in Alpha status. For details please check the <a href="https://docs.fulfillmenttools.com/documentation/developer-docs/api/core-concepts/api-release-life-cycle#alpha" target="_blank">api-release-life-cycle documentation</a>.<br /><br />
+	OutOfStockBehaviour *OutOfStockBehaviour `json:"outOfStockBehaviour,omitempty"`
+	Quantity            *float32             `json:"quantity,omitempty"`
+	TenantArticleId     *string              `json:"tenantArticleId,omitempty"`
+	Title               *string              `json:"title,omitempty"`
+}
+
+// DeliveryPromiseShipment BasicDeliveryPromiseShipment
+type DeliveryPromiseShipment = BasicDeliveryPromiseShipment
+
 // DeliveryReservationMode DeliveryReservationMode
 type DeliveryReservationMode = interface{}
 
@@ -12538,6 +13299,15 @@ type ErrorInner struct {
 	RequestVersion *int64 `json:"requestVersion,omitempty"`
 	Summary        string `json:"summary"`
 	Version        *int64 `json:"version,omitempty"`
+}
+
+// EstimatedDeliveryTime EstimatedDeliveryTime
+type EstimatedDeliveryTime struct {
+	// MaxDeliveryDays Maximum total delivery time in days
+	MaxDeliveryDays int `json:"maxDeliveryDays"`
+
+	// MinDeliveryDays Minimum total delivery time in days
+	MinDeliveryDays int `json:"minDeliveryDays"`
 }
 
 // Facility defines model for Facility.
@@ -15310,6 +16080,21 @@ type ModifyUserPersonalData struct {
 	Locale *SupportedLocale `json:"locale,omitempty"`
 }
 
+// MonetaryValue MonetaryValue
+type MonetaryValue struct {
+	// Currency ISO 4217 currency code
+	Currency MonetaryValueCurrency `json:"currency"`
+
+	// DecimalPlaces Number of decimal places. If omitted, the default for the currency applies.
+	DecimalPlaces *int64 `json:"decimalPlaces,omitempty"`
+
+	// Value Monetary value as integer (no decimals)
+	Value int64 `json:"value"`
+}
+
+// MonetaryValueCurrency ISO 4217 currency code
+type MonetaryValueCurrency string
+
 // Money Money
 type Money struct {
 	// Currency The currency code is a three-letter code that represents a currency in the ISO 4217 standard.
@@ -15510,8 +16295,91 @@ type OptimizationHints struct {
 	RequestedResultCount *int `json:"requestedResultCount,omitempty"`
 }
 
+// Order defines model for Order.
+type Order struct {
+	// Anonymized Indicates if gdpr related data was anonymized
+	Anonymized *bool `json:"anonymized,omitempty"`
+
+	// CancelationReason CancelationReason
+	CancelationReason *CancelationReason `json:"cancelationReason,omitempty"`
+
+	// Consumer OrderForCreationConsumer
+	Consumer OrderForCreationConsumer `json:"consumer"`
+
+	// Created The date this entity was created at the platform. This value is generated by the service.
+	Created *time.Time `json:"created,omitempty"`
+
+	// CustomAttributes Attributes that can be added to the order. These attributes cannot be used within fulfillment processes, but it could be useful to have the informations carried here.
+	CustomAttributes *map[string]interface{}   `json:"customAttributes,omitempty"`
+	CustomServices   *[]CustomServiceReference `json:"customServices,omitempty"`
+
+	// DeliveryPreferences DeliveryPreferences
+	DeliveryPreferences *DeliveryPreferences `json:"deliveryPreferences,omitempty"`
+
+	// Id The id of this order. It is generated during creation automatically and suits as the primary identifier of the described entity.
+	Id string `json:"id"`
+
+	// LastModified The date this entity was modified last. This value is generated by the service.
+	LastModified *time.Time `json:"lastModified,omitempty"`
+
+	// OrderDate The date this order was created at the supplying system.
+	OrderDate      time.Time       `json:"orderDate"`
+	OrderLineItems []OrderLineItem `json:"orderLineItems"`
+
+	// PaymentInfo OrderPaymentInfo
+	PaymentInfo *OrderPaymentInfo `json:"paymentInfo,omitempty"`
+
+	// Pricing This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
+	Pricing *OrderPricing `json:"pricing,omitempty"`
+
+	// ProcessId Id of the global process related to this entity. For example used for starting the GDPR process and others.
+	ProcessId string `json:"processId"`
+
+	// PromisesOptions OrderPromisesOptions
+	PromisesOptions *OrderPromisesOptions `json:"promisesOptions,omitempty"`
+	SchemaVersion   *float32              `json:"schemaVersion,omitempty"`
+
+	// Source Defines the source of this order. This field is not required, if the order is created based on an external system.
+	Source *Order_Source `json:"source,omitempty"`
+
+	// Status The state of the order. Initially it is OPEN.
+	Status        OrderStatus          `json:"status"`
+	StatusReasons *[]OrderStatusReason `json:"statusReasons,omitempty"`
+	Stickers      *[]Sticker           `json:"stickers,omitempty"`
+	Tags          *[]TagReference      `json:"tags,omitempty"`
+
+	// TenantOrderId Field can be used as a reference number in foreign systems, for example as a reference to the source system's identifier for this order.
+	TenantOrderId *string              `json:"tenantOrderId,omitempty"`
+	UpdateDetails *[]OrderUpdateDetail `json:"updateDetails,omitempty"`
+
+	// Version The version of the document to be used in optimistic locking mechanisms.
+	Version             int64                     `json:"version"`
+	WorkflowInformation Order_WorkflowInformation `json:"workflowInformation"`
+}
+
+// Order_Source Defines the source of this order. This field is not required, if the order is created based on an external system.
+type Order_Source struct {
+	union json.RawMessage
+}
+
+// Order_WorkflowInformation defines model for Order.WorkflowInformation.
+type Order_WorkflowInformation struct {
+	union json.RawMessage
+}
+
+// OrderActionsParameter OrderActionsParameter
+type OrderActionsParameter struct {
+	union json.RawMessage
+}
+
 // OrderArticleAttributeItem ArticleAttributeItem
 type OrderArticleAttributeItem = ArticleAttributeItem
+
+// OrderCancelActionParameter AbstractOrderActionsParameter
+type OrderCancelActionParameter = AbstractOrderActionsParameter
+
+// OrderConsumerAddressChangeActionParameter AbstractOrderActionsParameter
+type OrderConsumerAddressChangeActionParameter = AbstractOrderActionsParameter
 
 // OrderConsumerAddressesAddressTypeEnumFilter OrderConsumerAddressesAddressTypeEnumFilter
 type OrderConsumerAddressesAddressTypeEnumFilter struct {
@@ -15576,6 +16444,9 @@ type OrderConsumerAddressesListFilter struct {
 	Contains *OrderConsumerAddressesFilter `json:"contains,omitempty"`
 }
 
+// OrderConsumerAddressesReplaceActionParameter AbstractOrderActionsParameter
+type OrderConsumerAddressesReplaceActionParameter = AbstractOrderActionsParameter
+
 // OrderConsumerFilter OrderConsumerFilter
 type OrderConsumerFilter struct {
 	// Addresses Nested list search by addresses
@@ -15639,6 +16510,70 @@ type OrderDeliveryPreferencesShippingFilter struct {
 	ServiceLevel *OrderDeliveryPreferencesShippingDeliveryServiceLevelEnumFilter `json:"serviceLevel,omitempty"`
 }
 
+// OrderForCreation OrderForCreation
+type OrderForCreation struct {
+	// Consumer OrderForCreationConsumer
+	Consumer OrderForCreationConsumer `json:"consumer"`
+
+	// CustomAttributes Attributes that can be added to the order. These attributes cannot be used within fulfillment processes, but it could be useful to have the informations carried here.
+	CustomAttributes *map[string]interface{}              `json:"customAttributes,omitempty"`
+	CustomServices   *[]CustomServiceReferenceForCreation `json:"customServices,omitempty"`
+
+	// DeliveryPreferences DeliveryPreferences
+	DeliveryPreferences *DeliveryPreferences `json:"deliveryPreferences,omitempty"`
+
+	// OrderDate The date this order was created at the supplying system.
+	OrderDate      time.Time                  `json:"orderDate"`
+	OrderLineItems []OrderLineItemForCreation `json:"orderLineItems"`
+
+	// PaymentInfo OrderPaymentInfoForCreation
+	PaymentInfo *OrderPaymentInfoForCreation `json:"paymentInfo,omitempty"`
+
+	// Pricing This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
+	Pricing *OrderPricingForCreation `json:"pricing,omitempty"`
+
+	// PromisesOptions OrderPromisesOptions
+	PromisesOptions *OrderPromisesOptions `json:"promisesOptions,omitempty"`
+
+	// Source Defines the source of this order. This field is not required, if the order is created based on an external system.
+	Source *OrderForCreation_Source `json:"source,omitempty"`
+
+	// Status The state of the order. Initially it is OPEN.
+	Status        *OrderStatus         `json:"status,omitempty"`
+	StatusReasons *[]OrderStatusReason `json:"statusReasons,omitempty"`
+	Stickers      *[]Sticker           `json:"stickers,omitempty"`
+	Tags          *[]TagReference      `json:"tags,omitempty"`
+
+	// TenantOrderId Field can be used as a reference number in foreign systems, for example as a reference to the source system's identifier for this order.
+	TenantOrderId *string `json:"tenantOrderId,omitempty"`
+}
+
+// OrderForCreation_Source Defines the source of this order. This field is not required, if the order is created based on an external system.
+type OrderForCreation_Source struct {
+	union json.RawMessage
+}
+
+// OrderForCreationConsumer OrderForCreationConsumer
+type OrderForCreationConsumer struct {
+	Addresses *[]ConsumerAddress `json:"addresses,omitempty"`
+
+	// ConsumerId The id of the consumer.
+	ConsumerId *string `json:"consumerId,omitempty"`
+
+	// CustomAttributes Attributes that can be added to the consumer. These attributes cannot be used within fulfillment processes, but it could be useful to have the informations carried here.
+	CustomAttributes *map[string]interface{} `json:"customAttributes,omitempty"`
+
+	// Email @deprecated The email address of the consumer. Use email in addresses array
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	Email *openapi_types.Email `json:"email,omitempty"`
+
+	// FacilityRef ID of the facility, if the recipient is a facility.
+	FacilityRef *string `json:"facilityRef,omitempty"`
+
+	// TenantFacilityId tenantFacilityId of the facility, if the recipient is a facility
+	TenantFacilityId *string `json:"tenantFacilityId,omitempty"`
+}
+
 // OrderForSourcingOptionsRequest OrderForSourcingOptionsRequest
 type OrderForSourcingOptionsRequest struct {
 	// Consumer ConsumerAddressesForSourcingOptions
@@ -15671,6 +16606,73 @@ type OrderForSourcingOptionsRequest struct {
 	TenantOrderId *string `json:"tenantOrderId,omitempty"`
 }
 
+// OrderForUpdate OrderForUpdate
+type OrderForUpdate struct {
+	// Comment A comment for updating this order.
+	Comment *string `json:"comment,omitempty"`
+
+	// Consumer OrderForCreationConsumer
+	Consumer *OrderForCreationConsumer `json:"consumer,omitempty"`
+
+	// CustomAttributes Attributes that can be added to the order. These attributes cannot be used within fulfillment processes, but it could be useful to have the informations carried here.
+	CustomAttributes *map[string]interface{} `json:"customAttributes,omitempty"`
+
+	// OrderLineItems Updates the order line items of the order. All order lines must be included, only the included lines will remain after the update.
+	OrderLineItems *[]OrderLineItemForUpdate `json:"orderLineItems,omitempty"`
+
+	// PreferredHandlingTime Updates the preferred handling time for ship-from-store orders or the provisioning time for click-and-collect orders.
+	PreferredHandlingTime *time.Time `json:"preferredHandlingTime,omitempty"`
+
+	// Pricing This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
+	Pricing *OrderPricingForCreation `json:"pricing,omitempty"`
+
+	// Version The version of the document to be used in optimistic locking mechanisms.
+	Version int64 `json:"version"`
+}
+
+// OrderForceCancelActionParameter AbstractOrderActionsParameter
+type OrderForceCancelActionParameter = AbstractOrderActionsParameter
+
+// OrderLineItem defines model for OrderLineItem.
+type OrderLineItem struct {
+	// AllowedSubstitutes Array of allowed substitutes for given orderLineItem. If an empty array is provided, no substitute is allowed for this orderLineItem. If allowedSubstitutes is not provided, this configured substitutes on listing level will be available
+	AllowedSubstitutes *[]Substitute `json:"allowedSubstitutes,omitempty"`
+
+	// Article OrderLineItemArticle
+	Article OrderLineItemArticle `json:"article"`
+
+	// CustomAttributes Attributes that can be added to the orderline. These attributes cannot be used within fulfillment processes, but it could be useful to have the informations carried here.
+	CustomAttributes *map[string]interface{} `json:"customAttributes,omitempty"`
+
+	// Id The id of this orderline. It is generated during creation automatically by the API and suits as the primary identifier of the described line.
+	Id string `json:"id"`
+
+	// MeasurementUnitKey Identifier for items unit of measurement.
+	MeasurementUnitKey *string `json:"measurementUnitKey,omitempty"`
+
+	// MeasurementValidation MeasurementValidation
+	MeasurementValidation *MeasurementValidation `json:"measurementValidation,omitempty"`
+
+	// Quantity quantity of the specific article that has been ordered
+	Quantity       int64     `json:"quantity"`
+	ScannableCodes *[]string `json:"scannableCodes,omitempty"`
+
+	// SecondaryMeasurementUnitKey Secondary identifier for items unit of measurement.
+	SecondaryMeasurementUnitKey *string `json:"secondaryMeasurementUnitKey,omitempty"`
+
+	// SecondaryQuantity Secondary quantity of the specific article that has been ordered
+	SecondaryQuantity *int64 `json:"secondaryQuantity,omitempty"`
+
+	// ShopPrice @deprecated price per piece of this line item Use attributes instead (see: <a href="https://docs.fulfillmenttools.com/documentation/by-pillar/global-inventory-hub/articles/article-attributes">customization by attributes</a>)
+	ShopPrice *float32        `json:"shopPrice,omitempty"`
+	Tags      *[]TagReference `json:"tags,omitempty"`
+}
+
+// OrderLineItemActionsParameter OrderLineItemActionsParameter
+type OrderLineItemActionsParameter struct {
+	union json.RawMessage
+}
+
 // OrderLineItemArticle defines model for OrderLineItemArticle.
 type OrderLineItemArticle struct {
 	// Attributes Attributes are used in fulfillmenttools to impose a certain degree of customization to a process, such as improving the appearance in the platform and clients.
@@ -15696,6 +16698,35 @@ type OrderLineItemArticle struct {
 	// Weight Weight value is in gram
 	Weight *float32 `json:"weight,omitempty"`
 }
+
+// OrderLineItemArticleForUpdate defines model for OrderLineItemArticleForUpdate.
+type OrderLineItemArticleForUpdate struct {
+	// Attributes Attributes are used in fulfillmenttools to impose a certain degree of customization to a process, such as improving the appearance in the platform and clients.
+	// Details about usage can be found in the <a href="https://docs.fulfillmenttools.com/documentation/by-pillar/global-inventory-hub/articles/article-attributes">article attributes article</a>.
+	Attributes *[]OrderArticleAttributeItem `json:"attributes,omitempty"`
+
+	// CustomAttributes @deprecated Please use customAttributes in OrderLineItem.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	CustomAttributes *map[string]interface{} `json:"customAttributes,omitempty"`
+
+	// ImageUrl A web link to a picture of this article. Ensure that no authentication is needed to fetch the image.
+	ImageUrl *string `json:"imageUrl,omitempty"`
+
+	// TenantArticleId This is a reference to an article number
+	TenantArticleId *string `json:"tenantArticleId,omitempty"`
+
+	// Title The title of the product
+	Title string `json:"title"`
+
+	// TitleLocalized The translations for the title of the product
+	TitleLocalized *LocaleString `json:"titleLocalized,omitempty"`
+
+	// Weight Weight value is in gram
+	Weight *float32 `json:"weight,omitempty"`
+}
+
+// OrderLineItemCustomAttributesUpdateParameter AbstractOrderLineItemActionsParameter
+type OrderLineItemCustomAttributesUpdateParameter = AbstractOrderLineItemActionsParameter
 
 // OrderLineItemForCreation OrderLineItemForCreation
 type OrderLineItemForCreation struct {
@@ -15727,6 +16758,18 @@ type OrderLineItemForCreation struct {
 	// ShopPrice @deprecated price per piece of this line item Use attributes instead (see: <a href="https://docs.fulfillmenttools.com/documentation/by-pillar/global-inventory-hub/articles/article-attributes">customization by attributes</a>)
 	ShopPrice *float32        `json:"shopPrice,omitempty"`
 	Tags      *[]TagReference `json:"tags,omitempty"`
+}
+
+// OrderLineItemForUpdate OrderLineItemForUpdate
+type OrderLineItemForUpdate struct {
+	// Article OrderLineItemArticleForUpdate
+	Article *OrderLineItemArticleForUpdate `json:"article,omitempty"`
+
+	// Id The id of this order line item. It is generated during creation automatically and suits as the primary identifier of the described entity.
+	Id *string `json:"id,omitempty"`
+
+	// Quantity The quantity of this order line item.
+	Quantity *float32 `json:"quantity,omitempty"`
 }
 
 // OrderOrderLineItemsArticleFilter OrderOrderLineItemsArticleFilter
@@ -15765,6 +16808,29 @@ type OrderOrderLineItemsListFilter struct {
 	Contains *OrderOrderLineItemsFilter `json:"contains,omitempty"`
 }
 
+// OrderPaginatedResult OrderPaginatedResult
+type OrderPaginatedResult struct {
+	Orders []Order `json:"orders"`
+
+	// PageInfo Pagination information for the search result.
+	PageInfo PageInfo `json:"pageInfo"`
+
+	// Total The total number of items matching the search criteria. Only filled, if withTotal is set to true in the search options.
+	Total *float32 `json:"total,omitempty"`
+}
+
+// OrderPaymentInfo OrderPaymentInfo
+type OrderPaymentInfo struct {
+	// Currency The currency in which the consumer paid with
+	Currency *string `json:"currency,omitempty"`
+
+	// Method Localized value from methodLocalized
+	Method *string `json:"method,omitempty"`
+
+	// MethodLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	MethodLocalized *LocaleString `json:"methodLocalized,omitempty"`
+}
+
 // OrderPaymentInfoFilter OrderPaymentInfoFilter
 type OrderPaymentInfoFilter struct {
 	// Currency Search by currency
@@ -15796,6 +16862,96 @@ type OrderPaymentInfoMethodLocalizedFilter struct {
 
 	// RuRU Search by ru_RU
 	RuRU *StringFilter `json:"ru_RU,omitempty"`
+}
+
+// OrderPricing defines model for OrderPricing.
+type OrderPricing struct {
+	Discounts *[]OrderPricingDiscount `json:"discounts,omitempty"`
+	Fees      *[]OrderPricingFee      `json:"fees,omitempty"`
+	Taxes     *[]OrderPricingTax      `json:"taxes,omitempty"`
+
+	// Total This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />OrderPricingTotal
+	Total *OrderPricingTotal `json:"total,omitempty"`
+}
+
+// OrderPricingDiscount This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />OrderPricingDiscount
+type OrderPricingDiscount struct {
+	// Code Discount code
+	Code *string `json:"code,omitempty"`
+
+	// Context Context of the discount
+	Context *string `json:"context,omitempty"`
+
+	// Name Name of the discount
+	Name *string `json:"name,omitempty"`
+
+	// NameLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	NameLocalized *LocaleString `json:"nameLocalized,omitempty"`
+
+	// Percentage Discount percentage (-100 to 0). Required when type is PERCENTAGE. Must be negative or zero (e.g. -10 for 10% off).
+	Percentage *float32 `json:"percentage,omitempty"`
+
+	// TenantDiscountId Tenant-specific discount identifier
+	TenantDiscountId *string `json:"tenantDiscountId,omitempty"`
+
+	// Type Type of the discount. ABSOLUTE requires value, PERCENTAGE requires percentage.
+	Type *OrderPricingDiscountType `json:"type,omitempty"`
+
+	// Value MonetaryValue
+	Value *MonetaryValue `json:"value,omitempty"`
+}
+
+// OrderPricingDiscountType Type of the discount. ABSOLUTE requires value, PERCENTAGE requires percentage.
+type OrderPricingDiscountType string
+
+// OrderPricingFee This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />OrderPricingFee
+type OrderPricingFee struct {
+	// Name Name of the fee
+	Name *string `json:"name,omitempty"`
+
+	// Value MonetaryValue
+	Value *MonetaryValue `json:"value,omitempty"`
+}
+
+// OrderPricingForCreation This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Customer-provided order-level pricing inputs. All arrays are optional — if a pricing feature block is missing, OMS treats the feature as not relevant. On update, pricing uses partial-merge semantics: only the provided arrays are replaced, omitted arrays retain their previous values.
+type OrderPricingForCreation struct {
+	Discounts *[]OrderPricingDiscount `json:"discounts,omitempty"`
+	Fees      *[]OrderPricingFee      `json:"fees,omitempty"`
+	Taxes     *[]OrderPricingTax      `json:"taxes,omitempty"`
+}
+
+// OrderPricingTax This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />OrderPricingTax
+type OrderPricingTax struct {
+	// RatePercent Tax rate as percentage
+	RatePercent *float32 `json:"ratePercent,omitempty"`
+
+	// Scope Scope of the tax
+	Scope *string `json:"scope,omitempty"`
+
+	// TaxableValue MonetaryValue
+	TaxableValue *MonetaryValue `json:"taxableValue,omitempty"`
+
+	// Type Tax type identifier
+	Type *string `json:"type,omitempty"`
+
+	// Value MonetaryValue
+	Value MonetaryValue `json:"value"`
+}
+
+// OrderPricingTotal This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />OrderPricingTotal
+type OrderPricingTotal struct {
+	// PriceBreakdown This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Calculated order price breakdown. All fields are optional — if a derived field cannot be calculated, it is omitted.
+	PriceBreakdown *OrderPricingTotals `json:"priceBreakdown,omitempty"`
+}
+
+// OrderPricingTotals This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Calculated order price breakdown. All fields are optional — if a derived field cannot be calculated, it is omitted.
+type OrderPricingTotals struct {
+	SubTotal                *MonetaryValue       `json:"subTotal,omitempty"`
+	Total                   *MonetaryValue       `json:"total,omitempty"`
+	TotalDiscounts          *OrderTotalDiscounts `json:"totalDiscounts,omitempty"`
+	TotalFees               *MonetaryValue       `json:"totalFees,omitempty"`
+	TotalLineItemSurcharges *MonetaryValue       `json:"totalLineItemSurcharges,omitempty"`
+	TotalTaxes              *MonetaryValue       `json:"totalTaxes,omitempty"`
 }
 
 // OrderPromisesOptions OrderPromisesOptions
@@ -15897,6 +17053,34 @@ type OrderRecordSearchQuery struct {
 	TenantOrderRecordId *StringFilter `json:"tenantOrderRecordId,omitempty"`
 }
 
+// OrderSearchPayload OrderSearchPayload
+type OrderSearchPayload struct {
+	// After The cursor to start after for forward pagination. The value is provided in the `pageInfo.endCursor` field of the response. Cannot be used with `before` or `last`.
+	After *string `json:"after,omitempty"`
+
+	// Before The cursor to start before for backward pagination. The value is provided in the `pageInfo.startCursor` field of the response. Cannot be used with `after` or `size` (first).
+	Before *string `json:"before,omitempty"`
+
+	// Last Number of items to return for backward pagination. Cannot be used with 'size' (first). Default: 20.
+	Last *float32 `json:"last,omitempty"`
+
+	// Options SearchOptions
+	Options *SearchOptions `json:"options,omitempty"`
+
+	// Query OrderSearchQuery
+	Query OrderSearchQuery `json:"query"`
+
+	// Size Number of items to return for forward pagination. Cannot be used with 'last'. Default: 20.
+	Size *float32 `json:"size,omitempty"`
+
+	// Sort Use for sorting the result.
+	Sort *[]OrderSort `json:"sort,omitempty"`
+
+	// StartAfterId The ID to start after. Deprecated, use `after` with the value provided in `pageInfo.endCursor` instead.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	StartAfterId *string `json:"startAfterId,omitempty"`
+}
+
 // OrderSearchQuery OrderSearchQuery
 type OrderSearchQuery struct {
 	And *[]OrderSearchQuery `json:"and,omitempty"`
@@ -15934,6 +17118,18 @@ type OrderSearchQuery struct {
 type OrderSearchQuery_CustomAttributes_AdditionalProperties struct {
 	union json.RawMessage
 }
+
+// OrderSort OrderSort
+type OrderSort struct {
+	OrderDate *OrderSortOrderDate `json:"orderDate,omitempty"`
+	Status    *OrderSortStatus    `json:"status,omitempty"`
+}
+
+// OrderSortOrderDate defines model for OrderSort.OrderDate.
+type OrderSortOrderDate string
+
+// OrderSortStatus defines model for OrderSort.Status.
+type OrderSortStatus string
 
 // OrderStatus The state of the order. Initially it is OPEN.
 type OrderStatus string
@@ -15978,6 +17174,44 @@ type OrderTagsFilter struct {
 type OrderTagsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *OrderTagsFilter `json:"contains,omitempty"`
+}
+
+// OrderTotalDiscounts This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Aggregate discount total with a breakdown by source. Values follow the negative-or-zero discount convention.
+type OrderTotalDiscounts struct {
+	Breakdown *struct {
+		LineItemDiscounts *MonetaryValue `json:"lineItemDiscounts,omitempty"`
+		OrderDiscounts    *MonetaryValue `json:"orderDiscounts,omitempty"`
+	} `json:"breakdown,omitempty"`
+	Value *MonetaryValue `json:"value,omitempty"`
+}
+
+// OrderUnlockActionParameter AbstractOrderActionsParameter
+type OrderUnlockActionParameter = AbstractOrderActionsParameter
+
+// OrderUpdateDetail OrderUpdateDetail
+type OrderUpdateDetail struct {
+	// Changes OrderUpdateDetailChanges
+	Changes OrderUpdateDetailChanges `json:"changes"`
+	Comment *string                  `json:"comment,omitempty"`
+
+	// Created The date this update was done.
+	Created time.Time `json:"created"`
+	User    *string   `json:"user,omitempty"`
+}
+
+// OrderUpdateDetailChanges OrderUpdateDetailChanges
+type OrderUpdateDetailChanges struct {
+	// Consumer OrderForCreationConsumer
+	Consumer *OrderForCreationConsumer `json:"consumer,omitempty"`
+
+	// CustomAttributes Attributes that can be added to the order. These attributes cannot be used within fulfillment processes, but it could be useful to have the informations carried here.
+	CustomAttributes *map[string]interface{} `json:"customAttributes,omitempty"`
+
+	// OrderLineItems Updates the order line items of the order. All order lines must be included, only the included lines will remain after the update.
+	OrderLineItems *[]OrderLineItemForUpdate `json:"orderLineItems,omitempty"`
+
+	// PreferredHandlingTime Updates the preferred handling time for ship-from-store orders or the provisioning time for click-and-collect orders.
+	PreferredHandlingTime *time.Time `json:"preferredHandlingTime,omitempty"`
 }
 
 // OutOfStockBehaviour The PREORDER and RESTOCK can be only set, when the depending outOfStockConfig is provided.
@@ -17334,6 +18568,78 @@ type ProcessTagsListFilter struct {
 	Contains *ProcessTagsFilter `json:"contains,omitempty"`
 }
 
+// PromiseCarrier PromiseCarrier
+type PromiseCarrier struct {
+	CarrierKey                string                   `json:"carrierKey"`
+	CarrierName               string                   `json:"carrierName"`
+	CarrierRef                string                   `json:"carrierRef"`
+	DeliveryPromiseValidUntil *time.Time               `json:"deliveryPromiseValidUntil,omitempty"`
+	Products                  []PromiseDeliveryOptions `json:"products"`
+}
+
+// PromiseConfirmActionParameter AbstractOrderActionsParameter
+type PromiseConfirmActionParameter = AbstractOrderActionsParameter
+
+// PromiseDeliveryOptions PromiseDeliveryOptions
+type PromiseDeliveryOptions struct {
+	// CarrierProductCategory CarrierProductCategory
+	CarrierProductCategory CarrierProductCategory `json:"carrierProductCategory"`
+	DeliveryCosts          []DeliveryCost         `json:"deliveryCosts"`
+
+	// EstimatedDeliveryTime EstimatedDeliveryTime
+	EstimatedDeliveryTime *EstimatedDeliveryTime `json:"estimatedDeliveryTime,omitempty"`
+
+	// TransitTime CarrierTransitTime
+	TransitTime *CarrierTransitTime `json:"transitTime,omitempty"`
+}
+
+// PromiseExtendActionParameter AbstractOrderActionsParameter
+type PromiseExtendActionParameter = AbstractOrderActionsParameter
+
+// PromiseRequest PromiseRequest
+type PromiseRequest struct {
+	// AdditionalInfo PromiseRequestAdditionalInfo
+	AdditionalInfo *PromiseRequestAdditionalInfo `json:"additionalInfo,omitempty"`
+
+	// Consumer OrderForCreationConsumer
+	Consumer OrderForCreationConsumer `json:"consumer"`
+
+	// CustomAttributes Attributes that can be added to the order. These attributes cannot be used within fulfillment processes, but it could be useful to have the informations carried here.
+	CustomAttributes *map[string]interface{}              `json:"customAttributes,omitempty"`
+	CustomServices   *[]CustomServiceReferenceForCreation `json:"customServices,omitempty"`
+
+	// DeliveryPreferences DeliveryPreferences
+	DeliveryPreferences *DeliveryPreferences `json:"deliveryPreferences,omitempty"`
+
+	// OrderDate The date this order was created at the supplying system.
+	OrderDate      time.Time                  `json:"orderDate"`
+	OrderLineItems []OrderLineItemForCreation `json:"orderLineItems"`
+
+	// PaymentInfo OrderPaymentInfoForCreation
+	PaymentInfo *OrderPaymentInfoForCreation `json:"paymentInfo,omitempty"`
+
+	// PromisesOptions OrderPromisesOptions
+	PromisesOptions *OrderPromisesOptions `json:"promisesOptions,omitempty"`
+
+	// Status The state of the order. Initially it is OPEN.
+	Status        *OrderStatus         `json:"status,omitempty"`
+	StatusReasons *[]OrderStatusReason `json:"statusReasons,omitempty"`
+	Stickers      *[]Sticker           `json:"stickers,omitempty"`
+	Tags          *[]TagReference      `json:"tags,omitempty"`
+
+	// TenantOrderId Field can be used as a reference number in foreign systems, for example as a reference to the source system's identifier for this order.
+	TenantOrderId *string `json:"tenantOrderId,omitempty"`
+}
+
+// PromiseRequestAdditionalInfo PromiseRequestAdditionalInfo
+type PromiseRequestAdditionalInfo struct {
+	// IncludeListingCustomAttributes If true, the listing custom attributes are included in the response. This is useful for debugging purposes.
+	IncludeListingCustomAttributes *bool `json:"includeListingCustomAttributes,omitempty"`
+
+	// ResourceInvestment How much resources should be invested during the optimization?
+	ResourceInvestment *ResourceInvestment `json:"resourceInvestment,omitempty"`
+}
+
 // RatingConfigurationType This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Identifies the rating configuration variant and determines which properties are applicable.
 type RatingConfigurationType string
 
@@ -17421,6 +18727,25 @@ type ReservationSearchQuery struct {
 type ResourceInvestment struct {
 	// Level [abstract values]: how many resources should we invest in optimization. With a higher level the results will be better, nevertheless we need to invest more time for the optimization.
 	Level float32 `json:"level"`
+}
+
+// ResponseForDeliveryPromise ResponseForDeliveryPromise
+type ResponseForDeliveryPromise struct {
+	// BackOrdered Backordered
+	BackOrdered *Backordered `json:"backOrdered,omitempty"`
+
+	// Collect DeliveryPromiseCollect
+	Collect      *DeliveryPromiseCollect `json:"collect,omitempty"`
+	OrderRef     string                  `json:"orderRef"`
+	OrderVersion float32                 `json:"orderVersion"`
+
+	// PromisesOptions OrderPromisesOptions
+	PromisesOptions *OrderPromisesOptions      `json:"promisesOptions,omitempty"`
+	ShipToCustomer  *[]DeliveryPromiseShipment `json:"shipToCustomer,omitempty"`
+	ShipToStore     *[]DeliveryPromiseShipment `json:"shipToStore,omitempty"`
+
+	// SourcingOption SourcingOption
+	SourcingOption *SourcingOption `json:"sourcingOption,omitempty"`
 }
 
 // Role Role
@@ -19010,6 +20335,11 @@ type SimulationOrderTagsListFilter struct {
 	Contains *SimulationOrderTagsFilter `json:"contains,omitempty"`
 }
 
+// SourceRef SourceRef
+type SourceRef struct {
+	SourceRef string `json:"sourceRef"`
+}
+
 // SourcingOption SourcingOption
 type SourcingOption struct {
 	// EstimatedDeliveryDate Estimated delivery date in format YYYY-MM-DD.
@@ -20341,6 +21671,42 @@ type StrippedManagedFacility struct {
 // StrippedManagedFacilityPhoneNumbersType defines model for StrippedManagedFacility.PhoneNumbers.Type.
 type StrippedManagedFacilityPhoneNumbersType string
 
+// StrippedOrder defines model for StrippedOrder.
+type StrippedOrder struct {
+	// Created The date this entity was created at the platform. This value is generated by the service.
+	Created *time.Time `json:"created,omitempty"`
+
+	// Id The id of this order. It is generated during creation automatically and suits as the primary identifier of the described entity.
+	Id string `json:"id"`
+
+	// LastModified The date this entity was modified last. This value is generated by the service.
+	LastModified *time.Time `json:"lastModified,omitempty"`
+
+	// OrderDate The date this order was created at the supplying system.
+	OrderDate      time.Time `json:"orderDate"`
+	OrderLineItems *[]struct {
+		// Quantity quantity of the specific article that has been ordered
+		Quantity int64  `json:"quantity"`
+		Title    string `json:"title"`
+	} `json:"orderLineItems,omitempty"`
+	ProcessRef *string `json:"processRef,omitempty"`
+
+	// Status The state of the order. Initially it is OPEN.
+	Status   OrderStatus `json:"status"`
+	Stickers *[]Sticker  `json:"stickers,omitempty"`
+
+	// Version The version of the document to be used in optimistic locking mechanisms.
+	Version int64 `json:"version"`
+}
+
+// StrippedOrders StrippedOrders
+type StrippedOrders struct {
+	Orders *[]StrippedOrder `json:"orders,omitempty"`
+
+	// Total Total number of found entities for this query
+	Total *int `json:"total,omitempty"`
+}
+
 // Substitute Substitute
 type Substitute struct {
 	Attributes *[]SubstituteAttributeItem `json:"attributes,omitempty"`
@@ -20555,6 +21921,11 @@ type TagSearchQuery struct {
 type TenantFacilityIdSelector struct {
 	// TenantFacilityId Resolves a facility by its tenantFacilityId.
 	TenantFacilityId string `json:"tenantFacilityId"`
+}
+
+// TenantSourceId TenantSourceId
+type TenantSourceId struct {
+	TenantSourceId string `json:"tenantSourceId"`
 }
 
 // TimeRange TimeRange
@@ -21276,6 +22647,21 @@ type VersionlessUpdateStock_Stocks_Item struct {
 // WeekDay A weekday
 type WeekDay string
 
+// WorkflowInformation WorkflowInformation
+type WorkflowInformation struct {
+	// InstanceRef The ID identifying the workflow instance this entity belongs to.
+	InstanceRef *string `json:"instanceRef,omitempty"`
+
+	// IsAvailable Explicitly states if this entity is part of a workflow.
+	IsAvailable *WorkflowInformationIsAvailable `json:"isAvailable,omitempty"`
+
+	// NodeRef The ID identifying the node within the workflow instance tha this entity belongs to.
+	NodeRef *string `json:"nodeRef,omitempty"`
+}
+
+// WorkflowInformationIsAvailable Explicitly states if this entity is part of a workflow.
+type WorkflowInformationIsAvailable bool
+
 // WorkflowSearchQuery WorkflowSearchQuery
 type WorkflowSearchQuery struct {
 	And *[]WorkflowSearchQuery `json:"and,omitempty"`
@@ -21290,6 +22676,15 @@ type WorkflowSearchQuery struct {
 	Name *StringSearchFilter    `json:"name,omitempty"`
 	Or   *[]WorkflowSearchQuery `json:"or,omitempty"`
 }
+
+// WorkflowUnavailable WorkflowUnavailable
+type WorkflowUnavailable struct {
+	// IsAvailable Explicitly states if this entity is part of a workflow.
+	IsAvailable *WorkflowUnavailableIsAvailable `json:"isAvailable,omitempty"`
+}
+
+// WorkflowUnavailableIsAvailable Explicitly states if this entity is part of a workflow.
+type WorkflowUnavailableIsAvailable bool
 
 // ZoneSearchQuery ZoneSearchQuery
 type ZoneSearchQuery struct {
@@ -21481,6 +22876,21 @@ type GetDiscountsForFacilityParams struct {
 	Size *int `form:"size,omitempty" json:"size,omitempty"`
 }
 
+// GetAllOrdersParams defines parameters for GetAllOrders.
+type GetAllOrdersParams struct {
+	// StartAfterId all entities after given Id
+	StartAfterId *string `form:"startAfterId,omitempty" json:"startAfterId,omitempty"`
+
+	// Size number of entities to show
+	Size *int `form:"size,omitempty" json:"size,omitempty"`
+
+	// TenantOrderId filter orders by tenantOrderId
+	TenantOrderId *string `form:"tenantOrderId,omitempty" json:"tenantOrderId,omitempty"`
+
+	// ConsumerId filter orders by consumerId
+	ConsumerId *string `form:"consumerId,omitempty" json:"consumerId,omitempty"`
+}
+
 // GetPermissionsParams defines parameters for GetPermissions.
 type GetPermissionsParams struct {
 	Size         *float32 `form:"size,omitempty" json:"size,omitempty"`
@@ -21627,6 +23037,24 @@ type BulkUpsertListingsJSONRequestBody = ListingBulkUpsertPayload
 
 // SearchListingJSONRequestBody defines body for SearchListing for application/json ContentType.
 type SearchListingJSONRequestBody = ListingSearchPayload
+
+// AddOrderJSONRequestBody defines body for AddOrder for application/json ContentType.
+type AddOrderJSONRequestBody = OrderForCreation
+
+// SearchOrderJSONRequestBody defines body for SearchOrder for application/json ContentType.
+type SearchOrderJSONRequestBody = OrderSearchPayload
+
+// UpdateOrderJSONRequestBody defines body for UpdateOrder for application/json ContentType.
+type UpdateOrderJSONRequestBody = OrderForUpdate
+
+// OrderActionJSONRequestBody defines body for OrderAction for application/json ContentType.
+type OrderActionJSONRequestBody = OrderActionsParameter
+
+// OrderLineItemActionJSONRequestBody defines body for OrderLineItemAction for application/json ContentType.
+type OrderLineItemActionJSONRequestBody = OrderLineItemActionsParameter
+
+// PostDeliveryPromiseJSONRequestBody defines body for PostDeliveryPromise for application/json ContentType.
+type PostDeliveryPromiseJSONRequestBody = PromiseRequest
 
 // CreateRoleJSONRequestBody defines body for CreateRole for application/json ContentType.
 type CreateRoleJSONRequestBody = RoleForCreation
@@ -23712,6 +25140,420 @@ func (t ListingSearchQuery_CustomAttributes_AdditionalProperties) MarshalJSON() 
 }
 
 func (t *ListingSearchQuery_CustomAttributes_AdditionalProperties) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsSourceRef returns the union data inside the Order_Source as a SourceRef
+func (t Order_Source) AsSourceRef() (SourceRef, error) {
+	var body SourceRef
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSourceRef overwrites any union data inside the Order_Source as the provided SourceRef
+func (t *Order_Source) FromSourceRef(v SourceRef) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSourceRef performs a merge with any union data inside the Order_Source, using the provided SourceRef
+func (t *Order_Source) MergeSourceRef(v SourceRef) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsTenantSourceId returns the union data inside the Order_Source as a TenantSourceId
+func (t Order_Source) AsTenantSourceId() (TenantSourceId, error) {
+	var body TenantSourceId
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromTenantSourceId overwrites any union data inside the Order_Source as the provided TenantSourceId
+func (t *Order_Source) FromTenantSourceId(v TenantSourceId) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeTenantSourceId performs a merge with any union data inside the Order_Source, using the provided TenantSourceId
+func (t *Order_Source) MergeTenantSourceId(v TenantSourceId) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t Order_Source) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *Order_Source) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsWorkflowInformation returns the union data inside the Order_WorkflowInformation as a WorkflowInformation
+func (t Order_WorkflowInformation) AsWorkflowInformation() (WorkflowInformation, error) {
+	var body WorkflowInformation
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromWorkflowInformation overwrites any union data inside the Order_WorkflowInformation as the provided WorkflowInformation
+func (t *Order_WorkflowInformation) FromWorkflowInformation(v WorkflowInformation) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeWorkflowInformation performs a merge with any union data inside the Order_WorkflowInformation, using the provided WorkflowInformation
+func (t *Order_WorkflowInformation) MergeWorkflowInformation(v WorkflowInformation) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsWorkflowUnavailable returns the union data inside the Order_WorkflowInformation as a WorkflowUnavailable
+func (t Order_WorkflowInformation) AsWorkflowUnavailable() (WorkflowUnavailable, error) {
+	var body WorkflowUnavailable
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromWorkflowUnavailable overwrites any union data inside the Order_WorkflowInformation as the provided WorkflowUnavailable
+func (t *Order_WorkflowInformation) FromWorkflowUnavailable(v WorkflowUnavailable) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeWorkflowUnavailable performs a merge with any union data inside the Order_WorkflowInformation, using the provided WorkflowUnavailable
+func (t *Order_WorkflowInformation) MergeWorkflowUnavailable(v WorkflowUnavailable) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t Order_WorkflowInformation) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *Order_WorkflowInformation) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsOrderUnlockActionParameter returns the union data inside the OrderActionsParameter as a OrderUnlockActionParameter
+func (t OrderActionsParameter) AsOrderUnlockActionParameter() (OrderUnlockActionParameter, error) {
+	var body OrderUnlockActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOrderUnlockActionParameter overwrites any union data inside the OrderActionsParameter as the provided OrderUnlockActionParameter
+func (t *OrderActionsParameter) FromOrderUnlockActionParameter(v OrderUnlockActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeOrderUnlockActionParameter performs a merge with any union data inside the OrderActionsParameter, using the provided OrderUnlockActionParameter
+func (t *OrderActionsParameter) MergeOrderUnlockActionParameter(v OrderUnlockActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsOrderCancelActionParameter returns the union data inside the OrderActionsParameter as a OrderCancelActionParameter
+func (t OrderActionsParameter) AsOrderCancelActionParameter() (OrderCancelActionParameter, error) {
+	var body OrderCancelActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOrderCancelActionParameter overwrites any union data inside the OrderActionsParameter as the provided OrderCancelActionParameter
+func (t *OrderActionsParameter) FromOrderCancelActionParameter(v OrderCancelActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeOrderCancelActionParameter performs a merge with any union data inside the OrderActionsParameter, using the provided OrderCancelActionParameter
+func (t *OrderActionsParameter) MergeOrderCancelActionParameter(v OrderCancelActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsOrderForceCancelActionParameter returns the union data inside the OrderActionsParameter as a OrderForceCancelActionParameter
+func (t OrderActionsParameter) AsOrderForceCancelActionParameter() (OrderForceCancelActionParameter, error) {
+	var body OrderForceCancelActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOrderForceCancelActionParameter overwrites any union data inside the OrderActionsParameter as the provided OrderForceCancelActionParameter
+func (t *OrderActionsParameter) FromOrderForceCancelActionParameter(v OrderForceCancelActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeOrderForceCancelActionParameter performs a merge with any union data inside the OrderActionsParameter, using the provided OrderForceCancelActionParameter
+func (t *OrderActionsParameter) MergeOrderForceCancelActionParameter(v OrderForceCancelActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPromiseConfirmActionParameter returns the union data inside the OrderActionsParameter as a PromiseConfirmActionParameter
+func (t OrderActionsParameter) AsPromiseConfirmActionParameter() (PromiseConfirmActionParameter, error) {
+	var body PromiseConfirmActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromiseConfirmActionParameter overwrites any union data inside the OrderActionsParameter as the provided PromiseConfirmActionParameter
+func (t *OrderActionsParameter) FromPromiseConfirmActionParameter(v PromiseConfirmActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromiseConfirmActionParameter performs a merge with any union data inside the OrderActionsParameter, using the provided PromiseConfirmActionParameter
+func (t *OrderActionsParameter) MergePromiseConfirmActionParameter(v PromiseConfirmActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPromiseExtendActionParameter returns the union data inside the OrderActionsParameter as a PromiseExtendActionParameter
+func (t OrderActionsParameter) AsPromiseExtendActionParameter() (PromiseExtendActionParameter, error) {
+	var body PromiseExtendActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPromiseExtendActionParameter overwrites any union data inside the OrderActionsParameter as the provided PromiseExtendActionParameter
+func (t *OrderActionsParameter) FromPromiseExtendActionParameter(v PromiseExtendActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePromiseExtendActionParameter performs a merge with any union data inside the OrderActionsParameter, using the provided PromiseExtendActionParameter
+func (t *OrderActionsParameter) MergePromiseExtendActionParameter(v PromiseExtendActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsOrderConsumerAddressChangeActionParameter returns the union data inside the OrderActionsParameter as a OrderConsumerAddressChangeActionParameter
+func (t OrderActionsParameter) AsOrderConsumerAddressChangeActionParameter() (OrderConsumerAddressChangeActionParameter, error) {
+	var body OrderConsumerAddressChangeActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOrderConsumerAddressChangeActionParameter overwrites any union data inside the OrderActionsParameter as the provided OrderConsumerAddressChangeActionParameter
+func (t *OrderActionsParameter) FromOrderConsumerAddressChangeActionParameter(v OrderConsumerAddressChangeActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeOrderConsumerAddressChangeActionParameter performs a merge with any union data inside the OrderActionsParameter, using the provided OrderConsumerAddressChangeActionParameter
+func (t *OrderActionsParameter) MergeOrderConsumerAddressChangeActionParameter(v OrderConsumerAddressChangeActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsOrderConsumerAddressesReplaceActionParameter returns the union data inside the OrderActionsParameter as a OrderConsumerAddressesReplaceActionParameter
+func (t OrderActionsParameter) AsOrderConsumerAddressesReplaceActionParameter() (OrderConsumerAddressesReplaceActionParameter, error) {
+	var body OrderConsumerAddressesReplaceActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOrderConsumerAddressesReplaceActionParameter overwrites any union data inside the OrderActionsParameter as the provided OrderConsumerAddressesReplaceActionParameter
+func (t *OrderActionsParameter) FromOrderConsumerAddressesReplaceActionParameter(v OrderConsumerAddressesReplaceActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeOrderConsumerAddressesReplaceActionParameter performs a merge with any union data inside the OrderActionsParameter, using the provided OrderConsumerAddressesReplaceActionParameter
+func (t *OrderActionsParameter) MergeOrderConsumerAddressesReplaceActionParameter(v OrderConsumerAddressesReplaceActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t OrderActionsParameter) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *OrderActionsParameter) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsSourceRef returns the union data inside the OrderForCreation_Source as a SourceRef
+func (t OrderForCreation_Source) AsSourceRef() (SourceRef, error) {
+	var body SourceRef
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSourceRef overwrites any union data inside the OrderForCreation_Source as the provided SourceRef
+func (t *OrderForCreation_Source) FromSourceRef(v SourceRef) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSourceRef performs a merge with any union data inside the OrderForCreation_Source, using the provided SourceRef
+func (t *OrderForCreation_Source) MergeSourceRef(v SourceRef) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsTenantSourceId returns the union data inside the OrderForCreation_Source as a TenantSourceId
+func (t OrderForCreation_Source) AsTenantSourceId() (TenantSourceId, error) {
+	var body TenantSourceId
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromTenantSourceId overwrites any union data inside the OrderForCreation_Source as the provided TenantSourceId
+func (t *OrderForCreation_Source) FromTenantSourceId(v TenantSourceId) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeTenantSourceId performs a merge with any union data inside the OrderForCreation_Source, using the provided TenantSourceId
+func (t *OrderForCreation_Source) MergeTenantSourceId(v TenantSourceId) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t OrderForCreation_Source) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *OrderForCreation_Source) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsOrderLineItemCustomAttributesUpdateParameter returns the union data inside the OrderLineItemActionsParameter as a OrderLineItemCustomAttributesUpdateParameter
+func (t OrderLineItemActionsParameter) AsOrderLineItemCustomAttributesUpdateParameter() (OrderLineItemCustomAttributesUpdateParameter, error) {
+	var body OrderLineItemCustomAttributesUpdateParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOrderLineItemCustomAttributesUpdateParameter overwrites any union data inside the OrderLineItemActionsParameter as the provided OrderLineItemCustomAttributesUpdateParameter
+func (t *OrderLineItemActionsParameter) FromOrderLineItemCustomAttributesUpdateParameter(v OrderLineItemCustomAttributesUpdateParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeOrderLineItemCustomAttributesUpdateParameter performs a merge with any union data inside the OrderLineItemActionsParameter, using the provided OrderLineItemCustomAttributesUpdateParameter
+func (t *OrderLineItemActionsParameter) MergeOrderLineItemCustomAttributesUpdateParameter(v OrderLineItemCustomAttributesUpdateParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t OrderLineItemActionsParameter) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *OrderLineItemActionsParameter) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -27689,8 +29531,44 @@ type ClientInterface interface {
 
 	SearchListing(ctx context.Context, body SearchListingJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetAllOrders request
+	GetAllOrders(ctx context.Context, params *GetAllOrdersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// AddOrderWithBody request with any body
+	AddOrderWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	AddOrder(ctx context.Context, body AddOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// SearchOrderWithBody request with any body
+	SearchOrderWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	SearchOrder(ctx context.Context, body SearchOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetOrder request
+	GetOrder(ctx context.Context, orderId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateOrderWithBody request with any body
+	UpdateOrderWithBody(ctx context.Context, orderId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UpdateOrder(ctx context.Context, orderId string, body UpdateOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// OrderActionWithBody request with any body
+	OrderActionWithBody(ctx context.Context, orderId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	OrderAction(ctx context.Context, orderId string, body OrderActionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// OrderLineItemActionWithBody request with any body
+	OrderLineItemActionWithBody(ctx context.Context, orderId string, orderLineItemId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	OrderLineItemAction(ctx context.Context, orderId string, orderLineItemId string, body OrderLineItemActionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetPermissions request
 	GetPermissions(ctx context.Context, params *GetPermissionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostDeliveryPromiseWithBody request with any body
+	PostDeliveryPromiseWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostDeliveryPromise(ctx context.Context, body PostDeliveryPromiseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetAllRoles request
 	GetAllRoles(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -28510,8 +30388,176 @@ func (c *Client) SearchListing(ctx context.Context, body SearchListingJSONReques
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetAllOrders(ctx context.Context, params *GetAllOrdersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetAllOrdersRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) AddOrderWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAddOrderRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) AddOrder(ctx context.Context, body AddOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAddOrderRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SearchOrderWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSearchOrderRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SearchOrder(ctx context.Context, body SearchOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSearchOrderRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetOrder(ctx context.Context, orderId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetOrderRequest(c.Server, orderId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateOrderWithBody(ctx context.Context, orderId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateOrderRequestWithBody(c.Server, orderId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateOrder(ctx context.Context, orderId string, body UpdateOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateOrderRequest(c.Server, orderId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) OrderActionWithBody(ctx context.Context, orderId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewOrderActionRequestWithBody(c.Server, orderId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) OrderAction(ctx context.Context, orderId string, body OrderActionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewOrderActionRequest(c.Server, orderId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) OrderLineItemActionWithBody(ctx context.Context, orderId string, orderLineItemId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewOrderLineItemActionRequestWithBody(c.Server, orderId, orderLineItemId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) OrderLineItemAction(ctx context.Context, orderId string, orderLineItemId string, body OrderLineItemActionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewOrderLineItemActionRequest(c.Server, orderId, orderLineItemId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetPermissions(ctx context.Context, params *GetPermissionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetPermissionsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostDeliveryPromiseWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostDeliveryPromiseRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostDeliveryPromise(ctx context.Context, body PostDeliveryPromiseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostDeliveryPromiseRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -31294,6 +33340,358 @@ func NewSearchListingRequestWithBody(server string, contentType string, body io.
 	return req, nil
 }
 
+// NewGetAllOrdersRequest generates requests for GetAllOrders
+func NewGetAllOrdersRequest(server string, params *GetAllOrdersParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/orders")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.StartAfterId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "startAfterId", *params.StartAfterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.Size != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "size", *params.Size, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "integer", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.TenantOrderId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "tenantOrderId", *params.TenantOrderId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.ConsumerId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "consumerId", *params.ConsumerId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewAddOrderRequest calls the generic AddOrder builder with application/json body
+func NewAddOrderRequest(server string, body AddOrderJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewAddOrderRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewAddOrderRequestWithBody generates requests for AddOrder with any type of body
+func NewAddOrderRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/orders")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewSearchOrderRequest calls the generic SearchOrder builder with application/json body
+func NewSearchOrderRequest(server string, body SearchOrderJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewSearchOrderRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewSearchOrderRequestWithBody generates requests for SearchOrder with any type of body
+func NewSearchOrderRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/orders/search")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetOrderRequest generates requests for GetOrder
+func NewGetOrderRequest(server string, orderId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "orderId", orderId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/orders/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpdateOrderRequest calls the generic UpdateOrder builder with application/json body
+func NewUpdateOrderRequest(server string, orderId string, body UpdateOrderJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateOrderRequestWithBody(server, orderId, "application/json", bodyReader)
+}
+
+// NewUpdateOrderRequestWithBody generates requests for UpdateOrder with any type of body
+func NewUpdateOrderRequestWithBody(server string, orderId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "orderId", orderId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/orders/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPatch, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewOrderActionRequest calls the generic OrderAction builder with application/json body
+func NewOrderActionRequest(server string, orderId string, body OrderActionJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewOrderActionRequestWithBody(server, orderId, "application/json", bodyReader)
+}
+
+// NewOrderActionRequestWithBody generates requests for OrderAction with any type of body
+func NewOrderActionRequestWithBody(server string, orderId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "orderId", orderId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/orders/%s/actions", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewOrderLineItemActionRequest calls the generic OrderLineItemAction builder with application/json body
+func NewOrderLineItemActionRequest(server string, orderId string, orderLineItemId string, body OrderLineItemActionJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewOrderLineItemActionRequestWithBody(server, orderId, orderLineItemId, "application/json", bodyReader)
+}
+
+// NewOrderLineItemActionRequestWithBody generates requests for OrderLineItemAction with any type of body
+func NewOrderLineItemActionRequestWithBody(server string, orderId string, orderLineItemId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "orderId", orderId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "orderLineItemId", orderLineItemId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/orders/%s/orderlineitems/%s/actions", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewGetPermissionsRequest generates requests for GetPermissions
 func NewGetPermissionsRequest(server string, params *GetPermissionsParams) (*http.Request, error) {
 	var err error
@@ -31380,6 +33778,46 @@ func NewGetPermissionsRequest(server string, params *GetPermissionsParams) (*htt
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewPostDeliveryPromiseRequest calls the generic PostDeliveryPromise builder with application/json body
+func NewPostDeliveryPromiseRequest(server string, body PostDeliveryPromiseJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostDeliveryPromiseRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostDeliveryPromiseRequestWithBody generates requests for PostDeliveryPromise with any type of body
+func NewPostDeliveryPromiseRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/promises/deliverypromise")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -33150,8 +35588,44 @@ type ClientWithResponsesInterface interface {
 
 	SearchListingWithResponse(ctx context.Context, body SearchListingJSONRequestBody, reqEditors ...RequestEditorFn) (*SearchListingResponse, error)
 
+	// GetAllOrdersWithResponse request
+	GetAllOrdersWithResponse(ctx context.Context, params *GetAllOrdersParams, reqEditors ...RequestEditorFn) (*GetAllOrdersResponse, error)
+
+	// AddOrderWithBodyWithResponse request with any body
+	AddOrderWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AddOrderResponse, error)
+
+	AddOrderWithResponse(ctx context.Context, body AddOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*AddOrderResponse, error)
+
+	// SearchOrderWithBodyWithResponse request with any body
+	SearchOrderWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SearchOrderResponse, error)
+
+	SearchOrderWithResponse(ctx context.Context, body SearchOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*SearchOrderResponse, error)
+
+	// GetOrderWithResponse request
+	GetOrderWithResponse(ctx context.Context, orderId string, reqEditors ...RequestEditorFn) (*GetOrderResponse, error)
+
+	// UpdateOrderWithBodyWithResponse request with any body
+	UpdateOrderWithBodyWithResponse(ctx context.Context, orderId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateOrderResponse, error)
+
+	UpdateOrderWithResponse(ctx context.Context, orderId string, body UpdateOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateOrderResponse, error)
+
+	// OrderActionWithBodyWithResponse request with any body
+	OrderActionWithBodyWithResponse(ctx context.Context, orderId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OrderActionResponse, error)
+
+	OrderActionWithResponse(ctx context.Context, orderId string, body OrderActionJSONRequestBody, reqEditors ...RequestEditorFn) (*OrderActionResponse, error)
+
+	// OrderLineItemActionWithBodyWithResponse request with any body
+	OrderLineItemActionWithBodyWithResponse(ctx context.Context, orderId string, orderLineItemId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OrderLineItemActionResponse, error)
+
+	OrderLineItemActionWithResponse(ctx context.Context, orderId string, orderLineItemId string, body OrderLineItemActionJSONRequestBody, reqEditors ...RequestEditorFn) (*OrderLineItemActionResponse, error)
+
 	// GetPermissionsWithResponse request
 	GetPermissionsWithResponse(ctx context.Context, params *GetPermissionsParams, reqEditors ...RequestEditorFn) (*GetPermissionsResponse, error)
+
+	// PostDeliveryPromiseWithBodyWithResponse request with any body
+	PostDeliveryPromiseWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostDeliveryPromiseResponse, error)
+
+	PostDeliveryPromiseWithResponse(ctx context.Context, body PostDeliveryPromiseJSONRequestBody, reqEditors ...RequestEditorFn) (*PostDeliveryPromiseResponse, error)
 
 	// GetAllRolesWithResponse request
 	GetAllRolesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetAllRolesResponse, error)
@@ -34567,6 +37041,234 @@ func (r SearchListingResponse) ContentType() string {
 	return ""
 }
 
+type GetAllOrdersResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *StrippedOrders
+	JSON401      *ApiError
+	JSON403      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetAllOrdersResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetAllOrdersResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetAllOrdersResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type AddOrderResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *Order
+	JSON400      *ApiError
+	JSON401      *ApiError
+	JSON403      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r AddOrderResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r AddOrderResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r AddOrderResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type SearchOrderResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *OrderPaginatedResult
+	JSON401      *ApiError
+	JSON403      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r SearchOrderResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r SearchOrderResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r SearchOrderResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetOrderResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Order
+	JSON401      *ApiError
+	JSON403      *ApiError
+	JSON404      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetOrderResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetOrderResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetOrderResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type UpdateOrderResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Order
+	JSON401      *ApiError
+	JSON403      *ApiError
+	JSON404      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateOrderResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateOrderResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r UpdateOrderResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type OrderActionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Order
+	JSON401      *ApiError
+	JSON403      *ApiError
+	JSON404      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r OrderActionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r OrderActionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r OrderActionResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type OrderLineItemActionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Order
+	JSON401      *ApiError
+	JSON403      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r OrderLineItemActionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r OrderLineItemActionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r OrderLineItemActionResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
 type GetPermissionsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -34593,6 +37295,39 @@ func (r GetPermissionsResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r GetPermissionsResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type PostDeliveryPromiseResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *ResponseForDeliveryPromise
+	JSON400      *ApiError
+	JSON401      *ApiError
+	JSON403      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r PostDeliveryPromiseResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostDeliveryPromiseResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r PostDeliveryPromiseResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -36157,6 +38892,109 @@ func (c *ClientWithResponses) SearchListingWithResponse(ctx context.Context, bod
 	return ParseSearchListingResponse(rsp)
 }
 
+// GetAllOrdersWithResponse request returning *GetAllOrdersResponse
+func (c *ClientWithResponses) GetAllOrdersWithResponse(ctx context.Context, params *GetAllOrdersParams, reqEditors ...RequestEditorFn) (*GetAllOrdersResponse, error) {
+	rsp, err := c.GetAllOrders(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetAllOrdersResponse(rsp)
+}
+
+// AddOrderWithBodyWithResponse request with arbitrary body returning *AddOrderResponse
+func (c *ClientWithResponses) AddOrderWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AddOrderResponse, error) {
+	rsp, err := c.AddOrderWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAddOrderResponse(rsp)
+}
+
+func (c *ClientWithResponses) AddOrderWithResponse(ctx context.Context, body AddOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*AddOrderResponse, error) {
+	rsp, err := c.AddOrder(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAddOrderResponse(rsp)
+}
+
+// SearchOrderWithBodyWithResponse request with arbitrary body returning *SearchOrderResponse
+func (c *ClientWithResponses) SearchOrderWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SearchOrderResponse, error) {
+	rsp, err := c.SearchOrderWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSearchOrderResponse(rsp)
+}
+
+func (c *ClientWithResponses) SearchOrderWithResponse(ctx context.Context, body SearchOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*SearchOrderResponse, error) {
+	rsp, err := c.SearchOrder(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSearchOrderResponse(rsp)
+}
+
+// GetOrderWithResponse request returning *GetOrderResponse
+func (c *ClientWithResponses) GetOrderWithResponse(ctx context.Context, orderId string, reqEditors ...RequestEditorFn) (*GetOrderResponse, error) {
+	rsp, err := c.GetOrder(ctx, orderId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetOrderResponse(rsp)
+}
+
+// UpdateOrderWithBodyWithResponse request with arbitrary body returning *UpdateOrderResponse
+func (c *ClientWithResponses) UpdateOrderWithBodyWithResponse(ctx context.Context, orderId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateOrderResponse, error) {
+	rsp, err := c.UpdateOrderWithBody(ctx, orderId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateOrderResponse(rsp)
+}
+
+func (c *ClientWithResponses) UpdateOrderWithResponse(ctx context.Context, orderId string, body UpdateOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateOrderResponse, error) {
+	rsp, err := c.UpdateOrder(ctx, orderId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateOrderResponse(rsp)
+}
+
+// OrderActionWithBodyWithResponse request with arbitrary body returning *OrderActionResponse
+func (c *ClientWithResponses) OrderActionWithBodyWithResponse(ctx context.Context, orderId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OrderActionResponse, error) {
+	rsp, err := c.OrderActionWithBody(ctx, orderId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseOrderActionResponse(rsp)
+}
+
+func (c *ClientWithResponses) OrderActionWithResponse(ctx context.Context, orderId string, body OrderActionJSONRequestBody, reqEditors ...RequestEditorFn) (*OrderActionResponse, error) {
+	rsp, err := c.OrderAction(ctx, orderId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseOrderActionResponse(rsp)
+}
+
+// OrderLineItemActionWithBodyWithResponse request with arbitrary body returning *OrderLineItemActionResponse
+func (c *ClientWithResponses) OrderLineItemActionWithBodyWithResponse(ctx context.Context, orderId string, orderLineItemId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*OrderLineItemActionResponse, error) {
+	rsp, err := c.OrderLineItemActionWithBody(ctx, orderId, orderLineItemId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseOrderLineItemActionResponse(rsp)
+}
+
+func (c *ClientWithResponses) OrderLineItemActionWithResponse(ctx context.Context, orderId string, orderLineItemId string, body OrderLineItemActionJSONRequestBody, reqEditors ...RequestEditorFn) (*OrderLineItemActionResponse, error) {
+	rsp, err := c.OrderLineItemAction(ctx, orderId, orderLineItemId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseOrderLineItemActionResponse(rsp)
+}
+
 // GetPermissionsWithResponse request returning *GetPermissionsResponse
 func (c *ClientWithResponses) GetPermissionsWithResponse(ctx context.Context, params *GetPermissionsParams, reqEditors ...RequestEditorFn) (*GetPermissionsResponse, error) {
 	rsp, err := c.GetPermissions(ctx, params, reqEditors...)
@@ -36164,6 +39002,23 @@ func (c *ClientWithResponses) GetPermissionsWithResponse(ctx context.Context, pa
 		return nil, err
 	}
 	return ParseGetPermissionsResponse(rsp)
+}
+
+// PostDeliveryPromiseWithBodyWithResponse request with arbitrary body returning *PostDeliveryPromiseResponse
+func (c *ClientWithResponses) PostDeliveryPromiseWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostDeliveryPromiseResponse, error) {
+	rsp, err := c.PostDeliveryPromiseWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostDeliveryPromiseResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostDeliveryPromiseWithResponse(ctx context.Context, body PostDeliveryPromiseJSONRequestBody, reqEditors ...RequestEditorFn) (*PostDeliveryPromiseResponse, error) {
+	rsp, err := c.PostDeliveryPromise(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostDeliveryPromiseResponse(rsp)
 }
 
 // GetAllRolesWithResponse request returning *GetAllRolesResponse
@@ -38383,6 +41238,314 @@ func ParseSearchListingResponse(rsp *http.Response) (*SearchListingResponse, err
 	return response, nil
 }
 
+// ParseGetAllOrdersResponse parses an HTTP response from a GetAllOrdersWithResponse call
+func ParseGetAllOrdersResponse(rsp *http.Response) (*GetAllOrdersResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetAllOrdersResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest StrippedOrders
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseAddOrderResponse parses an HTTP response from a AddOrderWithResponse call
+func ParseAddOrderResponse(rsp *http.Response) (*AddOrderResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &AddOrderResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest Order
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseSearchOrderResponse parses an HTTP response from a SearchOrderWithResponse call
+func ParseSearchOrderResponse(rsp *http.Response) (*SearchOrderResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &SearchOrderResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest OrderPaginatedResult
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetOrderResponse parses an HTTP response from a GetOrderWithResponse call
+func ParseGetOrderResponse(rsp *http.Response) (*GetOrderResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetOrderResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Order
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateOrderResponse parses an HTTP response from a UpdateOrderWithResponse call
+func ParseUpdateOrderResponse(rsp *http.Response) (*UpdateOrderResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateOrderResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Order
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseOrderActionResponse parses an HTTP response from a OrderActionWithResponse call
+func ParseOrderActionResponse(rsp *http.Response) (*OrderActionResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &OrderActionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Order
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseOrderLineItemActionResponse parses an HTTP response from a OrderLineItemActionWithResponse call
+func ParseOrderLineItemActionResponse(rsp *http.Response) (*OrderLineItemActionResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &OrderLineItemActionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Order
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetPermissionsResponse parses an HTTP response from a GetPermissionsWithResponse call
 func ParseGetPermissionsResponse(rsp *http.Response) (*GetPermissionsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -38403,6 +41566,53 @@ func ParseGetPermissionsResponse(rsp *http.Response) (*GetPermissionsResponse, e
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostDeliveryPromiseResponse parses an HTTP response from a PostDeliveryPromiseWithResponse call
+func ParsePostDeliveryPromiseResponse(rsp *http.Response) (*PostDeliveryPromiseResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostDeliveryPromiseResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest ResponseForDeliveryPromise
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
 		var dest ApiError

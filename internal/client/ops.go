@@ -26,6 +26,9 @@ type ListingSearchPayload = SearchPayload[api.ListingSearchQuery, api.ListingSor
 // StockSearchPayload is the body of POST /api/stocks/search.
 type StockSearchPayload = SearchPayload[api.StockSearchQuery, api.StockSort]
 
+// OrderSearchPayload is the body of POST /api/orders/search.
+type OrderSearchPayload = SearchPayload[api.OrderSearchQuery, api.OrderSort]
+
 // FacilitySearch is POST /api/facilities/search, decoding each facility into T.
 func FacilitySearch[T any]() Op[T] {
 	return Op[T]{
@@ -55,6 +58,49 @@ func StockSearch[T any]() Op[T] {
 		Items: "stocks",
 		Do: func(ctx context.Context, raw api.ClientInterface, body []byte) (*http.Response, error) {
 			return raw.SearchStockWithBody(ctx, contentTypeJSON, bytes.NewReader(body))
+		},
+	}
+}
+
+// OrderSearch is POST /api/orders/search, decoding each order into T.
+func OrderSearch[T any]() Op[T] {
+	return Op[T]{
+		Name:  "search the orders",
+		Items: "orders",
+		Do: func(ctx context.Context, raw api.ClientInterface, body []byte) (*http.Response, error) {
+			return raw.SearchOrderWithBody(ctx, contentTypeJSON, bytes.NewReader(body))
+		},
+	}
+}
+
+// Orders is GET /api/orders, decoding each order into json.RawMessage.
+//
+// It is a [ListOp] and not an [Op] because the GET list pages by startAfterId, not
+// by a cursor — POST /api/orders/search is the cursor search (see [OrderSearch]).
+//
+// tenantOrderID and consumerID are the only two filters the GET list offers, both
+// exact-match query params; they are closed over here the way [FacilityConnections]
+// closes over its target. Anything richer (status, date range) is search-only.
+func Orders(tenantOrderID, consumerID string) ListOp[json.RawMessage] {
+	return ListOp[json.RawMessage]{
+		Name:  "list the orders",
+		Items: "orders",
+		ID:    RawID,
+		Do: func(ctx context.Context, raw api.ClientInterface, after string, size int) (*http.Response, error) {
+			params := &api.GetAllOrdersParams{}
+			if tenantOrderID != "" {
+				params.TenantOrderId = &tenantOrderID
+			}
+			if consumerID != "" {
+				params.ConsumerId = &consumerID
+			}
+			if after != "" {
+				params.StartAfterId = &after
+			}
+			if size != 0 {
+				params.Size = &size
+			}
+			return raw.GetAllOrders(ctx, params)
 		},
 	}
 }
