@@ -71,7 +71,9 @@ PATCH` is the edit tool; a second block corrupts the state machine). `pr-review`
    - `gh pr view <n> --repo Joessst-Dev/fft-cli --json state,isDraft,labels,headRefOid` shows
      state **OPEN**, `isDraft` **false**, the **`auto-review`** label present, and
      **`auto-review-stalled`** absent;
-   - the control comment's `round` is **≤ 6**;
+   - the control comment's `round` is **≤ 6** — note this `round` and the control comment's
+     `last_reviewed_sha` as the values observed at this gate (`<gate_round>`/`<gate_sha>`); step
+     7/8 re-check them before removing the handoff label;
    - **find the review to act on** — the `labeled` payload carries none, so list the PR's reviews
      (`gh api repos/Joessst-Dev/fft-cli/pulls/<n>/reviews`) and take the **most recent** one authored
      by the **companion `pr-review` bot account** whose `state` is `CHANGES_REQUESTED` **or**
@@ -106,24 +108,34 @@ PATCH` is the edit tool; a second block corrupts the state machine). `pr-review`
 7. **Commit + push:** conventional-commit message (e.g. `fix: address automated review findings`),
    **no attribution**, push to the PR branch. The push emits `synchronize` and re-fires
    `pr-review`. Reply to each addressed inline review comment stating what you changed. Then
-   rewrite the control comment, carrying `round` and `last_reviewed_sha` forward **unchanged** from
-   what `pr-review` last set and updating only `last_fixed_review_id` to `<id>`, and **remove the
-   handoff label** so the next round's re-add can wake you again:
-   `gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix`.
+   **re-read the control comment** and compare its current `round`/`last_reviewed_sha` against
+   `<gate_round>`/`<gate_sha>` from step 1:
+   - **unchanged** — a newer round hasn't started; rewrite the block carrying `round` and
+     `last_reviewed_sha` forward **unchanged** and updating only `last_fixed_review_id` to `<id>`,
+     and **remove the handoff label** so the next round's re-add can wake you again:
+     `gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix`.
+   - **advanced** — a `pr-review` run (your own push's `synchronize`, or one that started
+     independently while you were fixing) already re-armed the label with its own findings; rewrite
+     the block updating only `last_fixed_review_id` to `<id>` and **leave `round`/`last_reviewed_sha`
+     at their new values** — do **not** remove the label, so that newer round still reads as
+     pending.
 8. **Nothing to fix mechanically** — if every finding is a human-follow-up item, push NOTHING (no
-   empty commit): post one comment with the "Needs human follow-up" list, rewrite the control
-   comment the same way (`round`/`last_reviewed_sha` unchanged, `last_fixed_review_id` set to
-   `<id>`), and **remove the `auto-review-fix` label**, then stop. With no `synchronize`, the loop
-   ends cleanly and a human takes over.
+   empty commit): post one comment with the "Needs human follow-up" list, then apply the same
+   re-check as step 7 (current control comment vs. `<gate_round>`/`<gate_sha>`) to decide whether to
+   rewrite-and-remove or rewrite-and-leave the `auto-review-fix` label, then stop. With no
+   `synchronize` from this step, the loop still ends cleanly once the label comes off — or, if a
+   concurrent round already re-armed it, that round's own `pr-fix` wake handles it.
 
 **Guardrails:** act only on the companion reviewer's reviews (a `CHANGES_REQUESTED` or, on a
 self-authored PR, a `COMMENTED` one carrying findings), and only when its `auto-review-fix` label
-armed you. Idempotent on the review id (skip if `last_fixed_review_id` already matches). Always remove the `auto-review-fix`
-label before you finish, so its presence keeps accurately signalling "work pending" — `pr-review`'s
-own remove-then-add already guarantees the next round's `labeled` event regardless of whether you
-leave the label on or off. Do this removal promptly: your push (step 7) emits `synchronize` and can
-spawn a concurrent `pr-review` run before you reach this step; if that run re-arms the label first,
-a bare removal here would clear a freshly-armed signal rather than the stale one you meant to clear.
-Never weaken a guard test. **Never merge, never push to `main`, never remove the `auto-review` label** (that is the
-opt-in; only `auto-review-fix` is yours to remove). Finish by summarizing: the PR, the findings
-fixed vs. deferred to humans, and the SHA you pushed (or why you pushed nothing).
+armed you. Idempotent on the review id (skip if `last_fixed_review_id` already matches). Remove the
+`auto-review-fix` label when you finish, so its presence keeps accurately signalling "work pending"
+— unless the pre-removal re-check in step 7/8 finds the control comment's `round`/`last_reviewed_sha`
+has moved past the values captured at your own eligibility gate (step 1). That means a `pr-review`
+run already re-armed the label with its own findings while you were fixing; removing it then would
+clear that newer signal rather than the stale one you meant to clear, and nothing re-adds it
+afterward. Detect the actual state instead of racing the clock — do not rely on doing the removal
+"promptly". Never weaken a guard test. **Never merge, never push to `main`, never remove the
+`auto-review` label** (that is the opt-in; only `auto-review-fix` is yours to remove). Finish by
+summarizing: the PR, the findings fixed vs. deferred to humans, and the SHA you pushed (or why you
+pushed nothing).
