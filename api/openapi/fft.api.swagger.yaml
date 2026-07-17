@@ -13163,7 +13163,14 @@ paths:
         - Returns (Operations)
   /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}:
     delete:
-      description: Delete an item return from an item return job
+      deprecated: true
+      description: >-
+        This part of the API is deprecated. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br />Use
+        POST
+        /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}/actions
+        with the CancelItemReturn action instead.
       operationId: deleteItemReturn
       parameters:
         - description: id of the item return job to delete the item return for
@@ -31806,6 +31813,26 @@ components:
       type: string
       title: CancelHandoverjobActionEnum
       description: CancelHandoverjobActionEnum
+    CancelItemReturnActionEnum:
+      enum:
+        - CancelItemReturn
+      type: string
+      title: CancelItemReturnActionEnum
+      description: CancelItemReturnActionEnum
+    CancelItemReturnActionParameter:
+      additionalProperties: false
+      description: Action to cancel an ItemReturn.
+      properties:
+        itemReturnJobVersion:
+          description: Version of the entity to be changed
+          minimum: 0
+          type: integer
+        name:
+          $ref: '#/components/schemas/CancelItemReturnActionEnum'
+      required:
+        - name
+        - itemReturnJobVersion
+      title: CancelItemReturnActionParameter
     CancelPickRun:
       allOf:
         - additionalProperties: false
@@ -36741,6 +36768,101 @@ components:
       title: ExportContainerForUpdate
       type: object
       description: ExportContainerForUpdate
+    ExportContainerPaginatedResult:
+      properties:
+        exportContainers:
+          items:
+            $ref: '#/components/schemas/ExportContainer'
+          type: array
+        total:
+          minimum: 0
+          type: number
+      required:
+        - total
+        - exportContainers
+      title: ExportContainerPaginatedResult
+      type: object
+      description: ExportContainerPaginatedResult
+    ExportContainerSearchPayload:
+      properties:
+        after:
+          deprecated: false
+          description: >-
+            The cursor to start after for forward pagination. The value is
+            provided in the `pageInfo.endCursor` field of the response. Cannot
+            be used with `before` or `last`.
+          type: string
+        before:
+          description: >-
+            The cursor to start before for backward pagination. The value is
+            provided in the `pageInfo.startCursor` field of the response. Cannot
+            be used with `after` or `size` (first).
+          type: string
+        last:
+          description: >-
+            Number of items to return for backward pagination. Cannot be used
+            with 'size' (first). Default: 20.
+          maximum: 250
+          minimum: 1
+          type: number
+        options:
+          $ref: '#/components/schemas/SearchOptions'
+        query:
+          $ref: '#/components/schemas/ExportContainerSearchQuery'
+        size:
+          description: >-
+            Number of items to return for forward pagination. Cannot be used
+            with 'last'. Default: 20.
+          maximum: 250
+          minimum: 1
+          type: number
+        startAfterId:
+          deprecated: true
+          description: >-
+            The ID to start after. Deprecated, use `after` with the value
+            provided in `pageInfo.endCursor` instead.
+          type: string
+      required:
+        - query
+      title: ExportContainerSearchPayload
+      type: object
+      description: ExportContainerSearchPayload
+    ExportContainerSearchQuery:
+      properties:
+        and:
+          items:
+            $ref: '#/components/schemas/ExportContainerSearchQuery'
+          maxItems: 500
+          type: array
+        customAttributes:
+          additionalProperties:
+            anyOf:
+              - $ref: '#/components/schemas/BooleanFilter'
+              - $ref: '#/components/schemas/StringEqFilter'
+              - $ref: '#/components/schemas/NumberEqFilter'
+              - $ref: '#/components/schemas/DateFilter'
+          description: Search by custom attributes
+          type: object
+        description:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by description
+        name:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by name
+        or:
+          items:
+            $ref: '#/components/schemas/ExportContainerSearchQuery'
+          maxItems: 500
+          type: array
+        tenantExportContainerId:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by tenantExportContainerId
+      title: ExportContainerSearchQuery
+      type: object
+      description: ExportContainerSearchQuery
     ExportOperation:
       properties:
         created:
@@ -36866,6 +36988,21 @@ components:
       title: ExportOperationFile
       type: object
       description: ExportOperationFile
+    ExportOperationPaginatedResult:
+      properties:
+        exportOperations:
+          items:
+            $ref: '#/components/schemas/ExportOperation'
+          type: array
+        total:
+          minimum: 0
+          type: number
+      required:
+        - total
+        - exportOperations
+      title: ExportOperationPaginatedResult
+      type: object
+      description: ExportOperationPaginatedResult
     ExportRequest:
       properties:
         created:
@@ -37000,6 +37137,21 @@ components:
       title: ExportRequestForUpdate
       type: object
       description: ExportRequestForUpdate
+    ExportRequestPaginatedResult:
+      properties:
+        exportRequests:
+          items:
+            $ref: '#/components/schemas/ExportRequest'
+          type: array
+        total:
+          minimum: 0
+          type: number
+      required:
+        - total
+        - exportRequests
+      title: ExportRequestPaginatedResult
+      type: object
+      description: ExportRequestPaginatedResult
     ExportRequestSource:
       properties:
         type:
@@ -37802,25 +37954,6 @@ components:
       title: ExternalStockChangeReasonOutput
       type: object
       description: ExternalStockChangeReasonOutput
-    ExternalSystemWorkflowNode:
-      properties:
-        description:
-          description: Optional description of the external system
-          type: string
-        key:
-          description: Unique identifier for this node within the workflow
-          type: string
-        type:
-          description: Type of the workflow node
-          enum:
-            - EXTERNAL_SYSTEM
-          type: string
-      required:
-        - key
-        - type
-      title: ExternalSystemWorkflowNode
-      type: object
-      description: ExternalSystemWorkflowNode
     Facility:
       allOf:
         - $ref: '#/components/schemas/VersionedResource'
@@ -45932,6 +46065,7 @@ components:
         - $ref: '#/components/schemas/PauseItemReturnActionParameter'
         - $ref: '#/components/schemas/FinishItemReturnActionParameter'
         - $ref: '#/components/schemas/WaitForInputItemReturnActionParameter'
+        - $ref: '#/components/schemas/CancelItemReturnActionParameter'
       title: ItemReturnActionsParameter
       description: ItemReturnActionsParameter
     ItemReturnForCreation:
@@ -46442,6 +46576,8 @@ components:
         - PAUSED
         - FINISHED
         - WAITING_FOR_INPUT
+        - CANCELED
+        - OBSOLETE
       type: string
       title: ItemReturnStatus
       description: ItemReturnStatus
@@ -70740,6 +70876,11 @@ components:
           items:
             type: string
           type: array
+        runId:
+          description: >-
+            The runId of the connected sourcingOption this decision log is
+            related to.
+          type: string
         sourcingOptionRefs:
           description: >-
             The sourcingOptionsRefs of the request this decision log is related
@@ -84513,32 +84654,6 @@ components:
       type: object
       title: TransitTimeConfigurationForUpsert
       description: TransitTimeConfigurationForUpsert
-    TriggerExternalWorkflowNode:
-      properties:
-        description:
-          description: Optional description of the external trigger
-          type: string
-        interface:
-          description: Interface type for external trigger
-          enum:
-            - HTTP
-            - EVENT
-          type: string
-        key:
-          description: Unique identifier for this node within the workflow
-          type: string
-        type:
-          description: Type of the workflow node
-          enum:
-            - TRIGGER_EXTERNAL
-          type: string
-      required:
-        - key
-        - type
-        - interface
-      title: TriggerExternalWorkflowNode
-      type: object
-      description: TriggerExternalWorkflowNode
     TwoManHandlingDetails:
       properties:
         dimensions:
@@ -86367,8 +86482,6 @@ components:
               - $ref: '#/components/schemas/FFTActivityNode'
               - $ref: '#/components/schemas/GuardWorkflowNode'
               - $ref: '#/components/schemas/ConditionWorkflowNode'
-              - $ref: '#/components/schemas/ExternalSystemWorkflowNode'
-              - $ref: '#/components/schemas/TriggerExternalWorkflowNode'
           maxItems: 100
           type: array
         rootId:
@@ -86439,8 +86552,6 @@ components:
               - $ref: '#/components/schemas/FFTActivityNode'
               - $ref: '#/components/schemas/GuardWorkflowNode'
               - $ref: '#/components/schemas/ConditionWorkflowNode'
-              - $ref: '#/components/schemas/ExternalSystemWorkflowNode'
-              - $ref: '#/components/schemas/TriggerExternalWorkflowNode'
           maxItems: 100
           type: array
         rootId:
@@ -86496,8 +86607,6 @@ components:
               - $ref: '#/components/schemas/FFTActivityNode'
               - $ref: '#/components/schemas/GuardWorkflowNode'
               - $ref: '#/components/schemas/ConditionWorkflowNode'
-              - $ref: '#/components/schemas/ExternalSystemWorkflowNode'
-              - $ref: '#/components/schemas/TriggerExternalWorkflowNode'
           maxItems: 100
           type: array
         rootId:
@@ -86626,6 +86735,10 @@ components:
             $ref: '#/components/schemas/WorkflowSearchQuery'
           maxItems: 500
           type: array
+        id:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by id
         isActive:
           allOf:
             - $ref: '#/components/schemas/BooleanFilter'
@@ -86648,6 +86761,11 @@ components:
       description: WorkflowSearchQuery
     WorkflowSort:
       properties:
+        id:
+          enum:
+            - ASC
+            - DESC
+          type: string
         name:
           enum:
             - ASC

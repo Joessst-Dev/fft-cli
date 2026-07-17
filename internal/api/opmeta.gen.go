@@ -1338,12 +1338,13 @@ var operations = []Operation{
 		Path:        "/api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}",
 		Tags:        []string{"Returns (Operations)"},
 		Summary:     "Delete item return",
-		Description: "Delete an item return from an item return job",
+		Description: "This part of the API is deprecated. For details, see the API release lifecycle documentation. Use POST /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}/actions with the CancelItemReturn action instead.",
 		Params: []Param{
 			{Name: "itemReturnId", In: InPath, Type: TypeString, Required: true, Description: "id of the item return you want to delete"},
 			{Name: "itemReturnJobId", In: InPath, Type: TypeString, Required: true, Description: "id of the item return job to delete the item return for"},
 			{Name: "itemReturnJobVersion", In: InQuery, Type: TypeNumber, Required: true, Description: "version of the item return job to delete the item return for"},
 		},
+		Deprecated: true,
 	},
 	{
 		ID:          "deleteLineItemTargetContainers",
