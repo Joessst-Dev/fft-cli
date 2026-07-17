@@ -60,6 +60,10 @@ The **agent skill** (`internal/skill/assets/`) is documentation compiled into th
 
 Tier 2 and Tier 3 already reach every operation. To give a tag a *typed generated client*, add it to `output-options.include-tags` in `api/openapi/oapi-codegen.yaml` and run `make generate` (the spec is filtered by tag; unreached schemas are pruned). Two generators run under `make generate`, both writing to `internal/api/`: oapi-codegen → `fft.gen.go` (typed client + models), `tools/specgen` → `opmeta.gen.go` (summaries, permissions, and the synthesized `--example` bodies). Note that specgen cannot synthesize a coherent body for a discriminated `oneOf`; such commands hand-write their `--example` (see `fft stock create`, `fft connection create`).
 
+## Documentation site
+
+`docs/` is a VitePress site published to GitHub Pages (`.github/workflows/docs.yml`). It is **not a second copy of the docs** — every page under `docs/guide/` and `docs/reference/` is generated from a real source, committed, and drift-gated by CI's `docs` job exactly like `make generate`. `make docs` runs two generators: `tools/docsgen` syncs the skill assets (`internal/skill/assets/`) and README sections into the guide pages, and the hidden `fft gen-docs` command (`cmd/fft/gendocs.go`) renders the curated command tree into the CLI reference. So after editing a skill file or one of the README sections docsgen slices (Install, Setting up a project, Authentication, CI, …), run `make docs` and commit, or the build goes red. Only `docs/index.md`, `docs/reference/index.md`, and `docs/.vitepress/` are hand-written. `docsgen` fails loudly if a README heading it expects has been renamed.
+
 ## Release
 
 Tag `vX.Y.Z` and push — `.github/workflows/release.yml` runs GoReleaser (cross-platform binaries, SBOMs, cosign signatures) and updates the Homebrew tap at `Joessst-Dev/homebrew-tap` (a cask, `Casks/fft.rb`). Requires the `HOMEBREW_TAP_TOKEN` secret. Version is injected via ldflags into `internal/buildinfo`.

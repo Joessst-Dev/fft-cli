@@ -308,6 +308,7 @@ func newRootCmd(deps *Deps) *cobra.Command {
 		newAPICmd(deps),
 		newSkillCmd(deps),
 		newUpdateCmd(deps),
+		newGenDocsCmd(deps),
 	} {
 		c.GroupID = groupCore
 		cmd.AddCommand(c)
@@ -319,6 +320,7 @@ func newRootCmd(deps *Deps) *cobra.Command {
 		newListingCmd(deps),
 		newStockCmd(deps),
 		newSourcingCmd(deps),
+		newOrderCmd(deps),
 	} {
 		c.GroupID = groupResource
 		cmd.AddCommand(c)

@@ -59,6 +59,11 @@ do not widen the mechanical scope in step 4.
    - Push the branch and `gh pr create` against `main`. PR body summarizes: what changed, the POST
      classifications you made, the census-count update, and the "Needs human follow-up" items. End the body with
      `Closes #<n>`.
+   - Opt the PR into the automated review→fix loop by adding the **`auto-review`** label (create it first so this
+     is idempotent — it must match the definition [`pr-review`](./pr-review.md) expects):
+     `gh label create auto-review --color 0E8A16 --description "Opt this PR into the automated review→fix loop" || true`
+     then `gh pr edit <n> --repo Joessst-Dev/fft-cli --add-label auto-review`. This is what makes the
+     [`pr-review`](./pr-review.md) routine pick the PR up.
    - Comment the PR link back on the issue.
 
 6. If the build cannot be greened mechanically, open the PR as a **draft** describing the blocker (or, if there
