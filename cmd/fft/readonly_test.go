@@ -65,6 +65,10 @@ var commandsWithoutOperation = map[string]string{
 	"fft skill show":    "prints the embedded skill; no network",
 
 	"fft update check": "asks GitHub for the latest release",
+
+	// Renders the command tree to Markdown for the docs site. Builds a tree and
+	// prints it — no project, no network, nothing that reaches the tenant.
+	"fft gen-docs": "writes the CLI reference to local disk; no network",
 }
 
 // addressableCommands are the commands that can name an operation to send: every

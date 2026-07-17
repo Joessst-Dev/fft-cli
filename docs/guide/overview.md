@@ -1,0 +1,121 @@
+---
+title: Overview
+---
+
+# Driving fft
+
+`fft` is a CLI for the fulfillmenttools API. It signs in, refreshes tokens, and reaches
+every operation the API has. You do not need an HTTP client, a token, or the API key: if
+you find yourself reaching for `curl`, you have taken a wrong turn.
+
+## Before anything else
+
+```sh
+fft project current
+```
+
+That names the tenant every following command will act on. **Check it before any write.**
+A project called `staging` is a claim, not a guarantee, and the CLI will delete a
+production facility just as happily as a test one.
+
+Exit code 3 means no project is configured — see [recipes](./recipes.md), and ask
+the user rather than inventing credentials.
+
+## Reading
+
+Pass `-o json` whenever you are going to parse the answer:
+
+```sh
+fft facility list -o json
+fft stock list --facility berlin-warehouse -o json
+```
+
+**stdout is data and nothing else.** Counts, notices, warnings, prompts and the
+"new version available" banner all go to stderr, so a pipe is always safe and an empty
+stdout genuinely means no results. Never scrape the table format; it is for humans.
+
+## Finding the command — do not guess it
+
+The surface has three tiers, and the discovery commands work offline, need no project, and
+cost nothing:
+
+```sh
+fft api list --search pickjob
+fft api describe getPickJob
+fft api list --tag picking
+```
+
+`fft api list -o json` reports, for every operation, the `command` that runs it — the
+fastest route from a word the user said to a command line you can run:
+
+```sh
+fft api list --search handover -o json
+```
+
+1. **Curated** — `fft order`, `fft facility`, `fft connection`, `fft listing`, `fft stock`, `fft sourcing`.
+   Typed flags, real tables. Use these when they fit; see [commands](./commands.md).
+2. **Generated** — every other operation, as `fft <group> <operation>`, e.g.
+   `fft picking get-pick-job`.
+3. **Escape hatch** — `fft api <operationId>`, for anything at all.
+
+Every command's `--help` carries the endpoint's summary, the permission it requires, and a
+sample body. Read it. Do not guess a flag name — a guessed flag is a usage error at best,
+and at worst it is a real flag that means something else.
+
+## Writing
+
+The workflow is the same for all three tiers: print the sample body, edit it, send it.
+
+```sh
+fft stock create --example > stock.json
+fft stock create --file stock.json
+```
+
+Rules that are not optional:
+
+- **Show the user the command and the body, and let them confirm, before any write.** They
+  can see their tenant; you cannot.
+- **Versions.** The API locks optimistically, and how you send the version depends on the
+  command. A handful of curated commands take `--if-version` (`facility patch|update`,
+  `facility coordinates set`, `listing patch`, `stock update`) — everywhere else it is a
+  field *in the body*, which the `--example` body already has. Do not add `--if-version` to
+  a command that has no such flag; check `--help`.
+- **Exit 7** is a version conflict: the object changed under you. Re-read it, re-apply the
+  change, re-send with the version you just read. Never retry the same body — you would be
+  undoing someone's work on purpose.
+- **Exit 8** is a partial bulk write: some items in the file landed and some did not. Read
+  the per-item results and fix those items. Do not re-send the whole file blindly.
+
+## Exploring safely
+
+`--read-only` on any command refuses everything that would change the tenant, before it is
+sent — no token, no request. It can tighten but never loosen, so it is safe to add to any
+command line you are not sure about:
+
+```sh
+fft facility patch berlin-warehouse --name "Berlin" --read-only
+```
+
+**Exit 10** means fft itself refused a write because the project is read-only. Nothing left
+the machine. This is not an authentication problem and there is nothing to route around:
+tell the user, and let them decide.
+
+## Never
+
+- Print, echo, paste or log an ID token. `fft auth token` exists for scripts, not for chat.
+- Ask for a password on a command line. There is no `--password` flag; there is
+  `--password-stdin`, and that is deliberate.
+- Re-encode an id. They are strings that look like numbers and are up to 64 bits wide; a
+  tool that parses them as floats will corrupt them silently. fft passes the API's own bytes
+  through untouched — keep it that way.
+
+## Read when you need it
+
+- [references/commands.md](./commands.md) — the curated commands, and the
+  addressing rules that will otherwise bite you (a listing has no id of its own).
+- [references/discovery.md](./discovery.md) — getting from a word the user said to
+  a command, across all 557 operations.
+- [references/recipes.md](./recipes.md) — whole tasks: set up a project, bulk
+  upsert, page a large result, run in CI.
+- [references/troubleshooting.md](./troubleshooting.md) — every exit code, and what
+  to actually do about it.

@@ -1,0 +1,75 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+    # The site is built from the committed docs/ Markdown, which is generated from
+    # these sources. A push that touches none of them cannot change the site, so it
+    # does not rebuild it.
+    paths:
+      - "docs/**"
+      - "internal/skill/assets/**"
+      - "README.md"
+      - "tools/docsgen/**"
+      - "cmd/fft/gendocs.go"
+      - ".github/workflows/docs.yml"
+  # Deploy on demand — the first publish, or a re-run after enabling Pages.
+  workflow_dispatch:
+
+# Read-only by default; the deploy job grants itself exactly what Pages needs.
+permissions:
+  contents: read
+
+# One deploy at a time. Don't cancel a running publish — let it finish rather than
+# leave Pages half-updated.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      # The committed docs/ Markdown is already in sync — CI's "docs no drift" job
+      # guarantees it — so this only renders the site, it does not regenerate it.
+      - name: Build site
+        working-directory: docs
+        run: |
+          npm ci
+          npm run docs:build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
+
+  deploy:
+    name: deploy
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      # Publish the artifact to Pages.
+      pages: write
+      # Mint the OIDC token deploy-pages exchanges to prove the artifact is ours.
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

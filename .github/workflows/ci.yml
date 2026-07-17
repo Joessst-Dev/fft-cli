@@ -116,6 +116,30 @@ jobs:
           git diff --exit-code \
             || { echo "::error::Generated code is stale or non-deterministic. Run 'make generate' and commit the result."; exit 1; }
 
+  docs:
+    name: docs no drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      - name: Documentation sources are reproducible
+        # The guide pages are generated from the skill assets and the README, and
+        # the CLI reference from the command tree. Edit a source without running
+        # `make docs`, and the site would ship a stale copy — so this fails the
+        # build on any diff, the same contract the codegen gate above enforces.
+        # No Node here: this only regenerates Markdown. Building the site is the
+        # deploy workflow's job.
+        run: |
+          make docs
+          git diff --exit-code -- docs/ \
+            || { echo "::error::Docs are stale. Run 'make docs' and commit the result."; exit 1; }
+
   lint:
     name: lint (${{ matrix.os }})
     runs-on: ${{ matrix.os }}

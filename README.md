@@ -19,6 +19,10 @@ CLI obtain and refresh tokens invisibly.
 **Every one of the 557 API operations is reachable from day one.** Not "the ones someone
 got around to wrapping" — all of them.
 
+📖 **Documentation:** [joessst-dev.github.io/fft-cli](https://joessst-dev.github.io/fft-cli/) —
+the browsable, searchable rendering of this README, the command guide, and the full CLI
+reference.
+
 ---
 
 ## Install
