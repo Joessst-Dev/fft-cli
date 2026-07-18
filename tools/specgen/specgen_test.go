@@ -208,6 +208,49 @@ var _ = Describe("specgen", func() {
 		})
 	})
 
+	// The emulator serves these for every operation it does not answer from live
+	// state, and infers a collection's items-key from a list operation's response, so
+	// the shape has to be right, not just present.
+	Describe("synthesizing a response body", func() {
+		decode := func(id string) map[string]any {
+			GinkgoHelper()
+
+			op := find(ops, id)
+			var out map[string]any
+			Expect(json.Unmarshal([]byte(op.SampleResponse), &out)).
+				To(Succeed(), "the sample response is not valid JSON: %s", op.SampleResponse)
+			return out
+		}
+
+		It("builds a body from the success response's JSON schema", func() {
+			// getThing declares a 200 and a 500. The 500 has no body; the 200 does, and
+			// it is the one an emulator answers with.
+			Expect(decode("getThing")).To(HaveKeyWithValue("name", "Hamburg NW2"))
+		})
+
+		It("exposes a list response's array under its real key, for items-key inference", func() {
+			// This is the load-bearing case: the emulator learns that a collection's
+			// items live under `things` (not the path segment) from exactly this array.
+			body := decode("queryThings")
+			Expect(body).To(HaveKey("things"))
+			Expect(body["things"]).To(BeAssignableToTypeOf([]any{}))
+		})
+
+		It("gives an operation with no JSON success response an empty sample response", func() {
+			// addThing declares only a 201 with no content — there is nothing to build.
+			Expect(find(ops, "addThing").SampleResponse).To(BeEmpty())
+		})
+
+		It("is a deterministic function of the spec, run after run", func() {
+			for range 20 {
+				again, err := load(miniSpec)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(find(again, "queryThings").SampleResponse).
+					To(Equal(find(ops, "queryThings").SampleResponse))
+			}
+		})
+	})
+
 	Describe("rendering the Go file", func() {
 		It("emits source that parses", func() {
 			src, err := render("api", miniSpec, ops)
@@ -280,6 +323,25 @@ var _ = Describe("specgen", func() {
 					To(BeTrue(), "%s: the sample body is not valid JSON:\n%s", op.ID, op.SampleBody)
 			}
 			Expect(bodies).To(BeNumerically(">", 200))
+		})
+
+		It("synthesizes a response body for most operations, all of it valid JSON", func() {
+			// The emulator leans on these. The response schemas are larger and more
+			// recursive than the request ones, so "it terminates and parses" is worth
+			// asserting against the whole spec, not just the mini one.
+			real, err := load("../../api/openapi/fft.api.swagger.yaml")
+			Expect(err).NotTo(HaveOccurred())
+
+			responses := 0
+			for _, op := range real {
+				if op.SampleResponse == "" {
+					continue
+				}
+				responses++
+				Expect(json.Valid([]byte(op.SampleResponse))).
+					To(BeTrue(), "%s: the sample response is not valid JSON:\n%s", op.ID, op.SampleResponse)
+			}
+			Expect(responses).To(BeNumerically(">", 200))
 		})
 
 		It("gives every operation a unique operationId, which is the name fft api takes", func() {

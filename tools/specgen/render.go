@@ -73,6 +73,9 @@ func renderOperation(b *bytes.Buffer, op operation) {
 	if op.SampleBody != "" {
 		fmt.Fprintf(b, "\t\tSampleBody: %s,\n", quote(op.SampleBody))
 	}
+	if op.SampleResponse != "" {
+		fmt.Fprintf(b, "\t\tSampleResponse: %s,\n", quote(op.SampleResponse))
+	}
 	if op.Deprecated {
 		fmt.Fprintf(b, "\t\tDeprecated: true,\n")
 	}
