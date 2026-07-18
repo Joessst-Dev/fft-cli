@@ -74,10 +74,12 @@ func (s *Store) collection(name string) *collectionData {
 }
 
 // Create stores a new entity, assigning it an id (unless the body carries one) and
-// version 1 (unless the body carries a version, which a seed fixture captured from a
-// real tenant does), and returns the stored document. The exported methods speak the
-// concrete map[string]any rather than the internal entityDoc alias, which is the same
-// type.
+// version 1 (unless the body carries a version), and returns the stored document.
+// This honors an incoming id/version so seed() can replay a fixture's captured
+// values; the live HTTP create handler strips both from the body before calling
+// this, matching the real API's server-assigned id/version semantics. The exported
+// methods speak the concrete map[string]any rather than the internal entityDoc
+// alias, which is the same type.
 func (s *Store) Create(name string, doc entityDoc) map[string]any {
 	s.mu.Lock()
 	defer s.mu.Unlock()

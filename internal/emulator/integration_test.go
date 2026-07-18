@@ -119,6 +119,21 @@ var _ = Describe("driving the real client against the emulator", func() {
 		Expect(arr[0]).To(HaveKey("summary"))
 	})
 
+	It("ignores a caller-supplied id and version on a live create, unlike a seed load", func() {
+		status, body := postJSON(baseURL, "/api/orders", map[string]any{
+			"id":            "attacker-chosen-id",
+			"version":       99,
+			"tenantOrderId": "abc",
+		})
+		Expect(status).To(Equal(http.StatusCreated))
+
+		var got map[string]any
+		Expect(json.Unmarshal(body, &got)).To(Succeed())
+		Expect(got).NotTo(HaveKeyWithValue("id", "attacker-chosen-id"))
+		Expect(got).NotTo(HaveKeyWithValue("version", BeNumerically("==", 99)))
+		Expect(got).To(HaveKeyWithValue("version", BeNumerically("==", 1)))
+	})
+
 	It("reflects a create in a subsequent get", func() {
 		created := createOrder(baseURL, map[string]any{"tenantOrderId": "abc"})
 		id, _ := created["id"].(string)

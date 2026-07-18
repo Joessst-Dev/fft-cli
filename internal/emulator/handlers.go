@@ -66,19 +66,25 @@ func (h *handlers) search(coll string) fiber.Handler {
 }
 
 // create answers POST /api/{coll}, storing the body and returning it with its new id
-// and version.
+// and version. Unlike seed(), which calls Store.Create directly to preserve a
+// fixture's captured id/version, a live create strips both first — the real API
+// assigns them server-side and does not let a caller dictate them.
 func (h *handlers) create(coll string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		doc, err := decodeBody(c.Body())
 		if err != nil {
 			return writeError(c, fiber.StatusBadRequest, err.Error())
 		}
+		delete(doc, defaultIDField)
+		delete(doc, "version")
 		return writeJSON(c, fiber.StatusCreated, h.store.Create(coll, doc))
 	}
 }
 
 // get answers GET /api/{coll}/{id}, 404-ing an id the store does not hold so that a
-// delete-then-get and a get-before-create both behave like the real API.
+// delete-then-get and a get-before-create both behave like the real API. It re-checks
+// existence on its own Get rather than trusting resolve's — a concurrent delete
+// between the two would otherwise surface as a 200 with a null body instead of 404.
 func (h *handlers) get(coll, idParam string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		raw := c.Params(idParam)
@@ -86,7 +92,10 @@ func (h *handlers) get(coll, idParam string) fiber.Handler {
 		if !ok {
 			return writeError(c, fiber.StatusNotFound, fmt.Sprintf("no %s with id %q", coll, raw))
 		}
-		doc, _ := h.store.Get(coll, id)
+		doc, ok := h.store.Get(coll, id)
+		if !ok {
+			return writeError(c, fiber.StatusNotFound, fmt.Sprintf("no %s with id %q", coll, raw))
+		}
 		return writeJSON(c, fiber.StatusOK, doc)
 	}
 }
