@@ -50,9 +50,11 @@ func newEmulatorCmd(_ *Deps) *cobra.Command {
 			}
 
 			// The recipe is a notice, so it goes to stderr: stdout stays the data
-			// contract even for a command that never prints data.
-			printEmulatorRecipe(cmd.ErrOrStderr(), port)
-			return srv.Listen(cmd.Context())
+			// contract even for a command that never prints data. It prints only once
+			// the port is actually bound, so a taken-port failure doesn't follow a
+			// recipe that looks like it worked.
+			ready := func() { printEmulatorRecipe(cmd.ErrOrStderr(), port) }
+			return srv.Listen(cmd.Context(), ready)
 		},
 	}
 

@@ -77,14 +77,28 @@ func New(cfg Config) (*Server, error) {
 	return &Server{app: app, addr: net.JoinHostPort(host, strconv.Itoa(cfg.Port))}, nil
 }
 
-// Listen serves until ctx is cancelled, then shuts down gracefully and returns nil.
-// It returns a non-nil error only when it could not listen at all (a taken port).
+// Listen binds the port and serves until ctx is cancelled, then shuts down
+// gracefully and returns nil. It returns a non-nil error when the port could not be
+// bound (e.g. already taken) or the server otherwise failed.
+//
+// ready, if non-nil, is called the moment the port is bound — before Listen starts
+// blocking to serve — so a caller can print a "point fft here" recipe only once it is
+// actually true, instead of racing a bind failure with a recipe that looks like it
+// worked.
 //
 // ctx is the command's context, which the root cancels on SIGINT/SIGTERM — so Ctrl-C
 // drains the server and exits 0.
-func (s *Server) Listen(ctx context.Context) error {
+func (s *Server) Listen(ctx context.Context, ready func()) error {
+	ln, err := net.Listen("tcp", s.addr)
+	if err != nil {
+		return err
+	}
+	if ready != nil {
+		ready()
+	}
+
 	errc := make(chan error, 1)
-	go func() { errc <- s.app.Listen(s.addr) }()
+	go func() { errc <- s.app.Listener(ln) }()
 
 	select {
 	case <-ctx.Done():

@@ -30,6 +30,13 @@ var _ = Describe("Store", func() {
 			Expect(idOf(got)).To(Equal("f-custom"))
 		})
 
+		It("keeps a version the body already carries, as a seed fixture does", func() {
+			got := store.Create("facilities", entityDoc{"name": "Hamburg", "version": 7})
+			v, ok := versionOf(got)
+			Expect(ok).To(BeTrue())
+			Expect(v).To(Equal(7))
+		})
+
 		It("gives generated ids that do not collide", func() {
 			a := store.Create("facilities", entityDoc{})
 			b := store.Create("facilities", entityDoc{})

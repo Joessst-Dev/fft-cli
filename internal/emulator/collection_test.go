@@ -10,16 +10,28 @@ import (
 var _ = Describe("collection inference", func() {
 	Describe("arrayKey", func() {
 		It("finds the array property in a list envelope", func() {
-			Expect(arrayKey(`{"facilities":[{"id":"a"}],"total":1}`)).To(Equal("facilities"))
+			Expect(arrayKey(`{"facilities":[{"id":"a"}],"total":1}`, "facilities")).To(Equal("facilities"))
 		})
 
 		It("skips pageInfo and finds the entities in a search envelope", func() {
-			Expect(arrayKey(`{"pageInfo":{"hasNextPage":false},"facilities":[]}`)).To(Equal("facilities"))
+			Expect(arrayKey(`{"pageInfo":{"hasNextPage":false},"facilities":[]}`, "facilities")).To(Equal("facilities"))
 		})
 
 		It("returns nothing when the response carries no array", func() {
-			Expect(arrayKey(`{"id":"a","version":1}`)).To(BeEmpty())
-			Expect(arrayKey("")).To(BeEmpty())
+			Expect(arrayKey(`{"id":"a","version":1}`, "facilities")).To(BeEmpty())
+			Expect(arrayKey("", "facilities")).To(BeEmpty())
+		})
+
+		It("prefers the array matching the collection name over sorted order", func() {
+			// "reasons" < "rerouteDescriptions" alphabetically, but the collection is
+			// "reroutedescriptions" — the real getRerouteDescriptions shape.
+			body := `{"reasons":[{"id":"r"}],"rerouteDescriptions":[{"id":"d"}]}`
+			Expect(arrayKey(body, "reroutedescriptions")).To(Equal("rerouteDescriptions"))
+		})
+
+		It("falls back to sorted order when no array matches the collection name", func() {
+			body := `{"reasons":[{"id":"r"}],"rerouteDescriptions":[{"id":"d"}]}`
+			Expect(arrayKey(body, "somethingElse")).To(Equal("reasons"))
 		})
 	})
 
@@ -43,6 +55,7 @@ var _ = Describe("collection inference", func() {
 			Entry("listings", "listings", "listings"),
 			Entry("stocks", "stocks", "stocks"),
 			Entry("orders", "orders", "orders"),
+			Entry("reroutedescriptions", "reroutedescriptions", "rerouteDescriptions"),
 		)
 	})
 })

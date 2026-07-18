@@ -74,8 +74,10 @@ func (s *Store) collection(name string) *collectionData {
 }
 
 // Create stores a new entity, assigning it an id (unless the body carries one) and
-// version 1, and returns the stored document. The exported methods speak the concrete
-// map[string]any rather than the internal entityDoc alias, which is the same type.
+// version 1 (unless the body carries a version, which a seed fixture captured from a
+// real tenant does), and returns the stored document. The exported methods speak the
+// concrete map[string]any rather than the internal entityDoc alias, which is the same
+// type.
 func (s *Store) Create(name string, doc entityDoc) map[string]any {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -88,9 +90,14 @@ func (s *Store) Create(name string, doc entityDoc) map[string]any {
 		id = synthID(c.nextID)
 	}
 
+	version, ok := versionOf(doc)
+	if !ok {
+		version = 1
+	}
+
 	stored := cloneDoc(doc)
 	stored[defaultIDField] = id
-	stored["version"] = 1
+	stored["version"] = version
 
 	c.byID[id] = stored
 	c.order = append(c.order, id)

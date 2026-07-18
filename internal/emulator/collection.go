@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"maps"
 	"slices"
+	"strings"
 
 	"github.com/Joessst-Dev/fft-cli/internal/api"
 )
@@ -55,19 +56,25 @@ func inferCollections(ops []api.Operation) map[string]collectionMeta {
 		coll, _, kind := classify(op)
 		switch kind {
 		case kindList:
-			set(coll, arrayKey(op.SampleResponse), true)
+			set(coll, arrayKey(op.SampleResponse, coll), true)
 		case kindSearch:
-			set(coll, arrayKey(op.SampleResponse), false)
+			set(coll, arrayKey(op.SampleResponse, coll), false)
 		}
 	}
 	return metas
 }
 
 // arrayKey returns the name of the top-level property whose value is a JSON array —
-// the entities in a list or search envelope. pageInfo is skipped; it is an object,
-// so it would not be picked anyway, but naming it says why. "" when the response has
-// no array property (or is not an object).
-func arrayKey(sampleResponse string) string {
+// the entities in a list or search envelope. pageInfo is skipped; it is an object, so
+// it would not be picked anyway, but naming it says why. "" when the response has no
+// array property (or is not an object).
+//
+// Most envelopes carry exactly one array, but some (getRerouteDescriptions: both
+// "reasons" and "rerouteDescriptions") carry more than one. When that happens, the
+// array whose key matches coll (the collection's path segment, case-insensitively —
+// "reroutedescriptions" vs. "rerouteDescriptions") wins; sorted key order is only the
+// fallback tie-break for the rest.
+func arrayKey(sampleResponse, coll string) string {
 	if sampleResponse == "" {
 		return ""
 	}
@@ -77,17 +84,19 @@ func arrayKey(sampleResponse string) string {
 		return ""
 	}
 
-	// Sorted, so the choice is deterministic when a response somehow carries two
-	// arrays; the real envelopes carry exactly one.
+	var first string
 	for _, key := range slices.Sorted(maps.Keys(fields)) {
-		if key == "pageInfo" {
+		if key == "pageInfo" || !isJSONArray(fields[key]) {
 			continue
 		}
-		if isJSONArray(fields[key]) {
+		if first == "" {
+			first = key
+		}
+		if strings.EqualFold(key, coll) {
 			return key
 		}
 	}
-	return ""
+	return first
 }
 
 func isJSONArray(raw json.RawMessage) bool {
