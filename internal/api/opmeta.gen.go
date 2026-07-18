@@ -72,7 +72,7 @@ var operations = []Operation{
 		Permissions:  []string{"CARRIER_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"defaultParcelHeightInCm\": 10,\n  \"defaultParcelLengthInCm\": 25,\n  \"defaultParcelWeightInGram\": 1000,\n  \"defaultParcelWidthInCm\": 35,\n  \"key\": \"DHL_V2\",\n  \"name\": \"DHL Köln\",\n  \"productValueNeeded\": true\n}\n",
+		SampleBody:   "{\n  \"defaultParcelHeightInCm\": 10,\n  \"defaultParcelLengthInCm\": 25,\n  \"defaultParcelWeightInGram\": 1000,\n  \"defaultParcelWidthInCm\": 35,\n  \"key\": \"DHL_V2\",\n  \"logoUrl\": \"https://example.com/resource\",\n  \"name\": \"DHL Köln\",\n  \"productValueNeeded\": true\n}\n",
 	},
 	{
 		ID:          "addContentToDocument",
@@ -186,7 +186,7 @@ var operations = []Operation{
 		Permissions:  []string{"FACILITY_GROUP_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"facilityRefs\": [\n    \"string\"\n  ],\n  \"nameLocalized\": {},\n  \"tenantFacilityGroupId\": \"K12345\"\n}\n",
+		SampleBody:   "{\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"nameLocalized\": {},\n  \"tenantFacilityGroupId\": \"K12345\"\n}\n",
 	},
 	{
 		ID:           "addHandoverjob",
@@ -208,7 +208,7 @@ var operations = []Operation{
 		Permissions:  []string{"ADMIN_MODULES_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"additionalDocuments\": [\n    {\n      \"nameLocalized\": {},\n      \"url\": \"string\"\n    }\n  ],\n  \"carrierData\": {\n    \"carrierRef\": \"string\"\n  },\n  \"recipientAddress\": [\n    {\n      \"city\": \"string\",\n      \"country\": \"DE\",\n      \"postalCode\": \"string\",\n      \"street\": \"string\"\n    }\n  ],\n  \"senderAddress\": {\n    \"city\": \"string\",\n    \"companyName\": \"string\",\n    \"country\": \"DE\",\n    \"postalCode\": \"string\",\n    \"street\": \"string\"\n  },\n  \"status\": \"WAITING_FOR_INPUT\",\n  \"type\": \"SEND_LABEL\"\n}\n",
+		SampleBody:   "{\n  \"additionalDocuments\": [\n    {\n      \"nameLocalized\": {},\n      \"url\": \"https://example.com/resource\"\n    }\n  ],\n  \"carrierData\": {\n    \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n  },\n  \"labelUrl\": \"https://example.com/resource\",\n  \"operativeProcessRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"packageRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"processRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"recipientAddress\": [\n    {\n      \"city\": \"Yellowstone\",\n      \"country\": \"DE\",\n      \"email\": \"phil.bison@fulfillmenttools.com\",\n      \"emailAddresses\": [\n        {\n          \"value\": \"string\"\n        }\n      ],\n      \"houseNumber\": \"42\",\n      \"postalCode\": \"42420\",\n      \"street\": \"string\"\n    }\n  ],\n  \"senderAddress\": {\n    \"city\": \"Yellowstone\",\n    \"companyName\": \"string\",\n    \"country\": \"DE\",\n    \"emailAddresses\": [\n      {\n        \"value\": \"string\"\n      }\n    ],\n    \"houseNumber\": \"42\",\n    \"postalCode\": \"42420\",\n    \"street\": \"string\"\n  },\n  \"shippingInformationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"status\": \"WAITING_FOR_INPUT\",\n  \"tenantLabelId\": \"MY_LABEL_ID\",\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"type\": \"SEND_LABEL\"\n}\n",
 	},
 	{
 		ID:           "addLoadUnit",
@@ -220,7 +220,7 @@ var operations = []Operation{
 		Permissions:  []string{"LOADUNIT_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"loadUnits\": [\n    {\n      \"pickJobRefs\": [\n        \"string\"\n      ]\n    }\n  ]\n}\n",
+		SampleBody:   "{\n  \"loadUnits\": [\n    {\n      \"loadUnitTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"pickJobRefs\": [\n        \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n      ],\n      \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ]\n}\n",
 	},
 	{
 		ID:          "addNestedServiceJobLink",
@@ -248,7 +248,7 @@ var operations = []Operation{
 		Permissions:  []string{"ORDER_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"R456728546\"\n}\n",
+		SampleBody:   "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"R456728546\"\n}\n",
 	},
 	{
 		ID:           "addPackJob",
@@ -258,7 +258,7 @@ var operations = []Operation{
 		Summary:      "Create pack job",
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"facilityRef\": \"Esb50gpH7794X5NdMp3C\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"orderDate\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRef\": \"Pic50gpH7794X5NdMp3C\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleBody:   "{\n  \"facilityRef\": \"Esb50gpH7794X5NdMp3C\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"orderDate\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRef\": \"Pic50gpH7794X5NdMp3C\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:           "addPackingContainerType",
@@ -281,7 +281,7 @@ var operations = []Operation{
 		Description:  "This part of the API is in Beta status. For details, see the API release lifecycle documentation. Creating new packingSourceContainer.",
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"packJobRefs\": [\n    \"0857914c-d965-421e-b6cf-330501bcca58\"\n  ],\n  \"sequenceNumber\": 100\n}\n",
+		SampleBody:   "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"packJobRefs\": [\n    \"0857914c-d965-421e-b6cf-330501bcca58\"\n  ],\n  \"sequenceNumber\": 100\n}\n",
 	},
 	{
 		ID:      "addParcel",
@@ -303,7 +303,7 @@ var operations = []Operation{
 		Summary:      "Create pick job",
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderRef\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"tenantOrderId\": \"R456728546\"\n}\n",
+		SampleBody:   "{\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderRef\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"tenantOrderId\": \"R456728546\"\n}\n",
 	},
 	{
 		ID:          "addPickJobLoadUnits",
@@ -318,7 +318,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"codes\": [\n    \"string\"\n  ]\n}\n",
+		SampleBody:   "{\n  \"codes\": [\n    \"string\"\n  ],\n  \"loadUnitTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n}\n",
 	},
 	{
 		ID:           "addPickRun",
@@ -343,7 +343,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"comments\": [\n    {\n      \"content\": \"string\"\n    }\n  ],\n  \"receivedDate\": \"2026-01-01T00:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 1\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ]\n}\n",
+		SampleBody:   "{\n  \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"comments\": [\n    {\n      \"content\": \"string\",\n      \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ],\n  \"receivedDate\": \"2026-06-17T12:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 42\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\",\n          \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 42\n      },\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\"\n    }\n  ]\n}\n",
 	},
 	{
 		ID:          "addRemoteConfigurationScope",
@@ -433,7 +433,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"article\": {\n    \"tenantArticleId\": \"4711\",\n    \"title\": \"Cologne Water\"\n  },\n  \"measurementUnitKey\": \"liter\",\n  \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n  \"quantity\": 21,\n  \"secondaryMeasurementUnitKey\": \"gram\",\n  \"secondaryQuantity\": 200\n}\n",
+		SampleBody:   "{\n  \"article\": {\n    \"imageUrl\": \"https://example.com/resource\",\n    \"tenantArticleId\": \"4711\",\n    \"title\": \"Cologne Water\"\n  },\n  \"measurementUnitKey\": \"liter\",\n  \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n  \"quantity\": 21,\n  \"secondaryMeasurementUnitKey\": \"gram\",\n  \"secondaryQuantity\": 200\n}\n",
 		Deprecated:   true,
 	},
 	{
@@ -463,7 +463,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"facilityRef\": \"string\"\n}\n",
+		SampleBody:   "{\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n}\n",
 	},
 	{
 		ID:           "bulkCreateOrderRecords",
@@ -475,7 +475,7 @@ var operations = []Operation{
 		Permissions:  []string{"ORDER_RECORD_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"operations\": [\n    {\n      \"facilityRef\": \"string\",\n      \"lineItems\": [\n        {\n          \"article\": {\n            \"attributes\": [],\n            \"tenantArticleId\": \"string\"\n          },\n          \"quantity\": 1\n        }\n      ],\n      \"orderRecordDate\": \"2026-01-01T00:00:00Z\"\n    }\n  ]\n}\n",
+		SampleBody:   "{\n  \"operations\": [\n    {\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"lineItems\": [\n        {\n          \"article\": {\n            \"attributes\": [],\n            \"tenantArticleId\": \"MY_ARTICLE_ID\"\n          },\n          \"quantity\": 42\n        }\n      ],\n      \"orderRecordDate\": \"2026-06-17T12:00:00Z\",\n      \"tenantOrderRecordId\": \"MY_ORDERRECORD_ID\"\n    }\n  ]\n}\n",
 	},
 	{
 		ID:           "bulkUpdateSafetyStock",
@@ -498,7 +498,7 @@ var operations = []Operation{
 		Permissions:  []string{"LISTING_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"listings\": [\n    {\n      \"currency\": \"EUR\",\n      \"measurementUnitKey\": \"liter\",\n      \"price\": 1200,\n      \"selector\": [\n        {\n          \"facility\": {}\n        }\n      ],\n      \"targetingStrategy\": \"MULTI_SELECTOR\",\n      \"tenantArticleId\": \"4711\",\n      \"title\": \"Adidas Superstar\",\n      \"titleLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      }\n    }\n  ]\n}\n",
+		SampleBody:   "{\n  \"listings\": [\n    {\n      \"categoryRefs\": [\n        \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n      ],\n      \"currency\": \"EUR\",\n      \"imageUrl\": \"https://example.com/resource\",\n      \"measurementUnitKey\": \"liter\",\n      \"price\": 1200,\n      \"selector\": [\n        {\n          \"facility\": {},\n          \"version\": 1\n        }\n      ],\n      \"targetingStrategy\": \"MULTI_SELECTOR\",\n      \"tenantArticleId\": \"4711\",\n      \"title\": \"Adidas Superstar\",\n      \"titleLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"weight\": 42\n    }\n  ]\n}\n",
 	},
 	{
 		ID:          "calculateBestCarrier",
@@ -527,7 +527,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"actions\": [\n    {\n      \"action\": {},\n      \"locale\": \"de_DE\"\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"actions\": [\n    {\n      \"action\": {},\n      \"email\": \"phil.bison@fulfillmenttools.com\",\n      \"firstname\": \"Phil\",\n      \"lastname\": \"Bison\",\n      \"locale\": \"de_DE\"\n    }\n  ],\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:           "checkoutOptionsTimepoint",
@@ -538,7 +538,7 @@ var operations = []Operation{
 		Description:  "This endpoint is to be used to get information about the possible delivery of items.",
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"desiredDeliveryDate\": \"2026-01-01T00:00:00Z\",\n  \"facilities\": [\n    {\n      \"facilityRef\": \"string\",\n      \"latestPickingStart\": \"2026-01-01T00:00:00Z\"\n    }\n  ],\n  \"tenantArticleIds\": [\n    \"string\"\n  ]\n}\n",
+		SampleBody:   "{\n  \"desiredDeliveryDate\": \"2026-06-17T12:00:00Z\",\n  \"facilities\": [\n    {\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"latestPickingStart\": \"2026-06-17T12:00:00Z\"\n    }\n  ],\n  \"tenantArticleIds\": [\n    \"string\"\n  ]\n}\n",
 	},
 	{
 		ID:           "checkoutoptionCollectEarliest",
@@ -549,7 +549,7 @@ var operations = []Operation{
 		Description:  "Get earliest collect timepoint for a given checkoutOption",
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"tenantArticleIds\": [\n    \"string\"\n  ]\n}\n",
+		SampleBody:   "{\n  \"desiredCollectDate\": \"2026-06-17T12:00:00Z\",\n  \"includeCalculationHints\": true,\n  \"tenantArticleIds\": [\n    \"string\"\n  ]\n}\n",
 	},
 	{
 		ID:           "checkoutoptionDeliveryEarliest",
@@ -560,7 +560,7 @@ var operations = []Operation{
 		Description:  "Get earliest delivery timepoint for a given checkoutOption",
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"consumerAddress\": {\n    \"country\": \"DE\"\n  },\n  \"tenantArticleIds\": [\n    \"string\"\n  ]\n}\n",
+		SampleBody:   "{\n  \"consumerAddress\": {\n    \"city\": \"Yellowstone\",\n    \"country\": \"DE\",\n    \"houseNumber\": \"42\",\n    \"postalCode\": \"42420\"\n  },\n  \"earliestDeliveryDate\": \"2026-06-17T12:00:00Z\",\n  \"includeCalculationHints\": true,\n  \"tenantArticleIds\": [\n    \"string\"\n  ]\n}\n",
 	},
 	{
 		ID:           "checkoutoptionDeliveryTimePeriod",
@@ -570,7 +570,7 @@ var operations = []Operation{
 		Summary:      "Get delivery time period",
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"basket\": [\n    {\n      \"quantity\": 1,\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"consumerAddress\": {\n    \"country\": \"DE\"\n  }\n}\n",
+		SampleBody:   "{\n  \"basket\": [\n    {\n      \"quantity\": 42,\n      \"tenantArticleId\": \"MY_ARTICLE_ID\"\n    }\n  ],\n  \"consumerAddress\": {\n    \"city\": \"Yellowstone\",\n    \"country\": \"DE\",\n    \"houseNumber\": \"42\",\n    \"postalCode\": \"42420\"\n  },\n  \"endDate\": \"2026-06-17T12:00:00Z\",\n  \"includeCalculationHints\": true,\n  \"startDate\": \"2026-06-17T12:00:00Z\"\n}\n",
 	},
 	{
 		ID:          "connectCarrierToFacility",
@@ -643,7 +643,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"carrierConfigurationVersion\": 1,\n  \"destinations\": [\n    {\n      \"countryCode\": \"DE\"\n    }\n  ],\n  \"source\": {\n    \"countryCode\": \"DE\"\n  }\n}\n",
+		SampleBody:   "{\n  \"carrierConfigurationVersion\": 1,\n  \"destinations\": [\n    {\n      \"countryCode\": \"DE\"\n    }\n  ],\n  \"source\": {\n    \"countryCode\": \"DE\"\n  },\n  \"transitTime\": {\n    \"maxTransitDays\": 3,\n    \"minTransitDays\": 1\n  }\n}\n",
 	},
 	{
 		ID:          "createCarrierToFacility",
@@ -670,7 +670,7 @@ var operations = []Operation{
 		Permissions:  []string{"CATEGORY_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"nameLocalized\": {}\n}\n",
+		SampleBody:   "{\n  \"nameLocalized\": {},\n  \"tenantCategoryId\": \"MY_CATEGORY_ID\"\n}\n",
 	},
 	{
 		ID:          "createConnectionToFacility",
@@ -736,7 +736,7 @@ var operations = []Operation{
 		Permissions:  []string{"CONFIG_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"key\": \"string\",\n  \"status\": \"ACTIVE\"\n}\n",
+		SampleBody:   "{\n  \"facilityGroupRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"key\": \"string\",\n  \"status\": \"ACTIVE\"\n}\n",
 	},
 	{
 		ID:          "createExpiry",
@@ -790,7 +790,7 @@ var operations = []Operation{
 		Permissions:  []string{"HANDOVER_CONTAINER_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"handoverJobRef\": \"string\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"pcs\",\n      \"quantity\": 1,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  }\n}\n",
+		SampleBody:   "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"handoverJobRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"iconUrl\": \"https://example.com/resource\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"pcs\",\n      \"quantity\": 42,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"sequenceNumber\": 42,\n  \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"weightLimitInG\": 42\n}\n",
 	},
 	{
 		ID:           "createInboundProcess",
@@ -801,7 +801,7 @@ var operations = []Operation{
 		Permissions:  []string{"INBOUND_PROCESS_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"facilityRef\": \"string\"\n}\n",
+		SampleBody:   "{\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"tenantInboundProcessId\": \"MY_INBOUNDPROCESS_ID\"\n}\n",
 	},
 	{
 		ID:          "createItemReturn",
@@ -825,7 +825,7 @@ var operations = []Operation{
 		Summary:     "Create item return job",
 		Description: "Creates a new item return job.",
 		HasBody:     true,
-		SampleBody:  "{\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\"\n}\n",
+		SampleBody:  "{\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\"\n}\n",
 	},
 	{
 		ID:          "createItemReturnParcel",
@@ -868,7 +868,7 @@ var operations = []Operation{
 		Permissions:  []string{"LOOKUP_RECORD_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"attributeDefinitions\": {},\n  \"items\": [\n    {\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ]\n}\n",
+		SampleBody:   "{\n  \"attributeDefinitions\": {},\n  \"items\": [\n    {\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"tenantRecordId\": \"MY_RECORD_ID\"\n}\n",
 	},
 	{
 		ID:          "createMeasurementUnit",
@@ -914,7 +914,7 @@ var operations = []Operation{
 		Permissions:  []string{"PACKAGING_UNITS_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"carrierRef\": \"string\",\n  \"details\": {\n    \"dimensions\": {\n      \"maxHeight\": 1,\n      \"maxLength\": 1,\n      \"maxWidth\": 1\n    },\n    \"maxWeight\": 1,\n    \"packagingPricingDetails\": {\n      \"pricing\": [\n        {\n          \"prices\": []\n        }\n      ]\n    },\n    \"type\": \"PALLET\",\n    \"volumetricWeightFactor\": 1\n  },\n  \"nameLocalized\": {},\n  \"tenantPackagingUnitId\": \"string\"\n}\n",
+		SampleBody:   "{\n  \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"details\": {\n    \"dimensions\": {\n      \"maxHeight\": 1,\n      \"maxLength\": 1,\n      \"maxWidth\": 1\n    },\n    \"maxWeight\": 1,\n    \"packagingPricingDetails\": {\n      \"pricing\": [\n        {\n          \"prices\": []\n        }\n      ]\n    },\n    \"type\": \"PALLET\",\n    \"volumetricWeightFactor\": 1\n  },\n  \"nameLocalized\": {},\n  \"tenantPackagingUnitId\": \"MY_PACKAGINGUNIT_ID\"\n}\n",
 	},
 	{
 		ID:           "createParcelInformation",
@@ -926,7 +926,7 @@ var operations = []Operation{
 		Permissions:  []string{"ADMIN_MODULES_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"anonymized\": false,\n  \"parcelInformationLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019eefb2-0001-7000-9000-200000000002\",\n      \"quantity\": 2,\n      \"scannableCodes\": [\n        \"4006381333931\"\n      ]\n    }\n  ],\n  \"shippingInformationRef\": \"019eefb2-0001-7000-9000-100000000001\",\n  \"shortId\": \"FT-01\"\n}\n",
+		SampleBody:   "{\n  \"anonymized\": false,\n  \"parcelInformationLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019eefb2-0001-7000-9000-200000000002\",\n      \"quantity\": 2,\n      \"scannableCodes\": [\n        \"4006381333931\"\n      ]\n    }\n  ],\n  \"shippingInformationRef\": \"019eefb2-0001-7000-9000-100000000001\",\n  \"shortId\": \"FT-01\"\n}\n",
 	},
 	{
 		ID:           "createPurchaseOrder",
@@ -937,7 +937,7 @@ var operations = []Operation{
 		Permissions:  []string{"INBOUND_PROCESS_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"facilityRef\": \"string\",\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ]\n}\n",
+		SampleBody:   "{\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-06-17T12:00:00Z\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 42\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ]\n}\n",
 	},
 	{
 		ID:           "createReceipt",
@@ -948,7 +948,7 @@ var operations = []Operation{
 		Permissions:  []string{"INBOUND_PROCESS_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"comments\": [\n    {\n      \"content\": \"string\"\n    }\n  ],\n  \"facilityRef\": \"string\",\n  \"receivedDate\": \"2026-01-01T00:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 1\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ]\n}\n",
+		SampleBody:   "{\n  \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"comments\": [\n    {\n      \"content\": \"string\",\n      \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ],\n  \"facilityRef\": \"string\",\n  \"receivedDate\": \"2026-06-17T12:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 42\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\",\n          \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 42\n      },\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\"\n    }\n  ]\n}\n",
 	},
 	{
 		ID:           "createRemoteConfiguration",
@@ -997,7 +997,7 @@ var operations = []Operation{
 		Permissions:  []string{"SERVICE_JOB_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"iconUrl\": \"https://example.com/icon.png\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 5,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"scannableCodes\": [\n    \"AB-123456\"\n  ],\n  \"serviceJobRefs\": [\n    \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n  ],\n  \"stackRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"storageLocationRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"weightLimitInG\": 5000\n}\n",
+		SampleBody:   "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"iconUrl\": \"https://example.com/icon.png\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 5,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"scannableCodes\": [\n    \"AB-123456\"\n  ],\n  \"sequenceNumber\": 42,\n  \"serviceJobRefs\": [\n    \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n  ],\n  \"stackRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"storageLocationRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"weightLimitInG\": 5000\n}\n",
 	},
 	{
 		ID:           "createServiceJob",
@@ -1021,7 +1021,7 @@ var operations = []Operation{
 		Permissions:  []string{"ADMIN_MODULES_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"anonymized\": false,\n  \"carrierRecipientInformation\": [\n    {\n      \"address\": [\n        {\n          \"city\": \"string\",\n          \"country\": \"DE\",\n          \"postalCode\": \"string\",\n          \"street\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"facilityRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"operativeProcessRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"processRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"senderAddress\": {\n    \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n    \"city\": \"Langenfeld\",\n    \"companyName\": \"Speedy Boxales Ltd.\",\n    \"country\": \"DE\",\n    \"houseNumber\": \"42a\",\n    \"postalCode\": \"40764\",\n    \"province\": \"NRW\",\n    \"street\": \"Hauptstr.\"\n  },\n  \"shippingInformationLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"quantity\": 1,\n      \"scannableCodes\": [\n        \"ABC-12345\"\n      ]\n    }\n  ],\n  \"shortId\": \"ABC123\",\n  \"tenantOrderId\": \"ORDER-12345\"\n}\n",
+		SampleBody:   "{\n  \"anonymized\": false,\n  \"carrierRecipientInformation\": [\n    {\n      \"address\": [\n        {\n          \"city\": \"Yellowstone\",\n          \"country\": \"DE\",\n          \"email\": \"phil.bison@fulfillmenttools.com\",\n          \"emailAddresses\": [\n            {}\n          ],\n          \"houseNumber\": \"42\",\n          \"postalCode\": \"42420\",\n          \"street\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"facilityRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"operativeProcessRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"processRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"senderAddress\": {\n    \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n    \"city\": \"Langenfeld\",\n    \"companyName\": \"Speedy Boxales Ltd.\",\n    \"country\": \"DE\",\n    \"houseNumber\": \"42a\",\n    \"postalCode\": \"40764\",\n    \"province\": \"NRW\",\n    \"street\": \"Hauptstr.\"\n  },\n  \"shippingInformationLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"quantity\": 1,\n      \"scannableCodes\": [\n        \"ABC-12345\"\n      ]\n    }\n  ],\n  \"shortId\": \"ABC123\",\n  \"tenantOrderId\": \"ORDER-12345\"\n}\n",
 	},
 	{
 		ID:           "createSimulationOrder",
@@ -1033,7 +1033,7 @@ var operations = []Operation{
 		Permissions:  []string{"SIMULATION_ORDER_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ]\n}\n",
+		SampleBody:   "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"MY_ORDER_ID\"\n}\n",
 	},
 	{
 		ID:           "createSourcingOptionsRequest",
@@ -1055,7 +1055,7 @@ var operations = []Operation{
 		Permissions:  []string{"STACKS_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"facilityRefs\": [\n    \"string\"\n  ],\n  \"processRefs\": [\n    \"string\"\n  ]\n}\n",
+		SampleBody:   "{\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"processRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ]\n}\n",
 	},
 	{
 		ID:           "createStock",
@@ -1066,7 +1066,7 @@ var operations = []Operation{
 		Permissions:  []string{"STOCK_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"tenantArticleId\": \"string\",\n  \"value\": 1\n}\n",
+		SampleBody:   "{\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"locationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"receiptDate\": \"2026-06-17T12:00:00Z\",\n  \"tenantArticleId\": \"MY_ARTICLE_ID\",\n  \"tenantFacilityId\": \"MY_FACILITY_ID\",\n  \"tenantStockId\": \"MY_STOCK_ID\",\n  \"value\": 42\n}\n",
 	},
 	{
 		ID:           "createStowJob",
@@ -1078,7 +1078,7 @@ var operations = []Operation{
 		Permissions:  []string{"STOW_JOB_FULL_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"facilityRef\": \"string\",\n  \"status\": \"OPEN\",\n  \"stowLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"string\"\n      },\n      \"stowTo\": [\n        {\n          \"quantity\": 1,\n          \"type\": \"STOCK\"\n        }\n      ],\n      \"takeFrom\": {\n        \"quantity\": 1,\n        \"type\": \"STOCK\"\n      }\n    }\n  ]\n}\n",
+		SampleBody:   "{\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"status\": \"OPEN\",\n  \"stowLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"MY_ARTICLE_ID\"\n      },\n      \"stowTo\": [\n        {\n          \"quantity\": 1,\n          \"stockRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"type\": \"STOCK\"\n        }\n      ],\n      \"takeFrom\": {\n        \"quantity\": 1,\n        \"stockRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"type\": \"STOCK\"\n      }\n    }\n  ],\n  \"targetTime\": \"2026-06-17T12:00:00Z\"\n}\n",
 	},
 	{
 		ID:           "createUser",
@@ -1702,7 +1702,7 @@ var operations = []Operation{
 		Permissions:  []string{"PROCESS_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"documents\": [\n    {\n      \"documentId\": \"string\",\n      \"documentsSetRef\": \"string\"\n    }\n  ]\n}\n",
+		SampleBody:   "{\n  \"documents\": [\n    {\n      \"documentId\": \"string\",\n      \"documentsSetRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ]\n}\n",
 	},
 	{
 		ID:          "downloadProcessDocument",
@@ -1727,7 +1727,7 @@ var operations = []Operation{
 			{Name: "strategyId", In: InPath, Type: TypeString, Required: true, Description: "Id of the routing strategy"},
 		},
 		HasBody:    true,
-		SampleBody: "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"R456728546\"\n}\n",
+		SampleBody: "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"R456728546\"\n}\n",
 	},
 	{
 		ID:          "evaluateRoutingStrategyNode",
@@ -1759,7 +1759,7 @@ var operations = []Operation{
 		Permissions:  []string{"CURRENT_USER_MODIFY"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"action\": \"ModifyMe\",\n  \"locale\": \"de_DE\"\n}\n",
+		SampleBody:   "{\n  \"action\": \"ModifyMe\",\n  \"firstname\": \"Phil\",\n  \"lastname\": \"Bison\",\n  \"locale\": \"de_DE\"\n}\n",
 	},
 	{
 		ID:           "executeNotificationCenterConfigAction",
@@ -1771,7 +1771,7 @@ var operations = []Operation{
 		Permissions:  []string{"NOTIFICATION_CENTER_CONFIG_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"channel\": {\n    \"enabled\": false,\n    \"events\": [\n      \"PICK_JOB_CREATED\"\n    ],\n    \"receiver\": [\n      {\n        \"email\": \"user@example.com\",\n        \"language\": \"de_DE\"\n      }\n    ],\n    \"type\": \"EMAIL\"\n  },\n  \"name\": \"ADD_CHANNEL\",\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"channel\": {\n    \"enabled\": false,\n    \"events\": [\n      \"PICK_JOB_CREATED\"\n    ],\n    \"receiver\": [\n      {\n        \"email\": \"phil.bison@fulfillmenttools.com\",\n        \"language\": \"de_DE\"\n      }\n    ],\n    \"type\": \"EMAIL\"\n  },\n  \"name\": \"ADD_CHANNEL\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "executeNotificationCenterFacilityConfigAction",
@@ -1786,7 +1786,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"channel\": {\n    \"enabled\": false,\n    \"events\": [\n      \"PICK_JOB_CREATED\"\n    ],\n    \"receiver\": [\n      {\n        \"email\": \"user@example.com\",\n        \"language\": \"de_DE\"\n      }\n    ],\n    \"type\": \"EMAIL\"\n  },\n  \"name\": \"ADD_CHANNEL\",\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"channel\": {\n    \"enabled\": false,\n    \"events\": [\n      \"PICK_JOB_CREATED\"\n    ],\n    \"receiver\": [\n      {\n        \"email\": \"phil.bison@fulfillmenttools.com\",\n        \"language\": \"de_DE\"\n      }\n    ],\n    \"type\": \"EMAIL\"\n  },\n  \"name\": \"ADD_CHANNEL\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:      "facilityAction",
@@ -1813,7 +1813,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"facilitiesToAdd\": [\n    \"string\"\n  ],\n  \"name\": \"ADD_FACILITIES_TO_GROUP\"\n}\n",
+		SampleBody:   "{\n  \"facilitiesToAdd\": [\n    \"string\"\n  ],\n  \"name\": \"ADD_FACILITIES_TO_GROUP\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "findItemReturns",
@@ -4658,7 +4658,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"actions\": [\n    {\n      \"action\": \"ModifyCarrier\",\n      \"defaultParcelHeightInCm\": 10,\n      \"defaultParcelLengthInCm\": 25,\n      \"defaultParcelWeightInGram\": 1000,\n      \"defaultParcelWidthInCm\": 35\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"actions\": [\n    {\n      \"action\": \"ModifyCarrier\",\n      \"defaultParcelHeightInCm\": 10,\n      \"defaultParcelLengthInCm\": 25,\n      \"defaultParcelWeightInGram\": 1000,\n      \"defaultParcelWidthInCm\": 35,\n      \"logoUrl\": \"https://example.com/resource\"\n    }\n  ],\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "patchCustomService",
@@ -4784,7 +4784,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"labelUrl\": \"https://example.com/resource\",\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "patchLoadUnitByID",
@@ -4799,7 +4799,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"actions\": [\n    {\n      \"action\": \"ReplaceLoadUnitLineItems\",\n      \"loadUnitLineItems\": [\n        {\n          \"article\": {},\n          \"id\": \"string\",\n          \"measurementUnitKey\": \"liter\",\n          \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n          \"secondaryMeasurementUnitKey\": \"g\",\n          \"secondaryQuantity\": 1\n        }\n      ]\n    }\n  ],\n  \"version\": 42\n}\n",
+		SampleBody:   "{\n  \"actions\": [\n    {\n      \"action\": \"ReplaceLoadUnitLineItems\",\n      \"loadUnitLineItems\": [\n        {\n          \"article\": {},\n          \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"measurementUnitKey\": \"liter\",\n          \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n          \"secondaryMeasurementUnitKey\": \"g\",\n          \"secondaryQuantity\": 1\n        }\n      ]\n    }\n  ],\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "patchOidcProvider",
@@ -4911,7 +4911,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-06-17T12:00:00Z\"\n  },\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "patchReceipt",
@@ -4925,7 +4925,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"receivedDate\": \"2026-06-17T12:00:00Z\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "patchRestowItem",
@@ -4995,7 +4995,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "patchTargetContainerLineItem",
@@ -5011,7 +5011,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"name\": \"UpdateLineItem\",\n  \"payload\": {\n    \"lineItem\": {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  },\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"name\": \"UpdateLineItem\",\n  \"payload\": {\n    \"lineItem\": {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  },\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "patchTargetcontainer",
@@ -5053,7 +5053,7 @@ var operations = []Operation{
 		Permissions:  []string{"RESERVATION_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"name\": \"REMOVE_RESERVATIONS_REDUCE_STOCKS\",\n  \"reservationSelector\": {}\n}\n",
+		SampleBody:   "{\n  \"name\": \"REMOVE_RESERVATIONS_REDUCE_STOCKS\",\n  \"reservationSelector\": {\n    \"orderRefs\": [\n      \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n    ],\n    \"reservationRefs\": [\n      \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n    ],\n    \"routingPlanRefs\": [\n      \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n    ]\n  }\n}\n",
 	},
 	{
 		ID:           "performStocksActions",
@@ -5109,7 +5109,7 @@ var operations = []Operation{
 		Description:  "This part of the API is deprecated. For details, see the API release lifecycle documentation. Evaluate a checkout options input against the DOMS.",
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"deliveryPreferences\": {\n    \"targetTime\": \"2020-02-03T09:45:51.525Z\"\n  },\n  \"orderLineItems\": [\n    {}\n  ]\n}\n",
+		SampleBody:   "{\n  \"deliveryPreferences\": {\n    \"targetTime\": \"2020-02-03T09:45:51.525Z\"\n  },\n  \"filterDuplicates\": true,\n  \"orderLineItems\": [\n    {}\n  ]\n}\n",
 		Deprecated:   true,
 	},
 	{
@@ -5120,7 +5120,7 @@ var operations = []Operation{
 		Summary:      "Create promise order",
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"R456728546\"\n}\n",
+		SampleBody:   "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"R456728546\"\n}\n",
 	},
 	{
 		ID:           "postExternalAction",
@@ -5281,7 +5281,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"carrierRef\": \"string\",\n  \"fallBackTrackAndTraceEmail\": \"max@speedyboxales.com\",\n  \"mustBeWeighed\": false,\n  \"returnLabel\": false,\n  \"version\": 42\n}\n",
+		SampleBody:   "{\n  \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"defaultPickUpTime\": {\n    \"end\": {\n      \"hour\": 1,\n      \"minute\": 1\n    },\n    \"start\": {\n      \"hour\": 1,\n      \"minute\": 1\n    }\n  },\n  \"fallBackTrackAndTraceEmail\": \"max@speedyboxales.com\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"mustBeWeighed\": false,\n  \"returnLabel\": false,\n  \"serviceUrl\": \"https://example.com/resource\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:           "putCutoffTimeConfiguration",
@@ -5477,7 +5477,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"attributeDefinitions\": {},\n  \"items\": [\n    {\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"attributeDefinitions\": {},\n  \"items\": [\n    {\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"tenantRecordId\": \"MY_RECORD_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:           "putOperationalRestowingConfigurations",
@@ -5574,7 +5574,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"carrierRef\": \"string\",\n  \"details\": {\n    \"dimensions\": {\n      \"maxHeight\": 1,\n      \"maxLength\": 1,\n      \"maxWidth\": 1\n    },\n    \"maxWeight\": 1,\n    \"packagingPricingDetails\": {\n      \"pricing\": [\n        {\n          \"prices\": []\n        }\n      ]\n    },\n    \"type\": \"PALLET\",\n    \"volumetricWeightFactor\": 1\n  },\n  \"nameLocalized\": {},\n  \"tenantPackagingUnitId\": \"string\",\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"details\": {\n    \"dimensions\": {\n      \"maxHeight\": 1,\n      \"maxLength\": 1,\n      \"maxWidth\": 1\n    },\n    \"maxWeight\": 1,\n    \"packagingPricingDetails\": {\n      \"pricing\": [\n        {\n          \"prices\": []\n        }\n      ]\n    },\n    \"type\": \"PALLET\",\n    \"volumetricWeightFactor\": 1\n  },\n  \"nameLocalized\": {},\n  \"tenantPackagingUnitId\": \"MY_PACKAGINGUNIT_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:           "putPackingContainerRequirement",
@@ -5641,7 +5641,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"comments\": [\n    {\n      \"content\": \"string\"\n    }\n  ],\n  \"receivedDate\": \"2026-01-01T00:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 1\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"comments\": [\n    {\n      \"content\": \"string\",\n      \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ],\n  \"receivedDate\": \"2026-06-17T12:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 42\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\",\n          \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 42\n      },\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\"\n    }\n  ],\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "putRemoteConfiguration",
@@ -5919,7 +5919,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"nameLocalized\": {},\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"nameLocalized\": {},\n  \"tenantCategoryId\": \"MY_CATEGORY_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "replaceEventScopeConfig",
@@ -5934,7 +5934,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"facilityGroupRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:      "replaceFacility",
@@ -5962,7 +5962,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"tenantFacilityGroupId\": \"K12345\",\n  \"version\": 42\n}\n",
+		SampleBody:   "{\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"tenantFacilityGroupId\": \"K12345\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "replaceGroupUnderChannel",
@@ -6031,7 +6031,7 @@ var operations = []Operation{
 		Permissions:  []string{"AUDIT_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"entityRef\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchCategory",
@@ -6043,7 +6043,7 @@ var operations = []Operation{
 		Permissions:  []string{"ADMIN_MODULES_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"id\": {},\n    \"tenantCategoryId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchFacility",
@@ -6055,7 +6055,7 @@ var operations = []Operation{
 		Permissions:  []string{"FACILITY_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"id\": {},\n    \"tenantFacilityId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchFacilityGroup",
@@ -6067,7 +6067,7 @@ var operations = []Operation{
 		Permissions:  []string{"FACILITY_GROUP_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"facilityRefs\": {},\n    \"id\": {},\n    \"tenantFacilityGroupId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchHandoverJob",
@@ -6079,7 +6079,7 @@ var operations = []Operation{
 		Permissions:  []string{"HANDOVERJOB_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"pickJobRef\": {},\n    \"targetTime\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchInboundProcess",
@@ -6091,7 +6091,7 @@ var operations = []Operation{
 		Permissions:  []string{"INBOUND_PROCESS_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"inboundDate\": {},\n    \"tenantInboundProcessId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchLinkedServiceJobs",
@@ -6103,7 +6103,7 @@ var operations = []Operation{
 		Permissions:  []string{"LINKED_SERVICE_JOBS_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"linkedServiceJobRef\": {},\n    \"targetTime\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchListing",
@@ -6115,7 +6115,7 @@ var operations = []Operation{
 		Permissions:  []string{"LISTING_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"availabilityTimeframe\": {},\n    \"categoryRefs\": {},\n    \"facilityRef\": {},\n    \"id\": {},\n    \"tenantArticleId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchLookupRecordItem",
@@ -6127,7 +6127,7 @@ var operations = []Operation{
 		Permissions:  []string{"LOOKUP_RECORD_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"id\": {},\n    \"recordRef\": {},\n    \"tenantRecordId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchNotification",
@@ -6139,7 +6139,7 @@ var operations = []Operation{
 		Permissions:  []string{"NOTIFICATION_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"facilityRef\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchOrder",
@@ -6151,7 +6151,7 @@ var operations = []Operation{
 		Permissions:  []string{"ADMIN_MODULES_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"orderDate\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchOrderRecord",
@@ -6163,7 +6163,7 @@ var operations = []Operation{
 		Permissions:  []string{"ORDER_RECORD_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"orderRecordDate\": {},\n    \"tenantOrderRecordId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchPackJob",
@@ -6175,7 +6175,7 @@ var operations = []Operation{
 		Permissions:  []string{"PACKJOB_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"orderDate\": {},\n    \"targetTime\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchParcel",
@@ -6187,7 +6187,7 @@ var operations = []Operation{
 		Permissions:  []string{"PARCEL_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"carrierRef\": {},\n    \"facilityRef\": {},\n    \"id\": {},\n    \"shipmentRef\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchParcelInformation",
@@ -6199,7 +6199,7 @@ var operations = []Operation{
 		Permissions:  []string{"ADMIN_MODULES_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"shippingInformationRef\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchPickJob",
@@ -6211,7 +6211,7 @@ var operations = []Operation{
 		Permissions:  []string{"PICKJOB_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"orderRef\": {},\n    \"targetTime\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchProcess",
@@ -6223,7 +6223,7 @@ var operations = []Operation{
 		Permissions:  []string{"PROCESS_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"documentRefs\": {},\n    \"externalActionRefs\": {},\n    \"facilityRefs\": {},\n    \"flatRefs\": {},\n    \"handoverJobRefs\": {},\n    \"itemReturnJobsRef\": {},\n    \"orderRef\": {},\n    \"packJobRefs\": {},\n    \"pickJobRefs\": {},\n    \"returnRefs\": {},\n    \"routingPlanRefs\": {},\n    \"serviceJobRefs\": {},\n    \"shipmentRefs\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchRemoteConfiguration",
@@ -6235,7 +6235,7 @@ var operations = []Operation{
 		Permissions:  []string{"REMOTE_CONFIG_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {},\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchReservation",
@@ -6247,7 +6247,7 @@ var operations = []Operation{
 		Permissions:  []string{"RESERVATION_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"relatedRefs\": {\n      \"orderRefs\": {},\n      \"pickJobRefs\": {},\n      \"routingPlanRefs\": {},\n      \"transferRefs\": {}\n    },\n    \"tenantArticleId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchRole",
@@ -6259,7 +6259,7 @@ var operations = []Operation{
 		Permissions:  []string{"ROLE_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {},\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchRoutingPlan",
@@ -6271,7 +6271,7 @@ var operations = []Operation{
 		Permissions:  []string{"ROUTING_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"orderDate\": {},\n    \"orderRef\": {},\n    \"pickJobRef\": {},\n    \"provisioningTime\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchScopedAvailabilityConfig",
@@ -6283,7 +6283,7 @@ var operations = []Operation{
 		Permissions:  []string{"CONFIG_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"facilityGroupRefs\": {},\n    \"facilityRefs\": {},\n    \"id\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchShipment",
@@ -6295,7 +6295,7 @@ var operations = []Operation{
 		Permissions:  []string{"SHIPMENT_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {\n    \"created\": {}\n  }\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"carrierRef\": {},\n    \"created\": {},\n    \"facilityRef\": {},\n    \"id\": {},\n    \"pickJobRef\": {},\n    \"targetTime\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchShippingInformation",
@@ -6307,7 +6307,7 @@ var operations = []Operation{
 		Permissions:  []string{"ADMIN_MODULES_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchSimulationOrder",
@@ -6319,7 +6319,7 @@ var operations = []Operation{
 		Permissions:  []string{"ADMIN_MODULES_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"orderDate\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchStock",
@@ -6331,7 +6331,7 @@ var operations = []Operation{
 		Permissions:  []string{"STOCK_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"locationRef\": {},\n    \"receiptDate\": {},\n    \"tenantArticleId\": {},\n    \"tenantFacilityId\": {},\n    \"tenantStockId\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchStorageLocation",
@@ -6343,7 +6343,7 @@ var operations = []Operation{
 		Permissions:  []string{"STORAGE_LOCATION_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"tenantLocationId\": {},\n    \"zoneRef\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchStowJob",
@@ -6355,7 +6355,7 @@ var operations = []Operation{
 		Permissions:  []string{"STOW_JOB_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {\n    \"created\": {\n      \"after\": \"-P1W\"\n    }\n  }\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"created\": {\n      \"after\": \"-P1W\"\n    },\n    \"facilityRef\": {},\n    \"id\": {},\n    \"targetTime\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchTag",
@@ -6367,7 +6367,7 @@ var operations = []Operation{
 		Permissions:  []string{"TAG_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"id\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchUser",
@@ -6379,7 +6379,7 @@ var operations = []Operation{
 		Permissions:  []string{"USERS_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"firstname\": {},\n    \"lastname\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchWorkflow",
@@ -6391,7 +6391,7 @@ var operations = []Operation{
 		Permissions:  []string{"WORKFLOW_DEFINITION_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"id\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:           "searchZone",
@@ -6403,7 +6403,7 @@ var operations = []Operation{
 		Permissions:  []string{"ZONE_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"query\": {}\n}\n",
+		SampleBody:   "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {}\n  },\n  \"size\": 10\n}\n",
 	},
 	{
 		ID:          "shipmentActions",
@@ -6449,7 +6449,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"carrierConfigurationVersion\": 1\n}\n",
+		SampleBody:   "{\n  \"carrierConfigurationVersion\": 1,\n  \"transitTime\": {\n    \"maxTransitDays\": 3,\n    \"minTransitDays\": 1\n  }\n}\n",
 	},
 	{
 		ID:          "updateCustomServiceAdditionalInformation",
@@ -6630,7 +6630,7 @@ var operations = []Operation{
 		Permissions:  []string{"CURRENT_USER_MODIFY"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"locale\": \"de_DE\"\n}\n",
+		SampleBody:   "{\n  \"firstname\": \"Phil\",\n  \"lastname\": \"Bison\",\n  \"locale\": \"de_DE\"\n}\n",
 		Deprecated:   true,
 	},
 	{
@@ -6792,7 +6792,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "updateStock",
@@ -6806,7 +6806,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"value\": 1,\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"locationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"tenantStockId\": \"MY_STOCK_ID\",\n  \"value\": 42,\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "uploadLoadUnitTypeIcon",
@@ -6876,7 +6876,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-06-17T12:00:00Z\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 42\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:           "upsertInventoryConfigurations",
@@ -6887,7 +6887,7 @@ var operations = []Operation{
 		Permissions:  []string{"CONFIG_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"isMixedStorage\": true,\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "upsertInventoryFacilityConfigurations",
@@ -6902,7 +6902,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"isMixedStorage\": true,\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:           "upsertNotificationCenterConfig",
@@ -6968,7 +6968,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-06-17T12:00:00Z\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 42\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:           "upsertReturnConfiguration",
@@ -6991,7 +6991,7 @@ var operations = []Operation{
 		Permissions:  []string{"STOCK_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"stocks\": [\n    {\n      \"tenantArticleId\": \"string\",\n      \"value\": 1\n    }\n  ]\n}\n",
+		SampleBody:   "{\n  \"stocks\": [\n    {\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"locationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"receiptDate\": \"2026-06-17T12:00:00Z\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\",\n      \"tenantFacilityId\": \"MY_FACILITY_ID\",\n      \"tenantStockId\": \"MY_STOCK_ID\",\n      \"value\": 42\n    }\n  ]\n}\n",
 	},
 	{
 		ID:           "validatePostalCode",
