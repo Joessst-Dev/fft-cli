@@ -56,8 +56,9 @@ const defaultHost = "127.0.0.1"
 // Server is a running emulator: a Fiber app answering the whole API surface from one
 // in-memory store.
 type Server struct {
-	app  *fiber.App
-	addr string
+	app    *fiber.App
+	addr   string
+	events *eventEmitter
 }
 
 // New builds a server: it registers every operation in the spec, wires the store,
@@ -72,7 +73,8 @@ func New(cfg Config) (*Server, error) {
 	}
 	app.Use(permissiveAuth())
 
-	registerRoutes(app, ops, &handlers{store: store, events: newEventEmitter(cfg, store)})
+	events := newEventEmitter(cfg, store)
+	registerRoutes(app, ops, &handlers{store: store, events: events})
 
 	if cfg.Seed != "" {
 		if err := seed(store, cfg.Seed); err != nil {
@@ -85,7 +87,7 @@ func New(cfg Config) (*Server, error) {
 		host = defaultHost
 	}
 
-	return &Server{app: app, addr: net.JoinHostPort(host, strconv.Itoa(cfg.Port))}, nil
+	return &Server{app: app, addr: net.JoinHostPort(host, strconv.Itoa(cfg.Port)), events: events}, nil
 }
 
 // Listen binds the port and serves until ctx is cancelled, then shuts down
@@ -104,6 +106,9 @@ func (s *Server) Listen(ctx context.Context, ready func()) error {
 	if err != nil {
 		return err
 	}
+	// Once the port is bound the emitter's clients may be dialed, so release them on
+	// every exit path — a long-running session must not leak the Pub/Sub connections.
+	defer func() { _ = s.events.Close() }()
 	if ready != nil {
 		ready()
 	}

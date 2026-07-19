@@ -173,9 +173,10 @@ func newEmulatorEmitCmd(deps *Deps) *cobra.Command {
 }
 
 // emitEvent POSTs the event to the emulator and reports the outcome on stderr — the
-// command produces no stdout data, so the summary is a notice like every other. A
-// zero count means no subscription matched, which is the likeliest mistake, so it
-// says how to fix it.
+// command produces no stdout data, so the summary is a notice like every other. A zero
+// count has two causes with different fixes: eventing off entirely, or on but no
+// subscription matched, so it names the one that applies rather than always pointing at
+// a subscription.
 func emitEvent(ctx context.Context, w io.Writer, base string, body []byte) error {
 	endpoint := strings.TrimRight(base, "/") + "/_emulator/emit"
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
@@ -199,6 +200,7 @@ func emitEvent(ctx context.Context, w io.Writer, base string, body []byte) error
 	}
 
 	var result struct {
+		Enabled   bool     `json:"enabled"`
 		Published int      `json:"published"`
 		Topics    []string `json:"topics"`
 	}
@@ -206,11 +208,15 @@ func emitEvent(ctx context.Context, w io.Writer, base string, body []byte) error
 		return fmt.Errorf("decode emulator response: %w", err)
 	}
 
-	if result.Published == 0 {
+	switch {
+	case !result.Enabled:
+		fmt.Fprintf(w, "published 0 — eventing is off (set --pubsub-emulator-host or %s to publish)\n",
+			"PUBSUB_EMULATOR_HOST")
+	case result.Published == 0:
 		fmt.Fprintln(w, "published 0 — no subscription matched (register one with 'fft api addSubscription')")
-		return nil
+	default:
+		fmt.Fprintf(w, "published %d to %s\n", result.Published, strings.Join(result.Topics, ", "))
 	}
-	fmt.Fprintf(w, "published %d to %s\n", result.Published, strings.Join(result.Topics, ", "))
 	return nil
 }
 

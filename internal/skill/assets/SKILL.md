@@ -124,9 +124,9 @@ Cloud. Register where an event goes with an ordinary subscription
 (`POST /api/subscriptions` with a `GOOGLE_CLOUD_PUB_SUB` target of `projectId`+`topicId`,
 and optional facility `contexts`). A stateful mutation then publishes the matching lifecycle
 event (a create on `orders` publishes `ORDER_CREATED`, and so on). To publish an event that
-no create/update/delete maps to — a picking or routing state change — use `fft emulator emit
-<EVENT> --payload-file <file>`, which asks the running emulator to publish it to every
-subscription that matches the event name and contexts.
+no create/update/delete maps to — a picking or routing state change — use
+`fft emulator emit <EVENT> --payload-file <file>`, which asks the running emulator to
+publish it to every subscription that matches the event name and contexts.
 
 ## Never
 

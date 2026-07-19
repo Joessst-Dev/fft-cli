@@ -75,6 +75,7 @@ var _ = Describe("eventEmitter", func() {
 
 			result := emit.emit("ORDER_CREATED", map[string]any{"tenantOrderId": "t"})
 
+			Expect(result.Enabled).To(BeTrue())
 			Expect(result.Published).To(Equal(1))
 			Expect(result.Topics).To(ConsistOf("local/orders"))
 
@@ -140,13 +141,26 @@ var _ = Describe("eventEmitter", func() {
 			emit.enabled = false
 
 			result := emit.emit("ORDER_CREATED", map[string]any{})
+			Expect(result.Enabled).To(BeFalse())
 			Expect(result.Published).To(Equal(0))
 			Expect(rec.count()).To(Equal(0))
+		})
+
+		It("reports eventing enabled even when no subscription matches", func() {
+			result := emit.emit("ORDER_CREATED", map[string]any{})
+			Expect(result.Enabled).To(BeTrue())
+			Expect(result.Published).To(Equal(0))
 		})
 
 		It("does nothing for an empty event name", func() {
 			store.Create("subscriptions", pubSubSubscription("", "local", "orders", nil))
 			Expect(emit.emit("", map[string]any{}).Published).To(Equal(0))
+		})
+	})
+
+	Describe("Close", func() {
+		It("is a no-op when the publisher holds no closable resources", func() {
+			Expect(emit.Close()).To(Succeed())
 		})
 	})
 

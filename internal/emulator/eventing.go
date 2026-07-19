@@ -3,6 +3,7 @@ package emulator
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"sync"
@@ -102,6 +103,23 @@ func (p *pubsubPublisher) Publish(ctx context.Context, projectID, topicID string
 	return nil
 }
 
+// Close closes every cached client and clears the cache. The emulator calls it on
+// shutdown so a long-running local session does not leak the gRPC connection and
+// background goroutines each client keeps open.
+func (p *pubsubPublisher) Close() error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	var errs []error
+	for _, c := range p.clients {
+		if err := c.Close(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	clear(p.clients)
+	return errors.Join(errs...)
+}
+
 // noopPublisher stands in when no emulator host is configured: subscriptions are
 // still stored and matched, but nothing is sent. eventEmitter.enabled is false in
 // that case, so this is only ever the zero value's safety net.
@@ -135,16 +153,21 @@ func newEventEmitter(cfg Config, store *Store) *eventEmitter {
 	}
 }
 
-// emitResult reports what emit did: how many messages went out and to which
-// project/topic pairs. It is the body of the manual emit endpoint's response.
+// emitResult reports what emit did: whether eventing is on at all, how many messages
+// went out and to which project/topic pairs. It is the body of the manual emit
+// endpoint's response. Enabled tells a zero Published "no subscription matched" apart
+// from "eventing is off", which the caller reports differently.
 type emitResult struct {
+	Enabled   bool     `json:"enabled"`
 	Published int      `json:"published"`
 	Topics    []string `json:"topics"`
 }
 
-// publishTimeout bounds a single publish. Delivery is a side effect of a mutation
-// that has already committed, so it must not block the response indefinitely when the
-// configured Pub/Sub host is down or wrong.
+// publishTimeout bounds one emit's whole fan-out, not a single publish: every matching
+// subscription is published under one shared context with this deadline, so a down or
+// wrong Pub/Sub host delays the response by at most this long no matter how many
+// subscriptions match. Delivery is a side effect of a mutation that has already
+// committed, so it must not block the response indefinitely.
 const publishTimeout = 10 * time.Second
 
 // emit publishes event to every subscription that names it and whose contexts match
@@ -152,16 +175,17 @@ const publishTimeout = 10 * time.Second
 // propagated, matching the real at-least-once contract where the producer does not
 // fail the originating operation on a delivery error.
 //
-// Each publish runs on a bounded context detached from any request, not the caller's:
-// an already-committed mutation's event must not be cancelled by the caller
-// disconnecting. Publishing is still synchronous on the request path (the manual emit
-// endpoint needs the count), so the timeout caps — but does not remove — how long a
-// slow or dead host delays the response.
+// Matching subscriptions are published to concurrently under one bounded context
+// detached from any request, not the caller's: an already-committed mutation's event
+// must not be cancelled by the caller disconnecting, and one shared deadline caps total
+// latency at publishTimeout however many subscriptions match — a dead host delays the
+// response by the timeout once, not once per subscription. Publishing is still
+// synchronous on the request path, because the manual emit endpoint needs the count.
 //
 // All matching subscriptions share one eventId, because they are one occurrence of
 // the event delivered to several targets — the envelope is built once.
 func (e *eventEmitter) emit(event string, payload map[string]any) emitResult {
-	result := emitResult{Topics: []string{}}
+	result := emitResult{Enabled: e.enabled, Topics: []string{}}
 	if !e.enabled || event == "" {
 		return result
 	}
@@ -177,7 +201,7 @@ func (e *eventEmitter) emit(event string, payload map[string]any) emitResult {
 		return result
 	}
 
-	seen := map[string]bool{}
+	var matches []subscriptionMatch
 	for _, sub := range e.store.List("subscriptions") {
 		if mapString(sub, "event") != event {
 			continue
@@ -194,24 +218,50 @@ func (e *eventEmitter) emit(event string, payload map[string]any) emitResult {
 		if projectID == "" || topicID == "" {
 			continue
 		}
-
-		// The event attribute lets a consumer filter without decoding data. It is an
-		// emulator convention: fulfillmenttools does not document the attributes its
-		// production delivery sets, so nothing here claims to reproduce them.
-		ctx, cancel := context.WithTimeout(context.Background(), publishTimeout)
-		err := e.pub.Publish(ctx, projectID, topicID, data, map[string]string{"event": event})
-		cancel()
-		if err != nil {
-			e.logf("emulator: publish %s to %s/%s: %v", event, projectID, topicID, err)
-			continue
-		}
-		result.Published++
-		if topic := projectID + "/" + topicID; !seen[topic] {
-			seen[topic] = true
-			result.Topics = append(result.Topics, topic)
-		}
+		matches = append(matches, subscriptionMatch{projectID: projectID, topicID: topicID})
 	}
+	if len(matches) == 0 {
+		return result
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), publishTimeout)
+	defer cancel()
+
+	// result is aggregated by the fan-out goroutines, so guard every write to it and
+	// the topic-dedup map with mu.
+	var (
+		mu   sync.Mutex
+		wg   sync.WaitGroup
+		seen = map[string]bool{}
+	)
+	for _, m := range matches {
+		wg.Go(func() {
+			// The event attribute lets a consumer filter without decoding data. It is an
+			// emulator convention: fulfillmenttools does not document the attributes its
+			// production delivery sets, so nothing here claims to reproduce them.
+			if err := e.pub.Publish(ctx, m.projectID, m.topicID, data, map[string]string{"event": event}); err != nil {
+				e.logf("emulator: publish %s to %s/%s: %v", event, m.projectID, m.topicID, err)
+				return
+			}
+			mu.Lock()
+			defer mu.Unlock()
+			result.Published++
+			if topic := m.projectID + "/" + m.topicID; !seen[topic] {
+				seen[topic] = true
+				result.Topics = append(result.Topics, topic)
+			}
+		})
+	}
+	wg.Wait()
 	return result
+}
+
+// subscriptionMatch is a subscription that emit will publish to: the project and topic
+// resolved from its target, collected in a first pass so the publishes can then fan out
+// concurrently under one deadline.
+type subscriptionMatch struct {
+	projectID string
+	topicID   string
 }
 
 // onCreate, onUpdate and onRemove emit the lifecycle event a collection maps to, if
@@ -227,6 +277,15 @@ func (e *eventEmitter) onUpdate(coll string, doc map[string]any) {
 
 func (e *eventEmitter) onRemove(coll string, doc map[string]any) {
 	e.emit(collectionEvents[coll].deleted, doc)
+}
+
+// Close releases the underlying publisher's resources when it holds any. The no-op
+// and test publishers implement no io.Closer, so Close is nil for them.
+func (e *eventEmitter) Close() error {
+	if c, ok := e.pub.(io.Closer); ok {
+		return c.Close()
+	}
+	return nil
 }
 
 func (e *eventEmitter) logf(format string, args ...any) {
@@ -264,7 +323,6 @@ var collectionEvents = map[string]lifecycleEvents{
 	"packjobs":       {created: "PACK_JOB_CREATED", updated: "PACK_JOB_UPDATED"},
 	"handoverjobs":   {created: "HANDOVERJOB_CREATED"},
 	"shipments":      {created: "SHIPMENT_CREATED", updated: "SHIPMENT_UPDATED"},
-	"itemreturns":    {created: "RETURN_CREATED", updated: "RETURN_UPDATED"},
 	"itemreturnjobs": {created: "ITEM_RETURN_JOB_CREATED", updated: "ITEM_RETURN_JOB_UPDATED"},
 	"stowjobs":       {created: "STOW_JOB_CREATED"},
 	"servicejobs":    {created: "SERVICE_JOB_CREATED"},
