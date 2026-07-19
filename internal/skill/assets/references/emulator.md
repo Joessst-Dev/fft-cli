@@ -43,6 +43,15 @@ Point fft at it from another shell:
   when you mean to.
 - `--verbose` logs every request (`METHOD URL -> STATUS (N bytes in)`) to stderr.
 
+There is a container image too, `ghcr.io/joessst-dev/fft`. It runs the same binary, so
+`emulator` and its flags are the arguments — and `--host 0.0.0.0` is not optional here,
+since the default `127.0.0.1` answers only inside the container and the mapped port would
+be dead:
+
+```text
+docker run --rm -p 8080:8080 ghcr.io/joessst-dev/fft emulator --host 0.0.0.0
+```
+
 Once the recipe is exported, drive it like any tenant:
 
 ```sh
@@ -252,6 +261,55 @@ hand instead of step 4:
 ```sh
 fft emulator emit PICK_JOB_PICKING_COMMENCED --payload-file pickjob.json
 ```
+
+## A docker-compose sandbox
+
+The walkthrough above starts the two servers by hand. This compose file starts both at
+once — the fft emulator and a Pub/Sub emulator on one network — so `docker compose up`
+gives you the whole eventing sandbox with nothing installed but Docker. It stands in for
+steps 1 and 2; steps 3 to 5 (register a subscription, create an order, pull the event) are
+run from your host, unchanged.
+
+```text
+services:
+  emulator:
+    image: ghcr.io/joessst-dev/fft:latest
+    command: ["emulator", "--host", "0.0.0.0", "--pubsub-emulator-host", "pubsub:8085"]
+    ports: ["8080:8080"]
+    depends_on: [pubsub]
+  pubsub:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:emulators
+    command: ["gcloud", "beta", "emulators", "pubsub", "start", "--host-port=0.0.0.0:8085", "--project=local"]
+    ports: ["8085:8085"]
+```
+
+Two details earn their keep. The fft emulator binds **`--host 0.0.0.0`** — its default
+`127.0.0.1` answers only inside its own container, so the published port would be dead —
+and it reaches Pub/Sub at **`pubsub:8085`**, the service name on the compose network, not
+`localhost`. The Pub/Sub emulator binds `0.0.0.0:8085` for the same reason.
+
+Bring it up, then point your host at both — the published ports make this identical to the
+walkthrough, so the `FFT_*` recipe targets `http://localhost:8080` and the Pub/Sub REST
+API is on `localhost:8085`:
+
+```text
+docker compose up
+
+export FFT_BASE_URL=http://localhost:8080
+export FFT_FIREBASE_API_KEY=emulator
+export FFT_EMAIL=dev@localhost
+export FFT_ID_TOKEN=emulator-token
+
+curl -s -X PUT http://localhost:8085/v1/projects/local/topics/orders
+curl -s -X PUT http://localhost:8085/v1/projects/local/subscriptions/reader \
+  -H 'Content-Type: application/json' \
+  -d '{"topic":"projects/local/topics/orders"}'
+```
+
+From here, register the subscription and create the order as in steps 3 and 4, and pull as
+in step 5. The image is distroless and carries no shell, so drive `fft` from your host with
+the recipe above rather than from inside the container. State still dies with the process:
+`docker compose down` forgets everything, exactly as exiting the emulator does.
 
 ## Known limitations
 

@@ -47,6 +47,35 @@ archives:
       - README.md
       - LICENSE
 
+# Container images. GoReleaser does not rebuild here — the image COPYs the static binary
+# already built above (see Dockerfile). It builds both platforms with buildx in one pass;
+# because nothing target-arch runs during the build (only a file is copied), the arm64
+# image needs no QEMU on an amd64 runner. GHCR requires a lowercase path, hence
+# `joessst-dev` rather than the repo's `Joessst-Dev`.
+dockers_v2:
+  - id: fft
+    ids: [fft]
+    dockerfile: Dockerfile
+    images:
+      - ghcr.io/joessst-dev/fft
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    # An empty tag is skipped, so a prerelease never becomes `docker pull …/fft:latest` —
+    # the guard the cask gets from `skip_upload: auto`.
+    tags:
+      - "{{ .Version }}"
+      - "{{ if not .Prerelease }}latest{{ end }}"
+    # Links the GHCR package to this repo and records provenance.
+    labels:
+      org.opencontainers.image.title: "{{ .ProjectName }}"
+      org.opencontainers.image.description: "A CLI for the fulfillmenttools API — every operation reachable from your shell."
+      org.opencontainers.image.source: "https://github.com/Joessst-Dev/fft-cli"
+      org.opencontainers.image.version: "{{ .Version }}"
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
+      org.opencontainers.image.created: "{{ .CommitDate }}"
+      org.opencontainers.image.licenses: MIT
+
 checksum:
   name_template: checksums.txt
   algorithm: sha256
@@ -76,6 +105,19 @@ signs:
       - "--output-certificate=${certificate}"
       - "--output-signature=${signature}"
       - "${artifact}"
+      - "--yes"
+
+# The same keyless bargain for the images: sign the multi-arch manifest by digest so
+# `cosign verify ghcr.io/joessst-dev/fft:<tag>` proves an image is ours, exactly as the
+# tarball signatures do. Uses the workflow's OIDC token — no key to leak.
+docker_signs:
+  - id: cosign-image-keyless
+    cmd: cosign
+    artifacts: manifests
+    output: true
+    args:
+      - sign
+      - "${artifact}@${digest}"
       - "--yes"
 
 changelog:
