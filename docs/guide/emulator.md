@@ -45,7 +45,7 @@ Point fft at it from another shell:
 - `--host` defaults to `127.0.0.1`. The emulator has **no auth** — it accepts every
   request, token or not — so only widen it (`--host 0.0.0.0`, e.g. inside a container)
   when you mean to.
-- `--verbose` logs every request (`METHOD URL -> STATUS`) to stderr.
+- `--verbose` logs every request (`METHOD URL -> STATUS (N bytes in)`) to stderr.
 
 Once the recipe is exported, drive it like any tenant:
 
@@ -197,17 +197,22 @@ claim to reproduce production's message attributes.
 
 ## End to end: an order event, start to finish
 
-This publishes an `ORDER_CREATED` event and reads it back. It assumes the Google Cloud
-SDK's Pub/Sub emulator; any local Pub/Sub emulator on the same host works.
+This publishes an `ORDER_CREATED` event and reads it back. It uses the Google Cloud
+SDK's Pub/Sub emulator (`gcloud components install pubsub-emulator`) and talks to it over
+its REST API with `curl`, so it needs no extra client library; any local Pub/Sub
+emulator on the same host works.
 
-**1. Start a local Pub/Sub emulator** and create a pull subscription to read from:
+**1. Start a local Pub/Sub emulator**, then create a topic and a pull subscription to
+read from. The emulator's REST API is on the same host you started it on:
 
 ```text
 gcloud beta emulators pubsub start --host-port=localhost:8085
-# in another shell, against that emulator:
-export PUBSUB_EMULATOR_HOST=localhost:8085
-python -m google.cloud.pubsub topics create projects/local/topics/orders
-python -m google.cloud.pubsub subscriptions create projects/local/subscriptions/reader projects/local/topics/orders
+
+# in another shell, against that emulator's REST API:
+curl -s -X PUT http://localhost:8085/v1/projects/local/topics/orders
+curl -s -X PUT http://localhost:8085/v1/projects/local/subscriptions/reader \
+  -H 'Content-Type: application/json' \
+  -d '{"topic":"projects/local/topics/orders"}'
 ```
 
 **2. Start the emulator** pointed at Pub/Sub, and export its recipe in another shell:
@@ -239,11 +244,13 @@ fft order create --file order.json
 **5. Pull the published event** from the Pub/Sub emulator:
 
 ```text
-python -m google.cloud.pubsub subscriptions pull projects/local/subscriptions/reader --auto-ack
+curl -s -X POST http://localhost:8085/v1/projects/local/subscriptions/reader:pull \
+  -H 'Content-Type: application/json' \
+  -d '{"maxMessages":10}'
 ```
 
-The message body is the `{event, eventId, payload}` envelope, and its `event` attribute
-is `ORDER_CREATED`. For a state-transition event that no mutation triggers, publish it by
+Each `receivedMessages[].message` has an `attributes.event` of `ORDER_CREATED` and a
+base64 `data` field that decodes to the `{event, eventId, payload}` envelope. For a state-transition event that no mutation triggers, publish it by
 hand instead of step 4:
 
 ```sh
