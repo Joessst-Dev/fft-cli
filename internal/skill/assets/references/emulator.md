@@ -311,6 +311,46 @@ in step 5. The image is distroless and carries no shell, so drive `fft` from you
 the recipe above rather than from inside the container. State still dies with the process:
 `docker compose down` forgets everything, exactly as exiting the emulator does.
 
+## Integration tests with Testcontainers
+
+For a test suite that wants a fresh, disposable API per run — a random port, automatic
+readiness, automatic teardown — drive the same image through
+[Testcontainers](https://testcontainers.com). Two thin wrapper modules exist:
+
+- **Go** — [`Joessst-Dev/testcontainers-fft`](https://github.com/Joessst-Dev/testcontainers-fft)
+- **Java** — [`Joessst-Dev/fft-testcontainers-java`](https://github.com/Joessst-Dev/fft-testcontainers-java)
+
+Both start `ghcr.io/joessst-dev/fft` with `emulator --host 0.0.0.0` and wait on the
+**readiness signal**: `GET /api/status` answers `200` the moment the emulator is
+listening, and needs **no token**. So the wait asserts the status code, not the body —
+the emulator answers `/api/status` from its collection store, not with the live API's
+`{"status":"UP"}`. (The stderr line `fft emulator listening on …` is the fallback signal
+for a log-based wait.)
+
+Go:
+
+```text
+ctx := context.Background()
+c, err := fft.Run(ctx, fft.DefaultImage, fft.WithSeed("testdata/fixtures"))
+defer testcontainers.TerminateContainer(c)
+base, _ := c.BaseURL(ctx) // http://host:<mapped-port>
+```
+
+Java (JUnit 5):
+
+```text
+@Container
+static final FftEmulatorContainer FFT =
+        new FftEmulatorContainer().withSeed(Path.of("src/test/resources/fixtures"));
+// FFT.getBaseUrl() -> http://host:<mapped-port>
+```
+
+`WithSeed` / `withSeed` copy a directory of `<collection>.json` fixtures into the
+container and pass `--seed`, so a test seeds pinned ids the same way `--seed` does above.
+For eventing tests, both modules can start a Pub/Sub emulator sidecar on a shared network
+and wire the fft container to it — the container-native form of the compose sandbox below.
+The module image tag is pinned to a tested emulator release and is overridable.
+
 ## Known limitations
 
 - **Delivery is best-effort.** A publish that fails is logged and skipped; it never fails
