@@ -43,7 +43,7 @@ jobs:
       - name: Install syft
         uses: anchore/sbom-action/download-syft@v0
 
-      # GoReleaser's `dockers` use buildx to build the per-arch images.
+      # GoReleaser's `dockers_v2` builds the multi-platform image with buildx.
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
 
