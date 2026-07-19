@@ -333,7 +333,7 @@ for a log-based wait.)
 
 Go:
 
-```text
+```go
 ctx := context.Background()
 c, err := fft.Run(ctx, fft.DefaultImage, fft.WithSeed("testdata/fixtures"))
 defer testcontainers.TerminateContainer(c)
@@ -342,7 +342,7 @@ base, _ := c.BaseURL(ctx) // http://host:<mapped-port>
 
 Java (JUnit 5):
 
-```text
+```java
 @Container
 static final FftEmulatorContainer FFT =
         new FftEmulatorContainer().withSeed(Path.of("src/test/resources/fixtures"));
