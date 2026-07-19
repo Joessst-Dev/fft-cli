@@ -20,6 +20,9 @@ jobs:
       # Mint the OIDC token cosign exchanges for a short-lived signing certificate.
       # This is what makes keyless signing possible: no private key exists to leak.
       id-token: write
+      # Push the container images to GHCR. The built-in GITHUB_TOKEN can do this against
+      # *this* repo's package registry — unlike the Homebrew tap, no PAT is needed.
+      packages: write
 
     steps:
       - uses: actions/checkout@v4
@@ -39,6 +42,19 @@ jobs:
 
       - name: Install syft
         uses: anchore/sbom-action/download-syft@v0
+
+      # GoReleaser's `dockers_v2` builds the multi-platform image with buildx.
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Authenticate to GHCR so GoReleaser can push the images and the manifest. Login
+      # must precede GoReleaser — it pushes during `release`, not after.
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
