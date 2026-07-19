@@ -116,6 +116,17 @@ and every other operation answers from a response synthesized from the spec. `ff
 add` does not work against it (signing in reaches Google's identity service); the printed
 `FFT_ID_TOKEN` recipe is the way in. It holds all state in memory and forgets it on exit.
 
+The emulator can also publish domain events to a **local Google Pub/Sub emulator** you run
+yourself. Point it with `--pubsub-emulator-host host:port` (or `$PUBSUB_EMULATOR_HOST`);
+without one, eventing is off and nothing is published — it never publishes to real Google
+Cloud. Register where an event goes with an ordinary subscription
+(`POST /api/subscriptions` with a `GOOGLE_CLOUD_PUB_SUB` target of `projectId`+`topicId`,
+and optional facility `contexts`). A stateful mutation then publishes the matching lifecycle
+event (a create on `orders` publishes `ORDER_CREATED`, and so on). To publish an event that
+no create/update/delete maps to — a picking or routing state change — use
+`fft emulator emit <EVENT> --payload-file <file>`, which asks the running emulator to
+publish it to every subscription that matches the event name and contexts.
+
 ## Never
 
 - Print, echo, paste or log an ID token. `fft auth token` exists for scripts, not for chat.

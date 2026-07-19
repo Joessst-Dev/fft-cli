@@ -13,7 +13,8 @@ import (
 
 // handlers is the set of request handlers, all reading and writing the one store.
 type handlers struct {
-	store *Store
+	store  *Store
+	events *eventEmitter
 }
 
 // list answers GET /api/{coll} with the startAfterId envelope: the entities under
@@ -77,7 +78,9 @@ func (h *handlers) create(coll string) fiber.Handler {
 		}
 		delete(doc, defaultIDField)
 		delete(doc, "version")
-		return writeJSON(c, fiber.StatusCreated, h.store.Create(coll, doc))
+		created := h.store.Create(coll, doc)
+		h.events.onCreate(coll, created)
+		return writeJSON(c, fiber.StatusCreated, created)
 	}
 }
 
@@ -127,6 +130,7 @@ func (h *handlers) update(coll, idParam string, patch bool) fiber.Handler {
 			}
 			return writeError(c, fiber.StatusInternalServerError, err.Error())
 		}
+		h.events.onUpdate(coll, updated)
 		return writeJSON(c, fiber.StatusOK, updated)
 	}
 }
@@ -136,11 +140,45 @@ func (h *handlers) remove(coll, idParam string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		raw := c.Params(idParam)
 		id, ok := h.resolve(coll, raw)
-		if !ok || !h.store.Delete(coll, id) {
+		if !ok {
 			return writeError(c, fiber.StatusNotFound, fmt.Sprintf("no %s with id %q", coll, raw))
 		}
+		// Read the entity before removing it: the deleted event carries the entity that
+		// was deleted, which the store no longer holds once Delete returns.
+		doc, _ := h.store.Get(coll, id)
+		if !h.store.Delete(coll, id) {
+			return writeError(c, fiber.StatusNotFound, fmt.Sprintf("no %s with id %q", coll, raw))
+		}
+		h.events.onRemove(coll, doc)
 		return c.SendStatus(fiber.StatusNoContent)
 	}
+}
+
+// emit answers POST /_emulator/emit, publishing a named event with a supplied
+// payload to every matching subscription. It is the manual counterpart to the
+// lifecycle events the CRUD handlers emit — the state-transition events that do not
+// map to a plain create/update/delete are reached only through here. The route lives
+// outside /api so it can never collide with a real operation.
+func (h *handlers) emit(c *fiber.Ctx) error {
+	body, err := decodeBody(c.Body())
+	if err != nil {
+		return writeError(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	event := mapString(body, "event")
+	if event == "" {
+		return writeError(c, fiber.StatusBadRequest, "event is required")
+	}
+
+	payload := map[string]any{}
+	if raw, present := body["payload"]; present {
+		m, ok := raw.(map[string]any)
+		if !ok {
+			return writeError(c, fiber.StatusBadRequest, "payload must be a JSON object")
+		}
+		payload = m
+	}
+	return writeJSON(c, fiber.StatusOK, h.events.emit(event, payload))
 }
 
 // resolve turns a path id parameter into the id the store keeps. A value the store
