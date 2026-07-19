@@ -35,6 +35,8 @@ var languages = map[string]bool{
 	"sh":   true, // an fft command line; every one of them is verified
 	"json": true, // a body or a response
 	"text": true, // output, or a shape that is not a command
+	"go":   true, // a Go code sample (the testcontainers module), never an fft command line
+	"java": true, // a Java code sample (the testcontainers module), never an fft command line
 }
 
 // snippet is one command line the skill tells an agent to run.
