@@ -230,7 +230,7 @@ curl -s -X PUT http://localhost:8085/v1/projects/local/subscriptions/reader \
 fft emulator --pubsub-emulator-host localhost:8085
 ```
 
-```text
+```sh
 export FFT_BASE_URL=http://localhost:8080
 export FFT_FIREBASE_API_KEY=emulator
 export FFT_EMAIL=dev@localhost
