@@ -37,6 +37,17 @@ type Config struct {
 	// Log is where request logs and startup notices go — stderr, so stdout stays the
 	// data contract even here.
 	Log io.Writer
+
+	// PubSubHost is the local Pub/Sub emulator to publish events to (the standard
+	// PUBSUB_EMULATOR_HOST value). Empty disables eventing: subscriptions are still
+	// stored and matched, but nothing is published. It is never a real Google Cloud
+	// endpoint — the publisher pins every connection to this host with auth disabled.
+	PubSubHost string
+
+	// publisher overrides the Pub/Sub publisher. It exists for tests, which inject a
+	// recorder in place of a real emulator connection; production leaves it nil and
+	// New builds one from PubSubHost.
+	publisher Publisher
 }
 
 // defaultHost is the loopback interface the emulator binds unless told otherwise.
@@ -61,7 +72,7 @@ func New(cfg Config) (*Server, error) {
 	}
 	app.Use(permissiveAuth())
 
-	registerRoutes(app, ops, &handlers{store: store})
+	registerRoutes(app, ops, &handlers{store: store, events: newEventEmitter(cfg, store)})
 
 	if cfg.Seed != "" {
 		if err := seed(store, cfg.Seed); err != nil {

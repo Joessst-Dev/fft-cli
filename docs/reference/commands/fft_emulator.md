@@ -27,11 +27,16 @@ fft emulator [flags]
 ## Flags
 
 ```
-      --host string   Interface to bind; the emulator has no auth, so it stays on loopback unless you widen it (0.0.0.0 for a container) (default "127.0.0.1")
-      --port int      Port to listen on (default 8080)
-      --seed string   Directory of JSON fixtures to preload, one <collection>.json per collection
-      --verbose       Log every request to stderr
+      --host string                   Interface to bind; the emulator has no auth, so it stays on loopback unless you widen it (0.0.0.0 for a container) (default "127.0.0.1")
+      --port int                      Port to listen on (default 8080)
+      --pubsub-emulator-host string   Local Pub/Sub emulator (host:port) to publish events to; defaults to $PUBSUB_EMULATOR_HOST, empty disables eventing
+      --seed string                   Directory of JSON fixtures to preload, one <collection>.json per collection
+      --verbose                       Log every request to stderr
 ```
+
+## Subcommands
+
+- [fft emulator emit](./fft_emulator_emit.md) — Publish an event to a running emulator's subscriptions
 
 ## See also
 

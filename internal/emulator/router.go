@@ -17,6 +17,10 @@ import (
 // versionless upstream spec can grow two operationIds on one method+path, and the
 // first one registered is the one that answers.
 func registerRoutes(app *fiber.App, ops []api.Operation, h *handlers) {
+	// The emulator's own admin route, outside /api so it cannot shadow or be shadowed
+	// by any spec operation. It triggers an event that no CRUD mutation would.
+	app.Post("/_emulator/emit", h.emit)
+
 	seen := map[string]bool{}
 	add := func(method, path string, handler fiber.Handler) {
 		key := method + " " + path
