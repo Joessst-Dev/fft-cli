@@ -270,7 +270,7 @@ gives you the whole eventing sandbox with nothing installed but Docker. It stand
 steps 1 and 2; steps 3 to 5 (register a subscription, create an order, pull the event) are
 run from your host, unchanged.
 
-```text
+```yaml
 services:
   emulator:
     image: ghcr.io/joessst-dev/fft:latest
