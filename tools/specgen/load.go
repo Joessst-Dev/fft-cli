@@ -18,18 +18,19 @@ const permissionsExtension = "x-fft-permissions"
 // generated file that does not compile could not be regenerated, and the only way
 // out of that would be to hand-edit it.
 type operation struct {
-	ID           string
-	Method       string
-	Path         string
-	Tags         []string
-	Summary      string
-	Description  string
-	Permissions  []string
-	Params       []param
-	HasBody      bool
-	BodyRequired bool
-	SampleBody   string
-	Deprecated   bool
+	ID             string
+	Method         string
+	Path           string
+	Tags           []string
+	Summary        string
+	Description    string
+	Permissions    []string
+	Params         []param
+	HasBody        bool
+	BodyRequired   bool
+	SampleBody     string
+	SampleResponse string
+	Deprecated     bool
 }
 
 type param struct {
@@ -90,19 +91,25 @@ func load(path string) ([]operation, error) {
 				return nil, fmt.Errorf("%s: synthesize the request body: %w", src.OperationID, err)
 			}
 
+			response, err := syn.response(src.Responses)
+			if err != nil {
+				return nil, fmt.Errorf("%s: synthesize the response body: %w", src.OperationID, err)
+			}
+
 			ops = append(ops, operation{
-				ID:           src.OperationID,
-				Method:       method,
-				Path:         tmpl,
-				Tags:         append([]string(nil), src.Tags...),
-				Summary:      prose(src.Summary),
-				Description:  prose(src.Description),
-				Permissions:  permissions(src.Extensions),
-				Params:       params,
-				HasBody:      src.RequestBody != nil,
-				BodyRequired: src.RequestBody != nil && src.RequestBody.Value != nil && src.RequestBody.Value.Required,
-				SampleBody:   sample,
-				Deprecated:   src.Deprecated,
+				ID:             src.OperationID,
+				Method:         method,
+				Path:           tmpl,
+				Tags:           append([]string(nil), src.Tags...),
+				Summary:        prose(src.Summary),
+				Description:    prose(src.Description),
+				Permissions:    permissions(src.Extensions),
+				Params:         params,
+				HasBody:        src.RequestBody != nil,
+				BodyRequired:   src.RequestBody != nil && src.RequestBody.Value != nil && src.RequestBody.Value.Required,
+				SampleBody:     sample,
+				SampleResponse: response,
+				Deprecated:     src.Deprecated,
 			})
 		}
 	}

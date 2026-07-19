@@ -83,6 +83,50 @@ func (s *synthesizer) body(ref *openapi3.RequestBodyRef) (string, error) {
 	return string(out) + "\n", nil
 }
 
+// response returns the sample body for an operation's success response, built from
+// the same rules as body: the lowest 2xx status that carries a JSON body. It is ""
+// when there is nothing to build — no responses, a 204, or a success response whose
+// only content type is not JSON.
+//
+// The lowest 2xx is deterministic and matches what the CLI's client expects (it
+// decodes the first success shape): 200 wins over 201 wins over 204.
+func (s *synthesizer) response(responses *openapi3.Responses) (string, error) {
+	if responses == nil {
+		return "", nil
+	}
+
+	m := responses.Map()
+
+	// sortedKeys orders the status codes as strings, which puts the 2xx band in
+	// numeric order (they are all three digits), so the first 2xx is the lowest.
+	var chosen *openapi3.ResponseRef
+	for _, code := range sortedKeys(m) {
+		if len(code) == 3 && code[0] == '2' {
+			chosen = m[code]
+			break
+		}
+	}
+	if chosen == nil || chosen.Value == nil {
+		return "", nil
+	}
+
+	media := chosen.Value.Content.Get(contentTypeJSON)
+	if media == nil || media.Schema == nil {
+		return "", nil
+	}
+
+	value := s.value(media.Schema, nil, 0)
+	if value == nil {
+		return "", nil
+	}
+
+	out, err := json.MarshalIndent(value, "", "  ")
+	if err != nil {
+		return "", err
+	}
+	return string(out) + "\n", nil
+}
+
 // value builds the sample for one schema.
 //
 // seen holds the $refs already entered on this branch, so a schema that references

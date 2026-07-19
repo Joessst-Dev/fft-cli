@@ -101,6 +101,22 @@ fft facility patch berlin-warehouse --name "Berlin" --read-only
 the machine. This is not an authentication problem and there is nothing to route around:
 tell the user, and let them decide.
 
+## Working offline
+
+`fft emulator` runs a local server that mimics the API in memory — for a demo, a test, or
+trying a command out without touching a tenant:
+
+```sh
+fft emulator --port 8080
+```
+
+It prints an `FFT_*` recipe to export in another shell; once those are set, every command
+runs against the emulator. The top-level collections (facilities, listings, stocks, orders)
+are stateful — a create is remembered, a get reflects it, versions and pagination work —
+and every other operation answers from a response synthesized from the spec. `fft project
+add` does not work against it (signing in reaches Google's identity service); the printed
+`FFT_ID_TOKEN` recipe is the way in. It holds all state in memory and forgets it on exit.
+
 ## Never
 
 - Print, echo, paste or log an ID token. `fft auth token` exists for scripts, not for chat.

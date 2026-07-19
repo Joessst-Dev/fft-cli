@@ -121,6 +121,13 @@ type Operation struct {
 	// copy and this was built. It is "" when the operation takes no body.
 	SampleBody string
 
+	// SampleResponse is a success (2xx) response body synthesized from the schema the
+	// same way SampleBody is, and "" when the operation declares no JSON response body
+	// (a 204, or a non-JSON one). The spec carries no response examples either, so this
+	// is built. It backs `fft emulator`, which serves it for any operation it does not
+	// answer from live in-memory state.
+	SampleResponse string
+
 	// Deprecated says the spec marks the operation deprecated.
 	Deprecated bool
 }
