@@ -16,3 +16,5 @@ hatch — see [Discovery](/guide/discovery) for how to find any of them.
   command shares.
 - [Overview](/guide/overview) and [Commands](/guide/commands) — start here if you
   want the narrative rather than the flag-by-flag reference.
+- [Emulator](/guide/emulator) — run a local, offline API server (with Pub/Sub eventing)
+  to try commands without a tenant.

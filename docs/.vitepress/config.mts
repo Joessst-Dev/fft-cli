@@ -58,6 +58,7 @@ export default defineConfig({
             { text: 'Commands', link: '/guide/commands' },
             { text: 'Discovery', link: '/guide/discovery' },
             { text: 'Recipes', link: '/guide/recipes' },
+            { text: 'Emulator', link: '/guide/emulator' },
             { text: 'Troubleshooting', link: '/guide/troubleshooting' },
           ],
         },

@@ -392,6 +392,23 @@ reserves stock, so it is blocked; `evaluateRoutingStrategy` is a dry run, so it 
 A POST the API grows tomorrow is a write until a human says otherwise, and the build
 fails until one does.
 
+## Working offline
+
+`fft emulator` runs a local server that mimics the API in memory — for a demo, a test,
+or trying a command out without touching a tenant. It prints an `FFT_*` recipe to export
+in another shell, remembers the top-level collections (facilities, listings, stocks,
+orders) so creates, versions and pagination work, and synthesizes everything else from
+the spec. It holds all state in memory and forgets it on exit.
+
+```sh
+fft emulator --port 8080
+```
+
+It can also publish domain events to a **local** Google Pub/Sub emulator you run
+yourself — never to real Google Cloud. See the
+[emulator guide](https://joessst-dev.github.io/fft-cli/guide/emulator) for the stateful
+model, seeding fixtures, and driving eventing end to end.
+
 ## Output contract
 
 **stdout is data. Nothing else.** Update notices, warnings, prompts and progress all go
