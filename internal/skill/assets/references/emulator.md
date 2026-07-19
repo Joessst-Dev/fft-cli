@@ -210,14 +210,12 @@ emulator on the same host works.
 **1. Start a local Pub/Sub emulator**, then create a topic and a pull subscription to
 read from. The emulator's REST API is on the same host you started it on:
 
-```text
+```sh
 gcloud beta emulators pubsub start --host-port=localhost:8085
 
 # in another shell, against that emulator's REST API:
 curl -s -X PUT http://localhost:8085/v1/projects/local/topics/orders
-curl -s -X PUT http://localhost:8085/v1/projects/local/subscriptions/reader \
-  -H 'Content-Type: application/json' \
-  -d '{"topic":"projects/local/topics/orders"}'
+curl -s -X PUT http://localhost:8085/v1/projects/local/subscriptions/reader -H 'Content-Type: application/json' -d '{"topic":"projects/local/topics/orders"}'
 ```
 
 **2. Start the emulator** pointed at Pub/Sub, and export its recipe in another shell:
@@ -248,10 +246,8 @@ fft order create --file order.json
 
 **5. Pull the published event** from the Pub/Sub emulator:
 
-```text
-curl -s -X POST http://localhost:8085/v1/projects/local/subscriptions/reader:pull \
-  -H 'Content-Type: application/json' \
-  -d '{"maxMessages":10}'
+```sh
+curl -s -X POST http://localhost:8085/v1/projects/local/subscriptions/reader:pull -H 'Content-Type: application/json' -d '{"maxMessages":10}'
 ```
 
 Each `receivedMessages[].message` has an `attributes.event` of `ORDER_CREATED` and a
@@ -292,7 +288,7 @@ Bring it up, then point your host at both — the published ports make this iden
 walkthrough, so the `FFT_*` recipe targets `http://localhost:8080` and the Pub/Sub REST
 API is on `localhost:8085`:
 
-```text
+```sh
 docker compose up
 
 export FFT_BASE_URL=http://localhost:8080
@@ -301,9 +297,7 @@ export FFT_EMAIL=dev@localhost
 export FFT_ID_TOKEN=emulator-token
 
 curl -s -X PUT http://localhost:8085/v1/projects/local/topics/orders
-curl -s -X PUT http://localhost:8085/v1/projects/local/subscriptions/reader \
-  -H 'Content-Type: application/json' \
-  -d '{"topic":"projects/local/topics/orders"}'
+curl -s -X PUT http://localhost:8085/v1/projects/local/subscriptions/reader -H 'Content-Type: application/json' -d '{"topic":"projects/local/topics/orders"}'
 ```
 
 From here, register the subscription and create the order as in steps 3 and 4, and pull as
