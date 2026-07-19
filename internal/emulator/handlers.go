@@ -170,9 +170,13 @@ func (h *handlers) emit(c *fiber.Ctx) error {
 		return writeError(c, fiber.StatusBadRequest, "event is required")
 	}
 
-	payload := subMap(body, "payload")
-	if payload == nil {
-		payload = map[string]any{}
+	payload := map[string]any{}
+	if raw, present := body["payload"]; present {
+		m, ok := raw.(map[string]any)
+		if !ok {
+			return writeError(c, fiber.StatusBadRequest, "payload must be a JSON object")
+		}
+		payload = m
 	}
 	return writeJSON(c, fiber.StatusOK, h.events.emit(event, payload))
 }

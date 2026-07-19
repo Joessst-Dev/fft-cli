@@ -89,6 +89,15 @@ var _ = Describe("emulator eventing over HTTP", func() {
 		status, _ := postJSON(baseURL, "/_emulator/emit", map[string]any{"payload": map[string]any{}})
 		Expect(status).To(Equal(http.StatusBadRequest))
 	})
+
+	It("rejects an emit whose payload is not a JSON object", func() {
+		status, _ := postJSON(baseURL, "/_emulator/emit", map[string]any{
+			"event":   "PICK_JOB_PICKING_COMMENCED",
+			"payload": []any{"not", "an", "object"},
+		})
+		Expect(status).To(Equal(http.StatusBadRequest))
+		Expect(rec.count()).To(Equal(0))
+	})
 })
 
 // registerPubSubSub stores a GOOGLE_CLOUD_PUB_SUB subscription through the emulator's

@@ -236,6 +236,15 @@ func (e *eventEmitter) emit(event string, payload map[string]any) emitResult {
 	)
 	for _, m := range matches {
 		wg.Go(func() {
+			// Recovered so a panic inside Publisher.Publish (not just a returned error)
+			// degrades to a logged, best-effort delivery failure instead of crashing the
+			// whole emulator process out from under every in-flight request.
+			defer func() {
+				if r := recover(); r != nil {
+					e.logf("emulator: publish %s to %s/%s panicked: %v", event, m.projectID, m.topicID, r)
+				}
+			}()
+
 			// The event attribute lets a consumer filter without decoding data. It is an
 			// emulator convention: fulfillmenttools does not document the attributes its
 			// production delivery sets, so nothing here claims to reproduce them.

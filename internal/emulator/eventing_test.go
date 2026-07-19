@@ -43,6 +43,14 @@ func (p *recordingPublisher) count() int {
 	return len(p.calls)
 }
 
+// panickingPublisher stands in for a Publisher bug: it panics instead of returning an
+// error, so a spec can assert emit's fan-out recovers rather than crashing the process.
+type panickingPublisher struct{}
+
+func (panickingPublisher) Publish(context.Context, string, string, []byte, map[string]string) error {
+	panic("boom")
+}
+
 // pubSubSubscription builds the stored shape of a GOOGLE_CLOUD_PUB_SUB subscription.
 func pubSubSubscription(event, projectID, topicID string, contexts []any) entityDoc {
 	sub := entityDoc{
@@ -155,6 +163,15 @@ var _ = Describe("eventEmitter", func() {
 		It("does nothing for an empty event name", func() {
 			store.Create("subscriptions", pubSubSubscription("", "local", "orders", nil))
 			Expect(emit.emit("", map[string]any{}).Published).To(Equal(0))
+		})
+
+		It("recovers from a panic in Publish instead of crashing the fan-out", func() {
+			store.Create("subscriptions", pubSubSubscription("ORDER_CREATED", "local", "orders", nil))
+			emit.pub = panickingPublisher{}
+
+			var result emitResult
+			Expect(func() { result = emit.emit("ORDER_CREATED", map[string]any{"tenantOrderId": "t"}) }).NotTo(Panic())
+			Expect(result.Published).To(Equal(0))
 		})
 	})
 
