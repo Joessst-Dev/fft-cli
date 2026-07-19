@@ -33,12 +33,19 @@ const (
 // response — the whole surface stays addressable, only the plain collections are
 // remembered.
 func classify(op api.Operation) (collection, idParam string, kind routeKind) {
-	parts := pathSegments(op.Path)
-	if len(parts) < 2 || parts[0] != "api" {
+	const apiPrefix = "/api/"
+	if !strings.HasPrefix(op.Path, apiPrefix) {
 		return "", "", kindStateless
 	}
 
-	coll := parts[1]
+	// The segments after "/api/": ["facilities"], ["facilities", "{id}"], or
+	// ["facilities", "search"]. Anything deeper is nested and not stateful.
+	parts := pathSegments(strings.TrimPrefix(op.Path, apiPrefix))
+	if len(parts) == 0 {
+		return "", "", kindStateless
+	}
+
+	coll := parts[0]
 	// A collection segment that is itself a parameter (/api/{something}) is not one
 	// this emulator can key state by.
 	if isParam(coll) {
@@ -46,15 +53,15 @@ func classify(op api.Operation) (collection, idParam string, kind routeKind) {
 	}
 
 	switch len(parts) {
-	case 2: // /api/{coll}
+	case 1: // /api/{coll}
 		switch op.Method {
 		case "GET":
 			return coll, "", kindList
 		case "POST":
 			return coll, "", kindCreate
 		}
-	case 3: // /api/{coll}/{x}
-		last := parts[2]
+	case 2: // /api/{coll}/{x}
+		last := parts[1]
 		switch {
 		case last == "search" && op.Method == "POST":
 			return coll, "", kindSearch
