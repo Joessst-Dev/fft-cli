@@ -73,8 +73,8 @@ var operations = []Operation{
 		Permissions:    []string{"CARRIER_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"defaultParcelHeightInCm\": 10,\n  \"defaultParcelLengthInCm\": 25,\n  \"defaultParcelWeightInGram\": 1000,\n  \"defaultParcelWidthInCm\": 35,\n  \"key\": \"DHL_V2\",\n  \"name\": \"DHL Köln\",\n  \"productValueNeeded\": true\n}\n",
-		SampleResponse: "{\n  \"defaultParcelHeightInCm\": 10,\n  \"defaultParcelLengthInCm\": 25,\n  \"defaultParcelWeightInGram\": 1000,\n  \"defaultParcelWidthInCm\": 35,\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"key\": \"DHL_V2\",\n  \"name\": \"DHL Köln\",\n  \"productValueNeeded\": true,\n  \"version\": 42\n}\n",
+		SampleBody:     "{\n  \"defaultParcelHeightInCm\": 10,\n  \"defaultParcelLengthInCm\": 25,\n  \"defaultParcelWeightInGram\": 1000,\n  \"defaultParcelWidthInCm\": 35,\n  \"key\": \"DHL_V2\",\n  \"logoUrl\": \"https://example.com/resource\",\n  \"name\": \"DHL Köln\",\n  \"productValueNeeded\": true\n}\n",
+		SampleResponse: "{\n  \"defaultParcelHeightInCm\": 10,\n  \"defaultParcelLengthInCm\": 25,\n  \"defaultParcelWeightInGram\": 1000,\n  \"defaultParcelWidthInCm\": 35,\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"key\": \"DHL_V2\",\n  \"logoUrl\": \"https://example.com/resource\",\n  \"name\": \"DHL Köln\",\n  \"productValueNeeded\": true,\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "addContentToDocument",
@@ -195,8 +195,8 @@ var operations = []Operation{
 		Permissions:    []string{"FACILITY_GROUP_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"facilityRefs\": [\n    \"string\"\n  ],\n  \"nameLocalized\": {},\n  \"tenantFacilityGroupId\": \"K12345\"\n}\n",
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityCount\": 1,\n  \"facilityRefs\": [\n    \"string\"\n  ],\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"tenantFacilityGroupId\": \"K12345\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"nameLocalized\": {},\n  \"tenantFacilityGroupId\": \"K12345\"\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityCount\": 1,\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"tenantFacilityGroupId\": \"K12345\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "addHandoverjob",
@@ -219,8 +219,8 @@ var operations = []Operation{
 		Permissions:    []string{"ADMIN_MODULES_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"additionalDocuments\": [\n    {\n      \"nameLocalized\": {},\n      \"url\": \"string\"\n    }\n  ],\n  \"carrierData\": {\n    \"carrierRef\": \"string\"\n  },\n  \"recipientAddress\": [\n    {\n      \"city\": \"string\",\n      \"country\": \"DE\",\n      \"postalCode\": \"string\",\n      \"street\": \"string\"\n    }\n  ],\n  \"senderAddress\": {\n    \"city\": \"string\",\n    \"companyName\": \"string\",\n    \"country\": \"DE\",\n    \"postalCode\": \"string\",\n    \"street\": \"string\"\n  },\n  \"status\": \"WAITING_FOR_INPUT\",\n  \"type\": \"SEND_LABEL\"\n}\n",
-		SampleResponse: "{\n  \"additionalDocuments\": [\n    {\n      \"nameLocalized\": {},\n      \"url\": \"string\"\n    }\n  ],\n  \"anonymized\": false,\n  \"carrierData\": {\n    \"carrierRef\": \"string\"\n  },\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"recipientAddress\": [\n    {\n      \"city\": \"string\",\n      \"country\": \"DE\",\n      \"postalCode\": \"string\",\n      \"street\": \"string\"\n    }\n  ],\n  \"senderAddress\": {\n    \"city\": \"string\",\n    \"companyName\": \"string\",\n    \"country\": \"DE\",\n    \"postalCode\": \"string\",\n    \"street\": \"string\"\n  },\n  \"status\": \"WAITING_FOR_INPUT\",\n  \"type\": \"SEND_LABEL\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"additionalDocuments\": [\n    {\n      \"nameLocalized\": {},\n      \"url\": \"https://example.com/resource\"\n    }\n  ],\n  \"carrierData\": {\n    \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n  },\n  \"labelUrl\": \"https://example.com/resource\",\n  \"operativeProcessRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"packageRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"processRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"recipientAddress\": [\n    {\n      \"city\": \"Yellowstone\",\n      \"country\": \"DE\",\n      \"email\": \"phil.bison@fulfillmenttools.com\",\n      \"emailAddresses\": [\n        {\n          \"value\": \"string\"\n        }\n      ],\n      \"houseNumber\": \"42\",\n      \"postalCode\": \"42420\",\n      \"street\": \"string\"\n    }\n  ],\n  \"senderAddress\": {\n    \"city\": \"Yellowstone\",\n    \"companyName\": \"string\",\n    \"country\": \"DE\",\n    \"emailAddresses\": [\n      {\n        \"value\": \"string\"\n      }\n    ],\n    \"houseNumber\": \"42\",\n    \"postalCode\": \"42420\",\n    \"street\": \"string\"\n  },\n  \"shippingInformationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"status\": \"WAITING_FOR_INPUT\",\n  \"tenantLabelId\": \"MY_LABEL_ID\",\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"type\": \"SEND_LABEL\"\n}\n",
+		SampleResponse: "{\n  \"additionalDocuments\": [\n    {\n      \"nameLocalized\": {},\n      \"url\": \"https://example.com/resource\"\n    }\n  ],\n  \"anonymized\": false,\n  \"carrierData\": {\n    \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n  },\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"labelUrl\": \"https://example.com/resource\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"operativeProcessRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"packageRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"processRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"recipientAddress\": [\n    {\n      \"city\": \"Yellowstone\",\n      \"country\": \"DE\",\n      \"email\": \"phil.bison@fulfillmenttools.com\",\n      \"emailAddresses\": [\n        {\n          \"value\": \"string\"\n        }\n      ],\n      \"houseNumber\": \"42\",\n      \"postalCode\": \"42420\",\n      \"street\": \"string\"\n    }\n  ],\n  \"senderAddress\": {\n    \"city\": \"Yellowstone\",\n    \"companyName\": \"string\",\n    \"country\": \"DE\",\n    \"emailAddresses\": [\n      {\n        \"value\": \"string\"\n      }\n    ],\n    \"houseNumber\": \"42\",\n    \"postalCode\": \"42420\",\n    \"street\": \"string\"\n  },\n  \"shippingInformationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"status\": \"WAITING_FOR_INPUT\",\n  \"tenantLabelId\": \"MY_LABEL_ID\",\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"type\": \"SEND_LABEL\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "addLoadUnit",
@@ -232,8 +232,8 @@ var operations = []Operation{
 		Permissions:    []string{"LOADUNIT_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"loadUnits\": [\n    {\n      \"pickJobRefs\": [\n        \"string\"\n      ]\n    }\n  ]\n}\n",
-		SampleResponse: "[\n  {\n    \"created\": \"2026-01-01T00:00:00Z\",\n    \"descriptionLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n    \"id\": \"string\",\n    \"lastModified\": \"2026-01-01T00:00:00Z\",\n    \"nameLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"pickJobRefs\": [\n      \"string\"\n    ],\n    \"version\": 1\n  }\n]\n",
+		SampleBody:     "{\n  \"loadUnits\": [\n    {\n      \"loadUnitTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"pickJobRefs\": [\n        \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n      ],\n      \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ]\n}\n",
+		SampleResponse: "[\n  {\n    \"created\": \"2026-06-17T12:00:00Z\",\n    \"descriptionLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n    \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"lastModified\": \"2026-06-17T12:00:00Z\",\n    \"loadUnitTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"nameLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"pickJobRefs\": [\n      \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n    ],\n    \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"version\": 1\n  }\n]\n",
 	},
 	{
 		ID:          "addNestedServiceJobLink",
@@ -262,8 +262,8 @@ var operations = []Operation{
 		Permissions:    []string{"ORDER_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"R456728546\"\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleBody:     "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"R456728546\"\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:             "addPackJob",
@@ -273,8 +273,8 @@ var operations = []Operation{
 		Summary:        "Create pack job",
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"facilityRef\": \"Esb50gpH7794X5NdMp3C\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"orderDate\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRef\": \"Pic50gpH7794X5NdMp3C\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"documentsRef\": \"string\",\n  \"facilityRef\": \"Esb50gpH7794X5NdMp3C\",\n  \"id\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"packed\": 20,\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"orderDate\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRef\": \"Pic50gpH7794X5NdMp3C\",\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleBody:     "{\n  \"facilityRef\": \"Esb50gpH7794X5NdMp3C\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"orderDate\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRef\": \"Pic50gpH7794X5NdMp3C\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"documentsRef\": \"string\",\n  \"facilityRef\": \"Esb50gpH7794X5NdMp3C\",\n  \"id\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"packed\": 20,\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"orderDate\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRef\": \"Pic50gpH7794X5NdMp3C\",\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:             "addPackingContainerType",
@@ -298,8 +298,8 @@ var operations = []Operation{
 		Description:    "This part of the API is in Beta status. For details, see the API release lifecycle documentation. Creating new packingSourceContainer.",
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"packJobRefs\": [\n    \"0857914c-d965-421e-b6cf-330501bcca58\"\n  ],\n  \"sequenceNumber\": 100\n}\n",
-		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"c7467ba8-c28a-4473-8748-a4e54e675e4c\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"da488ad1-4215-4b9a-9642-c39883c6cd2c\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  ],\n  \"loadUnitRef\": \"2357914c-d965-421e-b6cf-330501bccaab\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"packJobRefs\": [\n    \"0857914c-d965-421e-b6cf-330501bcca58\"\n  ],\n  \"sequenceNumber\": 100,\n  \"type\": \"VIRTUAL\",\n  \"version\": 42\n}\n",
+		SampleBody:     "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"packJobRefs\": [\n    \"0857914c-d965-421e-b6cf-330501bcca58\"\n  ],\n  \"sequenceNumber\": 100\n}\n",
+		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"c7467ba8-c28a-4473-8748-a4e54e675e4c\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"da488ad1-4215-4b9a-9642-c39883c6cd2c\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  ],\n  \"loadUnitRef\": \"2357914c-d965-421e-b6cf-330501bccaab\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"packJobRefs\": [\n    \"0857914c-d965-421e-b6cf-330501bcca58\"\n  ],\n  \"sequenceNumber\": 100,\n  \"type\": \"VIRTUAL\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:      "addParcel",
@@ -322,8 +322,8 @@ var operations = []Operation{
 		Summary:        "Create pick job",
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderRef\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"tenantOrderId\": \"R456728546\"\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"deliveryinformation\": {\n    \"channel\": \"COLLECT\",\n    \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n    \"targetTimeBaseDate\": \"2020-02-03T08:45:50.525Z\"\n  },\n  \"documentsRef\": \"string\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderRef\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"a81f818e-2405-4570-8cde-b0c80fd3de31\",\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"pickJobLineItemRef\": \"12345\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryPicked\": 20,\n      \"secondaryQuantity\": 21,\n      \"status\": \"OPEN\",\n      \"stockEmptied\": true\n    }\n  ],\n  \"resetBlocked\": false,\n  \"shortId\": \"AS12\",\n  \"status\": \"ABORTED\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleBody:     "{\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderRef\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"tenantOrderId\": \"R456728546\"\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"deliveryinformation\": {\n    \"channel\": \"COLLECT\",\n    \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n    \"targetTimeBaseDate\": \"2020-02-03T08:45:50.525Z\"\n  },\n  \"documentsRef\": \"string\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderRef\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"a81f818e-2405-4570-8cde-b0c80fd3de31\",\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"pickJobLineItemRef\": \"12345\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryPicked\": 20,\n      \"secondaryQuantity\": 21,\n      \"status\": \"OPEN\",\n      \"stockEmptied\": true\n    }\n  ],\n  \"resetBlocked\": false,\n  \"shortId\": \"AS12\",\n  \"status\": \"ABORTED\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:          "addPickJobLoadUnits",
@@ -338,8 +338,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"codes\": [\n    \"string\"\n  ]\n}\n",
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"pickJobRefs\": [\n    \"string\"\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"codes\": [\n    \"string\"\n  ],\n  \"loadUnitTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"loadUnitTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"pickJobRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "addPickRun",
@@ -350,7 +350,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"facilityRef\": \"string\",\n  \"pickJobRefs\": [\n    \"string\"\n  ],\n  \"pickRunType\": \"batchPick\"\n}\n",
-		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRefs\": [\n    \"string\"\n  ],\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"pickJobLineItemRef\": \"12345\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryPicked\": 20,\n      \"secondaryQuantity\": 21,\n      \"status\": \"OPEN\",\n      \"stockEmptied\": true\n    }\n  ],\n  \"pickRunType\": \"batchPick\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRefs\": [\n    \"string\"\n  ],\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"pickJobLineItemRef\": \"12345\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryPicked\": 20,\n      \"secondaryQuantity\": 21,\n      \"status\": \"OPEN\",\n      \"stockEmptied\": true\n    }\n  ],\n  \"pickRunType\": \"batchPick\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "addReceiptToInboundProcess",
@@ -365,8 +365,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"comments\": [\n    {\n      \"content\": \"string\"\n    }\n  ],\n  \"receivedDate\": \"2026-01-01T00:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 1\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ]\n}\n",
-		SampleResponse: "{\n  \"comments\": [\n    {\n      \"content\": \"string\"\n    }\n  ],\n  \"id\": \"string\",\n  \"receivedDate\": \"2026-01-01T00:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 1\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ]\n}\n",
+		SampleBody:     "{\n  \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"comments\": [\n    {\n      \"content\": \"string\",\n      \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ],\n  \"receivedDate\": \"2026-06-17T12:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 42\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\",\n          \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 42\n      },\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\"\n    }\n  ]\n}\n",
+		SampleResponse: "{\n  \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"comments\": [\n    {\n      \"content\": \"string\",\n      \"documentSetRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ],\n  \"id\": \"string\",\n  \"receivedDate\": \"2026-06-17T12:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 42\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\",\n          \"documentSetRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 42\n      },\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\"\n    }\n  ]\n}\n",
 	},
 	{
 		ID:          "addRemoteConfigurationScope",
@@ -447,7 +447,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"codes\": [\n    \"string\"\n  ],\n  \"sequenceNumber\": 100\n}\n",
-		SampleResponse: "{\n  \"codes\": [\n    \"string\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"packJobRef\": \"string\",\n  \"sequenceNumber\": 100,\n  \"type\": \"VIRTUAL\",\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
+		SampleResponse: "{\n  \"codes\": [\n    \"string\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"packJobRef\": \"string\",\n  \"sequenceNumber\": 100,\n  \"type\": \"VIRTUAL\",\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
 	},
 	{
 		ID:          "addTargetcontainer",
@@ -462,8 +462,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"article\": {\n    \"tenantArticleId\": \"4711\",\n    \"title\": \"Cologne Water\"\n  },\n  \"measurementUnitKey\": \"liter\",\n  \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n  \"quantity\": 21,\n  \"secondaryMeasurementUnitKey\": \"gram\",\n  \"secondaryQuantity\": 200\n}\n",
-		SampleResponse: "{\n  \"codes\": [\n    \"string\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"packJobRef\": \"string\",\n  \"sequenceNumber\": 100,\n  \"type\": \"VIRTUAL\",\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
+		SampleBody:     "{\n  \"article\": {\n    \"imageUrl\": \"https://example.com/resource\",\n    \"tenantArticleId\": \"4711\",\n    \"title\": \"Cologne Water\"\n  },\n  \"measurementUnitKey\": \"liter\",\n  \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n  \"quantity\": 21,\n  \"secondaryMeasurementUnitKey\": \"gram\",\n  \"secondaryQuantity\": 200\n}\n",
+		SampleResponse: "{\n  \"codes\": [\n    \"string\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"packJobRef\": \"string\",\n  \"sequenceNumber\": 100,\n  \"type\": \"VIRTUAL\",\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
 		Deprecated:     true,
 	},
 	{
@@ -494,7 +494,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"facilityRef\": \"string\"\n}\n",
+		SampleBody:   "{\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n}\n",
 	},
 	{
 		ID:             "bulkCreateOrderRecords",
@@ -506,8 +506,8 @@ var operations = []Operation{
 		Permissions:    []string{"ORDER_RECORD_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"operations\": [\n    {\n      \"facilityRef\": \"string\",\n      \"lineItems\": [\n        {\n          \"article\": {\n            \"attributes\": [],\n            \"tenantArticleId\": \"string\"\n          },\n          \"quantity\": 1\n        }\n      ],\n      \"orderRecordDate\": \"2026-01-01T00:00:00Z\"\n    }\n  ]\n}\n",
-		SampleResponse: "{\n  \"details\": [\n    {\n      \"status\": \"CREATED\"\n    }\n  ],\n  \"summary\": {\n    \"created\": 1,\n    \"unchanged\": 1,\n    \"updated\": 1\n  }\n}\n",
+		SampleBody:     "{\n  \"operations\": [\n    {\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"lineItems\": [\n        {\n          \"article\": {\n            \"attributes\": [],\n            \"tenantArticleId\": \"MY_ARTICLE_ID\"\n          },\n          \"quantity\": 42\n        }\n      ],\n      \"orderRecordDate\": \"2026-06-17T12:00:00Z\",\n      \"tenantOrderRecordId\": \"MY_ORDERRECORD_ID\"\n    }\n  ]\n}\n",
+		SampleResponse: "{\n  \"details\": [\n    {\n      \"status\": \"CREATED\"\n    }\n  ],\n  \"summary\": {\n    \"created\": 42,\n    \"unchanged\": 42,\n    \"updated\": 1\n  }\n}\n",
 	},
 	{
 		ID:             "bulkUpdateSafetyStock",
@@ -531,7 +531,7 @@ var operations = []Operation{
 		Permissions:    []string{"LISTING_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"listings\": [\n    {\n      \"currency\": \"EUR\",\n      \"measurementUnitKey\": \"liter\",\n      \"price\": 1200,\n      \"selector\": [\n        {\n          \"facility\": {}\n        }\n      ],\n      \"targetingStrategy\": \"MULTI_SELECTOR\",\n      \"tenantArticleId\": \"4711\",\n      \"title\": \"Adidas Superstar\",\n      \"titleLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      }\n    }\n  ]\n}\n",
+		SampleBody:     "{\n  \"listings\": [\n    {\n      \"categoryRefs\": [\n        \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n      ],\n      \"currency\": \"EUR\",\n      \"imageUrl\": \"https://example.com/resource\",\n      \"measurementUnitKey\": \"liter\",\n      \"price\": 1200,\n      \"selector\": [\n        {\n          \"facility\": {},\n          \"version\": 1\n        }\n      ],\n      \"targetingStrategy\": \"MULTI_SELECTOR\",\n      \"tenantArticleId\": \"4711\",\n      \"title\": \"Adidas Superstar\",\n      \"titleLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"weight\": 42\n    }\n  ]\n}\n",
 		SampleResponse: "{\n  \"listings\": [\n    {\n      \"result\": {\n        \"created\": \"2020-02-03T08:45:51.525Z\",\n        \"currency\": \"EUR\",\n        \"facilityId\": \"4711\",\n        \"id\": \"fsfdsf87fsd\",\n        \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n        \"measurementUnitKey\": \"liter\",\n        \"price\": 1200,\n        \"status\": \"ACTIVE\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Adidas Superstar\",\n        \"titleLocalized\": {\n          \"de_DE\": \"Wert\",\n          \"en_US\": \"Value\",\n          \"ru_RU\": \"значение\"\n        },\n        \"version\": 42\n      },\n      \"status\": \"CREATED\"\n    }\n  ],\n  \"summary\": {\n    \"created\": 1,\n    \"unchanged\": 1,\n    \"updated\": 1\n  }\n}\n",
 	},
 	{
@@ -548,7 +548,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{}\n",
-		SampleResponse: "{\n  \"otherCarriers\": [\n    {\n      \"carrier\": {\n        \"defaultParcelHeightInCm\": 10,\n        \"defaultParcelLengthInCm\": 25,\n        \"defaultParcelWeightInGram\": 1000,\n        \"defaultParcelWidthInCm\": 35,\n        \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n        \"key\": \"DHL_V2\",\n        \"name\": \"DHL Köln\",\n        \"productValueNeeded\": true,\n        \"version\": 42\n      },\n      \"priority\": 1\n    }\n  ],\n  \"recommendedCarriers\": [\n    {\n      \"carrier\": {\n        \"defaultParcelHeightInCm\": 10,\n        \"defaultParcelLengthInCm\": 25,\n        \"defaultParcelWeightInGram\": 1000,\n        \"defaultParcelWidthInCm\": 35,\n        \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n        \"key\": \"DHL_V2\",\n        \"name\": \"DHL Köln\",\n        \"productValueNeeded\": true,\n        \"version\": 42\n      },\n      \"priority\": 1\n    }\n  ]\n}\n",
+		SampleResponse: "{\n  \"otherCarriers\": [\n    {\n      \"carrier\": {\n        \"defaultParcelHeightInCm\": 10,\n        \"defaultParcelLengthInCm\": 25,\n        \"defaultParcelWeightInGram\": 1000,\n        \"defaultParcelWidthInCm\": 35,\n        \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n        \"key\": \"DHL_V2\",\n        \"logoUrl\": \"https://example.com/resource\",\n        \"name\": \"DHL Köln\",\n        \"productValueNeeded\": true,\n        \"version\": 42\n      },\n      \"priority\": 42\n    }\n  ],\n  \"recommendedCarriers\": [\n    {\n      \"carrier\": {\n        \"defaultParcelHeightInCm\": 10,\n        \"defaultParcelLengthInCm\": 25,\n        \"defaultParcelWeightInGram\": 1000,\n        \"defaultParcelWidthInCm\": 35,\n        \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n        \"key\": \"DHL_V2\",\n        \"logoUrl\": \"https://example.com/resource\",\n        \"name\": \"DHL Köln\",\n        \"productValueNeeded\": true,\n        \"version\": 42\n      },\n      \"priority\": 42\n    }\n  ]\n}\n",
 	},
 	{
 		ID:          "changeUser",
@@ -562,8 +562,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"actions\": [\n    {\n      \"action\": {},\n      \"locale\": \"de_DE\"\n    }\n  ],\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"assignedRoles\": [\n    {\n      \"ref\": \"string\"\n    }\n  ],\n  \"authenticationProvider\": {\n    \"type\": {}\n  },\n  \"authenticationProviderType\": \"de_DE\",\n  \"email\": \"john.doe@example.com\",\n  \"firstname\": \"John\",\n  \"id\": \"string\",\n  \"lastname\": \"Doe\",\n  \"locale\": \"de_DE\",\n  \"username\": \"johndoe\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"actions\": [\n    {\n      \"action\": {},\n      \"email\": \"phil.bison@fulfillmenttools.com\",\n      \"firstname\": \"Phil\",\n      \"lastname\": \"Bison\",\n      \"locale\": \"de_DE\"\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"assignedRoles\": [\n    {\n      \"ref\": \"string\"\n    }\n  ],\n  \"authenticationProvider\": {\n    \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"type\": {}\n  },\n  \"authenticationProviderType\": \"de_DE\",\n  \"email\": \"john.doe@example.com\",\n  \"firstname\": \"John\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastname\": \"Doe\",\n  \"locale\": \"de_DE\",\n  \"username\": \"johndoe\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "checkoutOptionsTimepoint",
@@ -574,8 +574,8 @@ var operations = []Operation{
 		Description:    "This endpoint is to be used to get information about the possible delivery of items.",
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"desiredDeliveryDate\": \"2026-01-01T00:00:00Z\",\n  \"facilities\": [\n    {\n      \"facilityRef\": \"string\",\n      \"latestPickingStart\": \"2026-01-01T00:00:00Z\"\n    }\n  ],\n  \"tenantArticleIds\": [\n    \"string\"\n  ]\n}\n",
-		SampleResponse: "{\n  \"items\": [\n    {\n      \"available\": 1,\n      \"facilityRef\": \"string\",\n      \"tenantArticleId\": \"string\"\n    }\n  ]\n}\n",
+		SampleBody:     "{\n  \"desiredDeliveryDate\": \"2026-06-17T12:00:00Z\",\n  \"facilities\": [\n    {\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"latestPickingStart\": \"2026-06-17T12:00:00Z\"\n    }\n  ],\n  \"tenantArticleIds\": [\n    \"string\"\n  ]\n}\n",
+		SampleResponse: "{\n  \"items\": [\n    {\n      \"available\": 42,\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"latestPickingStart\": \"2026-06-17T12:00:00Z\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\"\n    }\n  ]\n}\n",
 	},
 	{
 		ID:             "checkoutoptionCollectEarliest",
@@ -586,8 +586,8 @@ var operations = []Operation{
 		Description:    "Get earliest collect timepoint for a given checkoutOption",
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"tenantArticleIds\": [\n    \"string\"\n  ]\n}\n",
-		SampleResponse: "{\n  \"checkoutOptions\": [\n    {\n      \"tenantArticleId\": \"string\"\n    }\n  ]\n}\n",
+		SampleBody:     "{\n  \"desiredCollectDate\": \"2026-06-17T12:00:00Z\",\n  \"includeCalculationHints\": true,\n  \"tenantArticleIds\": [\n    \"string\"\n  ]\n}\n",
+		SampleResponse: "{\n  \"checkoutOptions\": [\n    {\n      \"available\": 42,\n      \"earliestPredictedProvisioningDate\": \"2026-06-17T12:00:00Z\",\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"latestPickingStartDate\": \"2026-06-17T12:00:00Z\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\",\n      \"tenantFacilityId\": \"MY_FACILITY_ID\"\n    }\n  ]\n}\n",
 	},
 	{
 		ID:             "checkoutoptionDeliveryEarliest",
@@ -598,8 +598,8 @@ var operations = []Operation{
 		Description:    "Get earliest delivery timepoint for a given checkoutOption",
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"consumerAddress\": {\n    \"country\": \"DE\"\n  },\n  \"tenantArticleIds\": [\n    \"string\"\n  ]\n}\n",
-		SampleResponse: "{\n  \"checkoutOptions\": [\n    {\n      \"tenantArticleId\": \"string\"\n    }\n  ]\n}\n",
+		SampleBody:     "{\n  \"consumerAddress\": {\n    \"city\": \"Yellowstone\",\n    \"country\": \"DE\",\n    \"houseNumber\": \"42\",\n    \"postalCode\": \"42420\"\n  },\n  \"earliestDeliveryDate\": \"2026-06-17T12:00:00Z\",\n  \"includeCalculationHints\": true,\n  \"tenantArticleIds\": [\n    \"string\"\n  ]\n}\n",
+		SampleResponse: "{\n  \"checkoutOptions\": [\n    {\n      \"earliestPredictedDeliveryDate\": \"2026-06-17T12:00:00Z\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\"\n    }\n  ]\n}\n",
 	},
 	{
 		ID:             "checkoutoptionDeliveryTimePeriod",
@@ -609,8 +609,8 @@ var operations = []Operation{
 		Summary:        "Get delivery time period",
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"basket\": [\n    {\n      \"quantity\": 1,\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"consumerAddress\": {\n    \"country\": \"DE\"\n  }\n}\n",
-		SampleResponse: "{\n  \"checkoutOptions\": [\n    {\n      \"date\": \"2026-01-01T00:00:00Z\",\n      \"overallStatus\": \"ALL\"\n    }\n  ]\n}\n",
+		SampleBody:     "{\n  \"basket\": [\n    {\n      \"quantity\": 42,\n      \"tenantArticleId\": \"MY_ARTICLE_ID\"\n    }\n  ],\n  \"consumerAddress\": {\n    \"city\": \"Yellowstone\",\n    \"country\": \"DE\",\n    \"houseNumber\": \"42\",\n    \"postalCode\": \"42420\"\n  },\n  \"endDate\": \"2026-06-17T12:00:00Z\",\n  \"includeCalculationHints\": true,\n  \"startDate\": \"2026-06-17T12:00:00Z\"\n}\n",
+		SampleResponse: "{\n  \"checkoutOptions\": [\n    {\n      \"date\": \"2026-06-17T12:00:00Z\",\n      \"overallStatus\": \"ALL\"\n    }\n  ]\n}\n",
 	},
 	{
 		ID:          "connectCarrierToFacility",
@@ -627,7 +627,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"carrierRef\": \"string\",\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"key\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"key\": \"string\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "createAllocationUnderGroup",
@@ -687,8 +687,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"carrierConfigurationVersion\": 1,\n  \"destinations\": [\n    {\n      \"countryCode\": \"DE\"\n    }\n  ],\n  \"source\": {\n    \"countryCode\": \"DE\"\n  }\n}\n",
-		SampleResponse: "{\n  \"countAsTransitDayBefore\": \"12:00\",\n  \"destinations\": [\n    {\n      \"countryCode\": \"DE\"\n    }\n  ],\n  \"id\": \"bc5b581a-8f65-45b0-9f81-6e0d4babbcb2\",\n  \"source\": {\n    \"countryCode\": \"DE\"\n  },\n  \"sourceCountry\": \"DE\"\n}\n",
+		SampleBody:     "{\n  \"carrierConfigurationVersion\": 1,\n  \"destinations\": [\n    {\n      \"countryCode\": \"DE\"\n    }\n  ],\n  \"source\": {\n    \"countryCode\": \"DE\"\n  },\n  \"transitTime\": {\n    \"maxTransitDays\": 3,\n    \"minTransitDays\": 1\n  }\n}\n",
+		SampleResponse: "{\n  \"countAsTransitDayBefore\": \"12:00\",\n  \"destinations\": [\n    {\n      \"countryCode\": \"DE\"\n    }\n  ],\n  \"id\": \"bc5b581a-8f65-45b0-9f81-6e0d4babbcb2\",\n  \"source\": {\n    \"countryCode\": \"DE\"\n  },\n  \"sourceCountry\": \"DE\",\n  \"staticCCSMRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"transitTime\": {\n    \"maxTransitDays\": 3,\n    \"minTransitDays\": 1\n  }\n}\n",
 	},
 	{
 		ID:          "createCarrierToFacility",
@@ -705,7 +705,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{}\n",
-		SampleResponse: "{\n  \"carrierRef\": \"string\",\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"key\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"key\": \"string\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "createCategory",
@@ -716,8 +716,8 @@ var operations = []Operation{
 		Permissions:    []string{"CATEGORY_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"nameLocalized\": {}\n}\n",
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"nameLocalized\": {},\n  \"tenantCategoryId\": \"MY_CATEGORY_ID\"\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"tenantCategoryId\": \"MY_CATEGORY_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "createConnectionToFacility",
@@ -786,8 +786,8 @@ var operations = []Operation{
 		Permissions:    []string{"CONFIG_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"key\": \"string\",\n  \"status\": \"ACTIVE\"\n}\n",
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"key\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"facilityGroupRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"key\": \"string\",\n  \"status\": \"ACTIVE\"\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityGroupRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"id\": \"string\",\n  \"key\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "createExpiry",
@@ -844,8 +844,8 @@ var operations = []Operation{
 		Permissions:    []string{"HANDOVER_CONTAINER_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"handoverJobRef\": \"string\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"pcs\",\n      \"quantity\": 1,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  }\n}\n",
-		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"string\",\n  \"handoverJobRef\": \"string\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"17ebfdfb-e1b4-4913-9962-3aef2b49f16f\",\n      \"measurementUnitKey\": \"pcs\",\n      \"quantity\": 1,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"processRef\": \"string\",\n  \"stackRef\": \"string\",\n  \"type\": \"PHYSICAL\",\n  \"version\": 42\n}\n",
+		SampleBody:     "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"handoverJobRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"iconUrl\": \"https://example.com/resource\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"pcs\",\n      \"quantity\": 42,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"sequenceNumber\": 42,\n  \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"weightLimitInG\": 42\n}\n",
+		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"handoverJobRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"iconUrl\": \"https://example.com/resource\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"17ebfdfb-e1b4-4913-9962-3aef2b49f16f\",\n      \"measurementUnitKey\": \"pcs\",\n      \"quantity\": 42,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"processRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"sequenceNumber\": 42,\n  \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"type\": \"PHYSICAL\",\n  \"version\": 42,\n  \"weightLimitInG\": 42\n}\n",
 	},
 	{
 		ID:             "createInboundProcess",
@@ -856,8 +856,8 @@ var operations = []Operation{
 		Permissions:    []string{"INBOUND_PROCESS_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"facilityRef\": \"string\"\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"inboundDate\": [\n    \"2026-01-01T00:00:00Z\"\n  ],\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"onHold\": false,\n  \"origin\": [\n    {}\n  ],\n  \"receipts\": [\n    {\n      \"comments\": [\n        {\n          \"content\": \"string\"\n        }\n      ],\n      \"id\": \"string\",\n      \"receivedDate\": \"2026-01-01T00:00:00Z\",\n      \"receivedItems\": [\n        {\n          \"acceptedQuantity\": {\n            \"value\": 1\n          },\n          \"comments\": [\n            {}\n          ],\n          \"rejectedQuantity\": {\n            \"value\": 1\n          },\n          \"tenantArticleId\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"scannableCodes\": [\n    \"string\"\n  ],\n  \"status\": \"OPEN\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"tenantInboundProcessId\": \"MY_INBOUNDPROCESS_ID\"\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"inboundDate\": [\n    \"2026-01-01T00:00:00Z\"\n  ],\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"onHold\": false,\n  \"origin\": [\n    {}\n  ],\n  \"receipts\": [\n    {\n      \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"comments\": [\n        {\n          \"content\": \"string\",\n          \"documentSetRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n        }\n      ],\n      \"id\": \"string\",\n      \"receivedDate\": \"2026-06-17T12:00:00Z\",\n      \"receivedItems\": [\n        {\n          \"acceptedQuantity\": {\n            \"value\": 42\n          },\n          \"comments\": [\n            {}\n          ],\n          \"rejectedQuantity\": {\n            \"value\": 42\n          },\n          \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"tenantArticleId\": \"MY_ARTICLE_ID\"\n        }\n      ]\n    }\n  ],\n  \"scannableCodes\": [\n    \"string\"\n  ],\n  \"status\": \"OPEN\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "createItemReturn",
@@ -872,7 +872,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"itemReturnForCreation\": {\n    \"returnFacilityRef\": \"string\",\n    \"returnedLineItems\": [\n      {\n        \"itemConditionComment\": \"Upper corner damaged\",\n        \"itemConditionLocalized\": {\n          \"de_DE\": \"Wert\",\n          \"en_US\": \"Value\",\n          \"ru_RU\": \"значение\"\n        },\n        \"itemReturnJobLineItemRef\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n        \"status\": \"OPEN\",\n        \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n      }\n    ],\n    \"status\": \"ANNOUNCED\"\n  },\n  \"itemReturnJobVersion\": 1\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"string\",\n  \"itemReturns\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"returnFacilityRef\": \"string\",\n      \"returnedLineItems\": [\n        {\n          \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n          \"itemCondition\": \"Damaged\",\n          \"itemConditionComment\": \"Upper corner damaged\",\n          \"itemConditionLocalized\": {\n            \"de_DE\": \"Wert\",\n            \"en_US\": \"Value\",\n            \"ru_RU\": \"значение\"\n          },\n          \"itemReturnJobLineItemRefs\": [\n            \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n          ],\n          \"status\": \"OPEN\",\n          \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n        }\n      ],\n      \"status\": \"ANNOUNCED\"\n    }\n  ],\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"processRef\": \"string\",\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7,\n      \"id\": \"611c860f-3f00-4b01-9f4c-64cdee38a30e\",\n      \"returnable\": 7,\n      \"returned\": 5\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"string\",\n  \"itemReturns\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"returnFacilityRef\": \"string\",\n      \"returnedLineItems\": [\n        {\n          \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n          \"itemCondition\": \"Damaged\",\n          \"itemConditionComment\": \"Upper corner damaged\",\n          \"itemConditionLocalized\": {\n            \"de_DE\": \"Wert\",\n            \"en_US\": \"Value\",\n            \"ru_RU\": \"значение\"\n          },\n          \"itemReturnJobLineItemRefs\": [\n            \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n          ],\n          \"status\": \"OPEN\",\n          \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n        }\n      ],\n      \"status\": \"ANNOUNCED\"\n    }\n  ],\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"processRef\": \"string\",\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7,\n      \"id\": \"611c860f-3f00-4b01-9f4c-64cdee38a30e\",\n      \"returnable\": 7,\n      \"returned\": 5\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:             "createItemReturnJob",
@@ -882,8 +882,8 @@ var operations = []Operation{
 		Summary:        "Create item return job",
 		Description:    "Creates a new item return job.",
 		HasBody:        true,
-		SampleBody:     "{\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\"\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"string\",\n  \"itemReturns\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"returnFacilityRef\": \"string\",\n      \"returnedLineItems\": [\n        {\n          \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n          \"itemCondition\": \"Damaged\",\n          \"itemConditionComment\": \"Upper corner damaged\",\n          \"itemConditionLocalized\": {\n            \"de_DE\": \"Wert\",\n            \"en_US\": \"Value\",\n            \"ru_RU\": \"значение\"\n          },\n          \"itemReturnJobLineItemRefs\": [\n            \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n          ],\n          \"status\": \"OPEN\",\n          \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n        }\n      ],\n      \"status\": \"ANNOUNCED\"\n    }\n  ],\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"processRef\": \"string\",\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7,\n      \"id\": \"611c860f-3f00-4b01-9f4c-64cdee38a30e\",\n      \"returnable\": 7,\n      \"returned\": 5\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
+		SampleBody:     "{\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\"\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"string\",\n  \"itemReturns\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"returnFacilityRef\": \"string\",\n      \"returnedLineItems\": [\n        {\n          \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n          \"itemCondition\": \"Damaged\",\n          \"itemConditionComment\": \"Upper corner damaged\",\n          \"itemConditionLocalized\": {\n            \"de_DE\": \"Wert\",\n            \"en_US\": \"Value\",\n            \"ru_RU\": \"значение\"\n          },\n          \"itemReturnJobLineItemRefs\": [\n            \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n          ],\n          \"status\": \"OPEN\",\n          \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n        }\n      ],\n      \"status\": \"ANNOUNCED\"\n    }\n  ],\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"processRef\": \"string\",\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7,\n      \"id\": \"611c860f-3f00-4b01-9f4c-64cdee38a30e\",\n      \"returnable\": 7,\n      \"returned\": 5\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "createItemReturnParcel",
@@ -915,7 +915,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100\n}\n",
-		SampleResponse: "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"id\": \"string\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"id\": \"string\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"version\": 1\n}\n",
 		Deprecated:     true,
 	},
 	{
@@ -928,8 +928,8 @@ var operations = []Operation{
 		Permissions:    []string{"LOOKUP_RECORD_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"attributeDefinitions\": {},\n  \"items\": [\n    {\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ]\n}\n",
-		SampleResponse: "{\n  \"attributeDefinitions\": {},\n  \"id\": \"string\",\n  \"items\": [\n    {\n      \"id\": \"string\",\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"attributeDefinitions\": {},\n  \"items\": [\n    {\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"tenantRecordId\": \"MY_RECORD_ID\"\n}\n",
+		SampleResponse: "{\n  \"attributeDefinitions\": {},\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"items\": [\n    {\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"tenantRecordId\": \"MY_RECORD_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "createMeasurementUnit",
@@ -953,7 +953,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"assignedGroups\": [\n    {\n      \"facilityRefs\": [\n        \"string\"\n      ],\n      \"group\": \"string\"\n    }\n  ],\n  \"clientId\": \"string\",\n  \"clientSecret\": \"string\",\n  \"customParameters\": [\n    {\n      \"key\": \"string\",\n      \"value\": \"string\"\n    }\n  ],\n  \"issuer\": \"string\",\n  \"name\": \"string\",\n  \"status\": \"ACTIVE\"\n}\n",
-		SampleResponse: "{\n  \"assignedGroups\": [\n    {\n      \"facilityRefs\": [\n        \"string\"\n      ],\n      \"group\": \"string\"\n    }\n  ],\n  \"clientId\": \"string\",\n  \"customParameters\": [\n    {\n      \"key\": \"string\",\n      \"value\": \"string\"\n    }\n  ],\n  \"id\": \"string\",\n  \"issuer\": \"string\",\n  \"name\": \"string\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"assignedGroups\": [\n    {\n      \"facilityRefs\": [\n        \"string\"\n      ],\n      \"group\": \"string\"\n    }\n  ],\n  \"clientId\": \"string\",\n  \"customParameters\": [\n    {\n      \"key\": \"string\",\n      \"value\": \"string\"\n    }\n  ],\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"issuer\": \"string\",\n  \"name\": \"string\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "createOperativeContainerType",
@@ -978,7 +978,7 @@ var operations = []Operation{
 		Permissions:  []string{"PACKAGING_UNITS_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"carrierRef\": \"string\",\n  \"details\": {\n    \"dimensions\": {\n      \"maxHeight\": 1,\n      \"maxLength\": 1,\n      \"maxWidth\": 1\n    },\n    \"maxWeight\": 1,\n    \"packagingPricingDetails\": {\n      \"pricing\": [\n        {\n          \"prices\": []\n        }\n      ]\n    },\n    \"type\": \"PALLET\",\n    \"volumetricWeightFactor\": 1\n  },\n  \"nameLocalized\": {},\n  \"tenantPackagingUnitId\": \"string\"\n}\n",
+		SampleBody:   "{\n  \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"details\": {\n    \"dimensions\": {\n      \"maxHeight\": 1,\n      \"maxLength\": 1,\n      \"maxWidth\": 1\n    },\n    \"maxWeight\": 1,\n    \"packagingPricingDetails\": {\n      \"pricing\": [\n        {\n          \"prices\": []\n        }\n      ]\n    },\n    \"type\": \"PALLET\",\n    \"volumetricWeightFactor\": 1\n  },\n  \"nameLocalized\": {},\n  \"tenantPackagingUnitId\": \"MY_PACKAGINGUNIT_ID\"\n}\n",
 	},
 	{
 		ID:             "createParcelInformation",
@@ -990,8 +990,8 @@ var operations = []Operation{
 		Permissions:    []string{"ADMIN_MODULES_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"anonymized\": false,\n  \"parcelInformationLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019eefb2-0001-7000-9000-200000000002\",\n      \"quantity\": 2,\n      \"scannableCodes\": [\n        \"4006381333931\"\n      ]\n    }\n  ],\n  \"shippingInformationRef\": \"019eefb2-0001-7000-9000-100000000001\",\n  \"shortId\": \"FT-01\"\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2026-04-15T08:02:01.956Z\",\n  \"facilityRef\": \"019eefb2-0001-7000-9000-100000000002\",\n  \"id\": \"019eefb1-4bd1-7ef0-98ba-f91e07243ea7\",\n  \"lastModified\": \"2026-04-15T08:02:01.956Z\",\n  \"operativeProcessRef\": \"019eefb2-0001-7000-9000-100000000003\",\n  \"parcelInformationLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019eefb2-0001-7000-9000-200000000002\",\n      \"id\": \"019eefb2-0001-7000-9000-200000000001\",\n      \"quantity\": 2,\n      \"scannableCodes\": [\n        \"4006381333931\"\n      ]\n    }\n  ],\n  \"processRef\": \"019eefb2-0001-7000-9000-100000000004\",\n  \"shippingInformationRef\": \"019eefb2-0001-7000-9000-100000000001\",\n  \"shortId\": \"FT-01\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"anonymized\": false,\n  \"parcelInformationLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019eefb2-0001-7000-9000-200000000002\",\n      \"quantity\": 2,\n      \"scannableCodes\": [\n        \"4006381333931\"\n      ]\n    }\n  ],\n  \"shippingInformationRef\": \"019eefb2-0001-7000-9000-100000000001\",\n  \"shortId\": \"FT-01\"\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2026-04-15T08:02:01.956Z\",\n  \"facilityRef\": \"019eefb2-0001-7000-9000-100000000002\",\n  \"id\": \"019eefb1-4bd1-7ef0-98ba-f91e07243ea7\",\n  \"lastModified\": \"2026-04-15T08:02:01.956Z\",\n  \"operativeProcessRef\": \"019eefb2-0001-7000-9000-100000000003\",\n  \"parcelInformationLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019eefb2-0001-7000-9000-200000000002\",\n      \"id\": \"019eefb2-0001-7000-9000-200000000001\",\n      \"quantity\": 2,\n      \"scannableCodes\": [\n        \"4006381333931\"\n      ]\n    }\n  ],\n  \"processRef\": \"019eefb2-0001-7000-9000-100000000004\",\n  \"shippingInformationRef\": \"019eefb2-0001-7000-9000-100000000001\",\n  \"shortId\": \"FT-01\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "createPurchaseOrder",
@@ -1002,8 +1002,8 @@ var operations = []Operation{
 		Permissions:    []string{"INBOUND_PROCESS_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"facilityRef\": \"string\",\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ]\n}\n",
-		SampleResponse: "{\n  \"cancelled\": false,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-01-01T00:00:00Z\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"status\": \"OPEN\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-06-17T12:00:00Z\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 42\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ]\n}\n",
+		SampleResponse: "{\n  \"cancelled\": false,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-01-01T00:00:00Z\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 42\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"status\": \"OPEN\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "createReceipt",
@@ -1014,8 +1014,8 @@ var operations = []Operation{
 		Permissions:    []string{"INBOUND_PROCESS_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"comments\": [\n    {\n      \"content\": \"string\"\n    }\n  ],\n  \"facilityRef\": \"string\",\n  \"receivedDate\": \"2026-01-01T00:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 1\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ]\n}\n",
-		SampleResponse: "{\n  \"comments\": [\n    {\n      \"content\": \"string\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"receivedDate\": \"2026-01-01T00:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 1\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"comments\": [\n    {\n      \"content\": \"string\",\n      \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ],\n  \"facilityRef\": \"string\",\n  \"receivedDate\": \"2026-06-17T12:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 42\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\",\n          \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 42\n      },\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\"\n    }\n  ]\n}\n",
+		SampleResponse: "{\n  \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"comments\": [\n    {\n      \"content\": \"string\",\n      \"documentSetRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"receivedDate\": \"2026-06-17T12:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 42\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\",\n          \"documentSetRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 42\n      },\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\"\n    }\n  ],\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "createRemoteConfiguration",
@@ -1066,8 +1066,8 @@ var operations = []Operation{
 		Permissions:    []string{"SERVICE_JOB_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"iconUrl\": \"https://example.com/icon.png\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 5,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"scannableCodes\": [\n    \"AB-123456\"\n  ],\n  \"serviceJobRefs\": [\n    \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n  ],\n  \"stackRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"storageLocationRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"weightLimitInG\": 5000\n}\n",
-		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"description\": \"A medium-sized red box\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"ba095e30-879f-11ee-b9d1-0242ac120002\",\n  \"iconUrl\": \"https://example.com/icon.png\",\n  \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n      \"id\": \"17ebfdfb-e1b4-4913-9962-3aef2b49f16f\",\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 5,\n      \"scannableCodes\": [\n        \"AB-123456\"\n      ],\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 100\n    }\n  ],\n  \"name\": \"Red Box\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"scannableCodes\": [\n    \"AB-123456\"\n  ],\n  \"serviceJobRefs\": [\n    \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n  ],\n  \"stackRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"storageLocationRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"type\": \"DEFAULT\",\n  \"version\": 42,\n  \"weightLimitInG\": 5000\n}\n",
+		SampleBody:     "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"iconUrl\": \"https://example.com/icon.png\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 5,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"scannableCodes\": [\n    \"AB-123456\"\n  ],\n  \"sequenceNumber\": 42,\n  \"serviceJobRefs\": [\n    \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n  ],\n  \"stackRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"storageLocationRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"weightLimitInG\": 5000\n}\n",
+		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"description\": \"A medium-sized red box\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"ba095e30-879f-11ee-b9d1-0242ac120002\",\n  \"iconUrl\": \"https://example.com/icon.png\",\n  \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n      \"id\": \"17ebfdfb-e1b4-4913-9962-3aef2b49f16f\",\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 5,\n      \"scannableCodes\": [\n        \"AB-123456\"\n      ],\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 100\n    }\n  ],\n  \"name\": \"Red Box\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"scannableCodes\": [\n    \"AB-123456\"\n  ],\n  \"sequenceNumber\": 42,\n  \"serviceJobRefs\": [\n    \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n  ],\n  \"stackRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"storageLocationRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"type\": \"DEFAULT\",\n  \"version\": 42,\n  \"weightLimitInG\": 5000\n}\n",
 	},
 	{
 		ID:             "createServiceJob",
@@ -1080,7 +1080,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"customServiceRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"facilityRef\": \"ba095e30-879f-11ee-b9d1-0242ac120002\",\n  \"operativeProcessRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"processRef\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"serviceJobLinkRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"shortId\": \"KD-12-1\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"tenantCustomServiceId\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"tenantOrderId\": \"ocff-order-100\"\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"customServiceRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"description\": \"Wrapping 3 gifts for order ocff-order-100\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"executionTimeInMin\": 60,\n  \"facilityRef\": \"ba095e30-879f-11ee-b9d1-0242ac120002\",\n  \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"imageRefs\": [\n    \"https://my-image-host.com/images/custom-service-1.jpg\"\n  ],\n  \"itemsRequired\": \"OPTIONAL\",\n  \"itemsReturnable\": false,\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 12,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"linkedServiceJobsRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"name\": \"Gift Wrapping Job\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeProcessRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"processRef\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"serviceJobLinkRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"shortId\": \"KD-12-1\",\n  \"status\": \"OPEN\",\n  \"subStatus\": \"WAITING_FOR_INPUT\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"tenantCustomServiceId\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"tenantOrderId\": \"ocff-order-100\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"customServiceRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"description\": \"Wrapping 3 gifts for order ocff-order-100\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"executionTimeInMin\": 60,\n  \"facilityRef\": \"ba095e30-879f-11ee-b9d1-0242ac120002\",\n  \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"imageRefs\": [\n    \"https://my-image-host.com/images/custom-service-1.jpg\"\n  ],\n  \"itemsRequired\": \"OPTIONAL\",\n  \"itemsReturnable\": false,\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 12,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"linkedServiceJobsRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"name\": \"Gift Wrapping Job\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeProcessRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"processRef\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"serviceJobLinkRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"shortId\": \"KD-12-1\",\n  \"status\": \"OPEN\",\n  \"subStatus\": \"WAITING_FOR_INPUT\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"tenantCustomServiceId\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"tenantOrderId\": \"ocff-order-100\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:             "createShippingInformation",
@@ -1092,8 +1092,8 @@ var operations = []Operation{
 		Permissions:    []string{"ADMIN_MODULES_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"anonymized\": false,\n  \"carrierRecipientInformation\": [\n    {\n      \"address\": [\n        {\n          \"city\": \"string\",\n          \"country\": \"DE\",\n          \"postalCode\": \"string\",\n          \"street\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"facilityRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"operativeProcessRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"processRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"senderAddress\": {\n    \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n    \"city\": \"Langenfeld\",\n    \"companyName\": \"Speedy Boxales Ltd.\",\n    \"country\": \"DE\",\n    \"houseNumber\": \"42a\",\n    \"postalCode\": \"40764\",\n    \"province\": \"NRW\",\n    \"street\": \"Hauptstr.\"\n  },\n  \"shippingInformationLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"quantity\": 1,\n      \"scannableCodes\": [\n        \"ABC-12345\"\n      ]\n    }\n  ],\n  \"shortId\": \"ABC123\",\n  \"tenantOrderId\": \"ORDER-12345\"\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"carrierRecipientInformation\": [\n    {\n      \"address\": [\n        {\n          \"city\": \"string\",\n          \"country\": \"DE\",\n          \"postalCode\": \"string\",\n          \"street\": \"string\"\n        }\n      ],\n      \"id\": \"string\"\n    }\n  ],\n  \"created\": \"2025-08-04T08:16:07Z\",\n  \"facilityRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"id\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"lastModified\": \"2025-08-04T08:16:07Z\",\n  \"operativeProcessRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"processRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"senderAddress\": {\n    \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n    \"city\": \"Langenfeld\",\n    \"companyName\": \"Speedy Boxales Ltd.\",\n    \"country\": \"DE\",\n    \"houseNumber\": \"42a\",\n    \"postalCode\": \"40764\",\n    \"province\": \"NRW\",\n    \"street\": \"Hauptstr.\"\n  },\n  \"shippingInformationLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"id\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"quantity\": 1,\n      \"scannableCodes\": [\n        \"ABC-12345\"\n      ]\n    }\n  ],\n  \"shortId\": \"ABC123\",\n  \"tenantOrderId\": \"ORDER-12345\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"anonymized\": false,\n  \"carrierRecipientInformation\": [\n    {\n      \"address\": [\n        {\n          \"city\": \"Yellowstone\",\n          \"country\": \"DE\",\n          \"email\": \"phil.bison@fulfillmenttools.com\",\n          \"emailAddresses\": [\n            {}\n          ],\n          \"houseNumber\": \"42\",\n          \"postalCode\": \"42420\",\n          \"street\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"facilityRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"operativeProcessRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"processRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"senderAddress\": {\n    \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n    \"city\": \"Langenfeld\",\n    \"companyName\": \"Speedy Boxales Ltd.\",\n    \"country\": \"DE\",\n    \"houseNumber\": \"42a\",\n    \"postalCode\": \"40764\",\n    \"province\": \"NRW\",\n    \"street\": \"Hauptstr.\"\n  },\n  \"shippingInformationLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"quantity\": 1,\n      \"scannableCodes\": [\n        \"ABC-12345\"\n      ]\n    }\n  ],\n  \"shortId\": \"ABC123\",\n  \"tenantOrderId\": \"ORDER-12345\"\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"carrierRecipientInformation\": [\n    {\n      \"address\": [\n        {\n          \"city\": \"Yellowstone\",\n          \"country\": \"DE\",\n          \"email\": \"phil.bison@fulfillmenttools.com\",\n          \"emailAddresses\": [\n            {}\n          ],\n          \"houseNumber\": \"42\",\n          \"postalCode\": \"42420\",\n          \"street\": \"string\"\n        }\n      ],\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ],\n  \"created\": \"2025-08-04T08:16:07Z\",\n  \"facilityRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"id\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"lastModified\": \"2025-08-04T08:16:07Z\",\n  \"operativeProcessRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"processRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"senderAddress\": {\n    \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n    \"city\": \"Langenfeld\",\n    \"companyName\": \"Speedy Boxales Ltd.\",\n    \"country\": \"DE\",\n    \"houseNumber\": \"42a\",\n    \"postalCode\": \"40764\",\n    \"province\": \"NRW\",\n    \"street\": \"Hauptstr.\"\n  },\n  \"shippingInformationLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"id\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"quantity\": 1,\n      \"scannableCodes\": [\n        \"ABC-12345\"\n      ]\n    }\n  ],\n  \"shortId\": \"ABC123\",\n  \"tenantOrderId\": \"ORDER-12345\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "createSimulationOrder",
@@ -1105,8 +1105,8 @@ var operations = []Operation{
 		Permissions:    []string{"SIMULATION_ORDER_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ]\n}\n",
-		SampleResponse: "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"MY_ORDER_ID\"\n}\n",
+		SampleResponse: "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "createSourcingOptionsRequest",
@@ -1129,8 +1129,8 @@ var operations = []Operation{
 		Permissions:    []string{"STACKS_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"facilityRefs\": [\n    \"string\"\n  ],\n  \"processRefs\": [\n    \"string\"\n  ]\n}\n",
-		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRefs\": [\n    \"string\"\n  ],\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"processRefs\": [\n    \"string\"\n  ],\n  \"version\": 42\n}\n",
+		SampleBody:     "{\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"processRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ]\n}\n",
+		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"processRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:             "createStock",
@@ -1141,8 +1141,8 @@ var operations = []Operation{
 		Permissions:    []string{"STOCK_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"tenantArticleId\": \"string\",\n  \"value\": 1\n}\n",
-		SampleResponse: "{\n  \"available\": 1,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facility\": {\n    \"facilityRef\": \"string\"\n  },\n  \"facilityRef\": \"string\",\n  \"facilityWideReserved\": 1,\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"reserved\": 1,\n  \"serializedProperties\": \"string\",\n  \"tenantArticleId\": \"string\",\n  \"traits\": [\n    \"PICKABLE\"\n  ],\n  \"value\": 1,\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"locationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"receiptDate\": \"2026-06-17T12:00:00Z\",\n  \"tenantArticleId\": \"MY_ARTICLE_ID\",\n  \"tenantFacilityId\": \"MY_FACILITY_ID\",\n  \"tenantStockId\": \"MY_STOCK_ID\",\n  \"value\": 42\n}\n",
+		SampleResponse: "{\n  \"available\": 1,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facility\": {\n    \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"tenantFacilityId\": \"MY_FACILITY_ID\"\n  },\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"facilityWideReserved\": 1,\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"locationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"receiptDate\": \"2026-06-17T12:00:00Z\",\n  \"reserved\": 1,\n  \"serializedProperties\": \"string\",\n  \"tenantArticleId\": \"MY_ARTICLE_ID\",\n  \"tenantStockId\": \"MY_STOCK_ID\",\n  \"traits\": [\n    \"PICKABLE\"\n  ],\n  \"value\": 42,\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "createStowJob",
@@ -1154,8 +1154,8 @@ var operations = []Operation{
 		Permissions:    []string{"STOW_JOB_FULL_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"facilityRef\": \"string\",\n  \"status\": \"OPEN\",\n  \"stowLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"string\"\n      },\n      \"stowTo\": [\n        {\n          \"quantity\": 1,\n          \"type\": \"STOCK\"\n        }\n      ],\n      \"takeFrom\": {\n        \"quantity\": 1,\n        \"type\": \"STOCK\"\n      }\n    }\n  ]\n}\n",
-		SampleResponse: "{\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"status\": \"OPEN\",\n  \"stowLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"string\"\n      },\n      \"id\": \"string\",\n      \"stowTo\": [\n        {\n          \"id\": \"string\",\n          \"quantity\": 1,\n          \"type\": \"STOCK\"\n        }\n      ],\n      \"takeFrom\": {\n        \"quantity\": 1,\n        \"type\": \"STOCK\"\n      }\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"status\": \"OPEN\",\n  \"stowLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"MY_ARTICLE_ID\"\n      },\n      \"stowTo\": [\n        {\n          \"quantity\": 1,\n          \"stockRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"type\": \"STOCK\"\n        }\n      ],\n      \"takeFrom\": {\n        \"quantity\": 1,\n        \"stockRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"type\": \"STOCK\"\n      }\n    }\n  ],\n  \"targetTime\": \"2026-06-17T12:00:00Z\"\n}\n",
+		SampleResponse: "{\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"status\": \"OPEN\",\n  \"stowLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"MY_ARTICLE_ID\"\n      },\n      \"heldStockRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"stowTo\": [\n        {\n          \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"quantity\": 1,\n          \"stockRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"type\": \"STOCK\"\n        }\n      ],\n      \"takeFrom\": {\n        \"quantity\": 1,\n        \"stockRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"type\": \"STOCK\"\n      }\n    }\n  ],\n  \"targetTime\": \"2026-06-17T12:00:00Z\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "createUser",
@@ -1167,7 +1167,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"email\": \"john.doe@example.com\",\n  \"firstname\": \"John\",\n  \"lastname\": \"Doe\",\n  \"locale\": \"de_DE\",\n  \"password\": \"elephantMangoDance123\",\n  \"username\": \"johndoe\"\n}\n",
-		SampleResponse: "{\n  \"assignedRoles\": [\n    {\n      \"ref\": \"string\"\n    }\n  ],\n  \"authenticationProvider\": {\n    \"type\": {}\n  },\n  \"authenticationProviderType\": \"de_DE\",\n  \"email\": \"john.doe@example.com\",\n  \"firstname\": \"John\",\n  \"id\": \"string\",\n  \"lastname\": \"Doe\",\n  \"locale\": \"de_DE\",\n  \"username\": \"johndoe\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"assignedRoles\": [\n    {\n      \"ref\": \"string\"\n    }\n  ],\n  \"authenticationProvider\": {\n    \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"type\": {}\n  },\n  \"authenticationProviderType\": \"de_DE\",\n  \"email\": \"john.doe@example.com\",\n  \"firstname\": \"John\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastname\": \"Doe\",\n  \"locale\": \"de_DE\",\n  \"username\": \"johndoe\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "deleteAdditionalInfo",
@@ -1245,7 +1245,7 @@ var operations = []Operation{
 			{Name: "categoryId", In: InPath, Type: TypeString, Required: true},
 			{Name: "forceDeletion", In: InQuery, Type: TypeBoolean},
 		},
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"tenantCategoryId\": \"MY_CATEGORY_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:      "deleteDiscountForFacility",
@@ -1269,7 +1269,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "id", In: InPath, Type: TypeString, Required: true, Description: "ID of scope you want to get. Also accepts key in urn format (e.g., urn:fft:eventScopeConfig:key:{your-key})."},
 		},
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"key\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityGroupRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"id\": \"string\",\n  \"key\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "deleteExternalAction",
@@ -1419,13 +1419,14 @@ var operations = []Operation{
 		Path:        "/api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}",
 		Tags:        []string{"Returns (Operations)"},
 		Summary:     "Delete item return",
-		Description: "Delete an item return from an item return job",
+		Description: "This part of the API is deprecated. For details, see the API release lifecycle documentation. Use POST /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}/actions with the CancelItemReturn action instead.",
 		Params: []Param{
 			{Name: "itemReturnId", In: InPath, Type: TypeString, Required: true, Description: "id of the item return you want to delete"},
 			{Name: "itemReturnJobId", In: InPath, Type: TypeString, Required: true, Description: "id of the item return job to delete the item return for"},
 			{Name: "itemReturnJobVersion", In: InQuery, Type: TypeNumber, Required: true, Description: "version of the item return job to delete the item return for"},
 		},
 		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"returnFacilityRef\": \"string\",\n  \"returnedLineItems\": [\n    {\n      \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n      \"itemCondition\": \"Damaged\",\n      \"itemConditionComment\": \"Upper corner damaged\",\n      \"itemConditionLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"itemReturnJobLineItemRefs\": [\n        \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n      ],\n      \"status\": \"OPEN\",\n      \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n    }\n  ],\n  \"status\": \"ANNOUNCED\"\n}\n",
+		Deprecated:     true,
 	},
 	{
 		ID:          "deleteLineItemTargetContainers",
@@ -1462,7 +1463,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "loadUnitId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"pickJobRefs\": [\n    \"string\"\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"loadUnitTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"pickJobRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "deleteLoadUnits",
@@ -1476,7 +1477,7 @@ var operations = []Operation{
 			{Name: "id", In: InQuery, Type: TypeArray, Item: TypeString, Explode: true, Description: "Load unit ids"},
 			{Name: "pickJobRef", In: InQuery, Type: TypeString, Description: "Reference to the pickJob of which you want to delete the loadUnits"},
 		},
-		SampleResponse: "{\n  \"loadUnits\": [\n    {\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"descriptionLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"id\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"nameLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"pickJobRefs\": [\n        \"string\"\n      ],\n      \"version\": 1\n    }\n  ],\n  \"total\": 42\n}\n",
+		SampleResponse: "{\n  \"loadUnits\": [\n    {\n      \"created\": \"2026-06-17T12:00:00Z\",\n      \"descriptionLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"lastModified\": \"2026-06-17T12:00:00Z\",\n      \"loadUnitTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"nameLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"pickJobRefs\": [\n        \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n      ],\n      \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"version\": 1\n    }\n  ],\n  \"total\": 42\n}\n",
 	},
 	{
 		ID:          "deleteLookupRecord",
@@ -1489,7 +1490,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "recordId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"attributeDefinitions\": {},\n  \"id\": \"string\",\n  \"items\": [\n    {\n      \"id\": \"string\",\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"attributeDefinitions\": {},\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"items\": [\n    {\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"tenantRecordId\": \"MY_RECORD_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "deleteMeasurementUnit",
@@ -1588,7 +1589,7 @@ var operations = []Operation{
 			{Name: "receiptId", In: InPath, Type: TypeString, Required: true},
 			{Name: "version", In: InQuery, Type: TypeNumber, Required: true},
 		},
-		SampleResponse: "{\n  \"comments\": [\n    {\n      \"content\": \"string\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"receivedDate\": \"2026-01-01T00:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 1\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"comments\": [\n    {\n      \"content\": \"string\",\n      \"documentSetRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"receivedDate\": \"2026-06-17T12:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 42\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\",\n          \"documentSetRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 42\n      },\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\"\n    }\n  ],\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "deleteRemoteConfiguration",
@@ -1793,7 +1794,7 @@ var operations = []Operation{
 		Permissions:  []string{"PROCESS_READ"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"documents\": [\n    {\n      \"documentId\": \"string\",\n      \"documentsSetRef\": \"string\"\n    }\n  ]\n}\n",
+		SampleBody:   "{\n  \"documents\": [\n    {\n      \"documentId\": \"string\",\n      \"documentsSetRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ]\n}\n",
 	},
 	{
 		ID:          "downloadProcessDocument",
@@ -1818,7 +1819,7 @@ var operations = []Operation{
 			{Name: "strategyId", In: InPath, Type: TypeString, Required: true, Description: "Id of the routing strategy"},
 		},
 		HasBody:        true,
-		SampleBody:     "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"R456728546\"\n}\n",
+		SampleBody:     "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"R456728546\"\n}\n",
 		SampleResponse: "{\n  \"evaluatedConfig\": {\n    \"fences\": [\n      {\n        \"active\": false,\n        \"implementation\": \"FACILITY-BUSINESSTYPE\",\n        \"type\": \"StandardFence\"\n      }\n    ],\n    \"ratings\": [\n      {\n        \"active\": false,\n        \"implementation\": \"STOCK-BALANCING\",\n        \"maxPenalty\": 100,\n        \"type\": \"StandardRating\"\n      }\n    ]\n  },\n  \"evaluatedPath\": [\n    {\n      \"evaluationResult\": \"NODE_INACTIVE\",\n      \"nameLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"ref\": \"string\",\n      \"type\": \"CONDITION\"\n    }\n  ]\n}\n",
 	},
 	{
@@ -1852,8 +1853,8 @@ var operations = []Operation{
 		Permissions:    []string{"CURRENT_USER_MODIFY"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"action\": \"ModifyMe\",\n  \"locale\": \"de_DE\"\n}\n",
-		SampleResponse: "{\n  \"assignedRoles\": [\n    {\n      \"ref\": \"string\"\n    }\n  ],\n  \"authenticationProvider\": {\n    \"type\": {}\n  },\n  \"authenticationProviderType\": \"de_DE\",\n  \"email\": \"john.doe@example.com\",\n  \"firstname\": \"John\",\n  \"id\": \"string\",\n  \"lastname\": \"Doe\",\n  \"locale\": \"de_DE\",\n  \"username\": \"johndoe\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"action\": \"ModifyMe\",\n  \"firstname\": \"Phil\",\n  \"lastname\": \"Bison\",\n  \"locale\": \"de_DE\"\n}\n",
+		SampleResponse: "{\n  \"assignedRoles\": [\n    {\n      \"ref\": \"string\"\n    }\n  ],\n  \"authenticationProvider\": {\n    \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"type\": {}\n  },\n  \"authenticationProviderType\": \"de_DE\",\n  \"email\": \"john.doe@example.com\",\n  \"firstname\": \"John\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastname\": \"Doe\",\n  \"locale\": \"de_DE\",\n  \"username\": \"johndoe\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "executeNotificationCenterConfigAction",
@@ -1865,8 +1866,8 @@ var operations = []Operation{
 		Permissions:    []string{"NOTIFICATION_CENTER_CONFIG_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"channel\": {\n    \"enabled\": false,\n    \"events\": [\n      \"PICK_JOB_CREATED\"\n    ],\n    \"receiver\": [\n      {\n        \"email\": \"user@example.com\",\n        \"language\": \"de_DE\"\n      }\n    ],\n    \"type\": \"EMAIL\"\n  },\n  \"name\": \"ADD_CHANNEL\",\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"channels\": [\n    {\n      \"enabled\": false,\n      \"events\": [\n        \"PICK_JOB_CREATED\"\n      ],\n      \"id\": \"string\",\n      \"receiver\": [\n        {\n          \"email\": \"user@example.com\",\n          \"language\": \"de_DE\"\n        }\n      ],\n      \"type\": \"EMAIL\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"channel\": {\n    \"enabled\": false,\n    \"events\": [\n      \"PICK_JOB_CREATED\"\n    ],\n    \"receiver\": [\n      {\n        \"email\": \"phil.bison@fulfillmenttools.com\",\n        \"language\": \"de_DE\"\n      }\n    ],\n    \"type\": \"EMAIL\"\n  },\n  \"name\": \"ADD_CHANNEL\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"channels\": [\n    {\n      \"enabled\": false,\n      \"events\": [\n        \"PICK_JOB_CREATED\"\n      ],\n      \"id\": \"string\",\n      \"receiver\": [\n        {\n          \"email\": \"phil.bison@fulfillmenttools.com\",\n          \"language\": \"de_DE\"\n        }\n      ],\n      \"type\": \"EMAIL\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "executeNotificationCenterFacilityConfigAction",
@@ -1881,8 +1882,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"channel\": {\n    \"enabled\": false,\n    \"events\": [\n      \"PICK_JOB_CREATED\"\n    ],\n    \"receiver\": [\n      {\n        \"email\": \"user@example.com\",\n        \"language\": \"de_DE\"\n      }\n    ],\n    \"type\": \"EMAIL\"\n  },\n  \"name\": \"ADD_CHANNEL\",\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"channels\": [\n    {\n      \"enabled\": false,\n      \"events\": [\n        \"PICK_JOB_CREATED\"\n      ],\n      \"id\": \"string\",\n      \"receiver\": [\n        {\n          \"email\": \"user@example.com\",\n          \"language\": \"de_DE\"\n        }\n      ],\n      \"type\": \"EMAIL\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"channel\": {\n    \"enabled\": false,\n    \"events\": [\n      \"PICK_JOB_CREATED\"\n    ],\n    \"receiver\": [\n      {\n        \"email\": \"phil.bison@fulfillmenttools.com\",\n        \"language\": \"de_DE\"\n      }\n    ],\n    \"type\": \"EMAIL\"\n  },\n  \"name\": \"ADD_CHANNEL\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"channels\": [\n    {\n      \"enabled\": false,\n      \"events\": [\n        \"PICK_JOB_CREATED\"\n      ],\n      \"id\": \"string\",\n      \"receiver\": [\n        {\n          \"email\": \"phil.bison@fulfillmenttools.com\",\n          \"language\": \"de_DE\"\n        }\n      ],\n      \"type\": \"EMAIL\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:      "facilityAction",
@@ -1910,8 +1911,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"facilitiesToAdd\": [\n    \"string\"\n  ],\n  \"name\": \"ADD_FACILITIES_TO_GROUP\"\n}\n",
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityCount\": 1,\n  \"facilityRefs\": [\n    \"string\"\n  ],\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"tenantFacilityGroupId\": \"K12345\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"facilitiesToAdd\": [\n    \"string\"\n  ],\n  \"name\": \"ADD_FACILITIES_TO_GROUP\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityCount\": 1,\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"tenantFacilityGroupId\": \"K12345\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "findItemReturns",
@@ -2012,7 +2013,7 @@ var operations = []Operation{
 			{Name: "size", In: InQuery, Type: TypeInteger, Description: "number of loadUnits to show"},
 			{Name: "startAfterId", In: InQuery, Type: TypeString, Description: "all entities after given Id"},
 		},
-		SampleResponse: "{\n  \"loadUnits\": [\n    {\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"descriptionLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"id\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"nameLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"pickJobRefs\": [\n        \"string\"\n      ],\n      \"version\": 1\n    }\n  ],\n  \"total\": 42\n}\n",
+		SampleResponse: "{\n  \"loadUnits\": [\n    {\n      \"created\": \"2026-06-17T12:00:00Z\",\n      \"descriptionLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"lastModified\": \"2026-06-17T12:00:00Z\",\n      \"loadUnitTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"nameLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"pickJobRefs\": [\n        \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n      ],\n      \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"version\": 1\n    }\n  ],\n  \"total\": 42\n}\n",
 	},
 	{
 		ID:             "getAllLookupRecords",
@@ -2022,7 +2023,7 @@ var operations = []Operation{
 		Summary:        "Get all lookup records",
 		Description:    "Retrieves all lookup records.",
 		Permissions:    []string{"LOOKUP_RECORD_READ"},
-		SampleResponse: "{\n  \"attributeDefinitions\": {},\n  \"id\": \"string\",\n  \"items\": [\n    {\n      \"id\": \"string\",\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"attributeDefinitions\": {},\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"items\": [\n    {\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"tenantRecordId\": \"MY_RECORD_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "getAllMeasurementUnits",
@@ -2189,7 +2190,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "packJobId", In: InPath, Type: TypeString, Required: true, Description: "ID of the pack job you want to get"},
 		},
-		SampleResponse: "[\n  {\n    \"codes\": [\n      \"string\"\n    ],\n    \"created\": \"2020-02-03T08:45:51.525Z\",\n    \"descriptionLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n    \"id\": \"string\",\n    \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n    \"lineItems\": [\n      {\n        \"article\": {\n          \"tenantArticleId\": \"4711\",\n          \"title\": \"Cologne Water\"\n        },\n        \"id\": \"climk4dcQFiPdA5ULuhS\",\n        \"measurementUnitKey\": \"liter\",\n        \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n        \"quantity\": 21,\n        \"secondaryMeasurementUnitKey\": \"gram\",\n        \"secondaryQuantity\": 200\n      }\n    ],\n    \"nameLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"packJobRef\": \"string\",\n    \"sequenceNumber\": 100,\n    \"type\": \"VIRTUAL\",\n    \"version\": 42,\n    \"weightLimitInG\": 2500\n  }\n]\n",
+		SampleResponse: "[\n  {\n    \"codes\": [\n      \"string\"\n    ],\n    \"created\": \"2020-02-03T08:45:51.525Z\",\n    \"descriptionLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n    \"id\": \"string\",\n    \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n    \"lineItems\": [\n      {\n        \"article\": {\n          \"imageUrl\": \"https://example.com/resource\",\n          \"tenantArticleId\": \"4711\",\n          \"title\": \"Cologne Water\"\n        },\n        \"id\": \"climk4dcQFiPdA5ULuhS\",\n        \"measurementUnitKey\": \"liter\",\n        \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n        \"quantity\": 21,\n        \"secondaryMeasurementUnitKey\": \"gram\",\n        \"secondaryQuantity\": 200\n      }\n    ],\n    \"nameLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"packJobRef\": \"string\",\n    \"sequenceNumber\": 100,\n    \"type\": \"VIRTUAL\",\n    \"version\": 42,\n    \"weightLimitInG\": 2500\n  }\n]\n",
 	},
 	{
 		ID:          "getAllUsers",
@@ -2205,7 +2206,7 @@ var operations = []Operation{
 			{Name: "size", In: InQuery, Type: TypeNumber},
 			{Name: "startAfterId", In: InQuery, Type: TypeString},
 		},
-		SampleResponse: "{\n  \"assignedRoles\": [\n    {\n      \"ref\": \"string\"\n    }\n  ],\n  \"authenticationProvider\": {\n    \"type\": {}\n  },\n  \"authenticationProviderType\": \"de_DE\",\n  \"email\": \"john.doe@example.com\",\n  \"firstname\": \"John\",\n  \"id\": \"string\",\n  \"lastname\": \"Doe\",\n  \"locale\": \"de_DE\",\n  \"username\": \"johndoe\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"assignedRoles\": [\n    {\n      \"ref\": \"string\"\n    }\n  ],\n  \"authenticationProvider\": {\n    \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"type\": {}\n  },\n  \"authenticationProviderType\": \"de_DE\",\n  \"email\": \"john.doe@example.com\",\n  \"firstname\": \"John\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastname\": \"Doe\",\n  \"locale\": \"de_DE\",\n  \"username\": \"johndoe\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "getAllocationUnderGroupById",
@@ -2378,7 +2379,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "carrierId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"defaultParcelHeightInCm\": 10,\n  \"defaultParcelLengthInCm\": 25,\n  \"defaultParcelWeightInGram\": 1000,\n  \"defaultParcelWidthInCm\": 35,\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"key\": \"DHL_V2\",\n  \"name\": \"DHL Köln\",\n  \"productValueNeeded\": true,\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"defaultParcelHeightInCm\": 10,\n  \"defaultParcelLengthInCm\": 25,\n  \"defaultParcelWeightInGram\": 1000,\n  \"defaultParcelWidthInCm\": 35,\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"key\": \"DHL_V2\",\n  \"logoUrl\": \"https://example.com/resource\",\n  \"name\": \"DHL Köln\",\n  \"productValueNeeded\": true,\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "getCarrierConfiguration",
@@ -2391,7 +2392,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "carrierId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"carrierRef\": \"string\",\n  \"fallBackTrackAndTraceEmail\": \"max@speedyboxales.com\",\n  \"mustBeWeighed\": false,\n  \"returnLabel\": false,\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"defaultPickUpTime\": {\n    \"end\": {\n      \"hour\": 1,\n      \"minute\": 1\n    },\n    \"start\": {\n      \"hour\": 1,\n      \"minute\": 1\n    }\n  },\n  \"fallBackTrackAndTraceEmail\": \"max@speedyboxales.com\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"mustBeWeighed\": false,\n  \"returnLabel\": false,\n  \"serviceUrl\": \"https://example.com/resource\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "getCarrierCountryServiceMapping",
@@ -2405,7 +2406,7 @@ var operations = []Operation{
 			{Name: "carrierId", In: InPath, Type: TypeString, Required: true},
 			{Name: "countryServiceMappingId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"countAsTransitDayBefore\": \"12:00\",\n  \"destinations\": [\n    {\n      \"countryCode\": \"DE\"\n    }\n  ],\n  \"id\": \"bc5b581a-8f65-45b0-9f81-6e0d4babbcb2\",\n  \"source\": {\n    \"countryCode\": \"DE\"\n  },\n  \"sourceCountry\": \"DE\"\n}\n",
+		SampleResponse: "{\n  \"countAsTransitDayBefore\": \"12:00\",\n  \"destinations\": [\n    {\n      \"countryCode\": \"DE\"\n    }\n  ],\n  \"id\": \"bc5b581a-8f65-45b0-9f81-6e0d4babbcb2\",\n  \"source\": {\n    \"countryCode\": \"DE\"\n  },\n  \"sourceCountry\": \"DE\",\n  \"staticCCSMRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"transitTime\": {\n    \"maxTransitDays\": 3,\n    \"minTransitDays\": 1\n  }\n}\n",
 	},
 	{
 		ID:          "getCarrierCountryServiceMappings",
@@ -2418,7 +2419,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "carrierId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "[\n  {\n    \"countAsTransitDayBefore\": \"12:00\",\n    \"destinations\": [\n      {\n        \"countryCode\": \"DE\"\n      }\n    ],\n    \"id\": \"bc5b581a-8f65-45b0-9f81-6e0d4babbcb2\",\n    \"source\": {\n      \"countryCode\": \"DE\"\n    },\n    \"sourceCountry\": \"DE\"\n  }\n]\n",
+		SampleResponse: "[\n  {\n    \"countAsTransitDayBefore\": \"12:00\",\n    \"destinations\": [\n      {\n        \"countryCode\": \"DE\"\n      }\n    ],\n    \"id\": \"bc5b581a-8f65-45b0-9f81-6e0d4babbcb2\",\n    \"source\": {\n      \"countryCode\": \"DE\"\n    },\n    \"sourceCountry\": \"DE\",\n    \"staticCCSMRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"transitTime\": {\n      \"maxTransitDays\": 3,\n      \"minTransitDays\": 1\n    }\n  }\n]\n",
 	},
 	{
 		ID:          "getCarriers",
@@ -2432,7 +2433,7 @@ var operations = []Operation{
 			{Name: "size", In: InQuery, Type: TypeNumber},
 			{Name: "startAfterId", In: InQuery, Type: TypeString},
 		},
-		SampleResponse: "{}\n",
+		SampleResponse: "{\n  \"total\": 42\n}\n",
 	},
 	{
 		ID:          "getCategories",
@@ -2445,7 +2446,7 @@ var operations = []Operation{
 			{Name: "size", In: InQuery, Type: TypeNumber},
 			{Name: "startAfterId", In: InQuery, Type: TypeString},
 		},
-		SampleResponse: "[\n  {\n    \"created\": \"2026-01-01T00:00:00Z\",\n    \"lastModified\": \"2026-01-01T00:00:00Z\",\n    \"nameLocalized\": {},\n    \"version\": 1\n  }\n]\n",
+		SampleResponse: "[\n  {\n    \"created\": \"2026-01-01T00:00:00Z\",\n    \"lastModified\": \"2026-01-01T00:00:00Z\",\n    \"nameLocalized\": {},\n    \"tenantCategoryId\": \"MY_CATEGORY_ID\",\n    \"version\": 1\n  }\n]\n",
 	},
 	{
 		ID:          "getCategory",
@@ -2457,7 +2458,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "categoryId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"tenantCategoryId\": \"MY_CATEGORY_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "getCustomService",
@@ -2560,7 +2561,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "documentSetRef", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "getDocumentSetDeprecated",
@@ -2573,7 +2574,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "documentSetRef", In: InPath, Type: TypeString, Required: true, Description: "Reference to the entity you want to get"},
 		},
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"version\": 1\n}\n",
 		Deprecated:     true,
 	},
 	{
@@ -2606,7 +2607,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "id", In: InPath, Type: TypeString, Required: true, Description: "ID of scope you want to get. Also accepts key in urn format (e.g., urn:fft:eventScopeConfig:key:{your-key})."},
 		},
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"key\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityGroupRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"id\": \"string\",\n  \"key\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "getEvents",
@@ -2741,7 +2742,7 @@ var operations = []Operation{
 			{Name: "carrierRef", In: InPath, Type: TypeString, Required: true},
 			{Name: "facilityId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"carrierRef\": \"string\",\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"key\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"key\": \"string\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "getFacilityConnection",
@@ -2813,7 +2814,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "facilityGroupId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityCount\": 1,\n  \"facilityRefs\": [\n    \"string\"\n  ],\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"tenantFacilityGroupId\": \"K12345\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityCount\": 1,\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"tenantFacilityGroupId\": \"K12345\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:      "getFacilityListing",
@@ -2855,7 +2856,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "facilityId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"id\": \"string\",\n  \"listingReactivationAfter\": {\n    \"active\": true,\n    \"value\": 24\n  },\n  \"retainedOfflineStock\": {\n    \"value\": 0.15\n  },\n  \"shortpick\": {\n    \"active\": true\n  },\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"listingReactivationAfter\": {\n    \"active\": true,\n    \"value\": 24\n  },\n  \"retainedOfflineStock\": {\n    \"value\": 0.15\n  },\n  \"shortpick\": {\n    \"active\": true\n  },\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:      "getFacilityStorageLocation",
@@ -3018,7 +3019,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "handoverContainerId", In: InPath, Type: TypeString, Required: true, Description: "id of the handover container"},
 		},
-		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"string\",\n  \"handoverJobRef\": \"string\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"17ebfdfb-e1b4-4913-9962-3aef2b49f16f\",\n      \"measurementUnitKey\": \"pcs\",\n      \"quantity\": 1,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"processRef\": \"string\",\n  \"stackRef\": \"string\",\n  \"type\": \"PHYSICAL\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"handoverJobRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"iconUrl\": \"https://example.com/resource\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"17ebfdfb-e1b4-4913-9962-3aef2b49f16f\",\n      \"measurementUnitKey\": \"pcs\",\n      \"quantity\": 42,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"processRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"sequenceNumber\": 42,\n  \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"type\": \"PHYSICAL\",\n  \"version\": 42,\n  \"weightLimitInG\": 42\n}\n",
 	},
 	{
 		ID:          "getHandoverContainers",
@@ -3034,7 +3035,7 @@ var operations = []Operation{
 			{Name: "size", In: InQuery, Type: TypeInteger, Description: "number of entities to show"},
 			{Name: "startAfter", In: InQuery, Type: TypeString, Description: "entity to start after"},
 		},
-		SampleResponse: "{\n  \"handoverContainer\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"descriptionLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"facilityRef\": \"string\",\n      \"handoverJobRef\": \"string\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"lineItems\": [\n        {\n          \"article\": {\n            \"tenantArticleId\": \"4711\",\n            \"title\": \"Cologne Water\"\n          },\n          \"id\": \"17ebfdfb-e1b4-4913-9962-3aef2b49f16f\",\n          \"measurementUnitKey\": \"pcs\",\n          \"quantity\": 1,\n          \"secondaryMeasurementUnitKey\": \"g\",\n          \"secondaryQuantity\": 42\n        }\n      ],\n      \"nameLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"processRef\": \"string\",\n      \"stackRef\": \"string\",\n      \"type\": \"PHYSICAL\",\n      \"version\": 42\n    }\n  ],\n  \"total\": 1\n}\n",
+		SampleResponse: "{\n  \"handoverContainer\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"descriptionLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"handoverJobRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"iconUrl\": \"https://example.com/resource\",\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"lineItems\": [\n        {\n          \"article\": {\n            \"imageUrl\": \"https://example.com/resource\",\n            \"tenantArticleId\": \"4711\",\n            \"title\": \"Cologne Water\"\n          },\n          \"id\": \"17ebfdfb-e1b4-4913-9962-3aef2b49f16f\",\n          \"measurementUnitKey\": \"pcs\",\n          \"quantity\": 42,\n          \"secondaryMeasurementUnitKey\": \"g\",\n          \"secondaryQuantity\": 42\n        }\n      ],\n      \"nameLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"processRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"sequenceNumber\": 42,\n      \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"type\": \"PHYSICAL\",\n      \"version\": 42,\n      \"weightLimitInG\": 42\n    }\n  ],\n  \"total\": 42\n}\n",
 	},
 	{
 		ID:             "getHandoverJobTagConfiguration",
@@ -3065,7 +3066,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "inboundProcessId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"inboundDate\": [\n    \"2026-01-01T00:00:00Z\"\n  ],\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"onHold\": false,\n  \"origin\": [\n    {}\n  ],\n  \"receipts\": [\n    {\n      \"comments\": [\n        {\n          \"content\": \"string\"\n        }\n      ],\n      \"id\": \"string\",\n      \"receivedDate\": \"2026-01-01T00:00:00Z\",\n      \"receivedItems\": [\n        {\n          \"acceptedQuantity\": {\n            \"value\": 1\n          },\n          \"comments\": [\n            {}\n          ],\n          \"rejectedQuantity\": {\n            \"value\": 1\n          },\n          \"tenantArticleId\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"scannableCodes\": [\n    \"string\"\n  ],\n  \"status\": \"OPEN\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"inboundDate\": [\n    \"2026-01-01T00:00:00Z\"\n  ],\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"onHold\": false,\n  \"origin\": [\n    {}\n  ],\n  \"receipts\": [\n    {\n      \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"comments\": [\n        {\n          \"content\": \"string\",\n          \"documentSetRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n        }\n      ],\n      \"id\": \"string\",\n      \"receivedDate\": \"2026-06-17T12:00:00Z\",\n      \"receivedItems\": [\n        {\n          \"acceptedQuantity\": {\n            \"value\": 42\n          },\n          \"comments\": [\n            {}\n          ],\n          \"rejectedQuantity\": {\n            \"value\": 42\n          },\n          \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"tenantArticleId\": \"MY_ARTICLE_ID\"\n        }\n      ]\n    }\n  ],\n  \"scannableCodes\": [\n    \"string\"\n  ],\n  \"status\": \"OPEN\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "getInboundProcesses",
@@ -3086,7 +3087,7 @@ var operations = []Operation{
 			{Name: "startAfterId", In: InQuery, Type: TypeString},
 			{Name: "status", In: InQuery, Type: TypeArray, Item: TypeString, Enum: []string{"OPEN", "PARTIAL_DELIVERY", "ON_HOLD", "CLOSED"}},
 		},
-		SampleResponse: "{\n  \"inboundProcesses\": [\n    {\n      \"anonymized\": false,\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"facilityRef\": \"string\",\n      \"id\": \"string\",\n      \"inboundDate\": [\n        \"2026-01-01T00:00:00Z\"\n      ],\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"onHold\": false,\n      \"origin\": [\n        {}\n      ],\n      \"receipts\": [\n        {\n          \"comments\": [\n            {}\n          ],\n          \"id\": \"string\",\n          \"receivedDate\": \"2026-01-01T00:00:00Z\",\n          \"receivedItems\": [\n            {}\n          ]\n        }\n      ],\n      \"scannableCodes\": [\n        \"string\"\n      ],\n      \"status\": \"OPEN\",\n      \"version\": 1\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
+		SampleResponse: "{\n  \"inboundProcesses\": [\n    {\n      \"anonymized\": false,\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"facilityRef\": \"string\",\n      \"id\": \"string\",\n      \"inboundDate\": [\n        \"2026-01-01T00:00:00Z\"\n      ],\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"onHold\": false,\n      \"origin\": [\n        {}\n      ],\n      \"receipts\": [\n        {\n          \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"comments\": [\n            {}\n          ],\n          \"id\": \"string\",\n          \"receivedDate\": \"2026-06-17T12:00:00Z\",\n          \"receivedItems\": [\n            {}\n          ]\n        }\n      ],\n      \"scannableCodes\": [\n        \"string\"\n      ],\n      \"status\": \"OPEN\",\n      \"version\": 1\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
 	},
 	{
 		ID:          "getInboundReceiptJob",
@@ -3099,7 +3100,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "inboundEntryId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"expectedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-01-01T00:00:00Z\"\n  },\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"items\": {\n    \"quantity\": {\n      \"value\": 1\n    },\n    \"tenantArticleId\": \"string\"\n  },\n  \"origin\": {},\n  \"status\": \"OPEN\"\n}\n",
+		SampleResponse: "{\n  \"expectedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-01-01T00:00:00Z\"\n  },\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"items\": {\n    \"quantity\": {\n      \"value\": 42\n    },\n    \"tenantArticleId\": \"string\"\n  },\n  \"origin\": {},\n  \"status\": \"OPEN\"\n}\n",
 	},
 	{
 		ID:          "getInboundReceiptJobs",
@@ -3119,7 +3120,7 @@ var operations = []Operation{
 			{Name: "status", In: InQuery, Type: TypeArray, Item: TypeString, Enum: []string{"OPEN", "PARTIAL_DELIVERY", "ON_HOLD", "CLOSED"}},
 			{Name: "toDate", In: InQuery, Type: TypeString},
 		},
-		SampleResponse: "{\n  \"inboundReceiptJobs\": [\n    {\n      \"expectedDate\": {\n        \"type\": \"ASAP\",\n        \"value\": \"2026-01-01T00:00:00Z\"\n      },\n      \"facilityRef\": \"string\",\n      \"id\": \"string\",\n      \"inboundProcessRef\": \"string\",\n      \"items\": {\n        \"quantity\": {\n          \"value\": 1\n        },\n        \"tenantArticleId\": \"string\"\n      },\n      \"origin\": {},\n      \"status\": \"OPEN\"\n    }\n  ],\n  \"total\": 1\n}\n",
+		SampleResponse: "{\n  \"inboundReceiptJobs\": [\n    {\n      \"expectedDate\": {\n        \"type\": \"ASAP\",\n        \"value\": \"2026-01-01T00:00:00Z\"\n      },\n      \"facilityRef\": \"string\",\n      \"id\": \"string\",\n      \"inboundProcessRef\": \"string\",\n      \"items\": {\n        \"quantity\": {\n          \"value\": 42\n        },\n        \"tenantArticleId\": \"string\"\n      },\n      \"origin\": {},\n      \"status\": \"OPEN\"\n    }\n  ],\n  \"total\": 1\n}\n",
 	},
 	{
 		ID:             "getInventoryConfigurations",
@@ -3168,7 +3169,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "itemReturnJobId", In: InPath, Type: TypeString, Required: true, Description: "id of the item return job"},
 		},
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"string\",\n  \"itemReturns\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"returnFacilityRef\": \"string\",\n      \"returnedLineItems\": [\n        {\n          \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n          \"itemCondition\": \"Damaged\",\n          \"itemConditionComment\": \"Upper corner damaged\",\n          \"itemConditionLocalized\": {\n            \"de_DE\": \"Wert\",\n            \"en_US\": \"Value\",\n            \"ru_RU\": \"значение\"\n          },\n          \"itemReturnJobLineItemRefs\": [\n            \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n          ],\n          \"status\": \"OPEN\",\n          \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n        }\n      ],\n      \"status\": \"ANNOUNCED\"\n    }\n  ],\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"processRef\": \"string\",\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7,\n      \"id\": \"611c860f-3f00-4b01-9f4c-64cdee38a30e\",\n      \"returnable\": 7,\n      \"returned\": 5\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"string\",\n  \"itemReturns\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"returnFacilityRef\": \"string\",\n      \"returnedLineItems\": [\n        {\n          \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n          \"itemCondition\": \"Damaged\",\n          \"itemConditionComment\": \"Upper corner damaged\",\n          \"itemConditionLocalized\": {\n            \"de_DE\": \"Wert\",\n            \"en_US\": \"Value\",\n            \"ru_RU\": \"значение\"\n          },\n          \"itemReturnJobLineItemRefs\": [\n            \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n          ],\n          \"status\": \"OPEN\",\n          \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n        }\n      ],\n      \"status\": \"ANNOUNCED\"\n    }\n  ],\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"processRef\": \"string\",\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7,\n      \"id\": \"611c860f-3f00-4b01-9f4c-64cdee38a30e\",\n      \"returnable\": 7,\n      \"returned\": 5\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "getItemReturnJobs",
@@ -3188,7 +3189,7 @@ var operations = []Operation{
 			{Name: "size", In: InQuery, Type: TypeInteger, Description: "number of entities to show"},
 			{Name: "startAfterId", In: InQuery, Type: TypeString, Description: "entity to start after"},
 		},
-		SampleResponse: "[\n  {\n    \"anonymized\": false,\n    \"consumerAddresses\": [\n      {\n        \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n        \"city\": \"Langenfeld\",\n        \"companyName\": \"Speedy Boxales Ltd.\",\n        \"country\": \"DE\",\n        \"email\": \"test@try.de\",\n        \"firstName\": \"Maxine\",\n        \"houseNumber\": \"42a\",\n        \"lastName\": \"Muller\",\n        \"personalTitle\": \"Dr.\",\n        \"postalCode\": \"40764\",\n        \"province\": \"NRW\",\n        \"salutation\": \"Frau\",\n        \"street\": \"Hauptstr.\"\n      }\n    ],\n    \"created\": \"2020-02-03T08:45:51.525Z\",\n    \"id\": \"string\",\n    \"itemReturns\": [\n      {\n        \"created\": \"2020-02-03T08:45:51.525Z\",\n        \"id\": \"string\",\n        \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n        \"returnFacilityRef\": \"string\",\n        \"returnedLineItems\": [\n          {\n            \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n            \"itemCondition\": \"Damaged\",\n            \"itemConditionComment\": \"Upper corner damaged\",\n            \"itemConditionLocalized\": {\n              \"de_DE\": \"Wert\",\n              \"en_US\": \"Value\",\n              \"ru_RU\": \"значение\"\n            },\n            \"itemReturnJobLineItemRefs\": [],\n            \"status\": \"OPEN\",\n            \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n          }\n        ],\n        \"status\": \"ANNOUNCED\"\n      }\n    ],\n    \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n    \"originFacilityRefs\": [\n      \"string\"\n    ],\n    \"processRef\": \"string\",\n    \"returnableLineItems\": [\n      {\n        \"article\": {\n          \"tenantArticleId\": \"4711\",\n          \"title\": \"Cologne Water\"\n        },\n        \"delivered\": 7,\n        \"id\": \"611c860f-3f00-4b01-9f4c-64cdee38a30e\",\n        \"returnable\": 7,\n        \"returned\": 5\n      }\n    ],\n    \"shortId\": \"AS12\",\n    \"status\": \"OPEN\",\n    \"version\": 42\n  }\n]\n",
+		SampleResponse: "[\n  {\n    \"anonymized\": false,\n    \"consumerAddresses\": [\n      {\n        \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n        \"city\": \"Langenfeld\",\n        \"companyName\": \"Speedy Boxales Ltd.\",\n        \"country\": \"DE\",\n        \"email\": \"test@try.de\",\n        \"firstName\": \"Maxine\",\n        \"houseNumber\": \"42a\",\n        \"lastName\": \"Muller\",\n        \"personalTitle\": \"Dr.\",\n        \"postalCode\": \"40764\",\n        \"province\": \"NRW\",\n        \"salutation\": \"Frau\",\n        \"street\": \"Hauptstr.\"\n      }\n    ],\n    \"created\": \"2020-02-03T08:45:51.525Z\",\n    \"id\": \"string\",\n    \"itemReturns\": [\n      {\n        \"created\": \"2020-02-03T08:45:51.525Z\",\n        \"id\": \"string\",\n        \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n        \"returnFacilityRef\": \"string\",\n        \"returnedLineItems\": [\n          {\n            \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n            \"itemCondition\": \"Damaged\",\n            \"itemConditionComment\": \"Upper corner damaged\",\n            \"itemConditionLocalized\": {\n              \"de_DE\": \"Wert\",\n              \"en_US\": \"Value\",\n              \"ru_RU\": \"значение\"\n            },\n            \"itemReturnJobLineItemRefs\": [],\n            \"status\": \"OPEN\",\n            \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n          }\n        ],\n        \"status\": \"ANNOUNCED\"\n      }\n    ],\n    \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n    \"originFacilityRefs\": [\n      \"string\"\n    ],\n    \"processRef\": \"string\",\n    \"returnableLineItems\": [\n      {\n        \"article\": {\n          \"imageUrl\": \"https://example.com/resource\",\n          \"tenantArticleId\": \"4711\",\n          \"title\": \"Cologne Water\"\n        },\n        \"delivered\": 7,\n        \"id\": \"611c860f-3f00-4b01-9f4c-64cdee38a30e\",\n        \"returnable\": 7,\n        \"returned\": 5\n      }\n    ],\n    \"shortId\": \"AS12\",\n    \"status\": \"OPEN\",\n    \"version\": 42\n  }\n]\n",
 	},
 	{
 		ID:          "getItemReturns",
@@ -3215,7 +3216,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "id", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"additionalDocuments\": [\n    {\n      \"nameLocalized\": {},\n      \"url\": \"string\"\n    }\n  ],\n  \"anonymized\": false,\n  \"carrierData\": {\n    \"carrierRef\": \"string\"\n  },\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"recipientAddress\": [\n    {\n      \"city\": \"string\",\n      \"country\": \"DE\",\n      \"postalCode\": \"string\",\n      \"street\": \"string\"\n    }\n  ],\n  \"senderAddress\": {\n    \"city\": \"string\",\n    \"companyName\": \"string\",\n    \"country\": \"DE\",\n    \"postalCode\": \"string\",\n    \"street\": \"string\"\n  },\n  \"status\": \"WAITING_FOR_INPUT\",\n  \"type\": \"SEND_LABEL\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"additionalDocuments\": [\n    {\n      \"nameLocalized\": {},\n      \"url\": \"https://example.com/resource\"\n    }\n  ],\n  \"anonymized\": false,\n  \"carrierData\": {\n    \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n  },\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"labelUrl\": \"https://example.com/resource\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"operativeProcessRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"packageRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"processRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"recipientAddress\": [\n    {\n      \"city\": \"Yellowstone\",\n      \"country\": \"DE\",\n      \"email\": \"phil.bison@fulfillmenttools.com\",\n      \"emailAddresses\": [\n        {\n          \"value\": \"string\"\n        }\n      ],\n      \"houseNumber\": \"42\",\n      \"postalCode\": \"42420\",\n      \"street\": \"string\"\n    }\n  ],\n  \"senderAddress\": {\n    \"city\": \"Yellowstone\",\n    \"companyName\": \"string\",\n    \"country\": \"DE\",\n    \"emailAddresses\": [\n      {\n        \"value\": \"string\"\n      }\n    ],\n    \"houseNumber\": \"42\",\n    \"postalCode\": \"42420\",\n    \"street\": \"string\"\n  },\n  \"shippingInformationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"status\": \"WAITING_FOR_INPUT\",\n  \"tenantLabelId\": \"MY_LABEL_ID\",\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"type\": \"SEND_LABEL\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:      "getLabelForParcel",
@@ -3288,7 +3289,7 @@ var operations = []Operation{
 			{Name: "loadUnitId", In: InPath, Type: TypeString, Required: true},
 			{Name: "locale", In: InQuery, Type: TypeString, Description: "Provide the localized names and descriptions if found. If not provided the default locale is used. Example de_DE"},
 		},
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"pickJobRefs\": [\n    \"string\"\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"loadUnitTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"pickJobRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "getLoadUnitConfiguration",
@@ -3310,7 +3311,7 @@ var operations = []Operation{
 			{Name: "loadUnitTypeId", In: InPath, Type: TypeString, Required: true},
 			{Name: "locale", In: InQuery, Type: TypeString, Description: "Provide the localized names and descriptions if found. If not provided the default locale is used. Example de_DE"},
 		},
-		SampleResponse: "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"id\": \"string\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"id\": \"string\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"version\": 1\n}\n",
 		Deprecated:     true,
 	},
 	{
@@ -3326,7 +3327,7 @@ var operations = []Operation{
 			{Name: "size", In: InQuery, Type: TypeInteger, Description: "number of entities to show"},
 			{Name: "startAfterId", In: InQuery, Type: TypeString, Description: "all entities after given Id"},
 		},
-		SampleResponse: "[\n  {\n    \"descriptionLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"id\": \"string\",\n    \"nameLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"priority\": 100,\n    \"version\": 1\n  }\n]\n",
+		SampleResponse: "[\n  {\n    \"created\": \"2026-06-17T12:00:00Z\",\n    \"descriptionLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"id\": \"string\",\n    \"lastModified\": \"2026-06-17T12:00:00Z\",\n    \"nameLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"priority\": 100,\n    \"version\": 1\n  }\n]\n",
 		Deprecated:     true,
 	},
 	{
@@ -3356,7 +3357,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "recordId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"attributeDefinitions\": {},\n  \"id\": \"string\",\n  \"items\": [\n    {\n      \"id\": \"string\",\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"attributeDefinitions\": {},\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"items\": [\n    {\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"tenantRecordId\": \"MY_RECORD_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "getMeasurementUnitByID",
@@ -3388,7 +3389,7 @@ var operations = []Operation{
 		Summary:        "Get notification config",
 		Description:    "This part of the API is in Beta status. For details, see the API release lifecycle documentation. Returns the notification center configuration.",
 		Permissions:    []string{"NOTIFICATION_CENTER_CONFIG_READ"},
-		SampleResponse: "{\n  \"channels\": [\n    {\n      \"enabled\": false,\n      \"events\": [\n        \"PICK_JOB_CREATED\"\n      ],\n      \"id\": \"string\",\n      \"receiver\": [\n        {\n          \"email\": \"user@example.com\",\n          \"language\": \"de_DE\"\n        }\n      ],\n      \"type\": \"EMAIL\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"channels\": [\n    {\n      \"enabled\": false,\n      \"events\": [\n        \"PICK_JOB_CREATED\"\n      ],\n      \"id\": \"string\",\n      \"receiver\": [\n        {\n          \"email\": \"phil.bison@fulfillmenttools.com\",\n          \"language\": \"de_DE\"\n        }\n      ],\n      \"type\": \"EMAIL\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "getNotificationCenterFacilityConfig",
@@ -3401,7 +3402,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "facilityRef", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"channels\": [\n    {\n      \"enabled\": false,\n      \"events\": [\n        \"PICK_JOB_CREATED\"\n      ],\n      \"id\": \"string\",\n      \"receiver\": [\n        {\n          \"email\": \"user@example.com\",\n          \"language\": \"de_DE\"\n        }\n      ],\n      \"type\": \"EMAIL\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"channels\": [\n    {\n      \"enabled\": false,\n      \"events\": [\n        \"PICK_JOB_CREATED\"\n      ],\n      \"id\": \"string\",\n      \"receiver\": [\n        {\n          \"email\": \"phil.bison@fulfillmenttools.com\",\n          \"language\": \"de_DE\"\n        }\n      ],\n      \"type\": \"EMAIL\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "getOidcProvider",
@@ -3423,7 +3424,7 @@ var operations = []Operation{
 		Summary:        "Get OIDC providers",
 		Description:    "Return a complete list of all configured OIDC providers.",
 		Permissions:    []string{"OIDC_PROVIDERS_CONFIG_READ"},
-		SampleResponse: "{\n  \"providers\": [\n    {\n      \"assignedGroups\": [\n        {\n          \"facilityRefs\": [\n            \"string\"\n          ],\n          \"group\": \"string\"\n        }\n      ],\n      \"clientId\": \"string\",\n      \"customParameters\": [\n        {\n          \"key\": \"string\",\n          \"value\": \"string\"\n        }\n      ],\n      \"id\": \"string\",\n      \"issuer\": \"string\",\n      \"name\": \"string\",\n      \"status\": \"ACTIVE\",\n      \"version\": 1\n    }\n  ],\n  \"total\": 1\n}\n",
+		SampleResponse: "{\n  \"providers\": [\n    {\n      \"assignedGroups\": [\n        {\n          \"facilityRefs\": [\n            \"string\"\n          ],\n          \"group\": \"string\"\n        }\n      ],\n      \"clientId\": \"string\",\n      \"customParameters\": [\n        {\n          \"key\": \"string\",\n          \"value\": \"string\"\n        }\n      ],\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"issuer\": \"string\",\n      \"name\": \"string\",\n      \"status\": \"ACTIVE\",\n      \"version\": 1\n    }\n  ],\n  \"total\": 1\n}\n",
 	},
 	{
 		ID:             "getOperationalRestowingConfigurations",
@@ -3476,7 +3477,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "operativeProcessId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"entityChildren\": [\n    {\n      \"entityRef\": \"string\",\n      \"entityType\": \"PICK_JOB\"\n    }\n  ],\n  \"facilityRef\": \"string\",\n  \"flatEntityRefs\": [\n    \"string\"\n  ],\n  \"id\": \"string\",\n  \"processRef\": \"string\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"entityChildren\": [\n    {\n      \"entityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"entityType\": \"PICK_JOB\"\n    }\n  ],\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"flatEntityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"processRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"routingPlanRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "getOperativeProcesses",
@@ -3491,7 +3492,7 @@ var operations = []Operation{
 			{Name: "size", In: InQuery, Type: TypeInteger, Description: "number of entities to show"},
 			{Name: "startAfterId", In: InQuery, Type: TypeString, Description: "entity to start after"},
 		},
-		SampleResponse: "{\n  \"operativeProcesses\": [\n    {\n      \"entityChildren\": [\n        {\n          \"entityRef\": \"string\",\n          \"entityType\": \"PICK_JOB\"\n        }\n      ],\n      \"facilityRef\": \"string\",\n      \"flatEntityRefs\": [\n        \"string\"\n      ],\n      \"id\": \"string\",\n      \"processRef\": \"string\",\n      \"version\": 1\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"total\": 1\n}\n",
+		SampleResponse: "{\n  \"operativeProcesses\": [\n    {\n      \"entityChildren\": [\n        {\n          \"entityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"entityType\": \"PICK_JOB\"\n        }\n      ],\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"flatEntityRefs\": [\n        \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n      ],\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"processRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"routingPlanRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"version\": 1\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"total\": 1\n}\n",
 	},
 	{
 		ID:          "getOperativeServiceConfiguration",
@@ -3517,7 +3518,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "orderId", In: InPath, Type: TypeString, Required: true, Description: "ID of order you want to get"},
 		},
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:             "getOrderCancelationConfiguration",
@@ -3550,7 +3551,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "orderRecordId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"deletionDate\": \"2026-01-01T00:00:00Z\",\n  \"facilityRef\": \"string\",\n  \"gdprCleanupDate\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"attributes\": [\n          {\n            \"key\": \"string\",\n            \"value\": \"string\"\n          }\n        ],\n        \"tenantArticleId\": \"string\"\n      },\n      \"id\": \"string\",\n      \"quantity\": 1\n    }\n  ],\n  \"orderRecordDate\": \"2026-01-01T00:00:00Z\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"deletionDate\": \"2026-06-17T12:00:00Z\",\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"gdprCleanupDate\": \"2026-06-17T12:00:00Z\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"attributes\": [\n          {\n            \"key\": \"string\",\n            \"priority\": 42,\n            \"value\": \"string\"\n          }\n        ],\n        \"tenantArticleId\": \"MY_ARTICLE_ID\"\n      },\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"quantity\": 42\n    }\n  ],\n  \"orderRecordDate\": \"2026-06-17T12:00:00Z\",\n  \"tenantOrderRecordId\": \"MY_ORDERRECORD_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "getOrderRecordsConfiguration",
@@ -3560,7 +3561,7 @@ var operations = []Operation{
 		Summary:        "Get order records configuration",
 		Description:    "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Get the current configuration for the order records functionality",
 		Permissions:    []string{"CONFIG_READ"},
-		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:50.525Z\",\n  \"id\": \"string\",\n  \"isOrderRecordsEnabled\": false,\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:50.525Z\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"isOrderRecordsEnabled\": false,\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:             "getOrderRoutingConfiguration",
@@ -3604,7 +3605,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "packJobId", In: InPath, Type: TypeString, Required: true, Description: "ID of the pack job you want to get"},
 		},
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"documentsRef\": \"string\",\n  \"facilityRef\": \"Esb50gpH7794X5NdMp3C\",\n  \"id\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"packed\": 20,\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"orderDate\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRef\": \"Pic50gpH7794X5NdMp3C\",\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"documentsRef\": \"string\",\n  \"facilityRef\": \"Esb50gpH7794X5NdMp3C\",\n  \"id\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"packed\": 20,\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"orderDate\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRef\": \"Pic50gpH7794X5NdMp3C\",\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:      "getPackJobDeliveryNote",
@@ -3748,7 +3749,7 @@ var operations = []Operation{
 			{Name: "packingSourceContainerId", In: InPath, Type: TypeString, Required: true, Description: "ID of the packingSourceContainer"},
 			{Name: "locale", In: InQuery, Type: TypeString, Description: "Provide the localized values for the entity. If not provided the default locale is used. For example de_DE."},
 		},
-		SampleResponse: "[\n  {\n    \"created\": \"2020-02-03T08:45:51.525Z\",\n    \"descriptionLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n    \"id\": \"c7467ba8-c28a-4473-8748-a4e54e675e4c\",\n    \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n    \"lineItems\": [\n      {\n        \"article\": {\n          \"tenantArticleId\": \"4711\",\n          \"title\": \"Cologne Water\"\n        },\n        \"id\": \"da488ad1-4215-4b9a-9642-c39883c6cd2c\",\n        \"measurementUnitKey\": \"liter\",\n        \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n        \"quantity\": 21,\n        \"secondaryMeasurementUnitKey\": \"gram\",\n        \"secondaryQuantity\": 200\n      }\n    ],\n    \"loadUnitRef\": \"2357914c-d965-421e-b6cf-330501bccaab\",\n    \"nameLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"packJobRefs\": [\n      \"0857914c-d965-421e-b6cf-330501bcca58\"\n    ],\n    \"sequenceNumber\": 100,\n    \"type\": \"VIRTUAL\",\n    \"version\": 42\n  }\n]\n",
+		SampleResponse: "[\n  {\n    \"created\": \"2020-02-03T08:45:51.525Z\",\n    \"descriptionLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n    \"id\": \"c7467ba8-c28a-4473-8748-a4e54e675e4c\",\n    \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n    \"lineItems\": [\n      {\n        \"article\": {\n          \"imageUrl\": \"https://example.com/resource\",\n          \"tenantArticleId\": \"4711\",\n          \"title\": \"Cologne Water\"\n        },\n        \"id\": \"da488ad1-4215-4b9a-9642-c39883c6cd2c\",\n        \"measurementUnitKey\": \"liter\",\n        \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n        \"quantity\": 21,\n        \"secondaryMeasurementUnitKey\": \"gram\",\n        \"secondaryQuantity\": 200\n      }\n    ],\n    \"loadUnitRef\": \"2357914c-d965-421e-b6cf-330501bccaab\",\n    \"nameLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"packJobRefs\": [\n      \"0857914c-d965-421e-b6cf-330501bcca58\"\n    ],\n    \"sequenceNumber\": 100,\n    \"type\": \"VIRTUAL\",\n    \"version\": 42\n  }\n]\n",
 	},
 	{
 		ID:          "getPackingSourceContainers",
@@ -3855,7 +3856,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "parcelInformationId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2026-04-15T08:02:01.956Z\",\n  \"facilityRef\": \"019eefb2-0001-7000-9000-100000000002\",\n  \"id\": \"019eefb1-4bd1-7ef0-98ba-f91e07243ea7\",\n  \"lastModified\": \"2026-04-15T08:02:01.956Z\",\n  \"operativeProcessRef\": \"019eefb2-0001-7000-9000-100000000003\",\n  \"parcelInformationLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019eefb2-0001-7000-9000-200000000002\",\n      \"id\": \"019eefb2-0001-7000-9000-200000000001\",\n      \"quantity\": 2,\n      \"scannableCodes\": [\n        \"4006381333931\"\n      ]\n    }\n  ],\n  \"processRef\": \"019eefb2-0001-7000-9000-100000000004\",\n  \"shippingInformationRef\": \"019eefb2-0001-7000-9000-100000000001\",\n  \"shortId\": \"FT-01\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2026-04-15T08:02:01.956Z\",\n  \"facilityRef\": \"019eefb2-0001-7000-9000-100000000002\",\n  \"id\": \"019eefb1-4bd1-7ef0-98ba-f91e07243ea7\",\n  \"lastModified\": \"2026-04-15T08:02:01.956Z\",\n  \"operativeProcessRef\": \"019eefb2-0001-7000-9000-100000000003\",\n  \"parcelInformationLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019eefb2-0001-7000-9000-200000000002\",\n      \"id\": \"019eefb2-0001-7000-9000-200000000001\",\n      \"quantity\": 2,\n      \"scannableCodes\": [\n        \"4006381333931\"\n      ]\n    }\n  ],\n  \"processRef\": \"019eefb2-0001-7000-9000-100000000004\",\n  \"shippingInformationRef\": \"019eefb2-0001-7000-9000-100000000001\",\n  \"shortId\": \"FT-01\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:      "getParcelReturnNote",
@@ -3912,7 +3913,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "pickJobId", In: InPath, Type: TypeString, Required: true, Description: "ID of the pickjob you want to get"},
 		},
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"deliveryinformation\": {\n    \"channel\": \"COLLECT\",\n    \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n    \"targetTimeBaseDate\": \"2020-02-03T08:45:50.525Z\"\n  },\n  \"documentsRef\": \"string\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderRef\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"a81f818e-2405-4570-8cde-b0c80fd3de31\",\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"pickJobLineItemRef\": \"12345\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryPicked\": 20,\n      \"secondaryQuantity\": 21,\n      \"status\": \"OPEN\",\n      \"stockEmptied\": true\n    }\n  ],\n  \"resetBlocked\": false,\n  \"shortId\": \"AS12\",\n  \"status\": \"ABORTED\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"deliveryinformation\": {\n    \"channel\": \"COLLECT\",\n    \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n    \"targetTimeBaseDate\": \"2020-02-03T08:45:50.525Z\"\n  },\n  \"documentsRef\": \"string\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderRef\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"a81f818e-2405-4570-8cde-b0c80fd3de31\",\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"pickJobLineItemRef\": \"12345\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryPicked\": 20,\n      \"secondaryQuantity\": 21,\n      \"status\": \"OPEN\",\n      \"stockEmptied\": true\n    }\n  ],\n  \"resetBlocked\": false,\n  \"shortId\": \"AS12\",\n  \"status\": \"ABORTED\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:      "getPickJobDeliveryNote",
@@ -3963,7 +3964,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "pickRunId", In: InPath, Type: TypeString, Required: true, Description: "id of pickRun"},
 		},
-		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRefs\": [\n    \"string\"\n  ],\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"pickJobLineItemRef\": \"12345\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryPicked\": 20,\n      \"secondaryQuantity\": 21,\n      \"status\": \"OPEN\",\n      \"stockEmptied\": true\n    }\n  ],\n  \"pickRunType\": \"batchPick\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRefs\": [\n    \"string\"\n  ],\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"pickJobLineItemRef\": \"12345\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryPicked\": 20,\n      \"secondaryQuantity\": 21,\n      \"status\": \"OPEN\",\n      \"stockEmptied\": true\n    }\n  ],\n  \"pickRunType\": \"batchPick\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:             "getPickingConfigurations",
@@ -4042,7 +4043,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "purchaseOrderId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"cancelled\": false,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-01-01T00:00:00Z\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"status\": \"OPEN\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"cancelled\": false,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-01-01T00:00:00Z\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 42\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"status\": \"OPEN\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "getReceipt",
@@ -4054,7 +4055,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "receiptId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"comments\": [\n    {\n      \"content\": \"string\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"receivedDate\": \"2026-01-01T00:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 1\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"comments\": [\n    {\n      \"content\": \"string\",\n      \"documentSetRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"receivedDate\": \"2026-06-17T12:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 42\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\",\n          \"documentSetRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 42\n      },\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\"\n    }\n  ],\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "getRemoteConfiguration",
@@ -4117,7 +4118,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "restowItemId", In: InPath, Type: TypeString, Required: true, Description: "ID of the restow item you want to get"},
 		},
-		SampleResponse: "{\n  \"article\": {\n    \"tenantArticleId\": \"4711\",\n    \"title\": \"Cologne Water\"\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"measurementUnitKey\": \"liter\",\n  \"quantity\": 1,\n  \"restowed\": true,\n  \"secondaryMeasurementUnitKey\": \"g\",\n  \"secondaryQuantity\": 42,\n  \"status\": \"CANCELED\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"article\": {\n    \"imageUrl\": \"https://example.com/resource\",\n    \"tenantArticleId\": \"4711\",\n    \"title\": \"Cologne Water\"\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"measurementUnitKey\": \"liter\",\n  \"quantity\": 1,\n  \"restowed\": true,\n  \"secondaryMeasurementUnitKey\": \"g\",\n  \"secondaryQuantity\": 42,\n  \"status\": \"CANCELED\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:      "getResultingSubstitutesForTenantArticleId",
@@ -4223,7 +4224,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "id", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"blacklistedFacilityData\": [\n    {\n      \"facilityRef\": \"string\"\n    }\n  ],\n  \"changeType\": \"INITIAL\",\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"orderRef\": \"string\",\n  \"processRef\": \"string\",\n  \"routingPlanRefs\": [\n    \"string\"\n  ],\n  \"runId\": \"string\",\n  \"sourcingOptionRef\": {}\n}\n",
+		SampleResponse: "{\n  \"blacklistedFacilityData\": [\n    {\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ],\n  \"changeType\": \"INITIAL\",\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"orderRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"processRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"routingPlanRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"runId\": \"string\",\n  \"sourcingOptionRef\": {}\n}\n",
 	},
 	{
 		ID:      "getRoutingPlan",
@@ -4334,7 +4335,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "serviceContainerId", In: InPath, Type: TypeString, Required: true, Description: "ID of the service container to retrieve"},
 		},
-		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"description\": \"A medium-sized red box\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"ba095e30-879f-11ee-b9d1-0242ac120002\",\n  \"iconUrl\": \"https://example.com/icon.png\",\n  \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n      \"id\": \"17ebfdfb-e1b4-4913-9962-3aef2b49f16f\",\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 5,\n      \"scannableCodes\": [\n        \"AB-123456\"\n      ],\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 100\n    }\n  ],\n  \"name\": \"Red Box\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"scannableCodes\": [\n    \"AB-123456\"\n  ],\n  \"serviceJobRefs\": [\n    \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n  ],\n  \"stackRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"storageLocationRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"type\": \"DEFAULT\",\n  \"version\": 42,\n  \"weightLimitInG\": 5000\n}\n",
+		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"description\": \"A medium-sized red box\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"ba095e30-879f-11ee-b9d1-0242ac120002\",\n  \"iconUrl\": \"https://example.com/icon.png\",\n  \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n      \"id\": \"17ebfdfb-e1b4-4913-9962-3aef2b49f16f\",\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 5,\n      \"scannableCodes\": [\n        \"AB-123456\"\n      ],\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 100\n    }\n  ],\n  \"name\": \"Red Box\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"scannableCodes\": [\n    \"AB-123456\"\n  ],\n  \"sequenceNumber\": 42,\n  \"serviceJobRefs\": [\n    \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n  ],\n  \"stackRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"storageLocationRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"type\": \"DEFAULT\",\n  \"version\": 42,\n  \"weightLimitInG\": 5000\n}\n",
 	},
 	{
 		ID:          "getServiceContainers",
@@ -4364,7 +4365,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "serviceJobId", In: InPath, Type: TypeString, Required: true, Description: "ID of the service job to retrieve containers for"},
 		},
-		SampleResponse: "[\n  {\n    \"created\": \"2020-02-03T08:45:51.525Z\",\n    \"description\": \"A medium-sized red box\",\n    \"descriptionLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"facilityRef\": \"ba095e30-879f-11ee-b9d1-0242ac120002\",\n    \"iconUrl\": \"https://example.com/icon.png\",\n    \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n    \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n    \"lineItems\": [\n      {\n        \"article\": {\n          \"tenantArticleId\": \"4711\",\n          \"title\": \"Cologne Water\"\n        },\n        \"globalLineItemId\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n        \"id\": \"17ebfdfb-e1b4-4913-9962-3aef2b49f16f\",\n        \"measurementUnitKey\": \"pcs\",\n        \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n        \"quantity\": 5,\n        \"scannableCodes\": [\n          \"AB-123456\"\n        ],\n        \"secondaryMeasurementUnitKey\": \"g\",\n        \"secondaryQuantity\": 100\n      }\n    ],\n    \"name\": \"Red Box\",\n    \"nameLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"operativeContainerTypeRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n    \"scannableCodes\": [\n      \"AB-123456\"\n    ],\n    \"serviceJobRefs\": [\n      \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n    ],\n    \"stackRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n    \"storageLocationRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n    \"type\": \"DEFAULT\",\n    \"version\": 42,\n    \"weightLimitInG\": 5000\n  }\n]\n",
+		SampleResponse: "[\n  {\n    \"created\": \"2020-02-03T08:45:51.525Z\",\n    \"description\": \"A medium-sized red box\",\n    \"descriptionLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"facilityRef\": \"ba095e30-879f-11ee-b9d1-0242ac120002\",\n    \"iconUrl\": \"https://example.com/icon.png\",\n    \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n    \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n    \"lineItems\": [\n      {\n        \"article\": {\n          \"imageUrl\": \"https://example.com/resource\",\n          \"tenantArticleId\": \"4711\",\n          \"title\": \"Cologne Water\"\n        },\n        \"globalLineItemId\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n        \"id\": \"17ebfdfb-e1b4-4913-9962-3aef2b49f16f\",\n        \"measurementUnitKey\": \"pcs\",\n        \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n        \"quantity\": 5,\n        \"scannableCodes\": [\n          \"AB-123456\"\n        ],\n        \"secondaryMeasurementUnitKey\": \"g\",\n        \"secondaryQuantity\": 100\n      }\n    ],\n    \"name\": \"Red Box\",\n    \"nameLocalized\": {\n      \"de_DE\": \"Wert\",\n      \"en_US\": \"Value\",\n      \"ru_RU\": \"значение\"\n    },\n    \"operativeContainerTypeRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n    \"scannableCodes\": [\n      \"AB-123456\"\n    ],\n    \"sequenceNumber\": 42,\n    \"serviceJobRefs\": [\n      \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n    ],\n    \"stackRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n    \"storageLocationRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n    \"type\": \"DEFAULT\",\n    \"version\": 42,\n    \"weightLimitInG\": 5000\n  }\n]\n",
 	},
 	{
 		ID:          "getServiceData",
@@ -4377,7 +4378,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "serviceJobId", In: InPath, Type: TypeString, Required: true, Description: "ID of service job referenced by the service data you want to get"},
 		},
-		SampleResponse: "{\n  \"availableLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"availableQuantity\": 12,\n      \"executedServiceJobData\": [\n        {\n          \"appliedQuantity\": 0,\n          \"itemsReturnable\": true,\n          \"sequence\": 1,\n          \"serviceJobRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\"\n        }\n      ],\n      \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 1,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"serviceJobRefs\": [\n    \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n  ],\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"availableLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"availableQuantity\": 12,\n      \"executedServiceJobData\": [\n        {\n          \"appliedQuantity\": 0,\n          \"itemsReturnable\": true,\n          \"sequence\": 1,\n          \"serviceJobRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\"\n        }\n      ],\n      \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 1,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"serviceJobRefs\": [\n    \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n  ],\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "getServiceJob",
@@ -4390,7 +4391,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "serviceJobId", In: InPath, Type: TypeString, Required: true, Description: "ID of service job you want to get"},
 		},
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"customServiceRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"description\": \"Wrapping 3 gifts for order ocff-order-100\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"executionTimeInMin\": 60,\n  \"facilityRef\": \"ba095e30-879f-11ee-b9d1-0242ac120002\",\n  \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"imageRefs\": [\n    \"https://my-image-host.com/images/custom-service-1.jpg\"\n  ],\n  \"itemsRequired\": \"OPTIONAL\",\n  \"itemsReturnable\": false,\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 12,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"linkedServiceJobsRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"name\": \"Gift Wrapping Job\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeProcessRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"processRef\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"serviceJobLinkRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"shortId\": \"KD-12-1\",\n  \"status\": \"OPEN\",\n  \"subStatus\": \"WAITING_FOR_INPUT\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"tenantCustomServiceId\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"tenantOrderId\": \"ocff-order-100\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"customServiceRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"description\": \"Wrapping 3 gifts for order ocff-order-100\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"executionTimeInMin\": 60,\n  \"facilityRef\": \"ba095e30-879f-11ee-b9d1-0242ac120002\",\n  \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"imageRefs\": [\n    \"https://my-image-host.com/images/custom-service-1.jpg\"\n  ],\n  \"itemsRequired\": \"OPTIONAL\",\n  \"itemsReturnable\": false,\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 12,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"linkedServiceJobsRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"name\": \"Gift Wrapping Job\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeProcessRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"processRef\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"serviceJobLinkRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"shortId\": \"KD-12-1\",\n  \"status\": \"OPEN\",\n  \"subStatus\": \"WAITING_FOR_INPUT\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"tenantCustomServiceId\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"tenantOrderId\": \"ocff-order-100\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "getServiceJobs",
@@ -4465,7 +4466,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "shippingInformationId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"carrierRecipientInformation\": [\n    {\n      \"address\": [\n        {\n          \"city\": \"string\",\n          \"country\": \"DE\",\n          \"postalCode\": \"string\",\n          \"street\": \"string\"\n        }\n      ],\n      \"id\": \"string\"\n    }\n  ],\n  \"created\": \"2025-08-04T08:16:07Z\",\n  \"facilityRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"id\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"lastModified\": \"2025-08-04T08:16:07Z\",\n  \"operativeProcessRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"processRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"senderAddress\": {\n    \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n    \"city\": \"Langenfeld\",\n    \"companyName\": \"Speedy Boxales Ltd.\",\n    \"country\": \"DE\",\n    \"houseNumber\": \"42a\",\n    \"postalCode\": \"40764\",\n    \"province\": \"NRW\",\n    \"street\": \"Hauptstr.\"\n  },\n  \"shippingInformationLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"id\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"quantity\": 1,\n      \"scannableCodes\": [\n        \"ABC-12345\"\n      ]\n    }\n  ],\n  \"shortId\": \"ABC123\",\n  \"tenantOrderId\": \"ORDER-12345\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"carrierRecipientInformation\": [\n    {\n      \"address\": [\n        {\n          \"city\": \"Yellowstone\",\n          \"country\": \"DE\",\n          \"email\": \"phil.bison@fulfillmenttools.com\",\n          \"emailAddresses\": [\n            {}\n          ],\n          \"houseNumber\": \"42\",\n          \"postalCode\": \"42420\",\n          \"street\": \"string\"\n        }\n      ],\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ],\n  \"created\": \"2025-08-04T08:16:07Z\",\n  \"facilityRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"id\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"lastModified\": \"2025-08-04T08:16:07Z\",\n  \"operativeProcessRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"processRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n  \"senderAddress\": {\n    \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n    \"city\": \"Langenfeld\",\n    \"companyName\": \"Speedy Boxales Ltd.\",\n    \"country\": \"DE\",\n    \"houseNumber\": \"42a\",\n    \"postalCode\": \"40764\",\n    \"province\": \"NRW\",\n    \"street\": \"Hauptstr.\"\n  },\n  \"shippingInformationLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"id\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"quantity\": 1,\n      \"scannableCodes\": [\n        \"ABC-12345\"\n      ]\n    }\n  ],\n  \"shortId\": \"ABC123\",\n  \"tenantOrderId\": \"ORDER-12345\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "getSignedAttachmentUrl",
@@ -4491,7 +4492,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "id", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:      "getSourcingOption",
@@ -4515,7 +4516,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "stackId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRefs\": [\n    \"string\"\n  ],\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"processRefs\": [\n    \"string\"\n  ],\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"processRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "getStackForHandoverContainer",
@@ -4528,7 +4529,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "handoverContainerId", In: InPath, Type: TypeString, Required: true, Description: "id of the handover container"},
 		},
-		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRefs\": [\n    \"string\"\n  ],\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"processRefs\": [\n    \"string\"\n  ],\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"processRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "getStackForLoadUnit",
@@ -4541,7 +4542,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "loadUnitId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRefs\": [\n    \"string\"\n  ],\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"processRefs\": [\n    \"string\"\n  ],\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"processRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "getStacks",
@@ -4556,7 +4557,7 @@ var operations = []Operation{
 			{Name: "size", In: InQuery, Type: TypeInteger, Description: "number of entities to show"},
 			{Name: "startAfterId", In: InQuery, Type: TypeString, Description: "entity to start after"},
 		},
-		SampleResponse: "{\n  \"stacks\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"facilityRefs\": [\n        \"string\"\n      ],\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"processRefs\": [\n        \"string\"\n      ],\n      \"version\": 42\n    }\n  ],\n  \"total\": 42\n}\n",
+		SampleResponse: "{\n  \"stacks\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"facilityRefs\": [\n        \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n      ],\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"processRefs\": [\n        \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n      ],\n      \"version\": 42\n    }\n  ],\n  \"total\": 42\n}\n",
 	},
 	{
 		ID:          "getStock",
@@ -4568,7 +4569,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "stockId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"available\": 1,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facility\": {\n    \"facilityRef\": \"string\"\n  },\n  \"facilityRef\": \"string\",\n  \"facilityWideReserved\": 1,\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"reserved\": 1,\n  \"serializedProperties\": \"string\",\n  \"tenantArticleId\": \"string\",\n  \"traits\": [\n    \"PICKABLE\"\n  ],\n  \"value\": 1,\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"available\": 1,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facility\": {\n    \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"tenantFacilityId\": \"MY_FACILITY_ID\"\n  },\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"facilityWideReserved\": 1,\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"locationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"receiptDate\": \"2026-06-17T12:00:00Z\",\n  \"reserved\": 1,\n  \"serializedProperties\": \"string\",\n  \"tenantArticleId\": \"MY_ARTICLE_ID\",\n  \"tenantStockId\": \"MY_STOCK_ID\",\n  \"traits\": [\n    \"PICKABLE\"\n  ],\n  \"value\": 42,\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "getStockConfiguration",
@@ -4617,7 +4618,7 @@ var operations = []Operation{
 			{Name: "startAfterId", In: InQuery, Type: TypeString, Description: "The stockSummaries.article.tenantArticleId value should be used for pagination."},
 			{Name: "tenantArticleIds", In: InQuery, Type: TypeArray, Item: TypeString, Explode: true},
 		},
-		SampleResponse: "{\n  \"stockSummaries\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"string\",\n        \"title\": \"string\"\n      },\n      \"details\": {\n        \"available\": 1,\n        \"availableForPicking\": 1,\n        \"availableOnStock\": 1,\n        \"availableToPromise\": 1,\n        \"byTrait\": {\n          \"ACCESSIBLE\": 1,\n          \"PICKABLE\": 1\n        },\n        \"readyToPick\": 1,\n        \"reserved\": 1,\n        \"safetyStock\": 1,\n        \"stockOnHand\": 1,\n        \"totalAmount\": 1\n      },\n      \"includedFacilityRefs\": [\n        \"string\"\n      ]\n    }\n  ],\n  \"total\": 1\n}\n",
+		SampleResponse: "{\n  \"stockSummaries\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"string\",\n        \"title\": \"string\"\n      },\n      \"details\": {\n        \"available\": 1,\n        \"availableForPicking\": 1,\n        \"availableOnStock\": 1,\n        \"availableToPromise\": 1,\n        \"byTrait\": {\n          \"ACCESSIBLE\": 1,\n          \"PICKABLE\": 1\n        },\n        \"readyToPick\": 1,\n        \"reserved\": 1,\n        \"safetyStock\": 1,\n        \"stockOnHand\": 1,\n        \"totalAmount\": 1\n      },\n      \"includedFacilityRefs\": [\n        \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n      ]\n    }\n  ],\n  \"total\": 1\n}\n",
 	},
 	{
 		ID:          "getStocks",
@@ -4634,7 +4635,7 @@ var operations = []Operation{
 			{Name: "tenantArticleId", In: InQuery, Type: TypeArray, Item: TypeString, Explode: true},
 			{Name: "tenantFacilityId", In: InQuery, Type: TypeString},
 		},
-		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"stocks\": [\n    {\n      \"available\": 1,\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"facility\": {\n        \"facilityRef\": \"string\"\n      },\n      \"facilityRef\": \"string\",\n      \"facilityWideReserved\": 1,\n      \"id\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"reserved\": 1,\n      \"serializedProperties\": \"string\",\n      \"tenantArticleId\": \"string\",\n      \"traits\": [\n        \"PICKABLE\"\n      ],\n      \"value\": 1,\n      \"version\": 1\n    }\n  ]\n}\n",
+		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"stocks\": [\n    {\n      \"available\": 1,\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"facility\": {\n        \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"tenantFacilityId\": \"MY_FACILITY_ID\"\n      },\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"facilityWideReserved\": 1,\n      \"id\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"locationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"receiptDate\": \"2026-06-17T12:00:00Z\",\n      \"reserved\": 1,\n      \"serializedProperties\": \"string\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\",\n      \"tenantStockId\": \"MY_STOCK_ID\",\n      \"traits\": [\n        \"PICKABLE\"\n      ],\n      \"value\": 42,\n      \"version\": 1\n    }\n  ]\n}\n",
 	},
 	{
 		ID:          "getStowJob",
@@ -4647,7 +4648,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "stowJobId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"status\": \"OPEN\",\n  \"stowLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"string\"\n      },\n      \"id\": \"string\",\n      \"stowTo\": [\n        {\n          \"id\": \"string\",\n          \"quantity\": 1,\n          \"type\": \"STOCK\"\n        }\n      ],\n      \"takeFrom\": {\n        \"quantity\": 1,\n        \"type\": \"STOCK\"\n      }\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"status\": \"OPEN\",\n  \"stowLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"MY_ARTICLE_ID\"\n      },\n      \"heldStockRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"stowTo\": [\n        {\n          \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"quantity\": 1,\n          \"stockRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"type\": \"STOCK\"\n        }\n      ],\n      \"takeFrom\": {\n        \"quantity\": 1,\n        \"stockRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"type\": \"STOCK\"\n      }\n    }\n  ],\n  \"targetTime\": \"2026-06-17T12:00:00Z\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "getStowJobs",
@@ -4669,7 +4670,7 @@ var operations = []Operation{
 			{Name: "stockRef", In: InQuery, Type: TypeArray, Item: TypeString, Explode: true},
 			{Name: "tenantArticleId", In: InQuery, Type: TypeArray, Item: TypeString, Explode: true},
 		},
-		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"stowJobs\": [\n    {\n      \"facilityRef\": \"string\",\n      \"id\": \"string\",\n      \"status\": \"OPEN\",\n      \"stowLineItems\": [\n        {\n          \"article\": {\n            \"tenantArticleId\": \"string\"\n          },\n          \"id\": \"string\",\n          \"stowTo\": [\n            {}\n          ],\n          \"takeFrom\": {\n            \"quantity\": 1,\n            \"type\": \"STOCK\"\n          }\n        }\n      ],\n      \"version\": 1\n    }\n  ]\n}\n",
+		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"stowJobs\": [\n    {\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"status\": \"OPEN\",\n      \"stowLineItems\": [\n        {\n          \"article\": {\n            \"imageUrl\": \"https://example.com/resource\",\n            \"tenantArticleId\": \"MY_ARTICLE_ID\"\n          },\n          \"heldStockRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"stowTo\": [\n            {}\n          ],\n          \"takeFrom\": {\n            \"quantity\": 1,\n            \"stockRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n            \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n            \"type\": \"STOCK\"\n          }\n        }\n      ],\n      \"targetTime\": \"2026-06-17T12:00:00Z\",\n      \"version\": 1\n    }\n  ]\n}\n",
 	},
 	{
 		ID:      "getSubscriptions",
@@ -4739,7 +4740,7 @@ var operations = []Operation{
 			{Name: "targetcontainerId", In: InPath, Type: TypeString, Required: true, Description: "ID of the target container you want to get"},
 			{Name: "locale", In: InQuery, Type: TypeString, Description: "Provide the localized values for the entity. If not provided the default locale is used. For example de_DE."},
 		},
-		SampleResponse: "{\n  \"codes\": [\n    \"string\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"packJobRef\": \"string\",\n  \"sequenceNumber\": 100,\n  \"type\": \"VIRTUAL\",\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
+		SampleResponse: "{\n  \"codes\": [\n    \"string\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"packJobRef\": \"string\",\n  \"sequenceNumber\": 100,\n  \"type\": \"VIRTUAL\",\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
 	},
 	{
 		ID:             "getTenantConfiguration",
@@ -4776,7 +4777,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "userId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"assignedRoles\": [\n    {\n      \"ref\": \"string\"\n    }\n  ],\n  \"authenticationProvider\": {\n    \"type\": {}\n  },\n  \"authenticationProviderType\": \"de_DE\",\n  \"email\": \"john.doe@example.com\",\n  \"firstname\": \"John\",\n  \"id\": \"string\",\n  \"lastname\": \"Doe\",\n  \"locale\": \"de_DE\",\n  \"username\": \"johndoe\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"assignedRoles\": [\n    {\n      \"ref\": \"string\"\n    }\n  ],\n  \"authenticationProvider\": {\n    \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"type\": {}\n  },\n  \"authenticationProviderType\": \"de_DE\",\n  \"email\": \"john.doe@example.com\",\n  \"firstname\": \"John\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastname\": \"Doe\",\n  \"locale\": \"de_DE\",\n  \"username\": \"johndoe\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "getUserRoles",
@@ -4824,7 +4825,7 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		SampleBody:     "{\n  \"itemReturnJobVersion\": 1,\n  \"name\": \"AnnounceItemReturn\"\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"string\",\n  \"itemReturns\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"returnFacilityRef\": \"string\",\n      \"returnedLineItems\": [\n        {\n          \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n          \"itemCondition\": \"Damaged\",\n          \"itemConditionComment\": \"Upper corner damaged\",\n          \"itemConditionLocalized\": {\n            \"de_DE\": \"Wert\",\n            \"en_US\": \"Value\",\n            \"ru_RU\": \"значение\"\n          },\n          \"itemReturnJobLineItemRefs\": [\n            \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n          ],\n          \"status\": \"OPEN\",\n          \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n        }\n      ],\n      \"status\": \"ANNOUNCED\"\n    }\n  ],\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"processRef\": \"string\",\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7,\n      \"id\": \"611c860f-3f00-4b01-9f4c-64cdee38a30e\",\n      \"returnable\": 7,\n      \"returned\": 5\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"string\",\n  \"itemReturns\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"returnFacilityRef\": \"string\",\n      \"returnedLineItems\": [\n        {\n          \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n          \"itemCondition\": \"Damaged\",\n          \"itemConditionComment\": \"Upper corner damaged\",\n          \"itemConditionLocalized\": {\n            \"de_DE\": \"Wert\",\n            \"en_US\": \"Value\",\n            \"ru_RU\": \"значение\"\n          },\n          \"itemReturnJobLineItemRefs\": [\n            \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n          ],\n          \"status\": \"OPEN\",\n          \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n        }\n      ],\n      \"status\": \"ANNOUNCED\"\n    }\n  ],\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"processRef\": \"string\",\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7,\n      \"id\": \"611c860f-3f00-4b01-9f4c-64cdee38a30e\",\n      \"returnable\": 7,\n      \"returned\": 5\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "listFacilityCarriers",
@@ -4837,7 +4838,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "facilityId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{}\n",
+		SampleResponse: "{\n  \"total\": 42\n}\n",
 	},
 	{
 		ID:          "listOrderRecords",
@@ -4853,7 +4854,7 @@ var operations = []Operation{
 			{Name: "startAfterId", In: InQuery, Type: TypeString},
 			{Name: "tenantOrderRecordId", In: InQuery, Type: TypeString},
 		},
-		SampleResponse: "{\n  \"orderRecords\": [\n    {\n      \"anonymized\": false,\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"deletionDate\": \"2026-01-01T00:00:00Z\",\n      \"facilityRef\": \"string\",\n      \"gdprCleanupDate\": \"2026-01-01T00:00:00Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"lineItems\": [\n        {\n          \"article\": {\n            \"attributes\": [],\n            \"tenantArticleId\": \"string\"\n          },\n          \"id\": \"string\",\n          \"quantity\": 1\n        }\n      ],\n      \"orderRecordDate\": \"2026-01-01T00:00:00Z\",\n      \"version\": 1\n    }\n  ],\n  \"total\": 42\n}\n",
+		SampleResponse: "{\n  \"orderRecords\": [\n    {\n      \"anonymized\": false,\n      \"created\": \"2026-06-17T12:00:00Z\",\n      \"deletionDate\": \"2026-06-17T12:00:00Z\",\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"gdprCleanupDate\": \"2026-06-17T12:00:00Z\",\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"lastModified\": \"2026-06-17T12:00:00Z\",\n      \"lineItems\": [\n        {\n          \"article\": {\n            \"attributes\": [],\n            \"tenantArticleId\": \"MY_ARTICLE_ID\"\n          },\n          \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"quantity\": 42\n        }\n      ],\n      \"orderRecordDate\": \"2026-06-17T12:00:00Z\",\n      \"tenantOrderRecordId\": \"MY_ORDERRECORD_ID\",\n      \"version\": 1\n    }\n  ],\n  \"total\": 42\n}\n",
 	},
 	{
 		ID:          "listRoutingJournals",
@@ -4869,7 +4870,7 @@ var operations = []Operation{
 			{Name: "size", In: InQuery, Type: TypeNumber},
 			{Name: "startAfterId", In: InQuery, Type: TypeString},
 		},
-		SampleResponse: "{\n  \"routingJournals\": [\n    {\n      \"blacklistedFacilityData\": [\n        {\n          \"facilityRef\": \"string\"\n        }\n      ],\n      \"changeType\": \"INITIAL\",\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"id\": \"string\",\n      \"orderRef\": \"string\",\n      \"processRef\": \"string\",\n      \"routingPlanRefs\": [\n        \"string\"\n      ],\n      \"runId\": \"string\",\n      \"sourcingOptionRef\": {}\n    }\n  ],\n  \"total\": 42\n}\n",
+		SampleResponse: "{\n  \"routingJournals\": [\n    {\n      \"blacklistedFacilityData\": [\n        {\n          \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n        }\n      ],\n      \"changeType\": \"INITIAL\",\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"orderRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"processRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"routingPlanRefs\": [\n        \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n      ],\n      \"runId\": \"string\",\n      \"sourcingOptionRef\": {}\n    }\n  ],\n  \"total\": 42\n}\n",
 	},
 	{
 		ID:          "listSimulationOrders",
@@ -4883,7 +4884,7 @@ var operations = []Operation{
 			{Name: "size", In: InQuery, Type: TypeNumber},
 			{Name: "startAfterId", In: InQuery, Type: TypeString},
 		},
-		SampleResponse: "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "loadUnitActions",
@@ -4899,7 +4900,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"name\": \"string\",\n  \"recordableAttributes\": [\n    {\n      \"group\": \"general\",\n      \"recordableAttributeId\": \"17ebfdfb-e1b4-4913-9962-3aef2b49f16f\",\n      \"recordingRule\": \"MANDATORY\",\n      \"value\": \"Germany\"\n    }\n  ],\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"pickJobRefs\": [\n    \"string\"\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"loadUnitTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"pickJobRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "orderAction",
@@ -4913,7 +4914,7 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		SampleBody:     "{\n  \"name\": \"UNLOCK\",\n  \"targetTime\": \"2025-01-15T00:00:00Z\",\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:          "orderLineItemAction",
@@ -4928,7 +4929,7 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		SampleBody:     "{\n  \"customAttributes\": {},\n  \"name\": \"UPDATE_CUSTOM_ATTRIBUTES\",\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:      "packJobAction",
@@ -4941,7 +4942,7 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		SampleBody:     "{\n  \"assignedUsers\": [\n    {\n      \"username\": \"string\"\n    }\n  ],\n  \"name\": \"REPLACE_ASSIGNED_USERS\",\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"documentsRef\": \"string\",\n  \"facilityRef\": \"Esb50gpH7794X5NdMp3C\",\n  \"id\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"packed\": 20,\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"orderDate\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRef\": \"Pic50gpH7794X5NdMp3C\",\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"documentsRef\": \"string\",\n  \"facilityRef\": \"Esb50gpH7794X5NdMp3C\",\n  \"id\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"packed\": 20,\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"orderDate\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRef\": \"Pic50gpH7794X5NdMp3C\",\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:          "parcelAction",
@@ -4970,8 +4971,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"actions\": [\n    {\n      \"action\": \"ModifyCarrier\",\n      \"defaultParcelHeightInCm\": 10,\n      \"defaultParcelLengthInCm\": 25,\n      \"defaultParcelWeightInGram\": 1000,\n      \"defaultParcelWidthInCm\": 35\n    }\n  ],\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"defaultParcelHeightInCm\": 10,\n  \"defaultParcelLengthInCm\": 25,\n  \"defaultParcelWeightInGram\": 1000,\n  \"defaultParcelWidthInCm\": 35,\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"key\": \"DHL_V2\",\n  \"name\": \"DHL Köln\",\n  \"productValueNeeded\": true,\n  \"version\": 42\n}\n",
+		SampleBody:     "{\n  \"actions\": [\n    {\n      \"action\": \"ModifyCarrier\",\n      \"defaultParcelHeightInCm\": 10,\n      \"defaultParcelLengthInCm\": 25,\n      \"defaultParcelWeightInGram\": 1000,\n      \"defaultParcelWidthInCm\": 35,\n      \"logoUrl\": \"https://example.com/resource\"\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"defaultParcelHeightInCm\": 10,\n  \"defaultParcelLengthInCm\": 25,\n  \"defaultParcelWeightInGram\": 1000,\n  \"defaultParcelWidthInCm\": 35,\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"key\": \"DHL_V2\",\n  \"logoUrl\": \"https://example.com/resource\",\n  \"name\": \"DHL Köln\",\n  \"productValueNeeded\": true,\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "patchCustomService",
@@ -5014,7 +5015,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "facilityId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"id\": \"string\",\n  \"listingReactivationAfter\": {\n    \"active\": true,\n    \"value\": 24\n  },\n  \"retainedOfflineStock\": {\n    \"value\": 0.15\n  },\n  \"shortpick\": {\n    \"active\": true\n  },\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"listingReactivationAfter\": {\n    \"active\": true,\n    \"value\": 24\n  },\n  \"retainedOfflineStock\": {\n    \"value\": 0.15\n  },\n  \"shortpick\": {\n    \"active\": true\n  },\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:      "patchFacilityListing",
@@ -5104,8 +5105,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"additionalDocuments\": [\n    {\n      \"nameLocalized\": {},\n      \"url\": \"string\"\n    }\n  ],\n  \"anonymized\": false,\n  \"carrierData\": {\n    \"carrierRef\": \"string\"\n  },\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"recipientAddress\": [\n    {\n      \"city\": \"string\",\n      \"country\": \"DE\",\n      \"postalCode\": \"string\",\n      \"street\": \"string\"\n    }\n  ],\n  \"senderAddress\": {\n    \"city\": \"string\",\n    \"companyName\": \"string\",\n    \"country\": \"DE\",\n    \"postalCode\": \"string\",\n    \"street\": \"string\"\n  },\n  \"status\": \"WAITING_FOR_INPUT\",\n  \"type\": \"SEND_LABEL\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"labelUrl\": \"https://example.com/resource\",\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"additionalDocuments\": [\n    {\n      \"nameLocalized\": {},\n      \"url\": \"https://example.com/resource\"\n    }\n  ],\n  \"anonymized\": false,\n  \"carrierData\": {\n    \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n  },\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"labelUrl\": \"https://example.com/resource\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"operativeProcessRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"packageRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"processRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"recipientAddress\": [\n    {\n      \"city\": \"Yellowstone\",\n      \"country\": \"DE\",\n      \"email\": \"phil.bison@fulfillmenttools.com\",\n      \"emailAddresses\": [\n        {\n          \"value\": \"string\"\n        }\n      ],\n      \"houseNumber\": \"42\",\n      \"postalCode\": \"42420\",\n      \"street\": \"string\"\n    }\n  ],\n  \"senderAddress\": {\n    \"city\": \"Yellowstone\",\n    \"companyName\": \"string\",\n    \"country\": \"DE\",\n    \"emailAddresses\": [\n      {\n        \"value\": \"string\"\n      }\n    ],\n    \"houseNumber\": \"42\",\n    \"postalCode\": \"42420\",\n    \"street\": \"string\"\n  },\n  \"shippingInformationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"status\": \"WAITING_FOR_INPUT\",\n  \"tenantLabelId\": \"MY_LABEL_ID\",\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"type\": \"SEND_LABEL\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "patchLoadUnitByID",
@@ -5120,8 +5121,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"actions\": [\n    {\n      \"action\": \"ReplaceLoadUnitLineItems\",\n      \"loadUnitLineItems\": [\n        {\n          \"article\": {},\n          \"id\": \"string\",\n          \"measurementUnitKey\": \"liter\",\n          \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n          \"secondaryMeasurementUnitKey\": \"g\",\n          \"secondaryQuantity\": 1\n        }\n      ]\n    }\n  ],\n  \"version\": 42\n}\n",
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"pickJobRefs\": [\n    \"string\"\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"actions\": [\n    {\n      \"action\": \"ReplaceLoadUnitLineItems\",\n      \"loadUnitLineItems\": [\n        {\n          \"article\": {},\n          \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"measurementUnitKey\": \"liter\",\n          \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n          \"secondaryMeasurementUnitKey\": \"g\",\n          \"secondaryQuantity\": 1\n        }\n      ]\n    }\n  ],\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"loadUnitTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"pickJobRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "patchOidcProvider",
@@ -5137,7 +5138,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"assignedGroups\": [\n    {\n      \"facilityRefs\": [\n        \"string\"\n      ],\n      \"group\": \"string\"\n    }\n  ],\n  \"clientId\": \"string\",\n  \"customParameters\": [\n    {\n      \"key\": \"string\",\n      \"value\": \"string\"\n    }\n  ],\n  \"id\": \"string\",\n  \"issuer\": \"string\",\n  \"name\": \"string\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"assignedGroups\": [\n    {\n      \"facilityRefs\": [\n        \"string\"\n      ],\n      \"group\": \"string\"\n    }\n  ],\n  \"clientId\": \"string\",\n  \"customParameters\": [\n    {\n      \"key\": \"string\",\n      \"value\": \"string\"\n    }\n  ],\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"issuer\": \"string\",\n  \"name\": \"string\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:      "patchPackJob",
@@ -5151,7 +5152,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"actions\": [\n    {\n      \"action\": \"ModifyPackJob\"\n    }\n  ],\n  \"version\": 42\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"documentsRef\": \"string\",\n  \"facilityRef\": \"Esb50gpH7794X5NdMp3C\",\n  \"id\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"packed\": 20,\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"orderDate\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRef\": \"Pic50gpH7794X5NdMp3C\",\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"documentsRef\": \"string\",\n  \"facilityRef\": \"Esb50gpH7794X5NdMp3C\",\n  \"id\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"packed\": 20,\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"orderDate\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRef\": \"Pic50gpH7794X5NdMp3C\",\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:      "patchParcel",
@@ -5180,7 +5181,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"actions\": [\n    {\n      \"action\": \"ModifyPickLineItem\",\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"shortPickReasonLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"stockEmptied\": true\n    }\n  ],\n  \"version\": 42\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"deliveryinformation\": {\n    \"channel\": \"COLLECT\",\n    \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n    \"targetTimeBaseDate\": \"2020-02-03T08:45:50.525Z\"\n  },\n  \"documentsRef\": \"string\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderRef\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"a81f818e-2405-4570-8cde-b0c80fd3de31\",\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"pickJobLineItemRef\": \"12345\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryPicked\": 20,\n      \"secondaryQuantity\": 21,\n      \"status\": \"OPEN\",\n      \"stockEmptied\": true\n    }\n  ],\n  \"resetBlocked\": false,\n  \"shortId\": \"AS12\",\n  \"status\": \"ABORTED\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"deliveryinformation\": {\n    \"channel\": \"COLLECT\",\n    \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n    \"targetTimeBaseDate\": \"2020-02-03T08:45:50.525Z\"\n  },\n  \"documentsRef\": \"string\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderRef\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"a81f818e-2405-4570-8cde-b0c80fd3de31\",\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"pickJobLineItemRef\": \"12345\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryPicked\": 20,\n      \"secondaryQuantity\": 21,\n      \"status\": \"OPEN\",\n      \"stockEmptied\": true\n    }\n  ],\n  \"resetBlocked\": false,\n  \"shortId\": \"AS12\",\n  \"status\": \"ABORTED\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 		Deprecated:     true,
 	},
 	{
@@ -5195,7 +5196,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"actions\": [\n    {\n      \"action\": \"ModifyPickRunLineItem\",\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"picked\": 20,\n      \"secondaryPicked\": 20\n    }\n  ],\n  \"version\": 42\n}\n",
-		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRefs\": [\n    \"string\"\n  ],\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"pickJobLineItemRef\": \"12345\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryPicked\": 20,\n      \"secondaryQuantity\": 21,\n      \"status\": \"OPEN\",\n      \"stockEmptied\": true\n    }\n  ],\n  \"pickRunType\": \"batchPick\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRefs\": [\n    \"string\"\n  ],\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"pickJobLineItemRef\": \"12345\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryPicked\": 20,\n      \"secondaryQuantity\": 21,\n      \"status\": \"OPEN\",\n      \"stockEmptied\": true\n    }\n  ],\n  \"pickRunType\": \"batchPick\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:      "patchPickRunPickJobs",
@@ -5239,8 +5240,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"cancelled\": false,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-01-01T00:00:00Z\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"status\": \"OPEN\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-06-17T12:00:00Z\"\n  },\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"cancelled\": false,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-01-01T00:00:00Z\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 42\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"status\": \"OPEN\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "patchReceipt",
@@ -5254,8 +5255,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"comments\": [\n    {\n      \"content\": \"string\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"receivedDate\": \"2026-01-01T00:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 1\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"receivedDate\": \"2026-06-17T12:00:00Z\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"comments\": [\n    {\n      \"content\": \"string\",\n      \"documentSetRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"receivedDate\": \"2026-06-17T12:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 42\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\",\n          \"documentSetRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 42\n      },\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\"\n    }\n  ],\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "patchRestowItem",
@@ -5270,7 +5271,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"actions\": [\n    {\n      \"action\": \"ModifyRestowItem\",\n      \"restowed\": true\n    }\n  ],\n  \"version\": 42\n}\n",
-		SampleResponse: "{\n  \"article\": {\n    \"tenantArticleId\": \"4711\",\n    \"title\": \"Cologne Water\"\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"measurementUnitKey\": \"liter\",\n  \"quantity\": 1,\n  \"restowed\": true,\n  \"secondaryMeasurementUnitKey\": \"g\",\n  \"secondaryQuantity\": 42,\n  \"status\": \"CANCELED\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"article\": {\n    \"imageUrl\": \"https://example.com/resource\",\n    \"tenantArticleId\": \"4711\",\n    \"title\": \"Cologne Water\"\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"measurementUnitKey\": \"liter\",\n  \"quantity\": 1,\n  \"restowed\": true,\n  \"secondaryMeasurementUnitKey\": \"g\",\n  \"secondaryQuantity\": 42,\n  \"status\": \"CANCELED\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "patchRole",
@@ -5329,8 +5330,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "patchTargetContainerLineItem",
@@ -5346,8 +5347,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"name\": \"UpdateLineItem\",\n  \"payload\": {\n    \"lineItem\": {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  },\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"codes\": [\n    \"string\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"packJobRef\": \"string\",\n  \"sequenceNumber\": 100,\n  \"type\": \"VIRTUAL\",\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
+		SampleBody:     "{\n  \"name\": \"UpdateLineItem\",\n  \"payload\": {\n    \"lineItem\": {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  },\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"codes\": [\n    \"string\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"packJobRef\": \"string\",\n  \"sequenceNumber\": 100,\n  \"type\": \"VIRTUAL\",\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
 	},
 	{
 		ID:          "patchTargetcontainer",
@@ -5363,7 +5364,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"actions\": [\n    {\n      \"action\": \"ReplaceCodesInPackingTargetContainer\"\n    }\n  ],\n  \"version\": 42\n}\n",
-		SampleResponse: "{\n  \"codes\": [\n    \"string\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"packJobRef\": \"string\",\n  \"sequenceNumber\": 100,\n  \"type\": \"VIRTUAL\",\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
+		SampleResponse: "{\n  \"codes\": [\n    \"string\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"gram\",\n      \"secondaryQuantity\": 200\n    }\n  ],\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"packJobRef\": \"string\",\n  \"sequenceNumber\": 100,\n  \"type\": \"VIRTUAL\",\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
 	},
 	{
 		ID:          "performLabelAction",
@@ -5379,7 +5380,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"name\": \"string\",\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"additionalDocuments\": [\n    {\n      \"nameLocalized\": {},\n      \"url\": \"string\"\n    }\n  ],\n  \"anonymized\": false,\n  \"carrierData\": {\n    \"carrierRef\": \"string\"\n  },\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"recipientAddress\": [\n    {\n      \"city\": \"string\",\n      \"country\": \"DE\",\n      \"postalCode\": \"string\",\n      \"street\": \"string\"\n    }\n  ],\n  \"senderAddress\": {\n    \"city\": \"string\",\n    \"companyName\": \"string\",\n    \"country\": \"DE\",\n    \"postalCode\": \"string\",\n    \"street\": \"string\"\n  },\n  \"status\": \"WAITING_FOR_INPUT\",\n  \"type\": \"SEND_LABEL\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"additionalDocuments\": [\n    {\n      \"nameLocalized\": {},\n      \"url\": \"https://example.com/resource\"\n    }\n  ],\n  \"anonymized\": false,\n  \"carrierData\": {\n    \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n  },\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"labelUrl\": \"https://example.com/resource\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"operativeProcessRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"packageRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"processRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"recipientAddress\": [\n    {\n      \"city\": \"Yellowstone\",\n      \"country\": \"DE\",\n      \"email\": \"phil.bison@fulfillmenttools.com\",\n      \"emailAddresses\": [\n        {\n          \"value\": \"string\"\n        }\n      ],\n      \"houseNumber\": \"42\",\n      \"postalCode\": \"42420\",\n      \"street\": \"string\"\n    }\n  ],\n  \"senderAddress\": {\n    \"city\": \"Yellowstone\",\n    \"companyName\": \"string\",\n    \"country\": \"DE\",\n    \"emailAddresses\": [\n      {\n        \"value\": \"string\"\n      }\n    ],\n    \"houseNumber\": \"42\",\n    \"postalCode\": \"42420\",\n    \"street\": \"string\"\n  },\n  \"shippingInformationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"status\": \"WAITING_FOR_INPUT\",\n  \"tenantLabelId\": \"MY_LABEL_ID\",\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"type\": \"SEND_LABEL\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "performReservationActions",
@@ -5391,7 +5392,7 @@ var operations = []Operation{
 		Permissions:    []string{"RESERVATION_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"name\": \"REMOVE_RESERVATIONS_REDUCE_STOCKS\",\n  \"reservationSelector\": {}\n}\n",
+		SampleBody:     "{\n  \"name\": \"REMOVE_RESERVATIONS_REDUCE_STOCKS\",\n  \"reservationSelector\": {\n    \"orderRefs\": [\n      \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n    ],\n    \"reservationRefs\": [\n      \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n    ],\n    \"routingPlanRefs\": [\n      \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n    ]\n  }\n}\n",
 		SampleResponse: "[\n  {\n    \"reservation\": {\n      \"id\": \"string\"\n    },\n    \"status\": \"DELETED\"\n  }\n]\n",
 	},
 	{
@@ -5417,7 +5418,7 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		SampleBody:     "{\n  \"name\": \"ABORT\",\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"deliveryinformation\": {\n    \"channel\": \"COLLECT\",\n    \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n    \"targetTimeBaseDate\": \"2020-02-03T08:45:50.525Z\"\n  },\n  \"documentsRef\": \"string\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderRef\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"a81f818e-2405-4570-8cde-b0c80fd3de31\",\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"pickJobLineItemRef\": \"12345\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryPicked\": 20,\n      \"secondaryQuantity\": 21,\n      \"status\": \"OPEN\",\n      \"stockEmptied\": true\n    }\n  ],\n  \"resetBlocked\": false,\n  \"shortId\": \"AS12\",\n  \"status\": \"ABORTED\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"deliveryinformation\": {\n    \"channel\": \"COLLECT\",\n    \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n    \"targetTimeBaseDate\": \"2020-02-03T08:45:50.525Z\"\n  },\n  \"documentsRef\": \"string\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"Esb20gpHBL94X5NdMp3C\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderRef\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"globalLineItemId\": \"a81f818e-2405-4570-8cde-b0c80fd3de31\",\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"pickJobLineItemRef\": \"12345\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryPicked\": 20,\n      \"secondaryQuantity\": 21,\n      \"status\": \"OPEN\",\n      \"stockEmptied\": true\n    }\n  ],\n  \"resetBlocked\": false,\n  \"shortId\": \"AS12\",\n  \"status\": \"ABORTED\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:      "pickRunAction",
@@ -5430,7 +5431,7 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		SampleBody:     "{\n  \"name\": \"START\",\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRefs\": [\n    \"string\"\n  ],\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"pickJobLineItemRef\": \"12345\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryPicked\": 20,\n      \"secondaryQuantity\": 21,\n      \"status\": \"OPEN\",\n      \"stockEmptied\": true\n    }\n  ],\n  \"pickRunType\": \"batchPick\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"pickJobRefs\": [\n    \"string\"\n  ],\n  \"pickLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"climk4dcQFiPdA5ULuhS\",\n      \"measurementUnitKey\": \"liter\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"pickJobLineItemRef\": \"12345\",\n      \"picked\": 20,\n      \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryPicked\": 20,\n      \"secondaryQuantity\": 21,\n      \"status\": \"OPEN\",\n      \"stockEmptied\": true\n    }\n  ],\n  \"pickRunType\": \"batchPick\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:             "postCancelationReason",
@@ -5452,8 +5453,8 @@ var operations = []Operation{
 		Description:    "This part of the API is deprecated. For details, see the API release lifecycle documentation. Evaluate a checkout options input against the DOMS.",
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"deliveryPreferences\": {\n    \"targetTime\": \"2020-02-03T09:45:51.525Z\"\n  },\n  \"orderLineItems\": [\n    {}\n  ]\n}\n",
-		SampleResponse: "{\n  \"facilities\": [\n    {\n      \"address\": {\n        \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n        \"city\": \"Langenfeld\",\n        \"companyName\": \"Speedy Boxales Ltd.\",\n        \"country\": \"DE\",\n        \"houseNumber\": \"42a\",\n        \"postalCode\": \"40764\",\n        \"province\": \"NRW\",\n        \"street\": \"Hauptstr.\"\n      },\n      \"availabilities\": [\n        {\n          \"available\": 1,\n          \"isBackOrderable\": false,\n          \"tenantArticleId\": \"string\"\n        }\n      ],\n      \"closingDays\": [\n        {\n          \"date\": \"2020-02-03T09:45:51.525Z\",\n          \"reason\": \"string\",\n          \"recurrence\": \"YEARLY\"\n        }\n      ],\n      \"customServices\": [\n        {\n          \"customServiceRef\": \"string\",\n          \"name\": \"string\"\n        }\n      ],\n      \"facilityRef\": \"string\",\n      \"name\": \"string\",\n      \"pickingTimes\": {},\n      \"targetTime\": \"2026-01-01T00:00:00Z\"\n    }\n  ]\n}\n",
+		SampleBody:     "{\n  \"deliveryPreferences\": {\n    \"targetTime\": \"2020-02-03T09:45:51.525Z\"\n  },\n  \"filterDuplicates\": true,\n  \"orderLineItems\": [\n    {}\n  ]\n}\n",
+		SampleResponse: "{\n  \"facilities\": [\n    {\n      \"address\": {\n        \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n        \"city\": \"Langenfeld\",\n        \"companyName\": \"Speedy Boxales Ltd.\",\n        \"country\": \"DE\",\n        \"houseNumber\": \"42a\",\n        \"postalCode\": \"40764\",\n        \"province\": \"NRW\",\n        \"street\": \"Hauptstr.\"\n      },\n      \"availabilities\": [\n        {\n          \"available\": 42,\n          \"isBackOrderable\": true,\n          \"latestPickingStart\": \"2026-06-17T12:00:00Z\",\n          \"preOrderReleaseDate\": \"2026-06-17T12:00:00Z\",\n          \"tenantArticleId\": \"MY_ARTICLE_ID\"\n        }\n      ],\n      \"closingDays\": [\n        {\n          \"date\": \"2020-02-03T09:45:51.525Z\",\n          \"reason\": \"string\",\n          \"recurrence\": \"YEARLY\"\n        }\n      ],\n      \"customServices\": [\n        {\n          \"customServiceRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"name\": \"string\"\n        }\n      ],\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"name\": \"string\",\n      \"pickingTimes\": {},\n      \"targetTime\": \"2026-06-17T12:00:00Z\"\n    }\n  ]\n}\n",
 		Deprecated:     true,
 	},
 	{
@@ -5464,7 +5465,7 @@ var operations = []Operation{
 		Summary:        "Create promise order",
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"R456728546\"\n}\n",
+		SampleBody:     "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"R456728546\"\n}\n",
 		SampleResponse: "{\n  \"orderRef\": \"string\",\n  \"orderVersion\": 1\n}\n",
 	},
 	{
@@ -5638,8 +5639,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"carrierRef\": \"string\",\n  \"fallBackTrackAndTraceEmail\": \"max@speedyboxales.com\",\n  \"mustBeWeighed\": false,\n  \"returnLabel\": false,\n  \"version\": 42\n}\n",
-		SampleResponse: "{\n  \"carrierRef\": \"string\",\n  \"fallBackTrackAndTraceEmail\": \"max@speedyboxales.com\",\n  \"mustBeWeighed\": false,\n  \"returnLabel\": false,\n  \"version\": 42\n}\n",
+		SampleBody:     "{\n  \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"defaultPickUpTime\": {\n    \"end\": {\n      \"hour\": 1,\n      \"minute\": 1\n    },\n    \"start\": {\n      \"hour\": 1,\n      \"minute\": 1\n    }\n  },\n  \"fallBackTrackAndTraceEmail\": \"max@speedyboxales.com\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"mustBeWeighed\": false,\n  \"returnLabel\": false,\n  \"serviceUrl\": \"https://example.com/resource\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"defaultPickUpTime\": {\n    \"end\": {\n      \"hour\": 1,\n      \"minute\": 1\n    },\n    \"start\": {\n      \"hour\": 1,\n      \"minute\": 1\n    }\n  },\n  \"fallBackTrackAndTraceEmail\": \"max@speedyboxales.com\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"mustBeWeighed\": false,\n  \"returnLabel\": false,\n  \"serviceUrl\": \"https://example.com/resource\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:             "putCutoffTimeConfiguration",
@@ -5849,8 +5850,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"attributeDefinitions\": {},\n  \"items\": [\n    {\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"attributeDefinitions\": {},\n  \"id\": \"string\",\n  \"items\": [\n    {\n      \"id\": \"string\",\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"attributeDefinitions\": {},\n  \"items\": [\n    {\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"tenantRecordId\": \"MY_RECORD_ID\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"attributeDefinitions\": {},\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"items\": [\n    {\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"values\": [\n        {\n          \"attributeId\": \"string\",\n          \"attributeValue\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"tenantRecordId\": \"MY_RECORD_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "putOperationalRestowingConfigurations",
@@ -5954,7 +5955,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"carrierRef\": \"string\",\n  \"details\": {\n    \"dimensions\": {\n      \"maxHeight\": 1,\n      \"maxLength\": 1,\n      \"maxWidth\": 1\n    },\n    \"maxWeight\": 1,\n    \"packagingPricingDetails\": {\n      \"pricing\": [\n        {\n          \"prices\": []\n        }\n      ]\n    },\n    \"type\": \"PALLET\",\n    \"volumetricWeightFactor\": 1\n  },\n  \"nameLocalized\": {},\n  \"tenantPackagingUnitId\": \"string\",\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"details\": {\n    \"dimensions\": {\n      \"maxHeight\": 1,\n      \"maxLength\": 1,\n      \"maxWidth\": 1\n    },\n    \"maxWeight\": 1,\n    \"packagingPricingDetails\": {\n      \"pricing\": [\n        {\n          \"prices\": []\n        }\n      ]\n    },\n    \"type\": \"PALLET\",\n    \"volumetricWeightFactor\": 1\n  },\n  \"nameLocalized\": {},\n  \"tenantPackagingUnitId\": \"MY_PACKAGINGUNIT_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "putPackingContainerRequirement",
@@ -6026,8 +6027,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"comments\": [\n    {\n      \"content\": \"string\"\n    }\n  ],\n  \"receivedDate\": \"2026-01-01T00:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 1\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"comments\": [\n    {\n      \"content\": \"string\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"receivedDate\": \"2026-01-01T00:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 1\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"comments\": [\n    {\n      \"content\": \"string\",\n      \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ],\n  \"receivedDate\": \"2026-06-17T12:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 42\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\",\n          \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 42\n      },\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\"\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"comments\": [\n    {\n      \"content\": \"string\",\n      \"documentSetRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"receivedDate\": \"2026-06-17T12:00:00Z\",\n  \"receivedItems\": [\n    {\n      \"acceptedQuantity\": {\n        \"value\": 42\n      },\n      \"comments\": [\n        {\n          \"content\": \"string\",\n          \"documentSetRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"userRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n        }\n      ],\n      \"rejectedQuantity\": {\n        \"value\": 42\n      },\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\"\n    }\n  ],\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "putRemoteConfiguration",
@@ -6186,7 +6187,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "pickJobId", In: InPath, Type: TypeString, Required: true},
 		},
-		SampleResponse: "{\n  \"loadUnits\": [\n    {\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"descriptionLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"id\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"nameLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"pickJobRefs\": [\n        \"string\"\n      ],\n      \"version\": 1\n    }\n  ],\n  \"total\": 42\n}\n",
+		SampleResponse: "{\n  \"loadUnits\": [\n    {\n      \"created\": \"2026-06-17T12:00:00Z\",\n      \"descriptionLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"lastModified\": \"2026-06-17T12:00:00Z\",\n      \"loadUnitTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"nameLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"pickJobRefs\": [\n        \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n      ],\n      \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"version\": 1\n    }\n  ],\n  \"total\": 42\n}\n",
 	},
 	{
 		ID:      "queryPickJobs",
@@ -6323,8 +6324,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"nameLocalized\": {},\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"nameLocalized\": {},\n  \"tenantCategoryId\": \"MY_CATEGORY_ID\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"tenantCategoryId\": \"MY_CATEGORY_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "replaceEventScopeConfig",
@@ -6339,8 +6340,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"key\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"facilityGroupRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityGroupRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"id\": \"string\",\n  \"key\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"status\": \"ACTIVE\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:      "replaceFacility",
@@ -6369,8 +6370,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"tenantFacilityGroupId\": \"K12345\",\n  \"version\": 42\n}\n",
-		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityCount\": 1,\n  \"facilityRefs\": [\n    \"string\"\n  ],\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"tenantFacilityGroupId\": \"K12345\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"tenantFacilityGroupId\": \"K12345\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityCount\": 1,\n  \"facilityRefs\": [\n    \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n  ],\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"tenantFacilityGroupId\": \"K12345\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "replaceGroupUnderChannel",
@@ -6403,7 +6404,7 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		SampleBody:     "{\n  \"itemReturnJobVersion\": 1,\n  \"returnedLineItems\": [\n    {\n      \"itemConditionComment\": \"Upper corner damaged\",\n      \"itemConditionLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"itemReturnJobLineItemRef\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n      \"status\": \"OPEN\",\n      \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n    }\n  ]\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"string\",\n  \"itemReturns\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"returnFacilityRef\": \"string\",\n      \"returnedLineItems\": [\n        {\n          \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n          \"itemCondition\": \"Damaged\",\n          \"itemConditionComment\": \"Upper corner damaged\",\n          \"itemConditionLocalized\": {\n            \"de_DE\": \"Wert\",\n            \"en_US\": \"Value\",\n            \"ru_RU\": \"значение\"\n          },\n          \"itemReturnJobLineItemRefs\": [\n            \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n          ],\n          \"status\": \"OPEN\",\n          \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n        }\n      ],\n      \"status\": \"ANNOUNCED\"\n    }\n  ],\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"processRef\": \"string\",\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7,\n      \"id\": \"611c860f-3f00-4b01-9f4c-64cdee38a30e\",\n      \"returnable\": 7,\n      \"returned\": 5\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"string\",\n  \"itemReturns\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"returnFacilityRef\": \"string\",\n      \"returnedLineItems\": [\n        {\n          \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n          \"itemCondition\": \"Damaged\",\n          \"itemConditionComment\": \"Upper corner damaged\",\n          \"itemConditionLocalized\": {\n            \"de_DE\": \"Wert\",\n            \"en_US\": \"Value\",\n            \"ru_RU\": \"значение\"\n          },\n          \"itemReturnJobLineItemRefs\": [\n            \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n          ],\n          \"status\": \"OPEN\",\n          \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n        }\n      ],\n      \"status\": \"ANNOUNCED\"\n    }\n  ],\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"processRef\": \"string\",\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7,\n      \"id\": \"611c860f-3f00-4b01-9f4c-64cdee38a30e\",\n      \"returnable\": 7,\n      \"returned\": 5\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "rerouteProcess",
@@ -6431,7 +6432,7 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		SampleBody:     "{\n  \"name\": \"RESTOW\",\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"article\": {\n    \"tenantArticleId\": \"4711\",\n    \"title\": \"Cologne Water\"\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"measurementUnitKey\": \"liter\",\n  \"quantity\": 1,\n  \"restowed\": true,\n  \"secondaryMeasurementUnitKey\": \"g\",\n  \"secondaryQuantity\": 42,\n  \"status\": \"CANCELED\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"article\": {\n    \"imageUrl\": \"https://example.com/resource\",\n    \"tenantArticleId\": \"4711\",\n    \"title\": \"Cologne Water\"\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"measurementUnitKey\": \"liter\",\n  \"quantity\": 1,\n  \"restowed\": true,\n  \"secondaryMeasurementUnitKey\": \"g\",\n  \"secondaryQuantity\": 42,\n  \"status\": \"CANCELED\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:             "searchAudit",
@@ -6443,7 +6444,7 @@ var operations = []Operation{
 		Permissions:    []string{"AUDIT_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"entityRef\": {}\n  },\n  \"size\": 10\n}\n",
 		SampleResponse: "{\n  \"audits\": [\n    {\n      \"actor\": {\n        \"details\": {\n          \"topic\": \"string\",\n          \"username\": \"string\"\n        },\n        \"id\": \"string\"\n      },\n      \"anonymizationDate\": \"2026-01-01T00:00:00Z\",\n      \"client\": {\n        \"api\": \"string\",\n        \"rawInfo\": \"string\"\n      },\n      \"deletionDate\": \"2026-01-01T00:00:00Z\",\n      \"entityCreated\": \"2026-01-01T00:00:00Z\",\n      \"entityRef\": \"string\",\n      \"entityType\": \"PACK_JOB\",\n      \"entityVersion\": 1,\n      \"eventId\": \"string\",\n      \"globalActor\": {\n        \"details\": {\n          \"topic\": \"string\",\n          \"username\": \"string\"\n        },\n        \"id\": \"string\"\n      },\n      \"id\": \"string\",\n      \"isAnonymized\": false,\n      \"operation\": {\n        \"name\": \"string\",\n        \"start\": \"2026-01-01T00:00:00Z\"\n      },\n      \"trace\": \"string\",\n      \"version\": 1\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
 	},
 	{
@@ -6456,8 +6457,8 @@ var operations = []Operation{
 		Permissions:    []string{"ADMIN_MODULES_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
-		SampleResponse: "{\n  \"categories\": [\n    {\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"nameLocalized\": {},\n      \"version\": 1\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"id\": {},\n    \"tenantCategoryId\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"categories\": [\n    {\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"nameLocalized\": {},\n      \"tenantCategoryId\": \"MY_CATEGORY_ID\",\n      \"version\": 1\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
 	},
 	{
 		ID:             "searchFacility",
@@ -6469,7 +6470,7 @@ var operations = []Operation{
 		Permissions:    []string{"FACILITY_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"id\": {},\n    \"tenantFacilityId\": {}\n  },\n  \"size\": 10\n}\n",
 		SampleResponse: "{\n  \"facilities\": [\n    {\n      \"address\": {\n        \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n        \"city\": \"Langenfeld\",\n        \"companyName\": \"Speedy Boxales Ltd.\",\n        \"country\": \"DE\",\n        \"houseNumber\": \"42a\",\n        \"postalCode\": \"40764\",\n        \"province\": \"NRW\",\n        \"street\": \"Hauptstr.\"\n      },\n      \"capacityEnabled\": false,\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"fulfillmentProcessBuffer\": 240,\n      \"id\": \"Esb20gpHBL94X5NdMp3C\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"locationType\": \"STORE\",\n      \"name\": \"Hamburg NW2\",\n      \"status\": \"ONLINE\",\n      \"tenantFacilityId\": \"K12345\",\n      \"type\": \"MANAGED_FACILITY\",\n      \"version\": 42\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
 	},
 	{
@@ -6482,8 +6483,8 @@ var operations = []Operation{
 		Permissions:    []string{"FACILITY_GROUP_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
-		SampleResponse: "{\n  \"facilityGroups\": [\n    {\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"facilityCount\": 1,\n      \"facilityRefs\": [\n        \"string\"\n      ],\n      \"id\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"nameLocalized\": {},\n      \"tenantFacilityGroupId\": \"K12345\",\n      \"version\": 1\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"facilityRefs\": {},\n    \"id\": {},\n    \"tenantFacilityGroupId\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"facilityGroups\": [\n    {\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"facilityCount\": 1,\n      \"facilityRefs\": [\n        \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n      ],\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"nameLocalized\": {},\n      \"tenantFacilityGroupId\": \"K12345\",\n      \"version\": 1\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
 	},
 	{
 		ID:             "searchHandoverJob",
@@ -6495,7 +6496,7 @@ var operations = []Operation{
 		Permissions:    []string{"HANDOVERJOB_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"pickJobRef\": {},\n    \"targetTime\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
 		SampleResponse: "{\n  \"handoverJobs\": [\n    {\n      \"anonymized\": false,\n      \"channel\": \"DELIVERY\",\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"id\": \"95EWrieX09OmeriXIUbb\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n      \"paid\": false,\n      \"parcelRef\": \"2fOge2ZGW54K4TgvDTQw\",\n      \"pickJobRef\": \"ca525716-7208-4a63-a2a6-11274eb37f67-0\",\n      \"shipmentRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"status\": \"OPEN\",\n      \"targetTime\": \"2026-01-01T00:00:00Z\",\n      \"tenantOrderId\": \"R456728546\",\n      \"version\": 42,\n      \"workflowInformation\": {\n        \"instanceRef\": \"64c13ab08edf48a008793cac\"\n      }\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
 	},
 	{
@@ -6508,8 +6509,8 @@ var operations = []Operation{
 		Permissions:    []string{"INBOUND_PROCESS_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
-		SampleResponse: "{\n  \"inboundProcesses\": [\n    {\n      \"anonymized\": false,\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"facilityRef\": \"string\",\n      \"id\": \"string\",\n      \"inboundDate\": [\n        \"2026-01-01T00:00:00Z\"\n      ],\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"onHold\": false,\n      \"origin\": [\n        {}\n      ],\n      \"receipts\": [\n        {\n          \"comments\": [\n            {}\n          ],\n          \"id\": \"string\",\n          \"receivedDate\": \"2026-01-01T00:00:00Z\",\n          \"receivedItems\": [\n            {}\n          ]\n        }\n      ],\n      \"scannableCodes\": [\n        \"string\"\n      ],\n      \"status\": \"OPEN\",\n      \"version\": 1\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"inboundDate\": {},\n    \"tenantInboundProcessId\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"inboundProcesses\": [\n    {\n      \"anonymized\": false,\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"facilityRef\": \"string\",\n      \"id\": \"string\",\n      \"inboundDate\": [\n        \"2026-01-01T00:00:00Z\"\n      ],\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"onHold\": false,\n      \"origin\": [\n        {}\n      ],\n      \"receipts\": [\n        {\n          \"asnRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"comments\": [\n            {}\n          ],\n          \"id\": \"string\",\n          \"receivedDate\": \"2026-06-17T12:00:00Z\",\n          \"receivedItems\": [\n            {}\n          ]\n        }\n      ],\n      \"scannableCodes\": [\n        \"string\"\n      ],\n      \"status\": \"OPEN\",\n      \"version\": 1\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
 	},
 	{
 		ID:             "searchLinkedServiceJobs",
@@ -6521,7 +6522,7 @@ var operations = []Operation{
 		Permissions:    []string{"LINKED_SERVICE_JOBS_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"linkedServiceJobRef\": {},\n    \"targetTime\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
 		SampleResponse: "{\n  \"linkedServiceJobs\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"facilityRef\": \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\",\n      \"fullIdentifier\": \"240429_lorem-42\",\n      \"id\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n      \"includedServiceJobLinkIds\": [\n        \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n      ],\n      \"includedServiceJobRefs\": [\n        \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n      ],\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"operativeProcessRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n      \"processRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n      \"serviceJobLinks\": [\n        {\n          \"id\": \"0ed803c2-fa20-48d9-9c1b-0d243937a9ad\",\n          \"nextServiceJobLinks\": [\n            null\n          ],\n          \"previousServiceJobLinkRefs\": [\n            \"9f197dbf-c724-469b-90f1-dc94f20b2825\"\n          ],\n          \"previousServiceJobRefs\": [\n            \"9f197dbf-c724-469b-90f1-dc94f20b2825\"\n          ],\n          \"serviceJobRef\": \"0ed803c2-fa20-48d9-9c1b-0d243937a9ad\"\n        }\n      ],\n      \"status\": \"OPEN\",\n      \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n      \"version\": 42\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
 	},
 	{
@@ -6534,7 +6535,7 @@ var operations = []Operation{
 		Permissions:    []string{"LISTING_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"availabilityTimeframe\": {},\n    \"categoryRefs\": {},\n    \"facilityRef\": {},\n    \"id\": {},\n    \"tenantArticleId\": {}\n  },\n  \"size\": 10\n}\n",
 		SampleResponse: "{\n  \"listings\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"currency\": \"EUR\",\n      \"facilityId\": \"4711\",\n      \"id\": \"fsfdsf87fsd\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"measurementUnitKey\": \"liter\",\n      \"price\": 1200,\n      \"status\": \"ACTIVE\",\n      \"tenantArticleId\": \"4711\",\n      \"title\": \"Adidas Superstar\",\n      \"titleLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"version\": 42\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
 	},
 	{
@@ -6547,8 +6548,8 @@ var operations = []Operation{
 		Permissions:    []string{"LOOKUP_RECORD_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
-		SampleResponse: "{\n  \"lookupRecordItems\": [\n    {\n      \"id\": \"string\",\n      \"recordRef\": \"string\",\n      \"values\": {\n        \"attributeId\": \"string\",\n        \"attributeValue\": \"string\"\n      }\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"id\": {},\n    \"recordRef\": {},\n    \"tenantRecordId\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"lookupRecordItems\": [\n    {\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"recordRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"tenantRecordId\": \"MY_RECORD_ID\",\n      \"values\": {\n        \"attributeId\": \"string\",\n        \"attributeValue\": \"string\"\n      }\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
 	},
 	{
 		ID:             "searchNotification",
@@ -6560,8 +6561,8 @@ var operations = []Operation{
 		Permissions:    []string{"NOTIFICATION_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
-		SampleResponse: "{\n  \"notifications\": [\n    {\n      \"category\": \"ORDER\",\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"event\": \"string\",\n      \"id\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"payload\": {\n        \"entityLinks\": [\n          {\n            \"ref\": \"string\",\n            \"type\": \"ORDER\"\n          }\n        ],\n        \"messageLocalized\": {}\n      },\n      \"priority\": {\n        \"label\": \"LOW\",\n        \"sequence\": 1\n      },\n      \"status\": \"OPEN\",\n      \"type\": \"EMAIL\",\n      \"version\": 1\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"facilityRef\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"notifications\": [\n    {\n      \"category\": \"ORDER\",\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"event\": \"string\",\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"payload\": {\n        \"entityLinks\": [\n          {\n            \"ref\": \"string\",\n            \"type\": \"ORDER\"\n          }\n        ],\n        \"messageLocalized\": {}\n      },\n      \"priority\": {\n        \"label\": \"LOW\",\n        \"sequence\": 1\n      },\n      \"status\": \"OPEN\",\n      \"type\": \"EMAIL\",\n      \"version\": 1\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
 	},
 	{
 		ID:             "searchOrder",
@@ -6573,8 +6574,8 @@ var operations = []Operation{
 		Permissions:    []string{"ADMIN_MODULES_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
-		SampleResponse: "{\n  \"orders\": [\n    {\n      \"anonymized\": false,\n      \"consumer\": {\n        \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n        \"email\": \"max@speedyboxales.com\",\n        \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n      },\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n      \"orderLineItems\": [\n        {\n          \"article\": {\n            \"tenantArticleId\": \"4711\",\n            \"title\": \"Cologne Water\"\n          },\n          \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n          \"measurementUnitKey\": \"liter\",\n          \"quantity\": 21,\n          \"secondaryMeasurementUnitKey\": \"liter\",\n          \"secondaryQuantity\": 21,\n          \"shopPrice\": 1200\n        }\n      ],\n      \"processId\": \"string\",\n      \"status\": \"OPEN\",\n      \"tenantOrderId\": \"R456728546\",\n      \"version\": 42,\n      \"workflowInformation\": {\n        \"instanceRef\": \"64c13ab08edf48a008793cac\"\n      }\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"orderDate\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"orders\": [\n    {\n      \"anonymized\": false,\n      \"consumer\": {\n        \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n        \"email\": \"max@speedyboxales.com\",\n        \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n      },\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n      \"orderLineItems\": [\n        {\n          \"article\": {\n            \"imageUrl\": \"https://example.com/resource\",\n            \"tenantArticleId\": \"4711\",\n            \"title\": \"Cologne Water\"\n          },\n          \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n          \"measurementUnitKey\": \"liter\",\n          \"quantity\": 21,\n          \"secondaryMeasurementUnitKey\": \"liter\",\n          \"secondaryQuantity\": 21,\n          \"shopPrice\": 1200\n        }\n      ],\n      \"processId\": \"string\",\n      \"status\": \"OPEN\",\n      \"tenantOrderId\": \"R456728546\",\n      \"version\": 42,\n      \"workflowInformation\": {\n        \"instanceRef\": \"64c13ab08edf48a008793cac\"\n      }\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
 	},
 	{
 		ID:             "searchOrderRecord",
@@ -6586,8 +6587,8 @@ var operations = []Operation{
 		Permissions:    []string{"ORDER_RECORD_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
-		SampleResponse: "{\n  \"orderRecords\": [\n    {\n      \"anonymized\": false,\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"deletionDate\": \"2026-01-01T00:00:00Z\",\n      \"facilityRef\": \"string\",\n      \"gdprCleanupDate\": \"2026-01-01T00:00:00Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"lineItems\": [\n        {\n          \"article\": {\n            \"attributes\": [],\n            \"tenantArticleId\": \"string\"\n          },\n          \"id\": \"string\",\n          \"quantity\": 1\n        }\n      ],\n      \"orderRecordDate\": \"2026-01-01T00:00:00Z\",\n      \"version\": 1\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"orderRecordDate\": {},\n    \"tenantOrderRecordId\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"orderRecords\": [\n    {\n      \"anonymized\": false,\n      \"created\": \"2026-06-17T12:00:00Z\",\n      \"deletionDate\": \"2026-06-17T12:00:00Z\",\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"gdprCleanupDate\": \"2026-06-17T12:00:00Z\",\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"lastModified\": \"2026-06-17T12:00:00Z\",\n      \"lineItems\": [\n        {\n          \"article\": {\n            \"attributes\": [],\n            \"tenantArticleId\": \"MY_ARTICLE_ID\"\n          },\n          \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"quantity\": 42\n        }\n      ],\n      \"orderRecordDate\": \"2026-06-17T12:00:00Z\",\n      \"tenantOrderRecordId\": \"MY_ORDERRECORD_ID\",\n      \"version\": 1\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
 	},
 	{
 		ID:             "searchPackJob",
@@ -6599,8 +6600,8 @@ var operations = []Operation{
 		Permissions:    []string{"PACKJOB_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
-		SampleResponse: "{\n  \"packJobs\": [\n    {\n      \"anonymized\": false,\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"documentsRef\": \"string\",\n      \"facilityRef\": \"Esb50gpH7794X5NdMp3C\",\n      \"id\": \"Esb20gpHBL94X5NdMp3C\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"lineItems\": [\n        {\n          \"article\": {\n            \"tenantArticleId\": \"4711\",\n            \"title\": \"Cologne Water\"\n          },\n          \"id\": \"climk4dcQFiPdA5ULuhS\",\n          \"measurementUnitKey\": \"liter\",\n          \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n          \"packed\": 20,\n          \"quantity\": 21,\n          \"secondaryMeasurementUnitKey\": \"g\",\n          \"secondaryQuantity\": 42\n        }\n      ],\n      \"orderDate\": \"2020-02-03T09:45:51.525Z\",\n      \"pickJobRef\": \"Pic50gpH7794X5NdMp3C\",\n      \"processId\": \"string\",\n      \"status\": \"OPEN\",\n      \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n      \"version\": 42,\n      \"workflowInformation\": {\n        \"instanceRef\": \"64c13ab08edf48a008793cac\"\n      }\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"orderDate\": {},\n    \"targetTime\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"packJobs\": [\n    {\n      \"anonymized\": false,\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"documentsRef\": \"string\",\n      \"facilityRef\": \"Esb50gpH7794X5NdMp3C\",\n      \"id\": \"Esb20gpHBL94X5NdMp3C\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"lineItems\": [\n        {\n          \"article\": {\n            \"imageUrl\": \"https://example.com/resource\",\n            \"tenantArticleId\": \"4711\",\n            \"title\": \"Cologne Water\"\n          },\n          \"id\": \"climk4dcQFiPdA5ULuhS\",\n          \"measurementUnitKey\": \"liter\",\n          \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n          \"packed\": 20,\n          \"quantity\": 21,\n          \"secondaryMeasurementUnitKey\": \"g\",\n          \"secondaryQuantity\": 42\n        }\n      ],\n      \"orderDate\": \"2020-02-03T09:45:51.525Z\",\n      \"pickJobRef\": \"Pic50gpH7794X5NdMp3C\",\n      \"processId\": \"string\",\n      \"status\": \"OPEN\",\n      \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n      \"version\": 42,\n      \"workflowInformation\": {\n        \"instanceRef\": \"64c13ab08edf48a008793cac\"\n      }\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
 	},
 	{
 		ID:             "searchParcel",
@@ -6612,7 +6613,7 @@ var operations = []Operation{
 		Permissions:    []string{"PARCEL_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"carrierRef\": {},\n    \"facilityRef\": {},\n    \"id\": {},\n    \"shipmentRef\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
 		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"parcels\": [\n    {\n      \"anonymized\": false,\n      \"carrierProduct\": \"EXPRESS\",\n      \"carrierRef\": \"cf00e102-34f2-45c1-a846-6a21f384321e\",\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"customProductValue\": 12.5,\n      \"id\": \"95EWrieX09OmeriXIUbb\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"loadUnitRefs\": [\n        \"string\"\n      ],\n      \"processRef\": \"string\",\n      \"productValue\": 1250,\n      \"productValueType\": \"INSURANCE\",\n      \"recipient\": {\n        \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n        \"city\": \"Langenfeld\",\n        \"companyName\": \"Speedy Boxales Ltd.\",\n        \"country\": \"DE\",\n        \"email\": \"test@try.de\",\n        \"firstName\": \"Maxine\",\n        \"houseNumber\": \"42a\",\n        \"lastName\": \"Muller\",\n        \"personalTitle\": \"Dr.\",\n        \"postalCode\": \"40764\",\n        \"province\": \"NRW\",\n        \"salutation\": \"Frau\",\n        \"street\": \"Hauptstr.\"\n      },\n      \"sender\": {\n        \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n        \"city\": \"Langenfeld\",\n        \"companyName\": \"Speedy Boxales Ltd.\",\n        \"country\": \"DE\",\n        \"houseNumber\": \"42a\",\n        \"postalCode\": \"40764\",\n        \"province\": \"NRW\",\n        \"street\": \"Hauptstr.\"\n      },\n      \"sequenceNumber\": 100,\n      \"shipmentRef\": \"95EWrieX09OmeriXIUbb\",\n      \"shortId\": \"AA12-1\",\n      \"status\": \"OPEN\",\n      \"tenantOrderId\": \"R456728546\",\n      \"tenantParcelId\": \"MY-PARCEL-12345\",\n      \"version\": 42,\n      \"workflowInformation\": {\n        \"instanceRef\": \"64c13ab08edf48a008793cac\"\n      }\n    }\n  ]\n}\n",
 	},
 	{
@@ -6625,8 +6626,8 @@ var operations = []Operation{
 		Permissions:    []string{"ADMIN_MODULES_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
-		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"parcelInformationList\": [\n    {\n      \"anonymized\": false,\n      \"created\": \"2026-04-15T08:02:01.956Z\",\n      \"facilityRef\": \"019eefb2-0001-7000-9000-100000000002\",\n      \"id\": \"019eefb1-4bd1-7ef0-98ba-f91e07243ea7\",\n      \"lastModified\": \"2026-04-15T08:02:01.956Z\",\n      \"operativeProcessRef\": \"019eefb2-0001-7000-9000-100000000003\",\n      \"parcelInformationLineItems\": [\n        {\n          \"article\": {\n            \"tenantArticleId\": \"4711\",\n            \"title\": \"Cologne Water\"\n          },\n          \"globalLineItemId\": \"019eefb2-0001-7000-9000-200000000002\",\n          \"id\": \"019eefb2-0001-7000-9000-200000000001\",\n          \"quantity\": 2,\n          \"scannableCodes\": [\n            \"4006381333931\"\n          ]\n        }\n      ],\n      \"processRef\": \"019eefb2-0001-7000-9000-100000000004\",\n      \"shippingInformationRef\": \"019eefb2-0001-7000-9000-100000000001\",\n      \"shortId\": \"FT-01\",\n      \"version\": 1\n    }\n  ]\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"shippingInformationRef\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"parcelInformationList\": [\n    {\n      \"anonymized\": false,\n      \"created\": \"2026-04-15T08:02:01.956Z\",\n      \"facilityRef\": \"019eefb2-0001-7000-9000-100000000002\",\n      \"id\": \"019eefb1-4bd1-7ef0-98ba-f91e07243ea7\",\n      \"lastModified\": \"2026-04-15T08:02:01.956Z\",\n      \"operativeProcessRef\": \"019eefb2-0001-7000-9000-100000000003\",\n      \"parcelInformationLineItems\": [\n        {\n          \"article\": {\n            \"imageUrl\": \"https://example.com/resource\",\n            \"tenantArticleId\": \"4711\",\n            \"title\": \"Cologne Water\"\n          },\n          \"globalLineItemId\": \"019eefb2-0001-7000-9000-200000000002\",\n          \"id\": \"019eefb2-0001-7000-9000-200000000001\",\n          \"quantity\": 2,\n          \"scannableCodes\": [\n            \"4006381333931\"\n          ]\n        }\n      ],\n      \"processRef\": \"019eefb2-0001-7000-9000-100000000004\",\n      \"shippingInformationRef\": \"019eefb2-0001-7000-9000-100000000001\",\n      \"shortId\": \"FT-01\",\n      \"version\": 1\n    }\n  ]\n}\n",
 	},
 	{
 		ID:             "searchPickJob",
@@ -6638,8 +6639,8 @@ var operations = []Operation{
 		Permissions:    []string{"PICKJOB_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
-		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"pickJobs\": [\n    {\n      \"anonymized\": false,\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"deliveryinformation\": {\n        \"channel\": \"COLLECT\",\n        \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n        \"targetTimeBaseDate\": \"2020-02-03T08:45:50.525Z\"\n      },\n      \"documentsRef\": \"string\",\n      \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"id\": \"Esb20gpHBL94X5NdMp3C\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n      \"orderRef\": \"LGMl2DuvPnfPoSHhYFOm\",\n      \"pickLineItems\": [\n        {\n          \"article\": {\n            \"tenantArticleId\": \"4711\",\n            \"title\": \"Cologne Water\"\n          },\n          \"globalLineItemId\": \"a81f818e-2405-4570-8cde-b0c80fd3de31\",\n          \"id\": \"climk4dcQFiPdA5ULuhS\",\n          \"measurementUnitKey\": \"liter\",\n          \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n          \"pickJobLineItemRef\": \"12345\",\n          \"picked\": 20,\n          \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n          \"quantity\": 21,\n          \"secondaryMeasurementUnitKey\": \"liter\",\n          \"secondaryPicked\": 20,\n          \"secondaryQuantity\": 21,\n          \"status\": \"OPEN\",\n          \"stockEmptied\": true\n        }\n      ],\n      \"resetBlocked\": false,\n      \"shortId\": \"AS12\",\n      \"status\": \"ABORTED\",\n      \"tenantOrderId\": \"R456728546\",\n      \"version\": 42,\n      \"workflowInformation\": {\n        \"instanceRef\": \"64c13ab08edf48a008793cac\"\n      }\n    }\n  ]\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"orderRef\": {},\n    \"targetTime\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"pickJobs\": [\n    {\n      \"anonymized\": false,\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"deliveryinformation\": {\n        \"channel\": \"COLLECT\",\n        \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n        \"targetTimeBaseDate\": \"2020-02-03T08:45:50.525Z\"\n      },\n      \"documentsRef\": \"string\",\n      \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"id\": \"Esb20gpHBL94X5NdMp3C\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n      \"orderRef\": \"LGMl2DuvPnfPoSHhYFOm\",\n      \"pickLineItems\": [\n        {\n          \"article\": {\n            \"imageUrl\": \"https://example.com/resource\",\n            \"tenantArticleId\": \"4711\",\n            \"title\": \"Cologne Water\"\n          },\n          \"globalLineItemId\": \"a81f818e-2405-4570-8cde-b0c80fd3de31\",\n          \"id\": \"climk4dcQFiPdA5ULuhS\",\n          \"measurementUnitKey\": \"liter\",\n          \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n          \"pickJobLineItemRef\": \"12345\",\n          \"picked\": 20,\n          \"pickedAt\": \"2024-02-03T08:45:51.525Z\",\n          \"quantity\": 21,\n          \"secondaryMeasurementUnitKey\": \"liter\",\n          \"secondaryPicked\": 20,\n          \"secondaryQuantity\": 21,\n          \"status\": \"OPEN\",\n          \"stockEmptied\": true\n        }\n      ],\n      \"resetBlocked\": false,\n      \"shortId\": \"AS12\",\n      \"status\": \"ABORTED\",\n      \"tenantOrderId\": \"R456728546\",\n      \"version\": 42,\n      \"workflowInformation\": {\n        \"instanceRef\": \"64c13ab08edf48a008793cac\"\n      }\n    }\n  ]\n}\n",
 	},
 	{
 		ID:             "searchProcess",
@@ -6651,7 +6652,7 @@ var operations = []Operation{
 		Permissions:    []string{"PROCESS_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"documentRefs\": {},\n    \"externalActionRefs\": {},\n    \"facilityRefs\": {},\n    \"flatRefs\": {},\n    \"handoverJobRefs\": {},\n    \"itemReturnJobsRef\": {},\n    \"orderRef\": {},\n    \"packJobRefs\": {},\n    \"pickJobRefs\": {},\n    \"returnRefs\": {},\n    \"routingPlanRefs\": {},\n    \"serviceJobRefs\": {},\n    \"shipmentRefs\": {}\n  },\n  \"size\": 10\n}\n",
 		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"processes\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"deletionDate\": \"2020-02-03T08:45:50.525Z\",\n      \"domsStatus\": {},\n      \"gdprCleanupDate\": \"2020-02-03T08:45:50.525Z\",\n      \"id\": \"string\",\n      \"inventoryStatus\": {},\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"operativeStatus\": {},\n      \"returnStatus\": {},\n      \"status\": {},\n      \"version\": 42\n    }\n  ]\n}\n",
 	},
 	{
@@ -6664,7 +6665,7 @@ var operations = []Operation{
 		Permissions:    []string{"REMOTE_CONFIG_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
+		SampleBody:     "{\n  \"query\": {},\n  \"size\": 10\n}\n",
 		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"remoteConfigurations\": [\n    {\n      \"flattenScopeIds\": [\n        \"INVENTORY\",\n        \"67151fc3-3ce1-400e-8b23-23c29e0cde90\"\n      ],\n      \"groups\": [\n        \"INVENTORY\"\n      ],\n      \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n      \"key\": \"PICKING_SHOW_NEW_SCAN_VIEW\",\n      \"value\": \"string\",\n      \"valueType\": {},\n      \"version\": 1\n    }\n  ]\n}\n",
 	},
 	{
@@ -6677,7 +6678,7 @@ var operations = []Operation{
 		Permissions:    []string{"RESERVATION_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"relatedRefs\": {\n      \"orderRefs\": {},\n      \"pickJobRefs\": {},\n      \"routingPlanRefs\": {},\n      \"transferRefs\": {}\n    },\n    \"tenantArticleId\": {}\n  },\n  \"size\": 10\n}\n",
 		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"reservations\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"facilityRef\": \"string\",\n      \"host\": {\n        \"reference\": \"string\",\n        \"type\": \"STOCK\"\n      },\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"quantity\": 1,\n      \"relatedRefs\": {},\n      \"tenantArticleId\": \"string\",\n      \"version\": 42\n    }\n  ]\n}\n",
 	},
 	{
@@ -6690,7 +6691,7 @@ var operations = []Operation{
 		Permissions:    []string{"ROLE_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
+		SampleBody:     "{\n  \"query\": {},\n  \"size\": 10\n}\n",
 		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"roles\": [\n    {\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"name\": \"string\",\n      \"permissions\": [\n        \"USER_READ\"\n      ],\n      \"version\": 1\n    }\n  ]\n}\n",
 	},
 	{
@@ -6703,7 +6704,7 @@ var operations = []Operation{
 		Permissions:    []string{"ROUTING_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"orderDate\": {},\n    \"orderRef\": {},\n    \"pickJobRef\": {},\n    \"provisioningTime\": {}\n  },\n  \"size\": 10\n}\n",
 		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"routingPlans\": [\n    {\n      \"anonymized\": false,\n      \"consolidatedStatus\": \"REROUTED\",\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"decisionLogs\": [\n        {\n          \"url\": \"/api/routingplans/{routingPlanId}/decisionlogs/{routingRun}\"\n        }\n      ],\n      \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"finalizeRun\": 5,\n      \"firstRoutingAttempt\": \"2020-02-03T08:45:50.525Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n      \"orderRef\": \"LGMl2DuvPnfPoSHhYFOm\",\n      \"pickJobRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"predecessorRerouteRoutingPlanRefs\": [\n        \"string\"\n      ],\n      \"priority\": 1,\n      \"processId\": \"string\",\n      \"provisioningTime\": \"2020-02-03T08:45:50.525Z\",\n      \"reRoutedFacilityRef\": \"1DEYZgmfAcXRVYv6KEka36\",\n      \"reRoutedPickJobRef\": \"Eghhj20878dhbd989NdMp3C\",\n      \"reRoutedRoutingPlanRef\": \"Eghhj20878dhbd989NdMp3C\",\n      \"routingRun\": 1,\n      \"splitCount\": 5,\n      \"status\": \"IN_PREPARATION\",\n      \"successorRerouteRoutingPlanRefs\": [\n        \"string\"\n      ],\n      \"targetTimeBaseDate\": \"2020-02-03T08:45:50.525Z\",\n      \"version\": 42,\n      \"workflowInformation\": {\n        \"instanceRef\": \"64c13ab08edf48a008793cac\"\n      }\n    }\n  ]\n}\n",
 	},
 	{
@@ -6716,8 +6717,8 @@ var operations = []Operation{
 		Permissions:    []string{"CONFIG_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
-		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"scopedAvailabilityConfigs\": [\n    {\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"id\": \"string\",\n      \"key\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"status\": \"ACTIVE\",\n      \"version\": 1\n    }\n  ]\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"facilityGroupRefs\": {},\n    \"facilityRefs\": {},\n    \"id\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"scopedAvailabilityConfigs\": [\n    {\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"facilityGroupRefs\": [\n        \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n      ],\n      \"facilityRefs\": [\n        \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f\"\n      ],\n      \"id\": \"string\",\n      \"key\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"status\": \"ACTIVE\",\n      \"version\": 1\n    }\n  ]\n}\n",
 	},
 	{
 		ID:             "searchShipment",
@@ -6729,7 +6730,7 @@ var operations = []Operation{
 		Permissions:    []string{"SHIPMENT_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {\n    \"created\": {}\n  }\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"carrierRef\": {},\n    \"created\": {},\n    \"facilityRef\": {},\n    \"id\": {},\n    \"pickJobRef\": {},\n    \"targetTime\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
 		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"shipments\": [\n    {\n      \"anonymized\": false,\n      \"carrierKey\": \"DPD\",\n      \"carrierProduct\": \"EXPRESS\",\n      \"carrierRef\": \"ca525716-7208-4a63-a2a6-11274eb37f67-0\",\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"facilityRef\": \"string\",\n      \"hasActiveCarrier\": false,\n      \"id\": \"95EWrieX09OmeriXIUbb\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"orderDate\": \"2026-01-01T00:00:00Z\",\n      \"pickJobRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"status\": \"INITIAL\",\n      \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n      \"targetTimeBaseDate\": \"2020-02-03T08:45:50.525Z\",\n      \"version\": 42,\n      \"workflowInformation\": {\n        \"instanceRef\": \"64c13ab08edf48a008793cac\"\n      }\n    }\n  ]\n}\n",
 	},
 	{
@@ -6742,8 +6743,8 @@ var operations = []Operation{
 		Permissions:    []string{"ADMIN_MODULES_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
-		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"shippingInformationList\": [\n    {\n      \"anonymized\": false,\n      \"carrierRecipientInformation\": [\n        {\n          \"address\": [\n            {}\n          ],\n          \"id\": \"string\"\n        }\n      ],\n      \"created\": \"2025-08-04T08:16:07Z\",\n      \"facilityRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"id\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"lastModified\": \"2025-08-04T08:16:07Z\",\n      \"operativeProcessRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"processRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"senderAddress\": {\n        \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n        \"city\": \"Langenfeld\",\n        \"companyName\": \"Speedy Boxales Ltd.\",\n        \"country\": \"DE\",\n        \"houseNumber\": \"42a\",\n        \"postalCode\": \"40764\",\n        \"province\": \"NRW\",\n        \"street\": \"Hauptstr.\"\n      },\n      \"shippingInformationLineItems\": [\n        {\n          \"article\": {\n            \"tenantArticleId\": \"4711\",\n            \"title\": \"Cologne Water\"\n          },\n          \"globalLineItemId\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n          \"id\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n          \"quantity\": 1,\n          \"scannableCodes\": [\n            \"ABC-12345\"\n          ]\n        }\n      ],\n      \"shortId\": \"ABC123\",\n      \"tenantOrderId\": \"ORDER-12345\",\n      \"version\": 1\n    }\n  ]\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"shippingInformationList\": [\n    {\n      \"anonymized\": false,\n      \"carrierRecipientInformation\": [\n        {\n          \"address\": [\n            {}\n          ],\n          \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\"\n        }\n      ],\n      \"created\": \"2025-08-04T08:16:07Z\",\n      \"facilityRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"id\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"lastModified\": \"2025-08-04T08:16:07Z\",\n      \"operativeProcessRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"processRef\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n      \"senderAddress\": {\n        \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n        \"city\": \"Langenfeld\",\n        \"companyName\": \"Speedy Boxales Ltd.\",\n        \"country\": \"DE\",\n        \"houseNumber\": \"42a\",\n        \"postalCode\": \"40764\",\n        \"province\": \"NRW\",\n        \"street\": \"Hauptstr.\"\n      },\n      \"shippingInformationLineItems\": [\n        {\n          \"article\": {\n            \"imageUrl\": \"https://example.com/resource\",\n            \"tenantArticleId\": \"4711\",\n            \"title\": \"Cologne Water\"\n          },\n          \"globalLineItemId\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n          \"id\": \"019edfb7-f4cc-73ba-b117-8899ecbd1fa5\",\n          \"quantity\": 1,\n          \"scannableCodes\": [\n            \"ABC-12345\"\n          ]\n        }\n      ],\n      \"shortId\": \"ABC123\",\n      \"tenantOrderId\": \"ORDER-12345\",\n      \"version\": 1\n    }\n  ]\n}\n",
 	},
 	{
 		ID:             "searchSimulationOrder",
@@ -6755,8 +6756,8 @@ var operations = []Operation{
 		Permissions:    []string{"ADMIN_MODULES_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
-		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"simulationOrders\": [\n    {\n      \"consumer\": {\n        \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n        \"email\": \"max@speedyboxales.com\",\n        \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n      },\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"orderDate\": \"2026-01-01T00:00:00Z\",\n      \"orderLineItems\": [\n        {\n          \"article\": {\n            \"tenantArticleId\": \"4711\",\n            \"title\": \"Cologne Water\"\n          },\n          \"measurementUnitKey\": \"liter\",\n          \"quantity\": 21,\n          \"secondaryMeasurementUnitKey\": \"liter\",\n          \"secondaryQuantity\": 21,\n          \"shopPrice\": 1200\n        }\n      ],\n      \"version\": 1\n    }\n  ]\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"orderDate\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"simulationOrders\": [\n    {\n      \"consumer\": {\n        \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n        \"email\": \"max@speedyboxales.com\",\n        \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n      },\n      \"created\": \"2026-06-17T12:00:00Z\",\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"lastModified\": \"2026-06-17T12:00:00Z\",\n      \"orderDate\": \"2026-06-17T12:00:00Z\",\n      \"orderLineItems\": [\n        {\n          \"article\": {\n            \"imageUrl\": \"https://example.com/resource\",\n            \"tenantArticleId\": \"4711\",\n            \"title\": \"Cologne Water\"\n          },\n          \"measurementUnitKey\": \"liter\",\n          \"quantity\": 21,\n          \"secondaryMeasurementUnitKey\": \"liter\",\n          \"secondaryQuantity\": 21,\n          \"shopPrice\": 1200\n        }\n      ],\n      \"tenantOrderId\": \"MY_ORDER_ID\",\n      \"version\": 1\n    }\n  ]\n}\n",
 	},
 	{
 		ID:             "searchStock",
@@ -6768,8 +6769,8 @@ var operations = []Operation{
 		Permissions:    []string{"STOCK_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
-		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"stocks\": [\n    {\n      \"available\": 1,\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"facility\": {\n        \"facilityRef\": \"string\"\n      },\n      \"facilityRef\": \"string\",\n      \"facilityWideReserved\": 1,\n      \"id\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"reserved\": 1,\n      \"serializedProperties\": \"string\",\n      \"tenantArticleId\": \"string\",\n      \"traits\": [\n        \"PICKABLE\"\n      ],\n      \"value\": 1,\n      \"version\": 1\n    }\n  ]\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"locationRef\": {},\n    \"receiptDate\": {},\n    \"tenantArticleId\": {},\n    \"tenantFacilityId\": {},\n    \"tenantStockId\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"stocks\": [\n    {\n      \"available\": 1,\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"facility\": {\n        \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"tenantFacilityId\": \"MY_FACILITY_ID\"\n      },\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"facilityWideReserved\": 1,\n      \"id\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"locationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"receiptDate\": \"2026-06-17T12:00:00Z\",\n      \"reserved\": 1,\n      \"serializedProperties\": \"string\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\",\n      \"tenantStockId\": \"MY_STOCK_ID\",\n      \"traits\": [\n        \"PICKABLE\"\n      ],\n      \"value\": 42,\n      \"version\": 1\n    }\n  ]\n}\n",
 	},
 	{
 		ID:             "searchStorageLocation",
@@ -6781,7 +6782,7 @@ var operations = []Operation{
 		Permissions:    []string{"STORAGE_LOCATION_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"tenantLocationId\": {},\n    \"zoneRef\": {}\n  },\n  \"size\": 10\n}\n",
 		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"storageLocations\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"name\": \"string\",\n      \"runningSequences\": [\n        {\n          \"type\": \"PICKING_SEQUENCE\"\n        }\n      ],\n      \"scannableCodes\": [\n        \"string\"\n      ],\n      \"traits\": [\n        \"PICKABLE\"\n      ],\n      \"type\": \"SINGLE_STORAGE\",\n      \"version\": 42,\n      \"zoneRef\": \"Esb20gpHBL94X5NdMp3C\"\n    }\n  ]\n}\n",
 	},
 	{
@@ -6794,8 +6795,8 @@ var operations = []Operation{
 		Permissions:    []string{"STOW_JOB_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {\n    \"created\": {\n      \"after\": \"-P1W\"\n    }\n  }\n}\n",
-		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"stowJobs\": [\n    {\n      \"facilityRef\": \"string\",\n      \"id\": \"string\",\n      \"status\": \"OPEN\",\n      \"stowLineItems\": [\n        {\n          \"article\": {\n            \"tenantArticleId\": \"string\"\n          },\n          \"id\": \"string\",\n          \"stowTo\": [\n            {}\n          ],\n          \"takeFrom\": {\n            \"quantity\": 1,\n            \"type\": \"STOCK\"\n          }\n        }\n      ],\n      \"version\": 1\n    }\n  ]\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"created\": {\n      \"after\": \"-P1W\"\n    },\n    \"facilityRef\": {},\n    \"id\": {},\n    \"targetTime\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"stowJobs\": [\n    {\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"status\": \"OPEN\",\n      \"stowLineItems\": [\n        {\n          \"article\": {\n            \"imageUrl\": \"https://example.com/resource\",\n            \"tenantArticleId\": \"MY_ARTICLE_ID\"\n          },\n          \"heldStockRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n          \"stowTo\": [\n            {}\n          ],\n          \"takeFrom\": {\n            \"quantity\": 1,\n            \"stockRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n            \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n            \"type\": \"STOCK\"\n          }\n        }\n      ],\n      \"targetTime\": \"2026-06-17T12:00:00Z\",\n      \"version\": 1\n    }\n  ]\n}\n",
 	},
 	{
 		ID:             "searchTag",
@@ -6807,7 +6808,7 @@ var operations = []Operation{
 		Permissions:    []string{"TAG_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"id\": {}\n  },\n  \"size\": 10\n}\n",
 		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"tags\": [\n    {\n      \"allowedValues\": [\n        \"string\"\n      ],\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"version\": 42\n    }\n  ]\n}\n",
 	},
 	{
@@ -6820,8 +6821,8 @@ var operations = []Operation{
 		Permissions:    []string{"USERS_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
-		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"users\": [\n    {\n      \"assignedRoles\": [\n        {\n          \"ref\": \"string\"\n        }\n      ],\n      \"authenticationProvider\": {\n        \"type\": {}\n      },\n      \"authenticationProviderType\": \"de_DE\",\n      \"email\": \"john.doe@example.com\",\n      \"firstname\": \"John\",\n      \"id\": \"string\",\n      \"lastname\": \"Doe\",\n      \"locale\": \"de_DE\",\n      \"username\": \"johndoe\",\n      \"version\": 1\n    }\n  ]\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"firstname\": {},\n    \"lastname\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"users\": [\n    {\n      \"assignedRoles\": [\n        {\n          \"ref\": \"string\"\n        }\n      ],\n      \"authenticationProvider\": {\n        \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"type\": {}\n      },\n      \"authenticationProviderType\": \"de_DE\",\n      \"email\": \"john.doe@example.com\",\n      \"firstname\": \"John\",\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"lastname\": \"Doe\",\n      \"locale\": \"de_DE\",\n      \"username\": \"johndoe\",\n      \"version\": 1\n    }\n  ]\n}\n",
 	},
 	{
 		ID:             "searchWorkflow",
@@ -6833,7 +6834,7 @@ var operations = []Operation{
 		Permissions:    []string{"WORKFLOW_DEFINITION_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"id\": {}\n  },\n  \"size\": 10\n}\n",
 		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"workflows\": [\n    {\n      \"connections\": [\n        {\n          \"from\": \"string\",\n          \"to\": \"string\"\n        }\n      ],\n      \"description\": \"Conditional fraud verification flow with manual review\",\n      \"id\": \"507f1f77bcf86cd799439011\",\n      \"isActive\": true,\n      \"key\": \"fraud-check-workflow\",\n      \"name\": \"Fraud Check Workflow\",\n      \"nodes\": [\n        {\n          \"key\": \"string\",\n          \"type\": \"ORDER_MODULE\"\n        }\n      ],\n      \"rootId\": \"order-node\",\n      \"type\": \"ORDER\",\n      \"version\": 1\n    }\n  ]\n}\n",
 	},
 	{
@@ -6846,7 +6847,7 @@ var operations = []Operation{
 		Permissions:    []string{"ZONE_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"query\": {}\n}\n",
+		SampleBody:     "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {}\n  },\n  \"size\": 10\n}\n",
 		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"zones\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"name\": \"string\",\n      \"score\": 1,\n      \"version\": 42\n    }\n  ]\n}\n",
 	},
 	{
@@ -6895,8 +6896,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"carrierConfigurationVersion\": 1\n}\n",
-		SampleResponse: "{\n  \"countAsTransitDayBefore\": \"12:00\",\n  \"destinations\": [\n    {\n      \"countryCode\": \"DE\"\n    }\n  ],\n  \"id\": \"bc5b581a-8f65-45b0-9f81-6e0d4babbcb2\",\n  \"source\": {\n    \"countryCode\": \"DE\"\n  },\n  \"sourceCountry\": \"DE\"\n}\n",
+		SampleBody:     "{\n  \"carrierConfigurationVersion\": 1,\n  \"transitTime\": {\n    \"maxTransitDays\": 3,\n    \"minTransitDays\": 1\n  }\n}\n",
+		SampleResponse: "{\n  \"countAsTransitDayBefore\": \"12:00\",\n  \"destinations\": [\n    {\n      \"countryCode\": \"DE\"\n    }\n  ],\n  \"id\": \"bc5b581a-8f65-45b0-9f81-6e0d4babbcb2\",\n  \"source\": {\n    \"countryCode\": \"DE\"\n  },\n  \"sourceCountry\": \"DE\",\n  \"staticCCSMRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"transitTime\": {\n    \"maxTransitDays\": 3,\n    \"minTransitDays\": 1\n  }\n}\n",
 	},
 	{
 		ID:          "updateCustomServiceAdditionalInformation",
@@ -7042,7 +7043,7 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		SampleBody:     "{\n  \"name\": \"StartItemReturnJob\",\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"string\",\n  \"itemReturns\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"returnFacilityRef\": \"string\",\n      \"returnedLineItems\": [\n        {\n          \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n          \"itemCondition\": \"Damaged\",\n          \"itemConditionComment\": \"Upper corner damaged\",\n          \"itemConditionLocalized\": {\n            \"de_DE\": \"Wert\",\n            \"en_US\": \"Value\",\n            \"ru_RU\": \"значение\"\n          },\n          \"itemReturnJobLineItemRefs\": [\n            \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n          ],\n          \"status\": \"OPEN\",\n          \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n        }\n      ],\n      \"status\": \"ANNOUNCED\"\n    }\n  ],\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"processRef\": \"string\",\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7,\n      \"id\": \"611c860f-3f00-4b01-9f4c-64cdee38a30e\",\n      \"returnable\": 7,\n      \"returned\": 5\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"string\",\n  \"itemReturns\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"returnFacilityRef\": \"string\",\n      \"returnedLineItems\": [\n        {\n          \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n          \"itemCondition\": \"Damaged\",\n          \"itemConditionComment\": \"Upper corner damaged\",\n          \"itemConditionLocalized\": {\n            \"de_DE\": \"Wert\",\n            \"en_US\": \"Value\",\n            \"ru_RU\": \"значение\"\n          },\n          \"itemReturnJobLineItemRefs\": [\n            \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n          ],\n          \"status\": \"OPEN\",\n          \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n        }\n      ],\n      \"status\": \"ANNOUNCED\"\n    }\n  ],\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"processRef\": \"string\",\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7,\n      \"id\": \"611c860f-3f00-4b01-9f4c-64cdee38a30e\",\n      \"returnable\": 7,\n      \"returned\": 5\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "updateItemReturnLineItem",
@@ -7058,7 +7059,7 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		SampleBody:     "{\n  \"itemReturnJobVersion\": 42\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"string\",\n  \"itemReturns\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"returnFacilityRef\": \"string\",\n      \"returnedLineItems\": [\n        {\n          \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n          \"itemCondition\": \"Damaged\",\n          \"itemConditionComment\": \"Upper corner damaged\",\n          \"itemConditionLocalized\": {\n            \"de_DE\": \"Wert\",\n            \"en_US\": \"Value\",\n            \"ru_RU\": \"значение\"\n          },\n          \"itemReturnJobLineItemRefs\": [\n            \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n          ],\n          \"status\": \"OPEN\",\n          \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n        }\n      ],\n      \"status\": \"ANNOUNCED\"\n    }\n  ],\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"processRef\": \"string\",\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7,\n      \"id\": \"611c860f-3f00-4b01-9f4c-64cdee38a30e\",\n      \"returnable\": 7,\n      \"returned\": 5\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumerAddresses\": [\n    {\n      \"additionalAddressInfo\": \"to care of: Mrs. Müller\",\n      \"city\": \"Langenfeld\",\n      \"companyName\": \"Speedy Boxales Ltd.\",\n      \"country\": \"DE\",\n      \"email\": \"test@try.de\",\n      \"firstName\": \"Maxine\",\n      \"houseNumber\": \"42a\",\n      \"lastName\": \"Muller\",\n      \"personalTitle\": \"Dr.\",\n      \"postalCode\": \"40764\",\n      \"province\": \"NRW\",\n      \"salutation\": \"Frau\",\n      \"street\": \"Hauptstr.\"\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"string\",\n  \"itemReturns\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"id\": \"string\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"returnFacilityRef\": \"string\",\n      \"returnedLineItems\": [\n        {\n          \"id\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\",\n          \"itemCondition\": \"Damaged\",\n          \"itemConditionComment\": \"Upper corner damaged\",\n          \"itemConditionLocalized\": {\n            \"de_DE\": \"Wert\",\n            \"en_US\": \"Value\",\n            \"ru_RU\": \"значение\"\n          },\n          \"itemReturnJobLineItemRefs\": [\n            \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n          ],\n          \"status\": \"OPEN\",\n          \"tenantArticleId\": \"a69006ba-7100-4b4d-a610-1ca28016a4eb\"\n        }\n      ],\n      \"status\": \"ANNOUNCED\"\n    }\n  ],\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"originFacilityRefs\": [\n    \"string\"\n  ],\n  \"processRef\": \"string\",\n  \"returnableLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"delivered\": 7,\n      \"id\": \"611c860f-3f00-4b01-9f4c-64cdee38a30e\",\n      \"returnable\": 7,\n      \"returned\": 5\n    }\n  ],\n  \"shortId\": \"AS12\",\n  \"status\": \"OPEN\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "updateLoadUnitType",
@@ -7075,7 +7076,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"actions\": [\n    {\n      \"action\": \"ModifyLoadUnitType\",\n      \"descriptionLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"nameLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"priority\": 100\n    }\n  ],\n  \"version\": 42\n}\n",
-		SampleResponse: "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"id\": \"string\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"id\": \"string\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"version\": 1\n}\n",
 		Deprecated:     true,
 	},
 	{
@@ -7088,8 +7089,8 @@ var operations = []Operation{
 		Permissions:    []string{"CURRENT_USER_MODIFY"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"locale\": \"de_DE\"\n}\n",
-		SampleResponse: "{\n  \"assignedRoles\": [\n    {\n      \"ref\": \"string\"\n    }\n  ],\n  \"authenticationProvider\": {\n    \"type\": {}\n  },\n  \"authenticationProviderType\": \"de_DE\",\n  \"email\": \"john.doe@example.com\",\n  \"firstname\": \"John\",\n  \"id\": \"string\",\n  \"lastname\": \"Doe\",\n  \"locale\": \"de_DE\",\n  \"username\": \"johndoe\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"firstname\": \"Phil\",\n  \"lastname\": \"Bison\",\n  \"locale\": \"de_DE\"\n}\n",
+		SampleResponse: "{\n  \"assignedRoles\": [\n    {\n      \"ref\": \"string\"\n    }\n  ],\n  \"authenticationProvider\": {\n    \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"type\": {}\n  },\n  \"authenticationProviderType\": \"de_DE\",\n  \"email\": \"john.doe@example.com\",\n  \"firstname\": \"John\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastname\": \"Doe\",\n  \"locale\": \"de_DE\",\n  \"username\": \"johndoe\",\n  \"version\": 1\n}\n",
 		Deprecated:     true,
 	},
 	{
@@ -7152,7 +7153,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"preferredHandlingTime\": \"2025-01-15T00:00:00Z\",\n  \"version\": 42\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"LGMl2DuvPnfPoSHhYFOm\",\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"processId\": \"string\",\n  \"status\": \"OPEN\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:             "updateOrderRecordsConfiguration",
@@ -7165,7 +7166,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"isOrderRecordsEnabled\": false,\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:50.525Z\",\n  \"id\": \"string\",\n  \"isOrderRecordsEnabled\": false,\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"created\": \"2020-02-03T08:45:50.525Z\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"isOrderRecordsEnabled\": false,\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "updatePackingContainerType",
@@ -7229,7 +7230,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"name\": \"SELECT_ITEMS_FOR_SERVICE_JOB\",\n  \"serviceItemsToSelect\": [\n    {\n      \"quantity\": 1,\n      \"serviceItemRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\"\n    }\n  ],\n  \"serviceJobVersion\": 1\n}\n",
-		SampleResponse: "{\n  \"availableLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"availableQuantity\": 12,\n      \"executedServiceJobData\": [\n        {\n          \"appliedQuantity\": 0,\n          \"itemsReturnable\": true,\n          \"sequence\": 1,\n          \"serviceJobRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\"\n        }\n      ],\n      \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 1,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"serviceJobRefs\": [\n    \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n  ],\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"availableLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"availableQuantity\": 12,\n      \"executedServiceJobData\": [\n        {\n          \"appliedQuantity\": 0,\n          \"itemsReturnable\": true,\n          \"sequence\": 1,\n          \"serviceJobRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\"\n        }\n      ],\n      \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 1,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"serviceJobRefs\": [\n    \"cdb1dfc4-8361-4ba9-b3c2-33a6f2fc8d05\"\n  ],\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "updateServiceJob",
@@ -7245,7 +7246,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"name\": \"StartServiceJob\",\n  \"version\": 42\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"customServiceRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"description\": \"Wrapping 3 gifts for order ocff-order-100\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"executionTimeInMin\": 60,\n  \"facilityRef\": \"ba095e30-879f-11ee-b9d1-0242ac120002\",\n  \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"imageRefs\": [\n    \"https://my-image-host.com/images/custom-service-1.jpg\"\n  ],\n  \"itemsRequired\": \"OPTIONAL\",\n  \"itemsReturnable\": false,\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 12,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"linkedServiceJobsRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"name\": \"Gift Wrapping Job\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeProcessRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"processRef\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"serviceJobLinkRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"shortId\": \"KD-12-1\",\n  \"status\": \"OPEN\",\n  \"subStatus\": \"WAITING_FOR_INPUT\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"tenantCustomServiceId\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"tenantOrderId\": \"ocff-order-100\",\n  \"version\": 42\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"customServiceRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"description\": \"Wrapping 3 gifts for order ocff-order-100\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"executionTimeInMin\": 60,\n  \"facilityRef\": \"ba095e30-879f-11ee-b9d1-0242ac120002\",\n  \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"imageRefs\": [\n    \"https://my-image-host.com/images/custom-service-1.jpg\"\n  ],\n  \"itemsRequired\": \"OPTIONAL\",\n  \"itemsReturnable\": false,\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"lineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"id\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n      \"measurementUnitKey\": \"pcs\",\n      \"originId\": \"df671041-10dd-4600-a2ff-e9ffe2556bba\",\n      \"quantity\": 12,\n      \"secondaryMeasurementUnitKey\": \"g\",\n      \"secondaryQuantity\": 42\n    }\n  ],\n  \"linkedServiceJobsRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"name\": \"Gift Wrapping Job\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"operativeProcessRef\": \"9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1\",\n  \"processRef\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"serviceJobLinkRef\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"shortId\": \"KD-12-1\",\n  \"status\": \"OPEN\",\n  \"subStatus\": \"WAITING_FOR_INPUT\",\n  \"targetTime\": \"2020-02-03T09:45:51.525Z\",\n  \"tenantCustomServiceId\": \"41d43211-g5a1-gg22-a716-ba095e30ds1d\",\n  \"tenantOrderId\": \"ocff-order-100\",\n  \"version\": 42\n}\n",
 	},
 	{
 		ID:          "updateSimulationOrder",
@@ -7260,8 +7261,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"consumer\": {\n    \"consumerId\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\",\n    \"email\": \"max@speedyboxales.com\",\n    \"facilityRef\": \"e4213a07-f563-46a3-b1ba-4dfeb6abe82a\"\n  },\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"orderLineItems\": [\n    {\n      \"article\": {\n        \"imageUrl\": \"https://example.com/resource\",\n        \"tenantArticleId\": \"4711\",\n        \"title\": \"Cologne Water\"\n      },\n      \"measurementUnitKey\": \"liter\",\n      \"quantity\": 21,\n      \"secondaryMeasurementUnitKey\": \"liter\",\n      \"secondaryQuantity\": 21,\n      \"shopPrice\": 1200\n    }\n  ],\n  \"tenantOrderId\": \"MY_ORDER_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "updateStock",
@@ -7275,8 +7276,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"value\": 1,\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"available\": 1,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facility\": {\n    \"facilityRef\": \"string\"\n  },\n  \"facilityRef\": \"string\",\n  \"facilityWideReserved\": 1,\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"reserved\": 1,\n  \"serializedProperties\": \"string\",\n  \"tenantArticleId\": \"string\",\n  \"traits\": [\n    \"PICKABLE\"\n  ],\n  \"value\": 1,\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"locationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"tenantStockId\": \"MY_STOCK_ID\",\n  \"value\": 42,\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"available\": 1,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facility\": {\n    \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n    \"tenantFacilityId\": \"MY_FACILITY_ID\"\n  },\n  \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"facilityWideReserved\": 1,\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"locationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"receiptDate\": \"2026-06-17T12:00:00Z\",\n  \"reserved\": 1,\n  \"serializedProperties\": \"string\",\n  \"tenantArticleId\": \"MY_ARTICLE_ID\",\n  \"tenantStockId\": \"MY_STOCK_ID\",\n  \"traits\": [\n    \"PICKABLE\"\n  ],\n  \"value\": 42,\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "uploadLoadUnitTypeIcon",
@@ -7293,7 +7294,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"content\": \"JVBERi0xLjEKJcKlwrHDqwoKMSAwIG9iagogIDw8IC9UeXBlIC9DYXRhbG9nCiAgICAgL1BhZ2VzIDIgMCBSCiAgPj4KZW5kb2JqCgoyIDAgb2JqCiAgPDwgL1R5cGUgL1BhZ2VzCiAgICAgL0tpZHMgWzMgMCBSXQogICAgIC9Db3VudCAxCiAgICAgL01lZGlhQm94IFswIDAgMzAwIDE0NF0KICA+PgplbmRvYmoKCjMgMCBvYmoKICA8PCAgL1R5cGUgL1BhZ2UKICAgICAgL1BhcmVudCAyIDAgUgogICAgICAvUmVzb3VyY2VzCiAgICAgICA8PCAvRm9udAogICAgICAgICAgIDw8IC9GMQogICAgICAgICAgICAgICA8PCAvVHlwZSAvRm9udAogICAgICAgICAgICAgICAgICAvU3VidHlwZSAvVHlwZTEKICAgICAgICAgICAgICAgICAgL0Jhc2VGb250IC9UaW1lcy1Sb21hbgogICAgICAgICAgICAgICA+PgogICAgICAgICAgID4+CiAgICAgICA+PgogICAgICAvQ29udGVudHMgNCAwIFIKICA+PgplbmRvYmoKCjQgMCBvYmoKICA8PCAvTGVuZ3RoIDU1ID4+CnN0cmVhbQogIEJUCiAgICAvRjEgMTggVGYKICAgIDAgMCBUZAogICAgKEhlbGxvIFdvcmxkKSBUagogIEVUCmVuZHN0cmVhbQplbmRvYmoKCnhyZWYKMCA1CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAxOCAwMDAwMCBuIAowMDAwMDAwMDc3IDAwMDAwIG4gCjAwMDAwMDAxNzggMDAwMDAgbiAKMDAwMDAwMDQ1NyAwMDAwMCBuIAp0cmFpbGVyCiAgPDwgIC9Sb290IDEgMCBSCiAgICAgIC9TaXplIDUKICA+PgpzdGFydHhyZWYKNTY1CiUlRU9GCg==\",\n  \"name\": \"example.pdf\"\n}\n",
-		SampleResponse: "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"id\": \"string\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-06-17T12:00:00Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"id\": \"string\",\n  \"lastModified\": \"2026-06-17T12:00:00Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"version\": 1\n}\n",
 		Deprecated:     true,
 	},
 	{
@@ -7350,8 +7351,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"cancelled\": false,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-01-01T00:00:00Z\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"status\": \"OPEN\"\n}\n",
+		SampleBody:     "{\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-06-17T12:00:00Z\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 42\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"cancelled\": false,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-01-01T00:00:00Z\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 42\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"status\": \"OPEN\"\n}\n",
 	},
 	{
 		ID:             "upsertInventoryConfigurations",
@@ -7362,7 +7363,7 @@ var operations = []Operation{
 		Permissions:    []string{"CONFIG_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"isMixedStorage\": true,\n  \"version\": 1\n}\n",
 		SampleResponse: "{\n  \"version\": 1\n}\n",
 	},
 	{
@@ -7378,7 +7379,7 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"isMixedStorage\": true,\n  \"version\": 1\n}\n",
 		SampleResponse: "{\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"version\": 1\n}\n",
 	},
 	{
@@ -7392,7 +7393,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"channels\": [\n    {\n      \"enabled\": false,\n      \"events\": [\n        \"PICK_JOB_CREATED\"\n      ],\n      \"receiver\": [\n        {}\n      ],\n      \"type\": \"EMAIL\"\n    }\n  ],\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"channels\": [\n    {\n      \"enabled\": false,\n      \"events\": [\n        \"PICK_JOB_CREATED\"\n      ],\n      \"id\": \"string\",\n      \"receiver\": [\n        {\n          \"email\": \"user@example.com\",\n          \"language\": \"de_DE\"\n        }\n      ],\n      \"type\": \"EMAIL\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"channels\": [\n    {\n      \"enabled\": false,\n      \"events\": [\n        \"PICK_JOB_CREATED\"\n      ],\n      \"id\": \"string\",\n      \"receiver\": [\n        {\n          \"email\": \"phil.bison@fulfillmenttools.com\",\n          \"language\": \"de_DE\"\n        }\n      ],\n      \"type\": \"EMAIL\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "upsertNotificationCenterFacilityConfig",
@@ -7408,7 +7409,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"channels\": [\n    {\n      \"enabled\": false,\n      \"events\": [\n        \"PICK_JOB_CREATED\"\n      ],\n      \"receiver\": [\n        {}\n      ],\n      \"type\": \"EMAIL\"\n    }\n  ],\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"channels\": [\n    {\n      \"enabled\": false,\n      \"events\": [\n        \"PICK_JOB_CREATED\"\n      ],\n      \"id\": \"string\",\n      \"receiver\": [\n        {\n          \"email\": \"user@example.com\",\n          \"language\": \"de_DE\"\n        }\n      ],\n      \"type\": \"EMAIL\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"channels\": [\n    {\n      \"enabled\": false,\n      \"events\": [\n        \"PICK_JOB_CREATED\"\n      ],\n      \"id\": \"string\",\n      \"receiver\": [\n        {\n          \"email\": \"phil.bison@fulfillmenttools.com\",\n          \"language\": \"de_DE\"\n        }\n      ],\n      \"type\": \"EMAIL\"\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "upsertOperativeServiceConfigurations",
@@ -7449,8 +7450,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"cancelled\": false,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"orderDate\": \"2026-01-01T00:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-01-01T00:00:00Z\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 1\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"status\": \"OPEN\",\n  \"version\": 1\n}\n",
+		SampleBody:     "{\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-06-17T12:00:00Z\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 42\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"cancelled\": false,\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"facilityRef\": \"string\",\n  \"id\": \"string\",\n  \"inboundProcessRef\": \"string\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"orderDate\": \"2026-06-17T12:00:00Z\",\n  \"requestedDate\": {\n    \"type\": \"ASAP\",\n    \"value\": \"2026-01-01T00:00:00Z\"\n  },\n  \"requestedItems\": [\n    {\n      \"quantity\": {\n        \"value\": 42\n      },\n      \"tenantArticleId\": \"string\"\n    }\n  ],\n  \"status\": \"OPEN\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "upsertReturnConfiguration",
@@ -7474,8 +7475,8 @@ var operations = []Operation{
 		Permissions:    []string{"STOCK_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"stocks\": [\n    {\n      \"tenantArticleId\": \"string\",\n      \"value\": 1\n    }\n  ]\n}\n",
-		SampleResponse: "[\n  {\n    \"status\": \"UPDATED\",\n    \"stock\": {\n      \"available\": 1,\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"facility\": {\n        \"facilityRef\": \"string\"\n      },\n      \"facilityRef\": \"string\",\n      \"facilityWideReserved\": 1,\n      \"id\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"reserved\": 1,\n      \"serializedProperties\": \"string\",\n      \"tenantArticleId\": \"string\",\n      \"traits\": [\n        \"PICKABLE\"\n      ],\n      \"value\": 1,\n      \"version\": 1\n    }\n  }\n]\n",
+		SampleBody:     "{\n  \"stocks\": [\n    {\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"locationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"receiptDate\": \"2026-06-17T12:00:00Z\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\",\n      \"tenantFacilityId\": \"MY_FACILITY_ID\",\n      \"tenantStockId\": \"MY_STOCK_ID\",\n      \"value\": 42\n    }\n  ]\n}\n",
+		SampleResponse: "[\n  {\n    \"status\": \"UPDATED\",\n    \"stock\": {\n      \"available\": 1,\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"facility\": {\n        \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"tenantFacilityId\": \"MY_FACILITY_ID\"\n      },\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"facilityWideReserved\": 1,\n      \"id\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"locationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"receiptDate\": \"2026-06-17T12:00:00Z\",\n      \"reserved\": 1,\n      \"serializedProperties\": \"string\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\",\n      \"tenantStockId\": \"MY_STOCK_ID\",\n      \"traits\": [\n        \"PICKABLE\"\n      ],\n      \"value\": 42,\n      \"version\": 1\n    }\n  }\n]\n",
 	},
 	{
 		ID:           "validatePostalCode",

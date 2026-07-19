@@ -32,14 +32,21 @@ output-options:
   skip-prune: false
 
   # Prune misses self-referential schemas: it removes components by ref count,
-  # and a schema that references itself (here AuditSearchQuery via its and/or
-  # arrays) never reaches zero, so it survives even though no included operation
-  # reaches it — dragging its filter graph in with it. Audits (Core) is not an
-  # included tag, so exclude the two roots by hand. Extend this list if a future
-  # spec sync leaks another recursive, unreachable schema.
+  # and a schema that references itself (e.g. AuditSearchQuery / ExportRequestSearchQuery
+  # via their and/or arrays) never reaches zero, so it survives even though no included
+  # operation reaches it. Excluding a schema drops it from the output but does NOT
+  # decrement the ref counts it contributed, so its filter children stay above zero and
+  # survive too — every schema in the orphaned subgraph must be named here, not just the
+  # recursive root. Neither Audits (Core) nor Export is an included tag. Extend this list
+  # if a future spec sync leaks another recursive, unreachable schema.
   exclude-schemas:
     - AuditSearchQuery
     - AuditedEntityTypeEnumFilter
+    - ExportRequestSearchQuery
+    - ExportRequestReferenceFilter
+    - ExportRequestExportContainerFilter
+    - ExportRequestExportDataFormatEnumFilter
+    - ExportRequestExportSourceTypeEnumFilter
 
   # The spec is VERSIONLESS and regenerated upstream without notice; keeping
   # the raw body on responses lets us decode ApiError (a JSON *array*)
