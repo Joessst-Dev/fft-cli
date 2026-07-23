@@ -23,10 +23,10 @@ There is deliberately no --password flag: a password on the command line is
 recorded in your shell history and visible in the process list to every other
 user on the machine. Pipe it in instead:
 
-  fft project add staging \
+  fft project add prd \
     --base-url https://acme.api.fulfillmenttools.com \
     --api-key AIza... \
-    --project-id acme --env staging --username warehouse-bot \
+    --project-id acme --env prd --username warehouse-bot \
     --password-stdin < password.txt
 
 The base URL is stored exactly as you give it. fft never derives it from the
@@ -36,11 +36,11 @@ whether the host is "{projectId}.api…" or "ocff-{projectId}.api…".
 You may give either --email (used verbatim) or --username, from which fft builds
 the synthetic address fulfillmenttools issues, {username}@ocff-{projectId}-{env}.com.
 
-The Firebase Web API key is not a credential. It identifies the Firebase project,
-grants nothing on its own, and is sent only to Google's identity endpoints —
-never to fulfillmenttools. It is therefore stored in the config file, not the
-keychain. Only the password and the tokens go to the keychain, each under its own
-entry.`
+The fulfillmenttools API key (a Firebase Web API key) is not a credential. It
+identifies the Firebase project, grants nothing on its own, and is sent only to
+Google's identity endpoints — never to fulfillmenttools. It is therefore stored in
+the config file, not the keychain. Only the password and the tokens go to the
+keychain, each under its own entry.`
 
 // addFlags are the non-interactive inputs to `project add`.
 type addFlags struct {
@@ -75,12 +75,12 @@ func newProjectAddCmd(deps *Deps) *cobra.Command {
 
 	f := cmd.Flags()
 	f.StringVar(&flags.baseURL, "base-url", "", "API root, e.g. https://acme.api.fulfillmenttools.com")
-	f.StringVar(&flags.apiKey, "api-key", "", "Firebase Web API key")
+	f.StringVar(&flags.apiKey, "api-key", "", "fulfillmenttools API key")
 	f.StringVar(&flags.email, "email", "", "Email address to sign in with (use instead of --username)")
 	f.StringVar(&flags.username, "username", "", "Login name; the email is derived from it")
 	f.StringVar(&flags.tenant, "tenant", "", "Tenant name (informational)")
 	f.StringVar(&flags.projectID, "project-id", "", "fulfillmenttools project id")
-	f.StringVar(&flags.environment, "env", "", "Environment, e.g. staging or prod")
+	f.StringVar(&flags.environment, "env", "", "Environment, e.g. pre or prd")
 	f.BoolVar(&flags.passwordStdin, "password-stdin", false, "Read the password from stdin")
 	f.BoolVar(&flags.force, "force", false, "Overwrite an existing project of the same name")
 
@@ -223,16 +223,14 @@ func promptProject(p *prompt.Prompter, project *config.Project) error {
 	}{
 		{"Project name", &project.Name, true},
 		{"Base URL (e.g. https://acme.api.fulfillmenttools.com)", &project.BaseURL, true},
-		{"Firebase Web API key", &project.FirebaseAPIKey, true},
+		{"fulfillmenttools API key", &project.FirebaseAPIKey, true},
 		{"fulfillmenttools project id", &project.ProjectID, false},
-		{"Environment (e.g. staging, prod)", &project.Environment, false},
-		{"Username or full email address", &project.Username, true},
+		{"Environment (pre or prd)", &project.Environment, false},
 	}
 
 	for _, f := range fields {
-		// A value already given as a flag is not asked for again — and neither is
-		// the username when --email already settled the question.
-		if *f.value != "" || (f.value == &project.Username && project.Email != "") {
+		// A value already given as a flag is not asked for again.
+		if *f.value != "" {
 			continue
 		}
 
@@ -248,11 +246,23 @@ func promptProject(p *prompt.Prompter, project *config.Project) error {
 		*f.value = strings.TrimSpace(val)
 	}
 
-	// Username and email are one question, because users think of them as one
-	// thing. An "@" makes the answer an email address; anything else is a
-	// username, and the synthetic address is built from it.
-	if project.Email == "" && strings.Contains(project.Username, "@") {
-		project.Email = project.Username
+	// The interactive path asks for the login name, never an email: the address
+	// that authenticates is the synthetic {username}@ocff-{projectId}-{env}.com,
+	// and users typing their own corporate email instead was the common way to a
+	// failed sign-in. A genuinely non-synthetic account uses --email, so an "@"
+	// here is almost certainly the mistake — reject it and re-ask. The username is
+	// skipped only when --username or --email already settled it.
+	if project.Email == "" && project.Username == "" {
+		username, err := p.Validated("Username (login name)", func(v string) error {
+			if strings.Contains(v, "@") {
+				return errors.New("enter the short login name, not an email address (use --email for a full sign-in address)")
+			}
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+		project.Username = strings.TrimSpace(username)
 	}
 	return nil
 }

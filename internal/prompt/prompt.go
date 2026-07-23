@@ -114,6 +114,23 @@ func (p *Prompter) Required(label string) (string, error) {
 	}
 }
 
+// Validated asks for a non-empty value and keeps asking until validate accepts
+// it, printing the rejection message as the hint — the same shape as Required,
+// with a caller-supplied acceptance rule on top.
+func (p *Prompter) Validated(label string, validate func(string) error) (string, error) {
+	for {
+		val, err := p.Required(label)
+		if err != nil {
+			return "", err
+		}
+		if verr := validate(val); verr != nil {
+			fmt.Fprintln(p.out, verr.Error())
+			continue
+		}
+		return val, nil
+	}
+}
+
 // Password asks for a secret. On a terminal the input is masked; otherwise it is
 // read as a plain line, which is what lets the specs drive it.
 func (p *Prompter) Password(label string) (string, error) {
