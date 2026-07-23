@@ -129,9 +129,9 @@ Only with the user. Never invent a tenant, and never put a password on a command
 there is no `--password` flag, deliberately:
 
 ```sh
-fft project add staging --base-url https://acme-staging.api.fulfillmenttools.com --api-key AIza... --username bot --project-id acme --env staging --password-stdin
+fft project add acme-pre --base-url https://ocff-acme-pre.api.fulfillmenttools.com --api-key AIza... --username bot --project-id acme --env pre --password-stdin
 fft project list
-fft project use staging
+fft project use acme-pre
 ```
 
 If the user tells you a project is production, offer to protect it:

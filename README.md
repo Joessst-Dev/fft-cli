@@ -69,11 +69,11 @@ not all obvious, so:
 | What | Looks like | Notes |
 |---|---|---|
 | **Base URL** | `https://ocff-acme-pre.api.fulfillmenttools.com` | The **full host**. Don't try to build it from the project id — the official docs disagree with themselves about the prefix. Copy whatever a working curl call or the onboarding email uses. |
-| **Firebase Web API key** | `AIzaSy…` | The value in `?key=` on the Google sign-in URL. **This is not a credential** — see [Authentication](#authentication-honestly). |
+| **fulfillmenttools API key** | `AIzaSy…` | A Firebase Web API key — the value in `?key=` on the Google sign-in URL. **This is not a credential** — see [Authentication](#authentication-honestly). |
 | **Username** | `jane.doe` | Your login name, *not* an email address. |
 | **Password** | | |
 
-Plus the **project id** (`acme`) and **environment** (`pre`, `prod`, …) — fft needs them
+Plus the **project id** (`acme`) and **environment** (`pre` or `prd`) — fft needs them
 to derive your sign-in email, which is synthetic:
 `{username}@ocff-{projectId}-{env}.com`. If you already know the full email, pass that
 instead and the other two become unnecessary.
@@ -102,10 +102,10 @@ you like and switch between them; commands act on the **active** one unless you 
 $ fft project add prod
 Project name: prod
 Base URL (e.g. https://acme.api.fulfillmenttools.com): https://ocff-acme-pre.api.fulfillmenttools.com
-Firebase Web API key: AIzaSy…
+fulfillmenttools API key: AIzaSy…
 fulfillmenttools project id: acme
-Environment (e.g. staging, prod): pre
-Username or full email address: jane.doe
+Environment (pre or prd): pre
+Username (login name): jane.doe
 Password:
 Project "prod" added and is now active.
 ```

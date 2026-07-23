@@ -75,7 +75,7 @@ var _ = Describe("fft project add", func() {
 			Expect(string(data)).NotTo(ContainSubstring("s3cret"))
 		})
 
-		It("keeps the Firebase Web API key in the config file, since it is not a credential", func() {
+		It("keeps the fulfillmenttools API key in the config file, since it is not a credential", func() {
 			data, err := os.ReadFile(c.configPath)
 
 			Expect(err).NotTo(HaveOccurred())
@@ -88,6 +88,32 @@ var _ = Describe("fft project add", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cfg.ActiveProject).To(Equal("staging"))
 			Expect(c.errOut()).To(ContainSubstring(`Project "staging" added and is now active.`))
+		})
+	})
+
+	When("the login name is entered interactively", func() {
+		// The prompt asks for a username, never an email: typing a corporate email
+		// there built a wrong ocff address and a failed sign-in, so an "@" is
+		// rejected and re-asked. --email remains the way to pass a verbatim address.
+		It("rejects an email address, re-asks, and derives the ocff sign-in email from the username", func() {
+			c.answer("jane@acme.com", "jane", "s3cret")
+
+			code := c.run("project", "add", "demo",
+				"--base-url", "https://acme.api.fulfillmenttools.com",
+				"--api-key", "AIzaSyExample",
+				"--project-id", "acme",
+				"--env", "prd")
+
+			Expect(code).To(Equal(exitcode.OK))
+			Expect(c.errOut()).To(ContainSubstring("Username (login name)"))
+			Expect(c.errOut()).To(ContainSubstring("enter the short login name, not an email address"))
+
+			cfg, err := config.NewStore(c.configPath).Load()
+			Expect(err).NotTo(HaveOccurred())
+			project, ok := cfg.Find("demo")
+			Expect(ok).To(BeTrue())
+			Expect(project.Username).To(Equal("jane"))
+			Expect(project.Email).To(Equal("jane@ocff-acme-prd.com"))
 		})
 	})
 
