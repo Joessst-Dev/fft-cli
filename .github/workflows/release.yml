@@ -31,7 +31,7 @@ jobs:
           # so it needs the whole history, not just the tagged commit.
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version: stable
           cache: true
@@ -45,7 +45,7 @@ jobs:
 
       # GoReleaser's `dockers_v2` builds the multi-platform image with buildx.
       - name: Set up Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       # Authenticate to GHCR so GoReleaser can push the images and the manifest. Login
       # must precede GoReleaser — it pushes during `release`, not after.
