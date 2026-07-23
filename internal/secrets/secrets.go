@@ -47,12 +47,17 @@ const (
 	KindRefreshToken = "refreshToken"
 	KindIDToken      = "idToken"
 	KindIDTokenExp   = "idTokenExp"
+	// KindAPIKey is the Firebase Web API key. It confers no authorization by
+	// itself and only ever travels to Google's identity endpoints, but it is kept
+	// out of the plaintext config file and held here alongside the credentials all
+	// the same.
+	KindAPIKey = "apiKey"
 )
 
 // AllKinds lists every secret kind a project may have. `fft project remove`
 // walks it to make sure nothing is left behind in the keychain.
 func AllKinds() []string {
-	return []string{KindPassword, KindRefreshToken, KindIDToken, KindIDTokenExp}
+	return []string{KindPassword, KindRefreshToken, KindIDToken, KindIDTokenExp, KindAPIKey}
 }
 
 // Key builds the storage key for one secret of one project, for example

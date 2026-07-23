@@ -14,19 +14,21 @@ endpoint at all, which is why this is worth spelling out:
 3. When the token nears expiry it refreshes against `securetoken.googleapis.com`,
    transparently. You will not notice.
 
-**The API key is not a credential.** It is the Firebase *Web API key*: it identifies the
-Firebase project and confers no authorization whatsoever. It is sent only as `?key=` on
-those two Google URLs and is **never sent to fulfillmenttools** — the token source owns a
-separate HTTP client with a hardcoded allowlist of the two Google hosts, so the key is
-structurally incapable of reaching your tenant.
+**The API key confers no authorization.** It is the Firebase *Web API key*: it identifies
+the Firebase project and grants nothing on its own. It is sent only as `?key=` on those two
+Google URLs and is **never sent to fulfillmenttools** — the token source owns a separate
+HTTP client with a hardcoded allowlist of the two Google hosts, so the key is structurally
+incapable of reaching your tenant. It is nonetheless treated as sensitive and kept in the
+keychain, not the config file.
 
 **Your username is not your email.** fulfillmenttools derives a synthetic one:
 `{username}@ocff-{projectId}-{env}.com`. `fft` builds it for you; `project add` asks for
 the parts.
 
-Secrets (password, refresh token, ID token) live in the **OS keychain** — Keychain on
-macOS, Credential Manager on Windows, Secret Service on Linux. Each gets its own entry.
-Non-secret project data lives in `~/.config/fft/config.yaml`, mode `0600`.
+Secrets (API key, password, refresh token, ID token) live in the **OS keychain** — Keychain
+on macOS, Credential Manager on Windows, Secret Service on Linux. Each gets its own entry.
+Non-secret project data lives in `~/.config/fft/config.yaml`, mode `0600`. An older config
+that still holds the API key in cleartext is migrated into the keychain on the next run.
 
 On a Linux box with no Secret Service (a headless server, a bare container), pass
 `--no-keyring` or set `FFT_NO_KEYRING=1` to fall back to a `0600` file.

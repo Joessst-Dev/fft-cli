@@ -184,17 +184,18 @@ var _ = Describe("storing a project's secrets", func() {
 
 	It("gives every secret its own key, never one bundled blob", func() {
 		// The Windows Credential Manager caps one credential at roughly 2.5 KB and
-		// a Firebase id token alone is about 1 KB, so a blob holding all four would
+		// a Firebase id token alone is about 1 KB, so a blob holding them all would
 		// silently fail to save there.
 		for _, kind := range secrets.AllKinds() {
 			Expect(store.Set(secrets.Key("staging", kind), "value-of-"+kind)).To(Succeed())
 		}
 
-		Expect(store.Snapshot()).To(HaveLen(4))
+		Expect(store.Snapshot()).To(HaveLen(len(secrets.AllKinds())))
 		Expect(store.Snapshot()).To(HaveKey("fft:staging:password"))
 		Expect(store.Snapshot()).To(HaveKey("fft:staging:refreshToken"))
 		Expect(store.Snapshot()).To(HaveKey("fft:staging:idToken"))
 		Expect(store.Snapshot()).To(HaveKey("fft:staging:idTokenExp"))
+		Expect(store.Snapshot()).To(HaveKey("fft:staging:apiKey"))
 	})
 
 	Describe("DeleteAll", func() {
@@ -238,6 +239,12 @@ var _ = Describe("storing a project's secrets", func() {
 
 		It("is false when only a refresh token's expiry is stored", func() {
 			Expect(store.Set(secrets.Key("staging", secrets.KindIDTokenExp), "123")).To(Succeed())
+
+			Expect(secrets.Has(store, "staging")).To(BeFalse())
+		})
+
+		It("is false when only the API key is stored, which is not a sign-in credential", func() {
+			Expect(store.Set(secrets.Key("staging", secrets.KindAPIKey), "AIzaSy...")).To(Succeed())
 
 			Expect(secrets.Has(store, "staging")).To(BeFalse())
 		})

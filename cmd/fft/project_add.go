@@ -36,11 +36,10 @@ whether the host is "{projectId}.api…" or "ocff-{projectId}.api…".
 You may give either --email (used verbatim) or --username, from which fft builds
 the synthetic address fulfillmenttools issues, {username}@ocff-{projectId}-{env}.com.
 
-The fulfillmenttools API key (a Firebase Web API key) is not a credential. It
-identifies the Firebase project, grants nothing on its own, and is sent only to
-Google's identity endpoints — never to fulfillmenttools. It is therefore stored in
-the config file, not the keychain. Only the password and the tokens go to the
-keychain, each under its own entry.`
+The fulfillmenttools API key (a Firebase Web API key) is treated as sensitive: it
+goes to the keychain alongside the password and tokens, each under its own entry,
+and is never written to the config file. It grants nothing on its own and is sent
+only to Google's identity endpoints — never to fulfillmenttools.`
 
 // addFlags are the non-interactive inputs to `project add`.
 type addFlags struct {
@@ -337,17 +336,25 @@ func readPassword(deps *Deps, flags *addFlags, interactive bool) (string, error)
 	}
 }
 
-// persistProject writes the secret first and the config second.
+// persistProject writes the secrets first and the config second.
 //
 // The order matters. A project in the config file with no credential behind it
-// is a project every later command fails on, so if the keychain write fails we
+// is a project every later command fails on, so if a keychain write fails we
 // have written nothing; and if the config write fails after the keychain
-// succeeded, the orphaned secret is removed rather than left behind for a
+// succeeded, the orphaned secrets are removed rather than left behind for a
 // later `project add` of the same name to silently inherit.
+//
+// The API key goes to the store alongside the password: it is sensitive too, and
+// Project.FirebaseAPIKey is yaml:"-", so the config write below never records it.
 func persistProject(deps *Deps, cfg *config.Config, project config.Project, password string) error {
-	key := secrets.Key(project.Name, secrets.KindPassword)
-	if err := deps.Secrets.Set(key, password); err != nil {
+	if err := deps.Secrets.Set(secrets.Key(project.Name, secrets.KindPassword), password); err != nil {
 		return fmt.Errorf("store the password for %q: %w", project.Name, err)
+	}
+	if err := deps.Secrets.Set(secrets.Key(project.Name, secrets.KindAPIKey), project.FirebaseAPIKey); err != nil {
+		if delErr := secrets.DeleteAll(deps.Secrets, project.Name); delErr != nil {
+			return errors.Join(fmt.Errorf("store the API key for %q: %w", project.Name, err), delErr)
+		}
+		return fmt.Errorf("store the API key for %q: %w", project.Name, err)
 	}
 
 	cfg.Upsert(project)

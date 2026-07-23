@@ -125,29 +125,28 @@ var _ = Describe("Store", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(string(data)).To(ContainSubstring("activeProject:"))
 			Expect(string(data)).To(ContainSubstring("baseUrl:"))
-			Expect(string(data)).To(ContainSubstring("firebaseApiKey:"))
 			Expect(string(data)).To(ContainSubstring("updateCheck:"))
 
 			Expect(string(data)).NotTo(ContainSubstring("activeproject:"))
 			Expect(string(data)).NotTo(ContainSubstring("baseurl:"))
-			Expect(string(data)).NotTo(ContainSubstring("firebaseapikey:"))
 		})
 
-		It("reads back every field it wrote", func() {
+		It("reads back every field it wrote, minus the API key it never persists", func() {
 			cfg, err := store.Load()
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(cfg.ActiveProject).To(Equal("staging"))
 			Expect(cfg.Projects).To(HaveLen(1))
 
+			// FirebaseAPIKey is yaml:"-": it is a secret now, so it does not survive
+			// the trip through the file. It comes back zero, not "AIzaSyExample".
 			Expect(cfg.Projects[0]).To(Equal(config.Project{
-				Name:           "staging",
-				BaseURL:        "https://acme.api.fulfillmenttools.com",
-				FirebaseAPIKey: "AIzaSyExample",
-				Email:          "bot@ocff-acme-staging.com",
-				Username:       "bot",
-				ProjectID:      "acme",
-				Environment:    "staging",
+				Name:        "staging",
+				BaseURL:     "https://acme.api.fulfillmenttools.com",
+				Email:       "bot@ocff-acme-staging.com",
+				Username:    "bot",
+				ProjectID:   "acme",
+				Environment: "staging",
 			}))
 		})
 
@@ -167,6 +166,10 @@ var _ = Describe("Store", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(string(data)).NotTo(ContainSubstring("password"))
 			Expect(string(data)).NotTo(ContainSubstring("Token"))
+			// The API key is sensitive too: sampleConfig sets it, and it must not
+			// reach the file — neither the yaml key nor the value.
+			Expect(string(data)).NotTo(ContainSubstring("firebaseApiKey"))
+			Expect(string(data)).NotTo(ContainSubstring("AIzaSyExample"))
 		})
 
 		// The read-only flag is a safety property, so it has to survive the trip to
@@ -226,6 +229,27 @@ var _ = Describe("Store", func() {
 
 			Expect(err).To(MatchError(ContainSubstring("newer fft")))
 			Expect(exitcode.FromError(err)).To(Equal(exitcode.Config))
+		})
+	})
+
+	Describe("loading a pre-v2 config that stored the API key in cleartext", func() {
+		// The cleartext firebaseApiKey lands in the legacy field, not the live one:
+		// the startup migration reads it from there, moves it to the secret store and
+		// clears it. The live FirebaseAPIKey stays zero until something hydrates it.
+		It("reads the key into the legacy field, ready for migration", func() {
+			Expect(os.MkdirAll(filepath.Dir(path), 0o700)).To(Succeed())
+			Expect(os.WriteFile(path, []byte(`version: 1
+projects:
+    - name: legacy
+      baseUrl: https://legacy.api.fulfillmenttools.com
+      firebaseApiKey: AIzaSyLegacy
+`), 0o600)).To(Succeed())
+
+			cfg, err := store.Load()
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cfg.Projects[0].LegacyFirebaseAPIKey).To(Equal("AIzaSyLegacy"))
+			Expect(cfg.Projects[0].FirebaseAPIKey).To(BeEmpty())
 		})
 	})
 })

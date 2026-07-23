@@ -33,7 +33,13 @@ import (
 // Version is the schema version written to new config files. It exists so that
 // a future breaking change to the file layout can be detected and migrated
 // rather than misread.
-const Version = 1
+//
+// Version 2 moved the Firebase Web API key out of the config file and into the
+// secret store. A v1 file is migrated in place on the next run (the key is swept
+// into the store and the plaintext field dropped); a v2 file read by an older
+// build trips the newer-version guard in [Store.Load], which is what we want now
+// that the key no longer lives here.
+const Version = 2
 
 // Output formats a project may default to.
 const (
@@ -59,7 +65,7 @@ type Settings struct {
 }
 
 // Project is one configured fulfillmenttools tenant. It holds no secrets: the
-// password and tokens live in a [secrets.Store].
+// password, tokens and Firebase API key all live in a [secrets.Store].
 type Project struct {
 	// Name identifies the project to the user and namespaces its secrets.
 	Name string `yaml:"name"`
@@ -74,9 +80,19 @@ type Project struct {
 	BaseURL string `yaml:"baseUrl"`
 
 	// FirebaseAPIKey is the Firebase *Web* API key. It identifies the Firebase
-	// project and confers no authorization by itself; it is sent only as the
-	// ?key= parameter on Google's identity endpoints, never to fulfillmenttools.
-	FirebaseAPIKey string `yaml:"firebaseApiKey"`
+	// project and is sent only as the ?key= parameter on Google's identity
+	// endpoints, never to fulfillmenttools.
+	//
+	// It is treated as sensitive: hydrated at runtime from the secret store (a
+	// configured project) or the environment (a headless one) and never written
+	// to the plaintext config file — hence the yaml:"-".
+	FirebaseAPIKey string `yaml:"-"`
+
+	// LegacyFirebaseAPIKey catches the cleartext key that pre-v2 config files
+	// stored under firebaseApiKey. It exists only so the startup migration can
+	// move it into the secret store; nothing else sets it, and once the migration
+	// clears it, omitempty drops it from the file. See migrateAPIKeys in cmd/fft.
+	LegacyFirebaseAPIKey string `yaml:"firebaseApiKey,omitempty"`
 
 	// Email is the address that actually authenticates. fulfillmenttools users
 	// often have a synthetic address ({username}@ocff-{projectId}-{env}.com) but
