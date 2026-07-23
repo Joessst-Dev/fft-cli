@@ -47,6 +47,9 @@ output-options:
     - ExportRequestExportContainerFilter
     - ExportRequestExportDataFormatEnumFilter
     - ExportRequestExportSourceTypeEnumFilter
+    - ExportOperationSearchQuery
+    - ExportOperationStatusEnumFilter
+    - ExportOperationExportSourceTypeEnumFilter
 
   # The spec is VERSIONLESS and regenerated upstream without notice; keeping
   # the raw body on responses lets us decode ApiError (a JSON *array*)

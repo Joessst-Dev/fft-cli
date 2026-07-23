@@ -29639,13 +29639,13 @@ components:
       title: AddLabelsToParcelActionParameter
       type: object
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />AddLabelsToParcelActionParameter
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
     AddLabelsToParcelContent:
       additionalProperties: false
       description: File and Document for this Label
@@ -37152,6 +37152,29 @@ components:
       title: ExportOperationError
       type: object
       description: ExportOperationError
+    ExportOperationExportSourceTypeEnumFilter:
+      properties:
+        eq:
+          description: Search by sourceType
+          enum:
+            - STOCK_SUMMARY
+          type: string
+        in:
+          description: Search by sourceType
+          items:
+            enum:
+              - STOCK_SUMMARY
+            type: string
+          maxItems: 500
+          type: array
+        notEq:
+          description: Search by sourceType
+          enum:
+            - STOCK_SUMMARY
+          type: string
+      title: ExportOperationExportSourceTypeEnumFilter
+      type: object
+      description: ExportOperationExportSourceTypeEnumFilter
     ExportOperationFile:
       properties:
         id:
@@ -37193,6 +37216,154 @@ components:
       title: ExportOperationPaginatedResult
       type: object
       description: ExportOperationPaginatedResult
+    ExportOperationSearchPayload:
+      properties:
+        after:
+          deprecated: false
+          description: >-
+            The cursor to start after for forward pagination. The value is
+            provided in the `pageInfo.endCursor` field of the response. Cannot
+            be used with `before` or `last`.
+          type: string
+        before:
+          description: >-
+            The cursor to start before for backward pagination. The value is
+            provided in the `pageInfo.startCursor` field of the response. Cannot
+            be used with `after` or `size` (first).
+          type: string
+        last:
+          description: >-
+            Number of items to return for backward pagination. Cannot be used
+            with 'size' (first). Default: 20.
+          maximum: 250
+          minimum: 1
+          type: number
+        options:
+          $ref: '#/components/schemas/SearchOptions'
+        query:
+          $ref: '#/components/schemas/ExportOperationSearchQuery'
+        size:
+          description: >-
+            Number of items to return for forward pagination. Cannot be used
+            with 'last'. Default: 20.
+          example: 10
+          maximum: 250
+          minimum: 1
+          type: number
+        sort:
+          description: Use for sorting the result.
+          items:
+            $ref: '#/components/schemas/ExportOperationSort'
+          maxItems: 1
+          minItems: 1
+          type: array
+        startAfterId:
+          deprecated: true
+          description: >-
+            The ID to start after. Deprecated, use `after` with the value
+            provided in `pageInfo.endCursor` instead.
+          type: string
+      required:
+        - query
+      title: ExportOperationSearchPayload
+      type: object
+      description: ExportOperationSearchPayload
+    ExportOperationSearchQuery:
+      properties:
+        and:
+          items:
+            $ref: '#/components/schemas/ExportOperationSearchQuery'
+          maxItems: 500
+          type: array
+        exportRequestRef:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by exportRequestRef
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+        filesDeletionDate:
+          allOf:
+            - $ref: '#/components/schemas/DateFilter'
+          description: Search by filesDeletionDate
+          example: 2026-06-17T12:00:00.000Z
+        filesExpired:
+          allOf:
+            - $ref: '#/components/schemas/BooleanFilter'
+          description: Search by filesExpired
+        finishedAt:
+          allOf:
+            - $ref: '#/components/schemas/DateFilter'
+          description: Search by finishedAt
+          example: 2026-06-17T12:00:00.000Z
+        or:
+          items:
+            $ref: '#/components/schemas/ExportOperationSearchQuery'
+          maxItems: 500
+          type: array
+        sourceType:
+          allOf:
+            - $ref: '#/components/schemas/ExportOperationExportSourceTypeEnumFilter'
+          description: Search by sourceType
+        startedAt:
+          allOf:
+            - $ref: '#/components/schemas/DateFilter'
+          description: Search by startedAt
+          example: 2026-06-17T12:00:00.000Z
+        status:
+          allOf:
+            - $ref: '#/components/schemas/ExportOperationStatusEnumFilter'
+          description: Search by status
+      title: ExportOperationSearchQuery
+      type: object
+      description: ExportOperationSearchQuery
+    ExportOperationSort:
+      properties:
+        filesDeletionDate:
+          enum:
+            - ASC
+            - DESC
+          type: string
+        finishedAt:
+          enum:
+            - ASC
+            - DESC
+          type: string
+        startedAt:
+          enum:
+            - ASC
+            - DESC
+          type: string
+      title: ExportOperationSort
+      type: object
+      description: ExportOperationSort
+    ExportOperationStatusEnumFilter:
+      properties:
+        eq:
+          description: Search by status
+          enum:
+            - RUNNING
+            - COMPLETED
+            - FAILED
+          type: string
+        in:
+          description: Search by status
+          items:
+            enum:
+              - RUNNING
+              - COMPLETED
+              - FAILED
+            type: string
+          maxItems: 500
+          type: array
+        notEq:
+          description: Search by status
+          enum:
+            - RUNNING
+            - COMPLETED
+            - FAILED
+          type: string
+      title: ExportOperationStatusEnumFilter
+      type: object
+      description: ExportOperationStatusEnumFilter
     ExportRequest:
       properties:
         created:
@@ -71789,6 +71960,7 @@ components:
             - PROCESS_REROUTE
             - PROCESS_MANUAL_ASSIGNED
             - TASK_MANUAL_REROUTED
+            - PICKJOB_REJECTED
           type: string
         created:
           description: Creation date of this routing journal entry
