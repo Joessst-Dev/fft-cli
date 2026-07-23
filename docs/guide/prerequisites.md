@@ -10,7 +10,7 @@ not all obvious, so:
 | What | Looks like | Notes |
 |---|---|---|
 | **Base URL** | `https://ocff-acme-pre.api.fulfillmenttools.com` | The **full host**. Don't try to build it from the project id — the official docs disagree with themselves about the prefix. Copy whatever a working curl call or the onboarding email uses. |
-| **fulfillmenttools API key** | `AIzaSy…` | A Firebase Web API key — the value in `?key=` on the Google sign-in URL. **This is not a credential** — see [Authentication](./auth.md). |
+| **fulfillmenttools API key** | `AIzaSy…` | A Firebase Web API key — the value in `?key=` on the Google sign-in URL. Kept in the keychain, never sent to fulfillmenttools — see [Authentication](./auth.md). |
 | **Username** | `jane.doe` | Your login name, *not* an email address. |
 | **Password** | | |
 

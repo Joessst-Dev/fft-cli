@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -62,9 +63,10 @@ var _ = Describe("fft project add", func() {
 			Expect(project.Email).To(Equal("bot@ocff-acme-staging.com"))
 		})
 
-		It("stores the password in the keychain under its own key, and nothing else", func() {
+		It("stores the password and the API key in the keychain, each under its own key, and nothing else", func() {
 			Expect(c.secrets.Snapshot()).To(Equal(map[string]string{
 				"fft:staging:password": "s3cret",
+				"fft:staging:apiKey":   "AIzaSyExample",
 			}))
 		})
 
@@ -75,11 +77,12 @@ var _ = Describe("fft project add", func() {
 			Expect(string(data)).NotTo(ContainSubstring("s3cret"))
 		})
 
-		It("keeps the fulfillmenttools API key in the config file, since it is not a credential", func() {
+		It("keeps the API key out of the config file, since it is sensitive", func() {
 			data, err := os.ReadFile(c.configPath)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(string(data)).To(ContainSubstring("firebaseApiKey: AIzaSyExample"))
+			Expect(string(data)).NotTo(ContainSubstring("firebaseApiKey"))
+			Expect(string(data)).NotTo(ContainSubstring("AIzaSyExample"))
 		})
 
 		It("makes the first project the active one", func() {
@@ -472,7 +475,7 @@ var _ = Describe("fft project remove", func() {
 
 			Expect(code).To(Equal(exitcode.Usage))
 			Expect(c.errOut()).To(ContainSubstring("--yes"))
-			Expect(c.secrets.Snapshot()).To(HaveLen(4))
+			Expect(c.secrets.Snapshot()).To(HaveLen(len(secrets.AllKinds())))
 
 			cfg, err := config.NewStore(c.configPath).Load()
 			Expect(err).NotTo(HaveOccurred())
@@ -486,6 +489,173 @@ var _ = Describe("fft project remove", func() {
 		})
 	})
 })
+
+var _ = Describe("migrating a pre-v2 config that stored the API key in cleartext", func() {
+	var c *cli
+
+	// seedLegacyConfig writes a version-1 config file with the Firebase API key in
+	// the plaintext field, exactly as a pre-migration fft would have left it.
+	seedLegacyConfig := func(c *cli) {
+		Expect(os.MkdirAll(filepath.Dir(c.configPath), 0o700)).To(Succeed())
+		Expect(os.WriteFile(c.configPath, []byte(`version: 1
+activeProject: legacy
+projects:
+    - name: legacy
+      baseUrl: https://legacy.api.fulfillmenttools.com
+      firebaseApiKey: AIzaSyLegacy
+      email: bot@ocff-acme-prd.com
+settings:
+    output: table
+    updateCheck: true
+`), 0o600)).To(Succeed())
+	}
+
+	BeforeEach(func() {
+		c = newCLI()
+		seedLegacyConfig(c)
+	})
+
+	It("moves the key into the secret store on the next run", func() {
+		Expect(c.run("project", "list")).To(Equal(exitcode.OK))
+
+		Expect(c.secrets.Snapshot()).To(HaveKeyWithValue("fft:legacy:apiKey", "AIzaSyLegacy"))
+	})
+
+	It("rewrites the config file without the cleartext key, stamped at the new version", func() {
+		Expect(c.run("project", "list")).To(Equal(exitcode.OK))
+
+		data, err := os.ReadFile(c.configPath)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(string(data)).NotTo(ContainSubstring("firebaseApiKey"))
+		Expect(string(data)).NotTo(ContainSubstring("AIzaSyLegacy"))
+
+		cfg, err := config.NewStore(c.configPath).Load()
+		Expect(err).NotTo(HaveOccurred())
+		Expect(cfg.Version).To(Equal(config.Version))
+	})
+
+	It("leaves the key usable: the active project hydrates it back from the store", func() {
+		Expect(c.run("project", "list")).To(Equal(exitcode.OK)) // migrate first
+
+		p, err := c.deps.ActiveProject()
+		Expect(err).NotTo(HaveOccurred())
+		Expect(p.FirebaseAPIKey).To(Equal("AIzaSyLegacy"))
+	})
+
+	It("is a no-op on the second run, writing nothing further", func() {
+		Expect(c.run("project", "list")).To(Equal(exitcode.OK))
+		before, err := os.ReadFile(c.configPath)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(c.run("project", "list")).To(Equal(exitcode.OK))
+		after, err := os.ReadFile(c.configPath)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(after).To(Equal(before))
+	})
+
+	When("the secret store cannot be written (a locked or unavailable keychain)", func() {
+		BeforeEach(func() {
+			// A store that refuses every write but otherwise behaves. Migration must
+			// not brick the CLI on it: it warns, leaves the cleartext key in place,
+			// and the key stays usable through the config-file fallback.
+			c.deps.Secrets = failingSetStore{secrets.NewMem()}
+		})
+
+		It("stays fail-soft: warns, exits OK, and leaves the key in the config file", func() {
+			Expect(c.run("project", "list")).To(Equal(exitcode.OK))
+
+			Expect(c.errOut()).To(ContainSubstring("Could not move the API key"))
+
+			data, err := os.ReadFile(c.configPath)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(string(data)).To(ContainSubstring("firebaseApiKey: AIzaSyLegacy"))
+
+			// The version is not bumped while a cleartext key still sits in the file,
+			// so a retry on the next run still recognises there is work to do.
+			cfg, err := config.NewStore(c.configPath).Load()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(cfg.Version).To(Equal(1))
+		})
+
+		It("keeps the key usable, falling back to the config copy the store never took", func() {
+			Expect(c.run("project", "list")).To(Equal(exitcode.OK))
+
+			p, err := c.deps.ActiveProject()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(p.FirebaseAPIKey).To(Equal("AIzaSyLegacy"))
+		})
+	})
+
+	When("only some of several projects can be migrated", func() {
+		BeforeEach(func() {
+			// Two projects; the store refuses "beta" but accepts "alpha".
+			Expect(os.WriteFile(c.configPath, []byte(`version: 1
+activeProject: alpha
+projects:
+    - name: alpha
+      baseUrl: https://alpha.api.fulfillmenttools.com
+      firebaseApiKey: AIzaSyAlpha
+      email: bot@ocff-acme-prd.com
+    - name: beta
+      baseUrl: https://beta.api.fulfillmenttools.com
+      firebaseApiKey: AIzaSyBeta
+      email: bot@ocff-acme-prd.com
+settings:
+    output: table
+    updateCheck: true
+`), 0o600)).To(Succeed())
+			c.deps.Secrets = failSetForProject{Store: secrets.NewMem(), project: "beta"}
+		})
+
+		It("does not stamp v2 while a cleartext key still remains on disk", func() {
+			Expect(c.run("project", "list")).To(Equal(exitcode.OK))
+
+			cfg, err := config.NewStore(c.configPath).Load()
+			Expect(err).NotTo(HaveOccurred())
+			// The file was saved (alpha's cleartext key is gone) but stays at v1,
+			// because beta's is still there — a v2 stamp would be a false signal.
+			Expect(cfg.Version).To(Equal(1))
+		})
+
+		It("clears only the migrated project's key, leaving the failed one for a retry", func() {
+			Expect(c.run("project", "list")).To(Equal(exitcode.OK))
+
+			data, err := os.ReadFile(c.configPath)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(string(data)).NotTo(ContainSubstring("AIzaSyAlpha"))
+			Expect(string(data)).To(ContainSubstring("firebaseApiKey: AIzaSyBeta"))
+
+			Expect(c.deps.Secrets.Get(secrets.Key("alpha", secrets.KindAPIKey))).To(Equal("AIzaSyAlpha"))
+		})
+	})
+})
+
+// failingSetStore is a secret store whose writes always fail, standing in for a
+// locked or unavailable keychain. Reads, deletes and Kind come from the embedded
+// store so the rest of a command behaves normally.
+type failingSetStore struct {
+	secrets.Store
+}
+
+func (failingSetStore) Set(string, string) error {
+	return errors.New("keychain is locked")
+}
+
+// failSetForProject fails writes for one named project and lets every other
+// write through, standing in for a keychain entry that is locked for just one
+// project — the multi-project partial-migration case.
+type failSetForProject struct {
+	secrets.Store
+	project string
+}
+
+func (s failSetForProject) Set(key, val string) error {
+	if p, _, ok := secrets.ParseKey(key); ok && p == s.project {
+		return errors.New("keychain is locked")
+	}
+	return s.Store.Set(key, val)
+}
 
 var _ = Describe("fft project current", func() {
 	var c *cli

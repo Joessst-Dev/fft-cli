@@ -196,7 +196,29 @@ func (d *Deps) ActiveProject() (config.Project, error) {
 	if err != nil {
 		return config.Project{}, err
 	}
-	return cfg.Resolve(d.Project)
+	p, err := cfg.Resolve(d.Project)
+	if err != nil {
+		return config.Project{}, err
+	}
+
+	// The API key lives in the secret store, not the config file, so hydrate it
+	// onto the returned copy: newTokenSource and verifyCredentials read it off the
+	// project exactly as before. The stored config is untouched.
+	key, err := lookupSecret(d.Secrets, p.Name, secrets.KindAPIKey)
+	if err != nil {
+		return config.Project{}, err
+	}
+	if key == "" {
+		// The migration has not landed: either its store write failed (fail-soft,
+		// so the key was left in the config file) or it was skipped because FFT_* is
+		// set yet --project named this configured project. Either way the cleartext
+		// key in the config is still authoritative, so use it rather than fail auth
+		// with an empty key while a working copy sits untouched. It is "" for every
+		// already-migrated project, so this costs nothing once the sweep has run.
+		key = p.LegacyFirebaseAPIKey
+	}
+	p.FirebaseAPIKey = key
+	return p, nil
 }
 
 // Context bounds the command's work by --timeout. A zero timeout means no bound.
@@ -437,6 +459,15 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 
 	if d.Secrets == nil {
 		if d.Secrets, err = d.openSecrets(v.GetBool("no-keyring")); err != nil {
+			return err
+		}
+	}
+
+	// Sweep any pre-v2 cleartext API key out of the config file and into the
+	// secret store now that both are open. Headless runs touch neither file, so
+	// there is nothing to migrate there.
+	if d.Ephemeral == nil {
+		if err := d.migrateAPIKeys(); err != nil {
 			return err
 		}
 	}

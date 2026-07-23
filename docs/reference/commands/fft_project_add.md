@@ -29,11 +29,10 @@ whether the host is "{projectId}.api…" or "ocff-{projectId}.api…".
 You may give either --email (used verbatim) or --username, from which fft builds
 the synthetic address fulfillmenttools issues, {username}@ocff-{projectId}-{env}.com.
 
-The fulfillmenttools API key (a Firebase Web API key) is not a credential. It
-identifies the Firebase project, grants nothing on its own, and is sent only to
-Google's identity endpoints — never to fulfillmenttools. It is therefore stored in
-the config file, not the keychain. Only the password and the tokens go to the
-keychain, each under its own entry.
+The fulfillmenttools API key (a Firebase Web API key) is treated as sensitive: it
+goes to the keychain alongside the password and tokens, each under its own entry,
+and is never written to the config file. It grants nothing on its own and is sent
+only to Google's identity endpoints — never to fulfillmenttools.
 
 ## Usage
 

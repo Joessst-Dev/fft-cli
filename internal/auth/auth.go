@@ -5,14 +5,15 @@
 // out of band against Google Identity Platform (Firebase), and only the id token
 // that comes back is ever shown to a tenant.
 //
-// # The API key is not a credential
+// # The API key
 //
 // The Firebase *Web* API key identifies the Firebase project and grants nothing
 // by itself. It belongs on Google's two identity endpoints as ?key=, and nowhere
 // else. [Client] therefore owns its own *http.Client whose transport refuses
 // every host but those two, so the key is structurally incapable of reaching a
 // fulfillmenttools tenant — a leak no amount of care at the call site could
-// reliably prevent.
+// reliably prevent. It is nonetheless held as sensitive data: kept in the secret
+// store, never in the plaintext config file.
 //
 // # Two responses, two shapes
 //

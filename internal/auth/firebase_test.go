@@ -154,10 +154,9 @@ var _ = Describe("refreshing an id token", func() {
 })
 
 var _ = Describe("the API key's blast radius", func() {
-	// The Firebase Web API key is not a credential, but it is Google's and it is
-	// not fulfillmenttools'. The guarantee is structural: the client that carries
-	// the key cannot reach any host but Google's two, so no bug at a call site can
-	// leak it to a tenant.
+	// The Firebase Web API key belongs to Google, not to fulfillmenttools. The
+	// guarantee is structural: the client that carries the key cannot reach any
+	// host but Google's two, so no bug at a call site can leak it to a tenant.
 	It("refuses to send a request to any host but Google's identity endpoints", func() {
 		c, err := NewClient(testAPIKey)
 		Expect(err).NotTo(HaveOccurred())
