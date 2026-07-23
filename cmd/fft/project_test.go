@@ -586,6 +586,49 @@ settings:
 			Expect(p.FirebaseAPIKey).To(Equal("AIzaSyLegacy"))
 		})
 	})
+
+	When("only some of several projects can be migrated", func() {
+		BeforeEach(func() {
+			// Two projects; the store refuses "beta" but accepts "alpha".
+			Expect(os.WriteFile(c.configPath, []byte(`version: 1
+activeProject: alpha
+projects:
+    - name: alpha
+      baseUrl: https://alpha.api.fulfillmenttools.com
+      firebaseApiKey: AIzaSyAlpha
+      email: bot@ocff-acme-prd.com
+    - name: beta
+      baseUrl: https://beta.api.fulfillmenttools.com
+      firebaseApiKey: AIzaSyBeta
+      email: bot@ocff-acme-prd.com
+settings:
+    output: table
+    updateCheck: true
+`), 0o600)).To(Succeed())
+			c.deps.Secrets = failSetForProject{Store: secrets.NewMem(), project: "beta"}
+		})
+
+		It("does not stamp v2 while a cleartext key still remains on disk", func() {
+			Expect(c.run("project", "list")).To(Equal(exitcode.OK))
+
+			cfg, err := config.NewStore(c.configPath).Load()
+			Expect(err).NotTo(HaveOccurred())
+			// The file was saved (alpha's cleartext key is gone) but stays at v1,
+			// because beta's is still there — a v2 stamp would be a false signal.
+			Expect(cfg.Version).To(Equal(1))
+		})
+
+		It("clears only the migrated project's key, leaving the failed one for a retry", func() {
+			Expect(c.run("project", "list")).To(Equal(exitcode.OK))
+
+			data, err := os.ReadFile(c.configPath)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(string(data)).NotTo(ContainSubstring("AIzaSyAlpha"))
+			Expect(string(data)).To(ContainSubstring("firebaseApiKey: AIzaSyBeta"))
+
+			Expect(c.deps.Secrets.Get(secrets.Key("alpha", secrets.KindAPIKey))).To(Equal("AIzaSyAlpha"))
+		})
+	})
 })
 
 // failingSetStore is a secret store whose writes always fail, standing in for a
@@ -597,6 +640,21 @@ type failingSetStore struct {
 
 func (failingSetStore) Set(string, string) error {
 	return errors.New("keychain is locked")
+}
+
+// failSetForProject fails writes for one named project and lets every other
+// write through, standing in for a keychain entry that is locked for just one
+// project — the multi-project partial-migration case.
+type failSetForProject struct {
+	secrets.Store
+	project string
+}
+
+func (s failSetForProject) Set(key, val string) error {
+	if p, _, ok := secrets.ParseKey(key); ok && p == s.project {
+		return errors.New("keychain is locked")
+	}
+	return s.Store.Set(key, val)
 }
 
 var _ = Describe("fft project current", func() {

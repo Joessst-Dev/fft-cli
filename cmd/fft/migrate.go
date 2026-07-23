@@ -24,6 +24,7 @@ func (d *Deps) migrateAPIKeys() error {
 	}
 
 	migrated := false
+	cleartextRemains := false
 	for i := range cfg.Projects {
 		p := &cfg.Projects[i]
 		if p.LegacyFirebaseAPIKey == "" {
@@ -32,6 +33,7 @@ func (d *Deps) migrateAPIKeys() error {
 
 		if err := d.Secrets.Set(secrets.Key(p.Name, secrets.KindAPIKey), p.LegacyFirebaseAPIKey); err != nil {
 			d.Printer.Notef("Could not move the API key for %q into the credential store (%v); it stays in the config file for now.", p.Name, err)
+			cleartextRemains = true
 			continue
 		}
 		// Hydrate the in-memory copy so this same process can use the project, and
@@ -44,11 +46,17 @@ func (d *Deps) migrateAPIKeys() error {
 	if !migrated {
 		return nil
 	}
-	// Stamp the new schema version: the key has left the file, so an older build
-	// that no longer understands the layout should be turned away by Load's guard
-	// rather than sign in with an empty key. Save only stamps a zero version, so
-	// a loaded v1 config needs this set explicitly.
-	cfg.Version = config.Version
+	// Stamp the new schema version — but only once no plaintext key is left on
+	// disk. The key has left the file, so an older build that no longer
+	// understands the layout should be turned away by Load's guard rather than
+	// sign in with an empty key. If some project's write failed, its cleartext key
+	// gets written straight back below, so the file must stay at its old version:
+	// a v2 stamp on a file that still holds a plaintext key would be a lie, and the
+	// next run (which keys off LegacyFirebaseAPIKey, not the version) retries it.
+	// Save only stamps a zero version, so a loaded v1 config needs this explicitly.
+	if !cleartextRemains {
+		cfg.Version = config.Version
+	}
 	if err := d.SaveConfig(cfg); err != nil {
 		// The keys are already in the store; only the plaintext cleanup and the
 		// version stamp failed. Warn and move on — the next run retries the save.
