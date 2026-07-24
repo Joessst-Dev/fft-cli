@@ -36,11 +36,6 @@ const (
 // what the spec allows, so inferring "no POST means not a collection" would break
 // seeding /api/brands and the rest of the read-only reference data.
 //
-// /api/process (a single process by query parameter, distinct from the /api/processes
-// collection) belongs here by shape but is left out on purpose: the spec carries no
-// example for it, so a stateless route would answer 204 and trade one wrong shape for
-// another.
-//
 // route_test.go's census fails the build when the spec grows a single-segment path
 // that is in neither this map nor knownCollections, because a new singleton is
 // otherwise served as a fake empty collection and nobody finds out.
@@ -48,7 +43,8 @@ var singletons = map[string]bool{
 	"status":            true, // {"status":"UP"} — the health endpoint `fft ping` calls
 	"health":            true, // {"status":"UP","dependencies":[…]} — the deeper check
 	"routingplansgraph": true, // one graph: {"nodes":[…],"edges":[…]}
-	"supportedevents":   true, // one object listing the events the tenant supports
+	"supportedevents":   true, // one object; the spec's example for it is bare {}
+	"process":           true, // one process, found by query parameter (orderRef, pickJobRef, …)
 }
 
 // classify decides how the emulator serves an operation, and for the stateful kinds

@@ -62,7 +62,6 @@ var knownCollections = []string{
 	"permissions",
 	"pickjobs",
 	"pickruns",
-	"process",
 	"processes",
 	"purchaseorders",
 	"receipts",
@@ -141,28 +140,54 @@ var _ = Describe("classify", func() {
 			}
 		})
 
-		It("puts no path in both lists", func() {
+		It("puts no path in both lists, and none in one of them twice", func() {
+			seen := map[string]bool{}
 			for _, name := range knownCollections {
 				Expect(singletons).NotTo(HaveKey(name))
+				Expect(seen).NotTo(HaveKey(name), "knownCollections lists %q twice", name)
+				seen[name] = true
 			}
 		})
 	})
 
-	// The behaviour the census protects: a singleton is answered from the spec's
-	// sample, and a collection from the store.
-	It("serves a singleton statelessly and a collection from the store", func() {
+	// The behaviour the census cannot check for itself: it proves every path is
+	// classified, not that the classification is right. So every singleton is
+	// asserted to actually route statelessly, and a collection to still reach the
+	// store.
+	It("serves every singleton statelessly, and a collection from the store", func() {
+		routed := map[string]bool{}
+
 		for _, op := range api.Operations() {
-			switch op.Path {
-			case "/api/status", "/api/health":
-				_, _, kind := classify(op)
+			coll, _, kind := classify(op)
+
+			if name, ok := strings.CutPrefix(op.Path, "/api/"); ok && singletons[name] {
 				Expect(kind).To(Equal(kindStateless), "%s must not be served from the store", op.Path)
-			case "/api/facilities":
-				coll, _, kind := classify(op)
-				if op.Method == "GET" {
-					Expect(kind).To(Equal(kindList))
-					Expect(coll).To(Equal("facilities"))
-				}
+				routed[name] = true
+				continue
 			}
+
+			if op.Path == "/api/facilities" && op.Method == "GET" {
+				Expect(kind).To(Equal(kindList))
+				Expect(coll).To(Equal("facilities"))
+			}
+		}
+
+		Expect(routed).To(HaveLen(len(singletons)), "a singleton the spec no longer addresses went unasserted")
+	})
+
+	// A singleton is only an improvement if the spec has something to answer with:
+	// with no sample, stateless means 204, which trades one wrong shape for another.
+	It("gives every singleton a sample to answer with", func() {
+		samples := map[string]string{}
+		for _, op := range api.Operations() {
+			if name, ok := strings.CutPrefix(op.Path, "/api/"); ok && singletons[name] {
+				samples[name] = op.SampleResponse
+			}
+		}
+
+		for name := range singletons {
+			Expect(samples[name]).NotTo(BeEmpty(),
+				"%q has no SampleResponse, so serving it statelessly would answer 204", name)
 		}
 	})
 })
