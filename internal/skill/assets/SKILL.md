@@ -122,13 +122,15 @@ store, so `fft listing list` is always empty, `fft listing get` returns a canned
 listing that was never written, and `fft listing set` reports `1 updated` having stored
 nothing. Rehearse a read-modify-write loop against facilities, stocks or orders instead.
 
-It can also publish domain events to a **local Google Pub/Sub emulator** you run yourself
-(`--pubsub-emulator-host host:port` or `$PUBSUB_EMULATOR_HOST`); without one, eventing is
-off and it never publishes to real Google Cloud. A mutation on one of a curated set of
-collections (facilities, orders, pickjobs, shipments and a few more — not stocks or
-subscriptions) then publishes the matching lifecycle event, and `fft emulator emit
-<EVENT>` publishes one that no mutation maps to. The full story — seeding, the stateful
-model, the listings trap, and eventing end to end — is in
+It can also deliver domain events to a subscription's target, and all three targets the
+API defines work — each bounded to your own machine. A `WEBHOOK` needs no flag but reaches
+only a local callback URL (`--webhook-allow-remote` widens it); Pub/Sub and Azure Service
+Bus reach a **local** emulator you run yourself (`--pubsub-emulator-host`,
+`--servicebus-emulator-host`), never a real cloud. Startup prints which are live. A
+mutation on one of a curated set of collections (facilities, orders, pickjobs, shipments
+and a few more — not stocks or subscriptions) then delivers the matching lifecycle event,
+and `fft emulator emit <EVENT>` delivers one that no mutation maps to. The full story —
+seeding, the stateful model, the listings trap, and eventing end to end — is in
 [references/emulator.md](references/emulator.md).
 
 ## Never
