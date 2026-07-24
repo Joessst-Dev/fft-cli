@@ -33,6 +33,10 @@ import (
 // cannot see this way is `fft api <operationId>`, whose operation is an argument
 // rather than an annotation; it gates itself with [Deps.guardOperation].
 func (d *Deps) guard(cmd *cobra.Command) error {
+	if name, ok := cmd.Annotations[annotationComponent]; ok {
+		return d.guardComponent(cmd, name)
+	}
+
 	id, ok := cmd.Annotations[annotationOperationID]
 	if !ok {
 		return nil
@@ -47,6 +51,91 @@ func (d *Deps) guard(cmd *cobra.Command) error {
 		return fmt.Errorf("%s is annotated with the operation %q, which the API spec does not have", cmd.CommandPath(), id)
 	}
 	return d.guardOperation(cmd, op)
+}
+
+// guardComponent refuses a component command that would change a read-only project.
+//
+// A component carries no operationId, because fft builds none of its requests — so
+// without this the gate would wave every component through on the strength of a
+// missing annotation, and a component's writes would be the one way past a
+// guardrail the rest of the CLI cannot get past.
+//
+// What it gates on is two things, and the second is the interesting one:
+//
+//   - the manifest's own `mutates` declaration, which is the component telling the
+//     truth about itself; and
+//   - whether any operation the command *claims* is a mutation according to the
+//     spec, which does not depend on the manifest being honest at all.
+//
+// So a component that claims `updateFacility` while declaring `mutates: false` is
+// still gated. That is deliberate: `claims` is how a component supersedes a
+// generated command, and an operation fft already knows to be a write does not stop
+// being one because somebody else's manifest says otherwise.
+//
+// It cannot catch a component that writes while claiming nothing and declaring
+// nothing. Nothing could, short of not running it — which is why `fft component
+// install` says, in those words, that a component runs as you.
+func (d *Deps) guardComponent(cmd *cobra.Command, name string) error {
+	if op, ok := d.mutatingClaim(cmd); ok {
+		return d.guardOperation(cmd, op)
+	}
+	if cmd.Annotations[annotationComponentMutates] != "true" {
+		return nil
+	}
+
+	p, err := d.ActiveProject()
+	if err != nil {
+		return err
+	}
+
+	source, blocked := d.readOnlySource(p)
+	if !blocked {
+		return nil
+	}
+	return &componentReadOnlyError{component: name, command: cmd.CommandPath(), project: p.Name, source: source}
+}
+
+// mutatingClaim finds an operation the command claims that the spec says is a
+// write.
+func (d *Deps) mutatingClaim(cmd *cobra.Command) (api.Operation, bool) {
+	for _, id := range componentClaims(cmd) {
+		op, ok := api.LookupOperation(id)
+		if ok && op.Mutates() {
+			return op, true
+		}
+	}
+	return api.Operation{}, false
+}
+
+// componentReadOnlyError is a component command refused before it was spawned.
+//
+// Its own type rather than a [readOnlyError] with an invented operation, because
+// what it can honestly say is different: fft did not refuse a request, it refused to
+// *start* something that says it makes them. Naming an endpoint here would be fft
+// making one up.
+type componentReadOnlyError struct {
+	component string
+	command   string
+	project   string
+	source    readOnlySource
+}
+
+func (e *componentReadOnlyError) Error() string {
+	return fmt.Sprintf("project %q is read-only: %s comes from the %s component, which declares that it changes data, and it was not started",
+		e.project, e.command, e.component)
+}
+
+func (e *componentReadOnlyError) ExitCode() int { return exitcode.ReadOnly }
+
+func (e *componentReadOnlyError) Hint() string {
+	switch e.source {
+	case sourceEnv:
+		return fmt.Sprintf("Unset %s to allow writes.", config.EnvReadOnly)
+	case sourceFlag:
+		return "Drop --read-only to allow writes."
+	default:
+		return fmt.Sprintf("Run 'fft project read-only %s --off' to allow writes.", e.project)
+	}
 }
 
 // guardOperation refuses op when the project, the environment or the session is

@@ -46,6 +46,7 @@ fft
 
 - [fft api](./fft_api.md) — Call any API operation by its operationId
 - [fft auth](./fft_auth.md) — Inspect and renew credentials
+- [fft component](./fft_component.md) — Manage installed components
 - [fft connection](./fft_connection.md) — Manage interfacility connections
 - [fft emulator](./fft_emulator.md) — Run a local offline fulfillmenttools API emulator
 - [fft facility](./fft_facility.md) — Manage facilities

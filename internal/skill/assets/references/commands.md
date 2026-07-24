@@ -185,6 +185,7 @@ fft project read-only prod
 fft auth whoami
 fft ping
 fft version
+fft component list
 ```
 
 - `fft auth whoami` prints the permissions the current credentials actually have. When
@@ -193,3 +194,6 @@ fft version
   from "my token is wrong".
 - `fft project read-only prod` marks a project read-only for good, in the config file. It is
   the right suggestion whenever a user tells you a project is production.
+- `fft component list` says which components are installed, and whether fft ships them or
+  somebody else does — a command in `--help` that came from a component is somebody else's
+  code. See [components](components.md).

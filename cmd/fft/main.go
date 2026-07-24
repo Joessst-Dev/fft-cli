@@ -18,6 +18,16 @@ import (
 // and read the manual about.
 type hinted interface{ Hint() string }
 
+// silent is implemented by errors that have already been reported to the user by
+// whatever produced them.
+//
+// There is exactly one: a component that exited non-zero. It wrote its own
+// diagnostics to the stderr it inherited from fft, so the user has read them
+// already, and "Error: the emulator component exited 6" underneath would be fft
+// narrating a failure it did not witness. The exit code still has to come through,
+// which is why the error exists at all rather than being swallowed.
+type silent interface{ Silent() bool }
+
 func main() {
 	// SIGINT/SIGTERM cancel the root context, so in-flight requests unwind through
 	// the normal error path instead of being killed mid-write.
@@ -42,6 +52,11 @@ func main() {
 // which needs no explaining.
 func writeError(w io.Writer, err error) {
 	if err == nil || errors.Is(err, context.Canceled) {
+		return
+	}
+
+	var quiet silent
+	if errors.As(err, &quiet) && quiet.Silent() {
 		return
 	}
 

@@ -15,6 +15,7 @@ import (
 	"github.com/Joessst-Dev/fft-cli/internal/auth"
 	"github.com/Joessst-Dev/fft-cli/internal/buildinfo"
 	"github.com/Joessst-Dev/fft-cli/internal/client"
+	"github.com/Joessst-Dev/fft-cli/internal/component"
 	"github.com/Joessst-Dev/fft-cli/internal/config"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/output"
@@ -55,6 +56,11 @@ type VerifyFunc func(ctx context.Context, p config.Project, password string, deb
 // token so that a command spec never talks to Google.
 type TokenSourceFunc func(p config.Project, store secrets.Store, now func() time.Time, debug io.Writer) (auth.TokenSource, error)
 
+// InstallerFunc builds the installer `fft component install` downloads through.
+// [component.NewInstaller] is the real one; specs point it at an httptest server
+// standing in for GitHub.
+type InstallerFunc func(root string) *component.Installer
+
 // Deps are the collaborators the commands need. root.go builds the real ones in
 // PersistentPreRunE; specs construct a Deps of fakes and pass it to newRootCmd.
 //
@@ -70,6 +76,26 @@ type Deps struct {
 	Clock          func() time.Time
 	Verify         VerifyFunc
 	NewTokenSource TokenSourceFunc
+	NewInstaller   InstallerFunc
+
+	// Components is the set of installed components, and the one field that is
+	// resolved while the command tree is being *built* rather than in
+	// [Deps.complete].
+	//
+	// It has to be: what it holds decides which commands exist, and by the time
+	// PersistentPreRunE runs cobra has already matched the arguments against a tree
+	// that either had them or did not. So [newRootCmd] fills it in, and everything
+	// else about it follows from that — a discovery failure degrades to an empty
+	// registry rather than an error, because there is nobody to report an error to
+	// yet.
+	//
+	// A spec sets it to point at a temp directory, which is also what keeps the
+	// default tree free of whatever the developer happens to have installed.
+	Components *component.Registry
+
+	// componentWarnings are what registering the components had to say, held until
+	// there is a printer to say it with. See [addComponentCommands].
+	componentWarnings []string
 
 	// In is the command's standard input: the source of an interactive answer, or
 	// of a --password-stdin secret.
@@ -236,6 +262,10 @@ func (d *Deps) Context(cmd *cobra.Command) (context.Context, context.CancelFunc)
 // newRootCmd builds the command tree against deps. deps must not be nil; any of
 // its fields may be, and PersistentPreRunE fills those in.
 func newRootCmd(deps *Deps) *cobra.Command {
+	// Before the tree is built, because what it holds decides what the tree has in
+	// it. See [Deps.Components] for why this one field cannot wait for complete().
+	deps.openComponents()
+
 	cmd := &cobra.Command{
 		Use:   "fft",
 		Short: "Command-line client for the fulfillmenttools API",
@@ -318,6 +348,7 @@ func newRootCmd(deps *Deps) *cobra.Command {
 	cmd.AddGroup(
 		&cobra.Group{ID: groupCore, Title: "Core commands:"},
 		&cobra.Group{ID: groupResource, Title: "API operations, by resource:"},
+		&cobra.Group{ID: groupComponent, Title: "Installed components:"},
 	)
 	cmd.SetHelpCommandGroupID(groupCore)
 	cmd.SetCompletionCommandGroupID(groupCore)
@@ -331,6 +362,7 @@ func newRootCmd(deps *Deps) *cobra.Command {
 		newSkillCmd(deps),
 		newUpdateCmd(deps),
 		newEmulatorCmd(deps),
+		newComponentCmd(deps),
 		newGenDocsCmd(deps),
 	} {
 		c.GroupID = groupCore
@@ -348,6 +380,12 @@ func newRootCmd(deps *Deps) *cobra.Command {
 		c.GroupID = groupResource
 		cmd.AddCommand(c)
 	}
+
+	// After the curated commands and before the generated ones. A component is a
+	// Tier-1 command written by somebody else, so it claims its operations the same
+	// way a curated command does — and it can only do that if it is in the tree
+	// before addGeneratedCommands walks it.
+	addComponentCommands(deps, cmd)
 
 	// Last, and it has to be last: a generated command is registered only for an
 	// operation no curated command has claimed, and it learns what has been claimed
@@ -392,6 +430,9 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 	}
 	if d.NewTokenSource == nil {
 		d.NewTokenSource = newTokenSource
+	}
+	if d.NewInstaller == nil {
+		d.NewInstaller = func(root string) *component.Installer { return component.NewInstaller(root) }
 	}
 	if d.In == nil {
 		d.In = cmd.InOrStdin()
@@ -462,6 +503,8 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 			return err
 		}
 	}
+
+	d.flushComponentWarnings(cmd.ErrOrStderr())
 
 	// Sweep any pre-v2 cleartext API key out of the config file and into the
 	// secret store now that both are open. Headless runs touch neither file, so

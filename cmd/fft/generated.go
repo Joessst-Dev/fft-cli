@@ -40,8 +40,9 @@ import (
 // The cobra groups the root command's help is organised into. Without them, 60
 // generated groups and 6 hand-written commands would be one undifferentiated list.
 const (
-	groupCore     = "core"
-	groupResource = "resource"
+	groupCore      = "core"
+	groupResource  = "resource"
+	groupComponent = "component"
 )
 
 // reservedFlags are the flag names a generated command must not derive, because
@@ -102,13 +103,23 @@ func addGeneratedCommands(deps *Deps, root *cobra.Command) {
 	}
 }
 
-// claimedOperations collects the operationIds the curated commands have declared.
+// claimedOperations collects the operationIds the curated commands and the
+// installed components have declared.
+//
+// Two annotations, because they are two different promises. annotationOperationID
+// says "fft builds this request", which is what the read-only gate acts on;
+// annotationClaims says "somebody else's command covers this endpoint now", which
+// is only ever about shadowing. Both suppress the generated twin, and only the
+// first is something the gate may rely on.
 func claimedOperations(root *cobra.Command) map[string]bool {
 	claimed := make(map[string]bool)
 
 	var walk func(*cobra.Command)
 	walk = func(cmd *cobra.Command) {
 		if id := cmd.Annotations[annotationOperationID]; id != "" {
+			claimed[id] = true
+		}
+		for _, id := range componentClaims(cmd) {
 			claimed[id] = true
 		}
 		for _, child := range cmd.Commands() {
@@ -118,6 +129,22 @@ func claimedOperations(root *cobra.Command) map[string]bool {
 	walk(root)
 
 	return claimed
+}
+
+// componentClaims reads the operationIds a component command supersedes.
+func componentClaims(cmd *cobra.Command) []string {
+	raw := strings.TrimSpace(cmd.Annotations[annotationClaims])
+	if raw == "" {
+		return nil
+	}
+
+	var ids []string
+	for id := range strings.SplitSeq(raw, ",") {
+		if id = strings.TrimSpace(id); id != "" {
+			ids = append(ids, id)
+		}
+	}
+	return ids
 }
 
 // resourceGroup returns the command generated operations of this group hang off,

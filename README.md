@@ -242,6 +242,8 @@ fft api queryPickJobs --query status=OPEN --query size=10
 A curated command **shadows** its generated twin, so an endpoint being promoted from
 Tier 2 to Tier 1 is a pure upgrade — never a breaking rename.
 
+**Components** extend all three from outside the binary — see below.
+
 ### The universal workflow for any mutating endpoint
 
 The swagger has 1,556 field-level examples and *zero* request-body examples, so `fft`
@@ -500,6 +502,45 @@ fft emulator emit PICK_JOB_PICKING_COMMENCED --payload-file pickjob.json
 The [emulator guide](https://joessst-dev.github.io/fft-cli/guide/emulator) has the rest:
 the webhook allowlist, the eventing walkthroughs end to end, a docker-compose sandbox,
 and the limitations.
+
+## Components
+
+A component is a building block somebody else wrote: a binary plus a manifest, installed
+under `~/.local/share/fft/components`, that adds commands to `fft` — or teaches the
+emulator to deliver events to a broker `fft` has never heard of.
+
+```sh
+fft component list
+fft component install acme/fft-weather
+fft component info weather
+fft component remove weather
+```
+
+The archive is checked against its release's `checksums.txt` before a byte of it is
+unpacked, and nothing is installed until you have seen what it is and said yes.
+
+**What a component is given is decided by its manifest, and enforced by `fft`.** Every
+`FFT_*` variable is stripped out of the environment it inherits, and only what the
+declared session allows is put back:
+
+| `session` | what the component receives |
+| --- | --- |
+| `none` | no tenant credential at all — not even the base URL |
+| `read` | the base URL and a short-lived id token, with `FFT_READ_ONLY` forced on |
+| `write` | the same, without the forced read-only |
+
+The Firebase API key is never handed over at any level. A component gets a credential
+that expires; it never gets the one that mints more.
+
+The read-only gate reaches across the process boundary too: a component command that
+declares `mutates` is refused against a read-only project, with exit code 10, *before the
+component is started* — and so is one that claims an operation the spec says is a write,
+whatever its own manifest says about itself.
+
+That is a boundary, not a sandbox. A component is code running as you, in the way a shell
+alias or a `git` subcommand is. `fft` decides which credentials it receives and refuses to
+start it where it has said it would write; it cannot stop code you installed from doing
+what code can do. Install ones you would run by hand.
 
 ## Output contract
 

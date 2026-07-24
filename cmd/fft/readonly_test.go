@@ -75,6 +75,19 @@ var commandsWithoutOperation = map[string]string{
 	// Renders the command tree to Markdown for the docs site. Builds a tree and
 	// prints it — no project, no network, nothing that reaches the tenant.
 	"fft gen-docs": "writes the CLI reference to local disk; no network",
+
+	// Components are installed alongside fft, not inside the tenant. `install` and
+	// `upgrade` reach GitHub for a release; the rest read and write the component
+	// directory. None of them can address an operation.
+	//
+	// Note what is *not* excused here: the commands a component adds. Those carry the
+	// component annotation instead, and are gated by [Deps.guardComponent] — see the
+	// class exemption in the walk below.
+	"fft component list":    "reads the component directory; no network",
+	"fft component info":    "reads one component's manifest; no network",
+	"fft component install": "downloads a release from GitHub; makes no request to any tenant",
+	"fft component upgrade": "downloads a release from GitHub; makes no request to any tenant",
+	"fft component remove":  "deletes a component directory; no network",
 }
 
 // addressableCommands are the commands that can name an operation to send: every
@@ -126,6 +139,19 @@ var _ = Describe("the read-only gate's coverage of the command tree", func() {
 		for _, cmd := range addressableCommands(root) {
 			path := cmd.CommandPath()
 			if _, excused := commandsWithoutOperation[path]; excused {
+				continue
+			}
+
+			// A component's command is excused as a class, not by name: fft cannot know
+			// what the community will install, so an allow-list of paths could never be
+			// complete. What replaces it is that the annotation it *does* carry is gated
+			// too — [Deps.guardComponent] refuses a component that declares it writes, and
+			// one that claims a mutating operation whatever it declares. The specs for
+			// that are in component_test.go, and they are the other half of this one.
+			if _, dispatches := cmd.Annotations[annotationComponent]; dispatches {
+				Expect(cmd.Annotations).To(HaveKey(annotationComponentMutates),
+					"%s dispatches to a component but does not record whether it mutates, "+
+						"so the read-only gate has nothing to read", path)
 				continue
 			}
 

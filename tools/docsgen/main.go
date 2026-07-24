@@ -49,6 +49,7 @@ var skillPages = []skillPage{
 	{"references/recipes.md", "recipes.md", "Recipes"},
 	{"references/troubleshooting.md", "troubleshooting.md", "Troubleshooting"},
 	{"references/emulator.md", "emulator.md", "Emulator"},
+	{"references/components.md", "components.md", "Components"},
 }
 
 var readmePages = []readmePage{
@@ -70,6 +71,7 @@ var skillLinks = map[string]string{
 	"recipes.md":         "recipes",
 	"troubleshooting.md": "troubleshooting",
 	"emulator.md":        "emulator",
+	"components.md":      "components",
 }
 
 func run(args []string) error {
