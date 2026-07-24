@@ -5105,15 +5105,17 @@ paths:
         - Orders Configuration (DOMS)
   /api/configurations/return:
     get:
+      deprecated: false
       description: Returns the current return configuration for the tenant.
       operationId: getReturnConfiguration
+      parameters: []
       responses:
         '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LocalizedReturnConfiguration'
-          description: Return config found.
+          description: Return Configuration
         '401':
           content:
             application/json:
@@ -5133,21 +5135,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
-      summary: Get returns config
+          description: The requested entity was not found
+      summary: Get return configuration
+      x-fft-permissions:
+        - CONFIG_READ
       tags:
         - Returns Configuration (Operations)
     put:
+      deprecated: false
       description: >-
         Updates the return configuration for the tenant. If no configuration
         exists, it will be created.
       operationId: upsertReturnConfiguration
+      parameters: []
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ReturnConfiguration'
-        description: Desired return configuration to create/update
         required: true
       responses:
         '200':
@@ -5155,19 +5160,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LocalizedReturnConfiguration'
-          description: The return configuration was successfully updated.
+          description: ItemReturnJob containing the newly created item return
         '201':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LocalizedReturnConfiguration'
-          description: The return configuration was successfully created.
+          description: ItemReturnJob containing the newly created item return
         '400':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Invalid input. See response for details
+          description: Invalid input. See response for details.
         '401':
           content:
             application/json:
@@ -5187,8 +5192,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity version conflict
-      summary: Update returns config
+          description: A version conflict occurred.
+      summary: Upsert return configuration
+      x-fft-permissions:
+        - CONFIG_WRITE
       tags:
         - Returns Configuration (Operations)
   /api/configurations/returnnote:
@@ -12876,6 +12883,7 @@ paths:
           label: BETA
   /api/itemreturnjobs:
     get:
+      deprecated: false
       description: Returns the item return jobs matching the given parameters.
       operationId: getItemReturnJobs
       parameters:
@@ -12929,6 +12937,12 @@ paths:
           required: false
           schema:
             type: string
+        - description: show anonymized entities or not
+          in: query
+          name: anonymized
+          required: false
+          schema:
+            type: boolean
         - description: number of entities to show
           in: query
           name: size
@@ -12936,20 +12950,12 @@ paths:
           schema:
             default: 25
             type: integer
-        - description: show anonymized entities or not
-          in: query
-          name: anonymized
-          required: false
-          schema:
-            default: false
-            type: boolean
       responses:
         '200':
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/ItemReturnJob'
+                $ref: '#/components/schemas/ItemReturnJobs'
           description: All Item Return Jobs matching the given parameters
         '401':
           content:
@@ -12966,16 +12972,21 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: List item return jobs
+      x-fft-permissions:
+        - RETURN_READ
       tags:
         - Returns (Operations)
     post:
+      deprecated: false
       description: Creates a new item return job.
       operationId: createItemReturnJob
+      parameters: []
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ItemReturnJobForCreation'
+        required: true
       responses:
         '200':
           content:
@@ -12998,15 +13009,17 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Create item return job
+      x-fft-permissions:
+        - RETURN_WRITE
       tags:
         - Returns (Operations)
   /api/itemreturnjobs/{itemReturnJobId}:
     get:
+      deprecated: false
       description: Returns an item return job with the provided id.
       operationId: getItemReturnJob
       parameters:
-        - description: id of the item return job
-          in: path
+        - in: path
           name: itemReturnJobId
           required: true
           schema:
@@ -13037,19 +13050,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
+          description: The requested entity was not found
       summary: Get item return job
+      x-fft-permissions:
+        - RETURN_READ
       tags:
         - Returns (Operations)
   /api/itemreturnjobs/{itemReturnJobId}/actions:
     post:
+      deprecated: false
       description: >-
         Applies an action to an Item Return Job. Check
         ItemReturnJobActionsParameters for available actions.
       operationId: updateItemReturnJob
       parameters:
-        - description: id of the Item Return Job
-          in: path
+        - in: path
           name: itemReturnJobId
           required: true
           schema:
@@ -13058,7 +13073,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ItemReturnJobActionsParameter'
+              anyOf:
+                - $ref: '#/components/schemas/StartItemReturnJobActionParameter'
+                - $ref: '#/components/schemas/FinishItemReturnJobActionParameter'
+                - $ref: '#/components/schemas/RestartItemReturnJobActionParameter'
+                - $ref: >-
+                    #/components/schemas/ChangeLineItemsToNotReturnableInItemReturnJobActionParameter
+                - $ref: >-
+                    #/components/schemas/ChangeLineItemsToReturnableInItemReturnJobActionParameter
+                - $ref: >-
+                    #/components/schemas/ReplaceLineItemsOnItemReturnJobActionParameter
+        required: true
       responses:
         '200':
           content:
@@ -13085,34 +13110,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
+          description: The requested entity was not found
       summary: Call item return job action
+      x-fft-permissions:
+        - RETURN_WRITE
       tags:
         - Returns (Operations)
   /api/itemreturnjobs/{itemReturnJobId}/itemreturns:
     get:
+      deprecated: false
       description: Returns the item returns for a given item return job.
       operationId: getItemReturns
       parameters:
-        - description: item return job to read the item return for
-          in: path
+        - in: path
           name: itemReturnJobId
           required: true
           schema:
             type: string
-        - description: entity to start after
-          in: query
-          name: startAfterId
-          required: false
-          schema:
-            type: string
-        - description: number of entities to show
-          in: query
-          name: size
-          required: false
-          schema:
-            default: 25
-            type: integer
       responses:
         '200':
           content:
@@ -13120,6 +13134,7 @@ paths:
               schema:
                 items:
                   $ref: '#/components/schemas/ItemReturn'
+                type: array
           description: Get all item returns for a given item return job
         '401':
           content:
@@ -13140,16 +13155,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
+          description: The requested entity was not found
       summary: List item returns
+      x-fft-permissions:
+        - RETURN_READ
       tags:
         - Returns (Operations)
     post:
+      deprecated: false
       description: Create a new item return for an item return job
       operationId: createItemReturn
       parameters:
-        - description: Id of the item return job to create the item return for
-          in: path
+        - in: path
           name: itemReturnJobId
           required: true
           schema:
@@ -13182,6 +13199,8 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Create item return
+      x-fft-permissions:
+        - RETURN_WRITE
       tags:
         - Returns (Operations)
   /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}:
@@ -13190,14 +13209,11 @@ paths:
       description: >-
         This part of the API is deprecated. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />Use
-        POST
-        /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}/actions
-        with the CancelItemReturn action instead.
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Delete an item return from an item return job
       operationId: deleteItemReturn
       parameters:
-        - description: id of the item return job to delete the item return for
-          in: path
+        - in: path
           name: itemReturnJobId
           required: true
           schema:
@@ -13219,7 +13235,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ItemReturn'
+                $ref: '#/components/schemas/ItemReturnJob'
           description: >-
             item return was found and successfully deleted. Updated item return
             job is returned.
@@ -13242,16 +13258,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
+          description: The requested entity was not found
       summary: Delete item return
+      x-fft-permissions:
+        - RETURN_WRITE
       tags:
         - Returns (Operations)
     get:
+      deprecated: false
       description: Returns a specific item return for a given item return job.
       operationId: getItemReturn
       parameters:
-        - description: item return job to read the item return for
-          in: path
+        - in: path
           name: itemReturnJobId
           required: true
           schema:
@@ -13262,19 +13280,6 @@ paths:
           required: true
           schema:
             type: string
-        - description: entity to start after
-          in: query
-          name: startAfterId
-          required: false
-          schema:
-            type: string
-        - description: number of entities to show
-          in: query
-          name: size
-          required: false
-          schema:
-            default: 25
-            type: integer
       responses:
         '200':
           content:
@@ -13301,25 +13306,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
+          description: The requested entity was not found
       summary: Get item return
+      x-fft-permissions:
+        - RETURN_READ
       tags:
         - Returns (Operations)
   /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}/actions:
     post:
+      deprecated: false
       description: >-
         Applies an action to an Item Return. Check ItemReturnActionsParameters
         for available actions.
       operationId: itemReturnActions
       parameters:
-        - description: id of the Item Return Job
-          in: path
+        - in: path
           name: itemReturnJobId
           required: true
           schema:
             type: string
-        - description: id of the Item Return
-          in: path
+        - in: path
           name: itemReturnId
           required: true
           schema:
@@ -13328,7 +13334,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ItemReturnActionsParameter'
+              anyOf:
+                - $ref: '#/components/schemas/AnnounceItemReturnActionParameter'
+                - $ref: '#/components/schemas/OpenItemReturnActionParameter'
+                - $ref: '#/components/schemas/StartItemReturnActionParameter'
+                - $ref: '#/components/schemas/PauseItemReturnActionParameter'
+                - $ref: '#/components/schemas/FinishItemReturnActionParameter'
+                - $ref: '#/components/schemas/CancelItemReturnActionParameter'
+                - $ref: '#/components/schemas/WaitForInputItemReturnActionParameter'
+        required: true
       responses:
         '200':
           content:
@@ -13355,8 +13369,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
+          description: The requested entity was not found
       summary: Call item return action
+      x-fft-permissions:
+        - RETURN_WRITE
       tags:
         - Returns (Operations)
   /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}/parcels:
@@ -13422,17 +13438,16 @@ paths:
           label: BETA
   /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}/returnedlineitems:
     put:
+      deprecated: false
       description: Replace returned line items of an item return of an item return job.
       operationId: replaceReturnedLineItems
       parameters:
-        - description: id of the item return job the item return belongs to
-          in: path
+        - in: path
           name: itemReturnJobId
           required: true
           schema:
             type: string
-        - description: id of the item return the returned line items belong to
-          in: path
+        - in: path
           name: itemReturnId
           required: true
           schema:
@@ -13442,6 +13457,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ReplaceReturnedLineItems'
+        required: true
       responses:
         '200':
           content:
@@ -13456,7 +13472,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Invalid input. See response for details
+          description: Invalid input. See response for details.
         '401':
           content:
             application/json:
@@ -13476,25 +13492,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity version conflict
+          description: A version conflict occurred.
       summary: Update returned line items
+      x-fft-permissions:
+        - RETURN_WRITE
       tags:
         - Returns (Operations)
   /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}/returnedlineitems/{returnedLineItemId}:
     patch:
+      deprecated: false
       description: >-
         Patch for a ItemReturn LineItem. This is used to update the returned
         line item.
       operationId: updateItemReturnLineItem
       parameters:
-        - description: id of the Item Return Job
-          in: path
+        - in: path
           name: itemReturnJobId
           required: true
           schema:
             type: string
-        - description: id of the Item Return
-          in: path
+        - in: path
           name: itemReturnId
           required: true
           schema:
@@ -13510,6 +13527,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ItemReturnLineItemForUpdate'
+        required: true
       responses:
         '200':
           content:
@@ -13522,7 +13540,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Invalid input. See response for details
+          description: Invalid input. See response for details.
         '401':
           content:
             application/json:
@@ -13542,12 +13560,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
+          description: The requested entity was not found
       summary: Update returned line item
+      x-fft-permissions:
+        - RETURN_WRITE
       tags:
         - Returns (Operations)
   /api/itemreturns:
     get:
+      deprecated: false
       description: Returns the item returns matching the given parameters.
       operationId: findItemReturns
       parameters:
@@ -13560,14 +13581,6 @@ paths:
           required: false
           schema:
             type: string
-        - description: facilities to filter the results
-          in: query
-          name: facilityRefs
-          required: false
-          schema:
-            items:
-              type: string
-            type: array
         - description: ItemReturnStatus of an included ItemReturn to filter the results
           in: query
           name: itemReturnStatus
@@ -13586,39 +13599,44 @@ paths:
             items:
               type: string
             type: array
+        - description: number of entities to show
+          in: query
+          name: size
+          required: false
+          schema:
+            type: integer
         - description: entity to start after
           in: query
           name: startAfterId
           required: false
           schema:
             type: string
-        - description: number of entities to show
-          in: query
-          name: size
-          required: false
-          schema:
-            default: 25
-            type: integer
-        - description: show anonymized entities or not
-          in: query
-          name: anonymized
-          required: false
-          schema:
-            default: false
-            type: boolean
         - description: sorting for the results
           in: query
           name: orderBy
           required: false
           schema:
             type: string
+        - description: show anonymized entities or not
+          in: query
+          name: anonymized
+          required: false
+          schema:
+            type: boolean
+        - description: facilities to filter the results
+          in: query
+          name: facilityRefs
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
       responses:
         '200':
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/ItemReturn'
+                $ref: '#/components/schemas/ItemReturns'
           description: All Item Returns matching the given parameters
         '401':
           content:
@@ -13635,6 +13653,8 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Get item returns
+      x-fft-permissions:
+        - RETURN_READ
       tags:
         - Returns (Operations)
   /api/labels:
@@ -13859,6 +13879,51 @@ paths:
       x-badges:
         - color: red
           label: ALPHA
+  /api/labels/search:
+    post:
+      deprecated: false
+      description: >-
+        This part of the API is in Beta status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Search for Label
+      operationId: searchLabel
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LabelSearchPayload'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelPaginatedResult'
+          description: Your search result
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+      summary: Labels (search)
+      x-fft-permissions:
+        - ADMIN_MODULES_READ
+      tags:
+        - Label (Operations)
+      x-badges:
+        - color: orange
+          label: BETA
   /api/linkedservicejobs:
     get:
       deprecated: false
@@ -14317,7 +14382,7 @@ paths:
   /api/loadunits:
     delete:
       deprecated: false
-      description: Delete load units
+      description: Soft delete load units
       operationId: deleteLoadUnits
       parameters:
         - description: Reference to the pickJob of which you want to delete the loadUnits
@@ -14341,7 +14406,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoadUnits'
-          description: Load units are successfully deleted.
+          description: Load units have successfully been set to OBSOLETE.
         '400':
           content:
             application/json:
@@ -14376,7 +14441,7 @@ paths:
           description: >-
             The syntax of the request content was correct, but it was unable to
             process the contained instructions, possibly due to semantic errors.
-      summary: Delete load units
+      summary: Soft deletes load units by setting them to status OBSOLETE.
       x-fft-permissions:
         - LOADUNIT_WRITE
       tags:
@@ -14416,6 +14481,21 @@ paths:
           schema:
             example: de_DE
             type: string
+        - description: >-
+            The statuses you want to filter the load units by. If not provided,
+            only load units in status AVAILABLE will be returned. An empty array
+            will return all load units regardless of status.
+          in: query
+          name: statuses
+          required: false
+          schema:
+            example: '[AVAILABLE]'
+            items:
+              enum:
+                - AVAILABLE
+                - OBSOLETE
+              type: string
+            type: array
       responses:
         '200':
           content:
@@ -14490,7 +14570,7 @@ paths:
   /api/loadunits/{loadUnitId}:
     delete:
       deprecated: false
-      description: Delete load unit
+      description: Soft delete a load unit
       operationId: deleteLoadUnit
       parameters:
         - in: path
@@ -14504,7 +14584,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoadUnit'
-          description: Successfully deleted load unit.
+          description: Load unit has successfully been set to OBSOLETE.
         '401':
           content:
             application/json:
@@ -14525,7 +14605,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: The requested entity was not found
-      summary: Delete load unit
+      summary: Soft deletes load unit by setting them to status OBSOLETE.
       x-fft-permissions:
         - LOADUNIT_WRITE
       tags:
@@ -24855,6 +24935,22 @@ paths:
             example: 41d43211-g5a1-gg22-a716-ba095e30ds1d
             minLength: 1
             type: string
+        - description: >-
+            The statuses you want to filter the service containers by. If not
+            provided, only service containers in status AVAILABLE will be
+            returned. An empty array will return all service containers
+            regardless of status.
+          in: query
+          name: statuses
+          required: false
+          schema:
+            example: '[AVAILABLE]'
+            items:
+              enum:
+                - AVAILABLE
+                - OBSOLETE
+              type: string
+            type: array
       responses:
         '200':
           content:
@@ -24959,7 +25055,7 @@ paths:
             type: string
       responses:
         '200':
-          description: The service container was successfully deleted.
+          description: The service container has successfully been set to OBSOLETE.
         '401':
           content:
             application/json:
@@ -24980,7 +25076,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: The requested entity was not found
-      summary: Delete service container
+      summary: Soft deletes service container by id by setting them to status OBSOLETE.
       x-fft-permissions:
         - SERVICE_JOB_WRITE
       tags:
@@ -28323,6 +28419,307 @@ paths:
       x-badges:
         - color: orange
           label: BETA
+  /api/trackinginformation:
+    get:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Retrieves all found tracking information using the passed search
+        parameters.
+      operationId: trackingInformationList
+      parameters:
+        - description: Ordering of the found tracking information.
+          in: query
+          name: orderBy
+          required: false
+          schema:
+            enum:
+              - CREATED_ASC
+              - CREATED_DESC
+              - LAST_MODIFIED_ASC
+              - LAST_MODIFIED_DESC
+            example: CREATED_ASC
+            type: string
+        - description: Amount of results of this call.
+          in: query
+          name: size
+          required: false
+          schema:
+            example: 5
+            type: integer
+        - description: Used for pagination, return sorted results after this id.
+          in: query
+          name: startAfterId
+          required: false
+          schema:
+            example: 2d19415f-a8e6-4480-aa7d-e72ad85716a2
+            type: string
+        - description: >-
+            Flag to specify if the result should include a sum of all possible
+            found values for this filter.
+          in: query
+          name: withTotal
+          required: false
+          schema:
+            default: false
+            example: true
+            type: boolean
+        - description: Possible facility refs to filter by
+          in: query
+          name: facilityRefs
+          required: false
+          schema:
+            example: c8fe61e3-ba3f-461e-bc14-8fc610ce4cc2
+            items:
+              type: string
+            maxItems: 20
+            minItems: 0
+            type: array
+        - description: Connected shipping information ref to filter by
+          in: query
+          name: shippingInformationRef
+          required: false
+          schema:
+            example: 3d844fea-c9d0-4386-841c-d688cb205df3
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrackingInformationListResponse'
+          description: >-
+            Successfully retrieved all trackingInformation matching the given
+            parameters.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+      summary: Get all tracking information by parameters
+      x-fft-permissions:
+        - ADMIN_MODULES_READ
+      tags:
+        - TrackingInformation (Carrier)
+      x-badges:
+        - color: red
+          label: ALPHA
+    post:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Creates a new tracking information.
+      operationId: createTrackingInformation
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackingInformationForCreation'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrackingInformation'
+          description: Successfully created the trackingInformation.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The requested entity was not found
+      summary: Create a tracking information
+      x-fft-permissions:
+        - ADMIN_MODULES_WRITE
+      tags:
+        - TrackingInformation (Carrier)
+      x-badges:
+        - color: red
+          label: ALPHA
+  /api/trackinginformation/{trackingInformationId}:
+    get:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Retrieves a single tracking information using its unique identifier.
+      operationId: getTrackingInformationById
+      parameters:
+        - in: path
+          name: trackingInformationId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrackingInformation'
+          description: Successfully retrieved the trackingInformation.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The requested entity was not found
+      summary: Get a tracking information by its ID
+      x-fft-permissions:
+        - ADMIN_MODULES_READ
+      tags:
+        - TrackingInformation (Carrier)
+      x-badges:
+        - color: red
+          label: ALPHA
+  /api/trackinginformation/{trackingInformationId}/actions:
+    post:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Handle Action on an existing tracking information.
+      operationId: trackingInformationActions
+      parameters:
+        - in: path
+          name: trackingInformationId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: >-
+                    #/components/schemas/TrackingInformationAddTrackingEventActionParameter
+                - $ref: >-
+                    #/components/schemas/TrackingInformationRemoveTrackingEventsParameter
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrackingInformation'
+          description: Successfully handled the action on the tracking information.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The requested entity was not found
+      summary: handle tracking information action
+      x-fft-permissions:
+        - ADMIN_MODULES_WRITE
+      tags:
+        - TrackingInformation (Carrier)
+      x-badges:
+        - color: red
+          label: ALPHA
+  /api/trackinginformation/search:
+    post:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Search for TrackingInformation
+      operationId: searchTrackingInformation
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackingInformationSearchPayload'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrackingInformationPaginatedResult'
+          description: Your search result
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+      summary: List tracking information (search)
+      x-fft-permissions:
+        - ADMIN_MODULES_READ
+      tags:
+        - TrackingInformation (Carrier)
+      x-badges:
+        - color: red
+          label: ALPHA
   /api/users:
     get:
       deprecated: false
@@ -29184,10 +29581,10 @@ components:
       properties:
         type:
           $ref: '#/components/schemas/RatingConfigurationType'
+      title: AbstractRatingConfiguration
       type: object
       xml:
         name: AbstractRatingConfiguration
-      title: AbstractRatingConfiguration
     AbstractReason:
       allOf:
         - $ref: '#/components/schemas/AbstractReasonForCreation'
@@ -29409,18 +29806,19 @@ components:
       type: object
       description: AddFacilitiesToGroupVersionlessActionParameter
     AddItemReturnToItemReturnJob:
-      additionalProperties: false
       properties:
         itemReturnForCreation:
           $ref: '#/components/schemas/ItemReturnForCreation'
         itemReturnJobVersion:
           description: Version of the itemReturnJob the itemReturn gets added to
+          example: 1
           minimum: 0
           type: integer
       required:
         - itemReturnForCreation
         - itemReturnJobVersion
       title: AddItemReturnToItemReturnJob
+      type: object
       description: AddItemReturnToItemReturnJob
     AdditionalInformation:
       properties:
@@ -29974,26 +30372,23 @@ components:
         - alternativeReturnAddress
       title: AlternativeReturnAddressPerTag
       description: AlternativeReturnAddressPerTag
-    AnnounceItemReturnActionEnum:
-      enum:
-        - AnnounceItemReturn
-      type: string
-      title: AnnounceItemReturnActionEnum
-      description: AnnounceItemReturnActionEnum
     AnnounceItemReturnActionParameter:
-      additionalProperties: false
-      description: Action to announce an ItemReturn.
       properties:
         itemReturnJobVersion:
           description: Version of the entity to be changed
+          example: 1
           minimum: 0
           type: integer
         name:
-          $ref: '#/components/schemas/AnnounceItemReturnActionEnum'
+          enum:
+            - AnnounceItemReturn
+          type: string
       required:
         - name
         - itemReturnJobVersion
       title: AnnounceItemReturnActionParameter
+      type: object
+      description: AnnounceItemReturnActionParameter
     ApiError:
       items:
         $ref: '#/components/schemas/ErrorInner'
@@ -31108,7 +31503,6 @@ components:
       type: object
       description: AvailabilityTimeframe2
     AvailableDecisionReasons:
-      additionalProperties: false
       properties:
         reasonLocalized:
           $ref: '#/components/schemas/LocaleString'
@@ -31125,8 +31519,8 @@ components:
           type: string
       required:
         - reasonLocalized
-      type: object
       title: AvailableDecisionReasons
+      type: object
       description: AvailableDecisionReasons
     AvailableForPickingDetails:
       properties:
@@ -31138,15 +31532,13 @@ components:
       type: object
       description: AvailableForPickingDetails
     AvailableItemCondition:
-      additionalProperties: false
       properties:
         conditionLocalized:
           $ref: '#/components/schemas/LocaleString'
-          description: Will be translated into 'condition' when requested
-          example:
-            de_DE: Beschädigt
-            en_US: Damaged
+      required:
+        - conditionLocalized
       title: AvailableItemCondition
+      type: object
       description: AvailableItemCondition
     AvailableOperativeProcessAction:
       properties:
@@ -31264,14 +31656,9 @@ components:
       title: AvailableRefuseReasonForUpdate
       description: AvailableRefuseReasonForUpdate
     AvailableReturnReason:
-      additionalProperties: false
       properties:
         reasonLocalized:
           $ref: '#/components/schemas/LocaleString'
-          description: Will be translated into 'reason' when requested
-          example:
-            de_DE: Beschädigt
-            en_US: Damaged
         identifier:
           description: >-
             Small identifier to be displayed and printed. Allowed values are
@@ -31282,6 +31669,7 @@ components:
       required:
         - reasonLocalized
       title: AvailableReturnReason
+      type: object
       description: AvailableReturnReason
     AvailableUntilCalculationBase:
       description: >-
@@ -31892,26 +32280,23 @@ components:
       type: string
       title: CancelHandoverjobActionEnum
       description: CancelHandoverjobActionEnum
-    CancelItemReturnActionEnum:
-      enum:
-        - CancelItemReturn
-      type: string
-      title: CancelItemReturnActionEnum
-      description: CancelItemReturnActionEnum
     CancelItemReturnActionParameter:
-      additionalProperties: false
-      description: Action to cancel an ItemReturn.
       properties:
         itemReturnJobVersion:
           description: Version of the entity to be changed
+          example: 1
           minimum: 0
           type: integer
         name:
-          $ref: '#/components/schemas/CancelItemReturnActionEnum'
+          enum:
+            - CancelItemReturn
+          type: string
       required:
         - name
         - itemReturnJobVersion
       title: CancelItemReturnActionParameter
+      type: object
+      description: CancelItemReturnActionParameter
     CancelPickRun:
       allOf:
         - additionalProperties: false
@@ -32764,7 +33149,7 @@ components:
             Depending on the use case there can be multiple recipient addresses
             (e.g. invoice address deviates from shipping address).
           items:
-            $ref: '#/components/schemas/ShippingInformationConsumerAddress'
+            $ref: '#/components/schemas/ConsumerAddress'
           maxItems: 3
           minItems: 1
           type: array
@@ -32789,7 +33174,7 @@ components:
             Depending on the use case there can be multiple recipient addresses
             (e.g. invoice address deviates from shipping address).
           items:
-            $ref: '#/components/schemas/ShippingInformationConsumerAddress'
+            $ref: '#/components/schemas/ConsumerAddress'
           maxItems: 3
           minItems: 1
           type: array
@@ -33130,62 +33515,54 @@ components:
       title: CategorySort
       type: object
       description: CategorySort
-    ChangeLineItemsToNotReturnableInItemReturnJobActionEnum:
-      enum:
-        - CHANGE_LINE_ITEMS_TO_NOT_RETURNABLE_IN_ITEM_RETURN_JOB
-      type: string
-      title: ChangeLineItemsToNotReturnableInItemReturnJobActionEnum
-      description: ChangeLineItemsToNotReturnableInItemReturnJobActionEnum
     ChangeLineItemsToNotReturnableInItemReturnJobActionParameter:
-      additionalProperties: false
-      description: >-
-        Action to move line items from returnableLineItems to
-        notReturnableLineItems.
       properties:
         lineItemIds:
           items:
             type: string
+          maxItems: 20
+          minItems: 1
           type: array
         name:
-          $ref: >-
-            #/components/schemas/ChangeLineItemsToNotReturnableInItemReturnJobActionEnum
+          enum:
+            - CHANGE_LINE_ITEMS_TO_NOT_RETURNABLE_IN_ITEM_RETURN_JOB
+          type: string
         version:
           description: Version of the entity to be changed
+          example: 1
           minimum: 0
           type: integer
       required:
-        - name
         - version
+        - name
         - lineItemIds
       title: ChangeLineItemsToNotReturnableInItemReturnJobActionParameter
-    ChangeLineItemsToReturnableInItemReturnJobActionEnum:
-      enum:
-        - CHANGE_LINE_ITEMS_TO_RETURNABLE_IN_ITEM_RETURN_JOB
-      type: string
-      title: ChangeLineItemsToReturnableInItemReturnJobActionEnum
-      description: ChangeLineItemsToReturnableInItemReturnJobActionEnum
+      type: object
+      description: ChangeLineItemsToNotReturnableInItemReturnJobActionParameter
     ChangeLineItemsToReturnableInItemReturnJobActionParameter:
-      additionalProperties: false
-      description: >-
-        Action to move line items from notReturnableLineItems to
-        returnableLineItems.
       properties:
         lineItemIds:
           items:
             type: string
+          maxItems: 20
+          minItems: 1
           type: array
         name:
-          $ref: >-
-            #/components/schemas/ChangeLineItemsToReturnableInItemReturnJobActionEnum
+          enum:
+            - CHANGE_LINE_ITEMS_TO_RETURNABLE_IN_ITEM_RETURN_JOB
+          type: string
         version:
           description: Version of the entity to be changed
+          example: 1
           minimum: 0
           type: integer
       required:
-        - name
         - version
+        - name
         - lineItemIds
       title: ChangeLineItemsToReturnableInItemReturnJobActionParameter
+      type: object
+      description: ChangeLineItemsToReturnableInItemReturnJobActionParameter
     ChannelStockAvailability:
       properties:
         availableForPicking:
@@ -34117,14 +34494,28 @@ components:
       description: CompanyAddress
     ConditionWorkflowNode:
       properties:
+        nameLocalized:
+          allOf:
+            - $ref: '#/components/schemas/WorkflowNameLocaleString'
+          description: Localized name of the node
+        descriptionLocalized:
+          allOf:
+            - $ref: '#/components/schemas/WorkflowDescriptionLocaleString'
+          description: Localized description of the node
         condition:
           allOf:
             - $ref: '#/components/schemas/WorkflowCondition'
           description: >-
             Condition expression that determines the path. Connections from this
             node must use .TRUE or .FALSE suffixes
+        description:
+          description: Description resolved to the requesting user's locale (read-only)
+          type: string
         key:
           description: Unique identifier for this node within the workflow
+          type: string
+        name:
+          description: Name resolved to the requesting user's locale (read-only)
           type: string
         type:
           description: Type of the workflow node
@@ -35384,33 +35775,24 @@ components:
       title: DecisionLogRef
       description: DecisionLogRef
     DecisionReasonContext:
-      additionalProperties: false
       properties:
         type:
-          $ref: '#/components/schemas/DecisionReasonContextTypes'
+          enum:
+            - ITEM_RETURN_LINE_ITEM_STATUS
+          type: string
         values:
           items:
-            $ref: '#/components/schemas/DecisionReasonContextValues'
+            enum:
+              - ACCEPTED
+              - REJECTED
+              - WAITING_FOR_INPUT
+            type: string
           maxItems: 10
           minItems: 1
           type: array
-      type: object
       title: DecisionReasonContext
+      type: object
       description: DecisionReasonContext
-    DecisionReasonContextTypes:
-      enum:
-        - ITEM_RETURN_LINE_ITEM_STATUS
-      type: string
-      title: DecisionReasonContextTypes
-      description: DecisionReasonContextTypes
-    DecisionReasonContextValues:
-      enum:
-        - ACCEPTED
-        - REJECTED
-        - WAITING_FOR_INPUT
-      type: string
-      title: DecisionReasonContextValues
-      description: DecisionReasonContextValues
     DecisionType:
       enum:
         - FENCE
@@ -37451,16 +37833,6 @@ components:
       title: ExportRequestActionResult
       type: object
       description: ExportRequestActionResult
-    ExportRequestExportContainerFilter:
-      properties:
-        exportContainerRef:
-          allOf:
-            - $ref: '#/components/schemas/StringFilter'
-          description: Field of ExportContainer entity
-          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
-      title: ExportRequestExportContainerFilter
-      type: object
-      description: ExportRequestExportContainerFilter
     ExportRequestExportDataFormatEnumFilter:
       properties:
         eq:
@@ -37576,15 +37948,6 @@ components:
       title: ExportRequestPaginatedResult
       type: object
       description: ExportRequestPaginatedResult
-    ExportRequestReferenceFilter:
-      properties:
-        exportContainer:
-          allOf:
-            - $ref: '#/components/schemas/ExportRequestExportContainerFilter'
-          description: The referenced entity
-      title: ExportRequestReferenceFilter
-      type: object
-      description: ExportRequestReferenceFilter
     ExportRequestSearchPayload:
       properties:
         after:
@@ -37651,15 +38014,16 @@ components:
             - $ref: '#/components/schemas/ExportRequestExportDataFormatEnumFilter'
           description: Search by dataFormat
           example: 2026-06-17T12:00:00.000Z
+        exportContainerRef:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by exportContainerRef
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
         or:
           items:
             $ref: '#/components/schemas/ExportRequestSearchQuery'
           maxItems: 500
           type: array
-        referenced:
-          allOf:
-            - $ref: '#/components/schemas/ExportRequestReferenceFilter'
-          description: References to other entities
         sourceType:
           allOf:
             - $ref: '#/components/schemas/ExportRequestExportSourceTypeEnumFilter'
@@ -38623,7 +38987,8 @@ components:
             resolvedCoordinates:
               $ref: '#/components/schemas/Coordinates'
             resolvedTimeZone:
-              $ref: '#/components/schemas/TimeZoneForCreation'
+              allOf:
+                - $ref: '#/components/schemas/TimeZoneForCreation'
               description: >-
                 User-specified time zone in identifier format (e.g.,
                 "America/Los_Angeles"). Used to determine local time. Relevant
@@ -40847,8 +41212,22 @@ components:
       description: FenceStatistic
     FFTActivityNode:
       properties:
+        nameLocalized:
+          allOf:
+            - $ref: '#/components/schemas/WorkflowNameLocaleString'
+          description: Localized name of the node
+        descriptionLocalized:
+          allOf:
+            - $ref: '#/components/schemas/WorkflowDescriptionLocaleString'
+          description: Localized description of the node
+        description:
+          description: Description resolved to the requesting user's locale (read-only)
+          type: string
         key:
           description: Unique identifier for this node within the workflow
+          type: string
+        name:
+          description: Name resolved to the requesting user's locale (read-only)
           type: string
         type:
           description: >-
@@ -40953,46 +41332,40 @@ components:
         - handedOverQuantity
       title: FinishHandoverJobSubstituteLineItem
       description: FinishHandoverJobSubstituteLineItem
-    FinishItemReturnActionEnum:
-      enum:
-        - FinishItemReturn
-      type: string
-      title: FinishItemReturnActionEnum
-      description: FinishItemReturnActionEnum
     FinishItemReturnActionParameter:
-      additionalProperties: false
-      description: Action to finish an ItemReturn.
       properties:
         itemReturnJobVersion:
           description: Version of the entity to be changed
+          example: 1
           minimum: 0
           type: integer
         name:
-          $ref: '#/components/schemas/FinishItemReturnActionEnum'
+          enum:
+            - FinishItemReturn
+          type: string
       required:
         - name
         - itemReturnJobVersion
       title: FinishItemReturnActionParameter
-    FinishItemReturnJobActionEnum:
-      enum:
-        - FinishItemReturnJob
-      type: string
-      title: FinishItemReturnJobActionEnum
-      description: FinishItemReturnJobActionEnum
+      type: object
+      description: FinishItemReturnActionParameter
     FinishItemReturnJobActionParameter:
-      additionalProperties: false
-      description: Action to finish a ItemReturnJob.
       properties:
         name:
-          $ref: '#/components/schemas/FinishItemReturnJobActionEnum'
+          enum:
+            - FinishItemReturnJob
+          type: string
         version:
           description: Version of the entity to be changed
+          example: 1
           minimum: 0
           type: integer
       required:
-        - name
         - version
+        - name
       title: FinishItemReturnJobActionParameter
+      type: object
+      description: FinishItemReturnJobActionParameter
     FinishPickRun:
       allOf:
         - additionalProperties: false
@@ -41357,6 +41730,14 @@ components:
       description: GlsCarrierConfiguration
     GuardWorkflowNode:
       properties:
+        nameLocalized:
+          allOf:
+            - $ref: '#/components/schemas/WorkflowNameLocaleString'
+          description: Localized name of the node
+        descriptionLocalized:
+          allOf:
+            - $ref: '#/components/schemas/WorkflowDescriptionLocaleString'
+          description: Localized description of the node
         condition:
           description: 'Guard condition: an expression or a built-in (preconfigured) guard.'
           discriminator:
@@ -41367,8 +41748,14 @@ components:
           oneOf:
             - $ref: '#/components/schemas/ExpressionGuardCondition'
             - $ref: '#/components/schemas/PreconfiguredGuardCondition'
+        description:
+          description: Description resolved to the requesting user's locale (read-only)
+          type: string
         key:
           description: Unique identifier for this node within the workflow
+          type: string
+        name:
+          description: Name resolved to the requesting user's locale (read-only)
           type: string
         type:
           description: Type of the workflow node
@@ -46690,7 +47077,6 @@ components:
       type: object
       description: InventoryTagReference
     ItemReturn:
-      additionalProperties: false
       properties:
         created:
           description: >-
@@ -46701,9 +47087,10 @@ components:
           type: string
         customAttributes:
           description: >-
-            Attributes that can be added to the entity. These attributes cannot
-            be used within fulfillment processes, but it could be useful to have
-            the information carried here.
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
           type: object
         id:
           type: string
@@ -46715,14 +47102,16 @@ components:
           format: date-time
           type: string
         parcelRefs:
+          description: references the parcel
+          example: 672f3f72-b5d3-47c7-941c-9af5348e3cd7
           items:
-            description: references the parcel
-            example: 672f3f72-b5d3-47c7-941c-9af5348e3cd7
             type: string
+          maxItems: 50
           type: array
         returnedLineItems:
           items:
             $ref: '#/components/schemas/ItemReturnLineItem'
+          maxItems: 100
           minItems: 1
           type: array
         returnFacilityRef:
@@ -46730,61 +47119,75 @@ components:
         scannableCodes:
           items:
             type: string
+          maxItems: 50
           type: array
         status:
-          $ref: '#/components/schemas/ItemReturnStatus'
-        tenantOrderId:
+          enum:
+            - ANNOUNCED
+            - OPEN
+            - IN_PROGRESS
+            - PAUSED
+            - FINISHED
+            - WAITING_FOR_INPUT
+            - CANCELED
+            - OBSOLETE
           type: string
-      required:
-        - id
-        - status
-        - returnedLineItems
-        - returnFacilityRef
-      title: ItemReturn
-      description: ItemReturn
-    ItemReturnActionsParameter:
-      anyOf:
-        - $ref: '#/components/schemas/AnnounceItemReturnActionParameter'
-        - $ref: '#/components/schemas/OpenItemReturnActionParameter'
-        - $ref: '#/components/schemas/StartItemReturnActionParameter'
-        - $ref: '#/components/schemas/PauseItemReturnActionParameter'
-        - $ref: '#/components/schemas/FinishItemReturnActionParameter'
-        - $ref: '#/components/schemas/WaitForInputItemReturnActionParameter'
-        - $ref: '#/components/schemas/CancelItemReturnActionParameter'
-      title: ItemReturnActionsParameter
-      description: ItemReturnActionsParameter
-    ItemReturnForCreation:
-      additionalProperties: false
-      properties:
-        returnedLineItems:
-          items:
-            $ref: '#/components/schemas/ItemReturnLineItemForCreation'
-          minItems: 1
-          type: array
-        returnFacilityRef:
-          type: string
-        scannableCodes:
-          items:
-            type: string
-          type: array
-        status:
-          $ref: '#/components/schemas/ItemReturnStatus'
         tenantOrderId:
           deprecated: true
           description: >-
             deprecated: will be automatically deducted from related
             itemReturnJob
+          example: MY_ORDER_ID
           type: string
       required:
+        - id
+        - returnFacilityRef
+        - status
         - returnedLineItems
+      title: ItemReturn
+      type: object
+      description: ItemReturn
+    ItemReturnForCreation:
+      properties:
+        returnedLineItems:
+          items:
+            $ref: '#/components/schemas/ItemReturnLineItemForCreation'
+          maxItems: 100
+          minItems: 1
+          type: array
+        returnFacilityRef:
+          type: string
+        scannableCodes:
+          items:
+            type: string
+          maxItems: 50
+          type: array
+        status:
+          enum:
+            - ANNOUNCED
+            - OPEN
+            - IN_PROGRESS
+            - PAUSED
+            - FINISHED
+            - WAITING_FOR_INPUT
+            - CANCELED
+            - OBSOLETE
+          type: string
+        tenantOrderId:
+          deprecated: true
+          description: >-
+            deprecated: will be automatically deducted from related
+            itemReturnJob
+          example: MY_ORDER_ID
+          type: string
+      required:
         - status
         - returnFacilityRef
+        - returnedLineItems
       title: ItemReturnForCreation
+      type: object
       description: ItemReturnForCreation
     ItemReturnJob:
-      additionalProperties: false
-      allOf:
-        - $ref: '#/components/schemas/VersionedResource'
       properties:
         anonymized:
           description: Indicates if gdpr related data was anonymized
@@ -46794,38 +47197,57 @@ components:
           items:
             $ref: '#/components/schemas/ConsumerAddress'
           type: array
+        created:
+          description: Creation timestamp
+          example: 2026-06-17T12:00:00.000Z
+          format: date-time
+          type: string
         customAttributes:
           description: >-
-            Attributes that can be added to the entity. These attributes cannot
-            be used within fulfillment processes, but it could be useful to have
-            the information carried here.
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
           type: object
         id:
           type: string
         itemReturns:
           items:
             $ref: '#/components/schemas/ItemReturn'
+          maxItems: 100
           minItems: 0
           type: array
+        lastModified:
+          description: Last modification timestamp
+          example: 2026-06-17T12:00:00.000Z
+          format: date-time
+          type: string
         notReturnableLineItems:
           items:
             $ref: '#/components/schemas/ItemReturnJobLineItem'
+          maxItems: 100
           minItems: 0
           type: array
         originFacilityRefs:
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
           items:
             type: string
+          maxItems: 50
           type: array
         processRef:
           type: string
         returnableLineItems:
           items:
             $ref: '#/components/schemas/ItemReturnJobLineItem'
-          minItems: 1
+          maxItems: 100
+          minItems: 0
           type: array
         scannableCodes:
           items:
             type: string
+          maxItems: 50
           type: array
         shortId:
           description: >-
@@ -46834,64 +47256,73 @@ components:
           example: AS12
           type: string
         status:
-          $ref: '#/components/schemas/ItemReturnJobStatus'
+          enum:
+            - OPEN
+            - IN_PROGRESS
+            - FINISHED
+            - CANCELED
+          type: string
         tenantOrderId:
           type: string
+        version:
+          description: >-
+            The version of the document to be used in optimistic locking
+            mechanisms.
+          example: 1
+          type: integer
       required:
         - id
+        - version
         - processRef
         - originFacilityRefs
         - status
         - consumerAddresses
         - returnableLineItems
         - itemReturns
-      type: object
       title: ItemReturnJob
+      type: object
       description: ItemReturnJob
-    ItemReturnJobActionsParameter:
-      anyOf:
-        - $ref: '#/components/schemas/StartItemReturnJobActionParameter'
-        - $ref: '#/components/schemas/FinishItemReturnJobActionParameter'
-        - $ref: '#/components/schemas/RestartItemReturnJobActionParameter'
-        - $ref: >-
-            #/components/schemas/ChangeLineItemsToNotReturnableInItemReturnJobActionParameter
-        - $ref: >-
-            #/components/schemas/ChangeLineItemsToReturnableInItemReturnJobActionParameter
-        - $ref: '#/components/schemas/ReplaceLineItemsOnItemReturnJobActionParameter'
-      title: ItemReturnJobActionsParameter
-      description: ItemReturnJobActionsParameter
     ItemReturnJobForCreation:
-      additionalProperties: false
       properties:
         consumerAddresses:
           items:
             $ref: '#/components/schemas/ConsumerAddress'
+          maxItems: 5
+          minItems: 1
           type: array
         customAttributes:
           description: >-
-            Attributes that can be added to the entity. These attributes cannot
-            be used within fulfillment processes, but it could be useful to have
-            the information carried here.
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
           type: object
         notReturnableLineItems:
           items:
             $ref: '#/components/schemas/ItemReturnJobLineItemForCreation'
+          maxItems: 100
           minItems: 0
           type: array
         originFacilityRefs:
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
           items:
             type: string
+          maxItems: 50
           type: array
         processRef:
           type: string
         returnableLineItems:
           items:
             $ref: '#/components/schemas/ItemReturnJobLineItemForCreation'
+          maxItems: 100
           minItems: 0
           type: array
         scannableCodes:
           items:
             type: string
+          maxItems: 50
           type: array
         shortId:
           description: >-
@@ -46900,7 +47331,12 @@ components:
           example: AS12
           type: string
         status:
-          $ref: '#/components/schemas/ItemReturnJobStatus'
+          enum:
+            - OPEN
+            - IN_PROGRESS
+            - FINISHED
+            - CANCELED
+          type: string
         tenantOrderId:
           type: string
       required:
@@ -46908,14 +47344,24 @@ components:
         - status
         - consumerAddresses
         - returnableLineItems
-      type: object
       title: ItemReturnJobForCreation
+      type: object
       description: ItemReturnJobForCreation
     ItemReturnJobLineItem:
-      additionalProperties: false
-      allOf:
-        - $ref: '#/components/schemas/ItemReturnJobLineItemForCreation'
       properties:
+        article:
+          $ref: '#/components/schemas/ItemReturnJobLineItemArticle'
+        customAttributes:
+          description: >-
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
+          type: object
+        delivered:
+          description: Quantity of this line item that has been delivered
+          example: 7
+          type: number
         globalLineItemId:
           description: >-
             This id is used to identify if this line item is related to the line
@@ -46936,20 +47382,30 @@ components:
           type: array
         returnable:
           description: Quantity of this line item that can be returned
-          example: '7'
+          example: 7
           minimum: 0
           type: number
         returned:
           description: Quantity of this line item that has been returned
-          example: '5'
+          example: 5
           minimum: 0
           type: number
+        scannableCodes:
+          description: Codes that can be used for scanning this line item
+          items:
+            type: string
+          maxItems: 50
+          type: array
         serviceJobRefs:
           description: >-
             refs of the service jobs that altered this line item during the
             workflow
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
           items:
             type: string
+          maxItems: 100
           type: array
       required:
         - id
@@ -46958,41 +47414,66 @@ components:
         - returned
         - returnable
       title: ItemReturnJobLineItem
+      type: object
       description: ItemReturnJobLineItem
     ItemReturnJobLineItemArticle:
-      allOf:
-        - $ref: '#/components/schemas/AbstractArticle'
-        - properties:
-            attributes:
-              items:
-                $ref: '#/components/schemas/ArticleAttributeItem'
-              type: array
-            prices:
-              description: >-
-                Deprecated: Use attributes with keys: 'valuePerUnit', 'currency'
-                and 'numberOfDecimalPlaces'
-              items:
-                $ref: '#/components/schemas/ArticlePrice'
-              type: array
+      properties:
+        titleLocalized:
+          $ref: '#/components/schemas/LocaleString'
+        attributes:
+          items:
+            $ref: '#/components/schemas/ArticleAttributeItem'
+          maxItems: 100
+          type: array
+        customAttributes:
+          description: >-
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
           type: object
-      xml:
-        name: PickLineItemArticle
+        imageUrl:
+          type: string
+        prices:
+          deprecated: true
+          description: >-
+            Use attributes with keys: 'valuePerUnit', 'currency' and
+            'numberOfDecimalPlaces'
+          items:
+            $ref: '#/components/schemas/ArticlePrice'
+          maxItems: 50
+          type: array
+        tenantArticleId:
+          description: This is a reference to an article number
+          example: '4711'
+          type: string
+        title:
+          description: The title of the product
+          example: Cologne Water
+          type: string
+        weight:
+          minimum: 0
+          type: number
+      required:
+        - tenantArticleId
+        - title
       title: ItemReturnJobLineItemArticle
+      type: object
       description: ItemReturnJobLineItemArticle
     ItemReturnJobLineItemForCreation:
-      additionalProperties: false
       properties:
         article:
           $ref: '#/components/schemas/ItemReturnJobLineItemArticle'
         customAttributes:
           description: >-
-            Attributes that can be added to the entity. These attributes cannot
-            be used within fulfillment processes, but it could be useful to have
-            the information carried here.
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
           type: object
         delivered:
           description: Quantity of this line item that has been delivered
-          example: '7'
+          example: 7
           minimum: 1
           type: number
         globalLineItemId:
@@ -47007,47 +47488,46 @@ components:
         recordableAttributes:
           items:
             $ref: '#/components/schemas/RecordableAttributeForCreation'
+          maxItems: 50
           nullable: true
           type: array
         scannableCodes:
           description: Codes that can be used for scanning this line item
           items:
             type: string
+          maxItems: 50
           type: array
         serviceJobRefs:
           description: >-
             refs of the service jobs that altered this line item during the
             workflow
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
           items:
             type: string
+          maxItems: 100
           type: array
       required:
         - article
         - delivered
       title: ItemReturnJobLineItemForCreation
+      type: object
       description: ItemReturnJobLineItemForCreation
     ItemReturnJobs:
       properties:
         itemReturnJobsWithSearchPaths:
           items:
             $ref: '#/components/schemas/ItemReturnJobWithSearchPaths'
+          maxItems: 500
           type: array
         total:
           description: Total number of found entities for this query
           example: 42
-          type: integer
-      type: object
+          type: number
       title: ItemReturnJobs
+      type: object
       description: ItemReturnJobs
-    ItemReturnJobStatus:
-      enum:
-        - OPEN
-        - IN_PROGRESS
-        - FINISHED
-        - CANCELED
-      type: string
-      title: ItemReturnJobStatus
-      description: ItemReturnJobStatus
     ItemReturnJobWebHookEvent:
       allOf:
         - $ref: '#/components/schemas/WebHookEvent'
@@ -47060,28 +47540,115 @@ components:
       title: ItemReturnJobWebHookEvent
       description: ItemReturnJobWebHookEvent
     ItemReturnJobWithSearchPaths:
-      additionalProperties: false
-      allOf:
-        - $ref: '#/components/schemas/ItemReturnJob'
       properties:
+        anonymized:
+          description: Indicates if gdpr related data was anonymized
+          example: false
+          type: boolean
+        consumerAddresses:
+          items:
+            $ref: '#/components/schemas/ConsumerAddress'
+          type: array
+        created:
+          description: Creation timestamp
+          example: 2026-06-17T12:00:00.000Z
+          format: date-time
+          type: string
+        customAttributes:
+          description: >-
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
+          type: object
+        id:
+          type: string
+        itemReturns:
+          items:
+            $ref: '#/components/schemas/ItemReturn'
+          maxItems: 100
+          minItems: 0
+          type: array
+        lastModified:
+          description: Last modification timestamp
+          example: 2026-06-17T12:00:00.000Z
+          format: date-time
+          type: string
+        notReturnableLineItems:
+          items:
+            $ref: '#/components/schemas/ItemReturnJobLineItem'
+          maxItems: 100
+          minItems: 0
+          type: array
+        originFacilityRefs:
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+          items:
+            type: string
+          maxItems: 50
+          type: array
+        processRef:
+          type: string
+        returnableLineItems:
+          items:
+            $ref: '#/components/schemas/ItemReturnJobLineItem'
+          maxItems: 100
+          minItems: 0
+          type: array
+        scannableCodes:
+          items:
+            type: string
+          maxItems: 50
+          type: array
         searchPaths:
           items:
             type: string
-          minItems: 0
+          maxItems: 500
           type: array
-      type: object
+        shortId:
+          description: >-
+            A short identifier that helps assigning a item return job to a
+            customer. This is automatically created during creation.
+          example: AS12
+          type: string
+        status:
+          enum:
+            - OPEN
+            - IN_PROGRESS
+            - FINISHED
+            - CANCELED
+          type: string
+        tenantOrderId:
+          type: string
+        version:
+          description: >-
+            The version of the document to be used in optimistic locking
+            mechanisms.
+          example: 1
+          type: integer
+      required:
+        - id
+        - version
+        - processRef
+        - originFacilityRefs
+        - status
+        - consumerAddresses
+        - returnableLineItems
+        - itemReturns
       title: ItemReturnJobWithSearchPaths
+      type: object
       description: ItemReturnJobWithSearchPaths
     ItemReturnLineItem:
-      additionalProperties: false
       properties:
         itemConditionLocalized:
           $ref: '#/components/schemas/LocaleString'
         customAttributes:
           description: >-
-            Attributes that can be added to the entity. These attributes cannot
-            be used within fulfillment processes, but it could be useful to have
-            the information carried here.
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
           type: object
         decisionReason:
           $ref: '#/components/schemas/ItemReturnLineItemReason'
@@ -47096,17 +47663,21 @@ components:
           minLength: 1
           type: string
         itemReturnJobLineItemRefs:
+          example: a69006ba-7100-4b4d-a610-1ca28016a4eb
           items:
-            example: a69006ba-7100-4b4d-a610-1ca28016a4eb
             type: string
+          maxItems: 100
+          minItems: 1
           type: array
         reasons:
           items:
             $ref: '#/components/schemas/ItemReturnLineItemReason'
+          maxItems: 20
           type: array
         recordableAttributes:
           items:
             $ref: '#/components/schemas/RecordableAttribute'
+          maxItems: 50
           nullable: true
           type: array
         refund:
@@ -47114,29 +47685,38 @@ components:
         scannedCodes:
           items:
             type: string
+          maxItems: 50
           type: array
         status:
-          $ref: '#/components/schemas/ItemReturnLineItemStatus'
+          enum:
+            - OPEN
+            - IN_PROGRESS
+            - WAITING_FOR_INPUT
+            - REJECTED
+            - ACCEPTED
+            - CANCELED
+          type: string
         tenantArticleId:
           example: a69006ba-7100-4b4d-a610-1ca28016a4eb
           type: string
       required:
         - id
-        - status
         - itemReturnJobLineItemRefs
         - tenantArticleId
+        - status
       title: ItemReturnLineItem
+      type: object
       description: ItemReturnLineItem
     ItemReturnLineItemForCreation:
-      additionalProperties: false
       properties:
         itemConditionLocalized:
           $ref: '#/components/schemas/LocaleString'
         customAttributes:
           description: >-
-            Attributes that can be added to the entity. These attributes cannot
-            be used within fulfillment processes, but it could be useful to have
-            the information carried here.
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
           type: object
         decisionReason:
           $ref: '#/components/schemas/ItemReturnLineItemReasonForUpsert'
@@ -47151,18 +47731,28 @@ components:
         reasons:
           items:
             $ref: '#/components/schemas/ItemReturnLineItemReason'
+          maxItems: 20
           type: array
         recordableAttributes:
           items:
             $ref: '#/components/schemas/RecordableAttributeForCreation'
+          maxItems: 50
           nullable: true
           type: array
         scannedCodes:
           items:
             type: string
+          maxItems: 50
           type: array
         status:
-          $ref: '#/components/schemas/ItemReturnLineItemStatus'
+          enum:
+            - OPEN
+            - IN_PROGRESS
+            - WAITING_FOR_INPUT
+            - REJECTED
+            - ACCEPTED
+            - CANCELED
+          type: string
         tenantArticleId:
           example: a69006ba-7100-4b4d-a610-1ca28016a4eb
           type: string
@@ -47170,26 +47760,33 @@ components:
         - itemReturnJobLineItemRef
         - status
       title: ItemReturnLineItemForCreation
+      type: object
       description: ItemReturnLineItemForCreation
     ItemReturnLineItemForUpdate:
-      additionalProperties: false
       properties:
         decisionReason:
           $ref: '#/components/schemas/ItemReturnLineItemReasonForUpsert'
         itemReturnJobVersion:
           description: version of the overlaying itemReturnJob
           example: 42
-          type: number
+          type: integer
         refund:
           $ref: '#/components/schemas/ReturnedLineItemRefund'
         status:
-          $ref: '#/components/schemas/ItemReturnLineItemStatus'
+          enum:
+            - OPEN
+            - IN_PROGRESS
+            - WAITING_FOR_INPUT
+            - REJECTED
+            - ACCEPTED
+            - CANCELED
+          type: string
       required:
         - itemReturnJobVersion
       title: ItemReturnLineItemForUpdate
+      type: object
       description: ItemReturnLineItemForUpdate
     ItemReturnLineItemReason:
-      additionalProperties: false
       properties:
         reasonLocalized:
           $ref: '#/components/schemas/LocaleString'
@@ -47203,9 +47800,9 @@ components:
       required:
         - reasonLocalized
       title: ItemReturnLineItemReason
+      type: object
       description: ItemReturnLineItemReason
     ItemReturnLineItemReasonForUpsert:
-      additionalProperties: false
       properties:
         reasonLocalized:
           $ref: '#/components/schemas/LocaleString'
@@ -47216,68 +47813,101 @@ components:
       required:
         - reasonLocalized
       title: ItemReturnLineItemReasonForUpsert
+      type: object
       description: ItemReturnLineItemReasonForUpsert
-    ItemReturnLineItemStatus:
-      enum:
-        - OPEN
-        - IN_PROGRESS
-        - WAITING_FOR_INPUT
-        - REJECTED
-        - ACCEPTED
-        - CANCELED
-      type: string
-      title: ItemReturnLineItemStatus
-      description: ItemReturnLineItemStatus
     ItemReturns:
       properties:
         itemReturns:
           items:
             $ref: '#/components/schemas/ItemReturnsWithSearchPaths'
+          maxItems: 500
           type: array
         totalCount:
           description: Total number of found entities for this query
           example: 42
-          type: integer
+          type: number
       required:
         - itemReturns
         - totalCount
-      type: object
       title: ItemReturns
+      type: object
       description: ItemReturns
-    ItemReturnSortOptions:
-      enum:
-        - ITEM_RETURN_LAST_MODIFIED_ASC
-        - ITEM_RETURN_LAST_MODIFIED_DESC
-        - ITEM_RETURN_CREATED_ASC
-        - ITEM_RETURN_CREATED_DESC
-      type: string
-      title: ItemReturnSortOptions
-      description: ItemReturnSortOptions
-    ItemReturnStatus:
-      enum:
-        - ANNOUNCED
-        - OPEN
-        - IN_PROGRESS
-        - PAUSED
-        - FINISHED
-        - WAITING_FOR_INPUT
-        - CANCELED
-        - OBSOLETE
-      type: string
-      title: ItemReturnStatus
-      description: ItemReturnStatus
     ItemReturnsWithSearchPaths:
-      additionalProperties: false
-      allOf:
-        - $ref: '#/components/schemas/ItemReturn'
       properties:
+        created:
+          description: >-
+            The date this entity was created at the platform. This value is
+            generated by the service.
+          example: 2020-02-03T08:45:51.525Z
+          format: date-time
+          type: string
+        customAttributes:
+          description: >-
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
+          type: object
+        id:
+          type: string
+        lastModified:
+          description: >-
+            The date this entity was modified last. This value is generated by
+            the service.
+          example: 2020-02-03T09:45:51.525Z
+          format: date-time
+          type: string
+        parcelRefs:
+          description: references the parcel
+          example: 672f3f72-b5d3-47c7-941c-9af5348e3cd7
+          items:
+            type: string
+          maxItems: 50
+          type: array
+        returnedLineItems:
+          items:
+            $ref: '#/components/schemas/ItemReturnLineItem'
+          maxItems: 100
+          minItems: 1
+          type: array
+        returnFacilityRef:
+          type: string
+        scannableCodes:
+          items:
+            type: string
+          maxItems: 50
+          type: array
         searchPaths:
           items:
             type: string
+          maxItems: 500
           type: array
+        status:
+          enum:
+            - ANNOUNCED
+            - OPEN
+            - IN_PROGRESS
+            - PAUSED
+            - FINISHED
+            - WAITING_FOR_INPUT
+            - CANCELED
+            - OBSOLETE
+          type: string
+        tenantOrderId:
+          deprecated: true
+          description: >-
+            deprecated: will be automatically deducted from related
+            itemReturnJob
+          example: MY_ORDER_ID
+          type: string
       required:
+        - id
+        - returnFacilityRef
+        - status
+        - returnedLineItems
         - searchPaths
       title: ItemReturnsWithSearchPaths
+      type: object
       description: ItemReturnsWithSearchPaths
     KeyExistsFilter:
       properties:
@@ -47311,6 +47941,10 @@ components:
           additionalProperties: true
           description: Custom attributes
           type: object
+        facilityRef:
+          description: Reference to the connected facility
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
         id:
           description: Unique identifier of the label
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
@@ -47339,13 +47973,11 @@ components:
         recipientAddress:
           description: Recipient addresses
           items:
-            $ref: '#/components/schemas/LabelConsumerAddress'
+            $ref: '#/components/schemas/ConsumerAddress'
           maxItems: 10
           type: array
         senderAddress:
-          allOf:
-            - $ref: '#/components/schemas/LabelFacilityAddress'
-          description: Sender address
+          $ref: '#/components/schemas/FacilityAddress'
         shippingInformationRef:
           description: Reference to the shipping information
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
@@ -47385,6 +48017,10 @@ components:
       required:
         - id
         - status
+        - processRef
+        - operativeProcessRef
+        - facilityRef
+        - shippingInformationRef
         - additionalDocuments
         - carrierData
         - senderAddress
@@ -47413,30 +48049,6 @@ components:
       title: LabelAdditionalDocument
       type: object
       description: LabelAdditionalDocument
-    LabelAddressPhoneNumber:
-      properties:
-        customAttributes:
-          additionalProperties: true
-          description: Custom attributes
-          type: object
-        label:
-          description: Label for the phone number
-          type: string
-        type:
-          description: Phone number type
-          enum:
-            - MOBILE
-            - PHONE
-          type: string
-        value:
-          description: Phone number value
-          type: string
-      required:
-        - type
-        - value
-      title: LabelAddressPhoneNumber
-      type: object
-      description: LabelAddressPhoneNumber
     LabelCarrierData:
       properties:
         carrierRef:
@@ -47457,156 +48069,6 @@ components:
       title: LabelCarrierData
       type: object
       description: LabelCarrierData
-    LabelConsumerAddress:
-      properties:
-        additionalAddressInfo:
-          description: Additional address information
-          type: string
-        addressType:
-          description: Address type
-          enum:
-            - POSTAL_ADDRESS
-            - PARCEL_LOCKER
-            - INVOICE_ADDRESS
-          type: string
-        city:
-          description: City
-          example: Yellowstone
-          type: string
-        companyName:
-          description: Company name
-          type: string
-        coordinates:
-          description: Geo-coordinates
-          type: object
-        country:
-          description: Country code (ISO 3166-1 alpha-2)
-          example: DE
-          type: string
-        customAttributes:
-          additionalProperties: true
-          description: Custom attributes
-          type: object
-        email:
-          description: Email address of the consumer
-          example: phil.bison@fulfillmenttools.com
-          type: string
-        emailAddresses:
-          description: Email addresses
-          example: phil.bison@fulfillmenttools.com
-          items:
-            $ref: '#/components/schemas/LabelEmailAddress'
-          maxItems: 10
-          type: array
-        firstName:
-          description: First name
-          type: string
-        houseNumber:
-          description: House number
-          example: 42
-          type: string
-        lastName:
-          description: Last name
-          type: string
-        personalTitle:
-          description: Personal title
-          type: string
-        phoneNumbers:
-          description: Phone numbers
-          items:
-            $ref: '#/components/schemas/LabelAddressPhoneNumber'
-          maxItems: 10
-          type: array
-        postalCode:
-          description: Postal code
-          example: '42420'
-          type: string
-        province:
-          description: Province or state
-          type: string
-        salutation:
-          description: Salutation
-          type: string
-        street:
-          description: Street name
-          type: string
-      required:
-        - street
-        - postalCode
-        - city
-        - country
-      title: LabelConsumerAddress
-      type: object
-      description: LabelConsumerAddress
-    LabelEmailAddress:
-      properties:
-        recipient:
-          description: Human-readable recipient description
-          type: string
-        value:
-          description: Email address
-          type: string
-      required:
-        - value
-      title: LabelEmailAddress
-      type: object
-      description: LabelEmailAddress
-    LabelFacilityAddress:
-      properties:
-        additionalAddressInfo:
-          description: Additional address information
-          type: string
-        city:
-          description: City
-          example: Yellowstone
-          type: string
-        companyName:
-          description: Company name
-          type: string
-        country:
-          description: Country code (ISO 3166-1 alpha-2)
-          example: DE
-          type: string
-        customAttributes:
-          additionalProperties: true
-          description: Custom attributes
-          type: object
-        emailAddresses:
-          description: Email addresses
-          example: phil.bison@fulfillmenttools.com
-          items:
-            $ref: '#/components/schemas/LabelEmailAddress'
-          maxItems: 10
-          type: array
-        houseNumber:
-          description: House number
-          example: 42
-          type: string
-        phoneNumbers:
-          description: Phone numbers
-          items:
-            $ref: '#/components/schemas/LabelAddressPhoneNumber'
-          maxItems: 10
-          type: array
-        postalCode:
-          description: Postal code
-          example: '42420'
-          type: string
-        province:
-          description: Province or state
-          type: string
-        street:
-          description: Street name
-          type: string
-      required:
-        - companyName
-        - street
-        - postalCode
-        - city
-        - country
-      title: LabelFacilityAddress
-      type: object
-      description: LabelFacilityAddress
     LabelForCreation:
       properties:
         additionalDocuments:
@@ -47642,13 +48104,11 @@ components:
         recipientAddress:
           description: Recipient addresses
           items:
-            $ref: '#/components/schemas/LabelConsumerAddress'
+            $ref: '#/components/schemas/ConsumerAddress'
           maxItems: 10
           type: array
         senderAddress:
-          allOf:
-            - $ref: '#/components/schemas/LabelFacilityAddress'
-          description: Sender address
+          $ref: '#/components/schemas/FacilityAddress'
         shippingInformationRef:
           description: Reference to the shipping information
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
@@ -47683,6 +48143,7 @@ components:
           type: string
       required:
         - status
+        - shippingInformationRef
         - additionalDocuments
         - carrierData
         - senderAddress
@@ -47707,13 +48168,11 @@ components:
         recipientAddress:
           description: Recipient addresses
           items:
-            $ref: '#/components/schemas/LabelConsumerAddress'
+            $ref: '#/components/schemas/ConsumerAddress'
           maxItems: 10
           type: array
         senderAddress:
-          allOf:
-            - $ref: '#/components/schemas/LabelFacilityAddress'
-          description: Sender address
+          $ref: '#/components/schemas/FacilityAddress'
         shortId:
           description: Short human-readable identifier
           type: string
@@ -47747,6 +48206,146 @@ components:
       title: LabelForUpdate
       type: object
       description: LabelForUpdate
+    LabelPaginatedResult:
+      properties:
+        labels:
+          items:
+            $ref: '#/components/schemas/Label'
+          type: array
+        pageInfo:
+          allOf:
+            - $ref: '#/components/schemas/PageInfo'
+          description: Pagination information for the search result.
+        total:
+          description: >-
+            The total number of items matching the search criteria. Only filled,
+            if withTotal is set to true in the search options.
+          minimum: 0
+          type: number
+      required:
+        - pageInfo
+        - labels
+      title: LabelPaginatedResult
+      type: object
+      description: LabelPaginatedResult
+    LabelSearchPayload:
+      properties:
+        after:
+          deprecated: false
+          description: >-
+            The cursor to start after for forward pagination. The value is
+            provided in the `pageInfo.endCursor` field of the response. Cannot
+            be used with `before` or `last`.
+          type: string
+        before:
+          description: >-
+            The cursor to start before for backward pagination. The value is
+            provided in the `pageInfo.startCursor` field of the response. Cannot
+            be used with `after` or `size` (first).
+          type: string
+        last:
+          description: >-
+            Number of items to return for backward pagination. Cannot be used
+            with 'size' (first). Default: 20.
+          maximum: 250
+          minimum: 1
+          type: number
+        options:
+          $ref: '#/components/schemas/SearchOptions'
+        query:
+          $ref: '#/components/schemas/LabelSearchQuery'
+        size:
+          description: >-
+            Number of items to return for forward pagination. Cannot be used
+            with 'last'. Default: 20.
+          example: 10
+          maximum: 250
+          minimum: 1
+          type: number
+        sort:
+          description: Use for sorting the result.
+          items:
+            $ref: '#/components/schemas/LabelSort'
+          maxItems: 1
+          minItems: 1
+          type: array
+        startAfterId:
+          deprecated: true
+          description: >-
+            The ID to start after. Deprecated, use `after` with the value
+            provided in `pageInfo.endCursor` instead.
+          type: string
+      required:
+        - query
+      title: LabelSearchPayload
+      type: object
+      description: LabelSearchPayload
+    LabelSearchQuery:
+      properties:
+        and:
+          items:
+            $ref: '#/components/schemas/LabelSearchQuery'
+          maxItems: 500
+          type: array
+        created:
+          allOf:
+            - $ref: '#/components/schemas/DateFilter'
+          description: >-
+            Search entries by created. Applying a narrow and well-considered
+            filter value is strongly recommended, as it can greatly improve
+            response times, especially when working with large datasets.
+        facilityRef:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by facilityRef
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+        id:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by id
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+        lastModified:
+          allOf:
+            - $ref: '#/components/schemas/DateFilter'
+          description: Search by lastModified
+        or:
+          items:
+            $ref: '#/components/schemas/LabelSearchQuery'
+          maxItems: 500
+          type: array
+        processRef:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by processRef
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+        tenantLabelId:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by tenantLabelId
+          example: MY_LABEL_ID
+        tenantOrderId:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by tenantOrderId
+          example: MY_ORDER_ID
+      title: LabelSearchQuery
+      type: object
+      description: LabelSearchQuery
+    LabelSort:
+      properties:
+        created:
+          enum:
+            - ASC
+            - DESC
+          type: string
+        lastModified:
+          enum:
+            - ASC
+            - DESC
+          type: string
+      title: LabelSort
+      type: object
+      description: LabelSort
     LastDomainEntityStatusItem:
       description: >-
         An object holding the last DomainStatus of a given entity and its
@@ -49581,6 +50180,18 @@ components:
           description: the reference to the stackRef this loadUnit is part of
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
+        status:
+          default: AVAILABLE
+          description: >-
+            The status of the load unit. It can be AVAILABLE or OBSOLETE. The
+            status cannot be set from outside. When a load unit is created, it
+            is automatically set to AVAILABLE. When a load unit is deleted, it
+            is automatically set to OBSOLETE.
+          enum:
+            - AVAILABLE
+            - OBSOLETE
+          example: AVAILABLE
+          type: string
         storageLocationRef:
           description: >-
             the reference to the storage location this load unit as been placed
@@ -49602,6 +50213,8 @@ components:
         - version
         - facilityRef
         - pickJobRefs
+        - nameLocalized
+        - status
       title: LoadUnit
       type: object
       description: LoadUnit
@@ -50079,12 +50692,10 @@ components:
       type: object
       description: LocaleStringConstrained
     LocalizedAvailableDecisionReason:
-      additionalProperties: false
       properties:
         reasonLocalized:
           $ref: '#/components/schemas/LocaleString'
         context:
-          description: Context in which this reason is available
           items:
             $ref: '#/components/schemas/DecisionReasonContext'
           maxItems: 10
@@ -50095,33 +50706,29 @@ components:
           example: Item damaged
           type: string
       required:
-        - reasonLocalized
         - reason
-      type: object
+        - reasonLocalized
       title: LocalizedAvailableDecisionReason
+      type: object
       description: LocalizedAvailableDecisionReason
     LocalizedAvailableItemCondition:
-      additionalProperties: false
       properties:
         conditionLocalized:
           $ref: '#/components/schemas/LocaleString'
-          example:
-            de_DE: Beschädigt
-            en_US: Damaged
         condition:
           description: translated conditionsLocalized
           example: Damaged
           type: string
       required:
-        - conditionLocalized
         - condition
+        - conditionLocalized
       title: LocalizedAvailableItemCondition
+      type: object
       description: LocalizedAvailableItemCondition
     LocalizedAvailableReturnReason:
-      additionalProperties: false
-      allOf:
-        - $ref: '#/components/schemas/AvailableReturnReason'
       properties:
+        reasonLocalized:
+          $ref: '#/components/schemas/LocaleString'
         identifier:
           description: >-
             Small identifier to be displayed and printed. Allowed values are
@@ -50134,24 +50741,21 @@ components:
           example: Damaged
           type: string
       required:
-        - reasonLocalized
-        - reason
         - identifier
+        - reason
+        - reasonLocalized
       title: LocalizedAvailableReturnReason
+      type: object
       description: LocalizedAvailableReturnReason
     LocalizedReturnConfiguration:
-      allOf:
-        - $ref: '#/components/schemas/VersionedResource'
       properties:
         active:
           default: true
           deprecated: true
           description: >-
-            This part of the API is deprecated. For details, see the <a
-            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-            target="_blank">API release lifecycle documentation</a>.<br /><br
-            />Enable or disable legacy returns. Use returnTypeConfiguration
+            Enable or disable legacy returns. Use returnTypeConfiguration
             instead
+          example: true
           type: boolean
         allowTriggerRefund:
           default: false
@@ -50171,12 +50775,33 @@ components:
           items:
             $ref: '#/components/schemas/LocalizedAvailableReturnReason'
           type: array
+        created:
+          description: >-
+            The date this entity was created at the platform. This value is
+            generated by the service.
+          example: 2026-06-17T12:00:00.000Z
+          format: date-time
+          type: string
+        lastModified:
+          description: >-
+            The date this entity was modified last. This value is generated by
+            the service.
+          example: 2026-06-17T12:00:00.000Z
+          format: date-time
+          type: string
         returnTypeConfiguration:
           $ref: '#/components/schemas/ReturnTypeConfiguration'
+        version:
+          description: >-
+            The version of the document to be used in optimistic locking
+            mechanisms.
+          example: 1
+          type: integer
       required:
         - active
-      type: object
+        - version
       title: LocalizedReturnConfiguration
+      type: object
       description: LocalizedReturnConfiguration
     LocalizedStringSearchFilter:
       properties:
@@ -54014,26 +54639,23 @@ components:
       title: OidcProviders
       type: object
       description: OidcProviders
-    OpenItemReturnActionEnum:
-      enum:
-        - OpenItemReturn
-      type: string
-      title: OpenItemReturnActionEnum
-      description: OpenItemReturnActionEnum
     OpenItemReturnActionParameter:
-      additionalProperties: false
-      description: Action to open an ItemReturn.
       properties:
         itemReturnJobVersion:
           description: Version of the entity to be changed
+          example: 1
           minimum: 0
           type: integer
         name:
-          $ref: '#/components/schemas/OpenItemReturnActionEnum'
+          enum:
+            - OpenItemReturn
+          type: string
       required:
         - name
         - itemReturnJobVersion
       title: OpenItemReturnActionParameter
+      type: object
+      description: OpenItemReturnActionParameter
     OperationalRestowingConfigurations:
       allOf:
         - $ref: '#/components/schemas/VersionedResource'
@@ -55734,8 +56356,8 @@ components:
           type: string
         percentage:
           description: >-
-            Discount percentage (-100 to 0). Required when type is PERCENTAGE.
-            Must be negative or zero (e.g. -10 for 10% off).
+            Discount percentage (0 to 100). Required when type is PERCENTAGE.
+            Must be positive or zero (e.g. 10 for 10% off).
           format: float
           type: number
         tenantDiscountId:
@@ -62188,26 +62810,23 @@ components:
         name: PartialStocksForReplacement
       title: PartialStocksForReplacement
       description: PartialStocksForReplacement
-    PauseItemReturnActionEnum:
-      enum:
-        - PauseItemReturn
-      type: string
-      title: PauseItemReturnActionEnum
-      description: PauseItemReturnActionEnum
     PauseItemReturnActionParameter:
-      additionalProperties: false
-      description: Action to pause an ItemReturn.
       properties:
         itemReturnJobVersion:
           description: Version of the entity to be changed
+          example: 1
           minimum: 0
           type: integer
         name:
-          $ref: '#/components/schemas/PauseItemReturnActionEnum'
+          enum:
+            - PauseItemReturn
+          type: string
       required:
         - name
         - itemReturnJobVersion
       title: PauseItemReturnActionParameter
+      type: object
+      description: PauseItemReturnActionParameter
     PausePackJob:
       additionalProperties: false
       description: Action to pause a PackJob
@@ -62999,6 +63618,7 @@ components:
         - $ref: '#/components/schemas/ModifyPickLineItemsActionParameter'
         - $ref: '#/components/schemas/PickJobAddTargetTimeActionParameter'
         - $ref: '#/components/schemas/PickJobCancelActionParameter'
+        - $ref: '#/components/schemas/PickJobCloseActionParameter'
       title: PickJobActionsParameter
       description: PickJobActionsParameter
     PickJobAddTargetTimeActionEnum:
@@ -63049,6 +63669,31 @@ components:
         - name
         - version
       title: PickJobCancelActionParameter
+      type: object
+    PickJobCloseActionEnum:
+      enum:
+        - CLOSE
+      type: string
+      title: PickJobCloseActionEnum
+      description: PickJobCloseActionEnum
+    PickJobCloseActionParameter:
+      additionalProperties: false
+      description: >-
+        Action to close a PickJob. Directly setting a pickJob to CLOSED will
+        skip non zero shortPick actions like rerouting, setting subStatus to
+        SHORT_PICKED instead. If none of the pickLineItems have been picked, the
+        pickJob will be set to ABORTED instead of CLOSED.
+      properties:
+        name:
+          $ref: '#/components/schemas/PickJobCloseActionEnum'
+        version:
+          description: Version of the entity to be closed
+          minimum: 0
+          type: integer
+      required:
+        - name
+        - version
+      title: PickJobCloseActionParameter
       type: object
     PickjobDeliveryInformation:
       allOf:
@@ -68078,7 +68723,8 @@ components:
       description: >-
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Discriminator identifying a rating variant.
       enum:
         - STOCK-BALANCING
         - GEO-DISTANCE
@@ -68356,9 +69002,7 @@ components:
       additionalProperties: false
       properties:
         keyLocalized:
-          allOf:
-            - $ref: '#/components/schemas/LocaleString'
-          description: The translations of the key
+          $ref: '#/components/schemas/LocaleString'
         group:
           description: The group of the attribute
           example: general
@@ -68418,7 +69062,6 @@ components:
       type: object
       description: RecordableAttributeForUpdate
     RefundTrigger:
-      additionalProperties: false
       properties:
         created:
           description: Date when the refund was triggered
@@ -68455,12 +69098,12 @@ components:
           minLength: 1
           type: string
       required:
-        - refundedLineItems
-        - itemReturnRef
         - created
+        - refundedLineItems
         - returnFacilityRef
-      type: object
+        - itemReturnRef
       title: RefundTrigger
+      type: object
       description: RefundTrigger
     RefundTriggeredWebHookEvent:
       allOf:
@@ -69108,38 +69751,35 @@ components:
       type: object
       xml:
         name: ReplaceCodesInPackingTargetContainer
-    ReplaceLineItemsOnItemReturnJobActionEnum:
-      enum:
-        - REPLACE_LINE_ITEMS_ON_ITEM_RETURN_JOB
-      type: string
-      title: ReplaceLineItemsOnItemReturnJobActionEnum
-      description: ReplaceLineItemsOnItemReturnJobActionEnum
     ReplaceLineItemsOnItemReturnJobActionParameter:
-      additionalProperties: false
-      description: >-
-        Action to replace line items on an ItemReturnJob. This is used to
-        replace all line items of a job with new line items.
       properties:
         name:
-          $ref: '#/components/schemas/ReplaceLineItemsOnItemReturnJobActionEnum'
+          enum:
+            - REPLACE_LINE_ITEMS_ON_ITEM_RETURN_JOB
+          type: string
         notReturnableLineItems:
           items:
             $ref: '#/components/schemas/ItemReturnJobLineItemForCreation'
+          maxItems: 20
           minItems: 0
           type: array
         returnableLineItems:
           items:
             $ref: '#/components/schemas/ItemReturnJobLineItemForCreation'
+          maxItems: 20
           minItems: 0
           type: array
         version:
           description: Version of the entity to be changed
+          example: 1
           minimum: 0
           type: integer
       required:
-        - name
         - version
+        - name
       title: ReplaceLineItemsOnItemReturnJobActionParameter
+      type: object
+      description: ReplaceLineItemsOnItemReturnJobActionParameter
     ReplaceLoadUnitLineItems:
       properties:
         action:
@@ -69194,21 +69834,23 @@ components:
       title: ReplacePackingTargetContainerLineItemCodesEnum
       description: ReplacePackingTargetContainerLineItemCodesEnum
     ReplaceReturnedLineItems:
-      additionalProperties: false
       properties:
         itemReturnJobVersion:
           description: Version of the entity to be changed
+          example: 1
           minimum: 0
           type: integer
         returnedLineItems:
           items:
             $ref: '#/components/schemas/ItemReturnLineItemForCreation'
+          maxItems: 100
           minItems: 1
           type: array
       required:
         - itemReturnJobVersion
         - returnedLineItems
       title: ReplaceReturnedLineItems
+      type: object
       description: ReplaceReturnedLineItems
     RequestedDate:
       properties:
@@ -70099,26 +70741,23 @@ components:
       title: ResponseForSFSCheckoutOptions
       type: object
       description: ResponseForSFSCheckoutOptions
-    RestartItemReturnJobActionEnum:
-      enum:
-        - RestartItemReturnJob
-      type: string
-      title: RestartItemReturnJobActionEnum
-      description: RestartItemReturnJobActionEnum
     RestartItemReturnJobActionParameter:
-      additionalProperties: false
-      description: Action to restart a ItemReturnJob.
       properties:
         name:
-          $ref: '#/components/schemas/RestartItemReturnJobActionEnum'
+          enum:
+            - RestartItemReturnJob
+          type: string
         version:
           description: Version of the entity to be changed
+          example: 1
           minimum: 0
           type: integer
       required:
-        - name
         - version
+        - name
       title: RestartItemReturnJobActionParameter
+      type: object
+      description: RestartItemReturnJobActionParameter
     RestartPickJob:
       allOf:
         - additionalProperties: false
@@ -70406,18 +71045,14 @@ components:
       type: string
       title: RestowItemStatus
     ReturnConfiguration:
-      allOf:
-        - $ref: '#/components/schemas/VersionedResource'
       properties:
         active:
           default: true
           deprecated: true
           description: >-
-            This part of the API is deprecated. For details, see the <a
-            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-            target="_blank">API release lifecycle documentation</a>.<br /><br
-            />Enable or disable legacy returns. Use returnTypeConfiguration
+            Enable or disable legacy returns. Use returnTypeConfiguration
             instead
+          example: true
           type: boolean
         allowTriggerRefund:
           default: false
@@ -70438,35 +71073,57 @@ components:
           items:
             $ref: '#/components/schemas/AvailableReturnReason'
           type: array
+        created:
+          description: >-
+            The date this entity was created at the platform. This value is
+            generated by the service.
+          example: 2026-06-17T12:00:00.000Z
+          format: date-time
+          type: string
+        lastModified:
+          description: >-
+            The date this entity was modified last. This value is generated by
+            the service.
+          example: 2026-06-17T12:00:00.000Z
+          format: date-time
+          type: string
         returnTypeConfiguration:
           $ref: '#/components/schemas/ReturnTypeConfiguration'
+        version:
+          description: >-
+            The version of the document to be used in optimistic locking
+            mechanisms.
+          example: 1
+          type: integer
       required:
         - active
-      type: object
+        - version
       title: ReturnConfiguration
+      type: object
       description: ReturnConfiguration
-    ReturnConfigurationType:
-      description: ReturnConfigurationType RETURN is deprecated.
-      enum:
-        - RETURN
-        - ITEM_RETURN
-      type: string
-      title: ReturnConfigurationType
     ReturnedLineItemRefund:
-      additionalProperties: false
-      description: Either price or percent must be set, not both.
       properties:
         percent:
           description: 0.0 - 100.0 amount of the line item price that should be refunded
           example: 80.6
+          maximum: 100
+          minimum: 0
           type: number
         price:
-          $ref: '#/components/schemas/ReturnedLineItemRefundPrice'
+          allOf:
+            - $ref: '#/components/schemas/ReturnedLineItemRefundPrice'
+          description: Either price or percent must be set, not both.
         status:
-          $ref: '#/components/schemas/ReturnedLineItemRefundStatus'
+          enum:
+            - OPEN
+            - IN_PROGRESS
+            - CLOSED
+          type: string
       required:
         - status
       title: ReturnedLineItemRefund
+      type: object
+      description: ReturnedLineItemRefund
     ReturnedLineItemRefundPrice:
       additionalProperties: false
       properties:
@@ -70484,14 +71141,6 @@ components:
         - currency
       title: ReturnedLineItemRefundPrice
       description: ReturnedLineItemRefundPrice
-    ReturnedLineItemRefundStatus:
-      enum:
-        - OPEN
-        - IN_PROGRESS
-        - CLOSED
-      type: string
-      title: ReturnedLineItemRefundStatus
-      description: ReturnedLineItemRefundStatus
     ReturnManagementPayloadBase:
       properties:
         facility:
@@ -70700,10 +71349,14 @@ components:
     ReturnTypeConfiguration:
       properties:
         type:
-          $ref: '#/components/schemas/ReturnConfigurationType'
+          enum:
+            - RETURN
+            - ITEM_RETURN
+          type: string
       required:
         - type
       title: ReturnTypeConfiguration
+      type: object
       description: ReturnTypeConfiguration
     Role:
       properties:
@@ -74036,11 +74689,11 @@ components:
         type:
           $ref: '#/components/schemas/RoutingStrategyStandardRatingType'
       required:
+        - type
         - active
         - implementation
         - maxPenalty
-        - type
-      title: RoutingStrategyRating
+      title: RoutingStrategyRatingForUpsert
       type: object
     RoutingStrategyReplaceConditionActionParameter:
       allOf:
@@ -74214,17 +74867,19 @@ components:
           $ref: '#/components/schemas/RoutingStrategyStandardRatingType'
       required:
         - active
-        - implementation
         - maxPenalty
         - type
+        - implementation
       title: RoutingStrategyStandardRating
       type: object
     RoutingStrategyStandardRatingType:
+      description: >-
+        Discriminator identifying a rating as a routing strategy standard
+        rating.
       enum:
         - StandardRating
       type: string
       title: RoutingStrategyStandardRatingType
-      description: RoutingStrategyStandardRatingType
     RoutingStrategyToolkitFence:
       additionalProperties: false
       description: Routing Strategy Toolkit Fence.
@@ -74286,13 +74941,13 @@ components:
       additionalProperties: false
       description: Routing Strategy Toolkit Rating.
       properties:
-        descriptionLocalized:
-          $ref: '#/components/schemas/LocaleString'
         nameLocalized:
+          $ref: '#/components/schemas/LocaleString'
+        descriptionLocalized:
           $ref: '#/components/schemas/LocaleString'
         active:
           default: false
-          description: Indicates whether this fence is active or not
+          description: Indicates whether this rating is active or not
           type: boolean
         comparisonRule:
           $ref: '#/components/schemas/ToolkitComparisonRule'
@@ -74327,18 +74982,19 @@ components:
         type:
           $ref: '#/components/schemas/RoutingStrategyToolkitRatingType'
       required:
-        - type
-        - nameLocalized
         - active
         - maxPenalty
         - referenceId
+        - nameLocalized
+        - type
       title: RoutingStrategyToolkitRating
+      type: object
     RoutingStrategyToolkitRatingType:
+      description: Discriminator identifying a rating as a routing strategy toolkit rating.
       enum:
         - ToolkitRating
       type: string
       title: RoutingStrategyToolkitRatingType
-      description: RoutingStrategyToolkitRatingType
     RoutingStrategyTransporter:
       properties:
         routingStrategies:
@@ -74891,6 +75547,18 @@ components:
           example: 9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1
           minLength: 1
           type: string
+        status:
+          default: AVAILABLE
+          description: >-
+            The status of the service container. It can be AVAILABLE or
+            OBSOLETE. The status cannot be set from outside. When a service
+            container is created, it is automatically set to AVAILABLE. When a
+            service container is deleted, it is automatically set to OBSOLETE.
+          enum:
+            - AVAILABLE
+            - OBSOLETE
+          example: AVAILABLE
+          type: string
         storageLocationRef:
           description: Id of the storage location this container is located at.
           example: 41d43211-g5a1-gg22-a716-ba095e30ds1d
@@ -74925,6 +75593,7 @@ components:
         - id
         - facilityRef
         - type
+        - status
       title: ServiceContainer
       type: object
       description: ServiceContainer
@@ -77708,30 +78377,6 @@ components:
       title: ShippingInformation
       type: object
       description: ShippingInformation
-    ShippingInformationAddressPhoneNumber:
-      properties:
-        customAttributes:
-          additionalProperties: true
-          description: Custom attributes
-          type: object
-        label:
-          description: Label for the phone number
-          type: string
-        type:
-          description: Phone number type
-          enum:
-            - MOBILE
-            - PHONE
-          type: string
-        value:
-          description: Phone number value
-          type: string
-      required:
-        - type
-        - value
-      title: ShippingInformationAddressPhoneNumber
-      type: object
-      description: ShippingInformationAddressPhoneNumber
     ShippingInformationCarrierRecipientInformationAddressFilter:
       properties:
         companyName:
@@ -77784,100 +78429,6 @@ components:
       title: ShippingInformationCarrierRecipientInformationListFilter
       type: object
       description: ShippingInformationCarrierRecipientInformationListFilter
-    ShippingInformationConsumerAddress:
-      properties:
-        additionalAddressInfo:
-          description: Additional address information
-          type: string
-        addressType:
-          description: Address type
-          enum:
-            - POSTAL_ADDRESS
-            - PARCEL_LOCKER
-            - INVOICE_ADDRESS
-          type: string
-        city:
-          description: City
-          example: Yellowstone
-          type: string
-        companyName:
-          description: Company name
-          type: string
-        coordinates:
-          description: Geo-coordinates
-          type: object
-        country:
-          description: Country code (ISO 3166-1 alpha-2)
-          example: DE
-          type: string
-        customAttributes:
-          additionalProperties: true
-          description: Custom attributes
-          type: object
-        email:
-          description: Email address of the consumer
-          example: phil.bison@fulfillmenttools.com
-          type: string
-        emailAddresses:
-          description: Email addresses
-          example: phil.bison@fulfillmenttools.com
-          items:
-            $ref: '#/components/schemas/ShippingInformationEmailAddress'
-          maxItems: 10
-          type: array
-        firstName:
-          description: First name
-          type: string
-        houseNumber:
-          description: House number
-          example: 42
-          type: string
-        lastName:
-          description: Last name
-          type: string
-        personalTitle:
-          description: Personal title
-          type: string
-        phoneNumbers:
-          description: Phone numbers
-          items:
-            $ref: '#/components/schemas/ShippingInformationAddressPhoneNumber'
-          maxItems: 10
-          type: array
-        postalCode:
-          description: Postal code
-          example: '42420'
-          type: string
-        province:
-          description: Province or state
-          type: string
-        salutation:
-          description: Salutation
-          type: string
-        street:
-          description: Street name
-          type: string
-      required:
-        - street
-        - postalCode
-        - city
-        - country
-      title: ShippingInformationConsumerAddress
-      type: object
-      description: ShippingInformationConsumerAddress
-    ShippingInformationEmailAddress:
-      properties:
-        recipient:
-          description: Human-readable recipient description
-          type: string
-        value:
-          description: Email address
-          type: string
-      required:
-        - value
-      title: ShippingInformationEmailAddress
-      type: object
-      description: ShippingInformationEmailAddress
     ShippingInformationForCreation:
       properties:
         anonymized:
@@ -79708,46 +80259,40 @@ components:
       title: StackResponse
       type: object
       description: StackResponse
-    StartItemReturnActionEnum:
-      enum:
-        - StartItemReturn
-      type: string
-      title: StartItemReturnActionEnum
-      description: StartItemReturnActionEnum
     StartItemReturnActionParameter:
-      additionalProperties: false
-      description: Action to start an ItemReturn.
       properties:
         itemReturnJobVersion:
           description: Version of the entity to be changed
+          example: 1
           minimum: 0
           type: integer
         name:
-          $ref: '#/components/schemas/StartItemReturnActionEnum'
+          enum:
+            - StartItemReturn
+          type: string
       required:
         - name
         - itemReturnJobVersion
       title: StartItemReturnActionParameter
-    StartItemReturnJobActionEnum:
-      enum:
-        - StartItemReturnJob
-      type: string
-      title: StartItemReturnJobActionEnum
-      description: StartItemReturnJobActionEnum
+      type: object
+      description: StartItemReturnActionParameter
     StartItemReturnJobActionParameter:
-      additionalProperties: false
-      description: Action to start a ItemReturnJob.
       properties:
         name:
-          $ref: '#/components/schemas/StartItemReturnJobActionEnum'
+          enum:
+            - StartItemReturnJob
+          type: string
         version:
           description: Version of the entity to be changed
+          example: 1
           minimum: 0
           type: integer
       required:
-        - name
         - version
+        - name
       title: StartItemReturnJobActionParameter
+      type: object
+      description: StartItemReturnJobActionParameter
     StartPickRun:
       allOf:
         - additionalProperties: false
@@ -85784,6 +86329,534 @@ components:
       xml:
         name: ToolkitTransformationType
       title: ToolkitTransformationType
+    TrackingInformation:
+      properties:
+        carrierRef:
+          description: Reference to the connected carrier
+          example: 283554a4-1ba5-459b-9bf2-59bc9c68f60e
+          minLength: 1
+          type: string
+        carrierStatus:
+          additionalProperties: true
+          anyOf:
+            - type: string
+            - type: object
+          description: Status of the latest tracking information event status.
+          example:
+            code: SOME_CODE
+            status: SOME_VALUE
+        carrierStatusSet:
+          description: Creation timestamp of the latest tracking information event status.
+          example: 2020-02-03T08:45:50.525Z
+          format: date-time
+          type: string
+        created:
+          description: Creation date of this tracking information
+          example: 2020-02-03T08:45:50.525Z
+          format: date-time
+          type: string
+        facilityRef:
+          description: >-
+            Reference to the connected facility ref via the connected shipping
+            information
+          example: f7fcd0a1-d269-42d9-8322-ba8f354ca6a0
+          type: string
+        id:
+          description: Unique identifier of this tracking information
+          example: d7058a3c-e57d-45dc-b024-e1725bb09541
+          type: string
+        labelRef:
+          description: Reference to the connected label
+          example: 3b06b80c-55ae-4e0e-af1d-8843d901e9ed
+          minLength: 1
+          type: string
+        labelUrl:
+          description: The URL to the label for this tracking information.
+          example: https://www.example.com/label.pdf
+          minLength: 1
+          type: string
+        lastModified:
+          description: Last modification date of this tracking information
+          example: 2020-02-03T08:45:50.525Z
+          format: date-time
+          type: string
+        shippingInformationRef:
+          description: Reference to the connected shipping information
+          example: 9d88d014-5627-4f01-96fe-80c5621d268d
+          minLength: 1
+          type: string
+        status:
+          description: >-
+            Status of the tracking information entity. Will either be set by the
+            workflow or calculated from the event history.
+          enum:
+            - CREATED
+            - IN_PROGRESS
+            - FINISHED
+            - CANCELLED
+            - OBSOLETE
+          example: IN_PROGRESS
+          type: string
+        trackingHistory:
+          description: >-
+            The tracking history of the tracking information. Most recent one is
+            defined by the statusSet timestamp, then the internal id.
+          example:
+            - carrierStatus: CA_DELIVERY
+              carrierStatusSet: 2020-02-03T08:45:50.525Z
+              id: 066960e1-630c-4b13-b0b5-58d537190107
+              status: DELIVERED
+              statusSet: 2020-02-03T08:45:50.525Z
+          items:
+            $ref: '#/components/schemas/TrackingInformationTrackingEvent'
+          maxItems: 100
+          minItems: 1
+          type: array
+        trackingNumber:
+          description: Tracking number of the connected label
+          example: '000123456'
+          minLength: 1
+          type: string
+        trackingStatus:
+          description: >-
+            Latest tracking information event status. Based on the found
+            tracking event history.
+          enum:
+            - REGISTERED
+            - ERROR
+            - PICKED_UP
+            - IN_DELIVERY
+            - DELIVERED
+            - DELIVERED_TO_RECIPIENT
+            - DELIVERED_TO_NEIGHBOUR
+            - DELIVERED_TO_PICK_UP_STATION
+            - NOT_PICKED_UP
+            - RETURN_TO_SENDER
+            - LOST
+            - DESTROYED
+            - CANCELLED
+            - UNKNOWN
+          example: DELIVERED
+          type: string
+        trackingStatusSet:
+          description: Creation timestamp of the latest tracking information event.
+          example: 2020-02-03T08:45:50.525Z
+          format: date-time
+          type: string
+        trackingUrl:
+          description: Url to the tracking page of the given carrier and tracking number
+          example: https://www.example.com/tracking:000123456
+          minLength: 1
+          type: string
+        type:
+          description: Type of this tracking information
+          enum:
+            - SEND
+            - RETURN
+          example: RETURN
+          type: string
+        version:
+          description: Version number of this tracking information
+          example: 42
+          type: integer
+      required:
+        - type
+        - carrierRef
+        - shippingInformationRef
+        - trackingNumber
+        - trackingUrl
+        - labelUrl
+        - trackingHistory
+        - id
+        - created
+        - lastModified
+        - version
+        - status
+        - trackingStatus
+        - trackingStatusSet
+        - carrierStatus
+        - facilityRef
+      title: TrackingInformation
+      type: object
+      description: TrackingInformation
+    TrackingInformationAddTrackingEventActionParameter:
+      properties:
+        name:
+          description: Name of this action
+          example: ADD_TRACKING_EVENTS
+          type: string
+        trackingEvents:
+          description: Events to add to the tracking information
+          example:
+            - carrierStatus: CA_DELIVERY
+              carrierStatusSet: 2020-02-03T08:45:50.525Z
+              status: DELIVERED
+              statusSet: 2020-02-03T08:45:50.525Z
+          items:
+            $ref: '#/components/schemas/TrackingInformationTrackingEventForCreation'
+          maxItems: 20
+          minItems: 1
+          type: array
+        version:
+          description: Version of the tracking information to call the action upon
+          example: 2
+          minimum: 0
+          type: integer
+      required:
+        - name
+        - version
+        - trackingEvents
+      title: TrackingInformationAddTrackingEventActionParameter
+      type: object
+      description: TrackingInformationAddTrackingEventActionParameter
+    TrackingInformationForCreation:
+      properties:
+        carrierRef:
+          description: Reference to the connected carrier
+          example: 283554a4-1ba5-459b-9bf2-59bc9c68f60e
+          minLength: 1
+          type: string
+        labelRef:
+          description: Reference to the connected label
+          example: 3b06b80c-55ae-4e0e-af1d-8843d901e9ed
+          minLength: 1
+          type: string
+        labelUrl:
+          description: The URL to the label for this tracking information.
+          example: https://www.example.com/label.pdf
+          minLength: 1
+          type: string
+        shippingInformationRef:
+          description: Reference to the connected shipping information
+          example: 9d88d014-5627-4f01-96fe-80c5621d268d
+          minLength: 1
+          type: string
+        trackingHistory:
+          description: >-
+            The tracking history of the tracking information. Most recent one is
+            defined by the statusSet timestamp, then the internal id.
+          example:
+            - carrierStatus: CA_DELIVERY
+              carrierStatusSet: 2020-02-03T08:45:50.525Z
+              status: DELIVERED
+              statusSet: 2020-02-03T08:45:50.525Z
+          items:
+            $ref: '#/components/schemas/TrackingInformationTrackingEventForCreation'
+          maxItems: 100
+          minItems: 1
+          type: array
+        trackingNumber:
+          description: Tracking number of the connected label
+          example: '000123456'
+          minLength: 1
+          type: string
+        trackingUrl:
+          description: Url to the tracking page of the given carrier and tracking number
+          example: https://www.example.com/tracking:000123456
+          minLength: 1
+          type: string
+        type:
+          description: Type of this tracking information
+          enum:
+            - SEND
+            - RETURN
+          example: RETURN
+          type: string
+      required:
+        - type
+        - carrierRef
+        - shippingInformationRef
+        - trackingNumber
+        - trackingUrl
+        - labelUrl
+        - trackingHistory
+      title: TrackingInformationForCreation
+      type: object
+      description: TrackingInformationForCreation
+    TrackingInformationListResponse:
+      properties:
+        totalCount:
+          description: >-
+            Total number of found tracking information for the given search
+            parameters
+          example: 42
+          type: integer
+        trackingInformation:
+          items:
+            $ref: '#/components/schemas/TrackingInformation'
+          type: array
+      required:
+        - trackingInformation
+      title: TrackingInformationListResponse
+      type: object
+      description: TrackingInformationListResponse
+    TrackingInformationPaginatedResult:
+      properties:
+        pageInfo:
+          allOf:
+            - $ref: '#/components/schemas/PageInfo'
+          description: Pagination information for the search result.
+        total:
+          description: >-
+            The total number of items matching the search criteria. Only filled,
+            if withTotal is set to true in the search options.
+          minimum: 0
+          type: number
+        trackingInformations:
+          items:
+            $ref: '#/components/schemas/TrackingInformation'
+          type: array
+      required:
+        - pageInfo
+        - trackingInformations
+      title: TrackingInformationPaginatedResult
+      type: object
+      description: TrackingInformationPaginatedResult
+    TrackingInformationRemoveTrackingEventsParameter:
+      properties:
+        name:
+          description: Name of this action
+          example: REMOVE_TRACKING_EVENTS
+          type: string
+        trackingEventIds:
+          description: >-
+            Ids of the tracking events that should be removed from the tracking
+            information
+          example:
+            - fa21fdf3-9618-4697-ba2c-1f39a3a78b80
+          items:
+            type: string
+          maxItems: 20
+          minItems: 1
+          type: array
+        version:
+          description: Version of the tracking information to call the action upon
+          example: 2
+          minimum: 0
+          type: integer
+      required:
+        - name
+        - version
+        - trackingEventIds
+      title: TrackingInformationRemoveTrackingEventsParameter
+      type: object
+      description: TrackingInformationRemoveTrackingEventsParameter
+    TrackingInformationSearchPayload:
+      properties:
+        after:
+          deprecated: false
+          description: >-
+            The cursor to start after for forward pagination. The value is
+            provided in the `pageInfo.endCursor` field of the response. Cannot
+            be used with `before` or `last`.
+          type: string
+        before:
+          description: >-
+            The cursor to start before for backward pagination. The value is
+            provided in the `pageInfo.startCursor` field of the response. Cannot
+            be used with `after` or `size` (first).
+          type: string
+        last:
+          description: >-
+            Number of items to return for backward pagination. Cannot be used
+            with 'size' (first). Default: 20.
+          maximum: 250
+          minimum: 1
+          type: number
+        options:
+          $ref: '#/components/schemas/SearchOptions'
+        query:
+          $ref: '#/components/schemas/TrackingInformationSearchQuery'
+        size:
+          description: >-
+            Number of items to return for forward pagination. Cannot be used
+            with 'last'. Default: 20.
+          example: 10
+          maximum: 250
+          minimum: 1
+          type: number
+        sort:
+          description: Use for sorting the result.
+          items:
+            $ref: '#/components/schemas/TrackingInformationSort'
+          maxItems: 1
+          minItems: 1
+          type: array
+        startAfterId:
+          deprecated: true
+          description: >-
+            The ID to start after. Deprecated, use `after` with the value
+            provided in `pageInfo.endCursor` instead.
+          type: string
+      required:
+        - query
+      title: TrackingInformationSearchPayload
+      type: object
+      description: TrackingInformationSearchPayload
+    TrackingInformationSearchQuery:
+      properties:
+        and:
+          items:
+            $ref: '#/components/schemas/TrackingInformationSearchQuery'
+          maxItems: 500
+          type: array
+        carrierRef:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by carrierRef
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+        created:
+          allOf:
+            - $ref: '#/components/schemas/DateFilter'
+          description: >-
+            Search entries by created. Applying a narrow and well-considered
+            filter value is strongly recommended, as it can greatly improve
+            response times, especially when working with large datasets.
+        id:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by id
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+        labelRef:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by labelRef
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+        lastModified:
+          allOf:
+            - $ref: '#/components/schemas/DateFilter'
+          description: Search by lastModified
+        or:
+          items:
+            $ref: '#/components/schemas/TrackingInformationSearchQuery'
+          maxItems: 500
+          type: array
+        shippingInformationRef:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by shippingInformationRef
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+        trackingNumber:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by trackingNumber
+      title: TrackingInformationSearchQuery
+      type: object
+      description: TrackingInformationSearchQuery
+    TrackingInformationSort:
+      properties:
+        created:
+          enum:
+            - ASC
+            - DESC
+          type: string
+        lastModified:
+          enum:
+            - ASC
+            - DESC
+          type: string
+      title: TrackingInformationSort
+      type: object
+      description: TrackingInformationSort
+    TrackingInformationTrackingEvent:
+      properties:
+        carrierStatus:
+          additionalProperties: true
+          anyOf:
+            - type: string
+            - type: object
+          description: Status from the carrier before mapping to the internal status
+          example:
+            code: SOME_CODE
+            status: SOME_VALUE
+        carrierStatusSet:
+          description: Creation timestamp
+          example: 2020-02-03T08:45:50.525Z
+          format: date-time
+          type: string
+        id:
+          description: Unique identifier of this tracking history
+          example: 890b857f-8d66-4ec0-91ba-1cc19f2944f6
+          type: string
+        status:
+          description: Internal Status of this Tracking Information Event
+          enum:
+            - REGISTERED
+            - ERROR
+            - PICKED_UP
+            - IN_DELIVERY
+            - DELIVERED
+            - DELIVERED_TO_RECIPIENT
+            - DELIVERED_TO_NEIGHBOUR
+            - DELIVERED_TO_PICK_UP_STATION
+            - NOT_PICKED_UP
+            - RETURN_TO_SENDER
+            - LOST
+            - DESTROYED
+            - CANCELLED
+            - UNKNOWN
+          example: DELIVERED
+          type: string
+        statusSet:
+          description: Creation timestamp
+          example: 2020-02-03T08:45:50.525Z
+          format: date-time
+          type: string
+      required:
+        - status
+        - statusSet
+        - carrierStatus
+        - id
+      title: TrackingInformationTrackingEvent
+      type: object
+      description: TrackingInformationTrackingEvent
+    TrackingInformationTrackingEventForCreation:
+      properties:
+        carrierStatus:
+          additionalProperties: true
+          anyOf:
+            - type: string
+            - type: object
+          description: Status from the carrier before mapping to the internal status
+          example:
+            code: SOME_CODE
+            status: SOME_VALUE
+        carrierStatusSet:
+          description: Creation timestamp
+          example: 2020-02-03T08:45:50.525Z
+          format: date-time
+          type: string
+        status:
+          description: Internal Status of this Tracking Information Event
+          enum:
+            - REGISTERED
+            - ERROR
+            - PICKED_UP
+            - IN_DELIVERY
+            - DELIVERED
+            - DELIVERED_TO_RECIPIENT
+            - DELIVERED_TO_NEIGHBOUR
+            - DELIVERED_TO_PICK_UP_STATION
+            - NOT_PICKED_UP
+            - RETURN_TO_SENDER
+            - LOST
+            - DESTROYED
+            - CANCELLED
+            - UNKNOWN
+          example: DELIVERED
+          type: string
+        statusSet:
+          description: Creation timestamp
+          example: 2020-02-03T08:45:50.525Z
+          format: date-time
+          type: string
+      required:
+        - status
+        - statusSet
+        - carrierStatus
+      title: TrackingInformationTrackingEventForCreation
+      type: object
+      description: TrackingInformationTrackingEventForCreation
     TrackingStatus:
       description: The state of the KEP
       enum:
@@ -87626,25 +88699,22 @@ components:
       title: VersionlessUpdateStock
       type: object
       description: VersionlessUpdateStock
-    WaitForInputItemReturnActionEnum:
-      enum:
-        - WaitForInputItemReturn
-      type: string
-      title: WaitForInputItemReturnActionEnum
-      description: WaitForInputItemReturnActionEnum
     WaitForInputItemReturnActionParameter:
-      additionalProperties: false
       properties:
         itemReturnJobVersion:
           description: Version of the entity to be changed
+          example: 1
           minimum: 0
           type: integer
         name:
-          $ref: '#/components/schemas/WaitForInputItemReturnActionEnum'
+          enum:
+            - WaitForInputItemReturn
+          type: string
       required:
         - name
         - itemReturnJobVersion
       title: WaitForInputItemReturnActionParameter
+      type: object
       description: WaitForInputItemReturnActionParameter
     WebHookEvent:
       properties:
@@ -87712,6 +88782,16 @@ components:
       description: WorkflowConnection
     WorkflowDefinition:
       properties:
+        nameLocalized:
+          allOf:
+            - $ref: '#/components/schemas/WorkflowNameLocaleStringRequired'
+          description: >-
+            Localized human-readable name of the workflow. At least one locale
+            value is required.
+        descriptionLocalized:
+          allOf:
+            - $ref: '#/components/schemas/WorkflowDescriptionLocaleString'
+          description: Localized description of what the workflow does
         connections:
           description: Array of connections between workflow nodes
           items:
@@ -87719,8 +88799,7 @@ components:
           maxItems: 10
           type: array
         description:
-          description: Description of what the workflow does
-          example: Conditional fraud verification flow with manual review
+          description: Description resolved to the requesting user's locale (read-only)
           type: string
         id:
           description: Unique identifier for the workflow definition
@@ -87730,15 +88809,8 @@ components:
           description: Whether the workflow definition is active
           example: true
           type: boolean
-        key:
-          description: >-
-            Unique key for the workflow definition. Must not contain "." or "$"
-            characters.
-          example: fraud-check-workflow
-          type: string
         name:
-          description: Human-readable name of the workflow
-          example: Fraud Check Workflow
+          description: Name resolved to the requesting user's locale (read-only)
           type: string
         nodes:
           description: Array of workflow nodes
@@ -87753,6 +88825,12 @@ components:
           description: Key of the root node where workflow execution begins
           example: order-node
           type: string
+        tenantWorkflowId:
+          description: >-
+            Unique tenant id for the workflow definition. Must not contain "."
+            or "$" characters.
+          example: fraud-check-workflow
+          type: string
         type:
           description: Type of workflow. Currently only ORDER workflows are supported
           enum:
@@ -87763,10 +88841,9 @@ components:
           example: 1
           type: number
       required:
-        - key
+        - tenantWorkflowId
         - type
-        - name
-        - description
+        - nameLocalized
         - rootId
         - nodes
         - connections
@@ -87790,26 +88867,22 @@ components:
       description: WorkflowDefinitionAction
     WorkflowDefinitionForCreation:
       properties:
+        nameLocalized:
+          allOf:
+            - $ref: '#/components/schemas/WorkflowNameLocaleStringRequired'
+          description: >-
+            Localized human-readable name of the workflow. At least one locale
+            value is required.
+        descriptionLocalized:
+          allOf:
+            - $ref: '#/components/schemas/WorkflowDescriptionLocaleString'
+          description: Localized description of what the workflow does
         connections:
           description: Array of connections between workflow nodes
           items:
             $ref: '#/components/schemas/WorkflowConnection'
           maxItems: 10
           type: array
-        description:
-          description: Description of what the workflow does
-          example: Conditional fraud verification flow with manual review
-          type: string
-        key:
-          description: >-
-            Unique key for the workflow definition. Must not contain "." or "$"
-            characters.
-          example: fraud-check-workflow
-          type: string
-        name:
-          description: Human-readable name of the workflow
-          example: Fraud Check Workflow
-          type: string
         nodes:
           description: Array of workflow nodes
           items:
@@ -87823,16 +88896,21 @@ components:
           description: Key of the root node where workflow execution begins
           example: order-node
           type: string
+        tenantWorkflowId:
+          description: >-
+            Unique tenant id for the workflow definition. Must not contain "."
+            or "$" characters.
+          example: fraud-check-workflow
+          type: string
         type:
           description: Type of workflow. Currently only ORDER workflows are supported
           enum:
             - ORDER
           type: string
       required:
-        - key
+        - tenantWorkflowId
         - type
-        - name
-        - description
+        - nameLocalized
         - rootId
         - nodes
         - connections
@@ -87841,29 +88919,25 @@ components:
       description: WorkflowDefinitionForCreation
     WorkflowDefinitionForUpdate:
       properties:
+        nameLocalized:
+          allOf:
+            - $ref: '#/components/schemas/WorkflowNameLocaleStringRequired'
+          description: >-
+            Localized human-readable name of the workflow. At least one locale
+            value is required.
+        descriptionLocalized:
+          allOf:
+            - $ref: '#/components/schemas/WorkflowDescriptionLocaleString'
+          description: Localized description of what the workflow does
         connections:
           description: Array of connections between workflow nodes
           items:
             $ref: '#/components/schemas/WorkflowConnection'
           maxItems: 10
           type: array
-        description:
-          description: Description of what the workflow does
-          example: Conditional fraud verification flow with manual review
-          type: string
         id:
           description: Unique identifier for the workflow definition
           example: 507f1f77bcf86cd799439011
-          type: string
-        key:
-          description: >-
-            Unique key for the workflow definition. Must not contain "." or "$"
-            characters.
-          example: fraud-check-workflow
-          type: string
-        name:
-          description: Human-readable name of the workflow
-          example: Fraud Check Workflow
           type: string
         nodes:
           description: Array of workflow nodes
@@ -87877,6 +88951,12 @@ components:
         rootId:
           description: Key of the root node where workflow execution begins
           example: order-node
+          type: string
+        tenantWorkflowId:
+          description: >-
+            Unique tenant id for the workflow definition. Must not contain "."
+            or "$" characters.
+          example: fraud-check-workflow
           type: string
         type:
           description: Type of workflow. Currently only ORDER workflows are supported
@@ -87888,10 +88968,9 @@ components:
           example: 1
           type: number
       required:
-        - key
+        - tenantWorkflowId
         - type
-        - name
-        - description
+        - nameLocalized
         - rootId
         - nodes
         - connections
@@ -87900,6 +88979,20 @@ components:
       title: WorkflowDefinitionForUpdate
       type: object
       description: WorkflowDefinitionForUpdate
+    WorkflowDescriptionLocaleString:
+      additionalProperties:
+        maxLength: 500
+        minLength: 2
+        type: string
+      description: >-
+        Provides localized values. The key is the locale, the value is the
+        translation.
+        https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+      example:
+        de_DE: Betrugsprüfungs-Workflow
+        en_US: Fraud check workflow
+      title: WorkflowDescriptionLocaleString
+      type: object
     WorkflowInformation:
       additionalProperties: false
       properties:
@@ -87920,6 +89013,35 @@ components:
       title: WorkflowInformation
       type: object
       description: WorkflowInformation
+    WorkflowNameLocaleString:
+      additionalProperties:
+        maxLength: 100
+        minLength: 2
+        type: string
+      description: >-
+        Provides localized values. The key is the locale, the value is the
+        translation.
+        https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+      example:
+        de_DE: Betrugsprüfung
+        en_US: Fraud Check
+      title: WorkflowNameLocaleString
+      type: object
+    WorkflowNameLocaleStringRequired:
+      additionalProperties:
+        maxLength: 100
+        minLength: 2
+        type: string
+      description: >-
+        Provides localized values. The key is the locale, the value is the
+        translation.
+        https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+      example:
+        de_DE: Betrugsprüfung
+        en_US: Fraud Check
+      minProperties: 1
+      title: WorkflowNameLocaleStringRequired
+      type: object
     WorkflowPaginatedResult:
       properties:
         pageInfo:
@@ -88010,30 +89132,26 @@ components:
           allOf:
             - $ref: '#/components/schemas/BooleanFilter'
           description: Search by isActive
-        key:
-          allOf:
-            - $ref: '#/components/schemas/StringFilter'
-          description: Search by key
         name:
           allOf:
-            - $ref: '#/components/schemas/StringSearchFilter'
+            - $ref: '#/components/schemas/LocalizedStringSearchFilter'
           description: Search by name
         or:
           items:
             $ref: '#/components/schemas/WorkflowSearchQuery'
           maxItems: 500
           type: array
+        tenantWorkflowId:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by tenantWorkflowId
+          example: MY_WORKFLOW_ID
       title: WorkflowSearchQuery
       type: object
       description: WorkflowSearchQuery
     WorkflowSort:
       properties:
         id:
-          enum:
-            - ASC
-            - DESC
-          type: string
-        name:
           enum:
             - ASC
             - DESC

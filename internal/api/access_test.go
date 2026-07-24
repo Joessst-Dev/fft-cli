@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-// knownMutatingPOSTs is the other half of the POST census: the 109 POST operations
+// knownMutatingPOSTs is the other half of the POST census: the 112 POST operations
 // that write. It is a fixture, not production code, and it exists so that the two
 // lists together must account for every POST in the spec.
 //
@@ -88,6 +88,7 @@ var knownMutatingPOSTs = []string{
 	"createStack",
 	"createStock",
 	"createStowJob",
+	"createTrackingInformation",
 	"createUser",
 	"directCreateParcel",
 	"executeGraphQLCommand",
@@ -124,6 +125,7 @@ var knownMutatingPOSTs = []string{
 	"rerouteProcess",
 	"restowItemAction",
 	"shipmentActions",
+	"trackingInformationActions",
 	"triggerRetryNotRoutable",
 	"updateItemReturnJob",
 	"updateServiceData",
@@ -230,7 +232,7 @@ var _ = Describe("Mutates", func() {
 			}
 		})
 
-		It("accounts for all 153 of the spec's POSTs", func() {
+		It("accounts for all 157 of the spec's POSTs", func() {
 			var posts int
 			for _, op := range Operations() {
 				if op.Method == http.MethodPost {
