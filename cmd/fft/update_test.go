@@ -78,6 +78,12 @@ func (c *cli) fakeGitHub(handler http.HandlerFunc) *github {
 }
 
 // awaitUpdateCheck waits for the background release check, if one was started.
+//
+// It is also how a spec reads what that check wrote: join the goroutine, then
+// assert on the cache synchronously. Polling the file with Eventually instead is
+// a race against a goroutine we own, and Gomega's one-second default is a race
+// the Windows runner loses — twice observed in CI, once here and once on main,
+// both times with the check still healthy and half its own deadline left.
 func (c *cli) awaitUpdateCheck() {
 	if c.deps.updateDone == nil {
 		return
@@ -113,9 +119,9 @@ func (c *cli) cachedRelease(version string, age time.Duration) {
 // cached is what the update check left behind, or an error while it has not left
 // anything behind yet.
 //
-// It returns the error rather than asserting on it because the background check
-// is polled with Eventually, and a failed Expect inside a polled function aborts
-// the spec instead of trying again.
+// It returns the error rather than asserting on it so that the caller may say
+// Expect(c.cached()).To(...): Gomega asserts the trailing error is nil, and the
+// spec reads as one line about the cache rather than two.
 func (c *cli) cached() (update.State, error) {
 	data, err := os.ReadFile(c.updateCache)
 	if err != nil {
@@ -211,7 +217,9 @@ var _ = Describe("the update notice", func() {
 
 			// In the background: the command has already returned, so the answer is
 			// awaited here rather than in the command, which is the point.
-			Eventually(c.cached).Should(HaveField("LatestVersion", Equal("v1.3.0")))
+			c.awaitUpdateCheck()
+
+			Expect(c.cached()).To(HaveField("LatestVersion", Equal("v1.3.0")))
 			Expect(gh.requests.Load()).To(BeEquivalentTo(1))
 		})
 	})
@@ -220,7 +228,9 @@ var _ = Describe("the update notice", func() {
 		It("asks GitHub, and writes the cache the next run will read", func() {
 			Expect(c.run("facility", "delete", "BER-01", "--yes")).To(Equal(exitcode.OK))
 
-			Eventually(c.cached).Should(And(
+			c.awaitUpdateCheck()
+
+			Expect(c.cached()).To(And(
 				HaveField("LatestVersion", Equal("v1.3.0")),
 				HaveField("CheckedAt", Equal(testNow)),
 			))
@@ -230,15 +240,11 @@ var _ = Describe("the update notice", func() {
 			Expect(c.run("facility", "delete", "BER-01", "--yes")).To(Equal(exitcode.OK))
 
 			// The background check writes the cache by rename, so the file appears
-			// already carrying its final mode: waiting for it to exist is enough,
-			// there is no window in which it exists and is still world-readable.
-			// 5s, not Gomega's default 1s: the goroutine's own deadline is 1.5s, so
-			// the default is tighter than the thing it is waiting for — a loaded
-			// runner would fail this on timing rather than on behaviour.
-			Eventually(func() error {
-				_, err := os.Stat(c.updateCache)
-				return err
-			}, 5*time.Second).Should(Succeed())
+			// already carrying its final mode: once the check has finished there is no
+			// window in which it exists and is still world-readable.
+			c.awaitUpdateCheck()
+
+			Expect(c.updateCache).To(BeAnExistingFile())
 			testsupport.ExpectOwnerOnlyFile(c.updateCache)
 		})
 	})
@@ -257,7 +263,9 @@ var _ = Describe("the update notice", func() {
 
 				// Stamped even so: without it, a user with no network would ask GitHub
 				// on every single invocation for the rest of time.
-				Eventually(c.cached).Should(HaveField("CheckedAt", Equal(testNow)))
+				c.awaitUpdateCheck()
+
+				Expect(c.cached()).To(HaveField("CheckedAt", Equal(testNow)))
 			},
 			Entry("404, because there are no releases yet", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusNotFound)
