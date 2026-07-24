@@ -13491,7 +13491,7 @@ type FacilityAddressForCreation struct {
 	// ResolvedCoordinates Coordinates of the WGS84 geodetic reference system in Mercator projection, as used e.g. by the Google Maps API
 	ResolvedCoordinates *Coordinates `json:"resolvedCoordinates,omitempty"`
 
-	// ResolvedTimeZone Self-provided timezone for determining the local time of a facility
+	// ResolvedTimeZone User-specified time zone in identifier format (e.g., "America/Los_Angeles"). Used to determine local time. Relevant only if the country spans multiple time zones; otherwise, the time zone is automatically determined from the country or via Google if unspecified.
 	ResolvedTimeZone *TimeZoneForCreation `json:"resolvedTimeZone,omitempty"`
 	Street           string               `json:"street"`
 }
@@ -14930,6 +14930,33 @@ type InventoryOutOfStockConfigRestock struct {
 type KeyExistsFilter struct {
 	// Exists Search all entities which have or do not have this key defined
 	Exists *bool `json:"exists,omitempty"`
+}
+
+// LabelSearchQuery LabelSearchQuery
+type LabelSearchQuery struct {
+	And *[]LabelSearchQuery `json:"and,omitempty"`
+
+	// Created Search entries by created. Applying a narrow and well-considered filter value is strongly recommended, as it can greatly improve response times, especially when working with large datasets.
+	Created *DateFilter `json:"created,omitempty"`
+
+	// FacilityRef Search by facilityRef
+	FacilityRef *StringFilter `json:"facilityRef,omitempty"`
+
+	// Id Search by id
+	Id *StringFilter `json:"id,omitempty"`
+
+	// LastModified Search by lastModified
+	LastModified *DateFilter         `json:"lastModified,omitempty"`
+	Or           *[]LabelSearchQuery `json:"or,omitempty"`
+
+	// ProcessRef Search by processRef
+	ProcessRef *StringFilter `json:"processRef,omitempty"`
+
+	// TenantLabelId Search by tenantLabelId
+	TenantLabelId *StringFilter `json:"tenantLabelId,omitempty"`
+
+	// TenantOrderId Search by tenantOrderId
+	TenantOrderId *StringFilter `json:"tenantOrderId,omitempty"`
 }
 
 // LinkedConfiguration LinkedConfiguration
@@ -16911,7 +16938,7 @@ type OrderPricingDiscount struct {
 	// NameLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
 	NameLocalized *LocaleString `json:"nameLocalized,omitempty"`
 
-	// Percentage Discount percentage (-100 to 0). Required when type is PERCENTAGE. Must be negative or zero (e.g. -10 for 10% off).
+	// Percentage Discount percentage (0 to 100). Required when type is PERCENTAGE. Must be positive or zero (e.g. 10 for 10% off).
 	Percentage *float32 `json:"percentage,omitempty"`
 
 	// TenantDiscountId Tenant-specific discount identifier
@@ -18665,7 +18692,7 @@ type PromiseRequestAdditionalInfo struct {
 // RatingConfigurationType This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Identifies the rating configuration variant and determines which properties are applicable.
 type RatingConfigurationType string
 
-// RatingImplementation This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
+// RatingImplementation This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Discriminator identifying a rating variant.
 type RatingImplementation string
 
 // RatingResult RatingResult
@@ -19599,11 +19626,11 @@ type RoutingStrategyRatingForUpsert struct {
 	// Configuration Base configuration for ratings. See documentation for details.
 	Configuration *AbstractRatingConfiguration `json:"configuration,omitempty"`
 
-	// Implementation This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
+	// Implementation This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Discriminator identifying a rating variant.
 	Implementation RatingImplementation `json:"implementation"`
 	MaxPenalty     float32              `json:"maxPenalty"`
 
-	// Type RoutingStrategyStandardRatingType
+	// Type Discriminator identifying a rating as a routing strategy standard rating.
 	Type RoutingStrategyStandardRatingType `json:"type"`
 }
 
@@ -19667,16 +19694,16 @@ type RoutingStrategyStandardRating struct {
 	Configuration *AbstractRatingConfiguration `json:"configuration,omitempty"`
 	Description   *string                      `json:"description,omitempty"`
 
-	// Implementation This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
+	// Implementation This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Discriminator identifying a rating variant.
 	Implementation RatingImplementation `json:"implementation"`
 	MaxPenalty     float32              `json:"maxPenalty"`
 	Name           *string              `json:"name,omitempty"`
 
-	// Type RoutingStrategyStandardRatingType
+	// Type Discriminator identifying a rating as a routing strategy standard rating.
 	Type RoutingStrategyStandardRatingType `json:"type"`
 }
 
-// RoutingStrategyStandardRatingType RoutingStrategyStandardRatingType
+// RoutingStrategyStandardRatingType Discriminator identifying a rating as a routing strategy standard rating.
 type RoutingStrategyStandardRatingType string
 
 // RoutingStrategyToolkitFence Routing Strategy Toolkit Fence.
@@ -19733,7 +19760,7 @@ type RoutingStrategyToolkitFenceType string
 
 // RoutingStrategyToolkitRating Routing Strategy Toolkit Rating.
 type RoutingStrategyToolkitRating struct {
-	// Active Indicates whether this fence is active or not
+	// Active Indicates whether this rating is active or not
 	Active bool `json:"active"`
 
 	// ComparisonRule The rule, comparing the left and right path values, that will be evaluated applying a RuleOperator
@@ -19776,11 +19803,11 @@ type RoutingStrategyToolkitRating struct {
 	// Rule The rule, containing the left predicates and the right predicates, that will be evaluated applying a RuleOperator
 	Rule *ToolkitRule `json:"rule,omitempty"`
 
-	// Type RoutingStrategyToolkitRatingType
+	// Type Discriminator identifying a rating as a routing strategy toolkit rating.
 	Type RoutingStrategyToolkitRatingType `json:"type"`
 }
 
-// RoutingStrategyToolkitRatingType RoutingStrategyToolkitRatingType
+// RoutingStrategyToolkitRatingType Discriminator identifying a rating as a routing strategy toolkit rating.
 type RoutingStrategyToolkitRatingType string
 
 // SafetyStock SafetyStock
@@ -22158,6 +22185,33 @@ type ToolkitRuleScope string
 // ToolkitTransformationType The transformations available to apply on the entity property value before a predicate is evaluated
 type ToolkitTransformationType string
 
+// TrackingInformationSearchQuery TrackingInformationSearchQuery
+type TrackingInformationSearchQuery struct {
+	And *[]TrackingInformationSearchQuery `json:"and,omitempty"`
+
+	// CarrierRef Search by carrierRef
+	CarrierRef *StringFilter `json:"carrierRef,omitempty"`
+
+	// Created Search entries by created. Applying a narrow and well-considered filter value is strongly recommended, as it can greatly improve response times, especially when working with large datasets.
+	Created *DateFilter `json:"created,omitempty"`
+
+	// Id Search by id
+	Id *StringFilter `json:"id,omitempty"`
+
+	// LabelRef Search by labelRef
+	LabelRef *StringFilter `json:"labelRef,omitempty"`
+
+	// LastModified Search by lastModified
+	LastModified *DateFilter                       `json:"lastModified,omitempty"`
+	Or           *[]TrackingInformationSearchQuery `json:"or,omitempty"`
+
+	// ShippingInformationRef Search by shippingInformationRef
+	ShippingInformationRef *StringFilter `json:"shippingInformationRef,omitempty"`
+
+	// TrackingNumber Search by trackingNumber
+	TrackingNumber *StringFilter `json:"trackingNumber,omitempty"`
+}
+
 // TransferTimeLine TransferTimeLine
 type TransferTimeLine struct {
 	// CalculationStartPoint The date and time from which all time-related calculations for the corresponding items are based.
@@ -22694,12 +22748,12 @@ type WorkflowSearchQuery struct {
 	// IsActive Search by isActive
 	IsActive *BooleanFilter `json:"isActive,omitempty"`
 
-	// Key Search by key
-	Key *StringFilter `json:"key,omitempty"`
-
 	// Name Search by name
-	Name *StringSearchFilter    `json:"name,omitempty"`
-	Or   *[]WorkflowSearchQuery `json:"or,omitempty"`
+	Name *LocalizedStringSearchFilter `json:"name,omitempty"`
+	Or   *[]WorkflowSearchQuery       `json:"or,omitempty"`
+
+	// TenantWorkflowId Search by tenantWorkflowId
+	TenantWorkflowId *StringFilter `json:"tenantWorkflowId,omitempty"`
 }
 
 // WorkflowUnavailable WorkflowUnavailable
