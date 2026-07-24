@@ -3,20 +3,12 @@ package emulator
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"sync"
 	"time"
 
-	"cloud.google.com/go/pubsub/v2"
-	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 	"github.com/google/uuid"
-	"google.golang.org/api/option"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/status"
 )
 
 // webHookEvent is the envelope fulfillmenttools delivers to a subscriber: the event
@@ -29,164 +21,70 @@ type webHookEvent struct {
 	Payload json.RawMessage `json:"payload"`
 }
 
-// Publisher sends one event to one Pub/Sub topic. It is an interface so a test can
-// record what would have been published without standing up a real emulator.
-type Publisher interface {
-	Publish(ctx context.Context, projectID, topicID string, data []byte, attrs map[string]string) error
-}
-
-// pubsubPublisher publishes to a local Pub/Sub emulator over gRPC. Every client it
-// builds is pinned to the emulator host with authentication disabled and insecure
-// transport, so it can only ever reach that host — the emulator must never publish
-// to real Google Cloud. It is constructed only when a host is known.
-type pubsubPublisher struct {
-	host    string
-	mu      sync.Mutex
-	clients map[string]*pubsub.Client
-}
-
-func newPubsubPublisher(host string) *pubsubPublisher {
-	return &pubsubPublisher{host: host, clients: map[string]*pubsub.Client{}}
-}
-
-// client returns the cached client for a project, building one on first use. One
-// client per project is what the Pub/Sub library wants — a topic is addressed within
-// a project, and a subscription can name any project.
-func (p *pubsubPublisher) client(ctx context.Context, projectID string) (*pubsub.Client, error) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
-	if c, ok := p.clients[projectID]; ok {
-		return c, nil
-	}
-
-	c, err := pubsub.NewClient(ctx, projectID,
-		option.WithEndpoint(p.host),
-		option.WithoutAuthentication(),
-		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
-	)
-	if err != nil {
-		return nil, err
-	}
-	p.clients[projectID] = c
-	return c, nil
-}
-
-// Publish creates the topic if the emulator does not have it yet, then publishes the
-// message and waits for the emulator to acknowledge it. It stops the publisher
-// afterwards so a per-call publisher does not leak a goroutine.
-func (p *pubsubPublisher) Publish(ctx context.Context, projectID, topicID string, data []byte, attrs map[string]string) error {
-	c, err := p.client(ctx, projectID)
-	if err != nil {
-		return err
-	}
-
-	name := fmt.Sprintf("projects/%s/topics/%s", projectID, topicID)
-	if _, err := c.TopicAdminClient.GetTopic(ctx, &pubsubpb.GetTopicRequest{Topic: name}); err != nil {
-		if status.Code(err) != codes.NotFound {
-			return fmt.Errorf("check topic %s: %w", name, err)
-		}
-		// AlreadyExists is success, not failure: two events racing to a brand-new topic
-		// both see NotFound and both create it, and the loser must not drop its event.
-		if _, err := c.TopicAdminClient.CreateTopic(ctx, &pubsubpb.Topic{Name: name}); err != nil && status.Code(err) != codes.AlreadyExists {
-			return fmt.Errorf("create topic %s: %w", name, err)
-		}
-	}
-
-	publisher := c.Publisher(name)
-	defer publisher.Stop()
-
-	res := publisher.Publish(ctx, &pubsub.Message{Data: data, Attributes: attrs})
-	if _, err := res.Get(ctx); err != nil {
-		return fmt.Errorf("publish to %s: %w", name, err)
-	}
-	return nil
-}
-
-// Close closes every cached client and clears the cache. The emulator calls it on
-// shutdown so a long-running local session does not leak the gRPC connection and
-// background goroutines each client keeps open.
-func (p *pubsubPublisher) Close() error {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
-	var errs []error
-	for _, c := range p.clients {
-		if err := c.Close(); err != nil {
-			errs = append(errs, err)
-		}
-	}
-	clear(p.clients)
-	return errors.Join(errs...)
-}
-
-// noopPublisher stands in when no emulator host is configured: subscriptions are
-// still stored and matched, but nothing is sent. eventEmitter.enabled is false in
-// that case, so this is only ever the zero value's safety net.
-type noopPublisher struct{}
-
-func (noopPublisher) Publish(context.Context, string, string, []byte, map[string]string) error {
-	return nil
-}
-
-// eventEmitter turns a domain event into published messages, one per stored
+// eventEmitter turns a domain event into delivered messages, one per stored
 // subscription that matches. It reads subscriptions live from the store, so a
 // subscription registered a moment ago is honored on the next event.
 type eventEmitter struct {
-	pub     Publisher
-	store   *Store
-	log     io.Writer
-	enabled bool
+	transports map[string]transport
+	store      *Store
+	log        io.Writer
 }
 
-// newEventEmitter builds the emitter New wires into the handlers. A test-injected
-// publisher wins; otherwise a real Pub/Sub publisher is built when a host is
-// configured, and eventing is disabled (a no-op) when it is not.
+// newEventEmitter builds the emitter New wires into the handlers.
 func newEventEmitter(cfg Config, store *Store) *eventEmitter {
-	switch {
-	case cfg.publisher != nil:
-		return &eventEmitter{pub: cfg.publisher, store: store, log: cfg.Log, enabled: true}
-	case cfg.PubSubHost != "":
-		return &eventEmitter{pub: newPubsubPublisher(cfg.PubSubHost), store: store, log: cfg.Log, enabled: true}
-	default:
-		return &eventEmitter{pub: noopPublisher{}, store: store, log: cfg.Log, enabled: false}
-	}
+	return &eventEmitter{transports: newTransports(cfg), store: store, log: cfg.Log}
+}
+
+// enabled reports whether any transport is configured at all. A current emulator always
+// has one — webhook delivery needs no broker — so this is false only for an emitter
+// built with an empty registry, which a test does and production does not.
+func (e *eventEmitter) enabled() bool {
+	return len(e.transports) > 0
 }
 
 // emitResult reports what emit did: whether eventing is on at all, how many messages
-// went out and to which project/topic pairs. It is the body of the manual emit
-// endpoint's response. Enabled tells a zero Published "no subscription matched" apart
-// from "eventing is off", which the caller reports differently.
+// went out and to which targets. It is the body of the manual emit endpoint's response.
 type emitResult struct {
 	Enabled   bool     `json:"enabled"`
 	Published int      `json:"published"`
-	Topics    []string `json:"topics"`
+	Targets   []string `json:"targets"`
+
+	// Topics carries the same values as Targets under the name it had when Pub/Sub was
+	// the only target. It is kept so an older `fft emulator emit` — from a pinned
+	// container image, say — still reports where an event went.
+	//
+	// Deprecated: read Targets.
+	Topics []string `json:"topics"`
 }
 
-// publishTimeout bounds one emit's whole fan-out, not a single publish: every matching
-// subscription is published under one shared context with this deadline, so a down or
-// wrong Pub/Sub host delays the response by at most this long no matter how many
-// subscriptions match. Delivery is a side effect of a mutation that has already
-// committed, so it must not block the response indefinitely.
+// publishTimeout bounds one emit's whole fan-out, not a single delivery: every matching
+// subscription is delivered to under one shared context with this deadline, so a down or
+// wrong broker delays the response by at most this long no matter how many subscriptions
+// match. Delivery is a side effect of a mutation that has already committed, so it must
+// not block the response indefinitely.
 const publishTimeout = 10 * time.Second
 
-// emit publishes event to every subscription that names it and whose contexts match
-// payload. Delivery is best-effort: a publish that fails is logged and skipped, never
+// emit delivers event to every subscription that names it and whose contexts match
+// payload. Delivery is best-effort: one that fails is logged and skipped, never
 // propagated, matching the real at-least-once contract where the producer does not
 // fail the originating operation on a delivery error.
 //
-// Matching subscriptions are published to concurrently under one bounded context
+// Matching subscriptions are delivered to concurrently under one bounded context
 // detached from any request, not the caller's: an already-committed mutation's event
 // must not be cancelled by the caller disconnecting, and one shared deadline caps total
 // latency at publishTimeout however many subscriptions match — a dead host delays the
-// response by the timeout once, not once per subscription. Publishing is still
-// synchronous on the request path, because the manual emit endpoint needs the count.
+// response by the timeout once, not once per subscription. Delivery is still synchronous
+// on the request path, because the manual emit endpoint needs the count.
 //
 // All matching subscriptions share one eventId, because they are one occurrence of
 // the event delivered to several targets — the envelope is built once.
-func (e *eventEmitter) emit(event string, payload map[string]any) emitResult {
-	result := emitResult{Enabled: e.enabled, Topics: []string{}}
-	if !e.enabled || event == "" {
+func (e *eventEmitter) emit(event string, payload map[string]any) (result emitResult) {
+	// Deferred rather than set at each return, so the deprecated field cannot drift out
+	// of step with the one it mirrors.
+	defer func() { result.Topics = result.Targets }()
+
+	result = emitResult{Enabled: e.enabled(), Targets: []string{}}
+	if !result.Enabled || event == "" {
 		return result
 	}
 
@@ -201,26 +99,8 @@ func (e *eventEmitter) emit(event string, payload map[string]any) emitResult {
 		return result
 	}
 
-	var matches []subscriptionMatch
-	for _, sub := range e.store.List("subscriptions") {
-		if mapString(sub, "event") != event {
-			continue
-		}
-		target := subMap(sub, "target")
-		if mapString(target, "type") != targetGoogleCloudPubSub {
-			continue
-		}
-		if !payloadMatchesContexts(payload, subContexts(sub)) {
-			continue
-		}
-
-		projectID, topicID := mapString(target, "projectId"), mapString(target, "topicId")
-		if projectID == "" || topicID == "" {
-			continue
-		}
-		matches = append(matches, subscriptionMatch{projectID: projectID, topicID: topicID})
-	}
-	if len(matches) == 0 {
+	deliveries := e.plan(event, payload)
+	if len(deliveries) == 0 {
 		return result
 	}
 
@@ -228,36 +108,33 @@ func (e *eventEmitter) emit(event string, payload map[string]any) emitResult {
 	defer cancel()
 
 	// result is aggregated by the fan-out goroutines, so guard every write to it and
-	// the topic-dedup map with mu.
+	// the target-dedup map with mu.
 	var (
 		mu   sync.Mutex
 		wg   sync.WaitGroup
 		seen = map[string]bool{}
 	)
-	for _, m := range matches {
+	for _, d := range deliveries {
 		wg.Go(func() {
-			// Recovered so a panic inside Publisher.Publish (not just a returned error)
-			// degrades to a logged, best-effort delivery failure instead of crashing the
-			// whole emulator process out from under every in-flight request.
+			// Recovered so a panic inside a transport (not just a returned error) degrades
+			// to a logged, best-effort delivery failure instead of crashing the whole
+			// emulator process out from under every in-flight request.
 			defer func() {
 				if r := recover(); r != nil {
-					e.logf("emulator: publish %s to %s/%s panicked: %v", event, m.projectID, m.topicID, r)
+					e.logf("emulator: deliver %s to %s panicked: %v", event, d.label, r)
 				}
 			}()
 
-			// The event attribute lets a consumer filter without decoding data. It is an
-			// emulator convention: fulfillmenttools does not document the attributes its
-			// production delivery sets, so nothing here claims to reproduce them.
-			if err := e.pub.Publish(ctx, m.projectID, m.topicID, data, map[string]string{"event": event}); err != nil {
-				e.logf("emulator: publish %s to %s/%s: %v", event, m.projectID, m.topicID, err)
+			if err := d.send(ctx, event, data); err != nil {
+				e.logf("emulator: deliver %s to %s: %v", event, d.label, err)
 				return
 			}
 			mu.Lock()
 			defer mu.Unlock()
 			result.Published++
-			if topic := m.projectID + "/" + m.topicID; !seen[topic] {
-				seen[topic] = true
-				result.Topics = append(result.Topics, topic)
+			if !seen[d.label] {
+				seen[d.label] = true
+				result.Targets = append(result.Targets, d.label)
 			}
 		})
 	}
@@ -265,12 +142,57 @@ func (e *eventEmitter) emit(event string, payload map[string]any) emitResult {
 	return result
 }
 
-// subscriptionMatch is a subscription that emit will publish to: the project and topic
-// resolved from its target, collected in a first pass so the publishes can then fan out
-// concurrently under one deadline.
-type subscriptionMatch struct {
-	projectID string
-	topicID   string
+// plan resolves the subscriptions an event reaches into the deliveries to make, in one
+// pass so they can then fan out concurrently under a single deadline. Every subscription
+// that matched the event but will not be delivered to says why, naming the flag that
+// would enable it where there is one: a stored subscription that silently never fires is
+// otherwise a mystery, and the emit command points the user here for the reason.
+func (e *eventEmitter) plan(event string, payload map[string]any) []delivery {
+	var out []delivery
+	for _, sub := range e.store.List("subscriptions") {
+		if mapString(sub, "event") != event {
+			continue
+		}
+		if !payloadMatchesContexts(payload, subContexts(sub)) {
+			continue
+		}
+
+		target := subscriptionTarget(sub)
+		targetType := mapString(target, "type")
+		t, ok := e.transports[targetType]
+		if !ok {
+			e.logf("emulator: skip %s subscription %q: %s", event, mapString(sub, "name"), noTransport(targetType))
+			continue
+		}
+
+		d, err := t.plan(target)
+		if err != nil {
+			e.logf("emulator: skip %s subscription %q: %v", event, mapString(sub, "name"), err)
+			continue
+		}
+		out = append(out, d)
+	}
+	return out
+}
+
+// enablingFlags names the flag that turns a target type's transport on. The webhook
+// transport is always registered, so it needs none.
+var enablingFlags = map[string]string{
+	targetGoogleCloudPubSub: "--pubsub-emulator-host",
+	targetAzureServiceBus:   "--servicebus-emulator-host",
+}
+
+// noTransport explains why a target type has no transport, in the terms that let the
+// user fix it.
+func noTransport(targetType string) string {
+	switch {
+	case targetType == "":
+		return "it names no target"
+	case enablingFlags[targetType] != "":
+		return fmt.Sprintf("%s delivery is off (set %s)", targetType, enablingFlags[targetType])
+	default:
+		return fmt.Sprintf("no transport delivers to a %q target", targetType)
+	}
 }
 
 // onCreate, onUpdate and onRemove emit the lifecycle event a collection maps to, if
@@ -288,13 +210,9 @@ func (e *eventEmitter) onRemove(coll string, doc map[string]any) {
 	e.emit(collectionEvents[coll].deleted, doc)
 }
 
-// Close releases the underlying publisher's resources when it holds any. The no-op
-// and test publishers implement no io.Closer, so Close is nil for them.
+// Close releases the resources the transports hold, when they hold any.
 func (e *eventEmitter) Close() error {
-	if c, ok := e.pub.(io.Closer); ok {
-		return c.Close()
-	}
-	return nil
+	return closeTransports(e.transports)
 }
 
 func (e *eventEmitter) logf(format string, args ...any) {
@@ -303,10 +221,6 @@ func (e *eventEmitter) logf(format string, args ...any) {
 	}
 	fmt.Fprintf(e.log, format+"\n", args...)
 }
-
-// targetGoogleCloudPubSub is the one subscription target type the emulator publishes
-// to. A webhook or Azure Service Bus target is stored but skipped.
-const targetGoogleCloudPubSub = "GOOGLE_CLOUD_PUB_SUB"
 
 // lifecycleEvents is the event a collection emits on create, update and delete. An
 // empty field means the collection has no clean single event for that transition —

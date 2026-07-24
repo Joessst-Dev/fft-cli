@@ -39,15 +39,26 @@ type Config struct {
 	Log io.Writer
 
 	// PubSubHost is the local Pub/Sub emulator to publish events to (the standard
-	// PUBSUB_EMULATOR_HOST value). Empty disables eventing: subscriptions are still
-	// stored and matched, but nothing is published. It is never a real Google Cloud
-	// endpoint — the publisher pins every connection to this host with auth disabled.
+	// PUBSUB_EMULATOR_HOST value). Empty means a GOOGLE_CLOUD_PUB_SUB subscription is
+	// stored and matched but never published to. It is never a real Google Cloud
+	// endpoint — the transport pins every connection to this host with auth disabled.
 	PubSubHost string
 
-	// publisher overrides the Pub/Sub publisher. It exists for tests, which inject a
-	// recorder in place of a real emulator connection; production leaves it nil and
-	// New builds one from PubSubHost.
-	publisher Publisher
+	// ServiceBusHost is the local Azure Service Bus emulator to send events to. Empty
+	// means a MICROSOFT_AZURE_SERVICE_BUS subscription is stored and matched but never
+	// sent to. Like PubSubHost it is a host, not a connection string, so the transport
+	// cannot be pointed at a real Azure namespace.
+	ServiceBusHost string
+
+	// WebhookAllowRemote lets webhook delivery call a callbackUrl outside the local
+	// network. It is off by default so a subscription fixture naming a real endpoint is
+	// skipped rather than fired made-up events at.
+	WebhookAllowRemote bool
+
+	// transports overrides the delivery transports, keyed by subscription target type.
+	// It exists for tests, which inject recorders in place of real broker connections;
+	// production leaves it nil and New builds the registry from the fields above.
+	transports map[string]transport
 }
 
 // defaultHost is the loopback interface the emulator binds unless told otherwise.
