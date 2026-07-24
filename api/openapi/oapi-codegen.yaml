@@ -43,8 +43,6 @@ output-options:
     - AuditSearchQuery
     - AuditedEntityTypeEnumFilter
     - ExportRequestSearchQuery
-    - ExportRequestReferenceFilter
-    - ExportRequestExportContainerFilter
     - ExportRequestExportDataFormatEnumFilter
     - ExportRequestExportSourceTypeEnumFilter
     - ExportOperationSearchQuery
