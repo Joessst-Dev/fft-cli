@@ -18,6 +18,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/Joessst-Dev/fft-cli/internal/api"
 	"github.com/Joessst-Dev/fft-cli/internal/auth"
 	"github.com/Joessst-Dev/fft-cli/internal/client"
 )
@@ -145,6 +146,17 @@ var _ = Describe("driving the real client against the emulator", func() {
 		Expect(json.Unmarshal(body, &got)).To(Succeed())
 		Expect(got).To(HaveKeyWithValue("tenantOrderId", "abc"))
 		Expect(got).To(HaveKeyWithValue("id", id))
+	})
+
+	// /api/status looks like a collection and is not one. Served from the store it
+	// answered the list envelope {items, total}, which `fft ping` — the first command
+	// anyone points at the emulator — could not decode at all.
+	It("answers the health endpoint with the status object, not a list envelope", func() {
+		res, err := client.Fetch[api.Status](ctx, c, "reach the emulator",
+			func(ctx context.Context) (*http.Response, error) { return c.API().Status(ctx) })
+
+		Expect(err).NotTo(HaveOccurred())
+		Expect(res.Status).To(Equal(api.StatusStatusUP))
 	})
 })
 

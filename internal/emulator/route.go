@@ -24,6 +24,33 @@ const (
 	kindSearch // POST      /api/{coll}/search
 )
 
+// singletons are the top-level /api/{name} paths that look like a collection and
+// are not one: the spec declares a single object, and gives them no create, no item
+// route and no search. Served from the store they answer a list envelope keyed by
+// the path segment — GET /api/status answered {"status": [], "total": 0}, which
+// `fft ping` could not decode at all, the key having collided with the field it
+// reads. So they are answered from the spec's own sample instead.
+//
+// Every other single-segment path is a page of entities and stays stateful, even
+// the ones the spec gives no create: --seed fills a collection by file name, not by
+// what the spec allows, so inferring "no POST means not a collection" would break
+// seeding /api/brands and the rest of the read-only reference data.
+//
+// /api/process (a single process by query parameter, distinct from the /api/processes
+// collection) belongs here by shape but is left out on purpose: the spec carries no
+// example for it, so a stateless route would answer 204 and trade one wrong shape for
+// another.
+//
+// route_test.go's census fails the build when the spec grows a single-segment path
+// that is in neither this map nor knownCollections, because a new singleton is
+// otherwise served as a fake empty collection and nobody finds out.
+var singletons = map[string]bool{
+	"status":            true, // {"status":"UP"} — the health endpoint `fft ping` calls
+	"health":            true, // {"status":"UP","dependencies":[…]} — the deeper check
+	"routingplansgraph": true, // one graph: {"nodes":[…],"edges":[…]}
+	"supportedevents":   true, // one object listing the events the tenant supports
+}
+
 // classify decides how the emulator serves an operation, and for the stateful kinds
 // the collection it reads or writes and the name of the id path parameter.
 //
@@ -49,6 +76,9 @@ func classify(op api.Operation) (collection, idParam string, kind routeKind) {
 	// A collection segment that is itself a parameter (/api/{something}) is not one
 	// this emulator can key state by.
 	if isParam(coll) {
+		return "", "", kindStateless
+	}
+	if singletons[coll] {
 		return "", "", kindStateless
 	}
 
