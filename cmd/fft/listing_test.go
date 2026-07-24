@@ -333,6 +333,49 @@ var _ = Describe("fft listing patch", func() {
 		Expect(c.errOut()).To(ContainSubstring("--price cannot be negative"))
 		Expect(api.calls).To(BeEmpty())
 	})
+
+	// patchFacilityListing declares its 200 as an *array* of Listing
+	// (swagger:9657-9663), unlike every other single-listing endpoint. Rendering it
+	// as one object failed the write after it had already landed: exit 1, with the
+	// success notice printed above the error.
+	It("renders the patched listing when the API answers the array its schema declares", func() {
+		c.fakeTenant(func(w http.ResponseWriter, r *http.Request, _ []byte) {
+			if r.Method == http.MethodGet {
+				writeJSON(w, http.StatusOK, fixture("listing.json"))
+				return
+			}
+			writeJSON(w, http.StatusOK,
+				`[{"tenantArticleId":"4711","facilityId":"BER-01","title":"Adidas Superstar",`+
+					`"status":"INACTIVE","price":89.95,"version":42}]`)
+		})
+
+		Expect(c.run("listing", "patch", "--facility", "BER-01", "4711", "--status", "INACTIVE")).
+			To(Equal(exitcode.OK))
+
+		Expect(c.out()).To(Equal(strings.Join([]string{
+			"TENANT ARTICLE ID   FACILITY   TITLE              STATUS     PRICE   VERSION",
+			"4711                BER-01     Adidas Superstar   INACTIVE   89.95   42",
+			"",
+		}, "\n")))
+	})
+
+	It("prints the API's own array under -o json, not fft's re-encoding of one element", func() {
+		c.fakeTenant(func(w http.ResponseWriter, r *http.Request, _ []byte) {
+			if r.Method == http.MethodGet {
+				writeJSON(w, http.StatusOK, fixture("listing.json"))
+				return
+			}
+			writeJSON(w, http.StatusOK, `[{"tenantArticleId":"4711","version":42,"imageUrl":"https://example.com/4711.jpg"}]`)
+		})
+
+		Expect(c.run("listing", "patch", "--facility", "BER-01", "4711", "--status", "INACTIVE", "-o", "json")).
+			To(Equal(exitcode.OK))
+
+		var got []map[string]any
+		Expect(json.Unmarshal([]byte(c.out()), &got)).To(Succeed())
+		Expect(got).To(HaveLen(1))
+		Expect(got[0]).To(HaveKeyWithValue("imageUrl", "https://example.com/4711.jpg"))
+	})
 })
 
 var _ = Describe("fft listing delete", func() {

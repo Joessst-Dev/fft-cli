@@ -204,15 +204,35 @@ func priceCell(style output.Style, price float64) string {
 	return fmt.Sprintf("%.2f", price)
 }
 
-// renderListing renders one listing: the API's own JSON object under -o json, a
-// one-row table otherwise. A 2xx with no body renders nothing — the notice on
-// stderr has already said what happened.
+// renderListing renders what a single-listing mutation answered: the API's own
+// bytes under -o json, a table otherwise. A 2xx with no body renders nothing —
+// the notice on stderr has already said what happened.
+//
+// The body is an object or an array depending on the endpoint, and both land
+// here: getListing answers one Listing, while patchFacilityListing answers an
+// *array* of them (swagger:9657-9663) even though it patches exactly one. So the
+// shape is read off the payload rather than assumed — decoding the array as an
+// object failed the render of a write that had already landed.
 func renderListing(deps *Deps, raw []byte) error {
-	if len(bytes.TrimSpace(raw)) == 0 {
+	body := bytes.TrimSpace(raw)
+	if len(body) == 0 {
 		return nil
 	}
 
-	rows, err := listingRows(deps.Printer.Style(), []json.RawMessage{raw})
+	// Decoded into its own slice, never into one already holding body: a
+	// json.RawMessage element is filled with append(elem[:0], …), which would write
+	// straight through into raw's backing array and corrupt the bytes -o json is
+	// about to print.
+	items := []json.RawMessage{body}
+	if body[0] == '[' {
+		var array []json.RawMessage
+		if err := json.Unmarshal(body, &array); err != nil {
+			return fmt.Errorf("decode the listings the API answered with: %w", err)
+		}
+		items = array
+	}
+
+	rows, err := listingRows(deps.Printer.Style(), items)
 	if err != nil {
 		return err
 	}

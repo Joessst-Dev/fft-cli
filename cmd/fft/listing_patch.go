@@ -32,7 +32,11 @@ than fft can read, and saying so is more useful than trying again.
 
 --if-version skips the read: fft sends the version you name and the API answers
 409 if it is stale. That is one request instead of two. (It is --if-version and
-never --version: cobra owns --version on the root command.)`
+never --version: cobra owns --version on the root command.)
+
+Under -o json this prints the API's own answer, which for this endpoint is an
+*array* of one listing rather than the object 'fft listing get' returns. So it is
+'| jq '.[0].version'' here, and '| jq .version' there.`
 
 // listingModifyAction is the action name the PATCH body's discriminator takes
 // (swagger:50285). The listing PATCH is not a field patch: its body is
