@@ -1,0 +1,13 @@
+# Delivers fft emulator events to a local Azure Service Bus emulator. A transport
+# component, like emulator-pubsub. It reads SERVICEBUS_EMULATOR_HOST, which the
+# emulator sets from its --servicebus-emulator-host.
+apiVersion: 1
+name: emulator-servicebus
+kind: transport
+source: Joessst-Dev/fft-cli
+exec: bin/fft-emulator-servicebus
+description: Deliver fft emulator events to a local Azure Service Bus emulator
+targets:
+  - MICROSOFT_AZURE_SERVICE_BUS
+env:
+  - SERVICEBUS_EMULATOR_HOST

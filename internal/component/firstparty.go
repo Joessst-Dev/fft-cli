@@ -1,6 +1,10 @@
 package component
 
-import "path/filepath"
+import (
+	"path/filepath"
+
+	"github.com/Joessst-Dev/fft-cli/internal/config"
+)
 
 // The components fft ships itself.
 //
@@ -27,14 +31,41 @@ import "path/filepath"
 // A third-party component has no such table, so its manifest is authoritative for
 // everything. That is the trade for not being shipped by us, and it is why those
 // commands are listed under their own heading in `fft --help`.
-//
-// # It is empty, for now
-//
-// The emulator moves in here when it moves out of the binary. Until then the
-// machinery is exercised by third-party components and by the specs, which pass
-// their own table to [WithFirstParty] — there is deliberately no half-state where a
-// command is both built in and a first-party stub.
-var firstParty []Manifest
+var firstParty = []Manifest{{
+	APIVersion:  APIVersion,
+	Name:        "emulator",
+	Kind:        KindCommand,
+	Source:      DefaultRepo,
+	Exec:        "bin/fft-emulator",
+	Description: "Run a local offline fulfillmenttools API emulator",
+
+	// `fft emulator emit` talks to a running emulator, at the address the emulator's
+	// own startup recipe told the user to export. It is the one FFT_ variable a
+	// component may ask for — see [forwardable] — and it is asked for here so that
+	// `fft emulator emit` keeps working exactly as it always has.
+	Env: []string{config.EnvBaseURL},
+
+	Commands: []Command{{
+		Name:  "emulator",
+		Short: "Run a local offline fulfillmenttools API emulator",
+
+		// session: none, and it is the case that proves the level is worth having. The
+		// emulator serves a fake tenant; it has no use for a credential, and until this
+		// split it ran in-process inside a binary holding one.
+		Session: SessionNone,
+		Long: `Run a local server that mimics the fulfillmenttools API.
+
+Every operation the API has is addressable on the emulator. The top-level
+collections (facilities, listings, stocks, orders, …) are stateful: a POST is
+remembered, a GET reflects it, versions and pagination work. Everything else is
+answered from a response synthesized from the spec — reachable, but not remembered.
+
+The emulator makes no request to any tenant and holds all state in memory, so it
+dies with the process. Point fft at it with the FFT_* recipe it prints on startup;
+'fft project add' does not work against it, because signing in reaches Google's
+identity service, which a local server cannot stand in for.`,
+	}},
+}}
 
 // Option configures a [Registry].
 type Option func(*Registry)

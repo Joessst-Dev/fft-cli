@@ -1,0 +1,19 @@
+# The emulator component of fft. It is shipped with the CLI, but it is a component
+# like any other: fft finds it under the component root and dispatches `fft emulator`
+# to it. session: none — the emulator serves a fake tenant and needs no credential.
+#
+# This file is the source the release archive is assembled from; the same fields are
+# compiled into fft itself (internal/component/firstparty.go), which is authoritative
+# for the command tree. Keep the two in step.
+apiVersion: 1
+name: emulator
+kind: command
+source: Joessst-Dev/fft-cli
+exec: bin/fft-emulator
+description: Run a local offline fulfillmenttools API emulator
+env:
+  - FFT_BASE_URL
+commands:
+  - name: emulator
+    short: Run a local offline fulfillmenttools API emulator
+    session: none

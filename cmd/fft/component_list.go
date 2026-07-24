@@ -32,19 +32,18 @@ func newComponentListCmd(deps *Deps) *cobra.Command {
 func runComponentList(deps *Deps) error {
 	reportProblems(deps, deps.Components)
 
+	// Said whether or not anything is listed, because the list on its own does not
+	// show it: a first-party component is registered even with components switched
+	// off, so the table looks ordinary while every install and remove would refuse.
+	if deps.Components.Root() == "" {
+		deps.Printer.Notef("Components are disabled: %s is set to the empty string.", component.EnvRoot)
+	}
+
 	all := deps.Components.All()
 	if len(all) == 0 {
-		// Not an error: it is what every machine looks like until someone installs
-		// something. Empty says there are none — on stderr for a table, as `[]` on
-		// stdout for JSON — and this adds the bit it cannot know, which is what to do
-		// about it. Two different things to do, so two different sentences: telling
-		// someone to install a component when components are switched off would send
-		// them to a command that cannot work either.
-		if deps.Components.Root() == "" {
-			deps.Printer.Notef("Components are disabled: %s is set to the empty string.", component.EnvRoot)
-		} else {
-			deps.Printer.Notef("Run 'fft component install <name>' to add one.")
-		}
+		// Not an error: it is what a build with no first-party components and nothing
+		// installed looks like. Empty says there are none — on stderr for a table, as
+		// `[]` on stdout for JSON.
 		return deps.Printer.Empty("components")
 	}
 

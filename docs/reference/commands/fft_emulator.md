@@ -18,27 +18,16 @@ dies with the process. Point fft at it with the FFT_* recipe it prints on startu
 'fft project add' does not work against it, because signing in reaches Google's
 identity service, which a local server cannot stand in for.
 
+Provided by the emulator component (Joessst-Dev/fft-cli), which runs as you.
+fft gives it no tenant credential.
+
+It is not installed. Run 'fft component install emulator'.
+
 ## Usage
 
 ```
-fft emulator [flags]
+fft emulator [flags] [args]
 ```
-
-## Flags
-
-```
-      --host string                       Interface to bind; the emulator has no auth, so it stays on loopback unless you widen it (0.0.0.0 for a container) (default "127.0.0.1")
-      --port int                          Port to listen on (default 8080)
-      --pubsub-emulator-host string       Local Pub/Sub emulator (host:port) to publish GOOGLE_CLOUD_PUB_SUB targets to; defaults to $PUBSUB_EMULATOR_HOST, empty skips them
-      --seed string                       Directory of JSON fixtures to preload, one <collection>.json per collection
-      --servicebus-emulator-host string   Local Azure Service Bus emulator (host:port) to send MICROSOFT_AZURE_SERVICE_BUS targets to; empty skips them
-      --verbose                           Log every request to stderr
-      --webhook-allow-remote              Call WEBHOOK callbackUrls outside the local network; off by default, so a fixture naming a real endpoint is skipped rather than called
-```
-
-## Subcommands
-
-- [fft emulator emit](./fft_emulator_emit.md) — Publish an event to a running emulator's subscriptions
 
 ## See also
 

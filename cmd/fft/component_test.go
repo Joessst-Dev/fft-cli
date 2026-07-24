@@ -328,21 +328,25 @@ var _ = Describe("fft component", func() {
 	})
 
 	Describe("list", func() {
-		It("says so, and prints an empty JSON array, when there is nothing", func() {
-			Expect(c.run("component", "list", "-o", "json")).To(Equal(exitcode.OK))
-			Expect(c.out()).To(Equal("[]\n"))
-			Expect(c.errOut()).To(ContainSubstring("fft component install"))
+		It("lists a first-party component that is not installed", func() {
+			Expect(c.run("component", "list")).To(Equal(exitcode.OK))
+
+			// fft ships the emulator, so it is listed on a machine where nothing has been
+			// installed at all. That is what lets `fft emulator` explain how to get itself.
+			Expect(c.out()).To(ContainSubstring("emulator"))
+			Expect(c.out()).To(ContainSubstring(statusAvailable))
+			Expect(c.out()).To(ContainSubstring("first-party"))
 		})
 
-		It("says components are off rather than telling you to install one", func() {
+		It("says components are off, and still lists the ones fft ships", func() {
 			c.setenv(component.EnvRoot, "")
 
 			Expect(c.run("component", "list")).To(Equal(exitcode.OK))
-			Expect(c.errOut()).To(ContainSubstring("Components are disabled"))
 
-			// Not the install hint: that command cannot work either while they are off,
-			// and sending someone to it is sending them to a second failure.
-			Expect(c.errOut()).NotTo(ContainSubstring("fft component install"))
+			// The notice is the whole point: with components off the table looks ordinary,
+			// while every install and remove would refuse.
+			Expect(c.errOut()).To(ContainSubstring("Components are disabled"))
+			Expect(c.out()).To(ContainSubstring("emulator"))
 		})
 
 		It("lists an installed component", func() {

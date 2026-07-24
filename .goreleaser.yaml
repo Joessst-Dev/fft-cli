@@ -8,35 +8,67 @@ before:
     # Fail the release rather than ship a binary built from a stale go.sum.
     - go mod download
 
+# Four binaries now, not one. fft is the client; the other three are components — the
+# emulator and its two broker transports — which used to be compiled into fft and are
+# now shipped alongside it. The split takes roughly a third off the fft download,
+# because the cloud SDKs (gRPC for Pub/Sub, AMQP for Service Bus) go with the
+# transports that need them.
+#
+# Every build shares the same flags: no cgo (go-keyring reaches the OS keychain
+# through syscalls, not C, so a static binary is portable), -trimpath, and a stamped
+# commit date for reproducibility. Only fft carries the buildinfo ldflags — it is the
+# one with a `fft version`.
 builds:
   - id: fft
     main: ./cmd/fft
     binary: fft
-    # No cgo anywhere: go-keyring reaches the OS keychain through syscalls and
-    # DBus, not C. A static binary is what makes the tarballs portable.
-    env:
-      - CGO_ENABLED=0
-    flags:
-      - -trimpath
+    env: [CGO_ENABLED=0]
+    flags: [-trimpath]
     ldflags:
       - -s -w
       - -X github.com/Joessst-Dev/fft-cli/internal/buildinfo.Version={{ .Version }}
       - -X github.com/Joessst-Dev/fft-cli/internal/buildinfo.Commit={{ .FullCommit }}
       - -X github.com/Joessst-Dev/fft-cli/internal/buildinfo.Date={{ .CommitDate }}
-    goos:
-      - darwin
-      - linux
-      - windows
-    goarch:
-      - amd64
-      - arm64
-    # Reproducible: stamp the commit date, not the wall clock of the runner.
+    goos: [darwin, linux, windows]
+    goarch: [amd64, arm64]
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+  # The component binaries. `binary: bin/<name>` puts each one under bin/ inside its
+  # archive, which is exactly the layout the manifest's `exec:` names and the installer
+  # unpacks — so `fft component install emulator` finds bin/fft-emulator where it looks.
+  - id: fft-emulator
+    main: ./cmd/fft-emulator
+    binary: bin/fft-emulator
+    env: [CGO_ENABLED=0]
+    flags: [-trimpath]
+    ldflags: [-s -w]
+    goos: [darwin, linux, windows]
+    goarch: [amd64, arm64]
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+  - id: fft-emulator-pubsub
+    main: ./cmd/fft-emulator-pubsub
+    binary: bin/fft-emulator-pubsub
+    env: [CGO_ENABLED=0]
+    flags: [-trimpath]
+    ldflags: [-s -w]
+    goos: [darwin, linux, windows]
+    goarch: [amd64, arm64]
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+  - id: fft-emulator-servicebus
+    main: ./cmd/fft-emulator-servicebus
+    binary: bin/fft-emulator-servicebus
+    env: [CGO_ENABLED=0]
+    flags: [-trimpath]
+    ldflags: [-s -w]
+    goos: [darwin, linux, windows]
+    goarch: [amd64, arm64]
     mod_timestamp: "{{ .CommitTimestamp }}"
 
 archives:
   - id: fft
-    ids:
-      - fft
+    ids: [fft]
     formats: [tar.gz]
     format_overrides:
       - goos: windows
@@ -47,15 +79,62 @@ archives:
       - README.md
       - LICENSE
 
-# Container images. GoReleaser does not rebuild here — the image COPYs the static binary
-# already built above (see Dockerfile). It builds both platforms with buildx in one pass;
-# because nothing target-arch runs during the build (only a file is copied), the arm64
-# image needs no QEMU on an amd64 runner. GHCR requires a lowercase path, hence
-# `joessst-dev` rather than the repo's `Joessst-Dev`.
+  # One archive per component per platform, each carrying its committed component.yaml
+  # at the root and its binary under bin/ — the shape `fft component install` verifies
+  # against checksums.txt and unpacks. The name is what pickAsset looks for:
+  # fft-component-<name>_<version>_<os>_<arch>.
+  - id: fft-emulator
+    ids: [fft-emulator]
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: fft-component-emulator_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    files:
+      - src: components/emulator/component.yaml
+        dst: component.yaml
+
+  - id: fft-emulator-pubsub
+    ids: [fft-emulator-pubsub]
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: fft-component-emulator-pubsub_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    files:
+      - src: components/emulator-pubsub/component.yaml
+        dst: component.yaml
+
+  - id: fft-emulator-servicebus
+    ids: [fft-emulator-servicebus]
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: fft-component-emulator-servicebus_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    files:
+      - src: components/emulator-servicebus/component.yaml
+        dst: component.yaml
+
+# Container images. GoReleaser does not rebuild here — the image COPYs the static
+# binaries already built above (see Dockerfile). It builds both platforms with buildx
+# in one pass; because nothing target-arch runs during the build (only files are
+# copied), the arm64 image needs no QEMU on an amd64 runner. GHCR requires a lowercase
+# path, hence `joessst-dev` rather than the repo's `Joessst-Dev`.
+#
+# The image bundles all four binaries: fft plus its first-party components, laid out as
+# a component root the image bakes in. So `docker run …/fft emulator --host 0.0.0.0` is
+# byte-for-byte what it was before the split — the two Testcontainers modules that drive
+# exactly that command line need no change. A brew or tarball user installs the emulator
+# component once; an image user has it already.
 dockers_v2:
   - id: fft
-    ids: [fft]
+    ids: [fft, fft-emulator, fft-emulator-pubsub, fft-emulator-servicebus]
     dockerfile: Dockerfile
+    # The committed manifests, copied into the build context so the Dockerfile can
+    # assemble each component directory (manifest + binary) under the baked root.
+    extra_files:
+      - components
     images:
       - ghcr.io/joessst-dev/fft
     platforms:

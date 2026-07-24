@@ -28,11 +28,17 @@ type eventEmitter struct {
 	transports map[string]transport
 	store      *Store
 	log        io.Writer
+
+	// unavailable is why a target type has no transport, where something more
+	// specific than the generic advice is known — a component that is installed and
+	// would not start, say. Keyed by target type.
+	unavailable map[string]string
 }
 
 // newEventEmitter builds the emitter New wires into the handlers.
 func newEventEmitter(cfg Config, store *Store) *eventEmitter {
-	return &eventEmitter{transports: newTransports(cfg), store: store, log: cfg.Log}
+	transports, unavailable := newTransports(cfg)
+	return &eventEmitter{transports: transports, unavailable: unavailable, store: store, log: cfg.Log}
 }
 
 // enabled reports whether any transport is configured at all. A current emulator always
@@ -161,7 +167,7 @@ func (e *eventEmitter) plan(event string, payload map[string]any) []delivery {
 		targetType := mapString(target, "type")
 		t, ok := e.transports[targetType]
 		if !ok {
-			e.logf("emulator: skip %s subscription %q: %s", event, mapString(sub, "name"), noTransport(targetType))
+			e.logf("emulator: skip %s subscription %q: %s", event, mapString(sub, "name"), e.noTransport(targetType))
 			continue
 		}
 
@@ -175,24 +181,61 @@ func (e *eventEmitter) plan(event string, payload map[string]any) []delivery {
 	return out
 }
 
-// enablingFlags names the flag that turns a target type's transport on. The webhook
-// transport is always registered, so it needs none.
-var enablingFlags = map[string]string{
-	targetGoogleCloudPubSub: "--pubsub-emulator-host",
-	targetAzureServiceBus:   "--servicebus-emulator-host",
+// knownTargets are the target types SubscriptionForCreation.target is an anyOf over,
+// in the order the startup notice lists them. A subscription may name any of the
+// three whether or not anything is installed to deliver it, which is why the notice
+// reports all three rather than only the ones that work.
+var knownTargets = []string{targetGoogleCloudPubSub, targetWebhook, targetAzureServiceBus}
+
+// enablingComponents names the transport component that delivers a target type, and
+// the flag that points it somewhere. The webhook transport is compiled in, so it
+// needs neither.
+var enablingComponents = map[string]struct{ component, flag string }{
+	targetGoogleCloudPubSub: {"emulator-pubsub", "--pubsub-emulator-host"},
+	targetAzureServiceBus:   {"emulator-servicebus", "--servicebus-emulator-host"},
 }
 
-// noTransport explains why a target type has no transport, in the terms that let the
-// user fix it.
-func noTransport(targetType string) string {
-	switch {
+// unavailableReason explains why a target type has no transport, in the terms that
+// let the user fix it.
+//
+// The fixes are different and saying the wrong one wastes somebody's afternoon, so
+// what the emulator actually learned at startup wins over the generic advice: a
+// component that is installed and would not start is a different problem from one
+// that was never installed, and only the first is worth reading the log for.
+func (e *eventEmitter) unavailableReason(targetType string) string {
+	if reason := e.unavailable[targetType]; reason != "" {
+		return reason
+	}
+
+	switch enabling, known := enablingComponents[targetType]; {
 	case targetType == "":
 		return "it names no target"
-	case enablingFlags[targetType] != "":
-		return fmt.Sprintf("%s delivery is off (set %s)", targetType, enablingFlags[targetType])
+	case known:
+		return fmt.Sprintf("nothing delivers it (install the %s component, then set %s)",
+			enabling.component, enabling.flag)
 	default:
-		return fmt.Sprintf("no transport delivers to a %q target", targetType)
+		return "no transport delivers it"
 	}
+}
+
+// offReason is what a target type says when its transport is installed but was not
+// pointed anywhere — the ordinary state of a broker you are not using. It names the
+// flag that turns it on, and not the install step, because that step is already done.
+func offReason(targetType string) string {
+	if enabling, known := enablingComponents[targetType]; known {
+		return fmt.Sprintf("off (set %s)", enabling.flag)
+	}
+	return "off (not configured)"
+}
+
+// noTransport is [eventEmitter.unavailableReason] for the skip log, where the target
+// type has to be named because the line is about one subscription rather than about a
+// column of them.
+func (e *eventEmitter) noTransport(targetType string) string {
+	if targetType == "" {
+		return "it names no target"
+	}
+	return fmt.Sprintf("%s delivery is off: %s", targetType, e.unavailableReason(targetType))
 }
 
 // onCreate, onUpdate and onRemove emit the lifecycle event a collection maps to, if
