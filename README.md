@@ -19,6 +19,10 @@ CLI obtain and refresh tokens invisibly.
 **Every one of the 557 API operations is reachable from day one.** Not "the ones someone
 got around to wrapping" — all of them.
 
+**And you can drive all of them without a tenant.** `fft emulator` is a local, in-memory
+stand-in for the API — no account, no credentials, no network. See
+[Try it without a tenant](#try-it-without-a-tenant).
+
 📖 **Documentation:** [joessst-dev.github.io/fft-cli](https://joessst-dev.github.io/fft-cli/) —
 the browsable, searchable rendering of this README, the command guide, and the full CLI
 reference.
@@ -58,6 +62,34 @@ fft version
 
 fft tells you when a newer release exists (at most once a day, on stderr, never in your
 way). Set `FFT_NO_UPDATE_CHECK=1` to turn that off.
+
+---
+
+## Try it without a tenant
+
+`fft emulator` runs a local server that mimics the API in memory. No project is
+configured, no secret is stored, and no request reaches a tenant:
+
+```sh
+fft emulator                 # one shell; it prints the recipe below on stderr
+```
+
+```sh
+export FFT_BASE_URL=http://localhost:8080     # another shell
+export FFT_FIREBASE_API_KEY=emulator
+export FFT_EMAIL=dev@localhost
+export FFT_ID_TOKEN=emulator-token
+
+fft ping
+fft facility create --example > facility.json
+fft facility create --file facility.json
+fft facility list                             # the facility you just created
+```
+
+That is the same shape as driving a real tenant (see [Getting started](#getting-started)),
+with the sign-in removed. State lives in memory and dies with the process. More — seeding
+fixtures, the container image, eventing — in the
+[emulator guide](https://joessst-dev.github.io/fft-cli/guide/emulator).
 
 ---
 
@@ -394,23 +426,80 @@ reserves stock, so it is blocked; `evaluateRoutingStrategy` is a dry run, so it 
 A POST the API grows tomorrow is a write until a human says otherwise, and the build
 fails until one does.
 
-## Working offline
+## The emulator
 
-`fft emulator` runs a local server that mimics the API in memory — for a demo, a test,
-or trying a command out without touching a tenant. It prints an `FFT_*` recipe to export
-in another shell, remembers the top-level collections (facilities, listings, stocks,
-orders) so creates, versions and pagination work, and synthesizes everything else from
-the spec. It holds all state in memory and forgets it on exit.
+`fft emulator` runs a local server that mimics the API in memory — for a demo, an
+automated test, or trying a command out without touching a tenant. It makes no request to
+any tenant, and it forgets everything the moment the process exits.
 
 ```sh
 fft emulator --port 8080
 ```
 
-It can also deliver domain events to a subscription's target — a webhook on your machine,
-or a **local** Pub/Sub or Azure Service Bus emulator you run yourself — but never to a
-real cloud or a real remote endpoint. See the
-[emulator guide](https://joessst-dev.github.io/fft-cli/guide/emulator) for the stateful
-model, seeding fixtures, and driving eventing end to end.
+The `FFT_*` recipe it prints goes to **stderr**, because stdout is data even here. Export
+it and every command runs against the emulator instead of a tenant — see
+[Try it without a tenant](#try-it-without-a-tenant). Signing in is the one thing it cannot
+stand in for — that reaches Google's identity service — so `fft project add` does not work
+against it, and the printed `FFT_ID_TOKEN` is the way in.
+
+**What is remembered.** The top-level collections — facilities, stocks, orders, users —
+are stateful: a create is remembered, a get reflects it, an update bumps the `version`,
+and an update naming a stale one is refused with a real 409, so you can rehearse the
+read-modify-write-retry loop offline. Both pagination models work, and a
+`urn:fft:facility:tenantFacilityId:<id>` in a path resolves. Every other operation —
+nested resources, calculators, action endpoints — is answered from a response synthesized
+from the spec: reachable and shaped right, but not remembered. Listings are the one
+surprise: nothing can write their store, so they are canned throughout — the
+[emulator guide](https://joessst-dev.github.io/fft-cli/guide/emulator) says what each
+listing command does instead.
+
+**Seeding.** Preload state from a directory of JSON files, one `<collection>.json` per
+collection:
+
+```sh
+fft emulator --seed ./fixtures        # fixtures/facilities.json, fixtures/orders.json, …
+```
+
+Unlike a live create, a seeded document keeps the `id` and `version` it carries — so a
+fixture can pin the exact ids your test asserts on.
+
+**In a container.** The image runs the same binary, so `emulator` and its flags are the
+arguments. `--host 0.0.0.0` is not optional here: the default `127.0.0.1` answers only
+inside the container, so the published port would be dead.
+
+```sh
+docker run --rm -p 8080:8080 ghcr.io/joessst-dev/fft emulator --host 0.0.0.0
+```
+
+**In your test suite.** Two Testcontainers modules drive that image for you — a fresh
+emulator per run on a random port, seeded fixtures, readiness and teardown handled:
+
+- Go — [`Joessst-Dev/testcontainers-fft`](https://github.com/Joessst-Dev/testcontainers-fft)
+- Java — [`Joessst-Dev/fft-testcontainers-java`](https://github.com/Joessst-Dev/fft-testcontainers-java)
+
+**Eventing.** It delivers a domain event to a subscription's target, and all three targets
+the API defines work — each bounded so the emulator can only ever reach your own machine.
+A `WEBHOOK` needs no flag but is delivered only to a local callback URL, so a subscription
+fixture copied from a real tenant cannot spray fake events at somebody's production
+endpoint; Pub/Sub and Service Bus go to a local emulator you run yourself, never to real
+Google Cloud or real Azure. Startup prints which of the three are live.
+
+```sh
+fft emulator --pubsub-emulator-host localhost:8085 --servicebus-emulator-host localhost:5672
+```
+
+A create, update or delete on one of a curated set of collections — facilities, orders,
+pickjobs, shipments and a few more — then delivers the matching lifecycle event to every
+subscription that matches, and `fft emulator emit <EVENT>` delivers the state-transition
+events that no mutation maps to:
+
+```sh
+fft emulator emit PICK_JOB_PICKING_COMMENCED --payload-file pickjob.json
+```
+
+The [emulator guide](https://joessst-dev.github.io/fft-cli/guide/emulator) has the rest:
+the webhook allowlist, the eventing walkthroughs end to end, a docker-compose sandbox,
+and the limitations.
 
 ## Output contract
 

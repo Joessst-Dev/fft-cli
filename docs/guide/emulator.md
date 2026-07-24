@@ -66,8 +66,11 @@ fft facility list
 
 ## What is stateful, and what is synthesized
 
-Only the **top-level REST collections** under `/api/{collection}` — facilities,
-listings, stocks, orders, subscriptions, and the like — are stateful:
+Only the **top-level REST collections** under `/api/{collection}` — facilities, stocks,
+orders, users, and the like — are stateful, and only through the plain shapes the
+emulator can key state by: `GET`/`POST` on `/api/{collection}`, `GET`/`PUT`/`PATCH`/
+`DELETE` on `/api/{collection}/{id}`, and `POST /api/{collection}/search`. A collection
+the spec shapes differently is not stateful, however top-level it looks.
 
 - A create is remembered, a get reflects it, an update bumps its `version`, a delete
   removes it. IDs are minted UUID-shaped, so `fft <noun> get <id>` addresses what you
@@ -84,6 +87,24 @@ listings, stocks, orders, subscriptions, and the like — are stateful:
 Every *other* operation — nested resources, calculators, action endpoints — is answered
 from a response synthesized from the spec: reachable, and shaped right, but not
 remembered. All of it lives in memory and dies with the process.
+
+### Listings are the exception — do not rehearse them here
+
+Nothing can write the listings store. The spec gives `/api/listings` only a `PUT` (the
+bulk upsert) and a `/search`, and the per-facility verbs live under
+`/api/facilities/{facilityId}/listings`, which is nested. So the store stays empty for
+the life of the process and every listing command misleads differently:
+
+| Command | Against the emulator |
+| ------------------- | ------------------------------------------------------------- |
+| `fft listing list` | always empty — it searches a store nothing can fill |
+| `fft listing get` | a canned sample listing (`Adidas Superstar`, version 42) that was never written |
+| `fft listing set` | reports `1 updated`, stores nothing |
+| `fft listing patch` | renders the canned sample listing, unchanged by your patch |
+| `fft listing upsert` | exits 8 — the one-result canned response cannot answer the two listings `--example` sends |
+
+Rehearse a read-modify-write loop against facilities, stocks or orders instead. Against a
+real tenant every one of these behaves normally.
 
 ## Seeding fixtures
 
@@ -102,9 +123,11 @@ JSON you provide is stored as-is.
 
 ## Eventing
 
-The emulator can deliver a domain event to a subscription's target whenever you mutate a
-stateful collection. All three targets the API defines work, and each is bounded so the
-emulator can only ever reach your own machine:
+The emulator can deliver a domain event to a subscription's target when you mutate one of
+the collections in the lifecycle table further down — **not** every stateful one, despite
+what the name suggests: `stocks` and `subscriptions` are stateful and emit nothing. All
+three targets the API defines work, and each is bounded so the emulator can only ever
+reach your own machine:
 
 | Target | Delivered when | Reaches |
 | --- | --- | --- |
@@ -481,11 +504,11 @@ readiness, automatic teardown — drive the same image through
 - **Java** — [`Joessst-Dev/fft-testcontainers-java`](https://github.com/Joessst-Dev/fft-testcontainers-java)
 
 Both start `ghcr.io/joessst-dev/fft` with `emulator --host 0.0.0.0` and wait on the
-**readiness signal**: `GET /api/status` answers `200` the moment the emulator is
-listening, and needs **no token**. So the wait asserts the status code, not the body —
-the emulator answers `/api/status` from its collection store, not with the live API's
-`{"status":"UP"}`. (The stderr line `fft emulator listening on …` is the fallback signal
-for a log-based wait.)
+**readiness signal**: `GET /api/status` answers `200` with `{"status":"UP"}` the moment
+the emulator is listening, and needs **no token** — the same shape the live API answers,
+so `fft ping` works against it too. A wait that asserts only the status code is still the
+safer one. (The stderr line `fft emulator listening on …` is the fallback signal for a
+log-based wait.)
 
 Go:
 
@@ -508,7 +531,7 @@ static final FftEmulatorContainer FFT =
 `WithSeed` / `withSeed` copy a directory of `<collection>.json` fixtures into the
 container and pass `--seed`, so a test seeds pinned ids the same way `--seed` does above.
 For eventing tests, both modules can start a Pub/Sub emulator sidecar on a shared network
-and wire the fft container to it — the container-native form of the compose sandbox below.
+and wire the fft container to it — the container-native form of the compose sandbox above.
 The module image tag is pinned to a tested emulator release and is overridable.
 
 ## Known limitations
