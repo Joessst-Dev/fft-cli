@@ -53,6 +53,7 @@ var skillPages = []skillPage{
 
 var readmePages = []readmePage{
 	{"Install", "install.md", "Install"},
+	{"Try it without a tenant", "try-offline.md", "Try it without a tenant"},
 	{"Before you begin", "prerequisites.md", "Before you begin"},
 	{"Getting started", "getting-started.md", "Getting started"},
 	{"Setting up a project", "configuration.md", "Setting up a project"},

@@ -44,6 +44,7 @@ export default defineConfig({
           text: 'Getting started',
           items: [
             { text: 'Install', link: '/guide/install' },
+            { text: 'Try it without a tenant', link: '/guide/try-offline' },
             { text: 'Before you begin', link: '/guide/prerequisites' },
             { text: 'Getting started', link: '/guide/getting-started' },
             { text: 'Setting up a project', link: '/guide/configuration' },

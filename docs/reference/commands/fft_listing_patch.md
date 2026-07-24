@@ -26,6 +26,12 @@ than fft can read, and saying so is more useful than trying again.
 409 if it is stale. That is one request instead of two. (It is --if-version and
 never --version: cobra owns --version on the root command.)
 
+Under -o json this prints the API's own answer, which for this endpoint is an
+array of one listing rather than the object 'fft listing get' returns — so the
+index is not optional:
+
+  fft listing patch --facility BER-01 4711 --status INACTIVE -o json | jq -r '.[0].version'
+
 ## Usage
 
 ```

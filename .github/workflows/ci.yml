@@ -135,10 +135,16 @@ jobs:
         # build on any diff, the same contract the codegen gate above enforces.
         # No Node here: this only regenerates Markdown. Building the site is the
         # deploy workflow's job.
+        #
+        # git status, not git diff: a *new* page is untracked rather than modified,
+        # and git diff cannot see it. A sidebar entry whose page was never committed
+        # passes a diff-only gate and breaks the published site.
         run: |
           make docs
           git diff --exit-code -- docs/ \
             || { echo "::error::Docs are stale. Run 'make docs' and commit the result."; exit 1; }
+          test -z "$(git status --porcelain --untracked-files=all -- docs/)" \
+            || { echo "::error::A generated docs page is not committed:"; git status --short --untracked-files=all -- docs/; exit 1; }
 
   lint:
     name: lint (${{ matrix.os }})
