@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"sort"
 	"strconv"
 	"time"
 
@@ -118,16 +119,34 @@ type TargetStatus struct {
 	Live bool
 }
 
-// Eventing reports each subscription target type the API defines, and what will
-// happen to a subscription that names it.
+// Eventing reports each subscription target type, and what will happen to a
+// subscription that names it.
 //
-// Every type is reported, including the ones nothing delivers — a stored
-// subscription that silently never fires is the failure this notice exists to
-// prevent, and leaving the unavailable ones out of the list is how it would happen.
+// The three the API defines are always reported, including the ones nothing delivers
+// — a stored subscription that silently never fires is the failure this notice exists
+// to prevent, and leaving the unavailable ones out is how it would happen. A
+// third-party transport's own target type is reported too: it is the same silent
+// failure, and a notice that only knew the three built-in types would hide exactly the
+// broker the community protocol was added to reach.
 func (s *Server) Eventing() []TargetStatus {
-	out := make([]TargetStatus, 0, len(knownTargets))
+	// The known three first, in their canonical order, then any target a transport
+	// registered that is not one of them — sorted, so the notice reads the same twice.
+	targets := append([]string(nil), knownTargets...)
+	seen := make(map[string]bool, len(targets))
+	for _, t := range targets {
+		seen[t] = true
+	}
+	extra := make([]string, 0)
+	for target := range s.events.transports {
+		if !seen[target] {
+			extra = append(extra, target)
+		}
+	}
+	sort.Strings(extra)
+	targets = append(targets, extra...)
 
-	for _, target := range knownTargets {
+	out := make([]TargetStatus, 0, len(targets))
+	for _, target := range targets {
 		t, ok := s.events.transports[target]
 		if !ok {
 			out = append(out, TargetStatus{Target: target, Status: s.events.unavailableReason(target)})

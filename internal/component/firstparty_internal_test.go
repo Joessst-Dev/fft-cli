@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"testing"
 )
 
@@ -39,6 +40,13 @@ func TestFirstPartyMatchesCommittedManifests(t *testing.T) {
 		}
 		if got.Kind != want.Kind {
 			t.Errorf("%s: kind is %q in the table and %q in the manifest", want.Name, want.Kind, got.Kind)
+		}
+		// Env is load-bearing at runtime: it is what a component may ask fft to forward
+		// (FFT_BASE_URL) and what the emulator checks to know a transport is configured.
+		// A table and a manifest that disagree on it behave differently installed vs.
+		// compiled-in, which is exactly the drift this test exists to catch.
+		if !slices.Equal(got.Env, want.Env) {
+			t.Errorf("%s: env is %v in the table and %v in the manifest", want.Name, want.Env, got.Env)
 		}
 	}
 }

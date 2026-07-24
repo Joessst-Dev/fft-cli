@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"strconv"
 	"sync"
@@ -75,7 +76,12 @@ type processTransport struct {
 // able to say whether a target type will be delivered, and "it started but we will
 // find out at the first event" is not an answer.
 func newProcessTransport(c component.Component, extra map[string]string, log io.Writer) (*processTransport, error) {
-	env, err := component.Environ(nil, c, component.Command{Session: component.SessionNone}, component.EnvOptions{
+	// os.Environ, not nil: a transport is a headless component like any other and keeps
+	// the machine's environment — PATH, HOME, a proxy, the CA bundle — which a broker
+	// client reaches for. Environ strips the FFT_ namespace and puts back only what the
+	// (none) session allows, so the credential boundary still holds; what survives is
+	// the ambient configuration the in-process transport used to see for free.
+	env, err := component.Environ(os.Environ(), c, component.Command{Session: component.SessionNone}, component.EnvOptions{
 		Extra: extra,
 	})
 	if err != nil {
@@ -89,6 +95,12 @@ func newProcessTransport(c component.Component, extra map[string]string, log io.
 
 	cmd := exec.CommandContext(ctx, c.ExecPath()) //nolint:gosec // a validated manifest inside the managed component root
 	cmd.Env = env
+
+	// A grandchild that inherited the stdout pipe would otherwise keep cmd.Wait
+	// blocked long after the child itself was killed. WaitDelay closes the child's
+	// fds a bounded time after the context is cancelled, so shutdown cannot hang on a
+	// process the transport no longer controls.
+	cmd.WaitDelay = childGrace
 
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -123,7 +135,7 @@ func newProcessTransport(c component.Component, extra map[string]string, log io.
 		timeout: requestTimeout,
 	}
 
-	hello, err := t.do(transportproto.Request{Op: transportproto.OpHello})
+	hello, err := t.do(context.Background(), transportproto.Request{Op: transportproto.OpHello})
 	if err != nil {
 		_ = t.Close()
 		return nil, fmt.Errorf("greet the %s transport: %w", c.Name, err)
@@ -139,7 +151,7 @@ func newProcessTransport(c component.Component, extra map[string]string, log io.
 
 // plan asks the child to resolve a target.
 func (t *processTransport) plan(target map[string]any) (delivery, error) {
-	res, err := t.do(transportproto.Request{Op: transportproto.OpPlan, Target: target})
+	res, err := t.do(context.Background(), transportproto.Request{Op: transportproto.OpPlan, Target: target})
 	if err != nil {
 		return delivery{}, err
 	}
@@ -150,10 +162,13 @@ func (t *processTransport) plan(target map[string]any) (delivery, error) {
 	return delivery{
 		label: res.Label,
 		send: func(ctx context.Context, event string, data []byte) error {
-			// The target travels with every frame: the child keeps no state between them,
-			// which is what removes handle lifetimes from a protocol whose job is to be
-			// obviously correct.
-			sent, err := t.do(transportproto.Request{
+			// The emitter's ctx is threaded in, so this round trip ends when the fan-out's
+			// shared publishTimeout fires, not only when this transport's own per-request
+			// timer does — a wedged broker cannot outlast the deadline eventing.go
+			// documents. The target travels with every frame: the child keeps no state
+			// between them, which removes handle lifetimes from a protocol whose job is to
+			// be obviously correct.
+			sent, err := t.do(ctx, transportproto.Request{
 				Op: transportproto.OpSend, Target: target, Event: event, Data: data,
 			})
 			switch {
@@ -172,7 +187,11 @@ func (t *processTransport) plan(target map[string]any) (delivery, error) {
 func (t *processTransport) describe() string { return t.status }
 
 // do sends one request and reads its response.
-func (t *processTransport) do(req transportproto.Request) (transportproto.Response, error) {
+//
+// ctx is the caller's deadline — the emitter's fan-out context for a send, a bare
+// background for the handshake — and bounds the round trip alongside the transport's
+// own per-request timer, whichever fires first.
+func (t *processTransport) do(ctx context.Context, req transportproto.Request) (transportproto.Response, error) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
@@ -184,14 +203,16 @@ func (t *processTransport) do(req transportproto.Request) (transportproto.Respon
 	req.ID = t.nextID
 
 	// A child that stops answering must not hold the lock — and with it every other
-	// delivery — for the emitter's whole deadline. The timer closes the pipes, which
-	// is what unblocks the read below.
+	// delivery — for longer than a bound. Either the caller's context or this
+	// transport's own timer closes the pipes, which is what unblocks the read below.
 	done := make(chan struct{})
 	defer close(done)
 
 	go func() {
 		select {
 		case <-done:
+		case <-ctx.Done():
+			t.fail(ctx.Err())
 		case <-time.After(t.timeout):
 			t.fail(fmt.Errorf("no answer in %s", t.timeout))
 		}
