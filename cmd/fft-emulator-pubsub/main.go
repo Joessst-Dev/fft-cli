@@ -31,7 +31,11 @@ const EnvHost = "PUBSUB_EMULATOR_HOST"
 // targetGoogleCloudPubSub is the subscription target type this transport delivers.
 const targetGoogleCloudPubSub = "GOOGLE_CLOUD_PUB_SUB"
 
-func main() {
+// main is a thin wrapper around run so that the single os.Exit does not skip run's
+// deferred Close — a broker connection left un-drained on the way out.
+func main() { os.Exit(run()) }
+
+func run() int {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -41,7 +45,7 @@ func main() {
 		// notice has to be able to say this target type will not be delivered, and finding
 		// out when somebody's subscription silently does not fire is too late.
 		fmt.Fprintf(os.Stderr, "no %s is set, so there is no Pub/Sub emulator to publish to\n", EnvHost)
-		os.Exit(2)
+		return 2
 	}
 
 	transport := newPubSubTransport(host)
@@ -51,6 +55,7 @@ func main() {
 	// say to a human goes to stderr, which the emulator prefixes and forwards.
 	if err := transportproto.Serve(ctx, os.Stdin, os.Stdout, transport); err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		return 1
 	}
+	return 0
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/Joessst-Dev/fft-cli/internal/component"
 )
@@ -96,6 +97,15 @@ func newTransports(cfg Config) (map[string]transport, map[string]string) {
 			if !c.Delivers(target) {
 				logf(cfg.Log, "emulator: the %s transport delivers %s, which its manifest does not declare", c.Name, target)
 			}
+			// Two transports claiming one target: keep the first and close the second,
+			// rather than overwrite the map entry and leak the first's child process for
+			// the life of the emulator. First-installed wins is arbitrary but stable, and
+			// the collision is worth a line — the user installed two things that fight.
+			if _, taken := out[target]; taken {
+				logf(cfg.Log, "emulator: %s also delivers %s, which another transport already does; ignoring it", c.Name, target)
+				_ = t.Close()
+				break
+			}
 			out[target] = t
 		}
 	}
@@ -110,12 +120,18 @@ func newTransports(cfg Config) (map[string]transport, map[string]string) {
 // transport that declares such a variable and was handed no value for any of them is
 // one the user did not point anywhere, so there is nothing to start. A transport that
 // declares no configuration at all is always started: it needs none.
+//
+// A value counts whether it came from the emulator's own flags (env, e.g.
+// --pubsub-emulator-host) or from the ambient environment the child will inherit. The
+// second is what makes a community transport work at all: fft has no flag for a Kafka
+// broker, so a Kafka transport reading KAFKA_BROKER from the environment would
+// otherwise always look unconfigured and never start.
 func unconfigured(c component.Component, env map[string]string) bool {
 	if len(c.Env) == 0 {
 		return false
 	}
 	for _, name := range c.Env {
-		if env[name] != "" {
+		if env[name] != "" || os.Getenv(name) != "" {
 			return false
 		}
 	}

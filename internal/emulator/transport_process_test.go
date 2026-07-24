@@ -68,6 +68,13 @@ func runFakeTransport(mode string) {
 		fmt.Fprintln(os.Stderr, "two lines of it")
 	}
 
+	// An ambient, non-FFT_ variable the child echoes so a spec can prove it was
+	// inherited — which it is only because newProcessTransport passes os.Environ() as
+	// the base rather than nil, the thing the in-process transport got for free.
+	if probe := os.Getenv("SPEC_TRANSPORT_PROBE"); probe != "" {
+		fmt.Fprintf(os.Stderr, "probe=%s\n", probe)
+	}
+
 	handler := &fakeHandler{refuseHello: mode == fakeRefuseHello}
 	_ = transportproto.Serve(context.Background(), os.Stdin, os.Stdout, handler)
 	os.Exit(0)
@@ -345,6 +352,43 @@ var _ = Describe("a transport component", func() {
 		// process that is on its way out.
 		_, err := t.plan(map[string]any{"topicId": "orders"})
 		Expect(err).To(HaveOccurred())
+	})
+
+	It("gives the child the machine's environment, not a bare one", func() {
+		// A transport is a broker client: it reads PATH, a proxy, the CA bundle. The
+		// in-process transport saw all of it; the out-of-process one must too. This sets
+		// an ambient variable the manifest does not declare — so it can only reach the
+		// child by being inherited — and the child echoes it back.
+		GinkgoT().Setenv("SPEC_TRANSPORT_PROBE", "inherited")
+
+		_, _, log := newSet(fakeNormal)
+		Eventually(log.String).Should(ContainSubstring("probe=inherited"))
+	})
+})
+
+var _ = Describe("unconfigured", func() {
+	// The manifest's env is what a transport reads to know where to deliver. A value
+	// from either the emulator's flags or the ambient environment counts — the second
+	// is what makes a community transport work, since fft has no flag for its broker.
+	It("counts a value from the emulator's flags", func() {
+		c := component.Component{Manifest: component.Manifest{Env: []string{"KAFKA_BROKER"}}}
+		Expect(unconfigured(c, map[string]string{"KAFKA_BROKER": "localhost:9092"})).To(BeFalse())
+	})
+
+	It("counts a value from the ambient environment", func() {
+		GinkgoT().Setenv("KAFKA_BROKER", "localhost:9092")
+		c := component.Component{Manifest: component.Manifest{Env: []string{"KAFKA_BROKER"}}}
+		Expect(unconfigured(c, nil)).To(BeFalse())
+	})
+
+	It("is unconfigured when neither provides its declared var", func() {
+		c := component.Component{Manifest: component.Manifest{Env: []string{"KAFKA_BROKER_DEFINITELY_UNSET"}}}
+		Expect(unconfigured(c, nil)).To(BeTrue())
+	})
+
+	It("is always configured when it declares no variables", func() {
+		c := component.Component{Manifest: component.Manifest{}}
+		Expect(unconfigured(c, nil)).To(BeFalse())
 	})
 })
 
