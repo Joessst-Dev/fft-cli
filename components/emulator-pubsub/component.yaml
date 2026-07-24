@@ -1,0 +1,14 @@
+# Delivers fft emulator events to a local Google Cloud Pub/Sub emulator. A transport
+# component: the emulator starts it and speaks the line protocol to it, so it declares
+# the target type it delivers rather than a command. It reads PUBSUB_EMULATOR_HOST,
+# which the emulator sets from its --pubsub-emulator-host.
+apiVersion: 1
+name: emulator-pubsub
+kind: transport
+source: Joessst-Dev/fft-cli
+exec: bin/fft-emulator-pubsub
+description: Deliver fft emulator events to a local Pub/Sub emulator
+targets:
+  - GOOGLE_CLOUD_PUB_SUB
+env:
+  - PUBSUB_EMULATOR_HOST

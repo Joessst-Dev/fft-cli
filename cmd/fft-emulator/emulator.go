@@ -12,8 +12,10 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/Joessst-Dev/fft-cli/internal/component"
 	"github.com/Joessst-Dev/fft-cli/internal/config"
 	"github.com/Joessst-Dev/fft-cli/internal/emulator"
+	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 )
 
 const emulatorLong = `Run a local server that mimics the fulfillmenttools API.
@@ -28,9 +30,12 @@ dies with the process. Point fft at it with the FFT_* recipe it prints on startu
 'fft project add' does not work against it, because signing in reaches Google's
 identity service, which a local server cannot stand in for.`
 
-// newEmulatorCmd runs the offline API emulator. It makes no tenant request, so it
-// carries no operationId and is excused in readonly_test.go's commandsWithoutOperation.
-func newEmulatorCmd(deps *Deps) *cobra.Command {
+// newRootCmd builds the emulator's command tree.
+//
+// It is `fft emulator` when fft dispatches to it, and `fft-emulator` when it is run
+// directly. The Use string says the former, because that is what a user types and
+// what every piece of documentation shows.
+func newRootCmd() *cobra.Command {
 	var (
 		host        string
 		port        int
@@ -46,15 +51,32 @@ func newEmulatorCmd(deps *Deps) *cobra.Command {
 		Short: "Run a local offline fulfillmenttools API emulator",
 		Long:  emulatorLong,
 		Args:  usageArgs(cobra.NoArgs),
+
+		SilenceUsage:  true,
+		SilenceErrors: true,
+
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			srv, err := emulator.New(emulator.Config{
-				Host:               host,
-				Port:               port,
-				Seed:               seed,
-				Verbose:            verbose,
-				Log:                cmd.ErrOrStderr(),
-				PubSubHost:         pubsubHost,
-				ServiceBusHost:     sbHost,
+				Host:    host,
+				Port:    port,
+				Seed:    seed,
+				Verbose: verbose,
+				Log:     cmd.ErrOrStderr(),
+
+				// The transports are components of this component. They are found in the same
+				// root fft installs everything else into, which fft passes down in the
+				// environment — so a transport installed with `fft component install` is one
+				// the emulator finds without being told where to look.
+				Components: openComponents(),
+
+				// Each transport reads the variable its own ecosystem defines, and gets it
+				// only if its manifest declared it. So --pubsub-emulator-host still means
+				// exactly what it always did, and reaches only the transport that asked for it.
+				TransportEnv: map[string]string{
+					"PUBSUB_EMULATOR_HOST":     pubsubHost,
+					"SERVICEBUS_EMULATOR_HOST": sbHost,
+				},
+
 				WebhookAllowRemote: allowRemote,
 			})
 			if err != nil {
@@ -65,13 +87,7 @@ func newEmulatorCmd(deps *Deps) *cobra.Command {
 			// contract even for a command that never prints data. It prints only once
 			// the port is actually bound, so a taken-port failure doesn't follow a
 			// recipe that looks like it worked.
-			ready := func() {
-				printEmulatorRecipe(cmd.ErrOrStderr(), port, eventingStatus{
-					pubsubHost:  pubsubHost,
-					sbHost:      sbHost,
-					allowRemote: allowRemote,
-				})
-			}
+			ready := func() { printEmulatorRecipe(cmd.ErrOrStderr(), port, srv.Eventing()) }
 			return srv.Listen(cmd.Context(), ready)
 		},
 	}
@@ -89,15 +105,30 @@ func newEmulatorCmd(deps *Deps) *cobra.Command {
 	cmd.Flags().BoolVar(&allowRemote, "webhook-allow-remote", false,
 		"Call WEBHOOK callbackUrls outside the local network; off by default, so a fixture naming a real endpoint is skipped rather than called")
 
-	cmd.AddCommand(newEmulatorEmitCmd(deps))
+	cmd.SetFlagErrorFunc(func(_ *cobra.Command, err error) error {
+		return exitcode.UsageError{Err: err}
+	})
+
+	cmd.AddCommand(newEmulatorEmitCmd())
 	return cmd
+}
+
+// openComponents finds the transport components. A root that cannot be resolved is an
+// emulator with no broker transports, which is a perfectly ordinary way to run it —
+// not a reason to refuse to start.
+func openComponents() *component.Registry {
+	root, enabled, err := component.Root(os.LookupEnv)
+	if err != nil || !enabled {
+		return component.Open("")
+	}
+	return component.Open(root)
 }
 
 // printEmulatorRecipe prints the environment that points fft at the emulator. It uses
 // the headless FFT_ID_TOKEN path (config.FromEnv), which hands fft a static token and
 // never contacts Firebase — the only way in, since the emulator cannot stand in for
 // Google's sign-in.
-func printEmulatorRecipe(w io.Writer, port int, eventing eventingStatus) {
+func printEmulatorRecipe(w io.Writer, port int, eventing []emulator.TargetStatus) {
 	base := fmt.Sprintf("http://localhost:%d", port)
 
 	fmt.Fprintf(w, "fft emulator listening on %s\n\n", base)
@@ -112,36 +143,18 @@ func printEmulatorRecipe(w io.Writer, port int, eventing eventingStatus) {
 	fmt.Fprintln(w, "\nPress Ctrl-C to stop.")
 }
 
-// eventingStatus is what the startup notice needs to say where each subscription target
-// type will be delivered — or why it will not be.
-type eventingStatus struct {
-	pubsubHost  string
-	sbHost      string
-	allowRemote bool
-}
-
 // printEmulatorEventing reports each subscription target type separately, because they
-// are enabled separately: a broker target needs a local emulator to send to, while a
-// webhook target needs nothing but a callback URL the emulator is willing to call.
-func printEmulatorEventing(w io.Writer, eventing eventingStatus) {
+// are enabled separately — and now, for the broker targets, installed separately too.
+//
+// The line for a live target is the transport's own words, from the handshake. That is
+// what lets this notice say where a broker actually is without the emulator knowing
+// anything about brokers, and what will keep it honest about a transport nobody here
+// has heard of.
+func printEmulatorEventing(w io.Writer, eventing []emulator.TargetStatus) {
 	fmt.Fprintln(w, "\nEventing, by subscription target:")
 
-	if eventing.pubsubHost == "" {
-		fmt.Fprintln(w, "  GOOGLE_CLOUD_PUB_SUB         skipped (set --pubsub-emulator-host or PUBSUB_EMULATOR_HOST)")
-	} else {
-		fmt.Fprintf(w, "  GOOGLE_CLOUD_PUB_SUB         publishing to the Pub/Sub emulator at %s\n", eventing.pubsubHost)
-	}
-
-	if eventing.allowRemote {
-		fmt.Fprintln(w, "  WEBHOOK                      calling any callbackUrl (--webhook-allow-remote is set)")
-	} else {
-		fmt.Fprintln(w, "  WEBHOOK                      calling local callbackUrls (--webhook-allow-remote to widen)")
-	}
-
-	if eventing.sbHost == "" {
-		fmt.Fprintln(w, "  MICROSOFT_AZURE_SERVICE_BUS  skipped (set --servicebus-emulator-host)")
-	} else {
-		fmt.Fprintf(w, "  MICROSOFT_AZURE_SERVICE_BUS  sending to the Service Bus emulator at %s\n", eventing.sbHost)
+	for _, t := range eventing {
+		fmt.Fprintf(w, "  %-28s %s\n", t.Target, t.Status)
 	}
 
 	fmt.Fprintln(w, "\nRegister a subscription, then mutations deliver to its target:")
@@ -165,9 +178,8 @@ recipe exports.`
 
 // newEmulatorEmitCmd asks a running emulator to publish one event. It is a thin HTTP
 // client for POST /_emulator/emit, so the emulator does the subscription matching and
-// the publish; nothing here reaches a tenant, which is why it is excused in
-// readonly_test.go's commandsWithoutOperation.
-func newEmulatorEmitCmd(deps *Deps) *cobra.Command {
+// the publish; nothing here reaches a tenant.
+func newEmulatorEmitCmd() *cobra.Command {
 	var (
 		file string
 		url  string
@@ -179,12 +191,9 @@ func newEmulatorEmitCmd(deps *Deps) *cobra.Command {
 		Long:  emulatorEmitLong,
 		Args:  usageArgs(cobra.ExactArgs(1)),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx, cancel := deps.Context(cmd)
-			defer cancel()
-
 			payload := json.RawMessage("{}")
 			if file != "" {
-				raw, err := readBody(deps, file)
+				raw, err := readBody(cmd.InOrStdin(), file)
 				if err != nil {
 					return err
 				}
@@ -195,7 +204,7 @@ func newEmulatorEmitCmd(deps *Deps) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return emitEvent(ctx, cmd.ErrOrStderr(), url, body)
+			return emitEvent(cmd.Context(), cmd.ErrOrStderr(), url, body)
 		},
 	}
 
@@ -268,4 +277,37 @@ func emulatorURL() string {
 		return v
 	}
 	return "http://localhost:8080"
+}
+
+// readBody reads a JSON body from a file, or from stdin for "-".
+func readBody(stdin io.Reader, path string) ([]byte, error) {
+	var (
+		raw []byte
+		err error
+	)
+
+	if path == "-" {
+		raw, err = io.ReadAll(stdin)
+	} else {
+		raw, err = os.ReadFile(path) //nolint:gosec // a payload file the user named
+	}
+	if err != nil {
+		return nil, exitcode.UsageError{Err: fmt.Errorf("read %s: %w", path, err)}
+	}
+
+	if !json.Valid(raw) {
+		return nil, exitcode.UsageError{Err: fmt.Errorf("%s does not contain valid JSON", path)}
+	}
+	return raw, nil
+}
+
+// usageArgs tags a positional-argument validator's failures as usage errors, so that
+// "wrong number of arguments" exits 2 rather than 1 — the same contract fft has.
+func usageArgs(validator cobra.PositionalArgs) cobra.PositionalArgs {
+	return func(cmd *cobra.Command, args []string) error {
+		if err := validator(cmd, args); err != nil {
+			return exitcode.UsageError{Err: err}
+		}
+		return nil
+	}
 }

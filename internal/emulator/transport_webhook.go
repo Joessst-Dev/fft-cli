@@ -37,6 +37,16 @@ func newWebhookTransport(allowRemote bool) *webhookTransport {
 	}
 }
 
+// describe says where this transport will call, for the startup notice. The bound is
+// the whole of what a user needs to know about webhook delivery, so it is what the
+// notice says.
+func (t *webhookTransport) describe() string {
+	if t.allowRemote {
+		return "calling any callbackUrl (--webhook-allow-remote is set)"
+	}
+	return "calling local callbackUrls (--webhook-allow-remote to widen)"
+}
+
 // plan resolves a SubscriptionTargetWebhook into the endpoint to POST to, refusing a
 // callbackUrl that is unusable or that this emulator will not reach.
 func (t *webhookTransport) plan(target map[string]any) (delivery, error) {

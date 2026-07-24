@@ -119,7 +119,11 @@ func runComponentInstall(ctx context.Context, deps *Deps, src component.Source, 
 	// stderr, and nothing on stdout: an install has no data to emit, and a cheerful
 	// sentence in the pipe of whoever scripted it is exactly what the output contract
 	// is there to prevent.
-	deps.Printer.Notef("Installed %s %s into %s.", installed.Name, installed.Version, installed.Dir)
+	named := installed.Name
+	if installed.Version != "" {
+		named += " " + installed.Version
+	}
+	deps.Printer.Notef("Installed %s into %s.", named, installed.Dir)
 	for _, cmd := range installed.Commands {
 		deps.Printer.Notef("  fft %s — %s", cmd.Name, cmd.Short)
 	}

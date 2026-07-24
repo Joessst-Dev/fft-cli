@@ -47,6 +47,13 @@ var _ = Describe("the registry", func() {
 		}
 	}
 
+	// The specs about discovery pass an empty table, so that what they assert is what
+	// was found on the disk and not what fft happens to ship. The specs about the
+	// compiled-in table are further down, and pass their own.
+	discovered := func(root string, opts ...component.Option) *component.Registry {
+		return component.Open(root, append([]component.Option{component.WithFirstParty(nil)}, opts...)...)
+	}
+
 	Describe("discovery", func() {
 		It("finds an installed component", func() {
 			install(manifest("weather"), true)
@@ -72,16 +79,16 @@ var _ = Describe("the registry", func() {
 		// directory to find it empty would put something in the user's home for a
 		// feature they have not used.
 		It("is empty, and fine, when the root does not exist", func() {
-			reg := component.Open(filepath.Join(root, "nope"))
+			reg := discovered(filepath.Join(root, "nope"))
 
 			Expect(reg.All()).To(BeEmpty())
 			Expect(reg.Problems()).To(BeEmpty())
 		})
 
-		It("holds nothing when components are disabled", func() {
+		It("discovers nothing when components are disabled", func() {
 			install(manifest("weather"), true)
 
-			reg := component.Open("")
+			reg := discovered("")
 			Expect(reg.All()).To(BeEmpty())
 			Expect(reg.Root()).To(BeEmpty())
 		})
@@ -89,7 +96,7 @@ var _ = Describe("the registry", func() {
 		It("ignores a directory that is not a component", func() {
 			Expect(os.MkdirAll(filepath.Join(root, "somebody-elses"), 0o755)).To(Succeed())
 
-			reg := component.Open(root)
+			reg := discovered(root)
 			Expect(reg.All()).To(BeEmpty())
 
 			// Not a problem, either: a directory with no manifest is not a broken
@@ -104,7 +111,7 @@ var _ = Describe("the registry", func() {
 
 			install(manifest("weather"), true)
 
-			reg := component.Open(root)
+			reg := discovered(root)
 			Expect(reg.Problems()).To(HaveLen(1))
 
 			// The broken one must not take the working one down with it.
@@ -125,7 +132,7 @@ var _ = Describe("the registry", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(os.WriteFile(filepath.Join(dir, component.ManifestName), data, 0o600)).To(Succeed())
 
-			reg := component.Open(root)
+			reg := discovered(root)
 			Expect(reg.Problems()).To(HaveLen(1))
 			Expect(reg.Problems()[0].Err).To(MatchError(ContainSubstring("installed as")))
 		})
@@ -141,7 +148,7 @@ var _ = Describe("the registry", func() {
 			install(transport, true)
 			install(manifest("weather"), true)
 
-			reg := component.Open(root)
+			reg := discovered(root)
 			Expect(reg.Transports()).To(HaveLen(1))
 			Expect(reg.Transports()[0].Delivers("GOOGLE_CLOUD_PUB_SUB")).To(BeTrue())
 		})
@@ -171,6 +178,18 @@ var _ = Describe("the registry", func() {
 			// existing, and what keeps `fft --help` and the generated reference the same
 			// on every machine.
 			Expect(c.Commands).To(HaveLen(1))
+		})
+
+		// Disabled means "discover nothing from the disk", not "fft has no emulator".
+		// `fft gen-docs` runs with the root disabled precisely so the reference does not
+		// depend on what is installed — and the reference still has to document the
+		// commands fft ships.
+		It("survives components being disabled", func() {
+			reg := component.Open("", component.WithFirstParty(table))
+
+			c, ok := reg.Lookup("emulator")
+			Expect(ok).To(BeTrue())
+			Expect(c.Installed).To(BeFalse())
 		})
 
 		It("takes its version and binary from the installed copy", func() {

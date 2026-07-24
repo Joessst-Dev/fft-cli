@@ -434,7 +434,13 @@ fails until one does.
 automated test, or trying a command out without touching a tenant. It makes no request to
 any tenant, and it forgets everything the moment the process exits.
 
+The emulator is a [component](#components): a separate binary `fft` ships but does not
+bundle, so the CLI most people use only to reach a tenant does not carry a server and two
+cloud SDKs. Install it once — `fft emulator` on a fresh install prints the command — and
+the container image has it already:
+
 ```sh
+fft component install emulator
 fft emulator --port 8080
 ```
 
@@ -484,9 +490,12 @@ the API defines work — each bounded so the emulator can only ever reach your o
 A `WEBHOOK` needs no flag but is delivered only to a local callback URL, so a subscription
 fixture copied from a real tenant cannot spray fake events at somebody's production
 endpoint; Pub/Sub and Service Bus go to a local emulator you run yourself, never to real
-Google Cloud or real Azure. Startup prints which of the three are live.
+Google Cloud or real Azure. The two brokers are transport components of their own — the
+cloud SDKs they carry are why the emulator split out in the first place — so install the
+one you need. Startup prints which of the three are live.
 
 ```sh
+fft component install emulator-pubsub
 fft emulator --pubsub-emulator-host localhost:8085 --servicebus-emulator-host localhost:5672
 ```
 

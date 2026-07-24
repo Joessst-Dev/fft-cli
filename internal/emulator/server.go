@@ -11,6 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/Joessst-Dev/fft-cli/internal/api"
+	"github.com/Joessst-Dev/fft-cli/internal/component"
 )
 
 // shutdownGrace is how long a cancelled server waits for in-flight requests to
@@ -38,17 +39,17 @@ type Config struct {
 	// data contract even here.
 	Log io.Writer
 
-	// PubSubHost is the local Pub/Sub emulator to publish events to (the standard
-	// PUBSUB_EMULATOR_HOST value). Empty means a GOOGLE_CLOUD_PUB_SUB subscription is
-	// stored and matched but never published to. It is never a real Google Cloud
-	// endpoint — the transport pins every connection to this host with auth disabled.
-	PubSubHost string
+	// Components is where the emulator looks for its transport sub-components: the
+	// processes that deliver an event to a broker. A nil registry means none, which is
+	// an emulator that delivers webhooks and nothing else — a perfectly ordinary way to
+	// run it.
+	Components *component.Registry
 
-	// ServiceBusHost is the local Azure Service Bus emulator to send events to. Empty
-	// means a MICROSOFT_AZURE_SERVICE_BUS subscription is stored and matched but never
-	// sent to. Like PubSubHost it is a host, not a connection string, so the transport
-	// cannot be pointed at a real Azure namespace.
-	ServiceBusHost string
+	// TransportEnv is the configuration to hand those components, by variable name.
+	// Only the names a component's manifest declares are actually set, so
+	// --pubsub-emulator-host reaches the Pub/Sub transport as the PUBSUB_EMULATOR_HOST
+	// it already reads, and reaches nothing else.
+	TransportEnv map[string]string
 
 	// WebhookAllowRemote lets webhook delivery call a callbackUrl outside the local
 	// network. It is off by default so a subscription fixture naming a real endpoint is
@@ -99,6 +100,47 @@ func New(cfg Config) (*Server, error) {
 	}
 
 	return &Server{app: app, addr: net.JoinHostPort(host, strconv.Itoa(cfg.Port)), events: events}, nil
+}
+
+// TargetStatus is what the startup notice says about one subscription target type:
+// whether an event with that target will be delivered, and where.
+type TargetStatus struct {
+	// Target is the target type, e.g. GOOGLE_CLOUD_PUB_SUB.
+	Target string
+
+	// Status is one line, in the transport's own words where there is one. A
+	// transport that came from a component said this at the handshake, so the notice
+	// reports where a broker actually is without the emulator knowing anything about
+	// brokers.
+	Status string
+
+	// Live reports whether anything will be delivered to this target type at all.
+	Live bool
+}
+
+// Eventing reports each subscription target type the API defines, and what will
+// happen to a subscription that names it.
+//
+// Every type is reported, including the ones nothing delivers — a stored
+// subscription that silently never fires is the failure this notice exists to
+// prevent, and leaving the unavailable ones out of the list is how it would happen.
+func (s *Server) Eventing() []TargetStatus {
+	out := make([]TargetStatus, 0, len(knownTargets))
+
+	for _, target := range knownTargets {
+		t, ok := s.events.transports[target]
+		if !ok {
+			out = append(out, TargetStatus{Target: target, Status: s.events.unavailableReason(target)})
+			continue
+		}
+
+		status := "delivering"
+		if d, ok := t.(describer); ok && d.describe() != "" {
+			status = d.describe()
+		}
+		out = append(out, TargetStatus{Target: target, Status: status, Live: true})
+	}
+	return out
 }
 
 // Listen binds the port and serves until ctx is cancelled, then shuts down
