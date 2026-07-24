@@ -6,9 +6,10 @@ it makes no request to any tenant and holds all its state in memory, so it forge
 everything the moment the process exits.
 
 Every operation the API has is reachable on it, but only the top-level collections are
-*remembered*; everything else is answered from a canned response. It can also publish
-domain events to a **local** Google Pub/Sub emulator you run yourself — never to real
-Google Cloud.
+*remembered*; everything else is answered from a canned response. It can also deliver
+domain events to a subscription's target — a webhook on your machine, a **local** Pub/Sub
+or Azure Service Bus emulator you run yourself — but never to a real cloud or a real
+remote endpoint.
 
 Run `fft emulator --help` and `fft emulator emit --help` for the flags. The notes below
 are the things `--help` will not tell you.
@@ -97,13 +98,52 @@ JSON you provide is stored as-is.
 
 ## Eventing
 
-The emulator can publish a domain event to a Pub/Sub topic whenever you mutate a
-stateful collection. It publishes to a **local Pub/Sub emulator you run yourself** and
-**never to real Google Cloud** — its Pub/Sub client is pinned to the host you give it,
-with authentication disabled and an insecure transport, so it physically cannot reach
-anything else.
+The emulator can deliver a domain event to a subscription's target whenever you mutate a
+stateful collection. All three targets the API defines work, and each is bounded so the
+emulator can only ever reach your own machine:
 
-Point it at that host and eventing turns on:
+| Target | Delivered when | Reaches |
+| --- | --- | --- |
+| `WEBHOOK` | always | a **local** callback URL, unless you widen it |
+| `GOOGLE_CLOUD_PUB_SUB` | `--pubsub-emulator-host` is set | that **local** Pub/Sub emulator, never real Google Cloud |
+| `MICROSOFT_AZURE_SERVICE_BUS` | `--servicebus-emulator-host` is set | that **local** Service Bus emulator, never real Azure |
+
+Startup prints which of the three are live, on stderr. A target whose transport is not
+configured is stored and matched but never delivered to.
+
+### Webhook targets
+
+A webhook needs no flag: the emulator POSTs the event envelope to the subscription's
+`callbackUrl` as it stands. What it *will not* do is call a callback URL that could be
+somebody's production endpoint — a subscription fixture copied from a real tenant names a
+real address, and fake events must not turn up there. So a callback URL is delivered only
+when its host is one of:
+
+- a loopback, private, link-local or unspecified address (`127.0.0.1`, `[::1]`, `10.1.2.3`)
+- `localhost` or `host.docker.internal`
+- a name ending in `.localhost`, `.local` or `.internal`
+- a single-label name with no dot — a service on a Docker network, e.g. `http://app:3000`
+
+Anything else is skipped, with the reason on stderr. `--webhook-allow-remote` calls it
+anyway. The judgement is on the URL's literal host, with no DNS lookup, and redirects are
+not followed — a local endpoint cannot bounce the delivery somewhere remote.
+
+The last rule is a convenience for container networks rather than a guarantee: a
+single-label name is not *necessarily* local — a few TLDs resolve on their own, and a
+resolver search domain can turn any bare label into a public name. It is a guard against
+the fixture that names `https://api.acme.com`, not a sandbox.
+
+The request is a `POST` with the `WebHookEvent` body below, `Content-Type:
+application/json`, and every header the target's `headers` array declares. The emulator
+adds no header of its own invention. A subscription registered the deprecated way — a
+top-level `callbackUrl` and `headers` and no `target` object — is read as the webhook
+target it means.
+
+### Pub/Sub targets
+
+Point the emulator at a local Pub/Sub emulator and its client is pinned to that host, with
+authentication disabled and an insecure transport, so it physically cannot reach anything
+else:
 
 ```sh
 fft emulator --pubsub-emulator-host localhost:8085
@@ -116,22 +156,48 @@ too:
 PUBSUB_EMULATOR_HOST=localhost:8085 fft emulator
 ```
 
-**Without a host, eventing is off**: subscriptions are still stored and matched, but
-nothing is published, and startup says so on stderr.
+The topic is created on first publish, so it need not exist yet.
+
+### Service Bus targets
+
+Point the emulator at a local [Azure Service Bus
+emulator](https://learn.microsoft.com/en-us/azure/service-bus-messaging/test-locally-with-service-bus-emulator)
+and `MICROSOFT_AZURE_SERVICE_BUS` targets are sent over AMQP:
+
+```sh
+fft emulator --servicebus-emulator-host localhost:5672
+```
+
+It is a **host**, not a connection string, on purpose: the credentials are then fixed to
+the emulator's published development key over plain AMQP, which no real Azure namespace
+accepts. Two consequences worth knowing before you debug a silent target:
+
+- **The queue or topic must already exist** in the emulator's `config.json`. Unlike
+  Pub/Sub, a Service Bus emulator cannot create an entity on demand, so a send to an
+  undeclared one fails and is logged.
+- **The target's `tenantId`, `clientId` and `clientSecret` are ignored.** They are
+  Microsoft Entra credentials, and no local emulator honours Entra auth. Only
+  `queueOrTopicName` is used to address the send; `namespace` is only a label.
 
 ### Registering where an event goes
 
-A subscription is an ordinary stateful entity — `POST /api/subscriptions`. Give it a
-`GOOGLE_CLOUD_PUB_SUB` target naming a `projectId` and a `topicId`; the topic is created
-on first publish, so it need not exist yet:
+A subscription is an ordinary stateful entity — `POST /api/subscriptions`. Give it the
+target you want:
+
+```sh
+fft api addSubscription --data '{"name":"orders","event":"ORDER_CREATED","target":{"type":"WEBHOOK","callbackUrl":"http://localhost:3000/hook"}}'
+```
 
 ```sh
 fft api addSubscription --data '{"name":"orders","event":"ORDER_CREATED","target":{"type":"GOOGLE_CLOUD_PUB_SUB","projectId":"local","topicId":"orders"}}'
 ```
 
+```sh
+fft api addSubscription --data '{"name":"orders","event":"ORDER_CREATED","target":{"type":"MICROSOFT_AZURE_SERVICE_BUS","namespace":"local","queueOrTopicName":"orders","tenantId":"x","clientId":"x","clientSecret":"x"}}'
+```
+
 A subscription matches an event when **its `event` field equals the event name** and its
-target is `GOOGLE_CLOUD_PUB_SUB`. Only that target type is delivered — webhook and Azure
-Service Bus targets are stored but skipped.
+target type has a live transport.
 
 Optional facility `contexts` narrow it further. Contexts are **AND-combined**: every
 context must be satisfied by at least one of its own values, and a value matches when it
@@ -150,8 +216,8 @@ A subscription with no `contexts` matches every occurrence of its event.
 
 ### What fires automatically, and what you emit by hand
 
-A create, update or delete on a curated set of collections publishes a lifecycle event
-on its own:
+A create, update or delete on a curated set of collections emits a lifecycle event on its
+own:
 
 | Collection      | created                   | updated                   | deleted                   |
 | --------------- | ------------------------- | ------------------------- | ------------------------- |
@@ -169,22 +235,23 @@ on its own:
 
 An empty cell, or a collection not in the table, emits nothing. The long tail of
 state-transition events — a pickjob starting to be picked, a routing plan being routed —
-maps to no create, update or delete, so you publish those yourself:
+maps to no create, update or delete, so you emit those yourself:
 
 ```sh
 fft emulator emit PICK_JOB_PICKING_COMMENCED --payload-file pickjob.json
 ```
 
-`emit` asks the running emulator to publish the named event, with the payload you supply
+`emit` asks the running emulator to deliver the named event, with the payload you supply
 (an empty object if you omit `--payload-file`), to every subscription that matches the
 event name and contexts. It reads `$FFT_BASE_URL` to find the emulator, so the exported
-recipe points it automatically; `--url` overrides that. It reports the outcome on
-stderr: how many subscriptions it published to, or that eventing is off, or that nothing
-matched.
+recipe points it automatically; `--url` overrides that. It reports the outcome on stderr:
+how many targets it delivered to, or that nothing matched — in which case the emulator's
+own log says whether a subscription was skipped and why.
 
 ### The envelope on the wire
 
-Each published Pub/Sub message carries a `WebHookEvent` JSON body:
+Every delivery carries the same `WebHookEvent` JSON body — as the Pub/Sub message data,
+the Service Bus message body, or the webhook POST body:
 
 ```json
 {
@@ -195,12 +262,58 @@ Each published Pub/Sub message carries a `WebHookEvent` JSON body:
 ```
 
 `eventId` is one UUID per emit, shared across every target the event fans out to — it is
-the consumer's dedup key when one occurrence reaches several subscriptions. Every message
-also gets an `event` message **attribute** carrying the event name, so a consumer can
-filter without decoding the body. That attribute is an emulator convention — it is not a
-claim to reproduce production's message attributes.
+the consumer's dedup key when one occurrence reaches several subscriptions. A Pub/Sub
+message also gets an `event` **attribute**, and a Service Bus message an `event`
+**application property**, carrying the event name so a consumer can filter without
+decoding the body. Both are emulator conventions — they are not a claim to reproduce
+production's message metadata.
 
-## End to end: an order event, start to finish
+## End to end: a webhook, with nothing installed
+
+The shortest complete loop. It needs no broker at all — only something on loopback that
+answers a POST with a 2xx, which the `python3` one-liner below provides. (Plain
+`python3 -m http.server` will not do: it answers a POST with 501, which the emulator
+reports as a failed delivery.)
+
+**1. Start a listener** on port 3000, in its own shell:
+
+```text
+python3 -c 'from http.server import BaseHTTPRequestHandler as H, HTTPServer
+H.do_POST = lambda s: (print(s.rfile.read(int(s.headers["Content-Length"])).decode()), s.send_response(200), s.end_headers())
+HTTPServer(("127.0.0.1", 3000), H).serve_forever()'
+```
+
+**2. Start the emulator** and export its recipe in another shell:
+
+```sh
+fft emulator --verbose
+```
+
+```sh
+export FFT_BASE_URL=http://localhost:8080
+export FFT_FIREBASE_API_KEY=emulator
+export FFT_EMAIL=dev@localhost
+export FFT_ID_TOKEN=emulator-token
+```
+
+**3. Register a webhook subscription** pointing at the listener:
+
+```sh
+fft api addSubscription --data '{"name":"orders","event":"ORDER_CREATED","target":{"type":"WEBHOOK","callbackUrl":"http://localhost:3000/hook"}}'
+```
+
+**4. Create an order** — the create delivers `ORDER_CREATED` automatically, and the
+listener logs the `POST /hook`:
+
+```sh
+fft order create --example > order.json
+fft order create --file order.json
+```
+
+Swap the callback URL for `https://example.com/hook` and the emulator refuses it instead,
+saying so on stderr; `--webhook-allow-remote` makes it call anyway.
+
+## End to end: an order event through Pub/Sub
 
 This publishes an `ORDER_CREATED` event and reads it back. It uses the Google Cloud
 SDK's Pub/Sub emulator (`gcloud components install pubsub-emulator`) and talks to it over
@@ -305,6 +418,55 @@ in step 5. The image is distroless and carries no shell, so drive `fft` from you
 the recipe above rather than from inside the container. State still dies with the process:
 `docker compose down` forgets everything, exactly as exiting the emulator does.
 
+### Adding Azure Service Bus
+
+Microsoft's Service Bus emulator wants two things the Pub/Sub one does not: a SQL Edge
+sidecar, and a config file declaring every queue and topic up front — it creates none on
+demand, so a target naming an undeclared entity simply fails:
+
+```yaml
+services:
+  emulator:
+    image: ghcr.io/joessst-dev/fft:latest
+    command: ["emulator", "--host", "0.0.0.0", "--servicebus-emulator-host", "servicebus:5672"]
+    ports: ["8080:8080"]
+    depends_on: [servicebus]
+  servicebus:
+    image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Your_password123!"
+      SQL_SERVER: sqledge
+    volumes: ["./servicebus-config.json:/ServiceBus_Emulator/ConfigFiles/Config.json:ro"]
+    ports: ["5672:5672"]
+    depends_on: [sqledge]
+  sqledge:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Your_password123!"
+```
+
+`servicebus-config.json` declares the queue the subscription will name:
+
+```json
+{
+  "UserConfig": {
+    "Namespaces": [
+      {
+        "Name": "sbemulatorns",
+        "Queues": [{ "Name": "orders", "Properties": {}, "DeadletteringOnMessageExpiration": false }]
+      }
+    ],
+    "Logging": { "Type": "File" }
+  }
+}
+```
+
+Then register a Service Bus subscription naming `orders` and create an order as before.
+The `namespace` in the target is only a label — the host already picks the emulator's one
+namespace — so anything there is fine.
+
 ## Integration tests with Testcontainers
 
 For a test suite that wants a fresh, disposable API per run — a random port, automatic
@@ -347,16 +509,19 @@ The module image tag is pinned to a tested emulator release and is overridable.
 
 ## Known limitations
 
-- **Delivery is best-effort.** A publish that fails is logged and skipped; it never fails
-  the mutation that triggered it. Publishing is synchronous on the request path and
-  capped by a shared 10-second timeout.
+- **Delivery is best-effort.** A delivery that fails is logged and skipped; it never fails
+  the mutation that triggered it. Delivery is synchronous on the request path and capped
+  by a shared 10-second timeout.
 - **Context matching is best-effort.** A context's declared `type` (FACILITY vs
   FACILITY_GROUP) is not distinguished — a value is matched against every facility
   reference found in the payload — and facility groups are not expanded to their member
   facilities, so a `FACILITY_GROUP` context matches only when the entity names that group
   directly.
-- **Only `GOOGLE_CLOUD_PUB_SUB` targets are delivered.** Webhook and Azure Service Bus
-  targets can be registered, but the emulator does not call them.
+- **A remote webhook is skipped by default.** Only a callback URL whose host can only be
+  local is called, unless `--webhook-allow-remote` says otherwise.
+- **Azure targets use the emulator's development credentials.** The subscription's Entra
+  credentials are ignored, and the queue or topic must already be declared in the Service
+  Bus emulator's own config.
 
 For whole tasks — seeding a project, paging a large result, running in CI — see
 [recipes.md](recipes.md); for the curated commands you will drive it with, see

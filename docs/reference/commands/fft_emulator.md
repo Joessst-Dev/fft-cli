@@ -27,11 +27,13 @@ fft emulator [flags]
 ## Flags
 
 ```
-      --host string                   Interface to bind; the emulator has no auth, so it stays on loopback unless you widen it (0.0.0.0 for a container) (default "127.0.0.1")
-      --port int                      Port to listen on (default 8080)
-      --pubsub-emulator-host string   Local Pub/Sub emulator (host:port) to publish events to; defaults to $PUBSUB_EMULATOR_HOST, empty disables eventing
-      --seed string                   Directory of JSON fixtures to preload, one <collection>.json per collection
-      --verbose                       Log every request to stderr
+      --host string                       Interface to bind; the emulator has no auth, so it stays on loopback unless you widen it (0.0.0.0 for a container) (default "127.0.0.1")
+      --port int                          Port to listen on (default 8080)
+      --pubsub-emulator-host string       Local Pub/Sub emulator (host:port) to publish GOOGLE_CLOUD_PUB_SUB targets to; defaults to $PUBSUB_EMULATOR_HOST, empty skips them
+      --seed string                       Directory of JSON fixtures to preload, one <collection>.json per collection
+      --servicebus-emulator-host string   Local Azure Service Bus emulator (host:port) to send MICROSOFT_AZURE_SERVICE_BUS targets to; empty skips them
+      --verbose                           Log every request to stderr
+      --webhook-allow-remote              Call WEBHOOK callbackUrls outside the local network; off by default, so a fixture naming a real endpoint is skipped rather than called
 ```
 
 ## Subcommands

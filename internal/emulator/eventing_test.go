@@ -1,6 +1,7 @@
 package emulator
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"sync"
@@ -9,46 +10,62 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-// recordingPublisher stands in for a real Pub/Sub emulator: it records what would
-// have been published instead of sending it. It is safe to read from a test after the
-// handler goroutine that published has returned.
-type recordingPublisher struct {
+// recordingTransport stands in for a real broker or callback endpoint: it records what
+// would have been delivered instead of sending it, labelling each destination the way
+// the transport it replaces does. It is safe to read from a test after the handler
+// goroutine that delivered has returned.
+type recordingTransport struct {
+	label func(target map[string]any) string
 	mu    sync.Mutex
-	calls []publishedMessage
+	calls []deliveredMessage
 }
 
-type publishedMessage struct {
-	projectID string
-	topicID   string
-	data      []byte
-	attrs     map[string]string
+type deliveredMessage struct {
+	label string
+	event string
+	data  []byte
 }
 
-func (p *recordingPublisher) Publish(_ context.Context, projectID, topicID string, data []byte, attrs map[string]string) error {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.calls = append(p.calls, publishedMessage{projectID, topicID, data, attrs})
-	return nil
+// recordingPubSub and recordingWebhook are the two target types the specs below drive,
+// each labelling a destination as its real transport would.
+func recordingPubSub() *recordingTransport {
+	return &recordingTransport{label: func(t map[string]any) string {
+		return mapString(t, "projectId") + "/" + mapString(t, "topicId")
+	}}
 }
 
-func (p *recordingPublisher) messages() []publishedMessage {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	return append([]publishedMessage(nil), p.calls...)
+func recordingWebhook() *recordingTransport {
+	return &recordingTransport{label: func(t map[string]any) string { return mapString(t, "callbackUrl") }}
 }
 
-func (p *recordingPublisher) count() int {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	return len(p.calls)
+func (r *recordingTransport) plan(target map[string]any) (delivery, error) {
+	label := r.label(target)
+	return delivery{label: label, send: func(_ context.Context, event string, data []byte) error {
+		r.mu.Lock()
+		defer r.mu.Unlock()
+		r.calls = append(r.calls, deliveredMessage{label, event, data})
+		return nil
+	}}, nil
 }
 
-// panickingPublisher stands in for a Publisher bug: it panics instead of returning an
+func (r *recordingTransport) messages() []deliveredMessage {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return append([]deliveredMessage(nil), r.calls...)
+}
+
+func (r *recordingTransport) count() int {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return len(r.calls)
+}
+
+// panickingTransport stands in for a transport bug: it panics instead of returning an
 // error, so a spec can assert emit's fan-out recovers rather than crashing the process.
-type panickingPublisher struct{}
+type panickingTransport struct{}
 
-func (panickingPublisher) Publish(context.Context, string, string, []byte, map[string]string) error {
-	panic("boom")
+func (panickingTransport) plan(map[string]any) (delivery, error) {
+	return delivery{label: "boom", send: func(context.Context, string, []byte) error { panic("boom") }}, nil
 }
 
 // pubSubSubscription builds the stored shape of a GOOGLE_CLOUD_PUB_SUB subscription.
@@ -67,14 +84,18 @@ func pubSubSubscription(event, projectID, topicID string, contexts []any) entity
 var _ = Describe("eventEmitter", func() {
 	var (
 		store *Store
-		rec   *recordingPublisher
+		rec   *recordingTransport
+		hooks *recordingTransport
 		emit  *eventEmitter
 	)
 
 	BeforeEach(func() {
 		store = NewStore(map[string]collectionMeta{})
-		rec = &recordingPublisher{}
-		emit = &eventEmitter{pub: rec, store: store, enabled: true}
+		rec, hooks = recordingPubSub(), recordingWebhook()
+		emit = &eventEmitter{
+			transports: map[string]transport{targetGoogleCloudPubSub: rec, targetWebhook: hooks},
+			store:      store,
+		}
 	})
 
 	Describe("emit", func() {
@@ -85,13 +106,14 @@ var _ = Describe("eventEmitter", func() {
 
 			Expect(result.Enabled).To(BeTrue())
 			Expect(result.Published).To(Equal(1))
-			Expect(result.Topics).To(ConsistOf("local/orders"))
+			Expect(result.Targets).To(ConsistOf("local/orders"))
+			// Topics is the old name of Targets, kept for an older emit command.
+			Expect(result.Topics).To(Equal(result.Targets))
 
 			msgs := rec.messages()
 			Expect(msgs).To(HaveLen(1))
-			Expect(msgs[0].projectID).To(Equal("local"))
-			Expect(msgs[0].topicID).To(Equal("orders"))
-			Expect(msgs[0].attrs).To(HaveKeyWithValue("event", "ORDER_CREATED"))
+			Expect(msgs[0].label).To(Equal("local/orders"))
+			Expect(msgs[0].event).To(Equal("ORDER_CREATED"))
 
 			var ev webHookEvent
 			Expect(json.Unmarshal(msgs[0].data, &ev)).To(Succeed())
@@ -122,7 +144,7 @@ var _ = Describe("eventEmitter", func() {
 
 			result := emit.emit("ORDER_CREATED", map[string]any{"tenantOrderId": "t"})
 			Expect(result.Published).To(Equal(2))
-			Expect(result.Topics).To(ConsistOf("local/orders"))
+			Expect(result.Targets).To(ConsistOf("local/orders"))
 			Expect(rec.count()).To(Equal(2))
 		})
 
@@ -134,19 +156,65 @@ var _ = Describe("eventEmitter", func() {
 			Expect(rec.count()).To(Equal(0))
 		})
 
-		It("skips a target that is not a Pub/Sub topic", func() {
+		It("delivers a webhook target through its own transport", func() {
 			store.Create("subscriptions", entityDoc{
 				"event":  "ORDER_CREATED",
-				"target": map[string]any{"type": "WEBHOOK", "callbackUrl": "https://example.test/hook"},
+				"target": map[string]any{"type": targetWebhook, "callbackUrl": "http://localhost:3000/hook"},
+			})
+
+			result := emit.emit("ORDER_CREATED", map[string]any{})
+			Expect(result.Published).To(Equal(1))
+			Expect(result.Targets).To(ConsistOf("http://localhost:3000/hook"))
+			Expect(hooks.count()).To(Equal(1))
+			Expect(rec.count()).To(Equal(0))
+		})
+
+		It("reads a subscription's deprecated top-level callbackUrl as a webhook target", func() {
+			store.Create("subscriptions", entityDoc{
+				"event":       "ORDER_CREATED",
+				"callbackUrl": "http://localhost:3000/legacy",
+			})
+
+			result := emit.emit("ORDER_CREATED", map[string]any{})
+			Expect(result.Targets).To(ConsistOf("http://localhost:3000/legacy"))
+		})
+
+		It("delivers one occurrence across target types under a single eventId", func() {
+			store.Create("subscriptions", pubSubSubscription("ORDER_CREATED", "local", "orders", nil))
+			store.Create("subscriptions", entityDoc{
+				"event":  "ORDER_CREATED",
+				"target": map[string]any{"type": targetWebhook, "callbackUrl": "http://localhost:3000/hook"},
+			})
+
+			result := emit.emit("ORDER_CREATED", map[string]any{})
+			Expect(result.Published).To(Equal(2))
+			Expect(result.Targets).To(ConsistOf("local/orders", "http://localhost:3000/hook"))
+
+			var published, called webHookEvent
+			Expect(json.Unmarshal(rec.messages()[0].data, &published)).To(Succeed())
+			Expect(json.Unmarshal(hooks.messages()[0].data, &called)).To(Succeed())
+			Expect(published.EventID).To(Equal(called.EventID))
+		})
+
+		It("skips a target type no transport is configured for, naming the flag that would enable it", func() {
+			var log bytes.Buffer
+			emit.log = &log
+			store.Create("subscriptions", entityDoc{
+				"name":  "orders",
+				"event": "ORDER_CREATED",
+				"target": map[string]any{
+					"type": targetAzureServiceBus, "namespace": "ns", "queueOrTopicName": "orders",
+				},
 			})
 
 			result := emit.emit("ORDER_CREATED", map[string]any{})
 			Expect(result.Published).To(Equal(0))
+			Expect(log.String()).To(ContainSubstring("--servicebus-emulator-host"))
 		})
 
-		It("does nothing when eventing is disabled", func() {
+		It("does nothing when no transport is configured at all", func() {
 			store.Create("subscriptions", pubSubSubscription("ORDER_CREATED", "local", "orders", nil))
-			emit.enabled = false
+			emit.transports = nil
 
 			result := emit.emit("ORDER_CREATED", map[string]any{})
 			Expect(result.Enabled).To(BeFalse())
@@ -165,9 +233,9 @@ var _ = Describe("eventEmitter", func() {
 			Expect(emit.emit("", map[string]any{}).Published).To(Equal(0))
 		})
 
-		It("recovers from a panic in Publish instead of crashing the fan-out", func() {
+		It("recovers from a panic in a transport instead of crashing the fan-out", func() {
 			store.Create("subscriptions", pubSubSubscription("ORDER_CREATED", "local", "orders", nil))
-			emit.pub = panickingPublisher{}
+			emit.transports[targetGoogleCloudPubSub] = panickingTransport{}
 
 			var result emitResult
 			Expect(func() { result = emit.emit("ORDER_CREATED", map[string]any{"tenantOrderId": "t"}) }).NotTo(Panic())
@@ -176,7 +244,7 @@ var _ = Describe("eventEmitter", func() {
 	})
 
 	Describe("Close", func() {
-		It("is a no-op when the publisher holds no closable resources", func() {
+		It("is a no-op when no transport holds a closable resource", func() {
 			Expect(emit.Close()).To(Succeed())
 		})
 	})
@@ -254,8 +322,8 @@ var _ = Describe("payloadMatchesContexts", func() {
 	})
 })
 
-// lastEvent decodes the event name of the most recent published message.
-func lastEvent(rec *recordingPublisher) string {
+// lastEvent decodes the event name of the most recent delivered message.
+func lastEvent(rec *recordingTransport) string {
 	GinkgoHelper()
 	msgs := rec.messages()
 	Expect(msgs).NotTo(BeEmpty())

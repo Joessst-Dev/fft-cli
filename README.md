@@ -406,8 +406,9 @@ the spec. It holds all state in memory and forgets it on exit.
 fft emulator --port 8080
 ```
 
-It can also publish domain events to a **local** Google Pub/Sub emulator you run
-yourself — never to real Google Cloud. See the
+It can also deliver domain events to a subscription's target — a webhook on your machine,
+or a **local** Pub/Sub or Azure Service Bus emulator you run yourself — but never to a
+real cloud or a real remote endpoint. See the
 [emulator guide](https://joessst-dev.github.io/fft-cli/guide/emulator) for the stateful
 model, seeding fixtures, and driving eventing end to end.
 

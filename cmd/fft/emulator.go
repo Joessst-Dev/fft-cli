@@ -32,11 +32,13 @@ identity service, which a local server cannot stand in for.`
 // carries no operationId and is excused in readonly_test.go's commandsWithoutOperation.
 func newEmulatorCmd(deps *Deps) *cobra.Command {
 	var (
-		host       string
-		port       int
-		seed       string
-		verbose    bool
-		pubsubHost string
+		host        string
+		port        int
+		seed        string
+		verbose     bool
+		pubsubHost  string
+		sbHost      string
+		allowRemote bool
 	)
 
 	cmd := &cobra.Command{
@@ -46,12 +48,14 @@ func newEmulatorCmd(deps *Deps) *cobra.Command {
 		Args:  usageArgs(cobra.NoArgs),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			srv, err := emulator.New(emulator.Config{
-				Host:       host,
-				Port:       port,
-				Seed:       seed,
-				Verbose:    verbose,
-				Log:        cmd.ErrOrStderr(),
-				PubSubHost: pubsubHost,
+				Host:               host,
+				Port:               port,
+				Seed:               seed,
+				Verbose:            verbose,
+				Log:                cmd.ErrOrStderr(),
+				PubSubHost:         pubsubHost,
+				ServiceBusHost:     sbHost,
+				WebhookAllowRemote: allowRemote,
 			})
 			if err != nil {
 				return err
@@ -61,7 +65,13 @@ func newEmulatorCmd(deps *Deps) *cobra.Command {
 			// contract even for a command that never prints data. It prints only once
 			// the port is actually bound, so a taken-port failure doesn't follow a
 			// recipe that looks like it worked.
-			ready := func() { printEmulatorRecipe(cmd.ErrOrStderr(), port, pubsubHost) }
+			ready := func() {
+				printEmulatorRecipe(cmd.ErrOrStderr(), port, eventingStatus{
+					pubsubHost:  pubsubHost,
+					sbHost:      sbHost,
+					allowRemote: allowRemote,
+				})
+			}
 			return srv.Listen(cmd.Context(), ready)
 		},
 	}
@@ -73,7 +83,11 @@ func newEmulatorCmd(deps *Deps) *cobra.Command {
 		"Directory of JSON fixtures to preload, one <collection>.json per collection")
 	cmd.Flags().BoolVar(&verbose, "verbose", false, "Log every request to stderr")
 	cmd.Flags().StringVar(&pubsubHost, "pubsub-emulator-host", os.Getenv("PUBSUB_EMULATOR_HOST"),
-		"Local Pub/Sub emulator (host:port) to publish events to; defaults to $PUBSUB_EMULATOR_HOST, empty disables eventing")
+		"Local Pub/Sub emulator (host:port) to publish GOOGLE_CLOUD_PUB_SUB targets to; defaults to $PUBSUB_EMULATOR_HOST, empty skips them")
+	cmd.Flags().StringVar(&sbHost, "servicebus-emulator-host", "",
+		"Local Azure Service Bus emulator (host:port) to send MICROSOFT_AZURE_SERVICE_BUS targets to; empty skips them")
+	cmd.Flags().BoolVar(&allowRemote, "webhook-allow-remote", false,
+		"Call WEBHOOK callbackUrls outside the local network; off by default, so a fixture naming a real endpoint is skipped rather than called")
 
 	cmd.AddCommand(newEmulatorEmitCmd(deps))
 	return cmd
@@ -83,7 +97,7 @@ func newEmulatorCmd(deps *Deps) *cobra.Command {
 // the headless FFT_ID_TOKEN path (config.FromEnv), which hands fft a static token and
 // never contacts Firebase — the only way in, since the emulator cannot stand in for
 // Google's sign-in.
-func printEmulatorRecipe(w io.Writer, port int, pubsubHost string) {
+func printEmulatorRecipe(w io.Writer, port int, eventing eventingStatus) {
 	base := fmt.Sprintf("http://localhost:%d", port)
 
 	fmt.Fprintf(w, "fft emulator listening on %s\n\n", base)
@@ -94,25 +108,45 @@ func printEmulatorRecipe(w io.Writer, port int, pubsubHost string) {
 	fmt.Fprintf(w, "  export %s=emulator-token\n", config.EnvIDToken)
 	fmt.Fprintln(w, "\nThen: fft facility create --file facility.json && fft facility list")
 
-	printEmulatorEventing(w, pubsubHost)
+	printEmulatorEventing(w, eventing)
 	fmt.Fprintln(w, "\nPress Ctrl-C to stop.")
 }
 
-// printEmulatorEventing tells the user whether events will be published and, when
-// they will, how to point a subscription at a topic. Eventing is off unless a
-// Pub/Sub emulator host is configured — the emulator never publishes to real Google
-// Cloud.
-func printEmulatorEventing(w io.Writer, pubsubHost string) {
-	if pubsubHost == "" {
-		fmt.Fprintf(w, "\nEventing: off (set --pubsub-emulator-host or %s to publish events).\n",
-			"PUBSUB_EMULATOR_HOST")
-		return
+// eventingStatus is what the startup notice needs to say where each subscription target
+// type will be delivered — or why it will not be.
+type eventingStatus struct {
+	pubsubHost  string
+	sbHost      string
+	allowRemote bool
+}
+
+// printEmulatorEventing reports each subscription target type separately, because they
+// are enabled separately: a broker target needs a local emulator to send to, while a
+// webhook target needs nothing but a callback URL the emulator is willing to call.
+func printEmulatorEventing(w io.Writer, eventing eventingStatus) {
+	fmt.Fprintln(w, "\nEventing, by subscription target:")
+
+	if eventing.pubsubHost == "" {
+		fmt.Fprintln(w, "  GOOGLE_CLOUD_PUB_SUB         skipped (set --pubsub-emulator-host or PUBSUB_EMULATOR_HOST)")
+	} else {
+		fmt.Fprintf(w, "  GOOGLE_CLOUD_PUB_SUB         publishing to the Pub/Sub emulator at %s\n", eventing.pubsubHost)
 	}
 
-	fmt.Fprintf(w, "\nEventing: publishing to the Pub/Sub emulator at %s.\n", pubsubHost)
-	fmt.Fprintln(w, "Register a subscription, then mutations publish to its topic:")
+	if eventing.allowRemote {
+		fmt.Fprintln(w, "  WEBHOOK                      calling any callbackUrl (--webhook-allow-remote is set)")
+	} else {
+		fmt.Fprintln(w, "  WEBHOOK                      calling local callbackUrls (--webhook-allow-remote to widen)")
+	}
+
+	if eventing.sbHost == "" {
+		fmt.Fprintln(w, "  MICROSOFT_AZURE_SERVICE_BUS  skipped (set --servicebus-emulator-host)")
+	} else {
+		fmt.Fprintf(w, "  MICROSOFT_AZURE_SERVICE_BUS  sending to the Service Bus emulator at %s\n", eventing.sbHost)
+	}
+
+	fmt.Fprintln(w, "\nRegister a subscription, then mutations deliver to its target:")
 	fmt.Fprintln(w, `  fft api addSubscription --data '{"name":"orders","event":"ORDER_CREATED",`+
-		`"target":{"type":"GOOGLE_CLOUD_PUB_SUB","projectId":"local","topicId":"orders"}}'`)
+		`"target":{"type":"WEBHOOK","callbackUrl":"http://localhost:3000/hook"}}'`)
 	fmt.Fprintln(w, "Emit an event that no CRUD triggers:")
 	fmt.Fprintln(w, "  fft emulator emit PICK_JOB_PICKING_COMMENCED --payload-file pickjob.json")
 }
@@ -174,9 +208,9 @@ func newEmulatorEmitCmd(deps *Deps) *cobra.Command {
 
 // emitEvent POSTs the event to the emulator and reports the outcome on stderr — the
 // command produces no stdout data, so the summary is a notice like every other. A zero
-// count has two causes with different fixes: eventing off entirely, or on but no
-// subscription matched, so it names the one that applies rather than always pointing at
-// a subscription.
+// count has two causes with different fixes: eventing off entirely, or on but nothing
+// matched, so it names the one that applies rather than always pointing at a
+// subscription.
 func emitEvent(ctx context.Context, w io.Writer, base string, body []byte) error {
 	endpoint := strings.TrimRight(base, "/") + "/_emulator/emit"
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
@@ -202,20 +236,27 @@ func emitEvent(ctx context.Context, w io.Writer, base string, body []byte) error
 	var result struct {
 		Enabled   bool     `json:"enabled"`
 		Published int      `json:"published"`
-		Topics    []string `json:"topics"`
+		Targets   []string `json:"targets"`
+		Topics    []string `json:"topics"` // the name targets went by before the other two targets existed
 	}
 	if err := json.Unmarshal(raw, &result); err != nil {
 		return fmt.Errorf("decode emulator response: %w", err)
 	}
+	// An emulator old enough to predate the other two targets answers with topics only,
+	// which is the same list under its old name.
+	targets := result.Targets
+	if len(targets) == 0 {
+		targets = result.Topics
+	}
 
 	switch {
 	case !result.Enabled:
-		fmt.Fprintf(w, "published 0 — eventing is off (set --pubsub-emulator-host or %s to publish)\n",
-			"PUBSUB_EMULATOR_HOST")
+		fmt.Fprintln(w, "published 0 — the emulator has no delivery transport configured")
 	case result.Published == 0:
-		fmt.Fprintln(w, "published 0 — no subscription matched (register one with 'fft api addSubscription')")
+		fmt.Fprintln(w, "published 0 — nothing matched and could be delivered "+
+			"(register a subscription with 'fft api addSubscription'; the emulator's log says why one was skipped)")
 	default:
-		fmt.Fprintf(w, "published %d to %s\n", result.Published, strings.Join(result.Topics, ", "))
+		fmt.Fprintf(w, "published %d to %s\n", result.Published, strings.Join(targets, ", "))
 	}
 	return nil
 }
