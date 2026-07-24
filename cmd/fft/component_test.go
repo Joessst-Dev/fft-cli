@@ -49,6 +49,19 @@ var _ = Describe("fft component", func() {
 			Expect(c.errOut()).To(ContainSubstring("fake component weather speaking"))
 		})
 
+		It("does not impose the global --timeout on a long-running component", func() {
+			c.installFake(fakeManifest("weather"))
+			// A component runs until it is done — the emulator runs until Ctrl-C — so the
+			// per-API-call --timeout must not bound it. With the bug, a 5ms deadline would
+			// kill this component before its 80ms sleep finished; without it, the sleep
+			// completes and the component exits cleanly. The deadline is set through the
+			// env, not a flag, so it does not land in the args the stub passes through.
+			c.setenv("FFT_TIMEOUT", "5ms")
+			c.setenv(envFakeSleep, "80")
+
+			Expect(c.run("weather")).To(Equal(exitcode.OK))
+		})
+
 		It("exits with the component's status, and says nothing over its own message", func() {
 			c.installFake(fakeManifest("weather"))
 			c.setenv(envFakeExit, "6")
@@ -81,6 +94,23 @@ var _ = Describe("fft component", func() {
 			Expect(c.run("facility", "--help")).To(Equal(exitcode.OK))
 			Expect(c.out()).To(ContainSubstring("Manage the facilities of your tenant"))
 			Expect(c.errOut()).To(ContainSubstring(`component declares a command called "facility"`))
+		})
+
+		It("refuses a name a generated resource group will take", func() {
+			// `picking` is a generated group (fft picking get-pick-job, …), created after
+			// components register. Without reserving the group names it would slip past the
+			// collision check now and be silently adopted as the group's parent — a stub
+			// with flag parsing off, breaking the generated commands under it. It must be
+			// refused like any other name fft already owns.
+			m := fakeManifest("picking")
+			c.installFake(m)
+
+			Expect(c.run("picking", "--help")).To(Equal(exitcode.OK))
+			Expect(c.errOut()).To(ContainSubstring(`component declares a command called "picking"`))
+
+			// The generated group is intact: its commands are still there, not swallowed by
+			// a component stub.
+			Expect(c.out()).To(ContainSubstring("get-pick-job"))
 		})
 	})
 

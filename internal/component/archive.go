@@ -40,6 +40,7 @@ func unpackTarGz(archive []byte, dir string) error {
 	defer func() { _ = gz.Close() }()
 
 	tr := tar.NewReader(gz)
+	budget := &writeBudget{}
 	for files := 0; ; files++ {
 		if files > maxFiles {
 			return fmt.Errorf("the archive holds more than %d files", maxFiles)
@@ -53,6 +54,14 @@ func unpackTarGz(archive []byte, dir string) error {
 			return fmt.Errorf("read the archive: %w", err)
 		}
 
+		switch header.Typeflag {
+		case tar.TypeXGlobalHeader, tar.TypeXHeader:
+			// Not a file: a pax extended-header record, which git and some tar tools
+			// prepend. It carries no path of its own to unpack — skip it, rather than
+			// reject the whole archive as "not a regular file".
+			continue
+		}
+
 		target, err := safeJoin(dir, header.Name)
 		if err != nil {
 			return err
@@ -64,7 +73,7 @@ func unpackTarGz(archive []byte, dir string) error {
 				return fmt.Errorf("create %s: %w", target, err)
 			}
 		case tar.TypeReg:
-			if err := writeFile(target, tr, modeFor(header.FileInfo().Mode())); err != nil {
+			if err := writeFile(target, tr, modeFor(header.FileInfo().Mode()), budget); err != nil {
 				return err
 			}
 		default:
@@ -85,6 +94,7 @@ func unpackZip(archive []byte, dir string) error {
 		return fmt.Errorf("the archive holds more than %d files", maxFiles)
 	}
 
+	budget := &writeBudget{}
 	for _, entry := range zr.File {
 		target, err := safeJoin(dir, entry.Name)
 		if err != nil {
@@ -105,7 +115,7 @@ func unpackZip(archive []byte, dir string) error {
 		if err != nil {
 			return fmt.Errorf("read %s from the archive: %w", entry.Name, err)
 		}
-		err = writeFile(target, rc, modeFor(entry.FileInfo().Mode()))
+		err = writeFile(target, rc, modeFor(entry.FileInfo().Mode()), budget)
 		_ = rc.Close()
 		if err != nil {
 			return err
@@ -126,9 +136,31 @@ func modeFor(mode fs.FileMode) fs.FileMode {
 	return fileMode
 }
 
-// writeFile creates one file of an unpacked archive, capped so that a small archive
-// cannot decompress into a large disk.
-func writeFile(target string, r io.Reader, mode fs.FileMode) error {
+// writeBudget caps the total bytes an archive may unpack to.
+//
+// The per-file cap alone bounds one file; this bounds the sum, so a small archive of
+// many near-cap files cannot fill the disk. It is defence in depth behind the
+// checksum — an archive that reaches this point already matched the digest the
+// release published — but a running total costs nothing and closes the gap for a
+// hostile *release*, which the checksum cannot.
+type writeBudget struct{ written int64 }
+
+// maxTotal is the ceiling on an unpacked component: generous for a static binary and
+// its manifest, and far below a disk-filling bomb.
+const maxTotal = 512 << 20
+
+func (b *writeBudget) add(n int64) error {
+	b.written += n
+	if b.written > maxTotal {
+		return fmt.Errorf("the archive unpacks to more than %d bytes", maxTotal)
+	}
+	return nil
+}
+
+// writeFile creates one file of an unpacked archive, capped per file and against the
+// archive's running total, so that a small archive cannot decompress into a large
+// disk.
+func writeFile(target string, r io.Reader, mode fs.FileMode, budget *writeBudget) error {
 	if err := os.MkdirAll(filepath.Dir(target), dirMode); err != nil {
 		return fmt.Errorf("create %s: %w", filepath.Dir(target), err)
 	}
@@ -145,6 +177,9 @@ func writeFile(target string, r io.Reader, mode fs.FileMode) error {
 	}
 	if written > maxFile {
 		return fmt.Errorf("write %s: larger than %d bytes", target, maxFile)
+	}
+	if err := budget.add(written); err != nil {
+		return fmt.Errorf("write %s: %w", target, err)
 	}
 	return f.Close()
 }
@@ -165,6 +200,7 @@ func copyTree(src, dst string) error {
 	}
 
 	files := 0
+	budget := &writeBudget{}
 	return filepath.WalkDir(src, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -204,7 +240,7 @@ func copyTree(src, dst string) error {
 		}
 		defer func() { _ = f.Close() }()
 
-		return writeFile(target, f, modeFor(entry.Mode()))
+		return writeFile(target, f, modeFor(entry.Mode()), budget)
 	})
 }
 

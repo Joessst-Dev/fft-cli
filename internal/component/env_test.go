@@ -29,7 +29,6 @@ var _ = Describe("the environment a component is given", func() {
 		BaseURL:   "https://tenant.example",
 		Email:     "dev@example.com",
 		Token:     "minted-token",
-		Project:   "acme",
 		Tenant:    "acme-tenant",
 		ProjectID: "ocff-acme-dev",
 	}

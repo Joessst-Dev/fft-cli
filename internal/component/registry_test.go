@@ -209,11 +209,16 @@ var _ = Describe("the registry", func() {
 
 var _ = Describe("Root", func() {
 	It("prefers FFT_COMPONENT_DIR", func() {
-		dir, enabled, err := component.Root(lookup(map[string]string{component.EnvRoot: "/tmp/mine"}))
+		// An already-absolute path, so Root's filepath.Abs is a no-op and returns it
+		// unchanged — and absolute in the platform's own spelling, since a hardcoded
+		// POSIX "/tmp/mine" becomes "C:\tmp\mine" under filepath.Abs on Windows.
+		want := GinkgoT().TempDir()
+
+		dir, enabled, err := component.Root(lookup(map[string]string{component.EnvRoot: want}))
 
 		Expect(err).NotTo(HaveOccurred())
 		Expect(enabled).To(BeTrue())
-		Expect(dir).To(Equal("/tmp/mine"))
+		Expect(dir).To(Equal(want))
 	})
 
 	// Set-but-empty is a different answer from unset, and it is the one `fft gen-docs`

@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -41,6 +42,11 @@ const (
 	// envFakeStdout is what it writes to stdout instead of its usual report, for the
 	// specs about the output contract.
 	envFakeStdout = "SPEC_COMPONENT_STDOUT"
+
+	// envFakeSleep is how long the fake component sleeps before it reports, in
+	// milliseconds. It is how the timeout spec proves a component is not killed by the
+	// global --timeout: sleep past a tiny deadline and still exit cleanly.
+	envFakeSleep = "SPEC_COMPONENT_SLEEP_MS"
 )
 
 // init makes this binary a component when it is run as one.
@@ -70,6 +76,10 @@ type fakeReport struct {
 // streams straight through by asserting that this stdout is fft's stdout, byte for
 // byte, with fft's own notices nowhere in it.
 func runFakeComponent(stdout, stderr io.Writer, args []string) {
+	if ms, _ := strconv.Atoi(os.Getenv(envFakeSleep)); ms > 0 {
+		time.Sleep(time.Duration(ms) * time.Millisecond)
+	}
+
 	report := fakeReport{Args: args, Env: map[string]string{}}
 	for _, entry := range os.Environ() {
 		if name, value, ok := strings.Cut(entry, "="); ok && strings.HasPrefix(name, "FFT_") {

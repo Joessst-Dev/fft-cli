@@ -154,6 +154,40 @@ func tarGz(files map[string]string) []byte {
 	return buf.Bytes()
 }
 
+// tarGzWithPaxHeader is tarGz with a pax global-header record prepended, the way
+// git-archive writes one.
+func tarGzWithPaxHeader(files map[string]string) []byte {
+	var buf bytes.Buffer
+
+	gz := gzip.NewWriter(&buf)
+	tw := tar.NewWriter(gz)
+
+	Expect(tw.WriteHeader(&tar.Header{
+		Name:     "pax_global_header",
+		Typeflag: tar.TypeXGlobalHeader,
+		PAXRecords: map[string]string{
+			"comment": "0000000000000000000000000000000000000000",
+		},
+	})).To(Succeed())
+
+	for name, body := range files {
+		mode := int64(0o644)
+		if filepath.Dir(name) == "bin" {
+			mode = 0o755
+		}
+		Expect(tw.WriteHeader(&tar.Header{
+			Name: name, Mode: mode, Size: int64(len(body)), Typeflag: tar.TypeReg,
+		})).To(Succeed())
+		_, err := tw.Write([]byte(body))
+		Expect(err).NotTo(HaveOccurred())
+	}
+
+	Expect(tw.Close()).To(Succeed())
+	Expect(gz.Close()).To(Succeed())
+
+	return buf.Bytes()
+}
+
 const weatherManifest = `apiVersion: 1
 name: weather
 version: 1.0.0
@@ -268,6 +302,22 @@ var _ = Describe("the installer", func() {
 
 			_, err := inst.Prepare(context.Background(), component.Source{Repo: "acme/weather"})
 			Expect(err).To(MatchError(ContainSubstring("does not list")))
+		})
+
+		// git-archive and some tar tools prepend a pax global-header record. It is not a
+		// file and carries no path to unpack, so it must be skipped, not rejected as
+		// "not a regular file" — which would fail an install of an ordinary tarball.
+		It("tolerates a pax global header at the front of the tarball", func() {
+			hub.publish(assetName("weather", "1.0.0"), tarGzWithPaxHeader(map[string]string{
+				"component.yaml":  weatherManifest,
+				"bin/fft-weather": "#!/bin/sh\n",
+			}))
+
+			plan, err := inst.Prepare(context.Background(), component.Source{Repo: "acme/weather"})
+			Expect(err).NotTo(HaveOccurred())
+			defer inst.Discard(plan)
+
+			Expect(plan.Manifest.Name).To(Equal("weather"))
 		})
 
 		It("reports a release that is cosign-signed", func() {

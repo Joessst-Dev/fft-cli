@@ -49,7 +49,6 @@ type SessionInfo struct {
 	BaseURL     string
 	Email       string
 	Token       string
-	Project     string
 	Tenant      string
 	ProjectID   string
 	Environment string

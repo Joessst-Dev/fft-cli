@@ -11,6 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/Joessst-Dev/fft-cli/internal/api"
 	"github.com/Joessst-Dev/fft-cli/internal/buildinfo"
 	"github.com/Joessst-Dev/fft-cli/internal/component"
 	"github.com/Joessst-Dev/fft-cli/internal/output"
@@ -97,13 +98,24 @@ func addComponentCommands(deps *Deps, root *cobra.Command) {
 		return
 	}
 
+	// The names a component may not take. Two sources, because addGeneratedCommands
+	// has not run yet: the curated commands already in the tree (found by root.Find),
+	// and the resource-group names the generated step is *about* to create. Without
+	// the second, a component named `picking` would slip past this check now and then
+	// be silently adopted as the parent of the generated picking group — breaking both
+	// its own "everything reaches me untouched" contract and the generated commands'
+	// help. Reserved here so the collision is refused, with a reason, instead.
+	reserved := generatedGroupNames()
+
 	for _, c := range deps.Components.All() {
 		if c.Kind != component.KindCommand {
 			continue
 		}
 
 		for _, spec := range c.Commands {
-			if existing, _, err := root.Find([]string{spec.Name}); err == nil && existing != root {
+			existing, _, findErr := root.Find([]string{spec.Name})
+			taken := (findErr == nil && existing != nil && existing != root) || reserved[spec.Name]
+			if taken {
 				// Kept rather than printed: this runs while the tree is being built, before
 				// the flags are parsed and before there is a printer to write it with.
 				// [Deps.complete] flushes it once there is. A collision that was silently
@@ -117,6 +129,23 @@ func addComponentCommands(deps *Deps, root *cobra.Command) {
 			root.AddCommand(newComponentStub(deps, c, spec))
 		}
 	}
+}
+
+// generatedGroupNames is the set of resource-group names addGeneratedCommands will
+// create — one per distinct tag across the spec. A component command may not take one
+// of these, because the generated step reuses an existing same-named child as its
+// group parent and would otherwise adopt a component stub.
+//
+// Every operation's group is reserved, claimed or not: a claim suppresses a single
+// generated command, not the group, and over-reserving a name that a fully-claimed
+// tag would not have created only forbids a component one more name — which fails
+// safe, the way reservedFlags does.
+func generatedGroupNames() map[string]bool {
+	names := make(map[string]bool)
+	for _, op := range api.Operations() {
+		names[groupFor(op)] = true
+	}
+	return names
 }
 
 // newComponentStub is the cobra command that stands in for a component's.
@@ -191,8 +220,16 @@ func runComponent(deps *Deps, cmd *cobra.Command, c component.Component, spec co
 		return &component.NotInstalledError{Name: c.Name, Command: cmd.CommandPath()}
 	}
 
-	ctx, cancel := deps.Context(cmd)
-	defer cancel()
+	// The command's own context, not deps.Context — a component must not inherit
+	// --timeout. That flag bounds a single API call, and a component is not one: the
+	// emulator runs until Ctrl-C, and a 30-second default deadline would kill it
+	// mid-serve. The context still carries the signal cancellation the root installs,
+	// so Ctrl-C drains the child cleanly; how long the child runs is the child's own
+	// affair, and any deadline it wants is a flag it parses itself.
+	ctx := cmd.Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
 
 	env, err := deps.componentEnv(ctx, c, spec)
 	if err != nil {
@@ -258,7 +295,6 @@ func (d *Deps) componentSession(ctx context.Context) (*component.SessionInfo, er
 		BaseURL:     p.BaseURL,
 		Email:       p.Email,
 		Token:       token,
-		Project:     p.Name,
 		Tenant:      p.Tenant,
 		ProjectID:   p.ProjectID,
 		Environment: p.Environment,
