@@ -307,7 +307,16 @@ var _ = Describe("the installer", func() {
 		// git-archive and some tar tools prepend a pax global-header record. It is not a
 		// file and carries no path to unpack, so it must be skipped, not rejected as
 		// "not a regular file" — which would fail an install of an ordinary tarball.
+		//
+		// A tar-only concern: a pax header cannot appear in a zip, and Windows release
+		// archives are zips (assetName picks the suffix), so the scenario does not exist
+		// there — publishing a tarball under a .zip name would only prove unpackZip
+		// rejects non-zip bytes, which is a different test.
 		It("tolerates a pax global header at the front of the tarball", func() {
+			if runtime.GOOS == "windows" {
+				Skip("pax global headers are a tar feature; Windows components ship as zip")
+			}
+
 			hub.publish(assetName("weather", "1.0.0"), tarGzWithPaxHeader(map[string]string{
 				"component.yaml":  weatherManifest,
 				"bin/fft-weather": "#!/bin/sh\n",
