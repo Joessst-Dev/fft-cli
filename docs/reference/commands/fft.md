@@ -26,7 +26,7 @@ FFT_OUTPUT, --project becomes FFT_PROJECT, and so on.
 ## Usage
 
 ```
-fft
+fft [flags]
 ```
 
 ## Flags

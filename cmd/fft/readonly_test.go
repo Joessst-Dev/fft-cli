@@ -66,12 +66,6 @@ var commandsWithoutOperation = map[string]string{
 
 	"fft update check": "asks GitHub for the latest release",
 
-	// Asks a running emulator to publish an event over HTTP. The emulator is not a
-	// tenant — it *is* the thing requests are made to — so this reaches no tenant.
-	// (`fft emulator` itself is now a group and addresses nothing, so it needs no
-	// excuse; running it starts the server.)
-	"fft emulator emit": "asks a local emulator to publish an event; makes no request to any tenant",
-
 	// Renders the command tree to Markdown for the docs site. Builds a tree and
 	// prints it — no project, no network, nothing that reaches the tenant.
 	"fft gen-docs": "writes the CLI reference to local disk; no network",

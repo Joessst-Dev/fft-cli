@@ -21,6 +21,11 @@ runs.
 `ORIGIN` says who wrote it: `first-party` for one `fft` ships, `community` for anything
 else. It is the column that decides how much the others are worth trusting.
 
+The **emulator** is the reference first-party component: it used to be built into `fft`
+and is now installed separately, which is what took a third off the CLI's download. Its
+two broker transports — `emulator-pubsub` and `emulator-servicebus` — are components too.
+See [the emulator](emulator.md).
+
 ## Installing
 
 ```sh

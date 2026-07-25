@@ -7,6 +7,12 @@
 /fft
 /cmd/fft/fft
 /cmd/fft/fft.exe
+# The component binaries, when built by hand at the repo root (goreleaser puts them
+# under dist/). Named explicitly, like /fft, so the pattern cannot swallow a source
+# directory that shares the name.
+/fft-emulator
+/fft-emulator-pubsub
+/fft-emulator-servicebus
 /docsgen
 
 # Test and coverage output

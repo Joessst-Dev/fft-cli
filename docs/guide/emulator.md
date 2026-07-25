@@ -18,6 +18,21 @@ remote endpoint.
 Run `fft emulator --help` and `fft emulator emit --help` for the flags. The notes below
 are the things `--help` will not tell you.
 
+## Installing it
+
+The emulator is a **component** — a separate binary fft ships but does not bundle, so that
+a CLI most people use only to talk to a tenant does not carry a server and two cloud SDKs.
+`fft emulator` on a fresh install explains this and gives you the one command that fixes
+it:
+
+```sh
+fft component install emulator
+```
+
+The container image has it pre-installed, so `docker run …/fft emulator` needs no step.
+Delivering events to a **local** Pub/Sub or Azure Service Bus emulator needs one more
+component each — see [Eventing](https://github.com/Joessst-Dev/fft-cli/blob/main/README.md#eventing).
+
 ## Starting it
 
 ```sh
@@ -132,11 +147,21 @@ reach your own machine:
 | Target | Delivered when | Reaches |
 | --- | --- | --- |
 | `WEBHOOK` | always | a **local** callback URL, unless you widen it |
-| `GOOGLE_CLOUD_PUB_SUB` | `--pubsub-emulator-host` is set | that **local** Pub/Sub emulator, never real Google Cloud |
-| `MICROSOFT_AZURE_SERVICE_BUS` | `--servicebus-emulator-host` is set | that **local** Service Bus emulator, never real Azure |
+| `GOOGLE_CLOUD_PUB_SUB` | the `emulator-pubsub` component is installed and `--pubsub-emulator-host` is set | that **local** Pub/Sub emulator, never real Google Cloud |
+| `MICROSOFT_AZURE_SERVICE_BUS` | the `emulator-servicebus` component is installed and `--servicebus-emulator-host` is set | that **local** Service Bus emulator, never real Azure |
+
+Webhook delivery is built into the emulator; the two broker transports are **components**
+of their own, because they carry the cloud SDKs that made the emulator heavy. Install the
+one you need:
+
+```sh
+fft component install emulator-pubsub
+fft component install emulator-servicebus
+```
 
 Startup prints which of the three are live, on stderr. A target whose transport is not
-configured is stored and matched but never delivered to.
+installed — or installed but not pointed at a host — is stored and matched but never
+delivered to, and the startup notice says which of the two it is.
 
 ### Webhook targets
 
@@ -168,11 +193,13 @@ target it means.
 
 ### Pub/Sub targets
 
-Point the emulator at a local Pub/Sub emulator and its client is pinned to that host, with
+Install the transport, then point the emulator at a local Pub/Sub emulator. The transport
+is a separate process the emulator starts; its client is pinned to that host, with
 authentication disabled and an insecure transport, so it physically cannot reach anything
 else:
 
 ```sh
+fft component install emulator-pubsub
 fft emulator --pubsub-emulator-host localhost:8085
 ```
 
@@ -187,11 +214,12 @@ The topic is created on first publish, so it need not exist yet.
 
 ### Service Bus targets
 
-Point the emulator at a local [Azure Service Bus
+Install the transport, then point the emulator at a local [Azure Service Bus
 emulator](https://learn.microsoft.com/en-us/azure/service-bus-messaging/test-locally-with-service-bus-emulator)
 and `MICROSOFT_AZURE_SERVICE_BUS` targets are sent over AMQP:
 
 ```sh
+fft component install emulator-servicebus
 fft emulator --servicebus-emulator-host localhost:5672
 ```
 
@@ -358,9 +386,12 @@ curl -s -X PUT http://localhost:8085/v1/projects/local/topics/orders
 curl -s -X PUT http://localhost:8085/v1/projects/local/subscriptions/reader -H 'Content-Type: application/json' -d '{"topic":"projects/local/topics/orders"}'
 ```
 
-**2. Start the emulator** pointed at Pub/Sub, and export its recipe in another shell:
+**2. Start the emulator** pointed at Pub/Sub, and export its recipe in another shell.
+Install the Pub/Sub transport first if you have not — the emulator's startup notice will
+tell you if it is missing:
 
 ```sh
+fft component install emulator-pubsub
 fft emulator --pubsub-emulator-host localhost:8085
 ```
 

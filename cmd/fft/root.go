@@ -363,7 +363,6 @@ func newRootCmd(deps *Deps) *cobra.Command {
 		newAPICmd(deps),
 		newSkillCmd(deps),
 		newUpdateCmd(deps),
-		newEmulatorCmd(deps),
 		newComponentCmd(deps),
 		newGenDocsCmd(deps),
 	} {
