@@ -3728,15 +3728,18 @@ func (e NotificationPriorityPriorityLabelEnumFilterNotEq) Valid() bool {
 
 // Defines values for OperativeEntityEntityType.
 const (
+	HANDOVERCONTAINER      OperativeEntityEntityType = "HANDOVER_CONTAINER"
 	HANDOVERJOB            OperativeEntityEntityType = "HANDOVER_JOB"
 	ITEMRETURNJOB          OperativeEntityEntityType = "ITEM_RETURN_JOB"
 	LINKEDSERVICEJOBS      OperativeEntityEntityType = "LINKED_SERVICE_JOBS"
+	LOADUNIT               OperativeEntityEntityType = "LOAD_UNIT"
 	PACKINGTARGETCONTAINER OperativeEntityEntityType = "PACKING_TARGET_CONTAINER"
 	PACKJOB                OperativeEntityEntityType = "PACK_JOB"
 	PARCEL                 OperativeEntityEntityType = "PARCEL"
 	PARCELINFORMATION      OperativeEntityEntityType = "PARCEL_INFORMATION"
 	PICKJOB                OperativeEntityEntityType = "PICK_JOB"
 	RESTOWITEM             OperativeEntityEntityType = "RESTOW_ITEM"
+	SERVICECONTAINER       OperativeEntityEntityType = "SERVICE_CONTAINER"
 	SERVICEJOB             OperativeEntityEntityType = "SERVICE_JOB"
 	SHIPMENT               OperativeEntityEntityType = "SHIPMENT"
 	SHIPPINGINFORMATION    OperativeEntityEntityType = "SHIPPING_INFORMATION"
@@ -3745,11 +3748,15 @@ const (
 // Valid indicates whether the value is a known member of the OperativeEntityEntityType enum.
 func (e OperativeEntityEntityType) Valid() bool {
 	switch e {
+	case HANDOVERCONTAINER:
+		return true
 	case HANDOVERJOB:
 		return true
 	case ITEMRETURNJOB:
 		return true
 	case LINKEDSERVICEJOBS:
+		return true
+	case LOADUNIT:
 		return true
 	case PACKINGTARGETCONTAINER:
 		return true
@@ -3762,6 +3769,8 @@ func (e OperativeEntityEntityType) Valid() bool {
 	case PICKJOB:
 		return true
 	case RESTOWITEM:
+		return true
+	case SERVICECONTAINER:
 		return true
 	case SERVICEJOB:
 		return true

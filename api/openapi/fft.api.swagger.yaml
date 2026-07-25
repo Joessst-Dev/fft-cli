@@ -50165,6 +50165,10 @@ components:
           description: the reference to the operativeContainerType
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
+        operativeProcessRef:
+          description: Reference to related operative process
+          example: 019f5b8e-d580-767f-a28d-3fe569bd0064
+          type: string
         pickJobRefs:
           description: List of corresponding pickjob Ids
           example:
@@ -54923,6 +54927,9 @@ components:
             - ITEM_RETURN_JOB
             - LINKED_SERVICE_JOBS
             - PACKING_TARGET_CONTAINER
+            - LOAD_UNIT
+            - SERVICE_CONTAINER
+            - HANDOVER_CONTAINER
           type: string
       required:
         - entityRef
