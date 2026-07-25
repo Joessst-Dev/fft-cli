@@ -93,20 +93,31 @@ func newTransports(cfg Config) (map[string]transport, map[string]string) {
 		// they disagree the handshake wins, because it is the running code — but the
 		// disagreement is worth saying out loud, since the manifest is what the user read
 		// before installing it.
+		//
+		// Register the targets this transport wins, and skip the ones another already
+		// serves. It is kept alive if it registered anything and closed only if it won
+		// nothing — closing it while it still holds a target another loop iteration
+		// registered under it would leave a live-looking target pointed at a dead child.
+		registered := 0
 		for _, target := range t.targets {
 			if !c.Delivers(target) {
 				logf(cfg.Log, "emulator: the %s transport delivers %s, which its manifest does not declare", c.Name, target)
 			}
-			// Two transports claiming one target: keep the first and close the second,
-			// rather than overwrite the map entry and leak the first's child process for
-			// the life of the emulator. First-installed wins is arbitrary but stable, and
-			// the collision is worth a line — the user installed two things that fight.
 			if _, taken := out[target]; taken {
 				logf(cfg.Log, "emulator: %s also delivers %s, which another transport already does; ignoring it", c.Name, target)
-				_ = t.Close()
-				break
+				continue
 			}
 			out[target] = t
+			registered++
+		}
+
+		// A transport that greeted successfully but delivers nothing new — every target
+		// it claimed was already served, or it answered hello with no targets at all — is
+		// a child that would otherwise run untouched for the emulator's whole life. Close
+		// it: nothing routes to it.
+		if registered == 0 {
+			logf(cfg.Log, "emulator: the %s transport registered no targets; stopping it", c.Name)
+			_ = t.Close()
 		}
 	}
 	return out, reasons

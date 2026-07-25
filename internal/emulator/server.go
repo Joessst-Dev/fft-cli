@@ -86,11 +86,15 @@ func New(cfg Config) (*Server, error) {
 	}
 	app.Use(permissiveAuth())
 
+	// Building the emitter may start transport child processes. From here on every
+	// error return must close them, or New hands the caller an error and leaves
+	// orphans behind — the caller never got a Server to call Close on.
 	events := newEventEmitter(cfg, store)
 	registerRoutes(app, ops, &handlers{store: store, events: events})
 
 	if cfg.Seed != "" {
 		if err := seed(store, cfg.Seed); err != nil {
+			_ = events.Close()
 			return nil, fmt.Errorf("seed the emulator: %w", err)
 		}
 	}
@@ -174,13 +178,15 @@ func (s *Server) Eventing() []TargetStatus {
 // ctx is the command's context, which the root cancels on SIGINT/SIGTERM — so Ctrl-C
 // drains the server and exits 0.
 func (s *Server) Listen(ctx context.Context, ready func()) error {
+	// The transports were started in New, so they must be released even on the paths
+	// that never bind a port — a taken port would otherwise leave the transport
+	// children running after Listen returned its error.
+	defer func() { _ = s.events.Close() }()
+
 	ln, err := net.Listen("tcp", s.addr)
 	if err != nil {
 		return err
 	}
-	// Once the port is bound the emitter's clients may be dialed, so release them on
-	// every exit path — a long-running session must not leak the Pub/Sub connections.
-	defer func() { _ = s.events.Close() }()
 	if ready != nil {
 		ready()
 	}

@@ -166,25 +166,31 @@ func installFakeTransport() *component.Registry {
 	GinkgoHelper()
 
 	root := GinkgoT().TempDir()
-	dir := filepath.Join(root, "spec-transport")
-	Expect(os.MkdirAll(filepath.Join(dir, "bin"), 0o755)).To(Succeed())
+	writeFakeTransport(root, "spec-transport", targetGoogleCloudPubSub)
+	return component.Open(root, component.WithFirstParty(nil))
+}
 
+// writeFakeTransport lays one transport component down under root, delivering the
+// given targets. Several may share a root, which is how a collision is set up.
+func writeFakeTransport(root, name string, targets ...string) {
+	GinkgoHelper()
+
+	dir := filepath.Join(root, name)
+	Expect(os.MkdirAll(filepath.Join(dir, "bin"), 0o755)).To(Succeed())
 	Expect(copyExecutable(fakeTransportBinary(), filepath.Join(dir, "bin", execName("transport")))).To(Succeed())
 
 	m := component.Manifest{
 		APIVersion: component.APIVersion,
-		Name:       "spec-transport",
+		Name:       name,
 		Version:    "1.0.0",
 		Kind:       component.KindTransport,
 		Exec:       "bin/" + execName("transport"),
-		Targets:    []string{targetGoogleCloudPubSub},
+		Targets:    targets,
 		Env:        []string{envFakeTransport},
 	}
 	data, err := yaml.Marshal(m)
 	Expect(err).NotTo(HaveOccurred())
 	Expect(os.WriteFile(filepath.Join(dir, component.ManifestName), data, 0o600)).To(Succeed())
-
-	return component.Open(root, component.WithFirstParty(nil))
 }
 
 // execName is what the executable is called on this platform.
@@ -261,6 +267,25 @@ var _ = Describe("a transport component", func() {
 		Eventually(log.String).Should(ContainSubstring(`sent ORDER_CREATED {"event":"ORDER_CREATED","eventId":"abc"}`))
 	})
 
+	It("does not report a confirmed delivery as failed when the caller's context has lapsed", func() {
+		// The emitter's ctx is a deadline shared across the whole fan-out. A send that
+		// the child confirmed must return nil even if that shared deadline has since
+		// expired — reporting a landed message as failed (and killing the child) because
+		// some other target was slow was the round-1 regression.
+		transports, _, _ := newSet(fakeNormal)
+
+		d, err := transports[targetGoogleCloudPubSub].plan(map[string]any{"topicId": "orders"})
+		Expect(err).NotTo(HaveOccurred())
+
+		cancelled, cancel := context.WithCancel(context.Background())
+		cancel()
+
+		Expect(d.send(cancelled, "ORDER_CREATED", []byte("{}"))).To(Succeed())
+
+		// And the transport is still alive, not killed by the lapsed deadline.
+		Expect(d.send(context.Background(), "ORDER_CREATED", []byte("{}"))).To(Succeed())
+	})
+
 	It("reports a target the transport refuses as an ordinary error", func() {
 		transports, _, _ := newSet(fakeNormal)
 
@@ -286,6 +311,32 @@ var _ = Describe("a transport component", func() {
 
 		Eventually(log.String).Should(ContainSubstring("spec-transport: starting up"))
 		Eventually(log.String).Should(ContainSubstring("spec-transport: two lines of it"))
+	})
+
+	It("registers one of two transports that claim the same target, and stops the other", func() {
+		// Two components both delivering GOOGLE_CLOUD_PUB_SUB. Only one may own the
+		// target; the other must be closed, not left running with nothing routed to it,
+		// and not overwrite the winner's map entry.
+		root := GinkgoT().TempDir()
+		writeFakeTransport(root, "aaa-transport", targetGoogleCloudPubSub)
+		writeFakeTransport(root, "bbb-transport", targetGoogleCloudPubSub)
+
+		log := &syncBuffer{}
+		transports, _ := newTransports(Config{
+			Components:   component.Open(root, component.WithFirstParty(nil)),
+			TransportEnv: map[string]string{envFakeTransport: fakeNormal},
+			Log:          log,
+		})
+		DeferCleanup(func() { _ = closeTransports(transports) })
+
+		Expect(transports).To(HaveKey(targetGoogleCloudPubSub))
+
+		// The loser said so, and the target it lost still resolves — to the winner, a
+		// live transport, not a closed one.
+		Expect(log.String()).To(ContainSubstring("already does"))
+		d, err := transports[targetGoogleCloudPubSub].plan(map[string]any{"topicId": "orders"})
+		Expect(err).NotTo(HaveOccurred())
+		Expect(d.send(context.Background(), "ORDER_CREATED", []byte("{}"))).To(Succeed())
 	})
 
 	Describe("a transport that will not work", func() {
