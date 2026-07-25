@@ -66,8 +66,18 @@ type processTransport struct {
 	// closed is an atomic rather than mu-guarded, because fail sets it from the
 	// watchdog goroutine while do holds mu — taking mu there would deadlock. do reads
 	// it before acquiring mu, so a delivery to a child killed for a protocol violation
-	// gets the defined ErrClosed instead of a raw pipe error.
+	// gets the defined ErrClosed instead of a raw pipe error. It is the ErrClosed
+	// gate, not the shutdown latch: fail sets it to stop new deliveries but does not
+	// reap the process — reaping is [processTransport.reap]'s job.
 	closed atomic.Bool
+
+	// reap runs the wait-for-exit exactly once, whoever triggers the shutdown. It has
+	// to be independent of closed: fail sets closed and kills the child but must not
+	// block on cmd.Wait (it runs from inside do, under mu), so the actual wait is left
+	// to Close — and Close must run it even when fail already marked the transport
+	// closed, or a killed-but-unreaped process keeps its executable locked on Windows
+	// and the next temp-dir cleanup fails with "access is denied".
+	reap sync.Once
 
 	// status is what the child said at hello, for the startup notice.
 	status string
@@ -262,14 +272,14 @@ func (t *processTransport) do(req transportproto.Request) (transportproto.Respon
 	return res, nil
 }
 
-// fail marks a child that has stopped speaking the protocol dead and closes it down.
+// fail marks a child that has stopped speaking the protocol dead and kills it.
 //
-// It takes no mutex: it is called from inside do, and from the timer goroutine do
-// started, precisely because mu may be held by a read that will not return until the
-// pipes are closed. The closed flag is atomic for the same reason, so the next
-// delivery sees ErrClosed rather than a raw pipe error. It is idempotent — the first
-// caller logs and closes, later ones return at once — so the watchdog firing after
-// do already failed does not log twice or double-close.
+// It takes no mutex and does not wait for the process: it is called from inside do,
+// and from the timer goroutine do started, precisely because mu may be held by a read
+// that will not return until the pipes are closed, and cmd.Wait would block. Closing
+// stdin and cancelling the context unblock the read; the reap is left to Close, which
+// every failed transport still goes through. Idempotent via the closed swap, so the
+// watchdog firing after do already failed does not log twice.
 func (t *processTransport) fail(cause error) {
 	if t.closed.Swap(true) {
 		return
@@ -280,29 +290,34 @@ func (t *processTransport) fail(cause error) {
 	_ = t.in.Close()
 }
 
-// Close shuts the child down: stdin first, which is how the protocol says "no more
-// requests", and the context only if it does not take the hint.
+// Close shuts the child down and waits for it to exit.
+//
+// It always reaps, even when fail already marked the transport closed: an unreaped
+// child that was killed still holds its executable open, which on Windows fails the
+// next attempt to delete it. The wait itself runs once, whichever path gets here.
 func (t *processTransport) Close() error {
-	if t.closed.Swap(true) {
-		return nil
-	}
+	t.closed.Store(true)
 
-	_ = t.in.Close()
+	t.reap.Do(func() {
+		// stdin first, which is how the protocol says "no more requests"; fail may have
+		// closed it already, and a second close is harmless.
+		_ = t.in.Close()
 
-	exited := make(chan error, 1)
-	go func() { exited <- t.cmd.Wait() }()
+		exited := make(chan error, 1)
+		go func() { exited <- t.cmd.Wait() }()
 
-	select {
-	case <-exited:
-		t.kill()
-	case <-time.After(childGrace):
-		t.kill()
-		<-exited
-	}
+		select {
+		case <-exited:
+			t.kill()
+		case <-time.After(childGrace):
+			t.kill()
+			<-exited
+		}
 
-	// The child is gone; write out its last, newline-less log line — usually the most
-	// telling one — rather than leaving it in the buffer.
-	t.stderr.flush()
+		// The child is gone; write out its last, newline-less log line — usually the most
+		// telling one — rather than leaving it in the buffer.
+		t.stderr.flush()
+	})
 	return nil
 }
 
