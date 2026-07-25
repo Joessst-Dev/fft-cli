@@ -133,6 +133,17 @@ and `fft emulator emit <EVENT>` delivers one that no mutation maps to. The full 
 seeding, the stateful model, the listings trap, and eventing end to end — is in
 [references/emulator.md](references/emulator.md).
 
+## Components
+
+Some commands come from **components** — binaries installed alongside fft that add to its
+command tree. `fft component list` says which are installed and who wrote them, and
+`fft component info` says what each one is allowed to do.
+
+A component runs as the user, with their credentials. **Never install one on their behalf
+without asking**, and never pass `-y` to `fft component install` for them: that flag
+answers the one question in the whole CLI that is about trust rather than about data. See
+[references/components.md](references/components.md).
+
 ## Never
 
 - Print, echo, paste or log an ID token. `fft auth token` exists for scripts, not for chat.
@@ -154,3 +165,6 @@ seeding, the stateful model, the listings trap, and eventing end to end — is i
   to actually do about it.
 - [references/emulator.md](references/emulator.md) — the offline emulator in full: its
   stateful model, seeding fixtures, and publishing events to a local Pub/Sub emulator.
+- [references/components.md](references/components.md) — the components installed alongside
+  fft: what one is allowed to do, and why installing one is the user's decision and not
+  yours.

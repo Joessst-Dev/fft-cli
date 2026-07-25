@@ -14,6 +14,13 @@ import "github.com/fatih/color"
 // somewhere else, and a data race between two specs running in parallel.
 type Style struct{ enabled bool }
 
+// Enabled reports whether this Style paints anything.
+//
+// It exists for the one caller that has to pass the decision on rather than apply
+// it: fft tells a component whether to colour its own output, and the component is
+// a different process rendering to the same terminal.
+func (s Style) Enabled() bool { return s.enabled }
+
 // Bold is for table headers.
 func (s Style) Bold(v string) string { return s.paint(v, color.Bold) }
 

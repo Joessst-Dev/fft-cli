@@ -9,6 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/Joessst-Dev/fft-cli/internal/component"
 	"github.com/Joessst-Dev/fft-cli/internal/docsmd"
 )
 
@@ -38,7 +39,7 @@ func newGenDocsCmd(deps *Deps) *cobra.Command {
 // behind — an orphan would pass the drift gate (the file is unchanged) while the
 // site kept advertising a command that no longer exists.
 func generateDocs(deps *Deps, dir string) error {
-	root := newRootCmd(deps)
+	root := newRootCmd(withoutInstalledComponents(deps))
 	pruneGenerated(root)
 
 	if err := os.RemoveAll(dir); err != nil {
@@ -64,6 +65,20 @@ func generateDocs(deps *Deps, dir string) error {
 		return nil
 	}
 	return walk(root)
+}
+
+// withoutInstalledComponents copies deps with an empty component root, so that the
+// tree the reference is rendered from is the one fft ships.
+//
+// The drift gate is the whole reason. `make docs` output is committed and CI fails
+// on a diff, so a reference that included whatever the developer running it happened
+// to have installed would fail the build on somebody else's machine, for a reason
+// invisible in the diff. A first-party component still appears — it is compiled in,
+// registered whether or not it is installed, and part of what fft is.
+func withoutInstalledComponents(deps *Deps) *Deps {
+	clone := *deps
+	clone.Components = component.Open("")
+	return &clone
 }
 
 // pruneGenerated strips the Tier-2 generated commands from the tree so the
