@@ -41,6 +41,11 @@ func installHelp(deps *Deps, root *cobra.Command) {
 	root.SetHelpFunc(func(cmd *cobra.Command, _ []string) {
 		out := cmd.OutOrStdout()
 
+		// Help is answered before PersistentPreRunE, so this is the only chance to say
+		// that an installed component's command was dropped — and `fft --help` is where
+		// somebody notices it is missing. On stderr, like every other notice.
+		deps.flushComponentWarnings(cmd.ErrOrStderr())
+
 		if cmd.Long != "" {
 			fmt.Fprintln(out, strings.TrimSpace(cmd.Long))
 		} else if cmd.Short != "" {

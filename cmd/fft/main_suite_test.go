@@ -120,7 +120,14 @@ func hermeticEnv() {
 	// USERPROFILE is the one Windows reads: os.UserHomeDir does not look at HOME
 	// there, so setting only HOME would leave that fallback pointing at the real
 	// user on exactly one of the three platforms CI runs.
-	for _, name := range []string{"HOME", "USERPROFILE", "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_STATE_HOME"} {
+	// XDG_DATA_HOME is in the list for the components: it is where they are installed,
+	// so without it a spec would find whatever the developer running it happens to
+	// have installed, and `fft --help` would have commands in it that no spec put
+	// there.
+	for _, name := range []string{
+		"HOME", "USERPROFILE",
+		"XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_STATE_HOME", "XDG_DATA_HOME",
+	} {
 		GinkgoT().Setenv(name, GinkgoT().TempDir())
 	}
 
@@ -276,6 +283,10 @@ func (c *cli) run(args ...string) int {
 	// The cached config is dropped between runs so that a second command in the
 	// same spec reads what the first one wrote, exactly as a second process would.
 	c.deps.cfg = nil
+
+	// And the components with it: a spec that installs one and then runs its command
+	// must find it, which a registry discovered by the previous run would not.
+	c.deps.Components = nil
 
 	cmd := newRootCmd(c.deps)
 	cmd.SetArgs(args)

@@ -60,6 +60,7 @@ export default defineConfig({
             { text: 'Discovery', link: '/guide/discovery' },
             { text: 'Recipes', link: '/guide/recipes' },
             { text: 'Emulator', link: '/guide/emulator' },
+            { text: 'Components', link: '/guide/components' },
             { text: 'Troubleshooting', link: '/guide/troubleshooting' },
           ],
         },

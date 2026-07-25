@@ -140,6 +140,21 @@ linters:
         linters:
           - gosec
         text: G204
+      # The component installer's entire job is to write files it downloaded and run
+      # a binary it installed, so G304 (open a variable path), G122 (write inside a
+      # WalkDir callback) and G204 (exec a variable path) fire on the feature rather
+      # than on a mistake.
+      #
+      # What actually guards this is in the code, and is not something gosec can see:
+      # every path from an archive goes through safeJoin, which refuses anything
+      # absolute, anything containing `..` and anything that is not a regular file or
+      # a directory; validExec refuses a manifest whose executable escapes its own
+      # directory; and the archive itself is checksum-verified against the release
+      # before a single byte of it is unpacked.
+      - path: ^internal/component/
+        linters:
+          - gosec
+        text: (G304|G204|G122)
 
 formatters:
   enable:
