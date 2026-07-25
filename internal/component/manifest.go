@@ -2,6 +2,7 @@ package component
 
 import (
 	"fmt"
+	"net/url"
 	"path"
 	"regexp"
 	"sort"
@@ -203,6 +204,23 @@ func forwardableNames() []string {
 	}
 	sort.Strings(names)
 	return names
+}
+
+// withoutUserinfo strips any embedded userinfo from a forwarded URL.
+//
+// The forwardable base URL says *where*, never *who* — that is the whole reason it is
+// allowed through a boundary that strips every other credential. But a URL can carry
+// credentials in its userinfo (http://user:pass@host), and forwarding it verbatim
+// would hand a session:none component exactly the "who" the boundary refuses. So the
+// userinfo is removed; a value that does not parse as a URL, or carries none, is
+// returned untouched.
+func withoutUserinfo(raw string) string {
+	u, err := url.Parse(raw)
+	if err != nil || u.User == nil {
+		return raw
+	}
+	u.User = nil
+	return u.String()
 }
 
 // validCommand checks one declared command.

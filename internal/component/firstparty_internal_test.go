@@ -51,6 +51,51 @@ func TestFirstPartyMatchesCommittedManifests(t *testing.T) {
 	}
 }
 
+// TestCommittedManifestsAreValid parses every committed component.yaml, not only the
+// ones the compiled-in table names.
+//
+// The table has just the emulator, but goreleaser and the Dockerfile ship the two
+// transport manifests too — and a transport is not in firstParty, so the drift test
+// above never touches emulator-pubsub or emulator-servicebus. A typo in one of those
+// would sail through every gate and ship a component fft's own installer then refuses.
+func TestCommittedManifestsAreValid(t *testing.T) {
+	dir := filepath.Join(repoRoot(t), "components")
+
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatalf("read %s: %v", dir, err)
+	}
+
+	found := 0
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		path := filepath.Join(dir, entry.Name(), ManifestName)
+
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Errorf("%s: %v", entry.Name(), err)
+			continue
+		}
+		m, err := ParseManifest(data, path)
+		if err != nil {
+			t.Errorf("%s: committed manifest does not parse: %v", entry.Name(), err)
+			continue
+		}
+		// The directory a manifest ships in is the name the installer keys on, so the
+		// two must agree — the same check Registry.Open makes on disk.
+		if m.Name != entry.Name() {
+			t.Errorf("%s: manifest names it %q", entry.Name(), m.Name)
+		}
+		found++
+	}
+
+	if found == 0 {
+		t.Errorf("no committed manifests under %s", dir)
+	}
+}
+
 // repoRoot walks up from this source file to the module root.
 func repoRoot(t *testing.T) string {
 	t.Helper()
