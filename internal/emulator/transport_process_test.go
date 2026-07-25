@@ -267,12 +267,14 @@ var _ = Describe("a transport component", func() {
 		Eventually(log.String).Should(ContainSubstring(`sent ORDER_CREATED {"event":"ORDER_CREATED","eventId":"abc"}`))
 	})
 
-	It("does not report a confirmed delivery as failed when the caller's context has lapsed", func() {
-		// The emitter's ctx is a deadline shared across the whole fan-out. A send that
-		// the child confirmed must return nil even if that shared deadline has since
-		// expired — reporting a landed message as failed (and killing the child) because
-		// some other target was slow was the round-1 regression.
-		transports, _, _ := newSet(fakeNormal)
+	It("skips a send whose deadline has already lapsed, without killing the transport", func() {
+		// Two properties at once. The emitter's ctx is a deadline shared across the whole
+		// fan-out: a delivery must not START once it has lapsed (round 3 — otherwise queued
+		// deliveries to one slow target blow past the shared cap). But a lapsed deadline
+		// must not KILL the child either (round 1 — a slow unrelated target would take a
+		// healthy transport down with it). So a cancelled send returns the cancellation and
+		// leaves the transport able to deliver the next one.
+		transports, _, log := newSet(fakeNormal)
 
 		d, err := transports[targetGoogleCloudPubSub].plan(map[string]any{"topicId": "orders"})
 		Expect(err).NotTo(HaveOccurred())
@@ -280,10 +282,14 @@ var _ = Describe("a transport component", func() {
 		cancelled, cancel := context.WithCancel(context.Background())
 		cancel()
 
-		Expect(d.send(cancelled, "ORDER_CREATED", []byte("{}"))).To(Succeed())
+		Expect(d.send(cancelled, "ORDER_CREATED", []byte(`{"marker":"cancelled"}`))).To(MatchError(context.Canceled))
 
-		// And the transport is still alive, not killed by the lapsed deadline.
-		Expect(d.send(context.Background(), "ORDER_CREATED", []byte("{}"))).To(Succeed())
+		// The round trip never happened — the child was never asked to send it.
+		Consistently(log.String, "200ms", "50ms").ShouldNot(ContainSubstring("cancelled"))
+
+		// And the transport is alive, not killed by the lapsed deadline.
+		Expect(d.send(context.Background(), "ORDER_CREATED", []byte(`{"marker":"live"}`))).To(Succeed())
+		Eventually(log.String).Should(ContainSubstring(`"marker":"live"`))
 	})
 
 	It("reports a target the transport refuses as an ordinary error", func() {

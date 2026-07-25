@@ -89,10 +89,11 @@ func newTransports(cfg Config) (map[string]transport, map[string]string) {
 			continue
 		}
 
-		// The manifest declared what it delivers and the handshake confirmed it. Where
-		// they disagree the handshake wins, because it is the running code — but the
-		// disagreement is worth saying out loud, since the manifest is what the user read
-		// before installing it.
+		// A transport delivers only what its manifest declared — the list the user read
+		// and agreed to before installing it. The handshake confirms that list; it does
+		// not get to add to it. A target the running code claims but the manifest does
+		// not is refused, not merely logged, so a misbehaving or reordered component
+		// cannot claim a target type ahead of the one that actually declared it.
 		//
 		// Register the targets this transport wins, and skip the ones another already
 		// serves. It is kept alive if it registered anything and closed only if it won
@@ -101,7 +102,8 @@ func newTransports(cfg Config) (map[string]transport, map[string]string) {
 		registered := 0
 		for _, target := range t.targets {
 			if !c.Delivers(target) {
-				logf(cfg.Log, "emulator: the %s transport delivers %s, which its manifest does not declare", c.Name, target)
+				logf(cfg.Log, "emulator: the %s transport claims %s, which its manifest does not declare; ignoring it", c.Name, target)
+				continue
 			}
 			if _, taken := out[target]; taken {
 				logf(cfg.Log, "emulator: %s also delivers %s, which another transport already does; ignoring it", c.Name, target)

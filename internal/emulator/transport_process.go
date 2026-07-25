@@ -180,14 +180,24 @@ func (t *processTransport) plan(target map[string]any) (delivery, error) {
 
 	return delivery{
 		label: res.Label,
-		send: func(_ context.Context, event string, data []byte) error {
+		send: func(ctx context.Context, event string, data []byte) error {
+			// Honour the emitter's shared fan-out deadline *before* starting a round trip,
+			// not by killing the child. Deliveries to one target serialize under the
+			// transport's lock, each with its own per-request timeout, so a slow-but-alive
+			// broker with many subscriptions could otherwise hold a mutation's request path
+			// well past the publishTimeout eventing.go documents. Checking here caps that at
+			// the deadline without ever treating a wedged-vs-cancelled child as a failure —
+			// the per-request timer below remains the only thing that kills one.
+			if err := ctx.Err(); err != nil {
+				return err
+			}
+
 			// The emitter's ctx is deliberately not threaded into the kill path. Its
 			// deadline is shared across the whole fan-out, so killing this child when it
 			// fires would take down a healthy transport because some *other* target was
-			// slow. The per-request timer below is the liveness bound, and it returns each
-			// delivery well within the fan-out's deadline anyway. The target travels with
-			// every frame: the child keeps no state between them, which removes handle
-			// lifetimes from a protocol whose job is to be obviously correct.
+			// slow. The target travels with every frame: the child keeps no state between
+			// them, which removes handle lifetimes from a protocol whose job is to be
+			// obviously correct.
 			sent, err := t.do(transportproto.Request{
 				Op: transportproto.OpSend, Target: target, Event: event, Data: data,
 			})

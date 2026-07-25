@@ -128,7 +128,7 @@ func Environ(base []string, c Component, cmd Command, opts EnvOptions) ([]string
 	// the authoritative one.
 	for _, name := range c.Env {
 		if forwardable[name] && inherited[name] != "" {
-			env[name] = inherited[name]
+			env[name] = withoutUserinfo(inherited[name])
 		}
 	}
 
