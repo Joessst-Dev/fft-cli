@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/Joessst-Dev/fft-cli/internal/component"
@@ -50,6 +51,7 @@ type processTransport struct {
 	out     *bufio.Scanner
 	enc     *json.Encoder
 	kill    context.CancelFunc
+	stderr  *linePrefixer
 	timeout time.Duration
 
 	// mu serialises the request/response pairs.
@@ -59,8 +61,13 @@ type processTransport struct {
 	// carries a correlation id so that pipelining, if a local broker ever turns out to
 	// be the bottleneck, is a change here and not a change to the wire.
 	mu     sync.Mutex
-	closed bool
 	nextID int
+
+	// closed is an atomic rather than mu-guarded, because fail sets it from the
+	// watchdog goroutine while do holds mu — taking mu there would deadlock. do reads
+	// it before acquiring mu, so a delivery to a child killed for a protocol violation
+	// gets the defined ErrClosed instead of a raw pipe error.
+	closed atomic.Bool
 
 	// status is what the child said at hello, for the startup notice.
 	status string
@@ -114,7 +121,8 @@ func newProcessTransport(c component.Component, extra map[string]string, log io.
 	}
 	// The child's diagnostics land on the emulator's own stderr, prefixed with which
 	// transport said them. That is the whole of its logging: stdout is the protocol.
-	cmd.Stderr = prefixWriter(log, c.Name+": ")
+	stderr := prefixWriter(log, c.Name+": ")
+	cmd.Stderr = stderr
 
 	if err := cmd.Start(); err != nil {
 		cancel()
@@ -132,10 +140,11 @@ func newProcessTransport(c component.Component, extra map[string]string, log io.
 		out:     scanner,
 		enc:     json.NewEncoder(stdin),
 		kill:    cancel,
+		stderr:  stderr,
 		timeout: requestTimeout,
 	}
 
-	hello, err := t.do(context.Background(), transportproto.Request{Op: transportproto.OpHello})
+	hello, err := t.do(transportproto.Request{Op: transportproto.OpHello})
 	if err != nil {
 		_ = t.Close()
 		return nil, fmt.Errorf("greet the %s transport: %w", c.Name, err)
@@ -151,7 +160,7 @@ func newProcessTransport(c component.Component, extra map[string]string, log io.
 
 // plan asks the child to resolve a target.
 func (t *processTransport) plan(target map[string]any) (delivery, error) {
-	res, err := t.do(context.Background(), transportproto.Request{Op: transportproto.OpPlan, Target: target})
+	res, err := t.do(transportproto.Request{Op: transportproto.OpPlan, Target: target})
 	if err != nil {
 		return delivery{}, err
 	}
@@ -161,14 +170,15 @@ func (t *processTransport) plan(target map[string]any) (delivery, error) {
 
 	return delivery{
 		label: res.Label,
-		send: func(ctx context.Context, event string, data []byte) error {
-			// The emitter's ctx is threaded in, so this round trip ends when the fan-out's
-			// shared publishTimeout fires, not only when this transport's own per-request
-			// timer does — a wedged broker cannot outlast the deadline eventing.go
-			// documents. The target travels with every frame: the child keeps no state
-			// between them, which removes handle lifetimes from a protocol whose job is to
-			// be obviously correct.
-			sent, err := t.do(ctx, transportproto.Request{
+		send: func(_ context.Context, event string, data []byte) error {
+			// The emitter's ctx is deliberately not threaded into the kill path. Its
+			// deadline is shared across the whole fan-out, so killing this child when it
+			// fires would take down a healthy transport because some *other* target was
+			// slow. The per-request timer below is the liveness bound, and it returns each
+			// delivery well within the fan-out's deadline anyway. The target travels with
+			// every frame: the child keeps no state between them, which removes handle
+			// lifetimes from a protocol whose job is to be obviously correct.
+			sent, err := t.do(transportproto.Request{
 				Op: transportproto.OpSend, Target: target, Event: event, Data: data,
 			})
 			switch {
@@ -177,7 +187,9 @@ func (t *processTransport) plan(target map[string]any) (delivery, error) {
 			case !sent.OK:
 				return errors.New(sent.Reason)
 			default:
-				return ctx.Err()
+				// The child confirmed the publish. Returning ctx.Err() here would report a
+				// delivery that succeeded as failed the instant the shared deadline lapsed.
+				return nil
 			}
 		},
 	}, nil
@@ -186,16 +198,20 @@ func (t *processTransport) plan(target map[string]any) (delivery, error) {
 // status reports where this transport delivers, for the startup notice.
 func (t *processTransport) describe() string { return t.status }
 
-// do sends one request and reads its response.
-//
-// ctx is the caller's deadline — the emitter's fan-out context for a send, a bare
-// background for the handshake — and bounds the round trip alongside the transport's
-// own per-request timer, whichever fires first.
-func (t *processTransport) do(ctx context.Context, req transportproto.Request) (transportproto.Response, error) {
+// do sends one request and reads its response, bounded by the transport's own
+// per-request timer.
+func (t *processTransport) do(req transportproto.Request) (transportproto.Response, error) {
+	// Read before mu, because fail sets it while a wedged do still holds mu — this is
+	// how a delivery to an already-killed child gets ErrClosed rather than blocking on
+	// a lock the dying call still owns.
+	if t.closed.Load() {
+		return transportproto.Response{}, transportproto.ErrClosed
+	}
+
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	if t.closed {
+	if t.closed.Load() {
 		return transportproto.Response{}, transportproto.ErrClosed
 	}
 
@@ -203,22 +219,21 @@ func (t *processTransport) do(ctx context.Context, req transportproto.Request) (
 	req.ID = t.nextID
 
 	// A child that stops answering must not hold the lock — and with it every other
-	// delivery — for longer than a bound. Either the caller's context or this
-	// transport's own timer closes the pipes, which is what unblocks the read below.
+	// delivery — for longer than the per-request timer. It closes the pipes, which is
+	// what unblocks the read below.
 	done := make(chan struct{})
 	defer close(done)
 
 	go func() {
 		select {
 		case <-done:
-		case <-ctx.Done():
-			t.fail(ctx.Err())
 		case <-time.After(t.timeout):
 			t.fail(fmt.Errorf("no answer in %s", t.timeout))
 		}
 	}()
 
 	if err := t.enc.Encode(req); err != nil {
+		t.fail(err)
 		return transportproto.Response{}, fmt.Errorf("ask the %s transport: %w", t.name, err)
 	}
 
@@ -227,6 +242,9 @@ func (t *processTransport) do(ctx context.Context, req transportproto.Request) (
 		if err == nil {
 			err = io.EOF
 		}
+		// A read that ends is a transport that ended: mark it dead so the next delivery
+		// gets ErrClosed rather than trying to write to a broken pipe.
+		t.fail(err)
 		return transportproto.Response{}, fmt.Errorf("read from the %s transport: %w", t.name, err)
 	}
 
@@ -244,12 +262,18 @@ func (t *processTransport) do(ctx context.Context, req transportproto.Request) (
 	return res, nil
 }
 
-// fail kills a child that has stopped speaking the protocol.
+// fail marks a child that has stopped speaking the protocol dead and closes it down.
 //
-// It does not take the lock: it is called from inside do, and from the timer
-// goroutine do started, precisely because the lock may be held by a read that will
-// not return until the pipes are closed.
+// It takes no mutex: it is called from inside do, and from the timer goroutine do
+// started, precisely because mu may be held by a read that will not return until the
+// pipes are closed. The closed flag is atomic for the same reason, so the next
+// delivery sees ErrClosed rather than a raw pipe error. It is idempotent — the first
+// caller logs and closes, later ones return at once — so the watchdog firing after
+// do already failed does not log twice or double-close.
 func (t *processTransport) fail(cause error) {
+	if t.closed.Swap(true) {
+		return
+	}
 	fmt.Fprintf(orDiscard(t.log), "emulator: the %s transport stopped speaking the protocol (%v); it will deliver nothing more\n",
 		t.name, cause)
 	t.kill()
@@ -259,13 +283,9 @@ func (t *processTransport) fail(cause error) {
 // Close shuts the child down: stdin first, which is how the protocol says "no more
 // requests", and the context only if it does not take the hint.
 func (t *processTransport) Close() error {
-	t.mu.Lock()
-	if t.closed {
-		t.mu.Unlock()
+	if t.closed.Swap(true) {
 		return nil
 	}
-	t.closed = true
-	t.mu.Unlock()
 
 	_ = t.in.Close()
 
@@ -275,19 +295,27 @@ func (t *processTransport) Close() error {
 	select {
 	case <-exited:
 		t.kill()
-		return nil
 	case <-time.After(childGrace):
 		t.kill()
 		<-exited
-		return nil
 	}
+
+	// The child is gone; write out its last, newline-less log line — usually the most
+	// telling one — rather than leaving it in the buffer.
+	t.stderr.flush()
+	return nil
 }
+
+// maxLogLine caps how much of one unterminated log line the prefixer buffers. A child
+// that logs without ever writing a newline would otherwise grow the buffer without
+// bound and take the emulator's memory with it; past this, the line is flushed as-is.
+const maxLogLine = 64 << 10
 
 // prefixWriter tags every line a child logs with which transport wrote it, so one
 // emulator's stderr with three transports on it is still readable.
-func prefixWriter(w io.Writer, prefix string) io.Writer {
+func prefixWriter(w io.Writer, prefix string) *linePrefixer {
 	if w == nil {
-		return io.Discard
+		w = io.Discard
 	}
 	return &linePrefixer{w: w, prefix: prefix}
 }
@@ -300,7 +328,9 @@ type linePrefixer struct {
 }
 
 // Write buffers until a newline, so the prefix lands at the start of a line rather
-// than wherever the pipe happened to split.
+// than wherever the pipe happened to split. A line longer than [maxLogLine] is
+// flushed without waiting for its newline, so a child logging unbounded output cannot
+// grow the buffer without limit.
 func (p *linePrefixer) Write(b []byte) (int, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -309,12 +339,31 @@ func (p *linePrefixer) Write(b []byte) (int, error) {
 	for {
 		i := bytes.IndexByte(p.buf, '\n')
 		if i < 0 {
+			if len(p.buf) >= maxLogLine {
+				if _, err := fmt.Fprintf(p.w, "%s%s\n", p.prefix, p.buf); err != nil {
+					return len(b), err
+				}
+				p.buf = p.buf[:0]
+			}
 			return len(b), nil
 		}
 		if _, err := fmt.Fprintf(p.w, "%s%s\n", p.prefix, p.buf[:i]); err != nil {
 			return len(b), err
 		}
 		p.buf = p.buf[i+1:]
+	}
+}
+
+// flush writes whatever partial line is left, prefixed. A child's last log before it
+// crashes often has no trailing newline, and it is the most useful line there is; the
+// transport calls this when the child is gone so it is not lost.
+func (p *linePrefixer) flush() {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	if len(p.buf) > 0 {
+		fmt.Fprintf(p.w, "%s%s\n", p.prefix, p.buf)
+		p.buf = p.buf[:0]
 	}
 }
 
