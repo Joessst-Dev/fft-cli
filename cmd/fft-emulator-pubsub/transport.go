@@ -1,4 +1,4 @@
-package emulator
+package main
 
 import (
 	"context"
@@ -30,22 +30,43 @@ func newPubSubTransport(host string) *pubSubTransport {
 	return &pubSubTransport{host: host, clients: map[string]*pubsub.Client{}}
 }
 
-// plan resolves a SubscriptionTargetGoogleCloudPubSub into the topic to publish to.
-func (t *pubSubTransport) plan(target map[string]any) (delivery, error) {
-	projectID, topicID := mapString(target, "projectId"), mapString(target, "topicId")
-	if projectID == "" || topicID == "" {
-		return delivery{}, errors.New("target names no projectId and topicId")
+// Hello reports what this transport delivers and where.
+func (t *pubSubTransport) Hello() ([]string, string, error) {
+	return []string{targetGoogleCloudPubSub},
+		fmt.Sprintf("publishing to the Pub/Sub emulator at %s", t.host), nil
+}
+
+// Plan resolves a SubscriptionTargetGoogleCloudPubSub into the topic to publish to.
+func (t *pubSubTransport) Plan(target map[string]any) (string, error) {
+	projectID, topicID, err := topicOf(target)
+	if err != nil {
+		return "", err
+	}
+	return projectID + "/" + topicID, nil
+}
+
+// Send publishes one event. The target is resolved again rather than captured at Plan
+// time: the protocol carries it on every frame, so the transport keeps no state
+// between them and has no handles to leak.
+func (t *pubSubTransport) Send(ctx context.Context, target map[string]any, event string, data []byte) error {
+	projectID, topicID, err := topicOf(target)
+	if err != nil {
+		return err
 	}
 
-	return delivery{
-		label: projectID + "/" + topicID,
-		send: func(ctx context.Context, event string, data []byte) error {
-			// The event attribute lets a consumer filter without decoding data. It is an
-			// emulator convention: fulfillmenttools does not document the attributes its
-			// production delivery sets, so nothing here claims to reproduce them.
-			return t.publish(ctx, projectID, topicID, data, map[string]string{"event": event})
-		},
-	}, nil
+	// The event attribute lets a consumer filter without decoding data. It is an
+	// emulator convention: fulfillmenttools does not document the attributes its
+	// production delivery sets, so nothing here claims to reproduce them.
+	return t.publish(ctx, projectID, topicID, data, map[string]string{"event": event})
+}
+
+// topicOf reads the project and topic a target addresses.
+func topicOf(target map[string]any) (projectID, topicID string, err error) {
+	projectID, topicID = mapString(target, "projectId"), mapString(target, "topicId")
+	if projectID == "" || topicID == "" {
+		return "", "", errors.New("target names no projectId and topicId")
+	}
+	return projectID, topicID, nil
 }
 
 // client returns the cached client for a project, building one on first use. One client
@@ -107,9 +128,9 @@ func (t *pubSubTransport) publish(ctx context.Context, projectID, topicID string
 	return nil
 }
 
-// Close closes every cached client and clears the cache. The emulator calls it on
-// shutdown so a long-running local session does not leak the gRPC connection and
-// background goroutines each client keeps open.
+// Close closes every cached client and clears the cache. It runs when the emulator
+// closes this process's stdin, so a long-running local session does not leak the gRPC
+// connection and the background goroutines each client keeps open.
 func (t *pubSubTransport) Close() error {
 	t.mu.Lock()
 	defer t.mu.Unlock()

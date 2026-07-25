@@ -177,6 +177,53 @@ var _ = Describe("the environment a component is given", func() {
 			Expect(got).To(HaveKeyWithValue("WEATHER_API_HOST", "localhost:9000"))
 		})
 
+		It("forwards FFT_BASE_URL when the manifest asks for it", func() {
+			asks := component.Component{Manifest: component.Manifest{
+				Name: "emulator",
+				Env:  []string{config.EnvBaseURL},
+			}}
+
+			// The one FFT_ variable a component may ask for, and the reason it can: the
+			// emulator's emit command talks to a running emulator at the address the
+			// emulator's own recipe exported. It says where, never who.
+			got := env(asks, cmd, component.EnvOptions{})
+			Expect(got).To(HaveKeyWithValue(config.EnvBaseURL, "https://real.tenant"))
+
+			// Asking for it does not smuggle the rest of the session along with it.
+			Expect(got).NotTo(HaveKey(config.EnvIDToken))
+			Expect(got).NotTo(HaveKey(config.EnvPassword))
+			Expect(got).NotTo(HaveKey(config.EnvFirebaseAPIKey))
+		})
+
+		It("does not forward FFT_BASE_URL to a component that did not ask", func() {
+			got := env(declared, cmd, component.EnvOptions{})
+			Expect(got).NotTo(HaveKey(config.EnvBaseURL))
+		})
+
+		It("strips userinfo from a forwarded FFT_BASE_URL", func() {
+			// The base URL is allowed through because it says where, never who. A URL can
+			// carry credentials in its userinfo, though, and forwarding those verbatim would
+			// hand a session:none component exactly the who the boundary refuses.
+			asks := component.Component{Manifest: component.Manifest{
+				Name: "emulator",
+				Env:  []string{config.EnvBaseURL},
+			}}
+			out, err := component.Environ(
+				[]string{config.EnvBaseURL + "=http://user:secret@localhost:8080"},
+				asks, cmd, component.EnvOptions{},
+			)
+			Expect(err).NotTo(HaveOccurred())
+
+			got := ""
+			for _, entry := range out {
+				if name, value, _ := strings.Cut(entry, "="); name == config.EnvBaseURL {
+					got = value
+				}
+			}
+			Expect(got).To(Equal("http://localhost:8080"))
+			Expect(got).NotTo(ContainSubstring("secret"))
+		})
+
 		It("ignores configuration the manifest did not declare", func() {
 			// What a component consumes stays something it declared and `fft component
 			// info` can print, rather than whatever the host felt like pushing at it.

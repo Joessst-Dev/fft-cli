@@ -2,11 +2,15 @@ package component
 
 import (
 	"fmt"
+	"net/url"
 	"path"
 	"regexp"
+	"sort"
 	"strings"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/Joessst-Dev/fft-cli/internal/config"
 )
 
 // Manifest is a component.yaml: what a component is, and what it adds to fft.
@@ -169,14 +173,54 @@ func (m Manifest) Validate() error {
 	}
 
 	for _, name := range m.Env {
-		if strings.HasPrefix(name, "FFT_") {
-			// The FFT_ namespace is fft's to hand over, and Environ decides what of it a
-			// session may see. A manifest that could ask for FFT_PASSWORD by name would
-			// make that decision negotiable by the component being decided about.
-			return fmt.Errorf("env %q: a component cannot ask for an FFT_ variable; the session level decides those", name)
+		if strings.HasPrefix(name, "FFT_") && !forwardable[name] {
+			// The FFT_ namespace is fft's to hand over, and the session level decides what
+			// of it a component sees. A manifest that could ask for FFT_PASSWORD by name
+			// would make that decision negotiable by the component being decided about.
+			return fmt.Errorf("env %q: a component may ask for %s and no other FFT_ variable; the session level decides the rest",
+				name, strings.Join(forwardableNames(), ", "))
 		}
 	}
 	return nil
+}
+
+// forwardable are the FFT_ variables a component may ask for by name, whatever
+// session it declares.
+//
+// It has exactly one member, and adding a second should be hard. What qualifies is a
+// variable that is not a credential and does not describe one: the base URL says
+// *where*, never *who*, and a component that has it still cannot authenticate.
+//
+// The emulator is why it exists. `fft emulator emit` talks to a running emulator, and
+// the address it talks to is the one the emulator's own startup recipe exports — so
+// the component that needs FFT_BASE_URL here needs it to reach a fake tenant it is
+// itself serving, which is the opposite of the case the stripping protects against.
+var forwardable = map[string]bool{config.EnvBaseURL: true}
+
+func forwardableNames() []string {
+	names := make([]string, 0, len(forwardable))
+	for name := range forwardable {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
+}
+
+// withoutUserinfo strips any embedded userinfo from a forwarded URL.
+//
+// The forwardable base URL says *where*, never *who* — that is the whole reason it is
+// allowed through a boundary that strips every other credential. But a URL can carry
+// credentials in its userinfo (http://user:pass@host), and forwarding it verbatim
+// would hand a session:none component exactly the "who" the boundary refuses. So the
+// userinfo is removed; a value that does not parse as a URL, or carries none, is
+// returned untouched.
+func withoutUserinfo(raw string) string {
+	u, err := url.Parse(raw)
+	if err != nil || u.User == nil {
+		return raw
+	}
+	u.User = nil
+	return u.String()
 }
 
 // validCommand checks one declared command.

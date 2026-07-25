@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"sort"
 	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/Joessst-Dev/fft-cli/internal/api"
+	"github.com/Joessst-Dev/fft-cli/internal/component"
 )
 
 // shutdownGrace is how long a cancelled server waits for in-flight requests to
@@ -38,17 +40,17 @@ type Config struct {
 	// data contract even here.
 	Log io.Writer
 
-	// PubSubHost is the local Pub/Sub emulator to publish events to (the standard
-	// PUBSUB_EMULATOR_HOST value). Empty means a GOOGLE_CLOUD_PUB_SUB subscription is
-	// stored and matched but never published to. It is never a real Google Cloud
-	// endpoint — the transport pins every connection to this host with auth disabled.
-	PubSubHost string
+	// Components is where the emulator looks for its transport sub-components: the
+	// processes that deliver an event to a broker. A nil registry means none, which is
+	// an emulator that delivers webhooks and nothing else — a perfectly ordinary way to
+	// run it.
+	Components *component.Registry
 
-	// ServiceBusHost is the local Azure Service Bus emulator to send events to. Empty
-	// means a MICROSOFT_AZURE_SERVICE_BUS subscription is stored and matched but never
-	// sent to. Like PubSubHost it is a host, not a connection string, so the transport
-	// cannot be pointed at a real Azure namespace.
-	ServiceBusHost string
+	// TransportEnv is the configuration to hand those components, by variable name.
+	// Only the names a component's manifest declares are actually set, so
+	// --pubsub-emulator-host reaches the Pub/Sub transport as the PUBSUB_EMULATOR_HOST
+	// it already reads, and reaches nothing else.
+	TransportEnv map[string]string
 
 	// WebhookAllowRemote lets webhook delivery call a callbackUrl outside the local
 	// network. It is off by default so a subscription fixture naming a real endpoint is
@@ -84,11 +86,15 @@ func New(cfg Config) (*Server, error) {
 	}
 	app.Use(permissiveAuth())
 
+	// Building the emitter may start transport child processes. From here on every
+	// error return must close them, or New hands the caller an error and leaves
+	// orphans behind — the caller never got a Server to call Close on.
 	events := newEventEmitter(cfg, store)
 	registerRoutes(app, ops, &handlers{store: store, events: events})
 
 	if cfg.Seed != "" {
 		if err := seed(store, cfg.Seed); err != nil {
+			_ = events.Close()
 			return nil, fmt.Errorf("seed the emulator: %w", err)
 		}
 	}
@@ -99,6 +105,65 @@ func New(cfg Config) (*Server, error) {
 	}
 
 	return &Server{app: app, addr: net.JoinHostPort(host, strconv.Itoa(cfg.Port)), events: events}, nil
+}
+
+// TargetStatus is what the startup notice says about one subscription target type:
+// whether an event with that target will be delivered, and where.
+type TargetStatus struct {
+	// Target is the target type, e.g. GOOGLE_CLOUD_PUB_SUB.
+	Target string
+
+	// Status is one line, in the transport's own words where there is one. A
+	// transport that came from a component said this at the handshake, so the notice
+	// reports where a broker actually is without the emulator knowing anything about
+	// brokers.
+	Status string
+
+	// Live reports whether anything will be delivered to this target type at all.
+	Live bool
+}
+
+// Eventing reports each subscription target type, and what will happen to a
+// subscription that names it.
+//
+// The three the API defines are always reported, including the ones nothing delivers
+// — a stored subscription that silently never fires is the failure this notice exists
+// to prevent, and leaving the unavailable ones out is how it would happen. A
+// third-party transport's own target type is reported too: it is the same silent
+// failure, and a notice that only knew the three built-in types would hide exactly the
+// broker the community protocol was added to reach.
+func (s *Server) Eventing() []TargetStatus {
+	// The known three first, in their canonical order, then any target a transport
+	// registered that is not one of them — sorted, so the notice reads the same twice.
+	targets := append([]string(nil), knownTargets...)
+	seen := make(map[string]bool, len(targets))
+	for _, t := range targets {
+		seen[t] = true
+	}
+	extra := make([]string, 0)
+	for target := range s.events.transports {
+		if !seen[target] {
+			extra = append(extra, target)
+		}
+	}
+	sort.Strings(extra)
+	targets = append(targets, extra...)
+
+	out := make([]TargetStatus, 0, len(targets))
+	for _, target := range targets {
+		t, ok := s.events.transports[target]
+		if !ok {
+			out = append(out, TargetStatus{Target: target, Status: s.events.unavailableReason(target)})
+			continue
+		}
+
+		status := "delivering"
+		if d, ok := t.(describer); ok && d.describe() != "" {
+			status = d.describe()
+		}
+		out = append(out, TargetStatus{Target: target, Status: status, Live: true})
+	}
+	return out
 }
 
 // Listen binds the port and serves until ctx is cancelled, then shuts down
@@ -113,13 +178,15 @@ func New(cfg Config) (*Server, error) {
 // ctx is the command's context, which the root cancels on SIGINT/SIGTERM — so Ctrl-C
 // drains the server and exits 0.
 func (s *Server) Listen(ctx context.Context, ready func()) error {
+	// The transports were started in New, so they must be released even on the paths
+	// that never bind a port — a taken port would otherwise leave the transport
+	// children running after Listen returned its error.
+	defer func() { _ = s.events.Close() }()
+
 	ln, err := net.Listen("tcp", s.addr)
 	if err != nil {
 		return err
 	}
-	// Once the port is bound the emitter's clients may be dialed, so release them on
-	// every exit path — a long-running session must not leak the Pub/Sub connections.
-	defer func() { _ = s.events.Close() }()
 	if ready != nil {
 		ready()
 	}

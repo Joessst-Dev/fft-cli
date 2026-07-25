@@ -104,16 +104,32 @@ type EnvOptions struct {
 // base is the environment to inherit, in os.Environ form.
 func Environ(base []string, c Component, cmd Command, opts EnvOptions) ([]string, error) {
 	env := make(map[string]string, len(base)+8)
+	inherited := make(map[string]string, len(base))
+
 	for _, entry := range base {
 		name, value, ok := strings.Cut(entry, "=")
+		if !ok {
+			continue
+		}
+		inherited[name] = value
 		// Case-insensitive: Windows environment lookups ignore case, so a child asking
 		// for FFT_PASSWORD would read a `fft_password` a case-sensitive strip had left
 		// behind. The strip is the credential boundary; a boundary the case of a
 		// variable name can walk through is not one.
-		if !ok || strings.HasPrefix(strings.ToUpper(name), "FFT_") {
+		if strings.HasPrefix(strings.ToUpper(name), "FFT_") {
 			continue
 		}
 		env[name] = value
+	}
+
+	// The one part of the FFT_ namespace a manifest may ask for, and only if it did.
+	// See [forwardable] for what qualifies and why the list is one long. A session
+	// below may still overwrite it, which is right: a resolved session's base URL is
+	// the authoritative one.
+	for _, name := range c.Env {
+		if forwardable[name] && inherited[name] != "" {
+			env[name] = withoutUserinfo(inherited[name])
+		}
 	}
 
 	// Before the fixed set below, so a component cannot redefine FFT_COMPONENT_API

@@ -117,14 +117,23 @@ commands: [{name: weather, short: s, session: write}]
 		// The FFT_ namespace is fft's to hand over. A manifest that could ask for
 		// FFT_PASSWORD by name would make the session level negotiable by the component
 		// being decided about.
-		Entry("an FFT_ variable in env", `
+		Entry("a credential in env", `
 apiVersion: 1
 name: weather
 kind: command
 exec: bin/x
 env: [FFT_PASSWORD]
 commands: [{name: weather, short: s, session: none}]
-`, "cannot ask for an FFT_ variable"),
+`, "may ask for FFT_BASE_URL and no other FFT_ variable"),
+
+		Entry("a token in env", `
+apiVersion: 1
+name: weather
+kind: command
+exec: bin/x
+env: [FFT_ID_TOKEN]
+commands: [{name: weather, short: s, session: none}]
+`, "may ask for FFT_BASE_URL"),
 
 		Entry("a command component with no commands", `
 apiVersion: 1
