@@ -85,7 +85,7 @@ export default defineConfig({
     footer: {
       message:
         'An independent open-source project — not affiliated with, endorsed by, or supported by fulfillmenttools.',
-      copyright: 'MIT © Jost Weyers',
+      copyright: 'MIT © Joessst-Dev',
     },
   },
 })

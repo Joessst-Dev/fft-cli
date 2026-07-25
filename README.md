@@ -655,7 +655,7 @@ This requires two things to exist:
 
 ## License
 
-[MIT](LICENSE) © Jost Weyers.
+[MIT](LICENSE) © Joessst-Dev.
 
 ## Disclaimer
 
