@@ -106,7 +106,11 @@ func Environ(base []string, c Component, cmd Command, opts EnvOptions) ([]string
 	env := make(map[string]string, len(base)+8)
 	for _, entry := range base {
 		name, value, ok := strings.Cut(entry, "=")
-		if !ok || strings.HasPrefix(name, "FFT_") {
+		// Case-insensitive: Windows environment lookups ignore case, so a child asking
+		// for FFT_PASSWORD would read a `fft_password` a case-sensitive strip had left
+		// behind. The strip is the credential boundary; a boundary the case of a
+		// variable name can walk through is not one.
+		if !ok || strings.HasPrefix(strings.ToUpper(name), "FFT_") {
 			continue
 		}
 		env[name] = value

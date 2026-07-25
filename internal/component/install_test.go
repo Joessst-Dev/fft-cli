@@ -188,6 +188,31 @@ func tarGzWithPaxHeader(files map[string]string) []byte {
 	return buf.Bytes()
 }
 
+// tarGzWithSymlink builds a tarball whose one non-manifest entry is a symlink, to
+// prove the extractor refuses the class.
+func tarGzWithSymlink() []byte {
+	var buf bytes.Buffer
+
+	gz := gzip.NewWriter(&buf)
+	tw := tar.NewWriter(gz)
+
+	body := []byte(weatherManifest)
+	Expect(tw.WriteHeader(&tar.Header{
+		Name: "component.yaml", Mode: 0o644, Size: int64(len(body)), Typeflag: tar.TypeReg,
+	})).To(Succeed())
+	_, err := tw.Write(body)
+	Expect(err).NotTo(HaveOccurred())
+
+	Expect(tw.WriteHeader(&tar.Header{
+		Name: "bin/fft-weather", Typeflag: tar.TypeSymlink, Linkname: "/bin/sh", Mode: 0o777,
+	})).To(Succeed())
+
+	Expect(tw.Close()).To(Succeed())
+	Expect(gz.Close()).To(Succeed())
+
+	return buf.Bytes()
+}
+
 const weatherManifest = `apiVersion: 1
 name: weather
 version: 1.0.0
@@ -366,6 +391,21 @@ var _ = Describe("the installer", func() {
 
 			_, err := inst.Prepare(context.Background(), component.Source{Repo: "acme/weather"})
 			Expect(err).To(MatchError(ContainSubstring("not a relative path")))
+		})
+
+		// A symlink is a second way to name a file: everything safeJoin argues about
+		// paths would have to be argued again about where the link points. A component
+		// has no need of one, so the extractor refuses the whole class. Tar-only — zip's
+		// stored modes do not carry a symlink the same way, and Windows ships zips.
+		It("refuses a symlink entry", func() {
+			if runtime.GOOS == "windows" {
+				Skip("symlink tar entries are a tar/Unix concern; Windows components ship as zip")
+			}
+
+			hub.publish(assetName("weather", "1.0.0"), tarGzWithSymlink())
+
+			_, err := inst.Prepare(context.Background(), component.Source{Repo: "acme/weather"})
+			Expect(err).To(MatchError(ContainSubstring("not a regular file or a directory")))
 		})
 
 		It("refuses an archive with no manifest", func() {

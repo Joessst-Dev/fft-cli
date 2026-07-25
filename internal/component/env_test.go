@@ -64,6 +64,24 @@ var _ = Describe("the environment a component is given", func() {
 			Expect(got).NotTo(HaveKey(config.EnvBaseURL))
 		})
 
+		It("strips the FFT_ namespace whatever its case", func() {
+			// Windows environment lookups are case-insensitive, so a lowercase
+			// fft_password left behind by a case-sensitive strip is one a child reads as
+			// FFT_PASSWORD. The strip must not depend on the case a variable was written in.
+			got, err := component.Environ(
+				[]string{"fft_password=leaked", "Fft_Id_Token=leaked", "PATH=/usr/bin"},
+				comp, cmd, component.EnvOptions{},
+			)
+			Expect(err).NotTo(HaveOccurred())
+
+			// No entry carries the leaked value, whatever case its name was written in —
+			// while PATH and fft's own FFT_COMPONENT_* additions are untouched.
+			for _, entry := range got {
+				Expect(entry).NotTo(ContainSubstring("=leaked"), "a mixed-case FFT_ variable survived: %s", entry)
+			}
+			Expect(got).To(ContainElement("PATH=/usr/bin"))
+		})
+
 		It("keeps everything outside the FFT_ namespace", func() {
 			got := env(comp, cmd, component.EnvOptions{})
 

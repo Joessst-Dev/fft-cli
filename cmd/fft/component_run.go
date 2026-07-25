@@ -98,14 +98,16 @@ func addComponentCommands(deps *Deps, root *cobra.Command) {
 		return
 	}
 
-	// The names a component may not take. Two sources, because addGeneratedCommands
-	// has not run yet: the curated commands already in the tree (found by root.Find),
-	// and the resource-group names the generated step is *about* to create. Without
-	// the second, a component named `picking` would slip past this check now and then
-	// be silently adopted as the parent of the generated picking group — breaking both
-	// its own "everything reaches me untouched" contract and the generated commands'
-	// help. Reserved here so the collision is refused, with a reason, instead.
+	// The names a component may not take. Three sources, because none of them are in
+	// the tree yet at this point: the curated commands already added (found by
+	// root.Find); the resource-group names the generated step is about to create
+	// (without which a component named `picking` would be adopted as that group's
+	// parent); and cobra's own `help` and `completion`, which it registers lazily on
+	// first Execute — so root.Find cannot see them now, and a component named `help`
+	// would shadow the one command every CLI must have.
 	reserved := generatedGroupNames()
+	reserved["help"] = true
+	reserved["completion"] = true
 
 	for _, c := range deps.Components.All() {
 		if c.Kind != component.KindCommand {

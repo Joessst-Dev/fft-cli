@@ -43,8 +43,15 @@ func newComponentInstallCmd(deps *Deps) *cobra.Command {
 				return err
 			}
 
-			ctx, cancel := deps.Context(cmd)
-			defer cancel()
+			// The command's own context, not deps.Context: a component download is not a
+			// single API call, and the default 30s --timeout would cut off a large binary
+			// on a slow link — the very thing the installer's own client documents itself
+			// as leaving to the caller. Ctrl-C still cancels; the installer caps the body
+			// size so an unbounded context is not an unbounded read.
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
 
 			return runComponentInstall(ctx, deps, src, "Install")
 		},

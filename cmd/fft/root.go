@@ -278,7 +278,7 @@ func newRootCmd(deps *Deps) *cobra.Command {
 
 		Version: buildinfo.Version,
 
-		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := deps.complete(cmd); err != nil {
 				return err
 			}
@@ -300,8 +300,10 @@ func newRootCmd(deps *Deps) *cobra.Command {
 
 			// Before the update check and long before the token: a write refused
 			// against a read-only project must start no goroutine, open no keychain
-			// and sign in to nothing.
-			if err := deps.guard(cmd); err != nil {
+			// and sign in to nothing. args is passed for the one command that cannot
+			// find --read-only through the flag set — a component, whose stub turns flag
+			// parsing off, so the flag arrives as a raw argument instead. See guard.
+			if err := deps.guard(cmd, args); err != nil {
 				return err
 			}
 

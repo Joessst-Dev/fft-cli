@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -32,9 +33,9 @@ import (
 // `fft project use`, `fft api describe` — and is never gated. The one command it
 // cannot see this way is `fft api <operationId>`, whose operation is an argument
 // rather than an annotation; it gates itself with [Deps.guardOperation].
-func (d *Deps) guard(cmd *cobra.Command) error {
+func (d *Deps) guard(cmd *cobra.Command, args []string) error {
 	if name, ok := cmd.Annotations[annotationComponent]; ok {
-		return d.guardComponent(cmd, name)
+		return d.guardComponent(cmd, name, args)
 	}
 
 	id, ok := cmd.Annotations[annotationOperationID]
@@ -75,7 +76,24 @@ func (d *Deps) guard(cmd *cobra.Command) error {
 // It cannot catch a component that writes while claiming nothing and declaring
 // nothing. Nothing could, short of not running it — which is why `fft component
 // install` says, in those words, that a component runs as you.
-func (d *Deps) guardComponent(cmd *cobra.Command, name string) error {
+//
+// args are the component's own arguments, and they carry the one thing the flag set
+// does not: whether --read-only was given. A component stub turns flag parsing off so
+// its arguments reach it untouched (`fft weather -o wide` must give the component its
+// own -o), and the price is that fft's global --read-only, typed before the component
+// name, arrives here as a raw argument rather than a parsed flag with its Changed bit
+// set. So it is read from args — see [readOnlyRequested].
+func (d *Deps) guardComponent(cmd *cobra.Command, name string, args []string) error {
+	// Recover the --read-only the flag set never parsed, before any gate below reads
+	// d.ReadOnlyFlag. Fail-safe: any --read-only in a mutating component's line counts,
+	// because a guardrail a copied-and-pasted command line can slip past is not one,
+	// and refusing a write the user typed --read-only over is the safe way to be wrong.
+	// Set here rather than in complete because this is where the component's raw args
+	// are, and it feeds both the claim path below and the component's own session.
+	if d.ReadOnlyFlag == nil && readOnlyRequested(args) {
+		d.ReadOnlyFlag = ptr(true)
+	}
+
 	if op, ok := d.mutatingClaim(cmd); ok {
 		return d.guardOperation(cmd, op)
 	}
@@ -93,6 +111,25 @@ func (d *Deps) guardComponent(cmd *cobra.Command, name string) error {
 		return nil
 	}
 	return &componentReadOnlyError{component: name, command: cmd.CommandPath(), project: p.Name, source: source}
+}
+
+// readOnlyRequested reports whether --read-only appears among a component's arguments,
+// set to anything but a denial. It is the DisableFlagParsing counterpart of the flag's
+// Changed bit: the same tighten-only spirit as [config.ReadOnlyFromEnv], applied to a
+// flag that arrived as a bare string.
+func readOnlyRequested(args []string) bool {
+	for _, arg := range args {
+		name, value, hasValue := strings.Cut(arg, "=")
+		if name != "--read-only" {
+			continue
+		}
+		// `--read-only` alone is on; `--read-only=false` and friends are off, so a user
+		// can still spell the negative even here.
+		if !hasValue || !config.ReadOnlyDenied(value) {
+			return true
+		}
+	}
+	return false
 }
 
 // mutatingClaim finds an operation the command claims that the spec says is a

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -112,6 +113,21 @@ var _ = Describe("fft component", func() {
 			// a component stub.
 			Expect(c.out()).To(ContainSubstring("get-pick-job"))
 		})
+
+		DescribeTable("refuses a name one of cobra's own lazily-added commands owns",
+			func(name string) {
+				// help and completion are registered by cobra on first Execute, so root.Find
+				// cannot see them when components register — they are reserved by name instead.
+				// A component named `help` that shadowed the built-in would break the one
+				// command every CLI must have.
+				c.installFake(fakeManifest(name))
+
+				Expect(c.run("--help")).To(Equal(exitcode.OK))
+				Expect(c.errOut()).To(ContainSubstring(fmt.Sprintf("component declares a command called %q", name)))
+			},
+			Entry("help", "help"),
+			Entry("completion", "completion"),
+		)
 	})
 
 	Describe("the environment a component is given", func() {
@@ -199,6 +215,35 @@ var _ = Describe("fft component", func() {
 
 			Expect(c.run("writer")).To(Equal(exitcode.OK))
 			Expect(c.report().Env).To(HaveKeyWithValue(config.EnvIDToken, testIDToken))
+		})
+
+		It("honours --read-only even though the component parses no flags", func() {
+			// The stub turns flag parsing off so the component owns its argv, which means
+			// fft's global --read-only arrives as a raw argument, not a parsed flag. It
+			// must still gate: a guardrail a command line can slip past by being a
+			// component is no guardrail. The project here is writable — only the flag
+			// forbids the write.
+			c.installFake(mutating)
+			c.headless()
+
+			Expect(c.run("--read-only", "writer")).To(Equal(exitcode.ReadOnly))
+			Expect(c.out()).To(BeEmpty())
+		})
+
+		It("blocks a write session component under --read-only fail-safe, wherever the flag sits", func() {
+			c.installFake(mutating)
+			c.headless()
+
+			// After the component name, too: position is lost once flag parsing is off, so
+			// any --read-only in the line is honoured rather than risk letting one through.
+			Expect(c.run("writer", "--read-only")).To(Equal(exitcode.ReadOnly))
+		})
+
+		It("lets --read-only=false through on a writable project", func() {
+			c.installFake(mutating)
+			c.headless()
+
+			Expect(c.run("--read-only=false", "writer")).To(Equal(exitcode.OK))
 		})
 
 		It("gates a component that claims a mutating operation whatever its manifest says", func() {
@@ -385,6 +430,25 @@ var _ = Describe("fft component", func() {
 
 		It("refuses a name and a path together", func() {
 			Expect(c.run("component", "install", "emulator", "--path", "./x")).To(Equal(exitcode.Usage))
+		})
+	})
+
+	Describe("upgrade", func() {
+		It("refuses to upgrade a component installed from a local path", func() {
+			// A --path install records the directory it came from, which has no release
+			// behind it. A bare relative name like the temp dir's base must not resolve
+			// back to fft's own GitHub repo and fetch something unrelated — it is refused.
+			src := GinkgoT().TempDir()
+			m := fakeManifest("weather")
+			writeManifestFile(src, m)
+			Expect(os.MkdirAll(filepath.Join(src, "bin"), 0o755)).To(Succeed())
+			Expect(copyExecutable(fakeComponentBinary(), componentExecPath(src, m.Exec))).To(Succeed())
+
+			c.answer("y")
+			Expect(c.run("component", "install", "--path", src)).To(Equal(exitcode.OK))
+
+			Expect(c.run("component", "upgrade", "weather")).To(Equal(exitcode.Usage))
+			Expect(c.errOut()).To(ContainSubstring("not a GitHub release"))
 		})
 	})
 

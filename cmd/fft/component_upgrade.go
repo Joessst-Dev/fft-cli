@@ -61,7 +61,18 @@ func upgradeSource(deps *Deps, name string) (component.Source, error) {
 			"%s does not record where it came from, so there is nothing to upgrade from", name)}
 	}
 
-	src, err := component.ParseSource(sourceRepo(c.Source))
+	// Only a GitHub source can be fetched again. A --path install records the
+	// directory it was copied from — and a bare relative one like `mine` would parse
+	// as a component name and resolve, wrongly, to fft's own repo. So the prefix is
+	// required rather than inferred: anything else is a local install with no release
+	// behind it, and upgrading it is refused as documented.
+	repo, ok := githubRepo(c.Source)
+	if !ok {
+		return component.Source{}, exitcode.UsageError{Err: fmt.Errorf(
+			"%s was installed from %q, which is not a GitHub release fft can fetch again", name, c.Source)}
+	}
+
+	src, err := component.ParseSource(repo)
 	if err != nil {
 		return component.Source{}, exitcode.UsageError{Err: fmt.Errorf(
 			"%s was installed from %q, which is not a release fft can fetch again: %w", name, c.Source, err)}
@@ -74,10 +85,12 @@ func upgradeSource(deps *Deps, name string) (component.Source, error) {
 	return src, nil
 }
 
-// sourceRepo turns a recorded source back into the spec ParseSource understands.
-// Install records "github.com/owner/repo@v1"; a local install records a path, which
-// has no owner/repo in it and fails to parse, which is the refusal the caller wants.
-func sourceRepo(source string) string {
+// githubRepo turns a recorded source into the owner/repo ParseSource understands, and
+// reports whether it was a GitHub source at all. Install records
+// "github.com/owner/repo@v1"; a --path install records a directory, which has no such
+// prefix and is not fetchable.
+func githubRepo(source string) (string, bool) {
 	spec, _, _ := strings.Cut(source, "@")
-	return strings.TrimPrefix(spec, "github.com/")
+	rest, ok := strings.CutPrefix(spec, "github.com/")
+	return rest, ok
 }

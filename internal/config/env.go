@@ -35,6 +35,15 @@ const (
 // denials are the only ways to say no to [EnvReadOnly].
 var denials = map[string]bool{"": true, "0": true, "f": true, "false": true, "no": true, "off": true}
 
+// ReadOnlyDenied reports whether v is one of the values that turns read-only off —
+// the same short list [EnvReadOnly] recognises. It is exported for the one other
+// place that parses a read-only value fft did not get through a bound flag: a
+// --read-only passed to a flag-parsing-disabled component command, read as a raw
+// string. Case and surrounding space are forgiven, as they are for the variable.
+func ReadOnlyDenied(v string) bool {
+	return denials[strings.ToLower(strings.TrimSpace(v))]
+}
+
 // ReadOnlyFromEnv reports whether FFT_READ_ONLY forbids writes.
 //
 // It is deliberately not part of [FromEnv]'s all-or-nothing set. That set is what
