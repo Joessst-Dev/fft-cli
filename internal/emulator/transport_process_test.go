@@ -16,7 +16,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/Joessst-Dev/fft-cli/internal/component"
-	"github.com/Joessst-Dev/fft-cli/internal/transportproto"
+	"github.com/Joessst-Dev/fft-cli/pkg/transportproto"
 )
 
 // The specs here drive a real child process, because everything worth pinning about
@@ -74,6 +74,10 @@ func runFakeTransport(mode string) {
 	if probe := os.Getenv("SPEC_TRANSPORT_PROBE"); probe != "" {
 		fmt.Fprintf(os.Stderr, "probe=%s\n", probe)
 	}
+
+	// The protocol version the emulator says it speaks, echoed so a spec can prove the
+	// handshake the public docs tell external transports to gate on actually arrives.
+	fmt.Fprintf(os.Stderr, "transport-api=%s\n", os.Getenv(transportproto.EnvVersion))
 
 	handler := &fakeHandler{refuseHello: mode == fakeRefuseHello}
 	_ = transportproto.Serve(context.Background(), os.Stdin, os.Stdout, handler)
@@ -420,6 +424,16 @@ var _ = Describe("a transport component", func() {
 
 		_, _, log := newSet(fakeNormal)
 		Eventually(log.String).Should(ContainSubstring("probe=inherited"))
+	})
+
+	It("tells the child which protocol version it speaks", func() {
+		// The public compatibility docs tell an external transport to gate on
+		// FFT_TRANSPORT_API, and that guard fails open — the got == "" branch skips the
+		// check — if the emulator ever stops setting it. component.Environ strips the
+		// FFT_ namespace and the version is appended back after; this pins that it
+		// survives to the child with this build's version.
+		_, _, log := newSet(fakeNormal)
+		Eventually(log.String).Should(ContainSubstring(fmt.Sprintf("transport-api=%d", transportproto.Version)))
 	})
 })
 

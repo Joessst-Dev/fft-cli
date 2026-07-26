@@ -159,6 +159,11 @@ Startup prints which of the three are live, on stderr. A target whose transport 
 installed — or installed but not pointed at a host — is stored and matched but never
 delivered to, and the startup notice says which of the two it is.
 
+To teach the emulator a broker it has never heard of — Kafka, NATS, SQS — write your own
+transport component. It is a process speaking newline-delimited JSON on stdin and stdout;
+Go authors get the protocol types and loop from `github.com/Joessst-Dev/fft-cli/pkg/transportproto`.
+See [components](components.md).
+
 ### Webhook targets
 
 A webhook needs no flag: the emulator POSTs the event envelope to the subscription's

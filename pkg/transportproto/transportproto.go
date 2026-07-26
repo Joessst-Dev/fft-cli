@@ -40,13 +40,25 @@
 // Every request carries the target, because the child holds no state between frames.
 // That costs a few bytes and removes handle lifetimes, reconnection and leak
 // questions from a protocol whose whole job is to be obviously correct.
+//
+// # Compatibility
+//
+// [Request], [Response], [Handler] and [Serve] — together with [MaxFrame] and the
+// [OpHello]/[OpPlan]/[OpSend] constants — are the public surface an external transport
+// builds against, so their shape is a commitment. [Version] numbers that contract: a
+// change that alters what an existing frame or field means bumps it, while a new
+// optional field an older component can ignore does not.
+//
+// The emulator hands the child the version it speaks in [EnvVersion]. fft does not
+// enforce a match — it only reports it — so gating on it is the component's own choice:
+// read [EnvVersion], compare it against [Version], and refuse a host you do not
+// understand rather than fail in some more interesting way further in.
 package transportproto
 
 import (
 	"bufio"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 )
@@ -143,10 +155,14 @@ type Handler interface {
 }
 
 // Serve reads requests from in, answers them with h, and writes the responses to
-// out, until in reaches EOF or ctx is cancelled.
+// out, until in reaches EOF.
 //
 // It returns nil at EOF: the emulator closes the child's stdin to say it is
-// finished, and a clean shutdown is not an error.
+// finished, and a clean shutdown is not an error. ctx is checked after each frame is
+// read and before it is answered, and is passed to [Handler.Send]; a cancellation
+// therefore drops the request in hand and stops the loop, returning nil as at EOF, but
+// does not unblock a read already waiting on a stream that has gone quiet. Closing in
+// unblocks that, which is what the emulator does on shutdown.
 func Serve(ctx context.Context, in io.Reader, out io.Writer, h Handler) error {
 	scanner := bufio.NewScanner(in)
 	scanner.Buffer(make([]byte, 0, 64<<10), MaxFrame)
@@ -218,6 +234,3 @@ func answer(ctx context.Context, h Handler, req Request) Response {
 
 	return res
 }
-
-// ErrClosed is returned by a client whose transport has already been shut down.
-var ErrClosed = errors.New("the transport is closed")

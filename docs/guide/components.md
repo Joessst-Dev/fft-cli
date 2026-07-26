@@ -109,3 +109,74 @@ If `fft --help` warns that a component declared a command `fft` already has, the
 one wins and the component's is dropped. That is deliberate — a component cannot silently
 change what an existing command does — and the component's author is the one who has to
 rename it.
+
+## Writing a transport component in Go
+
+A transport component is a separate process the emulator talks to over stdin and stdout:
+newline-delimited JSON, one `hello`/`plan`/`send` request per line, stderr for logs. Any
+language can implement that wire format directly. Go authors do not have to — the protocol
+types and the loop that drives them are a public package,
+`github.com/Joessst-Dev/fft-cli/pkg/transportproto`.
+
+Implement `transportproto.Handler` and hand it to `transportproto.Serve`, which owns the
+read/answer/write loop and returns nil at EOF (the emulator closing stdin is how it says
+it is done):
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"os/signal"
+	"strconv"
+	"syscall"
+
+	"github.com/Joessst-Dev/fft-cli/pkg/transportproto"
+)
+
+// myTransport would hold a broker client; it answers with constants here so the
+// example stays about the wiring.
+type myTransport struct{}
+
+// Hello reports the target types this transport delivers, and one line for the
+// emulator's startup notice saying where.
+func (t *myTransport) Hello() (targets []string, status string, err error) {
+	return []string{"MY_BROKER"}, "publishing to my-broker at localhost:9000", nil
+}
+
+// Plan resolves one subscription target into the label its deliveries are reported
+// under, or returns an error the emulator logs as the reason it skips that subscription.
+func (t *myTransport) Plan(target map[string]any) (label string, err error) {
+	return "my-broker/orders", nil
+}
+
+// Send delivers one event to a target Plan accepted.
+func (t *myTransport) Send(ctx context.Context, target map[string]any, event string, data []byte) error {
+	return nil
+}
+
+func main() {
+	// fft does not enforce the protocol version — it only reports the one it speaks in
+	// FFT_TRANSPORT_API — so refusing a host this build does not understand is the
+	// component's own job.
+	if got := os.Getenv(transportproto.EnvVersion); got != "" && got != strconv.Itoa(transportproto.Version) {
+		fmt.Fprintf(os.Stderr, "the emulator speaks transport protocol %s, this component speaks %d\n", got, transportproto.Version)
+		os.Exit(1)
+	}
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	if err := transportproto.Serve(ctx, os.Stdin, os.Stdout, &myTransport{}); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+```
+
+This mirrors the `Example` in the package's `example_test.go`, which compiles under
+`go test` and renders on pkg.go.dev. The first-party `emulator-pubsub` and
+`emulator-servicebus` transports are built on the same package and are the working
+reference for wiring up a real broker client, validating targets, and shutting down
+cleanly.

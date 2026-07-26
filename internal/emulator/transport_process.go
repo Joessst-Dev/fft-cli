@@ -16,8 +16,13 @@ import (
 	"time"
 
 	"github.com/Joessst-Dev/fft-cli/internal/component"
-	"github.com/Joessst-Dev/fft-cli/internal/transportproto"
+	"github.com/Joessst-Dev/fft-cli/pkg/transportproto"
 )
+
+// errClosed is returned by a transport whose child has already been shut down. It is
+// a client sentinel, not part of the child handler contract, so it lives here rather
+// than in the public protocol package.
+var errClosed = errors.New("the transport is closed")
 
 // defaultRequestTimeout bounds one frame's round trip.
 //
@@ -66,7 +71,7 @@ type processTransport struct {
 	// closed is an atomic rather than mu-guarded, because fail sets it from the
 	// watchdog goroutine while do holds mu — taking mu there would deadlock. do reads
 	// it before acquiring mu, so a delivery to a child killed for a protocol violation
-	// gets the defined ErrClosed instead of a raw pipe error. It is the ErrClosed
+	// gets the defined errClosed instead of a raw pipe error. It is the errClosed
 	// gate, not the shutdown latch: fail sets it to stop new deliveries but does not
 	// reap the process — reaping is [processTransport.reap]'s job.
 	closed atomic.Bool
@@ -222,17 +227,17 @@ func (t *processTransport) describe() string { return t.status }
 // per-request timer.
 func (t *processTransport) do(req transportproto.Request) (transportproto.Response, error) {
 	// Read before mu, because fail sets it while a wedged do still holds mu — this is
-	// how a delivery to an already-killed child gets ErrClosed rather than blocking on
+	// how a delivery to an already-killed child gets errClosed rather than blocking on
 	// a lock the dying call still owns.
 	if t.closed.Load() {
-		return transportproto.Response{}, transportproto.ErrClosed
+		return transportproto.Response{}, errClosed
 	}
 
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
 	if t.closed.Load() {
-		return transportproto.Response{}, transportproto.ErrClosed
+		return transportproto.Response{}, errClosed
 	}
 
 	t.nextID++
@@ -263,7 +268,7 @@ func (t *processTransport) do(req transportproto.Request) (transportproto.Respon
 			err = io.EOF
 		}
 		// A read that ends is a transport that ended: mark it dead so the next delivery
-		// gets ErrClosed rather than trying to write to a broken pipe.
+		// gets errClosed rather than trying to write to a broken pipe.
 		t.fail(err)
 		return transportproto.Response{}, fmt.Errorf("read from the %s transport: %w", t.name, err)
 	}
