@@ -112,6 +112,32 @@ var _ = Describe("fft component init", func() {
 		Expect(c.errOut()).To(ContainSubstring("unknown --lang"))
 	})
 
+	It("refuses a --dir that does not exist rather than conjuring the tree", func() {
+		dir := filepath.Join(GinkgoT().TempDir(), "projcts") // a typo, never created
+		Expect(c.run("component", "init", "pricing", "--dir", dir)).To(Equal(exitcode.Usage))
+		Expect(dir).NotTo(BeADirectory(), "a misspelled --dir must not be created")
+	})
+
+	// The command skeleton echoes the FFT_ environment to demonstrate the contract, but a
+	// read or write session hands it a live tenant token — and stdout is the stream the
+	// output contract promises is safe to pipe. So the token must never reach it.
+	It("masks the tenant token in the command skeleton's stdout", func() {
+		if runtime.GOOS == "windows" {
+			Skip("the generated command is a shell script")
+		}
+		dir := GinkgoT().TempDir()
+		Expect(c.run("component", "init", "pricing", "--dir", dir)).To(Equal(exitcode.OK))
+
+		cmd := exec.Command(filepath.Join(dir, "pricing", "bin", "fft-pricing"))
+		cmd.Env = append(os.Environ(), "FFT_ID_TOKEN=live-bearer-token", "FFT_PASSWORD=hunter2")
+		out, err := cmd.Output()
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(string(out)).To(ContainSubstring("FFT_ID_TOKEN=<redacted>"))
+		Expect(string(out)).NotTo(ContainSubstring("live-bearer-token"))
+		Expect(string(out)).NotTo(ContainSubstring("hunter2"))
+	})
+
 	It("rejects a name the manifest rules forbid, writing nothing", func() {
 		dir := GinkgoT().TempDir()
 		Expect(c.run("component", "init", "Bad_Name", "--dir", dir)).To(Equal(exitcode.Usage))

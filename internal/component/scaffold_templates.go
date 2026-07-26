@@ -46,6 +46,9 @@ const shellCommand = `#!/bin/sh
 # fft runs this with the arguments after ` + "`fft {{name}}`" + ` and an environment it
 # builds from the session this component's manifest declares. Replace the body with
 # your own logic; what is here proves the contract by echoing both.
+#
+# FFT_ID_TOKEN and FFT_PASSWORD are masked: a read or write session hands over a live
+# tenant token, and stdout is the stream fft's output contract promises is safe to pipe.
 set -eu
 
 printf 'args:'
@@ -53,7 +56,10 @@ for arg in "$@"; do printf ' %s' "$arg"; done
 printf '\n'
 
 printf 'fft environment:\n'
-env | grep '^FFT_' | sort || true
+# Two -e expressions, not one with \| alternation: BSD sed (macOS) has no alternation in a
+# basic regex, and a scaffold has to redact on the author's machine as well as on Linux.
+env | grep '^FFT_' | sort \
+	| sed -e 's/^FFT_ID_TOKEN=.*/FFT_ID_TOKEN=<redacted>/' -e 's/^FFT_PASSWORD=.*/FFT_PASSWORD=<redacted>/' || true
 `
 
 const pythonCommand = `#!/usr/bin/env python3
@@ -62,14 +68,20 @@ const pythonCommand = `#!/usr/bin/env python3
 fft runs this with the arguments after ` + "`fft {{name}}`" + ` and an environment it builds
 from the session this component's manifest declares. Replace the body with your own
 logic; what is here proves the contract by echoing both.
+
+FFT_ID_TOKEN and FFT_PASSWORD are masked: a read or write session hands over a live
+tenant token, and stdout is the stream fft's output contract promises is safe to pipe.
 """
 import os
 import sys
 
+SECRET = {"FFT_ID_TOKEN", "FFT_PASSWORD"}
+
 print("args:", " ".join(sys.argv[1:]))
 print("fft environment:")
 for key in sorted(k for k in os.environ if k.startswith("FFT_")):
-    print(f"  {key}={os.environ[key]}")
+    value = "<redacted>" if key in SECRET else os.environ[key]
+    print(f"  {key}={value}")
 `
 
 const nodeCommand = `#!/usr/bin/env node
@@ -78,14 +90,19 @@ const nodeCommand = `#!/usr/bin/env node
 // fft runs this with the arguments after ` + "`fft {{name}}`" + ` and an environment it builds
 // from the session this component's manifest declares. Replace the body with your own
 // logic; what is here proves the contract by echoing both.
+//
+// FFT_ID_TOKEN and FFT_PASSWORD are masked: a read or write session hands over a live
+// tenant token, and stdout is the stream fft's output contract promises is safe to pipe.
 "use strict";
+
+const SECRET = new Set(["FFT_ID_TOKEN", "FFT_PASSWORD"]);
 
 console.log("args:", process.argv.slice(2).join(" "));
 console.log("fft environment:");
 Object.keys(process.env)
   .filter((k) => k.startsWith("FFT_"))
   .sort()
-  .forEach((k) => console.log("  " + k + "=" + process.env[k]));
+  .forEach((k) => console.log("  " + k + "=" + (SECRET.has(k) ? "<redacted>" : process.env[k])));
 `
 
 const goCommand = `// Command {{exec}} is a fft command component.
@@ -93,6 +110,9 @@ const goCommand = `// Command {{exec}} is a fft command component.
 // fft runs it with the arguments after ` + "`fft {{name}}`" + ` and an environment it builds
 // from the session this component's manifest declares. Replace the body with your own
 // logic; what is here proves the contract by echoing both.
+//
+// FFT_ID_TOKEN and FFT_PASSWORD are masked: a read or write session hands over a live
+// tenant token, and stdout is the stream fft's output contract promises is safe to pipe.
 package main
 
 import (
@@ -105,11 +125,18 @@ import (
 func main() {
 	fmt.Println("args:", strings.Join(os.Args[1:], " "))
 
+	secret := map[string]bool{"FFT_ID_TOKEN": true, "FFT_PASSWORD": true}
+
 	var fft []string
 	for _, e := range os.Environ() {
-		if strings.HasPrefix(e, "FFT_") {
-			fft = append(fft, e)
+		name, _, _ := strings.Cut(e, "=")
+		if !strings.HasPrefix(name, "FFT_") {
+			continue
 		}
+		if secret[name] {
+			e = name + "=<redacted>"
+		}
+		fft = append(fft, e)
 	}
 	slices.Sort(fft)
 

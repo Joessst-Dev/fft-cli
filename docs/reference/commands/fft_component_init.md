@@ -16,8 +16,8 @@ trivially-right thing — into &lt;dir>/&lt;name>, ready to install with:
 Two kinds:
 
   command    adds 'fft &lt;name>'; the skeleton prints its arguments and the FFT_
-             environment fft handed it, so the contract is visible before you
-             write any logic.
+             environment fft handed it — with the tenant token masked — so the
+             contract is visible before you write any logic.
   transport  delivers emulator events to a broker; the skeleton answers the
              protocol's hello, refuses plan, and acks send.
 

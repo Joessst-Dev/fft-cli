@@ -90,6 +90,25 @@ var _ = Describe("Scaffold", func() {
 			}
 		})
 
+		It("redacts the tenant token in every command skeleton", func() {
+			// A read or write session hands the command a live FFT_ID_TOKEN, and the skeleton
+			// echoes the FFT_ environment to stdout — the stream the output contract keeps safe
+			// to pipe. Every language's skeleton must mask it, not just the default shell one.
+			for _, lang := range []string{component.LangShell, component.LangGo, component.LangPython, component.LangNode} {
+				files, err := component.Scaffold{Name: "widget", Kind: component.KindCommand, Lang: lang}.Build()
+				Expect(err).NotTo(HaveOccurred())
+
+				body := ""
+				for _, f := range files {
+					if f.Name == "bin/fft-widget" || f.Name == "main.go" {
+						body = string(f.Data)
+					}
+				}
+				Expect(body).To(ContainSubstring("FFT_ID_TOKEN"), "lang %s", lang)
+				Expect(body).To(ContainSubstring("<redacted>"), "lang %s", lang)
+			}
+		})
+
 		It("emits a Go module rather than a bin/ script for --lang go", func() {
 			files, err := component.Scaffold{Name: "widget", Kind: component.KindCommand, Lang: component.LangGo}.Build()
 			Expect(err).NotTo(HaveOccurred())

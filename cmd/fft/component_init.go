@@ -23,8 +23,8 @@ trivially-right thing — into <dir>/<name>, ready to install with:
 Two kinds:
 
   command    adds 'fft <name>'; the skeleton prints its arguments and the FFT_
-             environment fft handed it, so the contract is visible before you
-             write any logic.
+             environment fft handed it — with the tenant token masked — so the
+             contract is visible before you write any logic.
   transport  delivers emulator events to a broker; the skeleton answers the
              protocol's hello, refuses plan, and acks send.
 
@@ -136,6 +136,13 @@ func runComponentInit(deps *Deps, s component.Scaffold, dir string) error {
 		return exitcode.UsageError{Err: err}
 	}
 
+	// The parent must already exist. Creating it would turn a typo'd `--dir ../projcts`
+	// into a directory tree conjured out of a misspelling, and it would leave those
+	// created parents behind on a failed write — the cleanup below only removes the leaf.
+	if info, err := os.Stat(dir); err != nil || !info.IsDir() {
+		return exitcode.UsageError{Err: fmt.Errorf("--dir %s is not an existing directory", dir)}
+	}
+
 	target := filepath.Join(dir, s.Name)
 	absent, err := ensureTargetWritable(target)
 	if err != nil {
@@ -201,9 +208,6 @@ func reportInit(deps *Deps, s component.Scaffold, target string, files []compone
 	}
 }
 
-// refuseNonEmptyDir stops init from writing over a directory that already has
-// something in it — the name comes from a shell, and clobbering an author's work is
-// not something a scaffolder gets to do.
 // ensureTargetWritable checks that dir is a safe place to stamp the component into, and
 // reports whether it was genuinely absent — which is what lets a failed write clean up
 // only the tree init itself created, never a directory the user already had.

@@ -119,8 +119,9 @@ fft component init ship --kind transport --lang python
 ```
 
 - `--kind command` (the default) adds `fft <name>`; its skeleton prints the arguments and the
-  `FFT_` environment it was handed, so the process contract is visible before any logic is
-  written. `--kind transport` delivers emulator events; its skeleton answers the protocol's
+  `FFT_` environment it was handed — with the tenant token masked, since stdout is the stream
+  the output contract keeps safe to pipe — so the process contract is visible before any logic
+  is written. `--kind transport` delivers emulator events; its skeleton answers the protocol's
   `hello`, refuses `plan`, and acks `send`.
 - `--lang` is `shell`, `go`, `python` or `node`. `shell`, `python` and `node` are interpreter
   scripts that run the moment they are installed; `go` compiles to `bin/`, so it needs
