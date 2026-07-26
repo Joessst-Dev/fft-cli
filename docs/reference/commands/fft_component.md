@@ -32,6 +32,7 @@ fft component
 ## Subcommands
 
 - [fft component info](./fft_component_info.md) — Show a component's manifest
+- [fft component init](./fft_component_init.md) — Scaffold a new component
 - [fft component install](./fft_component_install.md) — Install a component
 - [fft component list](./fft_component_list.md) — List installed components
 - [fft component remove](./fft_component_remove.md) — Remove an installed component

@@ -42,6 +42,7 @@ func newComponentCmd(deps *Deps) *cobra.Command {
 	cmd.AddCommand(
 		newComponentListCmd(deps),
 		newComponentInfoCmd(deps),
+		newComponentInitCmd(deps),
 		newComponentInstallCmd(deps),
 		newComponentUpgradeCmd(deps),
 		newComponentRemoveCmd(deps),
