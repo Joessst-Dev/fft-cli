@@ -16,7 +16,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/Joessst-Dev/fft-cli/internal/component"
-	"github.com/Joessst-Dev/fft-cli/internal/transportproto"
+	"github.com/Joessst-Dev/fft-cli/pkg/transportproto"
 )
 
 // The specs here drive a real child process, because everything worth pinning about

@@ -18,7 +18,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Joessst-Dev/fft-cli/internal/transportproto"
+	"github.com/Joessst-Dev/fft-cli/pkg/transportproto"
 )
 
 // EnvHost is where this transport reads the emulator it delivers to. It is the name

@@ -40,13 +40,22 @@
 // Every request carries the target, because the child holds no state between frames.
 // That costs a few bytes and removes handle lifetimes, reconnection and leak
 // questions from a protocol whose whole job is to be obviously correct.
+//
+// # Compatibility
+//
+// [Request], [Response], [Handler] and [Serve] — together with [MaxFrame] and the
+// [OpHello]/[OpPlan]/[OpSend] constants — are the public surface an external transport
+// builds against, so their shape is a commitment. The wire contract is gated by
+// [Version], which the emulator hands the child in [EnvVersion]: a change that alters
+// what an existing frame or field means bumps [Version] so a component can refuse a
+// host it no longer understands, while a new optional field that older components can
+// ignore does not.
 package transportproto
 
 import (
 	"bufio"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 )
@@ -218,6 +227,3 @@ func answer(ctx context.Context, h Handler, req Request) Response {
 
 	return res
 }
-
-// ErrClosed is returned by a client whose transport has already been shut down.
-var ErrClosed = errors.New("the transport is closed")

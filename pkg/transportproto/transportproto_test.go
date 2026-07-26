@@ -10,12 +10,12 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/Joessst-Dev/fft-cli/internal/transportproto"
+	"github.com/Joessst-Dev/fft-cli/pkg/transportproto"
 )
 
 func TestTransportProto(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "internal/transportproto")
+	RunSpecs(t, "pkg/transportproto")
 }
 
 // handler is a transport that records what it was asked and answers as told.
