@@ -110,6 +110,39 @@ one wins and the component's is dropped. That is deliberate — a component cann
 change what an existing command does — and the component's author is the one who has to
 rename it.
 
+## Scaffolding a new component
+
+`fft component init` stamps a runnable skeleton into `<dir>/<name>`, so an author starts from
+a working component rather than a blank manifest:
+
+```sh
+fft component init pricing
+fft component init pricing --lang go
+fft component init ship --kind transport
+fft component init ship --kind transport --lang python
+```
+
+- `--kind command` (the default) adds `fft <name>`; its skeleton prints the arguments and the
+  `FFT_` environment it was handed, so the process contract is visible before any logic is
+  written. `--kind transport` delivers emulator events; its skeleton answers the protocol's
+  `hello`, refuses `plan`, and acks `send`.
+- `--lang` is `shell`, `go`, `python` or `node`. `shell`, `python` and `node` are interpreter
+  scripts that run the moment they are installed; `go` compiles to `bin/`, so it needs
+  `go build` first (the emitted `README` says so). The default is `shell` for a command and
+  `go` for a transport.
+- `--session none|read|write` (command only) sets the tenant session the command receives; a
+  `write` skeleton is marked `mutates` so the read-only gate applies to it.
+
+The emitted `component.yaml` is validated exactly as `fft component install` validates one, so
+whatever `init` produces installs:
+
+```sh
+fft component init pricing
+fft component install --path ./pricing
+```
+
+after which `fft pricing` runs the component and prints its args and the `FFT_` environment.
+
 ## Writing a transport component in Go
 
 A transport component is a separate process the emulator talks to over stdin and stdout:

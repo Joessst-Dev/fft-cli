@@ -79,6 +79,7 @@ var commandsWithoutOperation = map[string]string{
 	// class exemption in the walk below.
 	"fft component list":    "reads the component directory; no network",
 	"fft component info":    "reads one component's manifest; no network",
+	"fft component init":    "stamps a component skeleton onto local disk; no network",
 	"fft component install": "downloads a release from GitHub; makes no request to any tenant",
 	"fft component upgrade": "downloads a release from GitHub; makes no request to any tenant",
 	"fft component remove":  "deletes a component directory; no network",

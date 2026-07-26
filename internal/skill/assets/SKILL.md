@@ -141,7 +141,9 @@ command tree. `fft component list` says which are installed and who wrote them, 
 
 A component runs as the user, with their credentials. **Never install one on their behalf
 without asking**, and never pass `-y` to `fft component install` for them: that flag
-answers the one question in the whole CLI that is about trust rather than about data. See
+answers the one question in the whole CLI that is about trust rather than about data.
+`fft component init` scaffolds a new one (a command or a transport, in shell, Go, Python or
+Node) that installs and runs straight away. See
 [references/components.md](references/components.md).
 
 ## Never

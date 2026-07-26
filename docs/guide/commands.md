@@ -201,3 +201,5 @@ fft component list
 - `fft component list` says which components are installed, and whether fft ships them or
   somebody else does — a command in `--help` that came from a component is somebody else's
   code. See [components](./components.md).
+- `fft component init pricing` scaffolds a new component (a command or a transport, in shell,
+  Go, Python or Node) that installs and runs straight away. See [components](./components.md).
