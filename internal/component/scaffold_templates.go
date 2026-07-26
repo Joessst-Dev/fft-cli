@@ -134,13 +134,15 @@ const shellTransport = `#!/bin/sh
 # by hand — Go authors can use github.com/Joessst-Dev/fft-cli/pkg/transportproto instead.
 #
 # It reads the "op" and "id" out of each frame with sed rather than a JSON parser, which
-# is enough for a scaffold; a real transport in shell would want jq.
+# is enough for a scaffold; a real transport in shell would want jq. The matches are
+# anchored to the start of the frame — the encoder always emits "id" then "op" first, so
+# a nested "id" or "op" inside a send frame's target or data is not what they pick up.
 set -eu
 
 while IFS= read -r line; do
 	[ -n "$line" ] || continue
-	op=$(printf '%s' "$line" | sed -n 's/.*"op":"\([a-z]*\)".*/\1/p')
-	id=$(printf '%s' "$line" | sed -n 's/.*"id":\([0-9]*\).*/\1/p')
+	op=$(printf '%s' "$line" | sed -n 's/^{"id":[0-9]*,"op":"\([a-z]*\)".*/\1/p')
+	id=$(printf '%s' "$line" | sed -n 's/^{"id":\([0-9]*\).*/\1/p')
 	id=${id:-0}
 	case "$op" in
 	hello)

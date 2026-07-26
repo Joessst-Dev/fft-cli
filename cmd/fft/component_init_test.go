@@ -2,8 +2,10 @@ package main
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -110,9 +112,38 @@ var _ = Describe("fft component init", func() {
 		Expect(c.errOut()).To(ContainSubstring("unknown --lang"))
 	})
 
-	It("rejects a name the manifest rules forbid", func() {
+	It("rejects a name the manifest rules forbid, writing nothing", func() {
 		dir := GinkgoT().TempDir()
 		Expect(c.run("component", "init", "Bad_Name", "--dir", dir)).To(Equal(exitcode.Usage))
+
+		// The path-safety argument — validate the manifest before touching disk — only
+		// holds if nothing was created, so pin it: a reorder that wrote first would fail here.
+		entries, err := os.ReadDir(dir)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(entries).To(BeEmpty(), "a rejected name must not create anything")
+	})
+
+	It("refuses a target path that is already a file, as a usage error", func() {
+		dir := GinkgoT().TempDir()
+		Expect(os.WriteFile(filepath.Join(dir, "pricing"), []byte("x"), 0o600)).To(Succeed())
+
+		// os.ReadDir on a file returns ENOTDIR, not IsNotExist: it must still exit 2, the
+		// same class as the non-empty-directory refusal, not the generic 1 a bare error gives.
+		Expect(c.run("component", "init", "pricing", "--dir", dir)).To(Equal(exitcode.Usage))
+	})
+
+	It("v-prefixes the go.mod require of a Go transport on a release build", func() {
+		// GoReleaser stamps buildinfo.Version without the leading v; a module version needs
+		// one. This exercises the real pinning branch scaffoldFromFlags takes, which the
+		// Scaffold.Build unit test cannot, since a dev build never reaches it.
+		c.asVersion("1.4.2")
+
+		dir := GinkgoT().TempDir()
+		Expect(c.run("component", "init", "ship", "--kind", "transport", "--dir", dir)).To(Equal(exitcode.OK))
+
+		data, err := os.ReadFile(filepath.Join(dir, "ship", "go.mod"))
+		Expect(err).NotTo(HaveOccurred())
+		Expect(string(data)).To(ContainSubstring("require github.com/Joessst-Dev/fft-cli v1.4.2"))
 	})
 
 	// The whole point, end to end: a freshly-initialised command component installs by
@@ -132,5 +163,32 @@ var _ = Describe("fft component init", func() {
 
 		Expect(c.run("pricing", "hello", "--city", "Berlin")).To(Equal(exitcode.OK))
 		Expect(c.out()).To(ContainSubstring("args: hello --city Berlin"))
+	})
+
+	// The shell transport reads the frame's op and id with sed, so it has to answer the
+	// frame's own id — not a nested one a send frame carries in its target or data. The
+	// emulator kills a transport that answers request N as request M, so a scaffold that
+	// did would die on its first real delivery.
+	It("produces a shell transport that answers the frame's own id past a nested one", func() {
+		if runtime.GOOS == "windows" {
+			Skip("the generated transport is a shell script")
+		}
+
+		dir := GinkgoT().TempDir()
+		Expect(c.run("component", "init", "relay", "--kind", "transport", "--lang", "shell", "--dir", dir)).
+			To(Equal(exitcode.OK))
+
+		script := filepath.Join(dir, "relay", "bin", "fft-relay")
+		frame := `{"id":7,"op":"send","target":{"id":"nested"},"event":"order.created","data":{"id":99,"op":"noop"}}` + "\n"
+
+		cmd := exec.Command(script)
+		cmd.Stdin = strings.NewReader(frame)
+		out, err := cmd.Output()
+		Expect(err).NotTo(HaveOccurred())
+
+		// The response is the frame's id (7), not the data's (99) or the sed default (0).
+		Expect(string(out)).To(ContainSubstring(`"id":7`))
+		Expect(string(out)).NotTo(ContainSubstring(`"id":99`))
+		Expect(string(out)).NotTo(ContainSubstring(`"id":0`))
 	})
 })
