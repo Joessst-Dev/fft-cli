@@ -175,7 +175,8 @@ func main() {
 }
 ```
 
-This example is kept honest by an `Example` in the package's `example_test.go`, so it
-also renders on pkg.go.dev. The first-party `emulator-pubsub` and `emulator-servicebus`
-transports are built on the same package and are the working reference for wiring up a
-real broker client, validating targets, and shutting down cleanly.
+This mirrors the `Example` in the package's `example_test.go`, which compiles under
+`go test` and renders on pkg.go.dev. The first-party `emulator-pubsub` and
+`emulator-servicebus` transports are built on the same package and are the working
+reference for wiring up a real broker client, validating targets, and shutting down
+cleanly.

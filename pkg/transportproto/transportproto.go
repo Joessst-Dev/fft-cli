@@ -158,10 +158,11 @@ type Handler interface {
 // out, until in reaches EOF.
 //
 // It returns nil at EOF: the emulator closes the child's stdin to say it is
-// finished, and a clean shutdown is not an error. ctx is checked between frames and
-// passed to [Handler.Send], so a cancellation stops the loop once the current read
-// returns — it does not interrupt a blocked read of a stream that has gone quiet.
-// Closing in is what unblocks that; the emulator does exactly that on shutdown.
+// finished, and a clean shutdown is not an error. ctx is checked after each frame is
+// read and before it is answered, and is passed to [Handler.Send]; a cancellation
+// therefore drops the request in hand and stops the loop, but does not unblock a read
+// already waiting on a stream that has gone quiet. Closing in unblocks that, which is
+// what the emulator does on shutdown.
 func Serve(ctx context.Context, in io.Reader, out io.Writer, h Handler) error {
 	scanner := bufio.NewScanner(in)
 	scanner.Buffer(make([]byte, 0, 64<<10), MaxFrame)
