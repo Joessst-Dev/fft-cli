@@ -45,11 +45,14 @@
 //
 // [Request], [Response], [Handler] and [Serve] — together with [MaxFrame] and the
 // [OpHello]/[OpPlan]/[OpSend] constants — are the public surface an external transport
-// builds against, so their shape is a commitment. The wire contract is gated by
-// [Version], which the emulator hands the child in [EnvVersion]: a change that alters
-// what an existing frame or field means bumps [Version] so a component can refuse a
-// host it no longer understands, while a new optional field that older components can
-// ignore does not.
+// builds against, so their shape is a commitment. [Version] numbers that contract: a
+// change that alters what an existing frame or field means bumps it, while a new
+// optional field an older component can ignore does not.
+//
+// The emulator hands the child the version it speaks in [EnvVersion]. fft does not
+// enforce a match — it only reports it — so gating on it is the component's own choice:
+// read [EnvVersion], compare it against [Version], and refuse a host you do not
+// understand rather than fail in some more interesting way further in.
 package transportproto
 
 import (
@@ -152,10 +155,13 @@ type Handler interface {
 }
 
 // Serve reads requests from in, answers them with h, and writes the responses to
-// out, until in reaches EOF or ctx is cancelled.
+// out, until in reaches EOF.
 //
 // It returns nil at EOF: the emulator closes the child's stdin to say it is
-// finished, and a clean shutdown is not an error.
+// finished, and a clean shutdown is not an error. ctx is checked between frames and
+// passed to [Handler.Send], so a cancellation stops the loop once the current read
+// returns — it does not interrupt a blocked read of a stream that has gone quiet.
+// Closing in is what unblocks that; the emulator does exactly that on shutdown.
 func Serve(ctx context.Context, in io.Reader, out io.Writer, h Handler) error {
 	scanner := bufio.NewScanner(in)
 	scanner.Buffer(make([]byte, 0, 64<<10), MaxFrame)

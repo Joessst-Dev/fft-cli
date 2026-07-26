@@ -130,12 +130,15 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
 	"github.com/Joessst-Dev/fft-cli/pkg/transportproto"
 )
 
-type myTransport struct{ /* a broker client */ }
+// myTransport would hold a broker client; it answers with constants here so the
+// example stays about the wiring.
+type myTransport struct{}
 
 // Hello reports the target types this transport delivers, and one line for the
 // emulator's startup notice saying where.
@@ -155,6 +158,14 @@ func (t *myTransport) Send(ctx context.Context, target map[string]any, event str
 }
 
 func main() {
+	// fft does not enforce the protocol version — it only reports the one it speaks in
+	// FFT_TRANSPORT_API — so refusing a host this build does not understand is the
+	// component's own job.
+	if got := os.Getenv(transportproto.EnvVersion); got != "" && got != strconv.Itoa(transportproto.Version) {
+		fmt.Fprintf(os.Stderr, "the emulator speaks transport protocol %s, this component speaks %d\n", got, transportproto.Version)
+		os.Exit(1)
+	}
+
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if err := transportproto.Serve(ctx, os.Stdin, os.Stdout, &myTransport{}); err != nil {
@@ -164,8 +175,7 @@ func main() {
 }
 ```
 
-The first-party `emulator-pubsub` and `emulator-servicebus` transports are built on this
-same package, so they are the working reference for a real broker client, target
-validation, and graceful shutdown. `transportproto.Version` (handed to the child in the
-`FFT_TRANSPORT_API` environment variable) gates wire compatibility, so a component can
-refuse a host it does not understand rather than fail further in.
+This example is kept honest by an `Example` in the package's `example_test.go`, so it
+also renders on pkg.go.dev. The first-party `emulator-pubsub` and `emulator-servicebus`
+transports are built on the same package and are the working reference for wiring up a
+real broker client, validating targets, and shutting down cleanly.
