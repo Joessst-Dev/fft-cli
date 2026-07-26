@@ -200,15 +200,24 @@ func reportInit(deps *Deps, s component.Scaffold, target string, files []compone
 // something in it — the name comes from a shell, and clobbering an author's work is
 // not something a scaffolder gets to do.
 func refuseNonEmptyDir(dir string) error {
-	entries, err := os.ReadDir(dir)
+	// Stat first, rather than lean on os.ReadDir's error for a non-directory: that error
+	// is ENOTDIR on Unix but not on Windows, where ReadDir of a plain file returns no
+	// error at all and the refusal would never fire. os.Stat + IsDir is the portable check
+	// install.go already uses.
+	info, err := os.Stat(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
 		}
-		// Anything else — a file already at this path (ENOTDIR), a permission problem — is
-		// still "something is already here, and it is not ours to write into". It is a usage
-		// problem the user fixes by naming a clear path, so it exits 2 like the non-empty
-		// case below, not the generic 1 a bare error would give.
+		return exitcode.UsageError{Err: fmt.Errorf("cannot create the component in %s: %w", dir, err)}
+	}
+	if !info.IsDir() {
+		// A file already at the path — usage, exit 2, the same class as the non-empty case.
+		return exitcode.UsageError{Err: fmt.Errorf("%s already exists", dir)}
+	}
+
+	entries, err := os.ReadDir(dir)
+	if err != nil {
 		return exitcode.UsageError{Err: fmt.Errorf("cannot create the component in %s: %w", dir, err)}
 	}
 	if len(entries) > 0 {
