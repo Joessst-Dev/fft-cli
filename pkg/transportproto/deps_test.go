@@ -30,6 +30,7 @@ var _ = Describe("dependencies", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		fset := token.NewFileSet()
+		checked := 0
 		for _, e := range entries {
 			name := e.Name()
 			// Test files are excused: they legitimately reach for Ginkgo and this file
@@ -41,6 +42,7 @@ var _ = Describe("dependencies", func() {
 
 			f, err := parser.ParseFile(fset, filepath.Join(dir, name), nil, parser.ImportsOnly)
 			Expect(err).NotTo(HaveOccurred())
+			checked++
 
 			for _, imp := range f.Imports {
 				path, err := strconv.Unquote(imp.Path.Value)
@@ -53,5 +55,9 @@ var _ = Describe("dependencies", func() {
 					"%s imports %q — the public package must depend on the standard library only", name, path)
 			}
 		}
+
+		// A guard that checked nothing would pass while proving nothing — the very
+		// silent green it exists to prevent — so require that it actually read the package.
+		Expect(checked).To(BeNumerically(">", 0), "found no non-test .go files to check in %s", dir)
 	})
 })
