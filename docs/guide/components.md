@@ -134,7 +134,9 @@ fft component init ship --kind transport --lang python
   `write` skeleton is marked `mutates` so the read-only gate applies to it.
 
 The emitted `component.yaml` is validated exactly as `fft component install` validates one, so
-whatever `init` produces installs:
+anything `init` produces is a manifest `fft component install` accepts. A `shell`, `python`
+or `node` command installs straight away; a `--lang go` component has to be built first, so
+that the executable its manifest names exists (the emitted `README` says so):
 
 ```sh
 fft component init pricing

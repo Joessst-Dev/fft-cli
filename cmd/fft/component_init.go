@@ -137,15 +137,20 @@ func runComponentInit(deps *Deps, s component.Scaffold, dir string) error {
 	}
 
 	target := filepath.Join(dir, s.Name)
-	if err := refuseNonEmptyDir(target); err != nil {
+	absent, err := ensureTargetWritable(target)
+	if err != nil {
 		return err
 	}
 
 	if err := writeFiles(target, files); err != nil {
-		// refuseNonEmptyDir proved target was empty or absent, so whatever is there now is
-		// init's own half-written debris. Remove it, so a re-run does not hit the "already
-		// exists" refusal with no way to tell fft's litter from the user's work.
-		_ = os.RemoveAll(target)
+		// Only clean up a tree init itself created. When target was absent, everything under
+		// it now is init's own half-written debris, and removing it keeps a re-run from
+		// hitting the "already exists" refusal with no way to tell fft's litter from the
+		// user's work. When target was a directory the user already had, its contents are
+		// theirs, so leave them.
+		if absent {
+			_ = os.RemoveAll(target)
+		}
 		return err
 	}
 
@@ -199,29 +204,38 @@ func reportInit(deps *Deps, s component.Scaffold, target string, files []compone
 // refuseNonEmptyDir stops init from writing over a directory that already has
 // something in it — the name comes from a shell, and clobbering an author's work is
 // not something a scaffolder gets to do.
-func refuseNonEmptyDir(dir string) error {
+// ensureTargetWritable checks that dir is a safe place to stamp the component into, and
+// reports whether it was genuinely absent — which is what lets a failed write clean up
+// only the tree init itself created, never a directory the user already had.
+func ensureTargetWritable(dir string) (absent bool, err error) {
 	// Stat first, rather than lean on os.ReadDir's error for a non-directory: that error
 	// is ENOTDIR on Unix but not on Windows, where ReadDir of a plain file returns no
 	// error at all and the refusal would never fire. os.Stat + IsDir is the portable check
 	// install.go already uses.
 	info, err := os.Stat(dir)
 	if err != nil {
-		if os.IsNotExist(err) {
-			return nil
+		if !os.IsNotExist(err) {
+			return false, exitcode.UsageError{Err: fmt.Errorf("cannot create the component in %s: %w", dir, err)}
 		}
-		return exitcode.UsageError{Err: fmt.Errorf("cannot create the component in %s: %w", dir, err)}
+		// os.Stat follows symlinks, so a dangling one reads as absent here. Lstat sees the
+		// link itself: an entry is already at the path, and init must neither write over it
+		// nor delete it on the failure-cleanup path.
+		if _, lerr := os.Lstat(dir); lerr == nil {
+			return false, exitcode.UsageError{Err: fmt.Errorf("%s already exists", dir)}
+		}
+		return true, nil
 	}
 	if !info.IsDir() {
 		// A file already at the path — usage, exit 2, the same class as the non-empty case.
-		return exitcode.UsageError{Err: fmt.Errorf("%s already exists", dir)}
+		return false, exitcode.UsageError{Err: fmt.Errorf("%s already exists", dir)}
 	}
 
 	entries, err := os.ReadDir(dir)
 	if err != nil {
-		return exitcode.UsageError{Err: fmt.Errorf("cannot create the component in %s: %w", dir, err)}
+		return false, exitcode.UsageError{Err: fmt.Errorf("cannot create the component in %s: %w", dir, err)}
 	}
 	if len(entries) > 0 {
-		return exitcode.UsageError{Err: fmt.Errorf("%s already exists and is not empty", dir)}
+		return false, exitcode.UsageError{Err: fmt.Errorf("%s already exists and is not empty", dir)}
 	}
-	return nil
+	return false, nil
 }

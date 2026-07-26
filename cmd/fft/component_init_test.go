@@ -127,9 +127,26 @@ var _ = Describe("fft component init", func() {
 		dir := GinkgoT().TempDir()
 		Expect(os.WriteFile(filepath.Join(dir, "pricing"), []byte("x"), 0o600)).To(Succeed())
 
-		// os.ReadDir on a file returns ENOTDIR, not IsNotExist: it must still exit 2, the
-		// same class as the non-empty-directory refusal, not the generic 1 a bare error gives.
+		// A file at the target path is caught by the os.Stat + IsDir check (portable, unlike
+		// ReadDir's error for a non-directory), and must exit 2 — the same class as the
+		// non-empty-directory refusal, not the generic 1 a bare error gives.
 		Expect(c.run("component", "init", "pricing", "--dir", dir)).To(Equal(exitcode.Usage))
+	})
+
+	It("refuses a dangling symlink at the target and leaves it in place", func() {
+		if runtime.GOOS == "windows" {
+			Skip("creating a symlink needs privilege on Windows")
+		}
+		dir := GinkgoT().TempDir()
+		link := filepath.Join(dir, "pricing")
+		Expect(os.Symlink(filepath.Join(dir, "nowhere"), link)).To(Succeed())
+
+		// os.Stat follows the link and reports it absent; only Lstat sees the entry that is
+		// really there. It must be a usage refusal, and the user's symlink must survive it.
+		Expect(c.run("component", "init", "pricing", "--dir", dir)).To(Equal(exitcode.Usage))
+
+		_, err := os.Lstat(link)
+		Expect(err).NotTo(HaveOccurred(), "the user's symlink must not be deleted")
 	})
 
 	It("v-prefixes the go.mod require of a Go transport on a release build", func() {
