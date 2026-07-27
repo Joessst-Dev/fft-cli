@@ -12,6 +12,23 @@ import (
 //
 // The `{{name}}`, `{{exec}}` and `{{target}}` tokens are substituted by [Scaffold.render].
 
+// scaffoldSecretEnv are the FFT_ environment variables a scaffold masks before it
+// echoes the process environment. It is the set that carries a credential: a live
+// token (id or refresh), the sign-in password, or the Firebase key. Everything
+// else fft exports — FFT_ID_TOKEN_EXPIRES_AT, the descriptive FFT_PROJECT_ID and
+// so on — is not a secret and is printed as-is.
+//
+// The four templates hardcode these names because each language spells the mask
+// differently (a sed script, a Python set, a JS Set, a Go map). scaffold_test.go
+// asserts every template masks exactly this list, so the two cannot drift — the
+// same failure class as the FFT_ID_TOKEN-to-stdout leak this scaffold once had.
+var scaffoldSecretEnv = []string{
+	"FFT_ID_TOKEN",
+	"FFT_REFRESH_TOKEN",
+	"FFT_PASSWORD",
+	"FFT_FIREBASE_API_KEY",
+}
+
 func (s Scaffold) shellTemplate() string {
 	if s.Kind == KindTransport {
 		return shellTransport
@@ -47,8 +64,8 @@ const shellCommand = `#!/bin/sh
 # builds from the session this component's manifest declares. Replace the body with
 # your own logic; what is here proves the contract by echoing both.
 #
-# FFT_ID_TOKEN and FFT_PASSWORD are masked: a read or write session hands over a live
-# tenant token, and stdout is the stream fft's output contract promises is safe to pipe.
+# The credential-bearing FFT_ variables are masked: a read or write session hands over
+# a live tenant token, and stdout is the stream fft's output contract promises is safe to pipe.
 set -eu
 
 printf 'args:'
@@ -56,10 +73,13 @@ for arg in "$@"; do printf ' %s' "$arg"; done
 printf '\n'
 
 printf 'fft environment:\n'
-# Two -e expressions, not one with \| alternation: BSD sed (macOS) has no alternation in a
+# One -e per name, not one with \| alternation: BSD sed (macOS) has no alternation in a
 # basic regex, and a scaffold has to redact on the author's machine as well as on Linux.
 env | grep '^FFT_' | sort \
-	| sed -e 's/^FFT_ID_TOKEN=.*/FFT_ID_TOKEN=<redacted>/' -e 's/^FFT_PASSWORD=.*/FFT_PASSWORD=<redacted>/' || true
+	| sed -e 's/^FFT_ID_TOKEN=.*/FFT_ID_TOKEN=<redacted>/' \
+	      -e 's/^FFT_REFRESH_TOKEN=.*/FFT_REFRESH_TOKEN=<redacted>/' \
+	      -e 's/^FFT_PASSWORD=.*/FFT_PASSWORD=<redacted>/' \
+	      -e 's/^FFT_FIREBASE_API_KEY=.*/FFT_FIREBASE_API_KEY=<redacted>/' || true
 `
 
 const pythonCommand = `#!/usr/bin/env python3
@@ -69,13 +89,13 @@ fft runs this with the arguments after ` + "`fft {{name}}`" + ` and an environme
 from the session this component's manifest declares. Replace the body with your own
 logic; what is here proves the contract by echoing both.
 
-FFT_ID_TOKEN and FFT_PASSWORD are masked: a read or write session hands over a live
-tenant token, and stdout is the stream fft's output contract promises is safe to pipe.
+The credential-bearing FFT_ variables are masked: a read or write session hands over a
+live tenant token, and stdout is the stream fft's output contract promises is safe to pipe.
 """
 import os
 import sys
 
-SECRET = {"FFT_ID_TOKEN", "FFT_PASSWORD"}
+SECRET = {"FFT_ID_TOKEN", "FFT_REFRESH_TOKEN", "FFT_PASSWORD", "FFT_FIREBASE_API_KEY"}
 
 print("args:", " ".join(sys.argv[1:]))
 print("fft environment:")
@@ -91,11 +111,11 @@ const nodeCommand = `#!/usr/bin/env node
 // from the session this component's manifest declares. Replace the body with your own
 // logic; what is here proves the contract by echoing both.
 //
-// FFT_ID_TOKEN and FFT_PASSWORD are masked: a read or write session hands over a live
-// tenant token, and stdout is the stream fft's output contract promises is safe to pipe.
+// The credential-bearing FFT_ variables are masked: a read or write session hands over a
+// live tenant token, and stdout is the stream fft's output contract promises is safe to pipe.
 "use strict";
 
-const SECRET = new Set(["FFT_ID_TOKEN", "FFT_PASSWORD"]);
+const SECRET = new Set(["FFT_ID_TOKEN", "FFT_REFRESH_TOKEN", "FFT_PASSWORD", "FFT_FIREBASE_API_KEY"]);
 
 console.log("args:", process.argv.slice(2).join(" "));
 console.log("fft environment:");
@@ -111,8 +131,8 @@ const goCommand = `// Command {{exec}} is a fft command component.
 // from the session this component's manifest declares. Replace the body with your own
 // logic; what is here proves the contract by echoing both.
 //
-// FFT_ID_TOKEN and FFT_PASSWORD are masked: a read or write session hands over a live
-// tenant token, and stdout is the stream fft's output contract promises is safe to pipe.
+// The credential-bearing FFT_ variables are masked: a read or write session hands over a
+// live tenant token, and stdout is the stream fft's output contract promises is safe to pipe.
 package main
 
 import (
@@ -125,7 +145,12 @@ import (
 func main() {
 	fmt.Println("args:", strings.Join(os.Args[1:], " "))
 
-	secret := map[string]bool{"FFT_ID_TOKEN": true, "FFT_PASSWORD": true}
+	secret := map[string]bool{
+		"FFT_ID_TOKEN":         true,
+		"FFT_REFRESH_TOKEN":    true,
+		"FFT_PASSWORD":         true,
+		"FFT_FIREBASE_API_KEY": true,
+	}
 
 	var fft []string
 	for _, e := range os.Environ() {
