@@ -34,6 +34,12 @@ type fileStore struct {
 	// serialised. This guards one process against itself; two concurrent fft
 	// processes are still last-write-wins, which is acceptable for a CLI.
 	mu sync.Mutex
+
+	// warnOnce keeps the loose-permissions warning to one line per process, since
+	// load runs on every read. warn receives it; nil sends it to stderr, where every
+	// other notice goes. A spec replaces warn to capture it.
+	warnOnce sync.Once
+	warn     func(string)
 }
 
 // NewFile returns a Store backed by the JSON file at path. The file and its
@@ -105,11 +111,42 @@ func (s *fileStore) load() (map[string]string, error) {
 		return nil, fmt.Errorf("read %s: %w", s.path, err)
 	}
 
+	// The file exists, so its mode is worth a look: warn (don't refuse) if it or its
+	// directory is readable by other users. Without this a 0644 credentials file — a
+	// restored backup, a shared XDG_STATE_HOME, a chmod -R — leaks the refresh token
+	// to a co-resident user, and fft, being read-mostly, never repairs the mode.
+	s.warnIfLoose()
+
 	values := make(map[string]string)
 	if err := json.Unmarshal(data, &values); err != nil {
 		return nil, fmt.Errorf("parse %s: %w", s.path, err)
 	}
 	return values, nil
+}
+
+// warnIfLoose emits, at most once, a warning when the credentials file or its
+// parent directory is group- or world-accessible.
+func (s *fileStore) warnIfLoose() {
+	s.warnOnce.Do(func() {
+		if err := atomicfile.CheckPrivate(s.path); errors.Is(err, atomicfile.ErrNotPrivate) {
+			s.emitWarning(err.Error())
+		}
+		dir := filepath.Dir(s.path)
+		if info, err := os.Stat(dir); err == nil && info.Mode().Perm()&0o077 != 0 {
+			s.emitWarning(fmt.Sprintf("%s has mode %#o and is reachable by other users", dir, info.Mode().Perm()))
+		}
+	})
+}
+
+// emitWarning routes a warning to the store's sink, or to stderr — where notices
+// belong, so a --debug-free `-o json | jq` is never contaminated by it.
+func (s *fileStore) emitWarning(problem string) {
+	msg := "warning: " + problem + "; your credentials are stored there in cleartext — run chmod 600 on it"
+	if s.warn != nil {
+		s.warn(msg)
+		return
+	}
+	fmt.Fprintln(os.Stderr, msg)
 }
 
 func (s *fileStore) save(values map[string]string) error {

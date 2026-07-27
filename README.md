@@ -324,7 +324,16 @@ Non-secret project data lives in `~/.config/fft/config.yaml`, mode `0600`. An ol
 that still holds the API key in cleartext is migrated into the keychain on the next run.
 
 On a Linux box with no Secret Service (a headless server, a bare container), pass
-`--no-keyring` or set `FFT_NO_KEYRING=1` to fall back to a `0600` file.
+`--no-keyring` or set `FFT_NO_KEYRING=1` to fall back to a `0600` file. `fft` **warns** (it
+does not refuse) if that fallback file, or its directory, is readable by other users — a
+restored backup, a shared `XDG_STATE_HOME`, or a stray `chmod -R` can loosen it after the
+fact, and the file holds your refresh token in cleartext.
+
+On macOS, a Keychain item `fft` stores is readable by **any process running as you**, with no
+per-access prompt — that is how the `security` framework's default access control works, and
+`fft` accepts it. The same-user threat is out of scope: a process running as you can already
+read the config, the fallback file, and the token in flight. It is spelled out here so the
+guarantee is not mistaken for a stronger one.
 
 ### On Windows, `--no-keyring` protects less than `0600` suggests
 
@@ -479,6 +488,12 @@ inside the container, so the published port would be dead.
 docker run --rm -p 8080:8080 ghcr.io/joessst-dev/fft emulator --host 0.0.0.0
 ```
 
+**The emulator has no authentication** — that is deliberate, since it holds no real data and
+signs nobody in. On the default `127.0.0.1` that is a non-issue. But `--host 0.0.0.0` exposes
+a read/write API that **anyone who can reach the port** may use, so publish it only on a
+network you trust (a CI job's private bridge, your own machine), never straight onto a public
+interface.
+
 **In your test suite.** Two Testcontainers modules drive that image for you — a fresh
 emulator per run on a random port, seeded fixtures, readiness and teardown handled:
 
@@ -604,6 +619,11 @@ cosign verify-blob \
 
 sha256sum --check checksums.txt --ignore-missing
 ```
+
+The Homebrew cask strips the `com.apple.quarantine` attribute on install, so macOS
+Gatekeeper does not second-guess the binary — the sha256 and cosign chain above are the
+substitute for notarization. That is standard for an unnotarized tool; if you would rather
+Gatekeeper vet it, download the archive in a browser and verify it by hand instead.
 
 ---
 

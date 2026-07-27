@@ -200,6 +200,13 @@ func gatherProject(deps *Deps, flags *addFlags, name string, interactive bool) (
 		return config.Project{}, "", err
 	}
 
+	// The name becomes part of every secret's storage key, so a colon or control
+	// character in it would either alias another project's secrets or be refused by
+	// a keychain. Reject it here, at the one door names enter through.
+	if err := secrets.ValidateProjectName(p.Name); err != nil {
+		return config.Project{}, "", exitcode.UsageError{Err: err}
+	}
+
 	normalized, err := config.NormalizeBaseURL(p.BaseURL)
 	if err != nil {
 		return config.Project{}, "", exitcode.UsageError{Err: err}
