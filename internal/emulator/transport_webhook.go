@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/netip"
 	"net/url"
+	"slices"
 	"strings"
 )
 
@@ -134,6 +135,14 @@ func callbackHeaders(target map[string]any) map[string]string {
 	return out
 }
 
+// metadataAddrs are the cloud instance-metadata endpoints (AWS/GCP/Azure IMDS and
+// its IPv6 form). They sit in the link-local / ULA ranges [isLocalHost] otherwise
+// treats as local, so they are matched out explicitly.
+var metadataAddrs = []netip.Addr{
+	netip.MustParseAddr("169.254.169.254"),
+	netip.MustParseAddr("fd00:ec2::254"),
+}
+
 // localOnlyHosts are the names that can only ever mean this machine.
 var localOnlyHosts = map[string]bool{
 	"localhost":            true,
@@ -159,6 +168,13 @@ func isLocalHost(host string) bool {
 	}
 
 	if addr, err := netip.ParseAddr(host); err == nil {
+		// The cloud instance-metadata endpoints are link-local (or ULA), so the
+		// acceptance below would wave them through. A POST to 169.254.169.254 with
+		// attacker-chosen headers is precisely the SSRF this guard denies, so it is
+		// refused even in local mode, before anything else is considered.
+		if slices.Contains(metadataAddrs, addr.Unmap()) {
+			return false
+		}
 		return addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() || addr.IsUnspecified()
 	}
 	if localOnlyHosts[host] {

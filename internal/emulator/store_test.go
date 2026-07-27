@@ -16,7 +16,7 @@ var _ = Describe("Store", func() {
 
 	Describe("Create", func() {
 		It("assigns an id and version 1, and echoes the body", func() {
-			got := store.Create("facilities", entityDoc{"name": "Hamburg"})
+			got, _ := store.Create("facilities", entityDoc{"name": "Hamburg"})
 
 			Expect(idOf(got)).NotTo(BeEmpty())
 			Expect(got).To(HaveKeyWithValue("name", "Hamburg"))
@@ -26,26 +26,43 @@ var _ = Describe("Store", func() {
 		})
 
 		It("keeps an id the body already carries", func() {
-			got := store.Create("facilities", entityDoc{"id": "f-custom"})
+			got, _ := store.Create("facilities", entityDoc{"id": "f-custom"})
 			Expect(idOf(got)).To(Equal("f-custom"))
 		})
 
 		It("keeps a version the body already carries, as a seed fixture does", func() {
-			got := store.Create("facilities", entityDoc{"name": "Hamburg", "version": 7})
+			got, _ := store.Create("facilities", entityDoc{"name": "Hamburg", "version": 7})
 			v, ok := versionOf(got)
 			Expect(ok).To(BeTrue())
 			Expect(v).To(Equal(7))
 		})
 
 		It("gives generated ids that do not collide", func() {
-			a := store.Create("facilities", entityDoc{})
-			b := store.Create("facilities", entityDoc{})
+			a, _ := store.Create("facilities", entityDoc{})
+			b, _ := store.Create("facilities", entityDoc{})
 			Expect(idOf(a)).NotTo(Equal(idOf(b)))
 		})
 
 		It("shapes a generated id like a platform UUID, so it passes through FacilityRef", func() {
-			created := store.Create("facilities", entityDoc{})
+			created, _ := store.Create("facilities", entityDoc{})
 			Expect(idOf(created)).To(MatchRegexp(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`))
+		})
+
+		It("refuses to grow one collection past the cap, but leaves others free", func() {
+			// The emulator authenticates nothing, so an unbounded store is a memory
+			// DoS. Fill the collection directly rather than issue 100k requests.
+			c := store.collection("facilities")
+			for i := range maxEntitiesPerCollection {
+				id := synthID(i + 1)
+				c.byID[id] = entityDoc{defaultIDField: id}
+				c.order = append(c.order, id)
+			}
+
+			_, ok := store.Create("facilities", entityDoc{"name": "one too many"})
+			Expect(ok).To(BeFalse())
+
+			_, ok = store.Create("orders", entityDoc{"name": "a different collection is fine"})
+			Expect(ok).To(BeTrue())
 		})
 	})
 
@@ -67,7 +84,7 @@ var _ = Describe("Store", func() {
 
 	Describe("Get", func() {
 		It("returns a stored entity", func() {
-			created := store.Create("facilities", entityDoc{"name": "Hamburg"})
+			created, _ := store.Create("facilities", entityDoc{"name": "Hamburg"})
 			got, ok := store.Get("facilities", idOf(created))
 			Expect(ok).To(BeTrue())
 			Expect(got).To(HaveKeyWithValue("name", "Hamburg"))
@@ -79,7 +96,7 @@ var _ = Describe("Store", func() {
 		})
 
 		It("does not hand back the stored map, so a caller cannot mutate state", func() {
-			created := store.Create("facilities", entityDoc{"name": "Hamburg"})
+			created, _ := store.Create("facilities", entityDoc{"name": "Hamburg"})
 			got, _ := store.Get("facilities", idOf(created))
 			got["name"] = "tampered"
 
@@ -90,8 +107,8 @@ var _ = Describe("Store", func() {
 
 	Describe("List", func() {
 		It("returns entities in insertion order", func() {
-			a := store.Create("facilities", entityDoc{"name": "a"})
-			b := store.Create("facilities", entityDoc{"name": "b"})
+			a, _ := store.Create("facilities", entityDoc{"name": "a"})
+			b, _ := store.Create("facilities", entityDoc{"name": "b"})
 
 			list := store.List("facilities")
 			Expect(list).To(HaveLen(2))
@@ -108,7 +125,7 @@ var _ = Describe("Store", func() {
 		var id string
 
 		BeforeEach(func() {
-			created := store.Create("facilities", entityDoc{"name": "Hamburg"})
+			created, _ := store.Create("facilities", entityDoc{"name": "Hamburg"})
 			id = idOf(created)
 		})
 
@@ -157,7 +174,7 @@ var _ = Describe("Store", func() {
 
 	Describe("Delete", func() {
 		It("removes an entity and reports it was there", func() {
-			created := store.Create("facilities", entityDoc{})
+			created, _ := store.Create("facilities", entityDoc{})
 			id := idOf(created)
 
 			Expect(store.Delete("facilities", id)).To(BeTrue())
@@ -170,8 +187,8 @@ var _ = Describe("Store", func() {
 		})
 
 		It("drops the entity from the listed order", func() {
-			a := store.Create("facilities", entityDoc{})
-			b := store.Create("facilities", entityDoc{})
+			a, _ := store.Create("facilities", entityDoc{})
+			b, _ := store.Create("facilities", entityDoc{})
 			store.Delete("facilities", idOf(a))
 
 			list := store.List("facilities")

@@ -59,6 +59,18 @@ var _ = Describe("webhookTransport", func() {
 			Expect(err).To(MatchError(ContainSubstring("--webhook-allow-remote")))
 		})
 
+		DescribeTable("refuses the cloud metadata endpoint even in local mode",
+			// 169.254.169.254 is link-local, so the local allowlist would otherwise
+			// wave it through — and a POST there with attacker-chosen headers is a
+			// blind-SSRF read of instance credentials.
+			func(url string) {
+				_, err := local.plan(webhookTarget(url))
+				Expect(err).To(HaveOccurred())
+			},
+			Entry("IMDS v4", "http://169.254.169.254/latest/meta-data/"),
+			Entry("IMDS IPv6", "http://[fd00:ec2::254]/latest/meta-data/"),
+		)
+
 		It("accepts a remote host once widened", func() {
 			_, err := newWebhookTransport(true).plan(webhookTarget("https://example.com/hook"))
 			Expect(err).NotTo(HaveOccurred())
