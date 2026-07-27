@@ -50,7 +50,7 @@ jobs:
       # Authenticate to GHCR so GoReleaser can push the images and the manifest. Login
       # must precede GoReleaser — it pushes during `release`, not after.
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
