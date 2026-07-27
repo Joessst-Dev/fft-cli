@@ -45,6 +45,12 @@ func NormalizeBaseURL(raw string) (string, error) {
 		return "", fmt.Errorf("the base URL %q has no host", raw)
 	}
 
+	// Userinfo (user:pass@host) has no place in an API root, and a password carried
+	// there would be printed by every error and --debug line that quotes the URL.
+	if u.User != nil {
+		return "", fmt.Errorf("the base URL %q carries credentials in user:pass@ form: give the API root without them", raw)
+	}
+
 	// Query strings and fragments on an API root are always a paste accident,
 	// and silently keeping them would corrupt every request built from it.
 	if u.RawQuery != "" || u.Fragment != "" {

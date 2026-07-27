@@ -21,6 +21,7 @@ import (
 	"io"
 	"net/http"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -36,6 +37,21 @@ const Redacted = "[REDACTED]"
 // request; not enough for a 2,000-facility page to bury the terminal.
 const maxBody = 4 << 10
 
+// jsonSecretFields are the JSON string fields whose value is a secret. Google's
+// sign-in request carries the password and its answer carries both tokens; the
+// fulfillmenttools API carries the OIDC clientSecret, a currentPassword and the
+// firebaseWebApiKey as raw request bodies that --debug dumps. The list is named
+// rather than inlined so a single place feeds both the regex and the drift gate
+// (see [SecretJSONFields]) that asserts it against the API spec.
+var jsonSecretFields = []string{
+	"password",
+	"idToken", "refreshToken", "id_token", "refresh_token", "access_token",
+	"clientSecret", "client_secret",
+	"currentPassword",
+	"firebaseWebApiKey",
+	"customToken",
+}
+
 var (
 	// keyParam matches the ?key= / &key= carrying the Firebase Web API key. Every
 	// error the standard library produces from an HTTP request quotes the whole
@@ -43,14 +59,26 @@ var (
 	// in the bug report they paste it into.
 	keyParam = regexp.MustCompile(`(?i)([?&]key=)[^&\s"']*`)
 
-	// jsonSecret matches a sensitive JSON string field. Google's sign-in request
-	// carries the password and its answer carries both tokens.
-	jsonSecret = regexp.MustCompile(`(?i)"(password|idToken|refreshToken|id_token|refresh_token|access_token)"(\s*:\s*)"[^"]*"`)
+	// jsonSecret matches a sensitive JSON string field. The value class consumes an
+	// escaped quote (\") as one unit — a password containing a " must not leak its
+	// tail (json.Marshal encodes it as \") — and the closing quote is optional, so
+	// a value that runs off the end of a truncated body is redacted rather than
+	// printed up to where the buffer was cut.
+	jsonSecret = regexp.MustCompile(`(?i)"(` + strings.Join(jsonSecretFields, "|") + `)"(\s*:\s*)"(?:\\.|[^"\\])*"?`)
 
 	// formSecret matches the same secrets in an x-www-form-urlencoded body, which
 	// is the shape the token refresh is sent in.
 	formSecret = regexp.MustCompile(`(?i)\b(password|refresh_token|id_token|access_token)=[^&\s]*`)
 )
+
+// SecretJSONFields returns the JSON field names whose values [Redact] removes.
+// It is exported so a drift gate can assert the redactor covers every
+// secret-valued field the API spec defines — the swagger is regenerated without
+// notice, and a new credential field that nobody adds here would otherwise leak
+// into a --debug trace silently.
+func SecretJSONFields() []string {
+	return slices.Clone(jsonSecretFields)
+}
 
 // sensitiveHeaders are logged as their name only. A bearer token is not more
 // useful to a reader than the fact that one was sent.
@@ -133,7 +161,9 @@ func (t *Transport) roundTrip(req *http.Request) (*http.Response, error) {
 
 func (t *Transport) logRequest(req *http.Request) {
 	var b strings.Builder
-	fmt.Fprintf(&b, "> %s %s\n", req.Method, Redact(req.URL.String()))
+	// Redacted() masks a password in the URL's userinfo (user:pass@host); Redact
+	// then takes out the ?key= and anything handed to it verbatim.
+	fmt.Fprintf(&b, "> %s %s\n", req.Method, Redact(req.URL.Redacted()))
 	writeHeaders(&b, ">", req.Header)
 
 	// req.Body is a one-shot reader that belongs to the transport underneath; only
@@ -219,18 +249,20 @@ func snippet(raw []byte) (string, bool) {
 		return "", false
 	}
 
-	truncated := len(raw) > maxBody
-	if truncated {
-		raw = raw[:maxBody]
-	}
-
 	// A body is quoted on one line: a request is one entry in the dump, and a
 	// pretty-printed JSON page would drown every other entry.
-	s := strings.Join(strings.Fields(string(raw)), " ")
-	if truncated {
+	//
+	// Redact runs on the whole buffer *before* it is truncated: a secret value
+	// whose closing quote falls past the cut would otherwise slip through the
+	// pattern (which needs the pair) and print up to where the buffer ended.
+	s := Redact(strings.Join(strings.Fields(string(raw)), " "))
+	if len(raw) > maxBody {
+		if len(s) > maxBody {
+			s = s[:maxBody]
+		}
 		s += " … (truncated)"
 	}
-	return Redact(s), true
+	return s, true
 }
 
 func (t *Transport) print(s string) {
