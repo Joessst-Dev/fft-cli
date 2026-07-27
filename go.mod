@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/pubsub/v2 v2.6.1
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.10.0
 	github.com/fatih/color v1.19.0
-	github.com/getkin/kin-openapi v0.142.0
+	github.com/getkin/kin-openapi v0.145.0
 	github.com/gofiber/fiber/v2 v2.52.14
 	github.com/google/uuid v1.6.0
 	github.com/oapi-codegen/runtime v1.6.0
@@ -18,7 +18,7 @@ require (
 	github.com/zalando/go-keyring v0.2.8
 	golang.org/x/mod v0.38.0
 	golang.org/x/term v0.45.0
-	google.golang.org/api v0.289.0
+	google.golang.org/api v0.290.0
 	google.golang.org/grpc v1.82.1
 	gopkg.in/yaml.v3 v3.0.1
 )
