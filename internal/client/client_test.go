@@ -242,4 +242,39 @@ var _ = Describe("building the API client", func() {
 		Expect(res.StatusCode()).To(Equal(http.StatusOK))
 		Expect(finalAuth).To(Equal("Bearer tok"))
 	})
+
+	// The origin comparison must normalize the way net/url does not: host case and a
+	// scheme-default port are not a different origin. Refusing those would fail closed
+	// (no leak) but break a legitimate gateway/CDN redirect. httptest can't reproduce
+	// them (it always uses 127.0.0.1 with an explicit non-default port), so pinRedirect
+	// is exercised directly.
+	DescribeTable("pinning the origin without spurious refusals",
+		func(from, to string, wantRefused bool) {
+			mkReq := func(raw string) *http.Request {
+				u, err := url.Parse(raw)
+				Expect(err).NotTo(HaveOccurred())
+				return &http.Request{URL: u}
+			}
+
+			err := client.PinRedirect(mkReq(to), []*http.Request{mkReq(from)})
+
+			if wantRefused {
+				Expect(err).To(MatchError(ContainSubstring("refusing cross-origin redirect")))
+			} else {
+				Expect(err).NotTo(HaveOccurred())
+			}
+		},
+		Entry("host case differs but the origin is the same",
+			"https://ACME.example.com/x", "https://acme.example.com/y", false),
+		Entry("explicit :443 equals the implicit https port",
+			"https://t.example.com/x", "https://t.example.com:443/y", false),
+		Entry("explicit :80 equals the implicit http port",
+			"http://t.example.com:80/x", "http://t.example.com/y", false),
+		Entry("a different host is refused",
+			"https://t.example.com/x", "https://evil.example.com/y", true),
+		Entry("a scheme downgrade is refused",
+			"https://t.example.com/x", "http://t.example.com/y", true),
+		Entry("a different non-default port is refused",
+			"https://t.example.com:8443/x", "https://t.example.com:9443/y", true),
+	)
 })

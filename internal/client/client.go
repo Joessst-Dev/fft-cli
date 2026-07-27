@@ -30,6 +30,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -158,16 +159,18 @@ func (c *Client) API() *api.ClientWithResponses { return c.api }
 // caller's req.Header, so Go's own cross-domain header stripping never engages — it
 // strips only the headers it set from the original request. Without this guard a 3xx
 // from the base host to an attacker host would re-attach the live token to that host.
-// Origin is scheme+host: Host (not Hostname) pins the port too, and Scheme pins the
-// scheme, so a same-host https→http downgrade — which would put the token on the wire
-// in cleartext — is refused as well. Same-origin redirects are still followed, up to
-// the stdlib limit of 10, past which we error exactly as Go's default policy does
-// rather than handing back the in-flight 3xx as a success. It is not overridable
-// through [WithHTTPClient]: on a token that rides every hop, refusing the off-origin
-// redirect is an invariant, not a policy the caller may relax.
+// Origin is scheme+host: the scheme is pinned so a same-host https→http downgrade —
+// which would put the token on the wire in cleartext — is refused as well, and the
+// host is compared through [originHost] so that host case and a default port
+// (:443/:80) do not spuriously read as a different origin and break a legitimate
+// gateway redirect. Same-origin redirects are still followed, up to the stdlib limit
+// of 10, past which we error exactly as Go's default policy does rather than handing
+// back the in-flight 3xx as a success. It is not overridable through [WithHTTPClient]:
+// on a token that rides every hop, refusing the off-origin redirect is an invariant,
+// not a policy the caller may relax.
 func pinRedirect(req *http.Request, via []*http.Request) error {
 	orig := via[0].URL
-	if req.URL.Scheme != orig.Scheme || req.URL.Host != orig.Host {
+	if req.URL.Scheme != orig.Scheme || originHost(req.URL) != originHost(orig) {
 		return fmt.Errorf("refusing cross-origin redirect from %s://%s to %s://%s",
 			orig.Scheme, orig.Host, req.URL.Scheme, req.URL.Host)
 	}
@@ -175,6 +178,21 @@ func pinRedirect(req *http.Request, via []*http.Request) error {
 		return fmt.Errorf("stopped after %d redirects", len(via))
 	}
 	return nil
+}
+
+// originHost is a URL's host in a form two same-origin URLs share regardless of
+// spelling: lower-cased (net/url lower-cases the scheme but not the host), with a
+// scheme-default port dropped so ":443"/":80" compares equal to the implicit form.
+// net.JoinHostPort re-adds IPv6 brackets, so "[::1]:8443" survives a round trip.
+func originHost(u *url.URL) string {
+	host := strings.ToLower(u.Hostname())
+	port := u.Port()
+	if port == "" ||
+		(u.Scheme == "https" && port == "443") ||
+		(u.Scheme == "http" && port == "80") {
+		return host
+	}
+	return net.JoinHostPort(host, port)
 }
 
 // transport is the default transport for tenant traffic: TLS 1.2 as the floor,
