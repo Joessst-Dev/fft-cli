@@ -131,7 +131,7 @@ func New(baseURL string, opts ...Option) (*Client, error) {
 	signed := &http.Client{
 		Transport:     base,
 		Timeout:       hc.Timeout,
-		CheckRedirect: hc.CheckRedirect,
+		CheckRedirect: pinRedirect,
 		Jar:           hc.Jar,
 	}
 
@@ -151,6 +151,26 @@ func New(baseURL string, opts ...Option) (*Client, error) {
 
 // API is the generated client, for a call that does not go through [Client.Do].
 func (c *Client) API() *api.ClientWithResponses { return c.api }
+
+// pinRedirect refuses a redirect to any host but the one the request started on.
+//
+// The tenant bearer token is attached by [auth.Transport] on every hop, not on the
+// caller's req.Header, so Go's own cross-domain header stripping never engages — it
+// strips only the headers it set from the original request. Without this guard a 3xx
+// from the base host to an attacker host would re-attach the live token to that host.
+// Same-host redirects are still followed, up to the stdlib limit of 10. Host (not
+// Hostname) is compared, so a redirect to the same host on a different port is refused
+// too. It is not overridable through [WithHTTPClient]: on a token that rides every hop,
+// refusing the cross-host redirect is an invariant, not a policy the caller may relax.
+func pinRedirect(req *http.Request, via []*http.Request) error {
+	if req.URL.Host != via[0].URL.Host {
+		return fmt.Errorf("refusing cross-host redirect from %s to %s", via[0].URL.Host, req.URL.Host)
+	}
+	if len(via) >= 10 {
+		return http.ErrUseLastResponse
+	}
+	return nil
+}
 
 // transport is the default transport for tenant traffic: TLS 1.2 as the floor,
 // because the bearer token rides on every request.

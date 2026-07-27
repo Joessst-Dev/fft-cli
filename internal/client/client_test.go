@@ -153,4 +153,55 @@ var _ = Describe("building the API client", func() {
 
 		Expect(err).To(MatchError(ContainSubstring("no base URL")))
 	})
+
+	// #72: the bearer token is attached by the transport on every hop, not on the
+	// caller's req.Header, so Go's stdlib cross-domain header stripping never
+	// engages. Without a redirect guard the live token would follow a 3xx from the
+	// base host to an attacker host — confirmed with a PoC. This asserts it does not.
+	It("refuses a cross-host redirect, so the token never reaches another host", func() {
+		var attackerAuth string
+		attacker := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			attackerAuth = r.Header.Get("Authorization")
+			w.WriteHeader(http.StatusOK)
+		}))
+		DeferCleanup(attacker.Close)
+
+		tenant := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, attacker.URL, http.StatusFound)
+		}))
+		DeferCleanup(tenant.Close)
+
+		c, err := client.New(tenant.URL, client.WithTokenSource(auth.StaticTokenSource("SECRET")))
+		Expect(err).NotTo(HaveOccurred())
+
+		_, err = c.API().StatusWithResponse(context.Background())
+
+		Expect(err).To(MatchError(ContainSubstring("refusing cross-host redirect")))
+		Expect(attackerAuth).To(BeEmpty(), "the token must never leave for another host")
+	})
+
+	It("still follows a same-host redirect, carrying the token to the final hop", func() {
+		var finalAuth string
+		mux := http.NewServeMux()
+		mux.HandleFunc("/api/status", func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, "/elsewhere", http.StatusFound)
+		})
+		mux.HandleFunc("/elsewhere", func(w http.ResponseWriter, r *http.Request) {
+			finalAuth = r.Header.Get("Authorization")
+			w.Header().Set("Content-Type", "application/json")
+			_, err := w.Write([]byte(`{"status":"OK"}`))
+			Expect(err).NotTo(HaveOccurred())
+		})
+		same := httptest.NewServer(mux)
+		DeferCleanup(same.Close)
+
+		c, err := client.New(same.URL, client.WithTokenSource(auth.StaticTokenSource("tok")))
+		Expect(err).NotTo(HaveOccurred())
+
+		res, err := c.API().StatusWithResponse(context.Background())
+
+		Expect(err).NotTo(HaveOccurred())
+		Expect(res.StatusCode()).To(Equal(http.StatusOK))
+		Expect(finalAuth).To(Equal("Bearer tok"))
+	})
 })
