@@ -14,6 +14,12 @@ import (
 // refused unless the host is a loopback address: a bearer token sent in the
 // clear to a real fulfillmenttools tenant is a credential leak, and the only
 // legitimate reason to point fft at http is a mock server on localhost.
+//
+// The host itself is not pinned to a *.fulfillmenttools.com suffix. That is a
+// considered risk, not an oversight: fft is pointed at self-hosted and staging
+// endpoints that do not share the production suffix, and once https is enforced
+// (above) and cross-host redirects are refused (see the tenant client's
+// pinRedirect), an https host the user configured is the host they meant.
 func NormalizeBaseURL(raw string) (string, error) {
 	raw = strings.TrimSpace(raw)
 	if raw == "" {

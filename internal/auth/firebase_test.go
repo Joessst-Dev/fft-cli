@@ -167,6 +167,16 @@ var _ = Describe("the API key's blast radius", func() {
 		Expect(err).To(MatchError(ContainSubstring("acme.api.fulfillmenttools.com")))
 	})
 
+	It("refuses an https→http downgrade to an allowed host, which would clear-text the key", func() {
+		c, err := NewClient(testAPIKey)
+		Expect(err).NotTo(HaveOccurred())
+
+		// Same host as signInEndpoint, but http: the allowlist alone would pass it.
+		_, err = c.hc.Get("http://" + hostOf(signInEndpoint) + "/v1/accounts:signInWithPassword")
+
+		Expect(err).To(MatchError(ContainSubstring("refusing to send the Firebase API key over")))
+	})
+
 	It("allows exactly the two Google hosts and nothing else", func() {
 		c, err := NewClient(testAPIKey)
 		Expect(err).NotTo(HaveOccurred())
