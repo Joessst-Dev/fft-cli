@@ -152,22 +152,27 @@ func New(baseURL string, opts ...Option) (*Client, error) {
 // API is the generated client, for a call that does not go through [Client.Do].
 func (c *Client) API() *api.ClientWithResponses { return c.api }
 
-// pinRedirect refuses a redirect to any host but the one the request started on.
+// pinRedirect refuses a redirect that leaves the origin the request started on.
 //
 // The tenant bearer token is attached by [auth.Transport] on every hop, not on the
 // caller's req.Header, so Go's own cross-domain header stripping never engages — it
 // strips only the headers it set from the original request. Without this guard a 3xx
 // from the base host to an attacker host would re-attach the live token to that host.
-// Same-host redirects are still followed, up to the stdlib limit of 10. Host (not
-// Hostname) is compared, so a redirect to the same host on a different port is refused
-// too. It is not overridable through [WithHTTPClient]: on a token that rides every hop,
-// refusing the cross-host redirect is an invariant, not a policy the caller may relax.
+// Origin is scheme+host: Host (not Hostname) pins the port too, and Scheme pins the
+// scheme, so a same-host https→http downgrade — which would put the token on the wire
+// in cleartext — is refused as well. Same-origin redirects are still followed, up to
+// the stdlib limit of 10, past which we error exactly as Go's default policy does
+// rather than handing back the in-flight 3xx as a success. It is not overridable
+// through [WithHTTPClient]: on a token that rides every hop, refusing the off-origin
+// redirect is an invariant, not a policy the caller may relax.
 func pinRedirect(req *http.Request, via []*http.Request) error {
-	if req.URL.Host != via[0].URL.Host {
-		return fmt.Errorf("refusing cross-host redirect from %s to %s", via[0].URL.Host, req.URL.Host)
+	orig := via[0].URL
+	if req.URL.Scheme != orig.Scheme || req.URL.Host != orig.Host {
+		return fmt.Errorf("refusing cross-origin redirect from %s://%s to %s://%s",
+			orig.Scheme, orig.Host, req.URL.Scheme, req.URL.Host)
 	}
 	if len(via) >= 10 {
-		return http.ErrUseLastResponse
+		return fmt.Errorf("stopped after %d redirects", len(via))
 	}
 	return nil
 }

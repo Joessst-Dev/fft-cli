@@ -176,8 +176,46 @@ var _ = Describe("building the API client", func() {
 
 		_, err = c.API().StatusWithResponse(context.Background())
 
-		Expect(err).To(MatchError(ContainSubstring("refusing cross-host redirect")))
+		Expect(err).To(MatchError(ContainSubstring("refusing cross-origin redirect")))
 		Expect(attackerAuth).To(BeEmpty(), "the token must never leave for another host")
+	})
+
+	// A same-host https→http downgrade keeps the Host but drops TLS, so the guard
+	// must catch it on Scheme too, or the live token rides the downgraded hop in
+	// cleartext (CWE-319). The redirect target is the same host:port as the TLS
+	// server, so only the scheme differs — pinRedirect refuses it before the
+	// plaintext request is ever made.
+	It("refuses a same-host scheme downgrade, so the token is never sent in cleartext", func() {
+		tenant := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, "http://"+r.Host+"/elsewhere", http.StatusFound)
+		}))
+		DeferCleanup(tenant.Close)
+
+		c, err := client.New(tenant.URL,
+			client.WithTokenSource(auth.StaticTokenSource("SECRET")),
+			client.WithHTTPClient(tenant.Client()))
+		Expect(err).NotTo(HaveOccurred())
+
+		_, err = c.API().StatusWithResponse(context.Background())
+
+		Expect(err).To(MatchError(ContainSubstring("refusing cross-origin redirect")))
+	})
+
+	// The 10-hop cap must error like Go's default policy, not hand back the in-flight
+	// 3xx as a success — a same-host redirect loop should fail loudly, not surface as
+	// a baffling "the API returned HTTP 302".
+	It("errors after the redirect limit rather than returning the 3xx as success", func() {
+		tenant := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, "/loop", http.StatusFound)
+		}))
+		DeferCleanup(tenant.Close)
+
+		c, err := client.New(tenant.URL, client.WithTokenSource(auth.StaticTokenSource("tok")))
+		Expect(err).NotTo(HaveOccurred())
+
+		_, err = c.API().StatusWithResponse(context.Background())
+
+		Expect(err).To(MatchError(ContainSubstring("stopped after 10 redirects")))
 	})
 
 	It("still follows a same-host redirect, carrying the token to the final hop", func() {
