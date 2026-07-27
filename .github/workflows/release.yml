@@ -25,7 +25,7 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # GoReleaser builds the changelog from the commits since the previous tag,
           # so it needs the whole history, not just the tagged commit.
@@ -50,7 +50,7 @@ jobs:
       # Authenticate to GHCR so GoReleaser can push the images and the manifest. Login
       # must precede GoReleaser — it pushes during `release`, not after.
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
