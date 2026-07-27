@@ -25,7 +25,7 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # GoReleaser builds the changelog from the commits since the previous tag,
           # so it needs the whole history, not just the tagged commit.
