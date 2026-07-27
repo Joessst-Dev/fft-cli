@@ -178,12 +178,18 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version: stable
+          # Scan at the floor go.mod declares, not `stable`: stable is always ahead
+          # of the floor, so it can never surface a floor that lags behind stdlib fixes
+          # — which is exactly the exposure for local builds and `go install` users.
+          go-version-file: go.mod
           cache: true
 
       - uses: golang/govulncheck-action@v1
         with:
-          go-version-input: stable
+          # go-version-input defaults to `stable`; setup-go prefers go-version over
+          # go-version-file, so clear it explicitly to let the floor win.
+          go-version-input: ""
+          go-version-file: go.mod
           go-package: ./...
 
   release-build:

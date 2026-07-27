@@ -1,6 +1,6 @@
 module github.com/Joessst-Dev/fft-cli
 
-go 1.25.8
+go 1.25.12
 
 require (
 	cloud.google.com/go/pubsub/v2 v2.6.1
