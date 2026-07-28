@@ -187,6 +187,11 @@ signs:
     output: true
     args:
       - sign-blob
+      # cosign v3 defaults --new-bundle-format=true, which rejects the separate
+      # --output-certificate/--output-signature flags (it wants a single --bundle).
+      # We keep the split .pem + .sig artifacts the verify recipe above documents, so
+      # opt back out of the bundle format rather than change the verification contract.
+      - "--new-bundle-format=false"
       - "--output-certificate=${certificate}"
       - "--output-signature=${signature}"
       - "${artifact}"
