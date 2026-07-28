@@ -121,15 +121,30 @@ func (c Component) ExecPath() string {
 	}
 
 	path := filepath.Join(c.Dir, filepath.FromSlash(c.Exec))
-	if _, err := os.Stat(path); err == nil {
+	if isRegularFile(path) {
 		return path
 	}
 	if suffixed := execName(path); suffixed != path {
-		if _, err := os.Stat(suffixed); err == nil {
+		if isRegularFile(suffixed) {
 			return suffixed
 		}
 	}
-	return path
+	// Neither candidate is a regular file — it is missing, or a symlink planted in
+	// the data dir. Return "" rather than the path so a caller that execs the result
+	// (transport_process.go does so without an Installed check) refuses to run it,
+	// not just the callers that happen to gate on Installed.
+	return ""
+}
+
+// isRegularFile reports whether path is a regular file, following no symlink.
+//
+// A component's executable is spawned as the user, so a symlink planted in the data
+// dir after install (a shared build box, still same-uid) must not redirect what
+// runs. The archive unpackers already refuse a symlink at install time; this keeps
+// the same rule at spawn time.
+func isRegularFile(path string) bool {
+	info, err := os.Lstat(path)
+	return err == nil && info.Mode().IsRegular()
 }
 
 // Command finds a declared command by name.
