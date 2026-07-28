@@ -105,6 +105,9 @@ var _ = Describe("Scaffold", func() {
 					}
 				}
 				Expect(body).To(ContainSubstring("FFT_ID_TOKEN"), "lang %s", lang)
+				// The long-lived refresh token is a credential too, and was missed
+				// until #81 — assert it explicitly so a regression is caught here.
+				Expect(body).To(ContainSubstring("FFT_REFRESH_TOKEN"), "lang %s", lang)
 				Expect(body).To(ContainSubstring("<redacted>"), "lang %s", lang)
 			}
 		})

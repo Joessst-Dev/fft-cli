@@ -180,6 +180,20 @@ var _ = Describe("fft project add", func() {
 		})
 	})
 
+	When("the project name contains a colon", func() {
+		It("exits 2 and refuses it, because a colon breaks the secret storage key", func() {
+			code := c.run("project", "add", "a:b",
+				"--base-url", "https://acme.api.fulfillmenttools.com",
+				"--api-key", "AIzaSyExample",
+				"--email", "someone@acme.com",
+				"--password-stdin")
+
+			Expect(code).To(Equal(exitcode.Usage))
+			Expect(c.errOut()).To(ContainSubstring("colon"))
+			Expect(c.configPath).NotTo(BeAnExistingFile())
+		})
+	})
+
 	When("stdin is not a terminal and --password-stdin was not given", func() {
 		It("exits 2 and says to pipe the password in", func() {
 			code := c.run("project", "add", "staging",

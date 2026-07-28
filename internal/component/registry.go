@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -201,13 +202,10 @@ func installed(dir, exec string) bool {
 		return false
 	}
 
+	// isRegularFile Lstats, not Stats: a symlink standing in for the executable is
+	// refused, the same rule ExecPath applies when it spawns it.
 	path := filepath.Join(dir, filepath.FromSlash(exec))
-	for _, candidate := range []string{path, execName(path)} {
-		if info, err := os.Stat(candidate); err == nil && info.Mode().IsRegular() {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc([]string{path, execName(path)}, isRegularFile)
 }
 
 // readManifest reads and validates one component's manifest.

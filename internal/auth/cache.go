@@ -244,19 +244,22 @@ func loadToken(store secrets.Store, project string) Token {
 // environment and there is nowhere durable to put a token. The job signs in once
 // per process, which is the correct behaviour and not a failure to report.
 func saveToken(store secrets.Store, project string, tok Token) error {
-	entries := map[string]string{
-		secrets.KindIDToken:      tok.ID,
-		secrets.KindRefreshToken: tok.Refresh,
-		secrets.KindIDTokenExp:   tok.ExpiresAt.UTC().Format(expiryLayout),
+	// Written in a fixed order, and the expiry last: a partial failure part-way
+	// through must not leave a fresh expiry vouching for a stale id token. Ranging a
+	// map here would make which pairing survives a crash a matter of hash order.
+	entries := []struct{ kind, value string }{
+		{secrets.KindRefreshToken, tok.Refresh},
+		{secrets.KindIDToken, tok.ID},
+		{secrets.KindIDTokenExp, tok.ExpiresAt.UTC().Format(expiryLayout)},
 	}
 
-	for kind, value := range entries {
-		err := store.Set(secrets.Key(project, kind), value)
+	for _, e := range entries {
+		err := store.Set(secrets.Key(project, e.kind), e.value)
 		if errors.Is(err, secrets.ErrReadOnly) {
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("cache the %s for %q: %w", kind, project, err)
+			return fmt.Errorf("cache the %s for %q: %w", e.kind, project, err)
 		}
 	}
 	return nil
