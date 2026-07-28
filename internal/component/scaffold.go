@@ -44,6 +44,11 @@ const (
 	LangNode   = "node"
 )
 
+// supportedLangs is the canonical set of languages skeleton() renders. It backs the
+// "unknown language" error and the scaffold drift test, so a new language cannot be
+// added to one without the other noticing.
+var supportedLangs = []string{LangShell, LangGo, LangPython, LangNode}
+
 // placeholderTarget is the target type a transport scaffold claims until its author
 // replaces it. It is deliberately not a real one: a scaffold that delivered to a
 // broker somebody actually runs would be a surprising thing to install unfinished.
@@ -157,8 +162,8 @@ func (s Scaffold) skeleton() ([]File, error) {
 			{Name: "go.mod", Data: []byte(s.goMod()), Mode: fileMode},
 		}, nil
 	default:
-		return nil, fmt.Errorf("unknown language %q: want %s, %s, %s or %s",
-			s.Lang, LangShell, LangGo, LangPython, LangNode)
+		return nil, fmt.Errorf("unknown language %q: want one of %s",
+			s.Lang, strings.Join(supportedLangs, ", "))
 	}
 }
 

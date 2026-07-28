@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -132,21 +133,34 @@ func WithAPI(url string) InstallerOption {
 	return func(i *Installer) { i.api = strings.TrimRight(url, "/") }
 }
 
-// WithHTTPClient replaces the client the installer downloads with.
-func WithHTTPClient(c *http.Client) InstallerOption {
-	return func(i *Installer) { i.client = c }
-}
-
 // NewInstaller returns an Installer writing into root.
+//
+// The download client is built here and never overridable: a replaceable client
+// would be a way to hand the installer one without the CheckRedirect guard below,
+// and specs reach GitHub through WithAPI instead, which keeps the guard in place.
 func NewInstaller(root string, opts ...InstallerOption) *Installer {
 	i := &Installer{
 		root: root,
 		api:  githubAPI,
+	}
 
-		// No deadline of its own: the caller's context bounds the download, and a
-		// component archive on a slow connection is a legitimately long request that a
-		// baked-in timeout would cut off for no reason.
-		client: &http.Client{},
+	// No deadline of its own: the caller's context bounds the download, and a
+	// component archive on a slow connection is a legitimately long request that a
+	// baked-in timeout would cut off for no reason.
+	//
+	// Every redirect hop is re-checked against allowedURL, not just the initial URL:
+	// GitHub serves release bytes via a 302 to *.githubusercontent.com (allowed),
+	// but Go's default policy would just as happily follow a 302 to an attacker host
+	// on any scheme.
+	i.client = &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			// A custom CheckRedirect replaces the stdlib default entirely, including
+			// its len(via) >= 10 stop — so keep that cap, then vet the next hop.
+			if len(via) >= 10 {
+				return errors.New("stopped after 10 redirects")
+			}
+			return i.allowedURL(req.URL.String())
+		},
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -178,8 +192,10 @@ type Plan struct {
 	// which has no archive and no checksums file to check it against.
 	Digest string
 
-	// Signed reports that the release publishes a cosign signature for this archive.
-	// fft does not verify it — see [Plan.Verification].
+	// Signed reports that the release publishes a cosign signature over its
+	// checksums file. fft does not fetch or verify that signature — it only notes
+	// its presence, so the user knows one exists to check by hand. See
+	// [Plan.Verification], whose wording must not imply fft verified anything.
 	Signed bool
 
 	// staged is the unpacked tree, waiting to be renamed into place.
@@ -193,9 +209,13 @@ func (p Plan) Verification() string {
 	case p.Digest == "":
 		return "unverified (installed from a local directory)"
 	case p.Signed:
-		return fmt.Sprintf("sha256:%s, and the release is cosign-signed (verify it with: cosign verify-blob)", short(p.Digest))
+		// Not "cosign-signed" as a trust claim: fft checked the sha256 against the
+		// release's own checksums.txt (integrity, not authenticity) and did *not*
+		// verify the signature. Saying it did would move a cautious user from no to
+		// yes on assurance fft never established.
+		return fmt.Sprintf("sha256:%s (matches the release checksums; the release also publishes a cosign signature that fft does not verify — check it with: cosign verify-blob)", short(p.Digest))
 	default:
-		return fmt.Sprintf("sha256:%s", short(p.Digest))
+		return fmt.Sprintf("sha256:%s (matches the release checksums)", short(p.Digest))
 	}
 }
 
@@ -248,7 +268,7 @@ func (i *Installer) stage(ctx context.Context, src Source, staged string) (Plan,
 		if err != nil {
 			return Plan{}, err
 		}
-		plan.Signed = rel.signed(asset.Name)
+		plan.Signed = rel.signed()
 
 		archive, err := i.download(ctx, asset.URL, maxArchive)
 		if err != nil {
@@ -386,10 +406,18 @@ type asset struct {
 	URL  string
 }
 
-// signed reports whether the release publishes a cosign signature for this asset.
-func (r *release) signed(name string) bool {
+// signed reports whether the release publishes a cosign signature over its
+// checksums file.
+//
+// GoReleaser signs checksums.txt, not each archive (signs.artifacts: checksum), so
+// the signature that exists for a real release is checksums.txt{.sig,.pem} — not a
+// per-archive .sig. Looking for the latter reported "signed: false" for every
+// genuine release and "true" only for a hand-crafted one, which is backwards.
+func (r *release) signed() bool {
 	for _, a := range r.Assets {
-		if a.Name == name+".sig" || a.Name == name+".sigstore" || a.Name == name+".pem" {
+		switch a.Name {
+		case "checksums.txt.sig", "checksums.txt.pem",
+			"checksums.txt.sigstore", "checksums.txt.sigstore.json":
 			return true
 		}
 	}
@@ -531,8 +559,53 @@ func (i *Installer) download(ctx context.Context, url string, limit int64) ([]by
 	return i.get(ctx, url, limit, "application/octet-stream")
 }
 
+// githubDownloadHosts are the hosts a release's asset and checksum URLs may name.
+// *.githubusercontent.com is where GitHub actually serves the bytes.
+var githubDownloadHosts = map[string]bool{
+	"api.github.com":      true,
+	"github.com":          true,
+	"codeload.github.com": true,
+}
+
+// allowedURL refuses a fetch to anywhere but GitHub (or the configured endpoint).
+//
+// The release JSON is attacker-influenced — a repo owner controls its
+// browser_download_url, and a user who runs `fft component install owner/repo`
+// against a fork is trusting that fork's release payload. Since checksums.txt is
+// fetched the same way, an attacker who could redirect both URLs would control both
+// sides of the integrity check. Pinning the fetch to GitHub closes that.
+func (i *Installer) allowedURL(raw string) error {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return fmt.Errorf("parse %s: %w", raw, err)
+	}
+	host := strings.ToLower(u.Hostname())
+
+	// The configured endpoint is allowed on its *own* scheme and host: production is
+	// api.github.com over https, and a spec points WithAPI at a loopback httptest
+	// server (http) that serves the assets too — pinning that away would mean the
+	// tests could not run. Matching the scheme as well as the host is what keeps this
+	// from becoming an http bypass: in production api.github.com is https, so a
+	// release payload naming http://api.github.com does *not* match and still has to
+	// clear the https check below.
+	if api, err := url.Parse(i.api); err == nil && api.Host != "" &&
+		strings.EqualFold(u.Scheme, api.Scheme) && strings.EqualFold(u.Host, api.Host) {
+		return nil
+	}
+	if u.Scheme != "https" {
+		return fmt.Errorf("refusing to fetch %s over %q: release assets must be https", raw, u.Scheme)
+	}
+	if githubDownloadHosts[host] || strings.HasSuffix(host, ".githubusercontent.com") {
+		return nil
+	}
+	return fmt.Errorf("refusing to fetch a release asset from %q: not a GitHub host", host)
+}
+
 // get is every HTTP request the installer makes.
 func (i *Installer) get(ctx context.Context, url string, limit int64, accept string) ([]byte, error) {
+	if err := i.allowedURL(url); err != nil {
+		return nil, err
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err

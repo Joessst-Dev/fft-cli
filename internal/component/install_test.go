@@ -354,7 +354,26 @@ var _ = Describe("the installer", func() {
 			Expect(plan.Manifest.Name).To(Equal("weather"))
 		})
 
-		It("reports a release that is cosign-signed", func() {
+		It("reports a release that signs its checksums, without claiming fft verified it", func() {
+			// GoReleaser signs checksums.txt, not each archive — that is the signature
+			// a real release carries.
+			hub.publish(assetName("weather", "1.0.0"), archive())
+			hub.assets["checksums.txt.sig"] = []byte("signature")
+
+			plan, err := inst.Prepare(context.Background(), component.Source{Repo: "acme/weather"})
+			Expect(err).NotTo(HaveOccurred())
+			defer inst.Discard(plan)
+
+			Expect(plan.Signed).To(BeTrue())
+			// The wording must offer the manual check, not imply fft ran it.
+			Expect(plan.Verification()).To(ContainSubstring("does not verify"))
+			Expect(plan.Verification()).To(ContainSubstring("cosign verify-blob"))
+		})
+
+		It("does not call a release signed on the strength of a per-archive .sig alone", func() {
+			// The old check keyed on <archive>.sig, which no real release produces —
+			// so it reported "signed" only for a hand-crafted release and "unsigned"
+			// for every genuine one. A stray per-archive sig must not resurrect that.
 			name := assetName("weather", "1.0.0")
 			hub.publish(name, archive())
 			hub.assets[name+".sig"] = []byte("signature")
@@ -363,8 +382,8 @@ var _ = Describe("the installer", func() {
 			Expect(err).NotTo(HaveOccurred())
 			defer inst.Discard(plan)
 
-			Expect(plan.Signed).To(BeTrue())
-			Expect(plan.Verification()).To(ContainSubstring("cosign verify-blob"))
+			Expect(plan.Signed).To(BeFalse())
+			Expect(plan.Verification()).NotTo(ContainSubstring("cosign"))
 		})
 	})
 
