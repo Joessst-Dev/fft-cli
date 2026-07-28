@@ -14,6 +14,12 @@ import (
 // refused unless the host is a loopback address: a bearer token sent in the
 // clear to a real fulfillmenttools tenant is a credential leak, and the only
 // legitimate reason to point fft at http is a mock server on localhost.
+//
+// The host itself is not pinned to a *.fulfillmenttools.com suffix. That is a
+// considered risk, not an oversight: fft is pointed at self-hosted and staging
+// endpoints that do not share the production suffix, and once https is enforced
+// (above) and cross-host redirects are refused (see the tenant client's
+// pinRedirect), an https host the user configured is the host they meant.
 func NormalizeBaseURL(raw string) (string, error) {
 	raw = strings.TrimSpace(raw)
 	if raw == "" {
@@ -35,7 +41,9 @@ func NormalizeBaseURL(raw string) (string, error) {
 	// *first*: a password carried there must not be echoed by the scheme/host/query
 	// errors below, none of which redact — and this error itself uses u.Redacted(),
 	// which masks the password, so the very check that stops the leak does not cause
-	// one. (Config errors reach the terminal unredacted, unlike internal/auth's.)
+	// one. This path matters here because FromEnv now routes a CI-supplied
+	// FFT_BASE_URL through this function, and config errors reach the terminal
+	// unredacted, unlike internal/auth's.
 	if u.User != nil {
 		return "", fmt.Errorf("the base URL %q carries credentials in user:pass@ form: give the API root without them", u.Redacted())
 	}

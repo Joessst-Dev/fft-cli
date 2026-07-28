@@ -41,6 +41,15 @@ var _ = Describe("running headless from the environment", func() {
 		Expect(c.configPath).NotTo(BeAnExistingFile())
 	})
 
+	It("refuses a cleartext FFT_BASE_URL to a real host, end to end, rather than falling back", func() {
+		// The env base URL now runs through the same guard `project add` applies; a
+		// bad one is a hard stop (exit 3), not a silent fall-back to the config file.
+		c.setenv(config.EnvBaseURL, "http://ci.api.fulfillmenttools.com")
+
+		Expect(c.run("project", "current")).To(Equal(exitcode.Config))
+		Expect(c.errOut()).To(ContainSubstring(config.EnvBaseURL))
+	})
+
 	It("reads its credentials from the environment rather than the keychain", func() {
 		Expect(c.run("project", "current")).To(Equal(exitcode.OK))
 

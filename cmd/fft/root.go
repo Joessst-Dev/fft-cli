@@ -455,7 +455,13 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 	// Headless mode is decided before anything reads the disk, because the whole
 	// point of it is that nothing does.
 	if d.Ephemeral == nil {
-		if p, ok := config.FromEnv(os.LookupEnv); ok {
+		p, ok, err := config.FromEnv(os.LookupEnv)
+		if err != nil {
+			// A headless set that names an unusable base URL (http to a real
+			// tenant, say) is a hard stop, not a quiet fall-back to the config file.
+			return config.NewError(err, "Fix "+config.EnvBaseURL+", or unset it to use a configured project.")
+		}
+		if ok {
 			d.Ephemeral = &p
 		}
 	}

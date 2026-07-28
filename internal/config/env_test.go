@@ -19,6 +19,16 @@ var _ = Describe("FromEnv", func() {
 		return v, ok
 	}
 
+	// fromEnv is the two-value shape these specs read against: they assert what a
+	// well-formed environment synthesizes, and a normalization error is a distinct
+	// concern exercised on its own below.
+	fromEnv := func() (config.Project, bool) {
+		GinkgoHelper()
+		p, ok, err := config.FromEnv(lookup)
+		Expect(err).NotTo(HaveOccurred())
+		return p, ok
+	}
+
 	BeforeEach(func() {
 		env = map[string]string{
 			config.EnvBaseURL:        "https://acme.api.fulfillmenttools.com",
@@ -30,7 +40,7 @@ var _ = Describe("FromEnv", func() {
 
 	When("the base URL, API key, email and a password are all set", func() {
 		It("synthesizes an ephemeral project", func() {
-			p, ok := config.FromEnv(lookup)
+			p, ok := fromEnv()
 
 			Expect(ok).To(BeTrue())
 			Expect(p.Name).To(Equal(config.EphemeralName))
@@ -46,7 +56,7 @@ var _ = Describe("FromEnv", func() {
 			env[config.EnvTenant] = "acme-tenant"
 			env[config.EnvUsername] = "bot"
 
-			p, ok := config.FromEnv(lookup)
+			p, ok := fromEnv()
 
 			Expect(ok).To(BeTrue())
 			Expect(p.ProjectID).To(Equal("acme"))
@@ -61,7 +71,7 @@ var _ = Describe("FromEnv", func() {
 			delete(env, config.EnvPassword)
 			env[config.EnvIDToken] = "eyJhbGciOi..."
 
-			p, ok := config.FromEnv(lookup)
+			p, ok := fromEnv()
 
 			Expect(ok).To(BeTrue())
 			Expect(p.Ephemeral).To(BeTrue())
@@ -75,7 +85,7 @@ var _ = Describe("FromEnv", func() {
 		func(missing string) {
 			delete(env, missing)
 
-			_, ok := config.FromEnv(lookup)
+			_, ok := fromEnv()
 
 			Expect(ok).To(BeFalse())
 		},
@@ -89,7 +99,7 @@ var _ = Describe("FromEnv", func() {
 		It("is treated as absent", func() {
 			env[config.EnvEmail] = "   "
 
-			_, ok := config.FromEnv(lookup)
+			_, ok := fromEnv()
 
 			Expect(ok).To(BeFalse())
 		})
@@ -109,7 +119,7 @@ var _ = Describe("FromEnv", func() {
 		It("builds the email from them", func() {
 			env[config.EnvEnvironment] = "staging"
 
-			p, ok := config.FromEnv(lookup)
+			p, ok := fromEnv()
 
 			Expect(ok).To(BeTrue())
 			Expect(p.Email).To(Equal("bot@ocff-acme-staging.com"))
@@ -118,7 +128,7 @@ var _ = Describe("FromEnv", func() {
 		It("accepts FFT_ENV as the alias of FFT_ENVIRONMENT, matching the --env flag", func() {
 			env[config.EnvEnv] = "staging"
 
-			p, ok := config.FromEnv(lookup)
+			p, ok := fromEnv()
 
 			Expect(ok).To(BeTrue())
 			Expect(p.Environment).To(Equal("staging"))
@@ -129,14 +139,14 @@ var _ = Describe("FromEnv", func() {
 			env[config.EnvEnvironment] = "prod"
 			env[config.EnvEnv] = "staging"
 
-			p, ok := config.FromEnv(lookup)
+			p, ok := fromEnv()
 
 			Expect(ok).To(BeTrue())
 			Expect(p.Environment).To(Equal("prod"))
 		})
 
 		It("still refuses when the environment is missing, rather than inventing an address", func() {
-			_, ok := config.FromEnv(lookup)
+			_, ok := fromEnv()
 
 			Expect(ok).To(BeFalse())
 		})
@@ -149,7 +159,7 @@ var _ = Describe("FromEnv", func() {
 			env[config.EnvProjectID] = "acme"
 			env[config.EnvEnv] = "staging"
 
-			p, ok := config.FromEnv(lookup)
+			p, ok := fromEnv()
 
 			Expect(ok).To(BeTrue())
 			Expect(p.Email).To(Equal("someone@acme.com"))
@@ -160,7 +170,7 @@ var _ = Describe("FromEnv", func() {
 		It("reports no ephemeral project", func() {
 			env = nil
 
-			_, ok := config.FromEnv(lookup)
+			_, ok := fromEnv()
 
 			Expect(ok).To(BeFalse())
 		})
@@ -170,7 +180,7 @@ var _ = Describe("FromEnv", func() {
 		It("marks the ephemeral project read-only", func() {
 			env[config.EnvReadOnly] = "1"
 
-			p, ok := config.FromEnv(lookup)
+			p, ok := fromEnv()
 
 			Expect(ok).To(BeTrue())
 			Expect(p.ReadOnly).To(BeTrue())
@@ -183,17 +193,66 @@ var _ = Describe("FromEnv", func() {
 		It("does not on its own synthesize a project", func() {
 			env = map[string]string{config.EnvReadOnly: "1"}
 
-			_, ok := config.FromEnv(lookup)
+			_, ok := fromEnv()
 
 			Expect(ok).To(BeFalse())
 		})
 	})
 
 	It("leaves a project writable when FFT_READ_ONLY is absent", func() {
-		p, ok := config.FromEnv(lookup)
+		p, ok := fromEnv()
 
 		Expect(ok).To(BeTrue())
 		Expect(p.ReadOnly).To(BeFalse())
+	})
+
+	When("the base URL is well-formed but not canonical", func() {
+		It("normalizes it, exactly as `fft project add` does", func() {
+			env[config.EnvBaseURL] = "acme.api.fulfillmenttools.com/"
+
+			p, ok := fromEnv()
+
+			Expect(ok).To(BeTrue())
+			Expect(p.BaseURL).To(Equal("https://acme.api.fulfillmenttools.com"))
+		})
+	})
+
+	When("the base URL would send the token in the clear", func() {
+		// The guard `fft project add` applies must apply here too — this is the CI
+		// path, where a mistyped FFT_BASE_URL is exactly how a token leaks.
+		It("refuses plain http to a real tenant with an error, not a silent fall-back", func() {
+			env[config.EnvBaseURL] = "http://acme.api.fulfillmenttools.com"
+
+			p, ok, err := config.FromEnv(lookup)
+
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring(config.EnvBaseURL))
+			Expect(ok).To(BeFalse())
+			Expect(p).To(Equal(config.Project{}))
+		})
+
+		It("still allows http to localhost, for a mock server", func() {
+			env[config.EnvBaseURL] = "http://localhost:8080"
+
+			p, ok := fromEnv()
+
+			Expect(ok).To(BeTrue())
+			Expect(p.BaseURL).To(Equal("http://localhost:8080"))
+		})
+	})
+
+	When("an incomplete set carries a bad base URL", func() {
+		It("is still just ignored, not turned into an error", func() {
+			// A stray FFT_BASE_URL in a shell that was never going to run headless
+			// must not fail a command that would have used the config file.
+			env[config.EnvBaseURL] = "http://acme.api.fulfillmenttools.com"
+			delete(env, config.EnvPassword)
+
+			_, ok, err := config.FromEnv(lookup)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(ok).To(BeFalse())
+		})
 	})
 })
 
