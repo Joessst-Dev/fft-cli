@@ -6,87 +6,70 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
-	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-func TestAllowedURL(t *testing.T) {
+var _ = Describe("allowedURL", func() {
 	i := &Installer{api: "https://api.github.com"}
 
-	ok := []string{
-		"https://api.github.com/repos/o/r/releases/latest",
-		"https://github.com/o/r/releases/download/v1/asset.tar.gz",
-		"https://codeload.github.com/o/r/tar.gz/v1",
-		"https://objects.githubusercontent.com/x",
-		"https://release-assets.githubusercontent.com/x",
-	}
-	for _, u := range ok {
-		if err := i.allowedURL(u); err != nil {
-			t.Errorf("allowedURL(%q) = %v, want nil", u, err)
-		}
-	}
+	DescribeTable("accepts a GitHub host over https",
+		func(u string) { Expect(i.allowedURL(u)).To(Succeed()) },
+		Entry("the API host", "https://api.github.com/repos/o/r/releases/latest"),
+		Entry("a release download", "https://github.com/o/r/releases/download/v1/asset.tar.gz"),
+		Entry("codeload", "https://codeload.github.com/o/r/tar.gz/v1"),
+		Entry("objects.githubusercontent.com", "https://objects.githubusercontent.com/x"),
+		Entry("release-assets.githubusercontent.com", "https://release-assets.githubusercontent.com/x"),
+	)
 
-	bad := []string{
-		"http://github.com/o/r/asset.tar.gz",       // not https
-		"https://evil.example/asset.tar.gz",        // not a GitHub host
-		"https://githubusercontent.com.evil.com/x", // suffix spoof
-		"https://notgithub.com/o/r/asset",          // lookalike
+	DescribeTable("refuses anything else",
+		func(u string) { Expect(i.allowedURL(u)).NotTo(Succeed()) },
+		Entry("http to a GitHub host", "http://github.com/o/r/asset.tar.gz"),
+		Entry("a non-GitHub host", "https://evil.example/asset.tar.gz"),
+		Entry("a suffix spoof", "https://githubusercontent.com.evil.com/x"),
+		Entry("a lookalike host", "https://notgithub.com/o/r/asset"),
 		// The configured endpoint is api.github.com over *https*; http to that same
 		// host must not be waved through by the endpoint exemption.
-		"http://api.github.com/repos/o/r/releases/latest",
-		"http://API.GitHub.com/x",
-	}
-	for _, u := range bad {
-		if err := i.allowedURL(u); err == nil {
-			t.Errorf("allowedURL(%q) = nil, want error", u)
+		Entry("http to the configured https endpoint", "http://api.github.com/repos/o/r/releases/latest"),
+		Entry("http to the configured endpoint, differently cased", "http://API.GitHub.com/x"),
+	)
+
+	It("allows the WithAPI endpoint on its own scheme and host, and nothing else", func() {
+		// A spec's loopback httptest server serves both the release JSON and the
+		// assets over http; the allowlist must let that host through without pinning
+		// it to GitHub — but only that host.
+		loop := &Installer{api: "http://127.0.0.1:54321"}
+		Expect(loop.allowedURL("http://127.0.0.1:54321/assets/weather.tar.gz")).To(Succeed())
+		Expect(loop.allowedURL("http://127.0.0.1:9999/assets/x")).NotTo(Succeed())
+	})
+
+	It("refuses a followed redirect off the allowed host", func() {
+		// The initial URL is the configured (allowed) host, but the server 302s to a
+		// disallowed one. Without CheckRedirect the client would follow it silently.
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, "https://evil.example/payload", http.StatusFound)
+		}))
+		DeferCleanup(srv.Close)
+
+		inst := NewInstaller(GinkgoT().TempDir(), WithAPI(srv.URL))
+		_, err := inst.get(context.Background(), srv.URL+"/asset", maxArchive, "")
+		Expect(err).To(HaveOccurred())
+	})
+})
+
+var _ = Describe("isRegularFile", func() {
+	It("accepts a real file but refuses a symlink standing in for the executable", func() {
+		dir := GinkgoT().TempDir()
+
+		real := filepath.Join(dir, "real")
+		Expect(os.WriteFile(real, []byte("#!/bin/sh\n"), 0o755)).To(Succeed())
+		Expect(isRegularFile(real)).To(BeTrue())
+
+		link := filepath.Join(dir, "link")
+		if err := os.Symlink(real, link); err != nil {
+			Skip("symlinks unsupported here: " + err.Error())
 		}
-	}
-}
-
-// TestGetRefusesRedirectOffAllowedHost proves the redirect re-check: the initial
-// URL is the configured (allowed) host, but the server 302s to a disallowed one.
-// Without CheckRedirect the client would follow it transparently.
-func TestGetRefusesRedirectOffAllowedHost(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "https://evil.example/payload", http.StatusFound)
-	}))
-	defer srv.Close()
-
-	i := NewInstaller(t.TempDir(), WithAPI(srv.URL))
-	_, err := i.get(context.Background(), srv.URL+"/asset", maxArchive, "")
-	if err == nil {
-		t.Fatal("a redirect to a non-GitHub host was followed")
-	}
-}
-
-// TestAllowedURLConfiguredEndpoint proves the WithAPI seam: a spec's loopback
-// httptest server serves both the release JSON and the assets over http, and the
-// allowlist must let that host through without pinning it to GitHub.
-func TestAllowedURLConfiguredEndpoint(t *testing.T) {
-	i := &Installer{api: "http://127.0.0.1:54321"}
-	if err := i.allowedURL("http://127.0.0.1:54321/assets/weather.tar.gz"); err != nil {
-		t.Errorf("configured endpoint refused: %v", err)
-	}
-	if err := i.allowedURL("http://127.0.0.1:9999/assets/x"); err == nil {
-		t.Error("a different http host was allowed; only the configured endpoint may be")
-	}
-}
-
-func TestIsRegularFileRejectsSymlink(t *testing.T) {
-	dir := t.TempDir()
-
-	real := filepath.Join(dir, "real")
-	if err := os.WriteFile(real, []byte("#!/bin/sh\n"), 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if !isRegularFile(real) {
-		t.Error("a real executable should be a regular file")
-	}
-
-	link := filepath.Join(dir, "link")
-	if err := os.Symlink(real, link); err != nil {
-		t.Skipf("symlinks unsupported here: %v", err)
-	}
-	if isRegularFile(link) {
-		t.Error("a symlink standing in for the executable must not be treated as regular")
-	}
-}
+		Expect(isRegularFile(link)).To(BeFalse())
+	})
+})
