@@ -167,12 +167,18 @@ sboms:
 # the signature is bound to this repo and this workflow in the public Rekor log.
 # fft handles tenant credentials, so a user must be able to prove a binary is ours.
 #
+# Only checksums.txt is signed (artifacts: checksum), so verification is two steps:
+# verify the checksums file's signature, then check the archive against it. This is
+# the procedure README.md's "Verifying a download" documents — do not imply a
+# per-archive .sig/.pem exists; none is produced.
+#
 #   cosign verify-blob \
-#     --certificate      fft_1.0.0_darwin_arm64.tar.gz.pem \
-#     --signature        fft_1.0.0_darwin_arm64.tar.gz.sig \
+#     --certificate      checksums.txt.pem \
+#     --signature        checksums.txt.sig \
 #     --certificate-identity-regexp 'https://github.com/Joessst-Dev/fft-cli/.*' \
 #     --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-#     fft_1.0.0_darwin_arm64.tar.gz
+#     checksums.txt
+#   sha256sum --check checksums.txt --ignore-missing
 signs:
   - id: cosign-keyless
     cmd: cosign

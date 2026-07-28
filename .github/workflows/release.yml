@@ -25,41 +25,49 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           # GoReleaser builds the changelog from the commits since the previous tag,
           # so it needs the whole history, not just the tagged commit.
           fetch-depth: 0
 
-      - uses: actions/setup-go@v7
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
           go-version: stable
           cache: true
 
       # Signing and SBOM generation are separate binaries GoReleaser shells out to.
+      # Their versions are pinned too, not just the installer actions: this job holds
+      # id-token/packages/contents write and the tap PAT, so a compromised upstream
+      # release of cosign or syft would run with those. Dependabot does not bump these
+      # input pins, so raise them by hand when a new tool release lands.
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3.9.1
+        with:
+          cosign-release: v3.1.2
 
       - name: Install syft
-        uses: anchore/sbom-action/download-syft@v0
+        uses: anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0
+        with:
+          syft-version: v1.49.0
 
       # GoReleaser's `dockers_v2` builds the multi-platform image with buildx.
       - name: Set up Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
 
       # Authenticate to GHCR so GoReleaser can push the images and the manifest. Login
       # must precede GoReleaser — it pushes during `release`, not after.
       - name: Log in to GHCR
-        uses: docker/login-action@v4
+        uses: docker/login-action@371161bbe7024a29a25c5e19bfcbc0804fe9ad2c # v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6
         with:
-          version: "~> v2"
+          version: "v2.17.1"
           args: release --clean
         env:
           # The tag that triggered this run — not whatever `git describe` happens to
