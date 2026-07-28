@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -127,7 +128,9 @@ func hostsOf(rawURLs ...string) (map[string]struct{}, error) {
 		if err != nil {
 			return nil, fmt.Errorf("parse the identity endpoint: %w", err)
 		}
-		hosts[u.Hostname()] = struct{}{}
+		// Lower-cased on both sides of the check: DNS is case-insensitive, and an
+		// allowlist that a differently-cased host slips past is not an allowlist.
+		hosts[strings.ToLower(u.Hostname())] = struct{}{}
 	}
 	return hosts, nil
 }
@@ -139,8 +142,31 @@ type allowlistTransport struct {
 	base    http.RoundTripper
 }
 
+// isLoopbackHost reports whether host is this machine, the only host the API key
+// may travel to over plain http. Google's real endpoints are not loopback, so this
+// exception cannot fire against them.
+func isLoopbackHost(host string) bool {
+	if host == "localhost" {
+		return true
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
+}
+
 func (t *allowlistTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	host := req.URL.Hostname()
+	host := strings.ToLower(req.URL.Hostname())
+
+	// Scheme first: the API key rides in the query string, so an https→http
+	// downgrade — a redirect the base transport followed, say — would put it on the
+	// wire in the clear. Google's identity endpoints are https, so http to them is
+	// refused. The one http exception is a loopback host, which is the fake identity
+	// server the specs point withEndpoints at — the same bargain NormalizeBaseURL
+	// strikes for the tenant base URL.
+	overTLS := req.URL.Scheme == "https"
+	overLoopback := req.URL.Scheme == "http" && isLoopbackHost(host)
+	if !overTLS && !overLoopback {
+		return nil, fmt.Errorf("auth: refusing to send the Firebase API key over %q", req.URL.Scheme)
+	}
 	if _, ok := t.allowed[host]; !ok {
 		// The URL itself is not quoted: it carries the key we are refusing to leak.
 		return nil, fmt.Errorf("auth: refusing to send the Firebase API key to %q", host)

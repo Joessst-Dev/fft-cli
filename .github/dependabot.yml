@@ -34,3 +34,36 @@ updates:
       actions-minor-and-patch:
         patterns: ["*"]
         update-types: [minor, patch]
+
+  # The Dockerfile's distroless base is pinned by digest; this keeps that pin fresh.
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:00"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: ci
+      include: scope
+    groups:
+      docker-minor-and-patch:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  # The VitePress docs toolchain — not shipped in the binary, but still a
+  # supply-chain surface the build runs.
+  - package-ecosystem: npm
+    directory: /docs
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:00"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      npm-minor-and-patch:
+        patterns: ["*"]
+        update-types: [minor, patch]

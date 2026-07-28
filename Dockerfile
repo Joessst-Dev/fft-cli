@@ -4,7 +4,11 @@
 # no libc, no shell, no package manager — but it does ship the CA certificates the update
 # check's HTTPS call needs. The version is already stamped into fft via ldflags, so
 # `fft version` reports the release tag with nothing set here.
-FROM gcr.io/distroless/static:nonroot
+#
+# Pinned by digest, not just the :nonroot tag, so the signed release image is
+# reproducible — whatever :nonroot pointed at on build day cannot drift underneath
+# it. Dependabot's docker ecosystem bumps this pin the same as any dependency.
+FROM gcr.io/distroless/static:nonroot@sha256:f7f8f729987ad0fdf6b05eeeae94b26e6a0f613bdf46feea7fc40f7bd72953e6
 
 # dockers_v2 stages every platform's build under <os>/<arch>/ in one build context, so
 # select this platform's with the TARGETOS/TARGETARCH that buildx sets per target. fft

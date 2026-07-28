@@ -381,6 +381,12 @@ file nor the keychain**:
 | `FFT_ENV` | likewise |
 | `FFT_READ_ONLY` | optional; refuse every request that would change the tenant — see [Read-only projects](#read-only-projects) |
 
+`FFT_BASE_URL` is held to the same rule as `fft project add`: it must be `https`, or
+`http` only to a loopback address (`localhost`/`127.0.0.1`). Plain `http` to any other
+host — including a container service name like `http://emulator:8080` on a compose
+network — is refused, so a misconfigured `FFT_BASE_URL` cannot send the bearer token in
+the clear. Reach a sidecar over its published port on `localhost`, or over `https`.
+
 ```yaml
 - run: fft facility list -o json | jq '.[].name'
   env:
