@@ -42,7 +42,7 @@ jobs:
       # release of cosign or syft would run with those. Dependabot does not bump these
       # input pins, so raise them by hand when a new tool release lands.
       - name: Install cosign
-        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3.9.1
         with:
           cosign-release: v3.1.2
 
