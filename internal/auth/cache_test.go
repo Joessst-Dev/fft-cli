@@ -269,6 +269,32 @@ var _ = Describe("a static token source", func() {
 	})
 })
 
+var _ = Describe("saveToken", func() {
+	It("writes the token secrets in a fixed order, with the expiry last", func() {
+		// A partial failure part-way through must not leave a fresh expiry vouching
+		// for a stale id token, so the expiry is committed last. Ranging a map would
+		// make which pairing survives a crash a matter of hash order.
+		rec := &orderRecordingStore{}
+		tok := Token{ID: "id", Refresh: "ref", ExpiresAt: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)}
+
+		Expect(saveToken(rec, "staging", tok)).To(Succeed())
+
+		Expect(rec.sets).To(Equal([]string{
+			secrets.Key("staging", secrets.KindRefreshToken),
+			secrets.Key("staging", secrets.KindIDToken),
+			secrets.Key("staging", secrets.KindIDTokenExp),
+		}))
+	})
+})
+
+// orderRecordingStore records the order its keys are written in, and nothing else.
+type orderRecordingStore struct{ sets []string }
+
+func (s *orderRecordingStore) Get(string) (string, error) { return "", secrets.ErrNotFound }
+func (s *orderRecordingStore) Set(key, _ string) error    { s.sets = append(s.sets, key); return nil }
+func (s *orderRecordingStore) Delete(string) error        { return nil }
+func (s *orderRecordingStore) Kind() string               { return "recording" }
+
 var _ = Describe("a token's freshness", func() {
 	now := time.Date(2026, 7, 12, 12, 0, 0, 0, time.UTC)
 
