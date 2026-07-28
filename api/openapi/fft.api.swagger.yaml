@@ -50168,6 +50168,7 @@ components:
         operativeProcessRef:
           description: Reference to related operative process
           example: 019f5b8e-d580-767f-a28d-3fe569bd0064
+          minLength: 1
           type: string
         pickJobRefs:
           description: List of corresponding pickjob Ids
@@ -75522,6 +75523,11 @@ components:
             Reference to the operative container type this container is based
             on.
           example: 41d43211-g5a1-gg22-a716-ba095e30ds1d
+          minLength: 1
+          type: string
+        operativeProcessRef:
+          description: Reference to related operative process
+          example: 019f5b8e-d580-767f-a28d-3fe569bd0064
           minLength: 1
           type: string
         previousModuleContainerInfo:
