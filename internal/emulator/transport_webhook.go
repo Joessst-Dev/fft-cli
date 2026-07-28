@@ -6,10 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/netip"
 	"net/url"
+	"slices"
 	"strings"
+	"syscall"
 )
 
 // webhookTransport POSTs the event envelope to a subscription's callbackUrl.
@@ -26,15 +29,57 @@ type webhookTransport struct {
 }
 
 func newWebhookTransport(allowRemote bool) *webhookTransport {
-	return &webhookTransport{
-		// Redirects are not followed: a local endpoint answering 302 with a remote
-		// Location would walk the request straight past the check below. Returning the
-		// redirect as the response instead makes it a non-2xx, i.e. a logged failure.
-		client: &http.Client{
-			CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse },
+	t := &webhookTransport{allowRemote: allowRemote}
+
+	// A dial-time guard on the *resolved* address, not just the textual host plan()
+	// vets. isLocalHost judges u.Hostname() as a string, which a decimal/hex IP
+	// encoding or a hostname that resolves to the metadata IP (DNS rebinding) can
+	// slip past; Control is handed the concrete ip:port Go is about to connect to, so
+	// it sees through both. The metadata endpoint is refused here whatever plan() did.
+	dialer := &net.Dialer{
+		Control: func(_, address string, _ syscall.RawConn) error {
+			return t.allowDial(address)
 		},
-		allowRemote: allowRemote,
 	}
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.DialContext = dialer.DialContext
+
+	t.client = &http.Client{
+		// Redirects are not followed: a local endpoint answering 302 with a remote
+		// Location would walk the request straight past the checks. Returning the
+		// redirect as the response instead makes it a non-2xx, i.e. a logged failure.
+		CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse },
+		Transport:     transport,
+	}
+	return t
+}
+
+// allowDial refuses a connection at dial time, judging the concrete address the
+// resolver returned rather than the callbackUrl's textual host. The cloud metadata
+// endpoint is refused always; any non-local address is refused unless the transport
+// was widened. This is the enforcement that cannot be encoded around — isLocalHost
+// is the earlier, friendlier refusal with a message, this is the backstop.
+func (t *webhookTransport) allowDial(address string) error {
+	host, _, err := net.SplitHostPort(address)
+	if err != nil {
+		host = address
+	}
+	addr, err := netip.ParseAddr(host)
+	if err != nil {
+		// Control is handed a resolved ip:port, so a non-IP here is unexpected — fail
+		// closed rather than guess.
+		return fmt.Errorf("refusing to dial %q: not an IP address", address)
+	}
+	if slices.Contains(metadataAddrs, addr.Unmap()) {
+		return fmt.Errorf("refusing to dial the cloud metadata endpoint %s", addr)
+	}
+	if t.allowRemote {
+		return nil
+	}
+	if addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() || addr.IsUnspecified() {
+		return nil
+	}
+	return fmt.Errorf("refusing to dial non-local address %s (--webhook-allow-remote to allow)", addr)
 }
 
 // describe says where this transport will call, for the startup notice. The bound is
@@ -134,6 +179,25 @@ func callbackHeaders(target map[string]any) map[string]string {
 	return out
 }
 
+// metadataAddrs are the cloud instance-metadata endpoints (AWS/GCP/Azure IMDS and
+// its IPv6 form). They sit in the link-local / ULA ranges [isLocalHost] otherwise
+// treats as local, so they are matched out explicitly.
+var metadataAddrs = []netip.Addr{
+	netip.MustParseAddr("169.254.169.254"),
+	netip.MustParseAddr("fd00:ec2::254"),
+}
+
+// metadataHosts are the *names* the metadata endpoint answers to. GCP resolves
+// metadata.google.internal, metadata.goog, and the bare "metadata" all to
+// 169.254.169.254 — and those would sail through localOnlySuffixes (".internal")
+// and the single-label rule below, which is the same blind-SSRF as hitting the IP.
+// isLocalHost does no DNS, so the names are denied literally.
+var metadataHosts = map[string]bool{
+	"metadata":                 true,
+	"metadata.google.internal": true,
+	"metadata.goog":            true,
+}
+
 // localOnlyHosts are the names that can only ever mean this machine.
 var localOnlyHosts = map[string]bool{
 	"localhost":            true,
@@ -158,7 +222,19 @@ func isLocalHost(host string) bool {
 		return false
 	}
 
+	// The metadata endpoint by name, refused before any acceptance rule can reach it.
+	if metadataHosts[host] {
+		return false
+	}
+
 	if addr, err := netip.ParseAddr(host); err == nil {
+		// The cloud instance-metadata endpoints are link-local (or ULA), so the
+		// acceptance below would wave them through. A POST to 169.254.169.254 with
+		// attacker-chosen headers is precisely the SSRF this guard denies, so it is
+		// refused even in local mode, before anything else is considered.
+		if slices.Contains(metadataAddrs, addr.Unmap()) {
+			return false
+		}
 		return addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() || addr.IsUnspecified()
 	}
 	if localOnlyHosts[host] {

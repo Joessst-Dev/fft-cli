@@ -78,7 +78,11 @@ func (h *handlers) create(coll string) fiber.Handler {
 		}
 		delete(doc, defaultIDField)
 		delete(doc, "version")
-		created := h.store.Create(coll, doc)
+		created, ok := h.store.Create(coll, doc)
+		if !ok {
+			return writeError(c, fiber.StatusInsufficientStorage,
+				fmt.Sprintf("collection %q is full (%d entities); the emulator caps growth so a runaway loop cannot exhaust memory", coll, maxEntitiesPerCollection))
+		}
 		h.events.onCreate(coll, created)
 		return writeJSON(c, fiber.StatusCreated, created)
 	}
