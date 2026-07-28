@@ -156,4 +156,33 @@ var _ = Describe("webhookTransport", func() {
 			Expect(remote.Load()).To(BeZero())
 		})
 	})
+
+	// allowDial is the dial-time backstop: it judges the resolved ip:port, so a name
+	// that resolves to a forbidden address (or an alternate IP encoding) is caught
+	// even when the textual isLocalHost check did not.
+	Describe("allowDial", func() {
+		DescribeTable("in local mode",
+			func(addr string, allowed bool) {
+				err := newWebhookTransport(false).allowDial(addr)
+				if allowed {
+					Expect(err).NotTo(HaveOccurred())
+				} else {
+					Expect(err).To(HaveOccurred())
+				}
+			},
+			Entry("loopback is allowed", "127.0.0.1:80", true),
+			Entry("a private address is allowed", "10.1.2.3:8080", true),
+			Entry("the metadata IP is refused", "169.254.169.254:80", false),
+			Entry("the IPv6 metadata address is refused", "[fd00:ec2::254]:80", false),
+			Entry("a public address is refused", "8.8.8.8:443", false),
+		)
+
+		It("still refuses the metadata endpoint even when widened", func() {
+			Expect(newWebhookTransport(true).allowDial("169.254.169.254:80")).To(HaveOccurred())
+		})
+
+		It("allows a public address once widened", func() {
+			Expect(newWebhookTransport(true).allowDial("8.8.8.8:443")).NotTo(HaveOccurred())
+		})
+	})
 })

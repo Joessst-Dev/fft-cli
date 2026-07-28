@@ -76,9 +76,11 @@ func (s *Store) collection(name string) *collectionData {
 // maxEntitiesPerCollection bounds how many entities one collection holds. The
 // emulator authenticates nothing, so an unauthenticated client — loopback by
 // default, LAN-wide under --host 0.0.0.0 — can loop POST /api/{coll} to grow the
-// store without limit. This caps the memory that costs. It is deliberately
-// generous: no real fixture set or dev session comes near it, so reaching it means
-// something is looping, not working.
+// store without limit. This bounds the *count*; per-request body size is separately
+// bounded by Fiber's 4 MiB default, and the set of collections is fixed at startup
+// from the spec (not attacker-chosen), so together those bound the growth. It is
+// deliberately generous: no real fixture set or dev session comes near it, so
+// reaching it means something is looping, not working.
 const maxEntitiesPerCollection = 100_000
 
 // Create stores a new entity, assigning it an id (unless the body carries one) and

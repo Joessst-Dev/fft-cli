@@ -6,11 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/netip"
 	"net/url"
 	"slices"
 	"strings"
+	"syscall"
 )
 
 // webhookTransport POSTs the event envelope to a subscription's callbackUrl.
@@ -27,15 +29,57 @@ type webhookTransport struct {
 }
 
 func newWebhookTransport(allowRemote bool) *webhookTransport {
-	return &webhookTransport{
-		// Redirects are not followed: a local endpoint answering 302 with a remote
-		// Location would walk the request straight past the check below. Returning the
-		// redirect as the response instead makes it a non-2xx, i.e. a logged failure.
-		client: &http.Client{
-			CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse },
+	t := &webhookTransport{allowRemote: allowRemote}
+
+	// A dial-time guard on the *resolved* address, not just the textual host plan()
+	// vets. isLocalHost judges u.Hostname() as a string, which a decimal/hex IP
+	// encoding or a hostname that resolves to the metadata IP (DNS rebinding) can
+	// slip past; Control is handed the concrete ip:port Go is about to connect to, so
+	// it sees through both. The metadata endpoint is refused here whatever plan() did.
+	dialer := &net.Dialer{
+		Control: func(_, address string, _ syscall.RawConn) error {
+			return t.allowDial(address)
 		},
-		allowRemote: allowRemote,
 	}
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.DialContext = dialer.DialContext
+
+	t.client = &http.Client{
+		// Redirects are not followed: a local endpoint answering 302 with a remote
+		// Location would walk the request straight past the checks. Returning the
+		// redirect as the response instead makes it a non-2xx, i.e. a logged failure.
+		CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse },
+		Transport:     transport,
+	}
+	return t
+}
+
+// allowDial refuses a connection at dial time, judging the concrete address the
+// resolver returned rather than the callbackUrl's textual host. The cloud metadata
+// endpoint is refused always; any non-local address is refused unless the transport
+// was widened. This is the enforcement that cannot be encoded around — isLocalHost
+// is the earlier, friendlier refusal with a message, this is the backstop.
+func (t *webhookTransport) allowDial(address string) error {
+	host, _, err := net.SplitHostPort(address)
+	if err != nil {
+		host = address
+	}
+	addr, err := netip.ParseAddr(host)
+	if err != nil {
+		// Control is handed a resolved ip:port, so a non-IP here is unexpected — fail
+		// closed rather than guess.
+		return fmt.Errorf("refusing to dial %q: not an IP address", address)
+	}
+	if slices.Contains(metadataAddrs, addr.Unmap()) {
+		return fmt.Errorf("refusing to dial the cloud metadata endpoint %s", addr)
+	}
+	if t.allowRemote {
+		return nil
+	}
+	if addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() || addr.IsUnspecified() {
+		return nil
+	}
+	return fmt.Errorf("refusing to dial non-local address %s (--webhook-allow-remote to allow)", addr)
 }
 
 // describe says where this transport will call, for the startup notice. The bound is
