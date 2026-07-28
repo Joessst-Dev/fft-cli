@@ -3,7 +3,10 @@ package auth
 import (
 	"context"
 	"errors"
+	"io"
 	"net/http"
+	"net/http/httptest"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -11,6 +14,12 @@ import (
 
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 )
+
+// roundTripFunc adapts a function to an http.RoundTripper, so a spec can stub the
+// transport under the allowlist without a real network call.
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 var _ = Describe("signing in against Google Identity Platform", func() {
 	var (
@@ -165,6 +174,49 @@ var _ = Describe("the API key's blast radius", func() {
 
 		Expect(err).To(MatchError(ContainSubstring("refusing to send the Firebase API key")))
 		Expect(err).To(MatchError(ContainSubstring("acme.api.fulfillmenttools.com")))
+	})
+
+	It("refuses an https→http downgrade to an allowed host, which would clear-text the key", func() {
+		c, err := NewClient(testAPIKey)
+		Expect(err).NotTo(HaveOccurred())
+
+		// Same host as signInEndpoint, but http: the allowlist alone would pass it.
+		_, err = c.hc.Get("http://" + hostOf(signInEndpoint) + "/v1/accounts:signInWithPassword")
+
+		Expect(err).To(MatchError(ContainSubstring("refusing to send the Firebase API key over")))
+	})
+
+	It("refuses a *followed* redirect that would carry the key to a disallowed host", func() {
+		// The client is allowed to call the loopback endpoint, but must refuse to
+		// follow its 302 onward — proving RoundTrip is re-entered per hop, which is
+		// the real downgrade/exfil scenario a direct request does not exercise.
+		redirector := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, "https://acme.api.fulfillmenttools.com/steal", http.StatusFound)
+		}))
+		defer redirector.Close()
+
+		c, err := NewClient(testAPIKey, withEndpoints(redirector.URL, redirector.URL))
+		Expect(err).NotTo(HaveOccurred())
+
+		_, err = c.SignIn(context.Background(), "e@x.com", "pw")
+		Expect(err).To(MatchError(ContainSubstring("refusing to send the Firebase API key")))
+	})
+
+	It("matches an allowed host case-insensitively, both sides folded", func() {
+		var called bool
+		tr := &allowlistTransport{
+			allowed: map[string]struct{}{"identitytoolkit.googleapis.com": {}},
+			base: roundTripFunc(func(*http.Request) (*http.Response, error) {
+				called = true
+				return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader("{}")), Header: http.Header{}}, nil
+			}),
+		}
+		req, err := http.NewRequest(http.MethodGet, "https://IdentityToolkit.GoogleAPIs.com/v1/x", nil)
+		Expect(err).NotTo(HaveOccurred())
+
+		_, err = tr.RoundTrip(req)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(called).To(BeTrue())
 	})
 
 	It("allows exactly the two Google hosts and nothing else", func() {

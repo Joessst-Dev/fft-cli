@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strings"
 )
@@ -92,8 +93,16 @@ func ReadOnlyFromEnv(lookup func(string) (string, bool)) bool {
 // sign-in is what settles it — but it means a CI job configures the same four
 // values a human types, rather than having to know how the address is spelled.
 //
+// The base URL is put through [NormalizeBaseURL], the same guard `fft project add`
+// applies: a headless FFT_BASE_URL of http://a-real-tenant would otherwise send
+// the bearer token in the clear, since this path never touched the check. A bad
+// base URL is a hard error — never a silent fall-back to the config file, which is
+// how a CI job ends up running against the wrong tenant — but only once the rest of
+// the set is present, so an unrelated stray FFT_BASE_URL does not fail a run that
+// was never going to be headless.
+//
 // lookup may be nil, in which case os.LookupEnv is used.
-func FromEnv(lookup func(string) (string, bool)) (Project, bool) {
+func FromEnv(lookup func(string) (string, bool)) (Project, bool, error) {
 	if lookup == nil {
 		lookup = os.LookupEnv
 	}
@@ -130,7 +139,14 @@ func FromEnv(lookup func(string) (string, bool)) (Project, bool) {
 
 	hasCredential := get(EnvPassword) != "" || get(EnvIDToken) != ""
 	if p.BaseURL == "" || p.FirebaseAPIKey == "" || p.Email == "" || !hasCredential {
-		return Project{}, false
+		return Project{}, false, nil
 	}
-	return p, true
+
+	normalized, err := NormalizeBaseURL(p.BaseURL)
+	if err != nil {
+		return Project{}, false, fmt.Errorf("%s: %w", EnvBaseURL, err)
+	}
+	p.BaseURL = normalized
+
+	return p, true, nil
 }
