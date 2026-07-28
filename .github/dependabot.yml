@@ -31,6 +31,13 @@ updates:
       prefix: ci
       include: scope
     groups:
+      # CodeQL ships init/autobuild/analyze as separate actions that MUST run the
+      # same version, so they have to move together. This group is listed first and
+      # includes major, so a vN->vN+1 bump lands as one PR (the catch-all below
+      # excludes majors, which otherwise splits it into one failing PR per action).
+      codeql-action:
+        patterns: ["github/codeql-action*"]
+        update-types: [minor, patch, major]
       actions-minor-and-patch:
         patterns: ["*"]
         update-types: [minor, patch]
