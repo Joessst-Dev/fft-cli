@@ -170,6 +170,28 @@ var _ = Describe("emulator webhook delivery", func() {
 		Expect(result.Enabled).To(BeTrue())
 		Expect(result.Published).To(Equal(0))
 	})
+
+	DescribeTable("refuses to deliver to the cloud metadata endpoint, end to end",
+		// The unit specs prove isLocalHost/plan refuse it; this proves the whole
+		// subscription→emit→deliver path does, which is what a real SSRF attempt would
+		// drive and what the by-name bypass slipped past.
+		func(callbackURL string) {
+			start()
+			registerWebhookSub(baseURL, "ORDER_CREATED", callbackURL, nil)
+
+			status, body := postJSON(baseURL, "/_emulator/emit", map[string]any{
+				"event":   "ORDER_CREATED",
+				"payload": map[string]any{},
+			})
+			Expect(status).To(Equal(http.StatusOK))
+
+			var result emitResult
+			Expect(json.Unmarshal(body, &result)).To(Succeed())
+			Expect(result.Published).To(Equal(0), "delivery to the metadata endpoint must be refused")
+		},
+		Entry("by IP", "http://169.254.169.254/latest/meta-data/"),
+		Entry("by name", "http://metadata.google.internal/computeMetadata/v1/"),
+	)
 })
 
 // callbackRecorder is the subscriber a webhook target points at: it answers 200 and

@@ -143,6 +143,17 @@ var metadataAddrs = []netip.Addr{
 	netip.MustParseAddr("fd00:ec2::254"),
 }
 
+// metadataHosts are the *names* the metadata endpoint answers to. GCP resolves
+// metadata.google.internal, metadata.goog, and the bare "metadata" all to
+// 169.254.169.254 — and those would sail through localOnlySuffixes (".internal")
+// and the single-label rule below, which is the same blind-SSRF as hitting the IP.
+// isLocalHost does no DNS, so the names are denied literally.
+var metadataHosts = map[string]bool{
+	"metadata":                 true,
+	"metadata.google.internal": true,
+	"metadata.goog":            true,
+}
+
 // localOnlyHosts are the names that can only ever mean this machine.
 var localOnlyHosts = map[string]bool{
 	"localhost":            true,
@@ -164,6 +175,11 @@ var localOnlySuffixes = []string{".localhost", ".local", ".internal"}
 func isLocalHost(host string) bool {
 	host = strings.ToLower(host)
 	if host == "" {
+		return false
+	}
+
+	// The metadata endpoint by name, refused before any acceptance rule can reach it.
+	if metadataHosts[host] {
 		return false
 	}
 

@@ -69,6 +69,11 @@ var _ = Describe("webhookTransport", func() {
 			},
 			Entry("IMDS v4", "http://169.254.169.254/latest/meta-data/"),
 			Entry("IMDS IPv6", "http://[fd00:ec2::254]/latest/meta-data/"),
+			// By name too: these resolve to the metadata IP but would otherwise pass
+			// as a .internal suffix or a bare single-label host.
+			Entry("GCP metadata FQDN", "http://metadata.google.internal/computeMetadata/v1/"),
+			Entry("GCP metadata short name", "http://metadata/computeMetadata/v1/"),
+			Entry("GCP metadata.goog", "http://metadata.goog/computeMetadata/v1/"),
 		)
 
 		It("accepts a remote host once widened", func() {
