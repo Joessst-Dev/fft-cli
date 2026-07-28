@@ -52,7 +52,7 @@ fastest route from a word the user said to a command line you can run:
 fft api list --search handover -o json
 ```
 
-1. **Curated** — `fft order`, `fft facility`, `fft connection`, `fft listing`, `fft stock`, `fft sourcing`.
+1. **Curated** — `fft order`, `fft facility`, `fft connection`, `fft listing`, `fft stock`, `fft sourcing`, `fft routing`.
    Typed flags, real tables. Use these when they fit; see [commands](./commands.md).
 2. **Generated** — every other operation, as `fft <group> <operation>`, e.g.
    `fft picking get-pick-job`.
@@ -85,6 +85,32 @@ Rules that are not optional:
   undoing someone's work on purpose.
 - **Exit 8** is a partial bulk write: some items in the file landed and some did not. Read
   the per-item results and fix those items. Do not re-send the whole file blindly.
+
+## Routing
+
+The live routing strategy is what decides where every order is sourced. `fft routing`
+manages it:
+
+One strategy is `IN USE`; the rest are drafts. `get -o json` prints the whole tree —
+nodes, fences, ratings.
+
+```sh
+fft routing strategy list
+fft routing strategy get 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10 -o json
+fft routing strategy activate 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10
+fft routing strategy evaluate 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10 --file order.json
+```
+
+`activate` makes one strategy live, taking over from whichever was in use. It is versioned
+in the body, so exit 7 means the strategy changed under you — re-read and retry.
+`evaluate` is a read: it is safe under `--read-only` and answers "what path would this
+strategy take for this order" without touching anything. `fft routing decision-logs` is
+the audit trail of real routing runs (filter by `--order`, `--routing-plan`, `--process`,
+`--tenant-order-id`), and `fft routing category` manages the node config category labels a
+strategy references.
+
+For the neighbouring "where would this order actually be fulfilled from" question, use
+`fft sourcing simulate`.
 
 ## Exploring safely
 

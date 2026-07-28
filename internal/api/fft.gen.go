@@ -9165,6 +9165,51 @@ func (e RoutingPlanStatusReasonsRoutingPlanStatusReasonStatusEnumFilterNotEq) Va
 	}
 }
 
+// Defines values for RoutingStrategyEvaluationResultType.
+const (
+	CONDITIONFALSE    RoutingStrategyEvaluationResultType = "CONDITION_FALSE"
+	CONDITIONINACTIVE RoutingStrategyEvaluationResultType = "CONDITION_INACTIVE"
+	CONDITIONTRUE     RoutingStrategyEvaluationResultType = "CONDITION_TRUE"
+	NODEACTIVE        RoutingStrategyEvaluationResultType = "NODE_ACTIVE"
+	NODEINACTIVE      RoutingStrategyEvaluationResultType = "NODE_INACTIVE"
+)
+
+// Valid indicates whether the value is a known member of the RoutingStrategyEvaluationResultType enum.
+func (e RoutingStrategyEvaluationResultType) Valid() bool {
+	switch e {
+	case CONDITIONFALSE:
+		return true
+	case CONDITIONINACTIVE:
+		return true
+	case CONDITIONTRUE:
+		return true
+	case NODEACTIVE:
+		return true
+	case NODEINACTIVE:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for RoutingStrategyPathElementType.
+const (
+	CONDITION RoutingStrategyPathElementType = "CONDITION"
+	NODE      RoutingStrategyPathElementType = "NODE"
+)
+
+// Valid indicates whether the value is a known member of the RoutingStrategyPathElementType enum.
+func (e RoutingStrategyPathElementType) Valid() bool {
+	switch e {
+	case CONDITION:
+		return true
+	case NODE:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for RoutingStrategyRerouteType.
 const (
 	RoutingStrategyRerouteTypeORDERSPLIT RoutingStrategyRerouteType = "ORDERSPLIT"
@@ -10596,6 +10641,24 @@ func (e SupportedLocale) Valid() bool {
 	}
 }
 
+// Defines values for TimeTriggeredConfigContextType.
+const (
+	TimeTriggeredConfigContextTypeFACILITY      TimeTriggeredConfigContextType = "FACILITY"
+	TimeTriggeredConfigContextTypeFACILITYGROUP TimeTriggeredConfigContextType = "FACILITY_GROUP"
+)
+
+// Valid indicates whether the value is a known member of the TimeTriggeredConfigContextType enum.
+func (e TimeTriggeredConfigContextType) Valid() bool {
+	switch e {
+	case TimeTriggeredConfigContextTypeFACILITY:
+		return true
+	case TimeTriggeredConfigContextTypeFACILITYGROUP:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ToolkitAllowedEntities.
 const (
 	ToolkitAllowedEntitiesCARRIERCONNECTION      ToolkitAllowedEntities = "CARRIERCONNECTION"
@@ -10976,25 +11039,25 @@ func (e UserAssignedRolesContextLimitationsContextTypesEnumFilterIn) Valid() boo
 
 // Defines values for UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq.
 const (
-	UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqFACILITY      UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "FACILITY"
-	UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqFACILITYGROUP UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "FACILITY_GROUP"
-	UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqROLE          UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "ROLE"
-	UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqUSERROLE      UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "USER_ROLE"
-	UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqZONE          UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "ZONE"
+	FACILITY      UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "FACILITY"
+	FACILITYGROUP UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "FACILITY_GROUP"
+	ROLE          UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "ROLE"
+	USERROLE      UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "USER_ROLE"
+	ZONE          UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq = "ZONE"
 )
 
 // Valid indicates whether the value is a known member of the UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq enum.
 func (e UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEq) Valid() bool {
 	switch e {
-	case UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqFACILITY:
+	case FACILITY:
 		return true
-	case UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqFACILITYGROUP:
+	case FACILITYGROUP:
 		return true
-	case UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqROLE:
+	case ROLE:
 		return true
-	case UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqUSERROLE:
+	case USERROLE:
 		return true
-	case UserAssignedRolesContextLimitationsContextTypesEnumFilterNotEqZONE:
+	case ZONE:
 		return true
 	default:
 		return false
@@ -12519,6 +12582,14 @@ type AbstractReasonForCreation struct {
 
 	// ReasonLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
 	ReasonLocalized LocaleString `json:"reasonLocalized"`
+}
+
+// AbstractRoutingStrategyActionsParameter AbstractRoutingStrategyActionsParameter
+type AbstractRoutingStrategyActionsParameter struct {
+	Name string `json:"name"`
+
+	// Version Version of the entity to be changed
+	Version int `json:"version"`
 }
 
 // ActivationTimeFrame ActivationTimeFrame
@@ -18748,6 +18819,32 @@ type RemoteConfigurationSearchQuery struct {
 // RemoveFacilityCoordinatesActionParameter AbstractFacilityActionsParameter
 type RemoveFacilityCoordinatesActionParameter = AbstractFacilityActionsParameter
 
+// RerouteConfiguration RerouteConfiguration
+type RerouteConfiguration struct {
+	Active bool `json:"active"`
+
+	// LeadTimeBeforeTimeTriggeredReroute How many minutes before a time triggered reroute a notification should be sent. Should be smaller than rerouteAfterMinutes
+	LeadTimeBeforeTimeTriggeredReroute *float32 `json:"leadTimeBeforeTimeTriggeredReroute,omitempty"`
+
+	// RerouteAfterMinutes The amount of minutes after which an automated reroute is executed
+	RerouteAfterMinutes float32 `json:"rerouteAfterMinutes"`
+
+	// RerouteStartedJobs RerouteStartedJobsConfiguration
+	RerouteStartedJobs *RerouteStartedJobsConfiguration `json:"rerouteStartedJobs,omitempty"`
+
+	// RerouteTargetTimeHours Only pickjobs within the target time window are considered for reroute.
+	RerouteTargetTimeHours float32 `json:"rerouteTargetTimeHours"`
+}
+
+// RerouteStartedJobsConfiguration RerouteStartedJobsConfiguration
+type RerouteStartedJobsConfiguration struct {
+	// Active If true, the reroute will be executed for jobs that are already started.
+	Active bool `json:"active"`
+
+	// MinimumStartedTimeInMinutes The minimum time in minutes that a job must be in a started status (eg. PAUSED, IN_PROGRESS) before it should be rerouted. This is to ensure that jobs are not rerouted too quickly after they have last been modified. Minimum value is 60 minutes.
+	MinimumStartedTimeInMinutes *float32 `json:"minimumStartedTimeInMinutes,omitempty"`
+}
+
 // ReservationRelatedRefsFilter ReservationRelatedRefsFilter
 type ReservationRelatedRefsFilter struct {
 	// OrderRefs Search by orderRefs
@@ -19009,6 +19106,59 @@ type RoleSort struct {
 
 // RoleSortDisplayName defines model for RoleSort.DisplayName.
 type RoleSortDisplayName string
+
+// RoutingDecisionLog RoutingDecisionLog
+type RoutingDecisionLog struct {
+	// Created The date this order was created at the platform. This value is generated by the service.
+	Created time.Time `json:"created"`
+
+	// ExecutionResults SourcingOptionsExecutionResults
+	ExecutionResults SourcingOptionsExecutionResults `json:"executionResults"`
+	Id               string                          `json:"id"`
+
+	// LastModified The date this order was modified last. This value is generated by the service.
+	LastModified time.Time `json:"lastModified"`
+
+	// RelatedRefs RoutingDecisionLogRelatedRefs
+	RelatedRefs RoutingDecisionLogRelatedRefs `json:"relatedRefs"`
+
+	// RoutingStrategyEvaluationResult RoutingStrategyEvaluationResult
+	RoutingStrategyEvaluationResult *RoutingStrategyEvaluationResult `json:"routingStrategyEvaluationResult,omitempty"`
+	SourcingOptions                 []SourcingOption                 `json:"sourcingOptions"`
+}
+
+// RoutingDecisionLogRelatedRefs RoutingDecisionLogRelatedRefs
+type RoutingDecisionLogRelatedRefs struct {
+	// OrderRef The orderRef of the order this decision log is related to.
+	OrderRef *string `json:"orderRef,omitempty"`
+
+	// ProcessRef The processRef of the process this decision log is related to.
+	ProcessRef *string `json:"processRef,omitempty"`
+
+	// RoutingPlanRefs The routingPlanRefs of the routing plans this decision log is related to.
+	RoutingPlanRefs *[]string `json:"routingPlanRefs,omitempty"`
+
+	// RunId The runId of the connected sourcingOption this decision log is related to.
+	RunId *string `json:"runId,omitempty"`
+
+	// SourcingOptionRefs The sourcingOptionsRefs of the request this decision log is related to.
+	SourcingOptionRefs *[]string `json:"sourcingOptionRefs,omitempty"`
+
+	// SourcingOptionsRef The sourcingOptionsRef of the request this decision log is related to.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	SourcingOptionsRef *string `json:"sourcingOptionsRef,omitempty"`
+
+	// TenantOrderId The tenantOrderId of the order this decision log is related to.
+	TenantOrderId *string `json:"tenantOrderId,omitempty"`
+}
+
+// RoutingDecisionLogs RoutingDecisionLogs
+type RoutingDecisionLogs struct {
+	DecisionLogs []RoutingDecisionLog `json:"decisionLogs"`
+
+	// Total Total number of found decision logs for this query
+	Total int `json:"total"`
+}
 
 // RoutingPlanCustomServicesArticleItemsFilter RoutingPlanCustomServicesArticleItemsFilter
 type RoutingPlanCustomServicesArticleItemsFilter struct {
@@ -19372,6 +19522,43 @@ type RoutingPlanTargetAddressFilter_CustomAttributes_AdditionalProperties struct
 	union json.RawMessage
 }
 
+// RoutingStrategy defines model for RoutingStrategy.
+type RoutingStrategy struct {
+	// Created The date this entity was created at the platform. This value is generated by the service.
+	Created *time.Time `json:"created,omitempty"`
+
+	// GlobalConfiguration RoutingStrategyGlobalConfiguration
+	GlobalConfiguration RoutingStrategyGlobalConfiguration `json:"globalConfiguration"`
+	Id                  string                             `json:"id"`
+
+	// InUse Only one strategy can be inUse
+	InUse bool `json:"inUse"`
+
+	// LastModified The date this entity was modified last. This value is generated by the service.
+	LastModified *time.Time `json:"lastModified,omitempty"`
+	Name         *string    `json:"name,omitempty"`
+
+	// NameLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	NameLocalized LocaleString `json:"nameLocalized"`
+
+	// Revision The revision of the routing strategy
+	Revision int `json:"revision"`
+
+	// RootNode RoutingStrategyNode
+	RootNode RoutingStrategyNode `json:"rootNode"`
+
+	// Version The version of the document to be used in optimistic locking mechanisms.
+	Version int64 `json:"version"`
+}
+
+// RoutingStrategyActionsParameter RoutingStrategyActionsParameter
+type RoutingStrategyActionsParameter struct {
+	union json.RawMessage
+}
+
+// RoutingStrategyActivateActionParameter AbstractRoutingStrategyActionsParameter
+type RoutingStrategyActivateActionParameter = AbstractRoutingStrategyActionsParameter
+
 // RoutingStrategyCondition RoutingStrategyCondition
 type RoutingStrategyCondition struct {
 	ActivationTimeFrames *[]ActivationTimeFrame `json:"activationTimeFrames,omitempty"`
@@ -19442,6 +19629,21 @@ type RoutingStrategyConditionForModification struct {
 	Rule RoutingStrategyConditionRule `json:"rule"`
 }
 
+// RoutingStrategyConditionForReplace Condition data for replacing a condition in a routing strategy.
+type RoutingStrategyConditionForReplace struct {
+	ActivationTimeFrames *[]ActivationTimeFrame `json:"activationTimeFrames,omitempty"`
+	Active               bool                   `json:"active"`
+
+	// DescriptionLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	DescriptionLocalized *LocaleString `json:"descriptionLocalized,omitempty"`
+
+	// NameLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	NameLocalized LocaleString `json:"nameLocalized"`
+
+	// Rule RoutingStrategyConditionRule
+	Rule RoutingStrategyConditionRule `json:"rule"`
+}
+
 // RoutingStrategyConditionPredicate The predicate for a routing strategy condition rule
 type RoutingStrategyConditionPredicate struct {
 	// EntityOperator The possible operator types that can be used on given entities
@@ -19489,6 +19691,19 @@ type RoutingStrategyConditionRule struct {
 	Predicates         []RoutingStrategyConditionPredicate `json:"predicates"`
 }
 
+// RoutingStrategyCreateCopyActionParameter AbstractRoutingStrategyActionsParameter
+type RoutingStrategyCreateCopyActionParameter = AbstractRoutingStrategyActionsParameter
+
+// RoutingStrategyEvaluationResult RoutingStrategyEvaluationResult
+type RoutingStrategyEvaluationResult struct {
+	// EvaluatedConfig RoutingStrategyNodeConfig
+	EvaluatedConfig RoutingStrategyNodeConfig    `json:"evaluatedConfig"`
+	EvaluatedPath   []RoutingStrategyPathElement `json:"evaluatedPath"`
+}
+
+// RoutingStrategyEvaluationResultType RoutingStrategyEvaluationResultType
+type RoutingStrategyEvaluationResultType string
+
 // RoutingStrategyFacilityRerouteConfig RoutingStrategyFacilityRerouteConfig
 type RoutingStrategyFacilityRerouteConfig struct {
 	Active *bool `json:"active,omitempty"`
@@ -19506,6 +19721,44 @@ type RoutingStrategyFallbackFacilityConfig struct {
 
 	// FallbackAfterTime Default amount of time in ISO 8601 duration format after which a not routable routingplan is routed to a configured fallback facility.
 	FallbackAfterTime string `json:"fallbackAfterTime"`
+}
+
+// RoutingStrategyForCreation RoutingStrategyForCreation
+type RoutingStrategyForCreation struct {
+	// NameLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	NameLocalized LocaleString `json:"nameLocalized"`
+}
+
+// RoutingStrategyForModification RoutingStrategyForModification
+type RoutingStrategyForModification struct {
+	// GlobalConfiguration RoutingStrategyGlobalConfiguration
+	GlobalConfiguration *RoutingStrategyGlobalConfiguration `json:"globalConfiguration,omitempty"`
+
+	// NameLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	NameLocalized LocaleString `json:"nameLocalized"`
+
+	// RootNode RoutingStrategyNodeForModification
+	RootNode RoutingStrategyNodeForModification `json:"rootNode"`
+	Version  int                                `json:"version"`
+}
+
+// RoutingStrategyGlobalConfiguration RoutingStrategyGlobalConfiguration
+type RoutingStrategyGlobalConfiguration struct {
+	// BlacklistAssignedFacilities If true, facilities that have already been assigned to the order in a previous routing attempt will not be considered in the next routing attempt.
+	BlacklistAssignedFacilities *bool `json:"blacklistAssignedFacilities,omitempty"`
+
+	// DefaultPrice The price applied when no specific price is defined in the order or listing
+	DefaultPrice float32 `json:"defaultPrice"`
+
+	// RestowAfterMinutes The amount of minutes after which a restow is executed. If not set, restows will not be executed.
+	RestowAfterMinutes *float32 `json:"restowAfterMinutes,omitempty"`
+
+	// StopRoutingAttemptsAfterTime The amount of time, specified in ISO 8601 duration format, after which a routing plan is considered not routable. Note: The duration must be a multiple of 60 seconds.
+	StopRoutingAttemptsAfterTime *string `json:"stopRoutingAttemptsAfterTime,omitempty"`
+
+	// TimeTriggered RoutingStrategyRerouteTimeTriggeredConfig
+	TimeTriggered          *RoutingStrategyRerouteTimeTriggeredConfig `json:"timeTriggered,omitempty"`
+	TimeTriggeredByContext *[]TimeTriggeredConfigurationContext       `json:"timeTriggeredByContext,omitempty"`
 }
 
 // RoutingStrategyNode RoutingStrategyNode
@@ -19552,6 +19805,51 @@ type RoutingStrategyNodeConfig_Fences_Item struct {
 // RoutingStrategyNodeConfig_Ratings_Item defines model for RoutingStrategyNodeConfig.ratings.Item.
 type RoutingStrategyNodeConfig_Ratings_Item struct {
 	union json.RawMessage
+}
+
+// RoutingStrategyNodeConfigCategory defines model for RoutingStrategyNodeConfigCategory.
+type RoutingStrategyNodeConfigCategory struct {
+	Color string `json:"color"`
+
+	// Created The date this entity was created at the platform. This value is generated by the service.
+	Created *time.Time `json:"created,omitempty"`
+
+	// LastModified The date this entity was modified last. This value is generated by the service.
+	LastModified *time.Time `json:"lastModified,omitempty"`
+
+	// NameLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	NameLocalized LocaleString `json:"nameLocalized"`
+
+	// Version The version of the document to be used in optimistic locking mechanisms.
+	Version int64 `json:"version"`
+}
+
+// RoutingStrategyNodeConfigCategoryForCreation RoutingStrategyNodeConfigCategoryForCreation
+type RoutingStrategyNodeConfigCategoryForCreation struct {
+	Color string `json:"color"`
+
+	// NameLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	NameLocalized LocaleString `json:"nameLocalized"`
+}
+
+// RoutingStrategyNodeConfigCategoryForModification RoutingStrategyNodeConfigCategoryForModification
+type RoutingStrategyNodeConfigCategoryForModification struct {
+	Color string `json:"color"`
+
+	// NameLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	NameLocalized LocaleString `json:"nameLocalized"`
+	Version       float32      `json:"version"`
+}
+
+// RoutingStrategyNodeConfigCategoryForResponse RoutingStrategyNodeConfigCategory
+type RoutingStrategyNodeConfigCategoryForResponse = RoutingStrategyNodeConfigCategory
+
+// RoutingStrategyNodeConfigCategoryTransporter RoutingStrategyNodeConfigCategoryTransporter
+type RoutingStrategyNodeConfigCategoryTransporter struct {
+	RoutingStrategyNodeConfigCategories []RoutingStrategyNodeConfigCategoryForResponse `json:"routingStrategyNodeConfigCategories"`
+
+	// Total Total number of entities found for this query
+	Total int `json:"total"`
 }
 
 // RoutingStrategyNodeConfigForUpsert RoutingStrategyNodeConfigForUpsert
@@ -19620,6 +19918,22 @@ type RoutingStrategyNodeForModification struct {
 	NextCondition *RoutingStrategyConditionForModification `json:"nextCondition,omitempty"`
 }
 
+// RoutingStrategyNodeForReplace Node data for replacing a node in a routing strategy.
+type RoutingStrategyNodeForReplace struct {
+	ActivationTimeFrames *[]ActivationTimeFrame `json:"activationTimeFrames,omitempty"`
+	Active               bool                   `json:"active"`
+	CategoryRef          *string                `json:"categoryRef,omitempty"`
+
+	// Config RoutingStrategyNodeConfigForUpsert
+	Config RoutingStrategyNodeConfigForUpsert `json:"config"`
+
+	// DescriptionLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	DescriptionLocalized *LocaleString `json:"descriptionLocalized,omitempty"`
+
+	// NameLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	NameLocalized LocaleString `json:"nameLocalized"`
+}
+
 // RoutingStrategyOrderSplitConfig RoutingStrategyOrderSplitConfig
 type RoutingStrategyOrderSplitConfig struct {
 	Active                                   bool `json:"active"`
@@ -19627,6 +19941,22 @@ type RoutingStrategyOrderSplitConfig struct {
 	MaxSplitCount                            int  `json:"maxSplitCount"`
 	ShouldUseWaitingRoomForPreBackOrderItems bool `json:"shouldUseWaitingRoomForPreBackOrderItems"`
 }
+
+// RoutingStrategyPathElement RoutingStrategyPathElement
+type RoutingStrategyPathElement struct {
+	// EvaluationResult RoutingStrategyEvaluationResultType
+	EvaluationResult RoutingStrategyEvaluationResultType `json:"evaluationResult"`
+
+	// NameLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	NameLocalized LocaleString `json:"nameLocalized"`
+	Ref           string       `json:"ref"`
+
+	// Type RoutingStrategyPathElementType
+	Type RoutingStrategyPathElementType `json:"type"`
+}
+
+// RoutingStrategyPathElementType RoutingStrategyPathElementType
+type RoutingStrategyPathElementType string
 
 // RoutingStrategyRatingForUpsert A rating is used to rate a set of possible facilities against each other during routing of orders.
 type RoutingStrategyRatingForUpsert struct {
@@ -19643,6 +19973,15 @@ type RoutingStrategyRatingForUpsert struct {
 	Type RoutingStrategyStandardRatingType `json:"type"`
 }
 
+// RoutingStrategyReplaceConditionActionParameter AbstractRoutingStrategyActionsParameter
+type RoutingStrategyReplaceConditionActionParameter = AbstractRoutingStrategyActionsParameter
+
+// RoutingStrategyReplaceGlobalConfigurationActionParameter AbstractRoutingStrategyActionsParameter
+type RoutingStrategyReplaceGlobalConfigurationActionParameter = AbstractRoutingStrategyActionsParameter
+
+// RoutingStrategyReplaceNodeActionParameter AbstractRoutingStrategyActionsParameter
+type RoutingStrategyReplaceNodeActionParameter = AbstractRoutingStrategyActionsParameter
+
 // RoutingStrategyRerouteConfig RoutingStrategyRerouteConfig
 type RoutingStrategyRerouteConfig struct {
 	// ClickAndCollect RoutingStrategyFacilityRerouteConfig
@@ -19654,6 +19993,18 @@ type RoutingStrategyRerouteConfig struct {
 
 	// ShipFromStore RoutingStrategyFacilityRerouteConfig
 	ShipFromStore *RoutingStrategyFacilityRerouteConfig `json:"shipFromStore,omitempty"`
+}
+
+// RoutingStrategyRerouteTimeTriggeredConfig RoutingStrategyRerouteTimeTriggeredConfig
+type RoutingStrategyRerouteTimeTriggeredConfig struct {
+	// ClickAndCollectReroute RerouteConfiguration
+	ClickAndCollectReroute RerouteConfiguration `json:"clickAndCollectReroute"`
+
+	// ShipFromStoreDeliveryReroute RerouteConfiguration
+	ShipFromStoreDeliveryReroute RerouteConfiguration `json:"shipFromStoreDeliveryReroute"`
+
+	// ShipFromStoreSamedayReroute RerouteConfiguration
+	ShipFromStoreSamedayReroute RerouteConfiguration `json:"shipFromStoreSamedayReroute"`
 }
 
 // RoutingStrategyRerouteType The type of reroute to apply to the order
@@ -19818,6 +20169,14 @@ type RoutingStrategyToolkitRating struct {
 
 // RoutingStrategyToolkitRatingType Discriminator identifying a rating as a routing strategy toolkit rating.
 type RoutingStrategyToolkitRatingType string
+
+// RoutingStrategyTransporter RoutingStrategyTransporter
+type RoutingStrategyTransporter struct {
+	RoutingStrategies []RoutingStrategy `json:"routingStrategies"`
+
+	// Total Total number of entities found for this query
+	Total int `json:"total"`
+}
 
 // SafetyStock SafetyStock
 type SafetyStock struct {
@@ -20488,6 +20847,14 @@ type SourcingOptionSalesPrice_Discount_Item struct {
 	union json.RawMessage
 }
 
+// SourcingOptionTotalRatingResult SourcingOptionTotalRatingResult
+type SourcingOptionTotalRatingResult struct {
+	AvgPenalty float32 `json:"avgPenalty"`
+	Id         string  `json:"id"`
+	MaxPenalty float32 `json:"maxPenalty"`
+	MinPenalty float32 `json:"minPenalty"`
+}
+
 // SourcingOptionTransfer SourcingOptionTransfer
 type SourcingOptionTransfer struct {
 	Carrier *struct {
@@ -20513,6 +20880,11 @@ type SourcingOptionTransfer struct {
 
 // SourcingOptionTransferExistenceReason SourcingOptionTransferExistenceReason
 type SourcingOptionTransferExistenceReason string
+
+// SourcingOptionsExecutionResults SourcingOptionsExecutionResults
+type SourcingOptionsExecutionResults struct {
+	TotalRatingResults *[]SourcingOptionTotalRatingResult `json:"totalRatingResults,omitempty"`
+}
 
 // SourcingOptionsRequest SourcingOptionsRequest
 type SourcingOptionsRequest struct {
@@ -22003,6 +22375,23 @@ type TimeStamp struct {
 	Minute float32 `json:"minute"`
 }
 
+// TimeTriggeredConfigContextType TimeTriggeredConfigContextType
+type TimeTriggeredConfigContextType string
+
+// TimeTriggeredConfigurationContext TimeTriggeredConfigurationContext
+type TimeTriggeredConfigurationContext struct {
+	Priority float32 `json:"priority"`
+
+	// TimeTriggered RoutingStrategyRerouteTimeTriggeredConfig
+	TimeTriggered RoutingStrategyRerouteTimeTriggeredConfig `json:"timeTriggered"`
+
+	// Type TimeTriggeredConfigContextType
+	Type TimeTriggeredConfigContextType `json:"type"`
+
+	// Values The id of the context values. For example, if the type is FACILITY, then the values are the ids of the facilities.
+	Values []openapi_types.UUID `json:"values"`
+}
+
 // TimeZone Timezone for information retrieved e.g. by the Google Maps API
 type TimeZone struct {
 	// OffsetInSeconds offset in seconds to standard time. Does not account for daylight saving time.
@@ -22997,6 +23386,51 @@ type GetPermissionsParamsKey string
 // GetPermissionsParamsGroup defines parameters for GetPermissions.
 type GetPermissionsParamsGroup string
 
+// GetRoutingDecisionLogsParams defines parameters for GetRoutingDecisionLogs.
+type GetRoutingDecisionLogsParams struct {
+	// SourcingOptionRef All decision logs for given sourcingOptionRef
+	SourcingOptionRef *string `form:"sourcingOptionRef,omitempty" json:"sourcingOptionRef,omitempty"`
+
+	// ProcessRef All decision logs for given processRef
+	ProcessRef *string `form:"processRef,omitempty" json:"processRef,omitempty"`
+
+	// OrderRef All decision logs for given orderRef
+	OrderRef *string `form:"orderRef,omitempty" json:"orderRef,omitempty"`
+
+	// RoutingPlanRef All decision logs for given routingPlanRef
+	RoutingPlanRef *string `form:"routingPlanRef,omitempty" json:"routingPlanRef,omitempty"`
+
+	// SourcingOptionsRef All decision logs for given sourcingOptionsRef
+	SourcingOptionsRef *string `form:"sourcingOptionsRef,omitempty" json:"sourcingOptionsRef,omitempty"`
+
+	// TenantOrderId All decision logs for given tenantOrderId
+	TenantOrderId *string `form:"tenantOrderId,omitempty" json:"tenantOrderId,omitempty"`
+
+	// StartAfterId All decision logs after given Id
+	StartAfterId *string `form:"startAfterId,omitempty" json:"startAfterId,omitempty"`
+
+	// Size Number of decision logs to show
+	Size *int `form:"size,omitempty" json:"size,omitempty"`
+}
+
+// GetRoutingStrategyNodeConfigCategoriesParams defines parameters for GetRoutingStrategyNodeConfigCategories.
+type GetRoutingStrategyNodeConfigCategoriesParams struct {
+	// StartAfterId All entities
+	StartAfterId *string `form:"startAfterId,omitempty" json:"startAfterId,omitempty"`
+
+	// Size Number of entities to show
+	Size *int `form:"size,omitempty" json:"size,omitempty"`
+}
+
+// GetRoutingStrategiesParams defines parameters for GetRoutingStrategies.
+type GetRoutingStrategiesParams struct {
+	// StartAfterId All entities
+	StartAfterId *string `form:"startAfterId,omitempty" json:"startAfterId,omitempty"`
+
+	// Size Number of entities to show
+	Size *int `form:"size,omitempty" json:"size,omitempty"`
+}
+
 // GetSafetyStocksParams defines parameters for GetSafetyStocks.
 type GetSafetyStocksParams struct {
 	Size            *float32 `form:"size,omitempty" json:"size,omitempty"`
@@ -23156,8 +23590,26 @@ type PatchRoleJSONRequestBody = RoleForPatch
 // UpdateRoleJSONRequestBody defines body for UpdateRole for application/json ContentType.
 type UpdateRoleJSONRequestBody = RoleForUpdate
 
+// PostRoutingStrategyNodeConfigCategoryJSONRequestBody defines body for PostRoutingStrategyNodeConfigCategory for application/json ContentType.
+type PostRoutingStrategyNodeConfigCategoryJSONRequestBody = RoutingStrategyNodeConfigCategoryForCreation
+
+// PutRoutingStrategyNodeConfigCategoryJSONRequestBody defines body for PutRoutingStrategyNodeConfigCategory for application/json ContentType.
+type PutRoutingStrategyNodeConfigCategoryJSONRequestBody = RoutingStrategyNodeConfigCategoryForModification
+
 // CreateSourcingOptionsRequestJSONRequestBody defines body for CreateSourcingOptionsRequest for application/json ContentType.
 type CreateSourcingOptionsRequestJSONRequestBody = SourcingOptionsRequest
+
+// PostRoutingStrategyJSONRequestBody defines body for PostRoutingStrategy for application/json ContentType.
+type PostRoutingStrategyJSONRequestBody = RoutingStrategyForCreation
+
+// PutRoutingStrategyJSONRequestBody defines body for PutRoutingStrategy for application/json ContentType.
+type PutRoutingStrategyJSONRequestBody = RoutingStrategyForModification
+
+// ActionsRoutingStrategyJSONRequestBody defines body for ActionsRoutingStrategy for application/json ContentType.
+type ActionsRoutingStrategyJSONRequestBody = RoutingStrategyActionsParameter
+
+// EvaluateRoutingStrategyJSONRequestBody defines body for EvaluateRoutingStrategy for application/json ContentType.
+type EvaluateRoutingStrategyJSONRequestBody = OrderForCreation
 
 // BulkUpdateSafetyStockJSONRequestBody defines body for BulkUpdateSafetyStock for application/json ContentType.
 type BulkUpdateSafetyStockJSONRequestBody = SafetyStockBulkOperations
@@ -26094,6 +26546,146 @@ func (t RoutingPlanTargetAddressFilter_CustomAttributes_AdditionalProperties) Ma
 }
 
 func (t *RoutingPlanTargetAddressFilter_CustomAttributes_AdditionalProperties) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsRoutingStrategyActivateActionParameter returns the union data inside the RoutingStrategyActionsParameter as a RoutingStrategyActivateActionParameter
+func (t RoutingStrategyActionsParameter) AsRoutingStrategyActivateActionParameter() (RoutingStrategyActivateActionParameter, error) {
+	var body RoutingStrategyActivateActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromRoutingStrategyActivateActionParameter overwrites any union data inside the RoutingStrategyActionsParameter as the provided RoutingStrategyActivateActionParameter
+func (t *RoutingStrategyActionsParameter) FromRoutingStrategyActivateActionParameter(v RoutingStrategyActivateActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeRoutingStrategyActivateActionParameter performs a merge with any union data inside the RoutingStrategyActionsParameter, using the provided RoutingStrategyActivateActionParameter
+func (t *RoutingStrategyActionsParameter) MergeRoutingStrategyActivateActionParameter(v RoutingStrategyActivateActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsRoutingStrategyCreateCopyActionParameter returns the union data inside the RoutingStrategyActionsParameter as a RoutingStrategyCreateCopyActionParameter
+func (t RoutingStrategyActionsParameter) AsRoutingStrategyCreateCopyActionParameter() (RoutingStrategyCreateCopyActionParameter, error) {
+	var body RoutingStrategyCreateCopyActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromRoutingStrategyCreateCopyActionParameter overwrites any union data inside the RoutingStrategyActionsParameter as the provided RoutingStrategyCreateCopyActionParameter
+func (t *RoutingStrategyActionsParameter) FromRoutingStrategyCreateCopyActionParameter(v RoutingStrategyCreateCopyActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeRoutingStrategyCreateCopyActionParameter performs a merge with any union data inside the RoutingStrategyActionsParameter, using the provided RoutingStrategyCreateCopyActionParameter
+func (t *RoutingStrategyActionsParameter) MergeRoutingStrategyCreateCopyActionParameter(v RoutingStrategyCreateCopyActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsRoutingStrategyReplaceGlobalConfigurationActionParameter returns the union data inside the RoutingStrategyActionsParameter as a RoutingStrategyReplaceGlobalConfigurationActionParameter
+func (t RoutingStrategyActionsParameter) AsRoutingStrategyReplaceGlobalConfigurationActionParameter() (RoutingStrategyReplaceGlobalConfigurationActionParameter, error) {
+	var body RoutingStrategyReplaceGlobalConfigurationActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromRoutingStrategyReplaceGlobalConfigurationActionParameter overwrites any union data inside the RoutingStrategyActionsParameter as the provided RoutingStrategyReplaceGlobalConfigurationActionParameter
+func (t *RoutingStrategyActionsParameter) FromRoutingStrategyReplaceGlobalConfigurationActionParameter(v RoutingStrategyReplaceGlobalConfigurationActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeRoutingStrategyReplaceGlobalConfigurationActionParameter performs a merge with any union data inside the RoutingStrategyActionsParameter, using the provided RoutingStrategyReplaceGlobalConfigurationActionParameter
+func (t *RoutingStrategyActionsParameter) MergeRoutingStrategyReplaceGlobalConfigurationActionParameter(v RoutingStrategyReplaceGlobalConfigurationActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsRoutingStrategyReplaceNodeActionParameter returns the union data inside the RoutingStrategyActionsParameter as a RoutingStrategyReplaceNodeActionParameter
+func (t RoutingStrategyActionsParameter) AsRoutingStrategyReplaceNodeActionParameter() (RoutingStrategyReplaceNodeActionParameter, error) {
+	var body RoutingStrategyReplaceNodeActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromRoutingStrategyReplaceNodeActionParameter overwrites any union data inside the RoutingStrategyActionsParameter as the provided RoutingStrategyReplaceNodeActionParameter
+func (t *RoutingStrategyActionsParameter) FromRoutingStrategyReplaceNodeActionParameter(v RoutingStrategyReplaceNodeActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeRoutingStrategyReplaceNodeActionParameter performs a merge with any union data inside the RoutingStrategyActionsParameter, using the provided RoutingStrategyReplaceNodeActionParameter
+func (t *RoutingStrategyActionsParameter) MergeRoutingStrategyReplaceNodeActionParameter(v RoutingStrategyReplaceNodeActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsRoutingStrategyReplaceConditionActionParameter returns the union data inside the RoutingStrategyActionsParameter as a RoutingStrategyReplaceConditionActionParameter
+func (t RoutingStrategyActionsParameter) AsRoutingStrategyReplaceConditionActionParameter() (RoutingStrategyReplaceConditionActionParameter, error) {
+	var body RoutingStrategyReplaceConditionActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromRoutingStrategyReplaceConditionActionParameter overwrites any union data inside the RoutingStrategyActionsParameter as the provided RoutingStrategyReplaceConditionActionParameter
+func (t *RoutingStrategyActionsParameter) FromRoutingStrategyReplaceConditionActionParameter(v RoutingStrategyReplaceConditionActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeRoutingStrategyReplaceConditionActionParameter performs a merge with any union data inside the RoutingStrategyActionsParameter, using the provided RoutingStrategyReplaceConditionActionParameter
+func (t *RoutingStrategyActionsParameter) MergeRoutingStrategyReplaceConditionActionParameter(v RoutingStrategyReplaceConditionActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t RoutingStrategyActionsParameter) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *RoutingStrategyActionsParameter) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -29801,6 +30393,28 @@ type ClientInterface interface {
 
 	UpdateRole(ctx context.Context, name string, body UpdateRoleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetRoutingDecisionLogs request
+	GetRoutingDecisionLogs(ctx context.Context, params *GetRoutingDecisionLogsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetRoutingStrategyNodeConfigCategories request
+	GetRoutingStrategyNodeConfigCategories(ctx context.Context, params *GetRoutingStrategyNodeConfigCategoriesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostRoutingStrategyNodeConfigCategoryWithBody request with any body
+	PostRoutingStrategyNodeConfigCategoryWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostRoutingStrategyNodeConfigCategory(ctx context.Context, body PostRoutingStrategyNodeConfigCategoryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteRoutingStrategyNodeConfigCategory request
+	DeleteRoutingStrategyNodeConfigCategory(ctx context.Context, categoryId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetRoutingStrategyNodeConfigCategory request
+	GetRoutingStrategyNodeConfigCategory(ctx context.Context, categoryId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PutRoutingStrategyNodeConfigCategoryWithBody request with any body
+	PutRoutingStrategyNodeConfigCategoryWithBody(ctx context.Context, categoryId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PutRoutingStrategyNodeConfigCategory(ctx context.Context, categoryId string, body PutRoutingStrategyNodeConfigCategoryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CreateSourcingOptionsRequestWithBody request with any body
 	CreateSourcingOptionsRequestWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -29808,6 +30422,35 @@ type ClientInterface interface {
 
 	// GetSourcingOption request
 	GetSourcingOption(ctx context.Context, sourcingOptionsRequestId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetRoutingStrategies request
+	GetRoutingStrategies(ctx context.Context, params *GetRoutingStrategiesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostRoutingStrategyWithBody request with any body
+	PostRoutingStrategyWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostRoutingStrategy(ctx context.Context, body PostRoutingStrategyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetRoutingStrategy request
+	GetRoutingStrategy(ctx context.Context, strategyId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PutRoutingStrategyWithBody request with any body
+	PutRoutingStrategyWithBody(ctx context.Context, strategyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PutRoutingStrategy(ctx context.Context, strategyId string, body PutRoutingStrategyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ActionsRoutingStrategyWithBody request with any body
+	ActionsRoutingStrategyWithBody(ctx context.Context, strategyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ActionsRoutingStrategy(ctx context.Context, strategyId string, body ActionsRoutingStrategyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EvaluateRoutingStrategyWithBody request with any body
+	EvaluateRoutingStrategyWithBody(ctx context.Context, strategyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EvaluateRoutingStrategy(ctx context.Context, strategyId string, body EvaluateRoutingStrategyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EvaluateRoutingStrategyNode request
+	EvaluateRoutingStrategyNode(ctx context.Context, strategyId string, nodeId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetSafetyStocks request
 	GetSafetyStocks(ctx context.Context, params *GetSafetyStocksParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -30902,6 +31545,102 @@ func (c *Client) UpdateRole(ctx context.Context, name string, body UpdateRoleJSO
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetRoutingDecisionLogs(ctx context.Context, params *GetRoutingDecisionLogsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetRoutingDecisionLogsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetRoutingStrategyNodeConfigCategories(ctx context.Context, params *GetRoutingStrategyNodeConfigCategoriesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetRoutingStrategyNodeConfigCategoriesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostRoutingStrategyNodeConfigCategoryWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostRoutingStrategyNodeConfigCategoryRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostRoutingStrategyNodeConfigCategory(ctx context.Context, body PostRoutingStrategyNodeConfigCategoryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostRoutingStrategyNodeConfigCategoryRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteRoutingStrategyNodeConfigCategory(ctx context.Context, categoryId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteRoutingStrategyNodeConfigCategoryRequest(c.Server, categoryId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetRoutingStrategyNodeConfigCategory(ctx context.Context, categoryId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetRoutingStrategyNodeConfigCategoryRequest(c.Server, categoryId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutRoutingStrategyNodeConfigCategoryWithBody(ctx context.Context, categoryId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutRoutingStrategyNodeConfigCategoryRequestWithBody(c.Server, categoryId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutRoutingStrategyNodeConfigCategory(ctx context.Context, categoryId string, body PutRoutingStrategyNodeConfigCategoryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutRoutingStrategyNodeConfigCategoryRequest(c.Server, categoryId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) CreateSourcingOptionsRequestWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateSourcingOptionsRequestRequestWithBody(c.Server, contentType, body)
 	if err != nil {
@@ -30928,6 +31667,138 @@ func (c *Client) CreateSourcingOptionsRequest(ctx context.Context, body CreateSo
 
 func (c *Client) GetSourcingOption(ctx context.Context, sourcingOptionsRequestId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetSourcingOptionRequest(c.Server, sourcingOptionsRequestId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetRoutingStrategies(ctx context.Context, params *GetRoutingStrategiesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetRoutingStrategiesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostRoutingStrategyWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostRoutingStrategyRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostRoutingStrategy(ctx context.Context, body PostRoutingStrategyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostRoutingStrategyRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetRoutingStrategy(ctx context.Context, strategyId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetRoutingStrategyRequest(c.Server, strategyId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutRoutingStrategyWithBody(ctx context.Context, strategyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutRoutingStrategyRequestWithBody(c.Server, strategyId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutRoutingStrategy(ctx context.Context, strategyId string, body PutRoutingStrategyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutRoutingStrategyRequest(c.Server, strategyId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ActionsRoutingStrategyWithBody(ctx context.Context, strategyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewActionsRoutingStrategyRequestWithBody(c.Server, strategyId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ActionsRoutingStrategy(ctx context.Context, strategyId string, body ActionsRoutingStrategyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewActionsRoutingStrategyRequest(c.Server, strategyId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EvaluateRoutingStrategyWithBody(ctx context.Context, strategyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEvaluateRoutingStrategyRequestWithBody(c.Server, strategyId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EvaluateRoutingStrategy(ctx context.Context, strategyId string, body EvaluateRoutingStrategyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEvaluateRoutingStrategyRequest(c.Server, strategyId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EvaluateRoutingStrategyNode(ctx context.Context, strategyId string, nodeId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEvaluateRoutingStrategyNodeRequest(c.Server, strategyId, nodeId)
 	if err != nil {
 		return nil, err
 	}
@@ -34293,6 +35164,365 @@ func NewUpdateRoleRequestWithBody(server string, name string, contentType string
 	return req, nil
 }
 
+// NewGetRoutingDecisionLogsRequest generates requests for GetRoutingDecisionLogs
+func NewGetRoutingDecisionLogsRequest(server string, params *GetRoutingDecisionLogsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/routing/decisionlogs")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.SourcingOptionRef != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "sourcingOptionRef", *params.SourcingOptionRef, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.ProcessRef != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "processRef", *params.ProcessRef, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.OrderRef != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "orderRef", *params.OrderRef, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.RoutingPlanRef != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "routingPlanRef", *params.RoutingPlanRef, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.SourcingOptionsRef != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "sourcingOptionsRef", *params.SourcingOptionsRef, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.TenantOrderId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "tenantOrderId", *params.TenantOrderId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.StartAfterId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "startAfterId", *params.StartAfterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.Size != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "size", *params.Size, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "integer", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetRoutingStrategyNodeConfigCategoriesRequest generates requests for GetRoutingStrategyNodeConfigCategories
+func NewGetRoutingStrategyNodeConfigCategoriesRequest(server string, params *GetRoutingStrategyNodeConfigCategoriesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/routing/nodeconfigcategories")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.StartAfterId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "startAfterId", *params.StartAfterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.Size != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "size", *params.Size, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "integer", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostRoutingStrategyNodeConfigCategoryRequest calls the generic PostRoutingStrategyNodeConfigCategory builder with application/json body
+func NewPostRoutingStrategyNodeConfigCategoryRequest(server string, body PostRoutingStrategyNodeConfigCategoryJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostRoutingStrategyNodeConfigCategoryRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostRoutingStrategyNodeConfigCategoryRequestWithBody generates requests for PostRoutingStrategyNodeConfigCategory with any type of body
+func NewPostRoutingStrategyNodeConfigCategoryRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/routing/nodeconfigcategories")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteRoutingStrategyNodeConfigCategoryRequest generates requests for DeleteRoutingStrategyNodeConfigCategory
+func NewDeleteRoutingStrategyNodeConfigCategoryRequest(server string, categoryId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "categoryId", categoryId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/routing/nodeconfigcategories/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodDelete, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetRoutingStrategyNodeConfigCategoryRequest generates requests for GetRoutingStrategyNodeConfigCategory
+func NewGetRoutingStrategyNodeConfigCategoryRequest(server string, categoryId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "categoryId", categoryId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/routing/nodeconfigcategories/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPutRoutingStrategyNodeConfigCategoryRequest calls the generic PutRoutingStrategyNodeConfigCategory builder with application/json body
+func NewPutRoutingStrategyNodeConfigCategoryRequest(server string, categoryId string, body PutRoutingStrategyNodeConfigCategoryJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPutRoutingStrategyNodeConfigCategoryRequestWithBody(server, categoryId, "application/json", bodyReader)
+}
+
+// NewPutRoutingStrategyNodeConfigCategoryRequestWithBody generates requests for PutRoutingStrategyNodeConfigCategory with any type of body
+func NewPutRoutingStrategyNodeConfigCategoryRequestWithBody(server string, categoryId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "categoryId", categoryId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/routing/nodeconfigcategories/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPut, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewCreateSourcingOptionsRequestRequest calls the generic CreateSourcingOptionsRequest builder with application/json body
 func NewCreateSourcingOptionsRequestRequest(server string, body CreateSourcingOptionsRequestJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -34360,6 +35590,328 @@ func NewGetSourcingOptionRequest(server string, sourcingOptionsRequestId string)
 	}
 
 	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetRoutingStrategiesRequest generates requests for GetRoutingStrategies
+func NewGetRoutingStrategiesRequest(server string, params *GetRoutingStrategiesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/routing/strategies")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.StartAfterId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "startAfterId", *params.StartAfterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.Size != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "size", *params.Size, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "integer", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostRoutingStrategyRequest calls the generic PostRoutingStrategy builder with application/json body
+func NewPostRoutingStrategyRequest(server string, body PostRoutingStrategyJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostRoutingStrategyRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostRoutingStrategyRequestWithBody generates requests for PostRoutingStrategy with any type of body
+func NewPostRoutingStrategyRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/routing/strategies")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetRoutingStrategyRequest generates requests for GetRoutingStrategy
+func NewGetRoutingStrategyRequest(server string, strategyId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "strategyId", strategyId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/routing/strategies/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPutRoutingStrategyRequest calls the generic PutRoutingStrategy builder with application/json body
+func NewPutRoutingStrategyRequest(server string, strategyId string, body PutRoutingStrategyJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPutRoutingStrategyRequestWithBody(server, strategyId, "application/json", bodyReader)
+}
+
+// NewPutRoutingStrategyRequestWithBody generates requests for PutRoutingStrategy with any type of body
+func NewPutRoutingStrategyRequestWithBody(server string, strategyId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "strategyId", strategyId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/routing/strategies/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPut, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewActionsRoutingStrategyRequest calls the generic ActionsRoutingStrategy builder with application/json body
+func NewActionsRoutingStrategyRequest(server string, strategyId string, body ActionsRoutingStrategyJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewActionsRoutingStrategyRequestWithBody(server, strategyId, "application/json", bodyReader)
+}
+
+// NewActionsRoutingStrategyRequestWithBody generates requests for ActionsRoutingStrategy with any type of body
+func NewActionsRoutingStrategyRequestWithBody(server string, strategyId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "strategyId", strategyId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/routing/strategies/%s/actions", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewEvaluateRoutingStrategyRequest calls the generic EvaluateRoutingStrategy builder with application/json body
+func NewEvaluateRoutingStrategyRequest(server string, strategyId string, body EvaluateRoutingStrategyJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEvaluateRoutingStrategyRequestWithBody(server, strategyId, "application/json", bodyReader)
+}
+
+// NewEvaluateRoutingStrategyRequestWithBody generates requests for EvaluateRoutingStrategy with any type of body
+func NewEvaluateRoutingStrategyRequestWithBody(server string, strategyId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "strategyId", strategyId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/routing/strategies/%s/evaluation", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewEvaluateRoutingStrategyNodeRequest generates requests for EvaluateRoutingStrategyNode
+func NewEvaluateRoutingStrategyNodeRequest(server string, strategyId string, nodeId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "strategyId", strategyId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "nodeId", nodeId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/routing/strategies/%s/nodes/%s/evaluation", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -35858,6 +37410,28 @@ type ClientWithResponsesInterface interface {
 
 	UpdateRoleWithResponse(ctx context.Context, name string, body UpdateRoleJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateRoleResponse, error)
 
+	// GetRoutingDecisionLogsWithResponse request
+	GetRoutingDecisionLogsWithResponse(ctx context.Context, params *GetRoutingDecisionLogsParams, reqEditors ...RequestEditorFn) (*GetRoutingDecisionLogsResponse, error)
+
+	// GetRoutingStrategyNodeConfigCategoriesWithResponse request
+	GetRoutingStrategyNodeConfigCategoriesWithResponse(ctx context.Context, params *GetRoutingStrategyNodeConfigCategoriesParams, reqEditors ...RequestEditorFn) (*GetRoutingStrategyNodeConfigCategoriesResponse, error)
+
+	// PostRoutingStrategyNodeConfigCategoryWithBodyWithResponse request with any body
+	PostRoutingStrategyNodeConfigCategoryWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostRoutingStrategyNodeConfigCategoryResponse, error)
+
+	PostRoutingStrategyNodeConfigCategoryWithResponse(ctx context.Context, body PostRoutingStrategyNodeConfigCategoryJSONRequestBody, reqEditors ...RequestEditorFn) (*PostRoutingStrategyNodeConfigCategoryResponse, error)
+
+	// DeleteRoutingStrategyNodeConfigCategoryWithResponse request
+	DeleteRoutingStrategyNodeConfigCategoryWithResponse(ctx context.Context, categoryId string, reqEditors ...RequestEditorFn) (*DeleteRoutingStrategyNodeConfigCategoryResponse, error)
+
+	// GetRoutingStrategyNodeConfigCategoryWithResponse request
+	GetRoutingStrategyNodeConfigCategoryWithResponse(ctx context.Context, categoryId string, reqEditors ...RequestEditorFn) (*GetRoutingStrategyNodeConfigCategoryResponse, error)
+
+	// PutRoutingStrategyNodeConfigCategoryWithBodyWithResponse request with any body
+	PutRoutingStrategyNodeConfigCategoryWithBodyWithResponse(ctx context.Context, categoryId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutRoutingStrategyNodeConfigCategoryResponse, error)
+
+	PutRoutingStrategyNodeConfigCategoryWithResponse(ctx context.Context, categoryId string, body PutRoutingStrategyNodeConfigCategoryJSONRequestBody, reqEditors ...RequestEditorFn) (*PutRoutingStrategyNodeConfigCategoryResponse, error)
+
 	// CreateSourcingOptionsRequestWithBodyWithResponse request with any body
 	CreateSourcingOptionsRequestWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateSourcingOptionsRequestResponse, error)
 
@@ -35865,6 +37439,35 @@ type ClientWithResponsesInterface interface {
 
 	// GetSourcingOptionWithResponse request
 	GetSourcingOptionWithResponse(ctx context.Context, sourcingOptionsRequestId string, reqEditors ...RequestEditorFn) (*GetSourcingOptionResponse, error)
+
+	// GetRoutingStrategiesWithResponse request
+	GetRoutingStrategiesWithResponse(ctx context.Context, params *GetRoutingStrategiesParams, reqEditors ...RequestEditorFn) (*GetRoutingStrategiesResponse, error)
+
+	// PostRoutingStrategyWithBodyWithResponse request with any body
+	PostRoutingStrategyWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostRoutingStrategyResponse, error)
+
+	PostRoutingStrategyWithResponse(ctx context.Context, body PostRoutingStrategyJSONRequestBody, reqEditors ...RequestEditorFn) (*PostRoutingStrategyResponse, error)
+
+	// GetRoutingStrategyWithResponse request
+	GetRoutingStrategyWithResponse(ctx context.Context, strategyId string, reqEditors ...RequestEditorFn) (*GetRoutingStrategyResponse, error)
+
+	// PutRoutingStrategyWithBodyWithResponse request with any body
+	PutRoutingStrategyWithBodyWithResponse(ctx context.Context, strategyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutRoutingStrategyResponse, error)
+
+	PutRoutingStrategyWithResponse(ctx context.Context, strategyId string, body PutRoutingStrategyJSONRequestBody, reqEditors ...RequestEditorFn) (*PutRoutingStrategyResponse, error)
+
+	// ActionsRoutingStrategyWithBodyWithResponse request with any body
+	ActionsRoutingStrategyWithBodyWithResponse(ctx context.Context, strategyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ActionsRoutingStrategyResponse, error)
+
+	ActionsRoutingStrategyWithResponse(ctx context.Context, strategyId string, body ActionsRoutingStrategyJSONRequestBody, reqEditors ...RequestEditorFn) (*ActionsRoutingStrategyResponse, error)
+
+	// EvaluateRoutingStrategyWithBodyWithResponse request with any body
+	EvaluateRoutingStrategyWithBodyWithResponse(ctx context.Context, strategyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*EvaluateRoutingStrategyResponse, error)
+
+	EvaluateRoutingStrategyWithResponse(ctx context.Context, strategyId string, body EvaluateRoutingStrategyJSONRequestBody, reqEditors ...RequestEditorFn) (*EvaluateRoutingStrategyResponse, error)
+
+	// EvaluateRoutingStrategyNodeWithResponse request
+	EvaluateRoutingStrategyNodeWithResponse(ctx context.Context, strategyId string, nodeId string, reqEditors ...RequestEditorFn) (*EvaluateRoutingStrategyNodeResponse, error)
 
 	// GetSafetyStocksWithResponse request
 	GetSafetyStocksWithResponse(ctx context.Context, params *GetSafetyStocksParams, reqEditors ...RequestEditorFn) (*GetSafetyStocksResponse, error)
@@ -37764,6 +39367,202 @@ func (r UpdateRoleResponse) ContentType() string {
 	return ""
 }
 
+type GetRoutingDecisionLogsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RoutingDecisionLogs
+	JSON401      *ApiError
+	JSON403      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetRoutingDecisionLogsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetRoutingDecisionLogsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetRoutingDecisionLogsResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetRoutingStrategyNodeConfigCategoriesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RoutingStrategyNodeConfigCategoryTransporter
+	JSON401      *ApiError
+	JSON403      *ApiError
+	JSON404      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetRoutingStrategyNodeConfigCategoriesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetRoutingStrategyNodeConfigCategoriesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetRoutingStrategyNodeConfigCategoriesResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type PostRoutingStrategyNodeConfigCategoryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *RoutingStrategyNodeConfigCategoryForResponse
+	JSON400      *ApiError
+	JSON401      *ApiError
+	JSON403      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r PostRoutingStrategyNodeConfigCategoryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostRoutingStrategyNodeConfigCategoryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r PostRoutingStrategyNodeConfigCategoryResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeleteRoutingStrategyNodeConfigCategoryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON400      *ApiError
+	JSON401      *ApiError
+	JSON403      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteRoutingStrategyNodeConfigCategoryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteRoutingStrategyNodeConfigCategoryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeleteRoutingStrategyNodeConfigCategoryResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetRoutingStrategyNodeConfigCategoryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RoutingStrategyNodeConfigCategoryForResponse
+	JSON400      *ApiError
+	JSON401      *ApiError
+	JSON403      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetRoutingStrategyNodeConfigCategoryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetRoutingStrategyNodeConfigCategoryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetRoutingStrategyNodeConfigCategoryResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type PutRoutingStrategyNodeConfigCategoryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RoutingStrategyNodeConfigCategoryForResponse
+	JSON400      *ApiError
+	JSON401      *ApiError
+	JSON403      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r PutRoutingStrategyNodeConfigCategoryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PutRoutingStrategyNodeConfigCategoryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r PutRoutingStrategyNodeConfigCategoryResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
 type CreateSourcingOptionsRequestResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -37824,6 +39623,239 @@ func (r GetSourcingOptionResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r GetSourcingOptionResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetRoutingStrategiesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RoutingStrategyTransporter
+	JSON401      *ApiError
+	JSON403      *ApiError
+	JSON404      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetRoutingStrategiesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetRoutingStrategiesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetRoutingStrategiesResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type PostRoutingStrategyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *RoutingStrategy
+	JSON400      *ApiError
+	JSON401      *ApiError
+	JSON403      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r PostRoutingStrategyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostRoutingStrategyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r PostRoutingStrategyResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetRoutingStrategyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RoutingStrategy
+	JSON400      *ApiError
+	JSON401      *ApiError
+	JSON403      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetRoutingStrategyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetRoutingStrategyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetRoutingStrategyResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type PutRoutingStrategyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RoutingStrategy
+	JSON400      *ApiError
+	JSON401      *ApiError
+	JSON403      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r PutRoutingStrategyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PutRoutingStrategyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r PutRoutingStrategyResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type ActionsRoutingStrategyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RoutingStrategy
+	JSON400      *ApiError
+	JSON401      *ApiError
+	JSON403      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r ActionsRoutingStrategyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ActionsRoutingStrategyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r ActionsRoutingStrategyResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type EvaluateRoutingStrategyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RoutingStrategyEvaluationResult
+	JSON400      *ApiError
+	JSON401      *ApiError
+	JSON403      *ApiError
+	JSON404      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r EvaluateRoutingStrategyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EvaluateRoutingStrategyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r EvaluateRoutingStrategyResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type EvaluateRoutingStrategyNodeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RoutingStrategyEvaluationResult
+	JSON400      *ApiError
+	JSON401      *ApiError
+	JSON403      *ApiError
+	JSON404      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r EvaluateRoutingStrategyNodeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EvaluateRoutingStrategyNodeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r EvaluateRoutingStrategyNodeResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -39318,6 +41350,76 @@ func (c *ClientWithResponses) UpdateRoleWithResponse(ctx context.Context, name s
 	return ParseUpdateRoleResponse(rsp)
 }
 
+// GetRoutingDecisionLogsWithResponse request returning *GetRoutingDecisionLogsResponse
+func (c *ClientWithResponses) GetRoutingDecisionLogsWithResponse(ctx context.Context, params *GetRoutingDecisionLogsParams, reqEditors ...RequestEditorFn) (*GetRoutingDecisionLogsResponse, error) {
+	rsp, err := c.GetRoutingDecisionLogs(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetRoutingDecisionLogsResponse(rsp)
+}
+
+// GetRoutingStrategyNodeConfigCategoriesWithResponse request returning *GetRoutingStrategyNodeConfigCategoriesResponse
+func (c *ClientWithResponses) GetRoutingStrategyNodeConfigCategoriesWithResponse(ctx context.Context, params *GetRoutingStrategyNodeConfigCategoriesParams, reqEditors ...RequestEditorFn) (*GetRoutingStrategyNodeConfigCategoriesResponse, error) {
+	rsp, err := c.GetRoutingStrategyNodeConfigCategories(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetRoutingStrategyNodeConfigCategoriesResponse(rsp)
+}
+
+// PostRoutingStrategyNodeConfigCategoryWithBodyWithResponse request with arbitrary body returning *PostRoutingStrategyNodeConfigCategoryResponse
+func (c *ClientWithResponses) PostRoutingStrategyNodeConfigCategoryWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostRoutingStrategyNodeConfigCategoryResponse, error) {
+	rsp, err := c.PostRoutingStrategyNodeConfigCategoryWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostRoutingStrategyNodeConfigCategoryResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostRoutingStrategyNodeConfigCategoryWithResponse(ctx context.Context, body PostRoutingStrategyNodeConfigCategoryJSONRequestBody, reqEditors ...RequestEditorFn) (*PostRoutingStrategyNodeConfigCategoryResponse, error) {
+	rsp, err := c.PostRoutingStrategyNodeConfigCategory(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostRoutingStrategyNodeConfigCategoryResponse(rsp)
+}
+
+// DeleteRoutingStrategyNodeConfigCategoryWithResponse request returning *DeleteRoutingStrategyNodeConfigCategoryResponse
+func (c *ClientWithResponses) DeleteRoutingStrategyNodeConfigCategoryWithResponse(ctx context.Context, categoryId string, reqEditors ...RequestEditorFn) (*DeleteRoutingStrategyNodeConfigCategoryResponse, error) {
+	rsp, err := c.DeleteRoutingStrategyNodeConfigCategory(ctx, categoryId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteRoutingStrategyNodeConfigCategoryResponse(rsp)
+}
+
+// GetRoutingStrategyNodeConfigCategoryWithResponse request returning *GetRoutingStrategyNodeConfigCategoryResponse
+func (c *ClientWithResponses) GetRoutingStrategyNodeConfigCategoryWithResponse(ctx context.Context, categoryId string, reqEditors ...RequestEditorFn) (*GetRoutingStrategyNodeConfigCategoryResponse, error) {
+	rsp, err := c.GetRoutingStrategyNodeConfigCategory(ctx, categoryId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetRoutingStrategyNodeConfigCategoryResponse(rsp)
+}
+
+// PutRoutingStrategyNodeConfigCategoryWithBodyWithResponse request with arbitrary body returning *PutRoutingStrategyNodeConfigCategoryResponse
+func (c *ClientWithResponses) PutRoutingStrategyNodeConfigCategoryWithBodyWithResponse(ctx context.Context, categoryId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutRoutingStrategyNodeConfigCategoryResponse, error) {
+	rsp, err := c.PutRoutingStrategyNodeConfigCategoryWithBody(ctx, categoryId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutRoutingStrategyNodeConfigCategoryResponse(rsp)
+}
+
+func (c *ClientWithResponses) PutRoutingStrategyNodeConfigCategoryWithResponse(ctx context.Context, categoryId string, body PutRoutingStrategyNodeConfigCategoryJSONRequestBody, reqEditors ...RequestEditorFn) (*PutRoutingStrategyNodeConfigCategoryResponse, error) {
+	rsp, err := c.PutRoutingStrategyNodeConfigCategory(ctx, categoryId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutRoutingStrategyNodeConfigCategoryResponse(rsp)
+}
+
 // CreateSourcingOptionsRequestWithBodyWithResponse request with arbitrary body returning *CreateSourcingOptionsRequestResponse
 func (c *ClientWithResponses) CreateSourcingOptionsRequestWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateSourcingOptionsRequestResponse, error) {
 	rsp, err := c.CreateSourcingOptionsRequestWithBody(ctx, contentType, body, reqEditors...)
@@ -39342,6 +41444,101 @@ func (c *ClientWithResponses) GetSourcingOptionWithResponse(ctx context.Context,
 		return nil, err
 	}
 	return ParseGetSourcingOptionResponse(rsp)
+}
+
+// GetRoutingStrategiesWithResponse request returning *GetRoutingStrategiesResponse
+func (c *ClientWithResponses) GetRoutingStrategiesWithResponse(ctx context.Context, params *GetRoutingStrategiesParams, reqEditors ...RequestEditorFn) (*GetRoutingStrategiesResponse, error) {
+	rsp, err := c.GetRoutingStrategies(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetRoutingStrategiesResponse(rsp)
+}
+
+// PostRoutingStrategyWithBodyWithResponse request with arbitrary body returning *PostRoutingStrategyResponse
+func (c *ClientWithResponses) PostRoutingStrategyWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostRoutingStrategyResponse, error) {
+	rsp, err := c.PostRoutingStrategyWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostRoutingStrategyResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostRoutingStrategyWithResponse(ctx context.Context, body PostRoutingStrategyJSONRequestBody, reqEditors ...RequestEditorFn) (*PostRoutingStrategyResponse, error) {
+	rsp, err := c.PostRoutingStrategy(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostRoutingStrategyResponse(rsp)
+}
+
+// GetRoutingStrategyWithResponse request returning *GetRoutingStrategyResponse
+func (c *ClientWithResponses) GetRoutingStrategyWithResponse(ctx context.Context, strategyId string, reqEditors ...RequestEditorFn) (*GetRoutingStrategyResponse, error) {
+	rsp, err := c.GetRoutingStrategy(ctx, strategyId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetRoutingStrategyResponse(rsp)
+}
+
+// PutRoutingStrategyWithBodyWithResponse request with arbitrary body returning *PutRoutingStrategyResponse
+func (c *ClientWithResponses) PutRoutingStrategyWithBodyWithResponse(ctx context.Context, strategyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutRoutingStrategyResponse, error) {
+	rsp, err := c.PutRoutingStrategyWithBody(ctx, strategyId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutRoutingStrategyResponse(rsp)
+}
+
+func (c *ClientWithResponses) PutRoutingStrategyWithResponse(ctx context.Context, strategyId string, body PutRoutingStrategyJSONRequestBody, reqEditors ...RequestEditorFn) (*PutRoutingStrategyResponse, error) {
+	rsp, err := c.PutRoutingStrategy(ctx, strategyId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutRoutingStrategyResponse(rsp)
+}
+
+// ActionsRoutingStrategyWithBodyWithResponse request with arbitrary body returning *ActionsRoutingStrategyResponse
+func (c *ClientWithResponses) ActionsRoutingStrategyWithBodyWithResponse(ctx context.Context, strategyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ActionsRoutingStrategyResponse, error) {
+	rsp, err := c.ActionsRoutingStrategyWithBody(ctx, strategyId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseActionsRoutingStrategyResponse(rsp)
+}
+
+func (c *ClientWithResponses) ActionsRoutingStrategyWithResponse(ctx context.Context, strategyId string, body ActionsRoutingStrategyJSONRequestBody, reqEditors ...RequestEditorFn) (*ActionsRoutingStrategyResponse, error) {
+	rsp, err := c.ActionsRoutingStrategy(ctx, strategyId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseActionsRoutingStrategyResponse(rsp)
+}
+
+// EvaluateRoutingStrategyWithBodyWithResponse request with arbitrary body returning *EvaluateRoutingStrategyResponse
+func (c *ClientWithResponses) EvaluateRoutingStrategyWithBodyWithResponse(ctx context.Context, strategyId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*EvaluateRoutingStrategyResponse, error) {
+	rsp, err := c.EvaluateRoutingStrategyWithBody(ctx, strategyId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEvaluateRoutingStrategyResponse(rsp)
+}
+
+func (c *ClientWithResponses) EvaluateRoutingStrategyWithResponse(ctx context.Context, strategyId string, body EvaluateRoutingStrategyJSONRequestBody, reqEditors ...RequestEditorFn) (*EvaluateRoutingStrategyResponse, error) {
+	rsp, err := c.EvaluateRoutingStrategy(ctx, strategyId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEvaluateRoutingStrategyResponse(rsp)
+}
+
+// EvaluateRoutingStrategyNodeWithResponse request returning *EvaluateRoutingStrategyNodeResponse
+func (c *ClientWithResponses) EvaluateRoutingStrategyNodeWithResponse(ctx context.Context, strategyId string, nodeId string, reqEditors ...RequestEditorFn) (*EvaluateRoutingStrategyNodeResponse, error) {
+	rsp, err := c.EvaluateRoutingStrategyNode(ctx, strategyId, nodeId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEvaluateRoutingStrategyNodeResponse(rsp)
 }
 
 // GetSafetyStocksWithResponse request returning *GetSafetyStocksResponse
@@ -42143,6 +44340,274 @@ func ParseUpdateRoleResponse(rsp *http.Response) (*UpdateRoleResponse, error) {
 	return response, nil
 }
 
+// ParseGetRoutingDecisionLogsResponse parses an HTTP response from a GetRoutingDecisionLogsWithResponse call
+func ParseGetRoutingDecisionLogsResponse(rsp *http.Response) (*GetRoutingDecisionLogsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetRoutingDecisionLogsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RoutingDecisionLogs
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetRoutingStrategyNodeConfigCategoriesResponse parses an HTTP response from a GetRoutingStrategyNodeConfigCategoriesWithResponse call
+func ParseGetRoutingStrategyNodeConfigCategoriesResponse(rsp *http.Response) (*GetRoutingStrategyNodeConfigCategoriesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetRoutingStrategyNodeConfigCategoriesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RoutingStrategyNodeConfigCategoryTransporter
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostRoutingStrategyNodeConfigCategoryResponse parses an HTTP response from a PostRoutingStrategyNodeConfigCategoryWithResponse call
+func ParsePostRoutingStrategyNodeConfigCategoryResponse(rsp *http.Response) (*PostRoutingStrategyNodeConfigCategoryResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostRoutingStrategyNodeConfigCategoryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest RoutingStrategyNodeConfigCategoryForResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteRoutingStrategyNodeConfigCategoryResponse parses an HTTP response from a DeleteRoutingStrategyNodeConfigCategoryWithResponse call
+func ParseDeleteRoutingStrategyNodeConfigCategoryResponse(rsp *http.Response) (*DeleteRoutingStrategyNodeConfigCategoryResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteRoutingStrategyNodeConfigCategoryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetRoutingStrategyNodeConfigCategoryResponse parses an HTTP response from a GetRoutingStrategyNodeConfigCategoryWithResponse call
+func ParseGetRoutingStrategyNodeConfigCategoryResponse(rsp *http.Response) (*GetRoutingStrategyNodeConfigCategoryResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetRoutingStrategyNodeConfigCategoryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RoutingStrategyNodeConfigCategoryForResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePutRoutingStrategyNodeConfigCategoryResponse parses an HTTP response from a PutRoutingStrategyNodeConfigCategoryWithResponse call
+func ParsePutRoutingStrategyNodeConfigCategoryResponse(rsp *http.Response) (*PutRoutingStrategyNodeConfigCategoryResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PutRoutingStrategyNodeConfigCategoryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RoutingStrategyNodeConfigCategoryForResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseCreateSourcingOptionsRequestResponse parses an HTTP response from a CreateSourcingOptionsRequestWithResponse call
 func ParseCreateSourcingOptionsRequestResponse(rsp *http.Response) (*CreateSourcingOptionsRequestResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -42231,6 +44696,349 @@ func ParseGetSourcingOptionResponse(rsp *http.Response) (*GetSourcingOptionRespo
 			return nil, err
 		}
 		response.XML200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetRoutingStrategiesResponse parses an HTTP response from a GetRoutingStrategiesWithResponse call
+func ParseGetRoutingStrategiesResponse(rsp *http.Response) (*GetRoutingStrategiesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetRoutingStrategiesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RoutingStrategyTransporter
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostRoutingStrategyResponse parses an HTTP response from a PostRoutingStrategyWithResponse call
+func ParsePostRoutingStrategyResponse(rsp *http.Response) (*PostRoutingStrategyResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostRoutingStrategyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest RoutingStrategy
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetRoutingStrategyResponse parses an HTTP response from a GetRoutingStrategyWithResponse call
+func ParseGetRoutingStrategyResponse(rsp *http.Response) (*GetRoutingStrategyResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetRoutingStrategyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RoutingStrategy
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePutRoutingStrategyResponse parses an HTTP response from a PutRoutingStrategyWithResponse call
+func ParsePutRoutingStrategyResponse(rsp *http.Response) (*PutRoutingStrategyResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PutRoutingStrategyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RoutingStrategy
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseActionsRoutingStrategyResponse parses an HTTP response from a ActionsRoutingStrategyWithResponse call
+func ParseActionsRoutingStrategyResponse(rsp *http.Response) (*ActionsRoutingStrategyResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ActionsRoutingStrategyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RoutingStrategy
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEvaluateRoutingStrategyResponse parses an HTTP response from a EvaluateRoutingStrategyWithResponse call
+func ParseEvaluateRoutingStrategyResponse(rsp *http.Response) (*EvaluateRoutingStrategyResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EvaluateRoutingStrategyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RoutingStrategyEvaluationResult
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEvaluateRoutingStrategyNodeResponse parses an HTTP response from a EvaluateRoutingStrategyNodeWithResponse call
+func ParseEvaluateRoutingStrategyNodeResponse(rsp *http.Response) (*EvaluateRoutingStrategyNodeResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EvaluateRoutingStrategyNodeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RoutingStrategyEvaluationResult
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
 
 	}
 

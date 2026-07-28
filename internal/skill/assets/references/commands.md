@@ -110,6 +110,35 @@ fft sourcing get 284f32cc-b106-487d-b633-f90d93d8c251
   and it is how you answer "why *there*?" — see the recipe in
   [recipes.md](recipes.md).
 
+## Routing
+
+A **routing strategy** is the decision tree the engine walks to source an order: a root
+node with fences (which facilities are eligible) and ratings (which is preferred), and
+conditions that branch to further nodes. Only one strategy is ever live — `inUse` — and
+`fft routing` is where you inspect, edit and switch it.
+
+```sh
+fft routing strategy list
+fft routing strategy get 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10 -o json
+fft routing strategy create --example > strategy.json
+fft routing strategy activate 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10
+fft routing strategy evaluate 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10 --file order.json
+```
+
+- **`activate` makes one strategy live**, taking over from whichever was `inUse`. It is
+  versioned in the body, so a stale version is exit 7 — re-read and retry. `--if-version`
+  skips the read for a clean 409.
+- **`evaluate` is a read.** It dry-runs the strategy against an order (the same body shape
+  `fft order create` takes) and reports the path the engine would walk. It reserves
+  nothing and is safe under `--read-only`. This answers "why would *this* strategy route
+  *this* order there?"; `fft sourcing simulate` answers the same question for the live one.
+- **`update` is a PUT, there is no `patch`.** Read the whole strategy, edit it, send it
+  back; fft supplies the `version`. There is no `delete` — the API does not offer one.
+- `fft routing decision-logs` is the audit trail of real routing runs. Filter by exact id:
+  `--order`, `--routing-plan`, `--process`, `--tenant-order-id`, `--sourcing-option(s)`.
+- `fft routing category` manages the node config category labels (a name and a colour) that
+  a strategy's nodes are grouped under. Full CRUD, including `delete`.
+
 ## Listings
 
 **A listing has no id of its own.** It is addressed by the facility it is in *and* the

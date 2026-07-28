@@ -54,6 +54,7 @@ fft [flags]
 - [fft order](./fft_order.md) — Manage orders
 - [fft ping](./fft_ping.md) — Check that the tenant is reachable
 - [fft project](./fft_project.md) — Manage projects
+- [fft routing](./fft_routing.md) — Configure order routing
 - [fft skill](./fft_skill.md) — Install the agent skill that teaches an AI to use fft
 - [fft sourcing](./fft_sourcing.md) — Simulate how an order would be routed
 - [fft stock](./fft_stock.md) — Manage stocks (the quantity of an article at a facility)

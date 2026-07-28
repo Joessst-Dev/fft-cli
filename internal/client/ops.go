@@ -135,3 +135,101 @@ func FacilityConnections(facilityID, target string) ListOp[json.RawMessage] {
 		},
 	}
 }
+
+// RoutingStrategies is GET /api/routing/strategies, decoding each strategy into
+// json.RawMessage.
+//
+// It is a [ListOp] and not an [Op] because the strategies have no /search: they page
+// by startAfterId, and their envelope is {routingStrategies, total}. See the top of
+// list.go.
+func RoutingStrategies() ListOp[json.RawMessage] {
+	return ListOp[json.RawMessage]{
+		Name:  "list the routing strategies",
+		Items: "routingStrategies",
+		ID:    RawID,
+		Do: func(ctx context.Context, raw api.ClientInterface, after string, size int) (*http.Response, error) {
+			params := &api.GetRoutingStrategiesParams{}
+			if after != "" {
+				params.StartAfterId = &after
+			}
+			if size != 0 {
+				params.Size = &size
+			}
+			return raw.GetRoutingStrategies(ctx, params)
+		},
+	}
+}
+
+// RoutingCategories is GET /api/routing/nodeconfigcategories, decoding each node
+// config category into json.RawMessage. Its envelope array is
+// routingStrategyNodeConfigCategories.
+func RoutingCategories() ListOp[json.RawMessage] {
+	return ListOp[json.RawMessage]{
+		Name:  "list the routing node config categories",
+		Items: "routingStrategyNodeConfigCategories",
+		ID:    RawID,
+		Do: func(ctx context.Context, raw api.ClientInterface, after string, size int) (*http.Response, error) {
+			params := &api.GetRoutingStrategyNodeConfigCategoriesParams{}
+			if after != "" {
+				params.StartAfterId = &after
+			}
+			if size != 0 {
+				params.Size = &size
+			}
+			return raw.GetRoutingStrategyNodeConfigCategories(ctx, params)
+		},
+	}
+}
+
+// RoutingDecisionLogsFilter is the exact-match filter set of GET
+// /api/routing/decisionlogs. Every field is an id the API compares literally; an empty
+// one is simply not sent, exactly as the two order filters behave on [Orders].
+type RoutingDecisionLogsFilter struct {
+	OrderRef           string
+	RoutingPlanRef     string
+	ProcessRef         string
+	TenantOrderID      string
+	SourcingOptionRef  string
+	SourcingOptionsRef string
+}
+
+// RoutingDecisionLogs is GET /api/routing/decisionlogs, decoding each decision log into
+// json.RawMessage. Its envelope array is decisionLogs.
+//
+// The endpoint offers only exact-match id filters — closed over here the way
+// [FacilityConnections] closes over its target — and pages by startAfterId.
+func RoutingDecisionLogs(filter RoutingDecisionLogsFilter) ListOp[json.RawMessage] {
+	return ListOp[json.RawMessage]{
+		Name:  "list the routing decision logs",
+		Items: "decisionLogs",
+		ID:    RawID,
+		Do: func(ctx context.Context, raw api.ClientInterface, after string, size int) (*http.Response, error) {
+			params := &api.GetRoutingDecisionLogsParams{}
+			if filter.OrderRef != "" {
+				params.OrderRef = &filter.OrderRef
+			}
+			if filter.RoutingPlanRef != "" {
+				params.RoutingPlanRef = &filter.RoutingPlanRef
+			}
+			if filter.ProcessRef != "" {
+				params.ProcessRef = &filter.ProcessRef
+			}
+			if filter.TenantOrderID != "" {
+				params.TenantOrderId = &filter.TenantOrderID
+			}
+			if filter.SourcingOptionRef != "" {
+				params.SourcingOptionRef = &filter.SourcingOptionRef
+			}
+			if filter.SourcingOptionsRef != "" {
+				params.SourcingOptionsRef = &filter.SourcingOptionsRef
+			}
+			if after != "" {
+				params.StartAfterId = &after
+			}
+			if size != 0 {
+				params.Size = &size
+			}
+			return raw.GetRoutingDecisionLogs(ctx, params)
+		},
+	}
+}
