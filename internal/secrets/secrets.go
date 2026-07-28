@@ -63,10 +63,10 @@ func AllKinds() []string {
 // Key builds the storage key for one secret of one project, for example
 // "fft:staging:refreshToken".
 //
-// [ParseKey] recovers the project by cutting on the *first* colon after the prefix,
-// so a project name that itself contains a colon would not round-trip — the tail
-// past the colon would be read back as the kind. [ValidateProjectName] holds that
-// invariant at the one door names enter through.
+// The key format reserves the colon as its separator, so a project name that
+// itself contains a colon would not round-trip: [ParseKey] cuts on the first colon
+// after the prefix and would read the tail back as part of the kind.
+// [ValidateProjectName] holds that invariant at the one door names enter through.
 func Key(project, kind string) string {
 	return "fft:" + project + ":" + kind
 }
@@ -74,9 +74,9 @@ func Key(project, kind string) string {
 // ValidateProjectName rejects a name that would not round-trip through [ParseKey],
 // or that a keychain backend would mangle.
 //
-// [ParseKey] cuts on the first colon after the "fft:" prefix, so a project called
-// "a:b" would be read back as project "a", kind "b:<kind>" — which `fft project
-// remove` relies on to enumerate a project's secrets. A control character has no
+// The key format reserves the colon as its separator (fft:<project>:<kind>), so a
+// colon in the name breaks the round-trip — [ParseKey], which the env-backed store
+// uses to recover a secret's kind, would mis-split it. A control character has no
 // place in a keychain item name and a keyring backend may refuse it. The check
 // lives at the one door names enter through — `fft project add` — so [Key] can stay
 // a pure join.

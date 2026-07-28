@@ -200,10 +200,10 @@ func gatherProject(deps *Deps, flags *addFlags, name string, interactive bool) (
 		return config.Project{}, "", err
 	}
 
-	// The name becomes part of every secret's storage key. A colon would not
-	// round-trip through secrets.ParseKey (which `fft project remove` uses to find a
-	// project's secrets), and a control character can be refused by a keychain.
-	// Reject it here, at the one door names enter through.
+	// The name becomes part of every secret's storage key, which reserves the colon
+	// as its separator (fft:<project>:<kind>). A colon would break the Key/ParseKey
+	// round-trip, and a control character can be refused by a keychain. Reject both
+	// here, at the one door names enter through.
 	if err := secrets.ValidateProjectName(p.Name); err != nil {
 		return config.Project{}, "", exitcode.UsageError{Err: err}
 	}
