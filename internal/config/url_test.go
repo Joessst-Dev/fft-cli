@@ -42,5 +42,22 @@ var _ = Describe("NormalizeBaseURL", func() {
 		Entry("refuses an empty value", "   ", "empty"),
 		Entry("refuses a URL carrying a query string, which is always a paste accident",
 			"https://acme.api.fulfillmenttools.com?key=AIza", "query or fragment"),
+		Entry("refuses a URL carrying user:pass@ credentials",
+			"https://admin:pw@acme.api.fulfillmenttools.com", "user:pass@"),
 	)
+
+	It("does not echo the userinfo password in its rejection, on any scheme", func() {
+		// The check that rejects credentials must not itself print them: config errors
+		// reach the terminal unredacted, and this runs before the scheme/host errors
+		// that quote the raw URL.
+		for _, raw := range []string{
+			"https://admin:SUPERSECRET@acme.api.fulfillmenttools.com",
+			"http://admin:SUPERSECRET@acme.api.fulfillmenttools.com",
+			"admin:SUPERSECRET@acme.api.fulfillmenttools.com",
+		} {
+			_, err := config.NormalizeBaseURL(raw)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).NotTo(ContainSubstring("SUPERSECRET"))
+		}
+	})
 })
