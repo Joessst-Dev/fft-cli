@@ -129,7 +129,11 @@ func (c Component) ExecPath() string {
 			return suffixed
 		}
 	}
-	return path
+	// Neither candidate is a regular file — it is missing, or a symlink planted in
+	// the data dir. Return "" rather than the path so a caller that execs the result
+	// (transport_process.go does so without an Installed check) refuses to run it,
+	// not just the callers that happen to gate on Installed.
+	return ""
 }
 
 // isRegularFile reports whether path is a regular file, following no symlink.

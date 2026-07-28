@@ -143,11 +143,20 @@ func NewInstaller(root string, opts ...InstallerOption) *Installer {
 	i := &Installer{
 		root: root,
 		api:  githubAPI,
+	}
 
-		// No deadline of its own: the caller's context bounds the download, and a
-		// component archive on a slow connection is a legitimately long request that a
-		// baked-in timeout would cut off for no reason.
-		client: &http.Client{},
+	// No deadline of its own: the caller's context bounds the download, and a
+	// component archive on a slow connection is a legitimately long request that a
+	// baked-in timeout would cut off for no reason.
+	//
+	// Every redirect hop is re-checked against allowedURL, not just the initial URL:
+	// GitHub serves release bytes via a 302 to *.githubusercontent.com (allowed),
+	// but Go's default policy would just as happily follow a 302 to an attacker host
+	// on any scheme. WithHTTPClient replaces this whole client for tests.
+	i.client = &http.Client{
+		CheckRedirect: func(req *http.Request, _ []*http.Request) error {
+			return i.allowedURL(req.URL.String())
+		},
 	}
 	for _, opt := range opts {
 		opt(i)
@@ -403,7 +412,8 @@ type asset struct {
 func (r *release) signed() bool {
 	for _, a := range r.Assets {
 		switch a.Name {
-		case "checksums.txt.sig", "checksums.txt.pem", "checksums.txt.sigstore":
+		case "checksums.txt.sig", "checksums.txt.pem",
+			"checksums.txt.sigstore", "checksums.txt.sigstore.json":
 			return true
 		}
 	}
@@ -567,10 +577,15 @@ func (i *Installer) allowedURL(raw string) error {
 	}
 	host := strings.ToLower(u.Hostname())
 
-	// The configured endpoint is always allowed: production is api.github.com over
-	// https, and a spec points WithAPI at a loopback httptest server that serves the
-	// assets too — pinning that away would mean the tests could not run.
-	if api, err := url.Parse(i.api); err == nil && api.Host != "" && strings.EqualFold(u.Host, api.Host) {
+	// The configured endpoint is allowed on its *own* scheme and host: production is
+	// api.github.com over https, and a spec points WithAPI at a loopback httptest
+	// server (http) that serves the assets too — pinning that away would mean the
+	// tests could not run. Matching the scheme as well as the host is what keeps this
+	// from becoming an http bypass: in production api.github.com is https, so a
+	// release payload naming http://api.github.com does *not* match and still has to
+	// clear the https check below.
+	if api, err := url.Parse(i.api); err == nil && api.Host != "" &&
+		strings.EqualFold(u.Scheme, api.Scheme) && strings.EqualFold(u.Host, api.Host) {
 		return nil
 	}
 	if u.Scheme != "https" {

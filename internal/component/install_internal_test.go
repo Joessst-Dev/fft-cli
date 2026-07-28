@@ -1,6 +1,9 @@
 package component
 
 import (
+	"context"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -27,11 +30,31 @@ func TestAllowedURL(t *testing.T) {
 		"https://evil.example/asset.tar.gz",        // not a GitHub host
 		"https://githubusercontent.com.evil.com/x", // suffix spoof
 		"https://notgithub.com/o/r/asset",          // lookalike
+		// The configured endpoint is api.github.com over *https*; http to that same
+		// host must not be waved through by the endpoint exemption.
+		"http://api.github.com/repos/o/r/releases/latest",
+		"http://API.GitHub.com/x",
 	}
 	for _, u := range bad {
 		if err := i.allowedURL(u); err == nil {
 			t.Errorf("allowedURL(%q) = nil, want error", u)
 		}
+	}
+}
+
+// TestGetRefusesRedirectOffAllowedHost proves the redirect re-check: the initial
+// URL is the configured (allowed) host, but the server 302s to a disallowed one.
+// Without CheckRedirect the client would follow it transparently.
+func TestGetRefusesRedirectOffAllowedHost(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "https://evil.example/payload", http.StatusFound)
+	}))
+	defer srv.Close()
+
+	i := NewInstaller(t.TempDir(), WithAPI(srv.URL))
+	_, err := i.get(context.Background(), srv.URL+"/asset", maxArchive, "")
+	if err == nil {
+		t.Fatal("a redirect to a non-GitHub host was followed")
 	}
 }
 
