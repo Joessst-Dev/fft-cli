@@ -212,5 +212,5 @@ jobs:
         # break on the PR that introduces it, instead of on the tag.
         uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6
         with:
-          version: "~> v2"
+          version: "v2.17.1"
           args: build --snapshot --clean

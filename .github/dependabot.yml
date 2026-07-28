@@ -46,6 +46,10 @@ updates:
     commit-message:
       prefix: ci
       include: scope
+    groups:
+      docker-minor-and-patch:
+        patterns: ["*"]
+        update-types: [minor, patch]
 
   # The VitePress docs toolchain — not shipped in the binary, but still a
   # supply-chain surface the build runs.

@@ -37,11 +37,19 @@ jobs:
           cache: true
 
       # Signing and SBOM generation are separate binaries GoReleaser shells out to.
+      # Their versions are pinned too, not just the installer actions: this job holds
+      # id-token/packages/contents write and the tap PAT, so a compromised upstream
+      # release of cosign or syft would run with those. Dependabot does not bump these
+      # input pins, so raise them by hand when a new tool release lands.
       - name: Install cosign
         uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
+        with:
+          cosign-release: v3.1.2
 
       - name: Install syft
         uses: anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0
+        with:
+          syft-version: v1.49.0
 
       # GoReleaser's `dockers_v2` builds the multi-platform image with buildx.
       - name: Set up Buildx
@@ -59,7 +67,7 @@ jobs:
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6
         with:
-          version: "~> v2"
+          version: "v2.17.1"
           args: release --clean
         env:
           # The tag that triggered this run — not whatever `git describe` happens to
