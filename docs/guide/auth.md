@@ -31,7 +31,16 @@ Non-secret project data lives in `~/.config/fft/config.yaml`, mode `0600`. An ol
 that still holds the API key in cleartext is migrated into the keychain on the next run.
 
 On a Linux box with no Secret Service (a headless server, a bare container), pass
-`--no-keyring` or set `FFT_NO_KEYRING=1` to fall back to a `0600` file.
+`--no-keyring` or set `FFT_NO_KEYRING=1` to fall back to a `0600` file. `fft` **warns** (it
+does not refuse) if that fallback file, or its directory, is readable by other users — a
+restored backup, a shared `XDG_STATE_HOME`, or a stray `chmod -R` can loosen it after the
+fact, and the file holds your refresh token in cleartext.
+
+On macOS, a Keychain item `fft` stores is readable by **any process running as you**, with no
+per-access prompt — that is how the `security` framework's default access control works, and
+`fft` accepts it. The same-user threat is out of scope: a process running as you can already
+read the config, the fallback file, and the token in flight. It is spelled out here so the
+guarantee is not mistaken for a stronger one.
 
 ## On Windows, `--no-keyring` protects less than `0600` suggests
 
