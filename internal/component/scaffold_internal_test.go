@@ -1,26 +1,27 @@
 package component
 
 import (
+	"os"
+	"os/exec"
+	"path/filepath"
 	"regexp"
+	"runtime"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
-// This keeps every command scaffold in step with scaffoldSecretEnv. It drives the
-// real Build path for each language in supportedLangs — so a newly-added language
-// whose template forgets to mask a credential is caught, not just the four that
-// exist today — and matches each name as a whole word, so "FFT_ID_TOKEN" is not
-// spuriously satisfied by the unrelated (and non-secret) FFT_ID_TOKEN_EXPIRES_AT
-// appearing in the environment dump.
 var _ = Describe("scaffold command secret masking", func() {
-	It("masks every scaffoldSecretEnv name, as a whole word, in every language", func() {
+	// The structural guard: every command scaffold, in every language in the
+	// canonical supportedLangs list, names each scaffoldSecretEnv variable as a whole
+	// word (so FFT_ID_TOKEN is not spuriously satisfied by FFT_ID_TOKEN_EXPIRES_AT),
+	// and a new language that forgets one is caught because this drives the real
+	// Build path.
+	It("names every scaffoldSecretEnv variable, as a whole word, in every language", func() {
 		for _, lang := range supportedLangs {
 			files, err := Scaffold{Name: "widget", Kind: KindCommand, Lang: lang}.Build()
 			Expect(err).NotTo(HaveOccurred(), "lang %s", lang)
 
-			// The executable source is the file that dumps the environment: bin/<exec>
-			// for a script, main.go for Go.
 			var body string
 			for _, f := range files {
 				if f.Name == "bin/fft-widget" || f.Name == "main.go" {
@@ -30,11 +31,45 @@ var _ = Describe("scaffold command secret masking", func() {
 			Expect(body).NotTo(BeEmpty(), "lang %s produced no executable source", lang)
 
 			for _, name := range scaffoldSecretEnv {
-				// \b after the name refuses a match inside a longer identifier: `_` is
-				// a word char, so `FFT_ID_TOKEN\b` does not match in `FFT_ID_TOKEN_EXPIRES`.
 				whole := regexp.MustCompile(regexp.QuoteMeta(name) + `\b`)
-				Expect(whole.MatchString(body)).To(BeTrue(), "lang %s does not mask %s as a whole name", lang, name)
+				Expect(whole.MatchString(body)).To(BeTrue(), "lang %s does not name %s as a whole word", lang, name)
 			}
+		}
+	})
+
+	// The behavioural guard, for the always-runnable shell scaffold: presence of the
+	// name is not proof of masking, so run it with real secret values and assert the
+	// values are actually redacted while a non-secret FFT_ variable passes through.
+	It("actually redacts the credential values when the shell scaffold runs", func() {
+		if runtime.GOOS == "windows" {
+			Skip("no POSIX shell to run the scaffold with")
+		}
+
+		files, err := Scaffold{Name: "widget", Kind: KindCommand, Lang: LangShell}.Build()
+		Expect(err).NotTo(HaveOccurred())
+
+		script := filepath.Join(GinkgoT().TempDir(), "fft-widget")
+		for _, f := range files {
+			if f.Name == "bin/fft-widget" {
+				Expect(os.WriteFile(script, f.Data, 0o755)).To(Succeed())
+			}
+		}
+
+		cmd := exec.Command("/bin/sh", script)
+		cmd.Env = append(os.Environ(),
+			"FFT_ID_TOKEN=SECRET-ID",
+			"FFT_REFRESH_TOKEN=SECRET-REFRESH",
+			"FFT_PASSWORD=SECRET-PW",
+			"FFT_FIREBASE_API_KEY=SECRET-KEY",
+			"FFT_PROJECT_ID=acme", // not a secret — must pass through unredacted
+		)
+		out, err := cmd.CombinedOutput()
+		Expect(err).NotTo(HaveOccurred(), string(out))
+
+		Expect(string(out)).To(ContainSubstring("<redacted>"))
+		Expect(string(out)).To(ContainSubstring("FFT_PROJECT_ID=acme"))
+		for _, secret := range []string{"SECRET-ID", "SECRET-REFRESH", "SECRET-PW", "SECRET-KEY"} {
+			Expect(string(out)).NotTo(ContainSubstring(secret), "the shell scaffold leaked a credential value")
 		}
 	})
 })

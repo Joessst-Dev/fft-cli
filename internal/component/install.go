@@ -154,7 +154,12 @@ func NewInstaller(root string, opts ...InstallerOption) *Installer {
 	// but Go's default policy would just as happily follow a 302 to an attacker host
 	// on any scheme. WithHTTPClient replaces this whole client for tests.
 	i.client = &http.Client{
-		CheckRedirect: func(req *http.Request, _ []*http.Request) error {
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			// A custom CheckRedirect replaces the stdlib default entirely, including
+			// its len(via) >= 10 stop — so keep that cap, then vet the next hop.
+			if len(via) >= 10 {
+				return errors.New("stopped after 10 redirects")
+			}
 			return i.allowedURL(req.URL.String())
 		},
 	}

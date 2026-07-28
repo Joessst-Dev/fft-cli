@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"sync/atomic"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -45,16 +46,25 @@ var _ = Describe("allowedURL", func() {
 	})
 
 	It("refuses a followed redirect off the allowed host", func() {
-		// The initial URL is the configured (allowed) host, but the server 302s to a
-		// disallowed one. Without CheckRedirect the client would follow it silently.
+		// The redirect target is a *second* loopback server — resolvable, so a DNS
+		// failure cannot masquerade as the refusal — that is not the configured
+		// endpoint, so allowedURL denies it. Reverting CheckRedirect would let the
+		// client follow it: the target would be reached and get() would succeed.
+		var reached atomic.Int64
+		blocked := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+			reached.Add(1)
+		}))
+		DeferCleanup(blocked.Close)
+
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			http.Redirect(w, r, "https://evil.example/payload", http.StatusFound)
+			http.Redirect(w, r, blocked.URL+"/payload", http.StatusFound)
 		}))
 		DeferCleanup(srv.Close)
 
 		inst := NewInstaller(GinkgoT().TempDir(), WithAPI(srv.URL))
 		_, err := inst.get(context.Background(), srv.URL+"/asset", maxArchive, "")
 		Expect(err).To(HaveOccurred())
+		Expect(reached.Load()).To(BeZero(), "the redirect target must never be reached")
 	})
 })
 
