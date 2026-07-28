@@ -38,7 +38,7 @@ fft routing decision-logs [flags]
       --routing-plan string       Only logs for this routingPlanRef
       --size int                  Decision logs per page, 1–250 (default 25)
       --sourcing-option string    Only logs for this sourcingOptionRef
-      --sourcing-options string   Only logs for this sourcingOptionsRef
+      --sourcing-options string   Only logs for this sourcingOptionsRef (the spec marks this filter deprecated; prefer --sourcing-option)
       --tenant-order-id string    Only logs for this tenantOrderId
       --total                     Also count the matches, and report the total on stderr
 ```

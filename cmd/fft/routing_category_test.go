@@ -95,6 +95,9 @@ var _ = Describe("fft routing category update", func() {
 		Expect(put.Method).To(Equal(http.MethodPut))
 		Expect(put.Path).To(Equal("/api/routing/nodeconfigcategories/k1"))
 		Expect(put.json()).To(HaveKeyWithValue("version", BeNumerically("==", 6)))
+		// The whole document survives the raw passthrough, not just the version.
+		Expect(put.json()).To(HaveKeyWithValue("color", "red"))
+		Expect(put.json()).To(HaveKey("nameLocalized"))
 	})
 })
 

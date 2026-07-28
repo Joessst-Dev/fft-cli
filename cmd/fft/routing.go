@@ -1,7 +1,8 @@
 package main
 
 import (
-	"sort"
+	"maps"
+	"slices"
 
 	"github.com/spf13/cobra"
 )
@@ -57,13 +58,7 @@ func localeName(m map[string]string) string {
 		return v
 	}
 
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
-	for _, k := range keys {
+	for _, k := range slices.Sorted(maps.Keys(m)) {
 		if m[k] != "" {
 			return m[k]
 		}

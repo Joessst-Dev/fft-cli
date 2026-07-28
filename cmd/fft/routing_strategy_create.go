@@ -9,7 +9,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/Joessst-Dev/fft-cli/internal/api"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 )
 
@@ -44,13 +43,10 @@ func newRoutingStrategyCreateCmd(deps *Deps) *cobra.Command {
 
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			// --example needs no project, credentials or network — answer it first. The
-			// body is the spec-synthesized one, so it never drifts from the schema.
+			// body is the command's own operation's spec-synthesized one, so it never
+			// drifts from the schema.
 			if example {
-				op, ok := api.LookupOperation("postRoutingStrategy")
-				if !ok {
-					return fmt.Errorf("no metadata for postRoutingStrategy")
-				}
-				return printExample(cmd, op)
+				return printCommandExample(cmd)
 			}
 
 			if file == "" {

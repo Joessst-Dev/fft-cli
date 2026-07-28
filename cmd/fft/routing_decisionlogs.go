@@ -56,7 +56,8 @@ func newRoutingDecisionLogsCmd(deps *Deps) *cobra.Command {
 	f.StringVar(&filter.ProcessRef, "process", "", "Only logs for this processRef")
 	f.StringVar(&filter.TenantOrderID, "tenant-order-id", "", "Only logs for this tenantOrderId")
 	f.StringVar(&filter.SourcingOptionRef, "sourcing-option", "", "Only logs for this sourcingOptionRef")
-	f.StringVar(&filter.SourcingOptionsRef, "sourcing-options", "", "Only logs for this sourcingOptionsRef")
+	f.StringVar(&filter.SourcingOptionsRef, "sourcing-options", "",
+		"Only logs for this sourcingOptionsRef (the spec marks this filter deprecated; prefer --sourcing-option)")
 	page.register(f, "decision logs", client.DefaultListSize)
 
 	return cmd
@@ -65,9 +66,9 @@ func newRoutingDecisionLogsCmd(deps *Deps) *cobra.Command {
 // routingDecisionLogView is the table's model of a decision log: enough to recognise
 // which run a row is, with the detail left to -o json.
 type routingDecisionLogView struct {
-	ID         string `json:"id"`
-	Created    string `json:"created"`
-	RelatedRef struct {
+	ID          string `json:"id"`
+	Created     string `json:"created"`
+	RelatedRefs struct {
 		OrderRef      string `json:"orderRef"`
 		ProcessRef    string `json:"processRef"`
 		TenantOrderID string `json:"tenantOrderId"`
@@ -91,9 +92,9 @@ func routingDecisionLogRows(style output.Style, items []json.RawMessage) (output
 
 		rows = append(rows, []string{
 			field(style, v.ID),
-			field(style, v.RelatedRef.TenantOrderID),
-			field(style, v.RelatedRef.OrderRef),
-			field(style, v.RelatedRef.ProcessRef),
+			field(style, v.RelatedRefs.TenantOrderID),
+			field(style, v.RelatedRefs.OrderRef),
+			field(style, v.RelatedRefs.ProcessRef),
 			field(style, v.Created),
 		})
 	}

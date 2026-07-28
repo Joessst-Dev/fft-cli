@@ -174,6 +174,33 @@ var _ = Describe("fft routing strategy update", func() {
 		Expect(put.json()).To(HaveKeyWithValue("version", BeNumerically("==", 4)))
 	})
 
+	// The entityDoc design exists so a PUT carries the fields fft has no model for,
+	// unchanged. rootNode is exactly such a field — a deep tree the view struct never
+	// touches — so the invariant worth pinning is that it reaches the wire byte-for-byte,
+	// not merely that the version does. A switch to the lossy generated model would drop
+	// it and still pass a version-only assertion. Same guard as connection_test's round
+	// trip.
+	It("sends the whole document through untouched, not just the version", func() {
+		api := c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+			writeJSON(w, http.StatusOK, strategy("s1", "Peak season", 2, true, 4))
+		})
+
+		file := tempFile(`{"id":"s1","nameLocalized":{"en_US":"Peak season"},"revision":2,"inUse":true,` +
+			`"version":4,"rootNode":{"id":"root","config":{"fences":[{"type":"StandardFence","implementation":"FACILITY-BUSINESSTYPE"}]}},` +
+			`"globalConfiguration":{"defaultPrice":10}}`)
+		Expect(c.run("routing", "strategy", "update", "s1", "--file", file)).To(Equal(exitcode.OK))
+
+		put := api.calls[len(api.calls)-1].json()
+		// The nested node tree survived: id, config, and the fence buried inside it.
+		root, ok := put["rootNode"].(map[string]any)
+		Expect(ok).To(BeTrue(), "rootNode was dropped from the PUT body")
+		Expect(root).To(HaveKeyWithValue("id", "root"))
+		cfg, ok := root["config"].(map[string]any)
+		Expect(ok).To(BeTrue(), "rootNode.config was dropped")
+		Expect(cfg["fences"]).To(HaveLen(1))
+		Expect(put).To(HaveKey("globalConfiguration"))
+	})
+
 	It("skips the read when --if-version says what the version is", func() {
 		api := c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
 			writeJSON(w, http.StatusOK, strategy("s1", "Peak season", 2, true, 9))
@@ -265,6 +292,101 @@ var _ = Describe("fft routing strategy evaluate", func() {
 
 		file := tempFile(`{"consumer":{},"orderLineItems":[]}`)
 		Expect(c.run("routing", "strategy", "evaluate", "s1", "--file", file)).To(Equal(exitcode.OK))
+	})
+
+	// --example takes no id, and cobra validates args before RunE — so ExactArgs(1)
+	// would make `evaluate --example` fail with exit 2 before the example branch runs.
+	It("prints an example with no id and no network", func() {
+		Expect(c.run("routing", "strategy", "evaluate", "--example")).To(Equal(exitcode.OK))
+		Expect(c.out()).NotTo(BeEmpty())
+	})
+
+	// An empty evaluated path is a real answer for a single-object response, so the
+	// API's document is still printed under -o json — Printer.Empty (`[]`) would be the
+	// wrong shape and throw the evaluatedConfig away.
+	It("still prints the API document under -o json when the path is empty", func() {
+		c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+			writeJSON(w, http.StatusOK, `{"evaluatedConfig":{"marker":true},"evaluatedPath":[]}`)
+		})
+
+		file := tempFile(`{"consumer":{},"orderLineItems":[]}`)
+		Expect(c.run("routing", "strategy", "evaluate", "s1", "--file", file, "-o", "json")).To(Equal(exitcode.OK))
+		Expect(c.out()).To(ContainSubstring(`"evaluatedConfig"`))
+		Expect(c.out()).NotTo(Equal("[]\n"))
+	})
+})
+
+var _ = Describe("fft routing strategy actions", func() {
+	var c *cli
+
+	BeforeEach(func() { c = newCLI() })
+
+	It("sends the action body to the actions endpoint and reports what ran", func() {
+		api := c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+			writeJSON(w, http.StatusOK, strategy("s1", "Peak season", 3, false, 6))
+		})
+
+		file := tempFile(`{"name":"REPLACE_GLOBAL_CONFIGURATION","version":5,"globalConfiguration":{"defaultPrice":20}}`)
+		Expect(c.run("routing", "strategy", "actions", "s1", "--file", file)).To(Equal(exitcode.OK))
+
+		Expect(api.only().Method).To(Equal(http.MethodPost))
+		Expect(api.only().Path).To(Equal("/api/routing/strategies/s1/actions"))
+		Expect(c.errOut()).To(ContainSubstring("Ran REPLACE_GLOBAL_CONFIGURATION against routing strategy s1"))
+	})
+
+	It("refuses an action the API does not have, before sending anything", func() {
+		api := c.fakeTenant(func(_ http.ResponseWriter, r *http.Request, _ []byte) {
+			Fail("fft sent " + r.Method + " " + r.URL.Path + " for an unknown action")
+		})
+
+		file := tempFile(`{"name":"DEMOLISH"}`)
+		Expect(c.run("routing", "strategy", "actions", "s1", "--file", file)).To(Equal(exitcode.Usage))
+		Expect(c.errOut()).To(ContainSubstring("unknown action"))
+		Expect(api.calls).To(BeEmpty())
+	})
+
+	It("prints an example with no id and no network", func() {
+		Expect(c.run("routing", "strategy", "actions", "--example")).To(Equal(exitcode.OK))
+		Expect(c.out()).To(ContainSubstring("name"))
+	})
+
+	It("is refused under --read-only, because an action is a write", func() {
+		c.setenv(config.EnvReadOnly, "1")
+		api := c.fakeTenant(func(_ http.ResponseWriter, r *http.Request, _ []byte) {
+			Fail("fft sent " + r.Method + " " + r.URL.Path + " under --read-only")
+		})
+
+		file := tempFile(`{"name":"COPY"}`)
+		Expect(c.run("routing", "strategy", "actions", "s1", "--file", file)).To(Equal(exitcode.ReadOnly))
+		Expect(api.calls).To(BeEmpty())
+	})
+})
+
+var _ = Describe("fft routing strategy evaluate-node", func() {
+	var c *cli
+
+	BeforeEach(func() { c = newCLI() })
+
+	It("evaluates one node by strategy and node id", func() {
+		api := c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+			writeJSON(w, http.StatusOK, `{"evaluatedConfig":{},"evaluatedPath":[`+
+				`{"type":"NODE","nameLocalized":{"en_US":"Root"},"ref":"n1","evaluationResult":"PASSED"}]}`)
+		})
+
+		Expect(c.run("routing", "strategy", "evaluate-node", "s1", "n1")).To(Equal(exitcode.OK))
+
+		Expect(api.only().Method).To(Equal(http.MethodPost))
+		Expect(api.only().Path).To(Equal("/api/routing/strategies/s1/nodes/n1/evaluation"))
+		Expect(c.out()).To(ContainSubstring("PASSED"))
+	})
+
+	It("is allowed under --read-only, because node evaluation reserves nothing", func() {
+		c.setenv(config.EnvReadOnly, "1")
+		c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+			writeJSON(w, http.StatusOK, `{"evaluatedConfig":{},"evaluatedPath":[]}`)
+		})
+
+		Expect(c.run("routing", "strategy", "evaluate-node", "s1", "n1")).To(Equal(exitcode.OK))
 	})
 })
 

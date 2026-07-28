@@ -28,9 +28,11 @@ fft routing strategy
 
 ## Subcommands
 
+- [fft routing strategy actions](./fft_routing_strategy_actions.md) — Run one action against a routing strategy
 - [fft routing strategy activate](./fft_routing_strategy_activate.md) — Make a routing strategy live
 - [fft routing strategy create](./fft_routing_strategy_create.md) — Create a routing strategy
 - [fft routing strategy evaluate](./fft_routing_strategy_evaluate.md) — Dry-run a strategy against an order
+- [fft routing strategy evaluate-node](./fft_routing_strategy_evaluate-node.md) — Dry-run one node of a strategy
 - [fft routing strategy get](./fft_routing_strategy_get.md) — Show one routing strategy
 - [fft routing strategy list](./fft_routing_strategy_list.md) — List the routing strategies
 - [fft routing strategy update](./fft_routing_strategy_update.md) — Replace a routing strategy (PUT)

@@ -131,11 +131,16 @@ fft routing strategy evaluate 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10 --file order.
 
 - **`activate` makes one strategy live**, taking over from whichever was `inUse`. It is
   versioned in the body, so a stale version is exit 7 — re-read and retry. `--if-version`
-  skips the read for a clean 409.
+  skips the read for a clean 409. `fft routing strategy actions <id> --file` is the escape
+  hatch for the other four actions (`COPY`, `REPLACE_NODE`, `REPLACE_CONDITION`,
+  `REPLACE_GLOBAL_CONFIGURATION`) — `REPLACE_NODE`/`REPLACE_CONDITION` edit one part of the
+  tree by id, the safer alternative to a whole-strategy PUT.
 - **`evaluate` is a read.** It dry-runs the strategy against an order (the same body shape
   `fft order create` takes) and reports the path the engine would walk. It reserves
   nothing and is safe under `--read-only`. This answers "why would *this* strategy route
   *this* order there?"; `fft sourcing simulate` answers the same question for the live one.
+  `fft routing strategy evaluate-node <id> <nodeId>` evaluates a single node instead of the
+  whole tree.
 - **`update` is a PUT, there is no `patch`.** Read the whole strategy, edit it, send it
   back; fft supplies the `version`. There is no `delete` — the API does not offer one.
 - `fft routing decision-logs` is the audit trail of real routing runs. Filter by exact id:

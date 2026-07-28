@@ -8,7 +8,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/Joessst-Dev/fft-cli/internal/api"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 )
 
@@ -38,11 +37,7 @@ func newRoutingCategoryCreateCmd(deps *Deps) *cobra.Command {
 
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if example {
-				op, ok := api.LookupOperation("postRoutingStrategyNodeConfigCategory")
-				if !ok {
-					return fmt.Errorf("no metadata for postRoutingStrategyNodeConfigCategory")
-				}
-				return printExample(cmd, op)
+				return printCommandExample(cmd)
 			}
 
 			if file == "" {

@@ -10,7 +10,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/Joessst-Dev/fft-cli/internal/api"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/output"
 )
@@ -39,19 +38,22 @@ func newRoutingStrategyEvaluateCmd(deps *Deps) *cobra.Command {
 		Use:   "evaluate <id> --file <order.json>",
 		Short: "Dry-run a strategy against an order",
 		Long:  routingStrategyEvaluateLong,
-		Args:  usageArgs(cobra.ExactArgs(1)),
+		// MaximumNArgs and not ExactArgs, because cobra validates the arguments before
+		// RunE runs and --example takes no id. The id is demanded below instead, once
+		// --example has had its say.
+		Args: usageArgs(cobra.MaximumNArgs(1)),
 
 		Annotations: map[string]string{annotationOperationID: "evaluateRoutingStrategy"},
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if example {
-				op, ok := api.LookupOperation("evaluateRoutingStrategy")
-				if !ok {
-					return fmt.Errorf("no metadata for evaluateRoutingStrategy")
-				}
-				return printExample(cmd, op)
+				return printCommandExample(cmd)
 			}
 
+			if len(args) != 1 {
+				return exitcode.UsageError{Err: fmt.Errorf(
+					"which strategy? Name one, or run --example for an order body to start from")}
+			}
 			if file == "" {
 				return exitcode.UsageError{Err: fmt.Errorf(
 					"--file is required: it holds the order to evaluate (run with --example for one to start from)")}
