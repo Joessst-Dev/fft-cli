@@ -63,20 +63,23 @@ func AllKinds() []string {
 // Key builds the storage key for one secret of one project, for example
 // "fft:staging:refreshToken".
 //
-// Its injectivity rests on the project name carrying no colon — otherwise
-// "fft:a:b:idToken" cannot be told apart as project "a:b" or project "a" with a
-// stray kind. [ValidateProjectName] is what holds that invariant at the door.
+// [ParseKey] recovers the project by cutting on the *first* colon after the prefix,
+// so a project name that itself contains a colon would not round-trip — the tail
+// past the colon would be read back as the kind. [ValidateProjectName] holds that
+// invariant at the one door names enter through.
 func Key(project, kind string) string {
 	return "fft:" + project + ":" + kind
 }
 
-// ValidateProjectName rejects a name that would break [Key]'s injectivity or a
-// keychain backend.
+// ValidateProjectName rejects a name that would not round-trip through [ParseKey],
+// or that a keychain backend would mangle.
 //
-// A colon is [Key]'s separator, so a project called "a:b" would alias project "a"
-// with kind "b"; a control character has no place in a keychain item name and a
-// keyring backend may mangle or refuse it. The check is deliberately at the one
-// door names enter through — `fft project add` — so [Key] can stay a pure join.
+// [ParseKey] cuts on the first colon after the "fft:" prefix, so a project called
+// "a:b" would be read back as project "a", kind "b:<kind>" — which `fft project
+// remove` relies on to enumerate a project's secrets. A control character has no
+// place in a keychain item name and a keyring backend may refuse it. The check
+// lives at the one door names enter through — `fft project add` — so [Key] can stay
+// a pure join.
 func ValidateProjectName(name string) error {
 	if strings.TrimSpace(name) == "" {
 		return errors.New("the project name is empty")
