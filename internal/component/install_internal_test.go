@@ -66,6 +66,21 @@ var _ = Describe("allowedURL", func() {
 		Expect(err).To(HaveOccurred())
 		Expect(reached.Load()).To(BeZero(), "the redirect target must never be reached")
 	})
+
+	It("stops a redirect loop after 10 hops, even among allowed hosts", func() {
+		// A server that always redirects to itself: allowedURL passes each hop (the
+		// same configured host), so only the restored len(via) >= 10 cap can stop it.
+		// A custom CheckRedirect replaces that stdlib default, so it must re-add it.
+		var srv *httptest.Server
+		srv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, srv.URL+"/again", http.StatusFound)
+		}))
+		DeferCleanup(srv.Close)
+
+		inst := NewInstaller(GinkgoT().TempDir(), WithAPI(srv.URL))
+		_, err := inst.get(context.Background(), srv.URL+"/asset", maxArchive, "")
+		Expect(err).To(MatchError(ContainSubstring("stopped after 10 redirects")))
+	})
 })
 
 var _ = Describe("isRegularFile", func() {

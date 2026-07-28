@@ -18,10 +18,12 @@ import (
 // else fft exports — FFT_ID_TOKEN_EXPIRES_AT, the descriptive FFT_PROJECT_ID and
 // so on — is not a secret and is printed as-is.
 //
-// The four templates hardcode these names because each language spells the mask
-// differently (a sed script, a Python set, a JS Set, a Go map). scaffold_test.go
-// asserts every template masks exactly this list, so the two cannot drift — the
-// same failure class as the FFT_ID_TOKEN-to-stdout leak this scaffold once had.
+// The templates hardcode these names because each language spells the mask
+// differently (a sed script, a Python set, a JS Set, a Go map). scaffold_internal_test.go
+// keeps them in step: structurally it asserts every template names each of these,
+// for every language in supportedLangs; behaviourally it runs the shell scaffold
+// with real secret values and checks they come out redacted — the same leak class
+// (FFT_ID_TOKEN to stdout) this scaffold once had.
 var scaffoldSecretEnv = []string{
 	"FFT_ID_TOKEN",
 	"FFT_REFRESH_TOKEN",

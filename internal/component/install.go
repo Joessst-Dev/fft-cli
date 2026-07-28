@@ -133,12 +133,11 @@ func WithAPI(url string) InstallerOption {
 	return func(i *Installer) { i.api = strings.TrimRight(url, "/") }
 }
 
-// WithHTTPClient replaces the client the installer downloads with.
-func WithHTTPClient(c *http.Client) InstallerOption {
-	return func(i *Installer) { i.client = c }
-}
-
 // NewInstaller returns an Installer writing into root.
+//
+// The download client is built here and never overridable: a replaceable client
+// would be a way to hand the installer one without the CheckRedirect guard below,
+// and specs reach GitHub through WithAPI instead, which keeps the guard in place.
 func NewInstaller(root string, opts ...InstallerOption) *Installer {
 	i := &Installer{
 		root: root,
@@ -152,7 +151,7 @@ func NewInstaller(root string, opts ...InstallerOption) *Installer {
 	// Every redirect hop is re-checked against allowedURL, not just the initial URL:
 	// GitHub serves release bytes via a 302 to *.githubusercontent.com (allowed),
 	// but Go's default policy would just as happily follow a 302 to an attacker host
-	// on any scheme. WithHTTPClient replaces this whole client for tests.
+	// on any scheme.
 	i.client = &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			// A custom CheckRedirect replaces the stdlib default entirely, including

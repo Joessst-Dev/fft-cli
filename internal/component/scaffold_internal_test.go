@@ -40,6 +40,10 @@ var _ = Describe("scaffold command secret masking", func() {
 	// The behavioural guard, for the always-runnable shell scaffold: presence of the
 	// name is not proof of masking, so run it with real secret values and assert the
 	// values are actually redacted while a non-secret FFT_ variable passes through.
+	//
+	// Only shell is exercised behaviourally — it is the one language guaranteed on
+	// every runner. The go/python/node templates rest on the structural guard above;
+	// running each would need its toolchain present and is left to a manual check.
 	It("actually redacts the credential values when the shell scaffold runs", func() {
 		if runtime.GOOS == "windows" {
 			Skip("no POSIX shell to run the scaffold with")
