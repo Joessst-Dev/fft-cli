@@ -51,7 +51,7 @@ var _ = Describe("ValidateProjectName", func() {
 		func(name string) {
 			Expect(secrets.ValidateProjectName(name)).To(HaveOccurred())
 		},
-		// A colon would alias project "a" kind "b" — the invariant Key relies on.
+		// A colon is Key's separator, so it would break the Key/ParseKey round-trip.
 		Entry("with a colon", "a:b"),
 		Entry("empty", ""),
 		Entry("blank", "   "),
