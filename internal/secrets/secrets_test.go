@@ -37,6 +37,29 @@ var _ = Describe("Key", func() {
 	)
 })
 
+var _ = Describe("ValidateProjectName", func() {
+	DescribeTable("accepts an ordinary name",
+		func(name string) {
+			Expect(secrets.ValidateProjectName(name)).To(Succeed())
+		},
+		Entry("simple", "staging"),
+		Entry("with a dash and dot", "acme-prod.eu"),
+		Entry("with underscores", "acme_prod_1"),
+	)
+
+	DescribeTable("rejects a name that would break the storage key",
+		func(name string) {
+			Expect(secrets.ValidateProjectName(name)).To(HaveOccurred())
+		},
+		// A colon is Key's separator, so it would break the Key/ParseKey round-trip.
+		Entry("with a colon", "a:b"),
+		Entry("empty", ""),
+		Entry("blank", "   "),
+		Entry("with a control character", "acme\x00prod"),
+		Entry("with a newline", "acme\nprod"),
+	)
+})
+
 // storeContract is the behaviour every implementation owes its callers. Running
 // it against each of them is what stops the keychain and the file store from
 // quietly disagreeing about what a missing secret looks like.
