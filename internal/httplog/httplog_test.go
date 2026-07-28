@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -51,6 +52,29 @@ var _ = Describe("redacting a trace", func() {
 			"grant_type=refresh_token&refresh_token=AMf-vBxSecret",
 			[]string{"grant_type=refresh_token", "refresh_token=" + httplog.Redacted},
 			"AMf-vBxSecret"),
+		Entry("a password whose value contains a JSON-escaped quote, tail and all",
+			// json.Marshal encodes a " inside a value as \". The old value class
+			// stopped at the escaped quote and printed everything after it.
+			`{"password":"pre\"POST-QUOTE-SECRET","returnSecureToken":true}`,
+			[]string{`"password":"` + httplog.Redacted + `"`, "returnSecureToken"},
+			"POST-QUOTE-SECRET"),
+		Entry("the OIDC clientSecret a create sends",
+			`{"name":"acme","clientSecret":"cs-live-abcdefghij"}`,
+			[]string{`"clientSecret":"` + httplog.Redacted + `"`, "acme"},
+			"cs-live-abcdefghij"),
+		Entry("the currentPassword a credentials change sends",
+			`{"currentPassword":"old-hunter2-secret","password":"new-hunter2-secret"}`,
+			[]string{httplog.Redacted},
+			"hunter2-secret"),
+		Entry("the firebaseWebApiKey carried as a JSON field",
+			`{"firebaseWebApiKey":"AIzaSyRealKeyInBody","tenant":"acme"}`,
+			[]string{`"firebaseWebApiKey":"` + httplog.Redacted + `"`, "acme"},
+			"AIzaSyRealKeyInBody"),
+		Entry("a token value with no closing quote, cut off at the end of a buffer",
+			// A value that runs off the end of a truncated body still has to go.
+			`{"idToken":"eyJhbGciOi.STRADDLING-SECRET`,
+			[]string{httplog.Redacted},
+			"STRADDLING-SECRET"),
 	)
 
 	It("removes a secret it is handed verbatim, wherever it appears", func() {
@@ -124,6 +148,26 @@ var _ = Describe("logging a request and its answer", func() {
 
 		Expect(err).NotTo(HaveOccurred())
 		Expect(string(body)).To(Equal(`{"facilities":[{"name":"Berlin Mitte"}]}`))
+	})
+
+	It("never prints a token whose value runs past the logged-body cap", func() {
+		// The logger reads only the first few KiB of a body. A token longer than
+		// that has no closing quote inside the buffer; the redactor must take it out
+		// anyway rather than print it up to the cut.
+		big := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprintf(w, `{"idToken":"%s"}`, strings.Repeat("STRADDLE", 1024)) // ~8 KiB value
+		}))
+		DeferCleanup(big.Close)
+
+		req, err := http.NewRequest(http.MethodGet, big.URL, nil)
+		Expect(err).NotTo(HaveOccurred())
+		res, err := client.Do(req)
+		Expect(err).NotTo(HaveOccurred())
+		DeferCleanup(res.Body.Close)
+
+		Expect(log.String()).NotTo(ContainSubstring("STRADDLE"))
+		Expect(log.String()).To(ContainSubstring(httplog.Redacted))
 	})
 
 	It("writes nothing at all when there is nowhere to write it", func() {
