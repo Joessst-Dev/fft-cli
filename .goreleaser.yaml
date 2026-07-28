@@ -170,11 +170,14 @@ sboms:
 # Only checksums.txt is signed (artifacts: checksum), so verification is two steps:
 # verify the checksums file's signature, then check the archive against it. This is
 # the procedure README.md's "Verifying a download" documents — do not imply a
-# per-archive .sig/.pem exists; none is produced.
+# per-archive signature exists; none is produced.
+#
+# cosign v3 emits a single Sigstore bundle (cert + signature + Rekor entry in one
+# .bundle) rather than the split .pem/.sig it deprecated. So one artifact,
+# checksums.txt.bundle, and one --bundle flag on verify:
 #
 #   cosign verify-blob \
-#     --certificate      checksums.txt.pem \
-#     --signature        checksums.txt.sig \
+#     --bundle checksums.txt.bundle \
 #     --certificate-identity-regexp 'https://github.com/Joessst-Dev/fft-cli/.*' \
 #     --certificate-oidc-issuer https://token.actions.githubusercontent.com \
 #     checksums.txt
@@ -183,17 +186,13 @@ signs:
   - id: cosign-keyless
     cmd: cosign
     artifacts: checksum
-    certificate: "${artifact}.pem"
+    # The bundle is what GoReleaser uploads for this signature, so name it here and
+    # point --bundle at the same path.
+    signature: "${artifact}.bundle"
     output: true
     args:
       - sign-blob
-      # cosign v3 defaults --new-bundle-format=true, which rejects the separate
-      # --output-certificate/--output-signature flags (it wants a single --bundle).
-      # We keep the split .pem + .sig artifacts the verify recipe above documents, so
-      # opt back out of the bundle format rather than change the verification contract.
-      - "--new-bundle-format=false"
-      - "--output-certificate=${certificate}"
-      - "--output-signature=${signature}"
+      - "--bundle=${signature}"
       - "${artifact}"
       - "--yes"
 
