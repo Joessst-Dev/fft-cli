@@ -617,14 +617,16 @@ transparency log.
 
 ```sh
 cosign verify-blob \
-  --certificate checksums.txt.pem \
-  --signature   checksums.txt.sig \
+  --bundle checksums.txt.bundle \
   --certificate-identity-regexp 'https://github.com/Joessst-Dev/fft-cli/.*' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   checksums.txt
 
 sha256sum --check checksums.txt --ignore-missing
 ```
+
+The signature ships as a single Sigstore bundle (`checksums.txt.bundle`) — cert,
+signature and transparency-log entry in one file.
 
 The Homebrew cask strips the `com.apple.quarantine` attribute on install, so macOS
 Gatekeeper does not second-guess the binary — the sha256 and cosign chain above are the

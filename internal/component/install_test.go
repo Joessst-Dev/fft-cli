@@ -370,6 +370,21 @@ var _ = Describe("the installer", func() {
 			Expect(plan.Verification()).To(ContainSubstring("cosign verify-blob"))
 		})
 
+		It("recognises the cosign bundle a v0.6.0+ release signs its checksums with", func() {
+			// cosign v3 emits one checksums.txt.bundle instead of the split .sig/.pem.
+			// Keying only on the old names would report every real release from v0.6.0
+			// on as unsigned.
+			hub.publish(assetName("weather", "1.0.0"), archive())
+			hub.assets["checksums.txt.bundle"] = []byte("bundle")
+
+			plan, err := inst.Prepare(context.Background(), component.Source{Repo: "acme/weather"})
+			Expect(err).NotTo(HaveOccurred())
+			defer inst.Discard(plan)
+
+			Expect(plan.Signed).To(BeTrue())
+			Expect(plan.Verification()).To(ContainSubstring("cosign verify-blob"))
+		})
+
 		It("does not call a release signed on the strength of a per-archive .sig alone", func() {
 			// The old check keyed on <archive>.sig, which no real release produces —
 			// so it reported "signed" only for a hand-crafted release and "unsigned"
