@@ -410,13 +410,18 @@ type asset struct {
 // checksums file.
 //
 // GoReleaser signs checksums.txt, not each archive (signs.artifacts: checksum), so
-// the signature that exists for a real release is checksums.txt{.sig,.pem} — not a
+// the signature that exists for a real release is a checksums.txt sidecar — not a
 // per-archive .sig. Looking for the latter reported "signed: false" for every
 // genuine release and "true" only for a hand-crafted one, which is backwards.
+//
+// The sidecar's name tracks how cosign is invoked: v0.6.0 on emits a single Sigstore
+// bundle (checksums.txt.bundle), earlier releases the split .sig/.pem. Both are
+// matched so this stays true across the format change and for older tags.
 func (r *release) signed() bool {
 	for _, a := range r.Assets {
 		switch a.Name {
-		case "checksums.txt.sig", "checksums.txt.pem",
+		case "checksums.txt.bundle",
+			"checksums.txt.sig", "checksums.txt.pem",
 			"checksums.txt.sigstore", "checksums.txt.sigstore.json":
 			return true
 		}
