@@ -9243,6 +9243,21 @@ func (e RoutingStrategyStandardFenceType) Valid() bool {
 	}
 }
 
+// Defines values for RoutingStrategyStandardPriorityRatingType.
+const (
+	StandardPriorityRating RoutingStrategyStandardPriorityRatingType = "StandardPriorityRating"
+)
+
+// Valid indicates whether the value is a known member of the RoutingStrategyStandardPriorityRatingType enum.
+func (e RoutingStrategyStandardPriorityRatingType) Valid() bool {
+	switch e {
+	case StandardPriorityRating:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for RoutingStrategyStandardRatingType.
 const (
 	StandardRating RoutingStrategyStandardRatingType = "StandardRating"
@@ -9267,6 +9282,21 @@ const (
 func (e RoutingStrategyToolkitFenceType) Valid() bool {
 	switch e {
 	case ToolkitFence:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for RoutingStrategyToolkitPriorityRatingType.
+const (
+	ToolkitPriorityRating RoutingStrategyToolkitPriorityRatingType = "ToolkitPriorityRating"
+)
+
+// Valid indicates whether the value is a known member of the RoutingStrategyToolkitPriorityRatingType enum.
+func (e RoutingStrategyToolkitPriorityRatingType) Valid() bool {
+	switch e {
+	case ToolkitPriorityRating:
 		return true
 	default:
 		return false
@@ -13500,6 +13530,9 @@ type FacilityAddressEmailAddressesFilter struct {
 type FacilityAddressEmailAddressesListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *FacilityAddressEmailAddressesFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // FacilityAddressFilter FacilityAddressFilter
@@ -14128,6 +14161,9 @@ type FacilityServicesFilter struct {
 type FacilityServicesListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *FacilityServicesFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // FacilityServicesSort FacilityServicesSort
@@ -14248,6 +14284,9 @@ type FacilityTagsFilter struct {
 type FacilityTagsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *FacilityTagsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // FacilityType FacilityType
@@ -14299,6 +14338,9 @@ type HandoverJobAssignedUsersFilter struct {
 type HandoverJobAssignedUsersListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *HandoverJobAssignedUsersFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // HandoverJobChannelEnumEnumFilter HandoverJobChannelEnumEnumFilter
@@ -14344,6 +14386,9 @@ type HandoverJobHandoverJobLineItemsFilter struct {
 type HandoverJobHandoverJobLineItemsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *HandoverJobHandoverJobLineItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // HandoverJobHandoverJobLineItemsSubstituteLineItemsArticleFilter HandoverJobHandoverJobLineItemsSubstituteLineItemsArticleFilter
@@ -14365,6 +14410,9 @@ type HandoverJobHandoverJobLineItemsSubstituteLineItemsFilter struct {
 type HandoverJobHandoverJobLineItemsSubstituteLineItemsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *HandoverJobHandoverJobLineItemsSubstituteLineItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // HandoverJobHandoverJobParcelInfoFilter HandoverJobHandoverJobParcelInfoFilter
@@ -14613,6 +14661,9 @@ type InboundProcessPurchaseOrderRequestedItemsFilter_StockProperties_AdditionalP
 type InboundProcessPurchaseOrderRequestedItemsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *InboundProcessPurchaseOrderRequestedItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // InboundProcessPurchaseOrderSupplierFilter InboundProcessPurchaseOrderSupplierFilter
@@ -14675,6 +14726,9 @@ type InboundProcessReceiptsInboundReceiptStatusTypeEnumFilterNotEq string
 type InboundProcessReceiptsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *InboundProcessReceiptsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // InboundProcessReceiptsReceivedItemsFilter InboundProcessReceiptsReceivedItemsFilter
@@ -14695,6 +14749,9 @@ type InboundProcessReceiptsReceivedItemsFilter_StockProperties_AdditionalPropert
 type InboundProcessReceiptsReceivedItemsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *InboundProcessReceiptsReceivedItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // InboundProcessSearchQuery InboundProcessSearchQuery
@@ -15105,6 +15162,9 @@ type LinkedServiceJobsUsersModificationHistoryFilter struct {
 type LinkedServiceJobsUsersModificationHistoryListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *LinkedServiceJobsUsersModificationHistoryFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // Listing defines model for Listing.
@@ -15704,6 +15764,9 @@ type ListingTagsFilter struct {
 type ListingTagsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *ListingTagsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // ListingsForReplacement ListingsForReplacement
@@ -15765,6 +15828,9 @@ type LookupRecordItemValuesFilter struct {
 type LookupRecordItemValuesListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *LookupRecordItemValuesFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // ManagedFacility defines model for ManagedFacility.
@@ -16572,6 +16638,9 @@ type OrderConsumerAddressesFilter struct {
 type OrderConsumerAddressesListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *OrderConsumerAddressesFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // OrderConsumerAddressesReplaceActionParameter AbstractOrderActionsParameter
@@ -16599,6 +16668,9 @@ type OrderDeliveryPreferencesCollectFilter struct {
 type OrderDeliveryPreferencesCollectListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *OrderDeliveryPreferencesCollectFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // OrderDeliveryPreferencesFilter OrderDeliveryPreferencesFilter
@@ -16936,6 +17008,9 @@ type OrderOrderLineItemsFilter struct {
 type OrderOrderLineItemsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *OrderOrderLineItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // OrderPaginatedResult OrderPaginatedResult
@@ -17103,6 +17178,9 @@ type OrderRecordConsumerAddressesFilter struct {
 type OrderRecordConsumerAddressesListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *OrderRecordConsumerAddressesFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // OrderRecordConsumerFilter OrderRecordConsumerFilter
@@ -17130,6 +17208,9 @@ type OrderRecordLineItemsFilter struct {
 type OrderRecordLineItemsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *OrderRecordLineItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // OrderRecordOriginFilter OrderRecordOriginFilter
@@ -17154,6 +17235,9 @@ type OrderRecordPaymentsFilter struct {
 type OrderRecordPaymentsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *OrderRecordPaymentsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // OrderRecordSearchQuery OrderRecordSearchQuery
@@ -17304,6 +17388,9 @@ type OrderTagsFilter struct {
 type OrderTagsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *OrderTagsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // OrderTotalDiscounts This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Aggregate discount total with a breakdown by source. Values follow the negative-or-zero discount convention.
@@ -17453,6 +17540,9 @@ type PackJobLineItemsFilter struct {
 type PackJobLineItemsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *PackJobLineItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // PackJobPackingSourceContainersFilter PackJobPackingSourceContainersFilter
@@ -17465,6 +17555,9 @@ type PackJobPackingSourceContainersFilter struct {
 type PackJobPackingSourceContainersListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *PackJobPackingSourceContainersFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // PackJobRecipientFilter PackJobRecipientFilter
@@ -17659,6 +17752,9 @@ type ParcelInformationParcelInformationLineItemsFilter struct {
 type ParcelInformationParcelInformationLineItemsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *ParcelInformationParcelInformationLineItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // ParcelInformationSearchQuery ParcelInformationSearchQuery
@@ -17722,6 +17818,9 @@ type ParcelItemsFilter struct {
 type ParcelItemsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *ParcelItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // ParcelLabelClassification ParcelLabelClassification
@@ -18028,6 +18127,9 @@ type PickJobTransfersFilter struct {
 type PickJobTransfersListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *PickJobTransfersFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // PickingMethodEnum Way in which the picking should be handled Deprecated: BATCH_PICKING, use BATCH instead
@@ -18695,6 +18797,9 @@ type ProcessTagsFilter struct {
 type ProcessTagsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *ProcessTagsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // PromiseCarrier PromiseCarrier
@@ -18799,6 +18904,9 @@ type RemoteConfigurationScopesFilter struct {
 type RemoteConfigurationScopesListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *RemoteConfigurationScopesFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // RemoteConfigurationSearchQuery RemoteConfigurationSearchQuery
@@ -19170,6 +19278,9 @@ type RoutingPlanCustomServicesArticleItemsFilter struct {
 type RoutingPlanCustomServicesArticleItemsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *RoutingPlanCustomServicesArticleItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // RoutingPlanCustomServicesCustomServiceDefinitionAdditionalInformationFilter RoutingPlanCustomServicesCustomServiceDefinitionAdditionalInformationFilter
@@ -19182,6 +19293,9 @@ type RoutingPlanCustomServicesCustomServiceDefinitionAdditionalInformationFilter
 type RoutingPlanCustomServicesCustomServiceDefinitionAdditionalInformationListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *RoutingPlanCustomServicesCustomServiceDefinitionAdditionalInformationFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // RoutingPlanCustomServicesCustomServiceDefinitionFilter RoutingPlanCustomServicesCustomServiceDefinitionFilter
@@ -19203,6 +19317,9 @@ type RoutingPlanCustomServicesCustomServiceItemsArticleItemsFilter struct {
 type RoutingPlanCustomServicesCustomServiceItemsArticleItemsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *RoutingPlanCustomServicesCustomServiceItemsArticleItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // RoutingPlanCustomServicesCustomServiceItemsFilter RoutingPlanCustomServicesCustomServiceItemsFilter
@@ -19215,6 +19332,9 @@ type RoutingPlanCustomServicesCustomServiceItemsFilter struct {
 type RoutingPlanCustomServicesCustomServiceItemsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *RoutingPlanCustomServicesCustomServiceItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // RoutingPlanCustomServicesFilter RoutingPlanCustomServicesFilter
@@ -19233,6 +19353,9 @@ type RoutingPlanCustomServicesFilter struct {
 type RoutingPlanCustomServicesListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *RoutingPlanCustomServicesFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // RoutingPlanDeliveryPreferencesCollectFilter RoutingPlanDeliveryPreferencesCollectFilter
@@ -19251,6 +19374,9 @@ type RoutingPlanDeliveryPreferencesCollectFilter struct {
 type RoutingPlanDeliveryPreferencesCollectListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *RoutingPlanDeliveryPreferencesCollectFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // RoutingPlanDeliveryPreferencesFilter RoutingPlanDeliveryPreferencesFilter
@@ -19287,6 +19413,9 @@ type RoutingPlanDeliveryPreferencesShippingPreferredCarriersWithProductFilter st
 type RoutingPlanDeliveryPreferencesShippingPreferredCarriersWithProductListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *RoutingPlanDeliveryPreferencesShippingPreferredCarriersWithProductFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // RoutingPlanEarliestPickingStartFilter RoutingPlanEarliestPickingStartFilter
@@ -19314,6 +19443,9 @@ type RoutingPlanHistoryFilter struct {
 type RoutingPlanHistoryListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *RoutingPlanHistoryFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // RoutingPlanHistoryRoutingPlanStatusEnumFilter RoutingPlanHistoryRoutingPlanStatusEnumFilter
@@ -19359,6 +19491,9 @@ type RoutingPlanOrderLineItemsFilter struct {
 type RoutingPlanOrderLineItemsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *RoutingPlanOrderLineItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // RoutingPlanSearchQuery RoutingPlanSearchQuery
@@ -19455,6 +19590,9 @@ type RoutingPlanStatusReasonsFilter struct {
 type RoutingPlanStatusReasonsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *RoutingPlanStatusReasonsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // RoutingPlanStatusReasonsRoutingPlanStatusReasonReasonEnumFilter RoutingPlanStatusReasonsRoutingPlanStatusReasonReasonEnumFilter
@@ -19790,8 +19928,9 @@ type RoutingStrategyNodeConfig struct {
 	Fences           []RoutingStrategyNodeConfig_Fences_Item `json:"fences"`
 
 	// OrderSplit RoutingStrategyOrderSplitConfig
-	OrderSplit *RoutingStrategyOrderSplitConfig         `json:"orderSplit,omitempty"`
-	Ratings    []RoutingStrategyNodeConfig_Ratings_Item `json:"ratings"`
+	OrderSplit      *RoutingStrategyOrderSplitConfig                  `json:"orderSplit,omitempty"`
+	PriorityRatings *[]RoutingStrategyNodeConfig_PriorityRatings_Item `json:"priorityRatings,omitempty"`
+	Ratings         []RoutingStrategyNodeConfig_Ratings_Item          `json:"ratings"`
 
 	// Reroute RoutingStrategyRerouteConfig
 	Reroute *RoutingStrategyRerouteConfig `json:"reroute,omitempty"`
@@ -19799,6 +19938,11 @@ type RoutingStrategyNodeConfig struct {
 
 // RoutingStrategyNodeConfig_Fences_Item defines model for RoutingStrategyNodeConfig.fences.Item.
 type RoutingStrategyNodeConfig_Fences_Item struct {
+	union json.RawMessage
+}
+
+// RoutingStrategyNodeConfig_PriorityRatings_Item defines model for RoutingStrategyNodeConfig.priorityRatings.Item.
+type RoutingStrategyNodeConfig_PriorityRatings_Item struct {
 	union json.RawMessage
 }
 
@@ -19859,8 +20003,9 @@ type RoutingStrategyNodeConfigForUpsert struct {
 	Fences           []RoutingStrategyNodeConfigForUpsert_Fences_Item `json:"fences"`
 
 	// OrderSplit RoutingStrategyOrderSplitConfig
-	OrderSplit *RoutingStrategyOrderSplitConfig                  `json:"orderSplit,omitempty"`
-	Ratings    []RoutingStrategyNodeConfigForUpsert_Ratings_Item `json:"ratings"`
+	OrderSplit      *RoutingStrategyOrderSplitConfig                           `json:"orderSplit,omitempty"`
+	PriorityRatings *[]RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item `json:"priorityRatings,omitempty"`
+	Ratings         []RoutingStrategyNodeConfigForUpsert_Ratings_Item          `json:"ratings"`
 
 	// Reroute RoutingStrategyRerouteConfig
 	Reroute *RoutingStrategyRerouteConfig `json:"reroute,omitempty"`
@@ -19868,6 +20013,11 @@ type RoutingStrategyNodeConfigForUpsert struct {
 
 // RoutingStrategyNodeConfigForUpsert_Fences_Item defines model for RoutingStrategyNodeConfigForUpsert.fences.Item.
 type RoutingStrategyNodeConfigForUpsert_Fences_Item struct {
+	union json.RawMessage
+}
+
+// RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item defines model for RoutingStrategyNodeConfigForUpsert.priorityRatings.Item.
+type RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item struct {
 	union json.RawMessage
 }
 
@@ -19958,6 +20108,19 @@ type RoutingStrategyPathElement struct {
 // RoutingStrategyPathElementType RoutingStrategyPathElementType
 type RoutingStrategyPathElementType string
 
+// RoutingStrategyPriorityRatingForUpsert A rating is used to rate a set of possible facilities against each other during routing of orders, ordered by priority.
+type RoutingStrategyPriorityRatingForUpsert struct {
+	// Configuration Base configuration for ratings. See documentation for details.
+	Configuration *AbstractRatingConfiguration `json:"configuration,omitempty"`
+
+	// Implementation This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Discriminator identifying a rating variant.
+	Implementation RatingImplementation `json:"implementation"`
+	Priority       float32              `json:"priority"`
+
+	// Type Discriminator identifying a rating as a routing strategy standard rating, ordered by priority.
+	Type RoutingStrategyStandardPriorityRatingType `json:"type"`
+}
+
 // RoutingStrategyRatingForUpsert A rating is used to rate a set of possible facilities against each other during routing of orders.
 type RoutingStrategyRatingForUpsert struct {
 	Active bool `json:"active"`
@@ -20046,6 +20209,24 @@ type RoutingStrategyStandardFenceForUpsert struct {
 // RoutingStrategyStandardFenceType RoutingStrategyStandardFenceType
 type RoutingStrategyStandardFenceType string
 
+// RoutingStrategyStandardPriorityRating A rating is used to rate a set of possible facilities against each other during routing of orders, ordered by priority.
+type RoutingStrategyStandardPriorityRating struct {
+	// Configuration Base configuration for ratings. See documentation for details.
+	Configuration *AbstractRatingConfiguration `json:"configuration,omitempty"`
+	Description   *string                      `json:"description,omitempty"`
+
+	// Implementation This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Discriminator identifying a rating variant.
+	Implementation RatingImplementation `json:"implementation"`
+	Name           *string              `json:"name,omitempty"`
+	Priority       float32              `json:"priority"`
+
+	// Type Discriminator identifying a rating as a routing strategy standard rating, ordered by priority.
+	Type RoutingStrategyStandardPriorityRatingType `json:"type"`
+}
+
+// RoutingStrategyStandardPriorityRatingType Discriminator identifying a rating as a routing strategy standard rating, ordered by priority.
+type RoutingStrategyStandardPriorityRatingType string
+
 // RoutingStrategyStandardRating A rating is used to rate a set of possible facilities against each other during routing of orders.
 type RoutingStrategyStandardRating struct {
 	Active bool `json:"active"`
@@ -20118,6 +20299,45 @@ type RoutingStrategyToolkitFence struct {
 // RoutingStrategyToolkitFenceType RoutingStrategyToolkitFenceType
 type RoutingStrategyToolkitFenceType string
 
+// RoutingStrategyToolkitPriorityRating Routing Strategy Toolkit Rating, ordered by priority.
+type RoutingStrategyToolkitPriorityRating struct {
+	// ComparisonRule The rule, comparing the left and right path values, that will be evaluated applying a RuleOperator
+	ComparisonRule *ToolkitComparisonRule `json:"comparisonRule,omitempty"`
+
+	// Description The description of this rating
+	Description *string `json:"description,omitempty"`
+
+	// DescriptionLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	DescriptionLocalized *LocaleString `json:"descriptionLocalized,omitempty"`
+
+	// Entity1 This field is obsolete, was replaced by the entity fields at predicate level.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	Entity1 *ToolkitAllowedEntities `json:"entity1,omitempty"`
+
+	// Entity2 This field is obsolete, was replaced by the entity fields at predicate level.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	Entity2 *ToolkitAllowedEntities `json:"entity2,omitempty"`
+
+	// Name The name of the rating
+	Name *string `json:"name,omitempty"`
+
+	// NameLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
+	NameLocalized LocaleString `json:"nameLocalized"`
+
+	// Priority The priority of this rating
+	Priority    int    `json:"priority"`
+	ReferenceId string `json:"referenceId"`
+
+	// Rule The rule, containing the left predicates and the right predicates, that will be evaluated applying a RuleOperator
+	Rule *ToolkitRule `json:"rule,omitempty"`
+
+	// Type Discriminator identifying a rating as a routing strategy toolkit rating, ordered by priority.
+	Type RoutingStrategyToolkitPriorityRatingType `json:"type"`
+}
+
+// RoutingStrategyToolkitPriorityRatingType Discriminator identifying a rating as a routing strategy toolkit rating, ordered by priority.
+type RoutingStrategyToolkitPriorityRatingType string
+
 // RoutingStrategyToolkitRating Routing Strategy Toolkit Rating.
 type RoutingStrategyToolkitRating struct {
 	// Active Indicates whether this rating is active or not
@@ -20132,22 +20352,12 @@ type RoutingStrategyToolkitRating struct {
 	// DescriptionLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
 	DescriptionLocalized *LocaleString `json:"descriptionLocalized,omitempty"`
 
-	// Entity1 The entities that can be compared by the toolkit fence or rating
-	//   * `ORDER`
-	//   * `FACILITY`
-	//   * `CARRIERCONNECTION`
-	//   * `LISTING`
-	//   * `ORDERING_FACILITY` - left side only
-	//   * `ORDERING_FACILITY_GROUPS` - left side only
+	// Entity1 This field is obsolete, was replaced by the entity fields at predicate level.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	Entity1 *ToolkitAllowedEntities `json:"entity1,omitempty"`
 
-	// Entity2 The entities that can be compared by the toolkit fence or rating
-	//   * `ORDER`
-	//   * `FACILITY`
-	//   * `CARRIERCONNECTION`
-	//   * `LISTING`
-	//   * `ORDERING_FACILITY` - left side only
-	//   * `ORDERING_FACILITY_GROUPS` - left side only
+	// Entity2 This field is obsolete, was replaced by the entity fields at predicate level.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	Entity2 *ToolkitAllowedEntities `json:"entity2,omitempty"`
 
 	// MaxPenalty The maximum penalty this rating can have
@@ -20337,6 +20547,9 @@ type ShipmentParcelsFilter struct {
 type ShipmentParcelsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *ShipmentParcelsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // ShipmentParcelsParcelStatusEnumFilter ShipmentParcelsParcelStatusEnumFilter
@@ -20448,6 +20661,9 @@ type ShippingInformationCarrierRecipientInformationAddressFilter struct {
 type ShippingInformationCarrierRecipientInformationAddressListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *ShippingInformationCarrierRecipientInformationAddressFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // ShippingInformationCarrierRecipientInformationFilter ShippingInformationCarrierRecipientInformationFilter
@@ -20460,6 +20676,9 @@ type ShippingInformationCarrierRecipientInformationFilter struct {
 type ShippingInformationCarrierRecipientInformationListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *ShippingInformationCarrierRecipientInformationFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // ShippingInformationSearchQuery ShippingInformationSearchQuery
@@ -20511,6 +20730,9 @@ type ShippingInformationShippingInformationLineItemsFilter struct {
 type ShippingInformationShippingInformationLineItemsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *ShippingInformationShippingInformationLineItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // SimulationOrderConsumerAddressesAddressTypeEnumFilter SimulationOrderConsumerAddressesAddressTypeEnumFilter
@@ -20574,6 +20796,9 @@ type SimulationOrderConsumerAddressesFilter struct {
 type SimulationOrderConsumerAddressesListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *SimulationOrderConsumerAddressesFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // SimulationOrderConsumerFilter SimulationOrderConsumerFilter
@@ -20598,6 +20823,9 @@ type SimulationOrderDeliveryPreferencesCollectFilter struct {
 type SimulationOrderDeliveryPreferencesCollectListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *SimulationOrderDeliveryPreferencesCollectFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // SimulationOrderDeliveryPreferencesFilter SimulationOrderDeliveryPreferencesFilter
@@ -20673,6 +20901,9 @@ type SimulationOrderOrderLineItemsFilter struct {
 type SimulationOrderOrderLineItemsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *SimulationOrderOrderLineItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // SimulationOrderPaymentInfoFilter SimulationOrderPaymentInfoFilter
@@ -20750,6 +20981,9 @@ type SimulationOrderTagsFilter struct {
 type SimulationOrderTagsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *SimulationOrderTagsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // SourceRef SourceRef
@@ -21873,6 +22107,9 @@ type StowJobStowLineItemsFilter struct {
 type StowJobStowLineItemsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *StowJobStowLineItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // StowJobStowLineItemsStowToFilter StowJobStowLineItemsStowToFilter
@@ -21891,6 +22128,9 @@ type StowJobStowLineItemsStowToFilter struct {
 type StowJobStowLineItemsStowToListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *StowJobStowLineItemsStowToFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // StowJobStowLineItemsStowToStowedFilter StowJobStowLineItemsStowToStowedFilter
@@ -22700,6 +22940,9 @@ type UserAssignedFacilitiesFilter struct {
 type UserAssignedFacilitiesListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *UserAssignedFacilitiesFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // UserAssignedFacility UserAssignedFacility
@@ -22787,12 +23030,18 @@ type UserAssignedRolesContextLimitationsFilter struct {
 type UserAssignedRolesContextLimitationsListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *UserAssignedRolesContextLimitationsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // UserAssignedRolesContextListFilter UserAssignedRolesContextListFilter
 type UserAssignedRolesContextListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *UserAssignedRolesContextFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // UserAssignedRolesFilter UserAssignedRolesFilter
@@ -22812,6 +23061,9 @@ type UserAssignedRolesFilter struct {
 type UserAssignedRolesListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *UserAssignedRolesFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // UserAssignedRolesSort UserAssignedRolesSort
@@ -22882,6 +23134,9 @@ type UserCustomClaimsRolesFilter struct {
 type UserCustomClaimsRolesListFilter struct {
 	// Contains Contains returns if at least one entry matches
 	Contains *UserCustomClaimsRolesFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
 }
 
 // UserCustomClaimsRolesUserRoleNamesEnumFilter UserCustomClaimsRolesUserRoleNamesEnumFilter
@@ -26955,6 +27210,95 @@ func (t *RoutingStrategyNodeConfig_Fences_Item) UnmarshalJSON(b []byte) error {
 	return err
 }
 
+// AsRoutingStrategyStandardPriorityRating returns the union data inside the RoutingStrategyNodeConfig_PriorityRatings_Item as a RoutingStrategyStandardPriorityRating
+func (t RoutingStrategyNodeConfig_PriorityRatings_Item) AsRoutingStrategyStandardPriorityRating() (RoutingStrategyStandardPriorityRating, error) {
+	var body RoutingStrategyStandardPriorityRating
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromRoutingStrategyStandardPriorityRating overwrites any union data inside the RoutingStrategyNodeConfig_PriorityRatings_Item as the provided RoutingStrategyStandardPriorityRating
+func (t *RoutingStrategyNodeConfig_PriorityRatings_Item) FromRoutingStrategyStandardPriorityRating(v RoutingStrategyStandardPriorityRating) error {
+	v.Type = "StandardPriorityRating"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeRoutingStrategyStandardPriorityRating performs a merge with any union data inside the RoutingStrategyNodeConfig_PriorityRatings_Item, using the provided RoutingStrategyStandardPriorityRating
+func (t *RoutingStrategyNodeConfig_PriorityRatings_Item) MergeRoutingStrategyStandardPriorityRating(v RoutingStrategyStandardPriorityRating) error {
+	v.Type = "StandardPriorityRating"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsRoutingStrategyToolkitPriorityRating returns the union data inside the RoutingStrategyNodeConfig_PriorityRatings_Item as a RoutingStrategyToolkitPriorityRating
+func (t RoutingStrategyNodeConfig_PriorityRatings_Item) AsRoutingStrategyToolkitPriorityRating() (RoutingStrategyToolkitPriorityRating, error) {
+	var body RoutingStrategyToolkitPriorityRating
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromRoutingStrategyToolkitPriorityRating overwrites any union data inside the RoutingStrategyNodeConfig_PriorityRatings_Item as the provided RoutingStrategyToolkitPriorityRating
+func (t *RoutingStrategyNodeConfig_PriorityRatings_Item) FromRoutingStrategyToolkitPriorityRating(v RoutingStrategyToolkitPriorityRating) error {
+	v.Type = "ToolkitPriorityRating"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeRoutingStrategyToolkitPriorityRating performs a merge with any union data inside the RoutingStrategyNodeConfig_PriorityRatings_Item, using the provided RoutingStrategyToolkitPriorityRating
+func (t *RoutingStrategyNodeConfig_PriorityRatings_Item) MergeRoutingStrategyToolkitPriorityRating(v RoutingStrategyToolkitPriorityRating) error {
+	v.Type = "ToolkitPriorityRating"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t RoutingStrategyNodeConfig_PriorityRatings_Item) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"type"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t RoutingStrategyNodeConfig_PriorityRatings_Item) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "StandardPriorityRating":
+		return t.AsRoutingStrategyStandardPriorityRating()
+	case "ToolkitPriorityRating":
+		return t.AsRoutingStrategyToolkitPriorityRating()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t RoutingStrategyNodeConfig_PriorityRatings_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *RoutingStrategyNodeConfig_PriorityRatings_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
 // AsRoutingStrategyStandardRating returns the union data inside the RoutingStrategyNodeConfig_Ratings_Item as a RoutingStrategyStandardRating
 func (t RoutingStrategyNodeConfig_Ratings_Item) AsRoutingStrategyStandardRating() (RoutingStrategyStandardRating, error) {
 	var body RoutingStrategyStandardRating
@@ -27129,6 +27473,95 @@ func (t RoutingStrategyNodeConfigForUpsert_Fences_Item) MarshalJSON() ([]byte, e
 }
 
 func (t *RoutingStrategyNodeConfigForUpsert_Fences_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsRoutingStrategyPriorityRatingForUpsert returns the union data inside the RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item as a RoutingStrategyPriorityRatingForUpsert
+func (t RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item) AsRoutingStrategyPriorityRatingForUpsert() (RoutingStrategyPriorityRatingForUpsert, error) {
+	var body RoutingStrategyPriorityRatingForUpsert
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromRoutingStrategyPriorityRatingForUpsert overwrites any union data inside the RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item as the provided RoutingStrategyPriorityRatingForUpsert
+func (t *RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item) FromRoutingStrategyPriorityRatingForUpsert(v RoutingStrategyPriorityRatingForUpsert) error {
+	v.Type = "StandardPriorityRating"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeRoutingStrategyPriorityRatingForUpsert performs a merge with any union data inside the RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item, using the provided RoutingStrategyPriorityRatingForUpsert
+func (t *RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item) MergeRoutingStrategyPriorityRatingForUpsert(v RoutingStrategyPriorityRatingForUpsert) error {
+	v.Type = "StandardPriorityRating"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsRoutingStrategyToolkitPriorityRating returns the union data inside the RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item as a RoutingStrategyToolkitPriorityRating
+func (t RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item) AsRoutingStrategyToolkitPriorityRating() (RoutingStrategyToolkitPriorityRating, error) {
+	var body RoutingStrategyToolkitPriorityRating
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromRoutingStrategyToolkitPriorityRating overwrites any union data inside the RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item as the provided RoutingStrategyToolkitPriorityRating
+func (t *RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item) FromRoutingStrategyToolkitPriorityRating(v RoutingStrategyToolkitPriorityRating) error {
+	v.Type = "ToolkitPriorityRating"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeRoutingStrategyToolkitPriorityRating performs a merge with any union data inside the RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item, using the provided RoutingStrategyToolkitPriorityRating
+func (t *RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item) MergeRoutingStrategyToolkitPriorityRating(v RoutingStrategyToolkitPriorityRating) error {
+	v.Type = "ToolkitPriorityRating"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"type"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "StandardPriorityRating":
+		return t.AsRoutingStrategyPriorityRatingForUpsert()
+	case "ToolkitPriorityRating":
+		return t.AsRoutingStrategyToolkitPriorityRating()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
