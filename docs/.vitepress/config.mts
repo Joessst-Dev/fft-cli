@@ -21,12 +21,13 @@ function referenceSidebar() {
 // Shared by og: and twitter:, which want the same sentence and would otherwise
 // drift apart.
 const SITE_URL = 'https://joessst-dev.github.io/fft-cli/'
+const SITE_TITLE = 'fft'
 const SOCIAL_TITLE = 'fft — one CLI for the fulfillmenttools API'
 const SOCIAL_DESCRIPTION =
   "Every one of the fulfillmenttools API's 557 operations in your shell — one binary, one auth path, one output contract. Runs without a tenant."
 
 export default defineConfig({
-  title: 'fft',
+  title: SITE_TITLE,
   description: 'A command-line client for the fulfillmenttools API.',
 
   // Project page under joessst-dev.github.io/fft-cli/, not a user/apex site.
@@ -65,9 +66,15 @@ export default defineConfig({
       .replace(/\.md$/, '')
     const isHome = path === ''
 
-    // `| fft` mirrors VitePress's own titleTemplate, so a page's <title> and its
-    // og:title don't disagree about how they join the site name.
-    const title = isHome ? SOCIAL_TITLE : `${pageData.title} | fft`
+    // Mirror VitePress's own createTitle, or og:title contradicts the <title> it
+    // shadows: it joins with `|`, and it dedupes when a page's title already *is*
+    // the site title — `fft`'s own reference page is <title>fft</title>, not
+    // `fft | fft`.
+    const title = isHome
+      ? SOCIAL_TITLE
+      : pageData.title === SITE_TITLE
+        ? SITE_TITLE
+        : `${pageData.title} | ${SITE_TITLE}`
     const description = pageData.frontmatter.description ?? SOCIAL_DESCRIPTION
 
     pageData.frontmatter.head ??= []
