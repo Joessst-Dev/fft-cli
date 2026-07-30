@@ -23468,6 +23468,7 @@ type GetStockDistributionParams struct {
 	FacilityStatus       *[]GetStockDistributionParamsFacilityStatus       `form:"facilityStatus,omitempty" json:"facilityStatus,omitempty"`
 	FacilityName         *string                                           `form:"facilityName,omitempty" json:"facilityName,omitempty"`
 	FacilityIds          *[]string                                         `form:"facilityIds,omitempty" json:"facilityIds,omitempty"`
+	FacilityGroupRefs    *[]string                                         `form:"facilityGroupRefs,omitempty" json:"facilityGroupRefs,omitempty"`
 
 	// ChannelRefs The channels to included under "channelAdjusted" in each summary and facility stock. Provide up to 50 channelRefs, specify "UNALLOCATED for unallocated stock."
 	ChannelRefs *[]string `form:"channelRefs,omitempty" json:"channelRefs,omitempty"`
@@ -32923,6 +32924,18 @@ func NewGetStockDistributionRequest(server string, tenantArticleId string, param
 		if params.FacilityIds != nil {
 
 			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "facilityIds", *params.FacilityIds, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "array", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.FacilityGroupRefs != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "facilityGroupRefs", *params.FacilityGroupRefs, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "array", Format: ""}); err != nil {
 				return nil, err
 			} else {
 				for _, qp := range strings.Split(queryFrag, "&") {

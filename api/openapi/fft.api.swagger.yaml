@@ -202,6 +202,18 @@ paths:
             items:
               type: string
             type: array
+        - explode: true
+          in: query
+          name: facilityGroupRefs
+          required: false
+          schema:
+            example:
+              - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+              - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+            items:
+              type: string
+            maxItems: 1
+            type: array
         - description: >-
             The channels to included under "channelAdjusted" in each summary and
             facility stock. Provide up to 50 channelRefs, specify "UNALLOCATED
