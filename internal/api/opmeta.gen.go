@@ -4612,6 +4612,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "tenantArticleId", In: InPath, Type: TypeString, Required: true},
 			{Name: "channelRefs", In: InQuery, Type: TypeArray, Item: TypeString, Explode: true, Description: "The channels to included under \"channelAdjusted\" in each summary and facility stock. Provide up to 50 channelRefs, specify \"UNALLOCATED for unallocated stock.\""},
+			{Name: "facilityGroupRefs", In: InQuery, Type: TypeArray, Item: TypeString, Explode: true},
 			{Name: "facilityIds", In: InQuery, Type: TypeArray, Item: TypeString, Explode: true},
 			{Name: "facilityName", In: InQuery, Type: TypeString},
 			{Name: "facilityServiceTypes", In: InQuery, Type: TypeArray, Item: TypeString, Enum: []string{"SHIP_FROM_STORE", "PICKUP"}},
