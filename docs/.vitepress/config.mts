@@ -18,6 +18,11 @@ function referenceSidebar() {
   }))
 }
 
+// Shared by og: and twitter:, which want the same sentence and would otherwise
+// drift apart.
+const SOCIAL_DESCRIPTION =
+  "Every one of the fulfillmenttools API's 557 operations in your shell — one binary, one auth path, one output contract. Runs without a tenant."
+
 export default defineConfig({
   title: 'fft',
   description: 'A command-line client for the fulfillmenttools API.',
@@ -29,7 +34,24 @@ export default defineConfig({
   lastUpdated: true,
   ignoreDeadLinks: false,
 
-  head: [['link', { rel: 'icon', href: '/fft-cli/favicon.svg' }]],
+  // The og:/twitter: tags are what a crawler, a Slack unfurl or a search result
+  // shows — VitePress's `description` above only reaches <meta name=description>.
+  // Their URLs are absolute because a consumer resolves them without the page's
+  // `base`, so a `/fft-cli/…` path would 404 for everyone but a browser already
+  // on the site. No og:image: there is no social card, and pointing one at the
+  // favicon.svg renders as a broken tile on every platform that rejects SVG —
+  // hence `summary` rather than `summary_large_image`.
+  head: [
+    ['link', { rel: 'icon', href: '/fft-cli/favicon.svg' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:site_name', content: 'fft' }],
+    ['meta', { property: 'og:title', content: 'fft — one CLI for the fulfillmenttools API' }],
+    ['meta', { property: 'og:description', content: SOCIAL_DESCRIPTION }],
+    ['meta', { property: 'og:url', content: 'https://joessst-dev.github.io/fft-cli/' }],
+    ['meta', { name: 'twitter:card', content: 'summary' }],
+    ['meta', { name: 'twitter:title', content: 'fft — one CLI for the fulfillmenttools API' }],
+    ['meta', { name: 'twitter:description', content: SOCIAL_DESCRIPTION }],
+  ],
 
   themeConfig: {
     nav: [
