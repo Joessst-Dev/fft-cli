@@ -202,6 +202,18 @@ paths:
             items:
               type: string
             type: array
+        - explode: true
+          in: query
+          name: facilityGroupRefs
+          required: false
+          schema:
+            example:
+              - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+              - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+            items:
+              type: string
+            maxItems: 1
+            type: array
         - description: >-
             The channels to included under "channelAdjusted" in each summary and
             facility stock. Provide up to 50 channelRefs, specify "UNALLOCATED
@@ -2573,7 +2585,7 @@ paths:
     post:
       deprecated: false
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />Create a new event scope configuration for inventory article
@@ -2615,13 +2627,13 @@ paths:
       tags:
         - Event Scope Configuration (Core)
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
   /api/configurations/eventscopes/inventoryarticleavailabilitychanged/{id}:
     delete:
       deprecated: false
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />Delete an event scope configuration by ID or URN.
@@ -2670,12 +2682,12 @@ paths:
       tags:
         - Event Scope Configuration (Core)
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
     get:
       deprecated: false
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br />Get
         an event scope configuration by ID or URN.
@@ -2724,12 +2736,12 @@ paths:
       tags:
         - Event Scope Configuration (Core)
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
     put:
       deprecated: false
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />Replace an existing event scope configuration.
@@ -2791,8 +2803,8 @@ paths:
       tags:
         - Event Scope Configuration (Core)
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
   /api/configurations/eventscopes/inventoryarticleavailabilitychanged/search:
     post:
       deprecated: false
@@ -36398,6 +36410,35 @@ components:
       title: DhlV2CarrierConfiguration
       type: object
       description: DhlV2CarrierConfiguration
+    DiagnosticCode:
+      description: >-
+        Indicates the specific reason a picking diagnostic was raised.
+
+
+        STOCK_SHORT_PICK => The quantity picked from a partial stock location
+        was below the requested quantity, while short-pick handling was enabled
+        for this configuration.
+
+
+        LINE_ITEM_SHORT_PICK => The quantity picked for a pick line item was
+        below the requested quantity.
+
+
+        STOCK_NOT_FOUND => The specified stock reference or tenant stock ID
+        could not be found.
+
+
+        INSUFFICIENT_STOCK => The target stock did not have enough available
+        quantity to fulfill the request.
+      enum:
+        - STOCK_SHORT_PICK
+        - LINE_ITEM_SHORT_PICK
+        - STOCK_NOT_FOUND
+        - INSUFFICIENT_STOCK
+      type: string
+      xml:
+        name: DiagnosticCode
+      title: DiagnosticCode
     DocumentCategory:
       enum:
         - EXTERNAL
@@ -38905,6 +38946,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/FacilityAddressEmailAddressesFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: FacilityAddressEmailAddressesListFilter
       type: object
       description: FacilityAddressEmailAddressesListFilter
@@ -40413,6 +40459,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/FacilityServicesFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: FacilityServicesListFilter
       type: object
       description: FacilityServicesListFilter
@@ -40726,7 +40777,6 @@ components:
         facilityServiceTypes:
           items:
             $ref: '#/components/schemas/FacilityServiceType'
-            type: string
           type: array
         facilityStatus:
           $ref: '#/components/schemas/FacilityStatus'
@@ -40803,6 +40853,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/FacilityTagsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: FacilityTagsListFilter
       type: object
       description: FacilityTagsListFilter
@@ -42427,6 +42482,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/HandoverJobAssignedUsersFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: HandoverJobAssignedUsersListFilter
       type: object
       description: HandoverJobAssignedUsersListFilter
@@ -42715,6 +42775,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/HandoverJobHandoverJobLineItemsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: HandoverJobHandoverJobLineItemsListFilter
       type: object
       description: HandoverJobHandoverJobLineItemsListFilter
@@ -42749,6 +42814,11 @@ components:
             - $ref: >-
                 #/components/schemas/HandoverJobHandoverJobLineItemsSubstituteLineItemsFilter
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: HandoverJobHandoverJobLineItemsSubstituteLineItemsListFilter
       type: object
       description: HandoverJobHandoverJobLineItemsSubstituteLineItemsListFilter
@@ -44335,6 +44405,11 @@ components:
             - $ref: >-
                 #/components/schemas/InboundProcessPurchaseOrderRequestedItemsFilter
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: InboundProcessPurchaseOrderRequestedItemsListFilter
       type: object
       description: InboundProcessPurchaseOrderRequestedItemsListFilter
@@ -44474,6 +44549,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/InboundProcessReceiptsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: InboundProcessReceiptsListFilter
       type: object
       description: InboundProcessReceiptsListFilter
@@ -44500,6 +44580,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/InboundProcessReceiptsReceivedItemsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: InboundProcessReceiptsReceivedItemsListFilter
       type: object
       description: InboundProcessReceiptsReceivedItemsListFilter
@@ -48916,6 +49001,11 @@ components:
             - $ref: >-
                 #/components/schemas/LinkedServiceJobsUsersModificationHistoryFilter
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: LinkedServiceJobsUsersModificationHistoryListFilter
       type: object
       description: LinkedServiceJobsUsersModificationHistoryListFilter
@@ -50090,6 +50180,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/ListingTagsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: ListingTagsListFilter
       type: object
       description: ListingTagsListFilter
@@ -51155,6 +51250,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/LookupRecordItemValuesFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: LookupRecordItemValuesListFilter
       type: object
       description: LookupRecordItemValuesListFilter
@@ -55443,6 +55543,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/OrderConsumerAddressesFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: OrderConsumerAddressesListFilter
       type: object
       description: OrderConsumerAddressesListFilter
@@ -55512,6 +55617,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/OrderDeliveryPreferencesCollectFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: OrderDeliveryPreferencesCollectListFilter
       type: object
       description: OrderDeliveryPreferencesCollectListFilter
@@ -56246,6 +56356,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/OrderOrderLineItemsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: OrderOrderLineItemsListFilter
       type: object
       description: OrderOrderLineItemsListFilter
@@ -56921,6 +57036,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/OrderRecordConsumerAddressesFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: OrderRecordConsumerAddressesListFilter
       type: object
       description: OrderRecordConsumerAddressesListFilter
@@ -57199,6 +57319,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/OrderRecordLineItemsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: OrderRecordLineItemsListFilter
       type: object
       description: OrderRecordLineItemsListFilter
@@ -57532,6 +57657,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/OrderRecordPaymentsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: OrderRecordPaymentsListFilter
       type: object
       description: OrderRecordPaymentsListFilter
@@ -58339,6 +58469,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/OrderTagsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: OrderTagsListFilter
       type: object
       description: OrderTagsListFilter
@@ -60097,6 +60232,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/PackJobLineItemsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: PackJobLineItemsListFilter
       type: object
       description: PackJobLineItemsListFilter
@@ -60245,6 +60385,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/PackJobPackingSourceContainersFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: PackJobPackingSourceContainersListFilter
       type: object
       description: PackJobPackingSourceContainersListFilter
@@ -61620,6 +61765,11 @@ components:
             - $ref: >-
                 #/components/schemas/ParcelInformationParcelInformationLineItemsFilter
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: ParcelInformationParcelInformationLineItemsListFilter
       type: object
       description: ParcelInformationParcelInformationLineItemsListFilter
@@ -62009,6 +62159,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/ParcelItemsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: ParcelItemsListFilter
       type: object
       description: ParcelItemsListFilter
@@ -62772,6 +62927,20 @@ components:
         name: PartialStock
       title: PartialStockForCreation
       description: PartialStockForCreation
+    PartialStockLocation:
+      properties:
+        stockRef:
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          nullable: true
+          type: string
+        tenantPartialStockId:
+          type: string
+      required:
+        - tenantPartialStockId
+        - stockRef
+      title: PartialStockLocation
+      type: object
+      description: PartialStockLocation
     PartialStockPatchActions:
       properties:
         actions:
@@ -63332,6 +63501,136 @@ components:
       type: object
       title: PickingMethodsConfiguration
       description: PickingMethodsConfiguration
+    PickingOutcomeConfigSnapshot:
+      properties:
+        shortPickActiveDefaulted:
+          description: True when shortpick.active config was absent and defaulted to true
+          type: boolean
+        stockToZeroOnEmptyPartialStockLocationActive:
+          description: Whether stock should be set to zero on empty partial stock location
+          type: boolean
+        stockToZeroOnShortPickActive:
+          description: Whether stock should be set to zero on short pick
+          type: boolean
+      required:
+        - stockToZeroOnShortPickActive
+        - stockToZeroOnEmptyPartialStockLocationActive
+        - shortPickActiveDefaulted
+      title: PickingOutcomeConfigSnapshot
+      type: object
+      description: PickingOutcomeConfigSnapshot
+    PickingOutcomeDiagnostic:
+      properties:
+        code:
+          $ref: '#/components/schemas/DiagnosticCode'
+      required:
+        - code
+      title: PickingOutcomeDiagnostic
+      type: object
+      description: PickingOutcomeDiagnostic
+    PickingOutcomeEventPayload:
+      properties:
+        config:
+          allOf:
+            - $ref: '#/components/schemas/PickingOutcomeConfigSnapshot'
+          description: Job-wide config snapshot
+        header:
+          $ref: '#/components/schemas/PickingOutcomeHeader'
+        reasons:
+          description: Unique list of all DiagnosticCodes
+          items:
+            $ref: '#/components/schemas/DiagnosticCode'
+          type: array
+        records:
+          items:
+            $ref: '#/components/schemas/PickingOutcomeRecord'
+          type: array
+      required:
+        - header
+        - config
+        - reasons
+        - records
+      title: PickingOutcomeEventPayload
+      type: object
+      description: PickingOutcomeEventPayload
+    PickingOutcomeHeader:
+      properties:
+        facilityRef:
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        jobRef:
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        jobType:
+          $ref: '#/components/schemas/PickingOutcomeHeaderJobType'
+        orderRef:
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        processRef:
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        routingPlanRef:
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        tenantOrderId:
+          example: MY_ORDER_ID
+          type: string
+      required:
+        - jobRef
+        - facilityRef
+      title: PickingOutcomeHeader
+      type: object
+      description: PickingOutcomeHeader
+    PickingOutcomeHeaderJobType:
+      description: PickingOutcome Source Trigger
+      enum:
+        - PICK_JOB
+        - HANDOVER_JOB
+        - CHAINED_SUPPLIER
+      type: string
+      xml:
+        name: PickingOutcomeHeaderJobType
+      title: PickingOutcomeHeaderJobType
+    PickingOutcomeRecord:
+      properties:
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/PickingOutcomeDiagnostic'
+          type: array
+        lineItemId:
+          description: >-
+            Depending on the trigger this holds the pickLineItem.id from a
+            pickJob or handoverJobLineItem.id from an handoverJob
+          type: string
+        partialStockLocation:
+          $ref: '#/components/schemas/PartialStockLocation'
+        provided:
+          $ref: '#/components/schemas/ProvidedSection'
+        reduction:
+          $ref: '#/components/schemas/ReductionSection'
+        stockSelection:
+          $ref: '#/components/schemas/StockSelectionSection'
+        substituteLocationRef:
+          type: string
+      required:
+        - provided
+        - stockSelection
+        - reduction
+        - diagnostics
+      title: PickingOutcomeRecord
+      type: object
+      description: PickingOutcomeRecord
+    PickingOutcomeWebHookEvent:
+      allOf:
+        - $ref: '#/components/schemas/WebHookEvent'
+      properties:
+        payload:
+          $ref: '#/components/schemas/PickingOutcomeEventPayload'
+      required:
+        - payload
+      title: PickingOutcomeWebHookEvent
+      type: object
+      description: PickingOutcomeWebHookEvent
     PickingPatchActions:
       properties:
         actions:
@@ -64632,6 +64931,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/PickJobTransfersFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: PickJobTransfersListFilter
       type: object
       description: PickJobTransfersListFilter
@@ -66235,7 +66539,10 @@ components:
             type: string
           type: array
         returnRefs:
-          description: References to the Returns connected to this process (if present).
+          deprecated: true
+          description: >-
+            Deprecated. Use itemReturnJobRefs instead. References to the Returns
+            connected to this process (if present).
           items:
             type: string
           type: array
@@ -68050,6 +68357,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/ProcessTagsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: ProcessTagsListFilter
       type: object
       description: ProcessTagsListFilter
@@ -68312,6 +68624,17 @@ components:
         - invalidAfterTime
       title: PromisesConfiguration
       description: PromisesConfiguration
+    ProvidedSection:
+      properties:
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/PickingOutcomeDiagnostic'
+          type: array
+      required:
+        - diagnostics
+      title: ProvidedSection
+      type: object
+      description: ProvidedSection
     PurchaseOrder:
       properties:
         cancelled:
@@ -69069,6 +69392,17 @@ components:
       title: RecordableAttributeForUpdate
       type: object
       description: RecordableAttributeForUpdate
+    ReductionSection:
+      properties:
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/PickingOutcomeDiagnostic'
+          type: array
+      required:
+        - diagnostics
+      title: ReductionSection
+      type: object
+      description: ReductionSection
     RefundTrigger:
       properties:
         created:
@@ -69495,6 +69829,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/RemoteConfigurationScopesFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: RemoteConfigurationScopesListFilter
       type: object
       description: RemoteConfigurationScopesListFilter
@@ -72931,6 +73270,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/RoutingPlanCustomServicesArticleItemsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: RoutingPlanCustomServicesArticleItemsListFilter
       type: object
       description: RoutingPlanCustomServicesArticleItemsListFilter
@@ -72953,6 +73297,11 @@ components:
             - $ref: >-
                 #/components/schemas/RoutingPlanCustomServicesCustomServiceDefinitionAdditionalInformationFilter
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: >-
         RoutingPlanCustomServicesCustomServiceDefinitionAdditionalInformationListFilter
       type: object
@@ -72990,6 +73339,11 @@ components:
             - $ref: >-
                 #/components/schemas/RoutingPlanCustomServicesCustomServiceItemsArticleItemsFilter
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: RoutingPlanCustomServicesCustomServiceItemsArticleItemsListFilter
       type: object
       description: RoutingPlanCustomServicesCustomServiceItemsArticleItemsListFilter
@@ -73010,6 +73364,11 @@ components:
             - $ref: >-
                 #/components/schemas/RoutingPlanCustomServicesCustomServiceItemsFilter
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: RoutingPlanCustomServicesCustomServiceItemsListFilter
       type: object
       description: RoutingPlanCustomServicesCustomServiceItemsListFilter
@@ -73039,6 +73398,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/RoutingPlanCustomServicesFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: RoutingPlanCustomServicesListFilter
       type: object
       description: RoutingPlanCustomServicesListFilter
@@ -73066,6 +73430,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/RoutingPlanDeliveryPreferencesCollectFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: RoutingPlanDeliveryPreferencesCollectListFilter
       type: object
       description: RoutingPlanDeliveryPreferencesCollectListFilter
@@ -73123,6 +73492,11 @@ components:
             - $ref: >-
                 #/components/schemas/RoutingPlanDeliveryPreferencesShippingPreferredCarriersWithProductFilter
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: >-
         RoutingPlanDeliveryPreferencesShippingPreferredCarriersWithProductListFilter
       type: object
@@ -73196,6 +73570,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/RoutingPlanHistoryFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: RoutingPlanHistoryListFilter
       type: object
       description: RoutingPlanHistoryListFilter
@@ -73364,6 +73743,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/RoutingPlanOrderLineItemsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: RoutingPlanOrderLineItemsListFilter
       type: object
       description: RoutingPlanOrderLineItemsListFilter
@@ -73840,6 +74224,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/RoutingPlanStatusReasonsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: RoutingPlanStatusReasonsListFilter
       type: object
       description: RoutingPlanStatusReasonsListFilter
@@ -74424,6 +74813,17 @@ components:
           type: array
         orderSplit:
           $ref: '#/components/schemas/RoutingStrategyOrderSplitConfig'
+        priorityRatings:
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/RoutingStrategyStandardPriorityRating'
+              - $ref: '#/components/schemas/RoutingStrategyToolkitPriorityRating'
+            discriminator:
+              propertyName: type
+              mapping:
+                StandardPriorityRating: '#/components/schemas/RoutingStrategyStandardPriorityRating'
+                ToolkitPriorityRating: '#/components/schemas/RoutingStrategyToolkitPriorityRating'
+          type: array
         ratings:
           items:
             anyOf:
@@ -74528,6 +74928,18 @@ components:
           type: array
         orderSplit:
           $ref: '#/components/schemas/RoutingStrategyOrderSplitConfig'
+        priorityRatings:
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/RoutingStrategyPriorityRatingForUpsert'
+              - $ref: '#/components/schemas/RoutingStrategyToolkitPriorityRating'
+            discriminator:
+              propertyName: type
+              mapping:
+                StandardPriorityRating: '#/components/schemas/RoutingStrategyPriorityRatingForUpsert'
+                ToolkitPriorityRating: '#/components/schemas/RoutingStrategyToolkitPriorityRating'
+          maxItems: 100
+          type: array
         ratings:
           items:
             anyOf:
@@ -74678,6 +75090,28 @@ components:
       type: string
       title: RoutingStrategyPathElementType
       description: RoutingStrategyPathElementType
+    RoutingStrategyPriorityRatingForUpsert:
+      additionalProperties: false
+      description: >-
+        A rating is used to rate a set of possible facilities against each other
+        during routing of orders, ordered by priority.
+      properties:
+        configuration:
+          $ref: '#/components/schemas/AbstractRatingConfiguration'
+        implementation:
+          $ref: '#/components/schemas/RatingImplementation'
+        priority:
+          example: 100
+          minimum: 0
+          type: number
+        type:
+          $ref: '#/components/schemas/RoutingStrategyStandardPriorityRatingType'
+      required:
+        - type
+        - implementation
+        - priority
+      title: RoutingStrategyPriorityRatingForUpsert
+      type: object
     RoutingStrategyRatingForUpsert:
       additionalProperties: false
       description: >-
@@ -74851,6 +75285,40 @@ components:
       type: string
       title: RoutingStrategyStandardFenceType
       description: RoutingStrategyStandardFenceType
+    RoutingStrategyStandardPriorityRating:
+      additionalProperties: false
+      description: >-
+        A rating is used to rate a set of possible facilities against each other
+        during routing of orders, ordered by priority.
+      properties:
+        configuration:
+          $ref: '#/components/schemas/AbstractRatingConfiguration'
+        description:
+          type: string
+        implementation:
+          $ref: '#/components/schemas/RatingImplementation'
+        name:
+          type: string
+        priority:
+          example: 100
+          minimum: 0
+          type: number
+        type:
+          $ref: '#/components/schemas/RoutingStrategyStandardPriorityRatingType'
+      required:
+        - priority
+        - type
+        - implementation
+      title: RoutingStrategyStandardPriorityRating
+      type: object
+    RoutingStrategyStandardPriorityRatingType:
+      description: >-
+        Discriminator identifying a rating as a routing strategy standard
+        rating, ordered by priority.
+      enum:
+        - StandardPriorityRating
+      type: string
+      title: RoutingStrategyStandardPriorityRatingType
     RoutingStrategyStandardRating:
       additionalProperties: false
       description: >-
@@ -74945,6 +75413,63 @@ components:
       type: string
       title: RoutingStrategyToolkitFenceType
       description: RoutingStrategyToolkitFenceType
+    RoutingStrategyToolkitPriorityRating:
+      additionalProperties: false
+      description: Routing Strategy Toolkit Rating, ordered by priority.
+      properties:
+        nameLocalized:
+          $ref: '#/components/schemas/LocaleString'
+        descriptionLocalized:
+          $ref: '#/components/schemas/LocaleString'
+        comparisonRule:
+          $ref: '#/components/schemas/ToolkitComparisonRule'
+        description:
+          description: The description of this rating
+          example: Some text that describes what the rating does.
+          type: string
+        entity1:
+          allOf:
+            - $ref: '#/components/schemas/ToolkitAllowedEntities'
+          deprecated: true
+          description: >-
+            This field is obsolete, was replaced by the entity fields at
+            predicate level.
+        entity2:
+          allOf:
+            - $ref: '#/components/schemas/ToolkitAllowedEntities'
+          deprecated: true
+          description: >-
+            This field is obsolete, was replaced by the entity fields at
+            predicate level.
+        name:
+          description: The name of the rating
+          example: CustomRating
+          type: string
+        priority:
+          description: The priority of this rating
+          example: 100
+          type: integer
+        referenceId:
+          type: string
+        rule:
+          $ref: '#/components/schemas/ToolkitRule'
+        type:
+          $ref: '#/components/schemas/RoutingStrategyToolkitPriorityRatingType'
+      required:
+        - priority
+        - referenceId
+        - nameLocalized
+        - type
+      title: RoutingStrategyToolkitPriorityRating
+      type: object
+    RoutingStrategyToolkitPriorityRatingType:
+      description: >-
+        Discriminator identifying a rating as a routing strategy toolkit rating,
+        ordered by priority.
+      enum:
+        - ToolkitPriorityRating
+      type: string
+      title: RoutingStrategyToolkitPriorityRatingType
     RoutingStrategyToolkitRating:
       additionalProperties: false
       description: Routing Strategy Toolkit Rating.
@@ -74964,13 +75489,15 @@ components:
           example: Some text that describes what the rating does.
           type: string
         entity1:
-          $ref: '#/components/schemas/ToolkitAllowedEntities'
+          allOf:
+            - $ref: '#/components/schemas/ToolkitAllowedEntities'
           deprecated: true
           description: >-
             This field is obsolete, was replaced by the entity fields at
             predicate level.
         entity2:
-          $ref: '#/components/schemas/ToolkitAllowedEntities'
+          allOf:
+            - $ref: '#/components/schemas/ToolkitAllowedEntities'
           deprecated: true
           description: >-
             This field is obsolete, was replaced by the entity fields at
@@ -77881,6 +78408,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/ShipmentParcelsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: ShipmentParcelsListFilter
       type: object
       description: ShipmentParcelsListFilter
@@ -78419,6 +78951,11 @@ components:
             - $ref: >-
                 #/components/schemas/ShippingInformationCarrierRecipientInformationAddressFilter
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: ShippingInformationCarrierRecipientInformationAddressListFilter
       type: object
       description: ShippingInformationCarrierRecipientInformationAddressListFilter
@@ -78439,6 +78976,11 @@ components:
             - $ref: >-
                 #/components/schemas/ShippingInformationCarrierRecipientInformationFilter
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: ShippingInformationCarrierRecipientInformationListFilter
       type: object
       description: ShippingInformationCarrierRecipientInformationListFilter
@@ -78797,6 +79339,11 @@ components:
             - $ref: >-
                 #/components/schemas/ShippingInformationShippingInformationLineItemsFilter
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: ShippingInformationShippingInformationLineItemsListFilter
       type: object
       description: ShippingInformationShippingInformationLineItemsListFilter
@@ -79037,6 +79584,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/SimulationOrderConsumerAddressesFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: SimulationOrderConsumerAddressesListFilter
       type: object
       description: SimulationOrderConsumerAddressesListFilter
@@ -79074,6 +79626,11 @@ components:
             - $ref: >-
                 #/components/schemas/SimulationOrderDeliveryPreferencesCollectFilter
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: SimulationOrderDeliveryPreferencesCollectListFilter
       type: object
       description: SimulationOrderDeliveryPreferencesCollectListFilter
@@ -79407,6 +79964,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/SimulationOrderOrderLineItemsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: SimulationOrderOrderLineItemsListFilter
       type: object
       description: SimulationOrderOrderLineItemsListFilter
@@ -79622,6 +80184,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/SimulationOrderTagsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: SimulationOrderTagsListFilter
       type: object
       description: SimulationOrderTagsListFilter
@@ -81540,6 +82107,17 @@ components:
       title: StockSearchQuery
       type: object
       description: StockSearchQuery
+    StockSelectionSection:
+      properties:
+        diagnostics:
+          items:
+            $ref: '#/components/schemas/PickingOutcomeDiagnostic'
+          type: array
+      required:
+        - diagnostics
+      title: StockSelectionSection
+      type: object
+      description: StockSelectionSection
     StocksForUpsert:
       properties:
         stocks:
@@ -82982,6 +83560,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/StowJobStowLineItemsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: StowJobStowLineItemsListFilter
       type: object
       description: StowJobStowLineItemsListFilter
@@ -83009,6 +83592,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/StowJobStowLineItemsStowToFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: StowJobStowLineItemsStowToListFilter
       type: object
       description: StowJobStowLineItemsStowToListFilter
@@ -87691,6 +88279,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/UserAssignedFacilitiesFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: UserAssignedFacilitiesListFilter
       type: object
       description: UserAssignedFacilitiesListFilter
@@ -87835,6 +88428,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/UserAssignedRolesContextLimitationsFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: UserAssignedRolesContextLimitationsListFilter
       type: object
       description: UserAssignedRolesContextLimitationsListFilter
@@ -87844,6 +88442,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/UserAssignedRolesContextFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: UserAssignedRolesContextListFilter
       type: object
       description: UserAssignedRolesContextListFilter
@@ -87872,6 +88475,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/UserAssignedRolesFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: UserAssignedRolesListFilter
       type: object
       description: UserAssignedRolesListFilter
@@ -87985,6 +88593,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/UserCustomClaimsRolesFilter'
           description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
       title: UserCustomClaimsRolesListFilter
       type: object
       description: UserCustomClaimsRolesListFilter

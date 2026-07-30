@@ -782,7 +782,7 @@ var operations = []Operation{
 		Path:           "/api/configurations/eventscopes/inventoryarticleavailabilitychanged",
 		Tags:           []string{"Event Scope Configuration (Core)"},
 		Summary:        "Create event scope config",
-		Description:    "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Create a new event scope configuration for inventory article availability changed events.",
+		Description:    "This part of the API is in Beta status. For details, see the API release lifecycle documentation. Create a new event scope configuration for inventory article availability changed events.",
 		Permissions:    []string{"CONFIG_WRITE"},
 		HasBody:        true,
 		BodyRequired:   true,
@@ -1280,7 +1280,7 @@ var operations = []Operation{
 		Path:        "/api/configurations/eventscopes/inventoryarticleavailabilitychanged/{id}",
 		Tags:        []string{"Event Scope Configuration (Core)"},
 		Summary:     "Delete event scope config",
-		Description: "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Delete an event scope configuration by ID or URN.",
+		Description: "This part of the API is in Beta status. For details, see the API release lifecycle documentation. Delete an event scope configuration by ID or URN.",
 		Permissions: []string{"CONFIG_WRITE"},
 		Params: []Param{
 			{Name: "id", In: InPath, Type: TypeString, Required: true, Description: "ID of scope you want to get. Also accepts key in urn format (e.g., urn:fft:eventScopeConfig:key:{your-key})."},
@@ -2621,7 +2621,7 @@ var operations = []Operation{
 		Path:        "/api/configurations/eventscopes/inventoryarticleavailabilitychanged/{id}",
 		Tags:        []string{"Event Scope Configuration (Core)"},
 		Summary:     "Get event scope config",
-		Description: "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Get an event scope configuration by ID or URN.",
+		Description: "This part of the API is in Beta status. For details, see the API release lifecycle documentation. Get an event scope configuration by ID or URN.",
 		Permissions: []string{"CONFIG_READ"},
 		Params: []Param{
 			{Name: "id", In: InPath, Type: TypeString, Required: true, Description: "ID of scope you want to get. Also accepts key in urn format (e.g., urn:fft:eventScopeConfig:key:{your-key})."},
@@ -4612,6 +4612,7 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "tenantArticleId", In: InPath, Type: TypeString, Required: true},
 			{Name: "channelRefs", In: InQuery, Type: TypeArray, Item: TypeString, Explode: true, Description: "The channels to included under \"channelAdjusted\" in each summary and facility stock. Provide up to 50 channelRefs, specify \"UNALLOCATED for unallocated stock.\""},
+			{Name: "facilityGroupRefs", In: InQuery, Type: TypeArray, Item: TypeString, Explode: true},
 			{Name: "facilityIds", In: InQuery, Type: TypeArray, Item: TypeString, Explode: true},
 			{Name: "facilityName", In: InQuery, Type: TypeString},
 			{Name: "facilityServiceTypes", In: InQuery, Type: TypeArray, Item: TypeString, Enum: []string{"SHIP_FROM_STORE", "PICKUP"}},
@@ -6369,7 +6370,7 @@ var operations = []Operation{
 		Path:        "/api/configurations/eventscopes/inventoryarticleavailabilitychanged/{id}",
 		Tags:        []string{"Event Scope Configuration (Core)"},
 		Summary:     "Replace event scope config",
-		Description: "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Replace an existing event scope configuration.",
+		Description: "This part of the API is in Beta status. For details, see the API release lifecycle documentation. Replace an existing event scope configuration.",
 		Permissions: []string{"CONFIG_WRITE"},
 		Params: []Param{
 			{Name: "id", In: InPath, Type: TypeString, Required: true, Description: "ID of scope you want to get. Also accepts key in urn format (e.g., urn:fft:eventScopeConfig:key:{your-key})."},
