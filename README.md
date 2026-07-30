@@ -11,9 +11,10 @@ A command-line client for the [fulfillmenttools](https://fulfillmenttools.com) A
 fulfillmenttools ships an [official Postman
 collection](https://docs.fulfillmenttools.com/documentation/getting-started/access-to-fulfillmenttools-apis),
 and it is good: import it, fill in an environment, and every request in the API is a click
-away. But a click is where it ends. You cannot pipe a response into `jq`, run the same
-request across 200 facilities, put it in a CI job, or hand it to an agent — and its token
-is yours to refresh by hand once an hour.
+away — Newman will even run a collection from CI. But it stays inside Postman. A response
+lands in a result pane or a run report, never on stdout, so there is nothing to pipe into
+`jq`, compose into a script, or hand to an agent. And its token is yours to refresh by
+hand once an hour.
 
 `fft` is that same API in your shell. Set your projects up once, switch between them with
 a flag, and let the CLI obtain and refresh tokens invisibly. stdout is data and nothing
