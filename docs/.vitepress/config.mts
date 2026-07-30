@@ -38,9 +38,10 @@ export default defineConfig({
 
   // The og:/twitter: tags are what a crawler, a Slack unfurl or a search result
   // shows — VitePress's `description` above only reaches <meta name=description>.
-  // Only the invariant ones live here; the title/description/url vary per page
-  // and are emitted by transformPageData below. Putting them in both places
-  // would ship two og:title tags, and a consumer takes whichever it sees first.
+  // Only the invariant ones live here; the title and url are per-page and are
+  // emitted by transformPageData below, which the description rides along with
+  // so a page can override it via frontmatter (none does today). Putting a tag
+  // in both places would ship it twice, and a consumer takes the first it sees.
   //
   // No og:image: there is no social card, and pointing one at the favicon.svg
   // renders as a broken tile on every platform that rejects SVG — hence
@@ -64,7 +65,9 @@ export default defineConfig({
       .replace(/\.md$/, '')
     const isHome = path === ''
 
-    const title = isHome ? SOCIAL_TITLE : `${pageData.title} — fft`
+    // `| fft` mirrors VitePress's own titleTemplate, so a page's <title> and its
+    // og:title don't disagree about how they join the site name.
+    const title = isHome ? SOCIAL_TITLE : `${pageData.title} | fft`
     const description = pageData.frontmatter.description ?? SOCIAL_DESCRIPTION
 
     pageData.frontmatter.head ??= []
