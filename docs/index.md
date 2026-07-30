@@ -23,9 +23,9 @@ features:
   - title: Every operation, from day one
     details: Three tiers — curated commands, generated commands for the rest, and an escape hatch by operationId — share one binary. Not the endpoints someone got around to wrapping; all of them.
   - title: Auth that gets out of the way
-    details: Sign in once per project, switch between tenants freely, and let the CLI obtain and refresh tokens invisibly. Secrets live in your OS keychain.
+    details: Sign in once per project, switch between tenants with a flag, and let the CLI obtain and refresh tokens invisibly — no re-authenticating every hour. Secrets live in your OS keychain.
   - title: A pipe is always safe
-    details: stdout is data and nothing else — totals, notices and prompts go to stderr. Under -o json you get the API's own bytes, never a re-encoding.
+    details: stdout is data and nothing else — totals, notices and prompts go to stderr. Under -o json you get the API's own bytes, never a re-encoding. Loop it, script it, run it from CI.
   - title: Runs without a tenant
     details: fft emulator is a local, in-memory stand-in for the API — for a demo, a test, or trying a command out. Ships as a container image and as Go and Java Testcontainers modules.
   - title: Built for agents too

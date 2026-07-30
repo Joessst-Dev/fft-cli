@@ -8,13 +8,16 @@ A command-line client for the [fulfillmenttools](https://fulfillmenttools.com) A
 > its respective owner and is used here only to describe what this tool talks to.
 > For official support, contact fulfillmenttools — not this repository's issue tracker.
 
-Working with the API today means hand-rolling curl requests or maintaining a Postman
-collection: mint a bearer token by hand, remember the right host for the right tenant,
-and dig a correctly-shaped JSON body out of an 86,000-line swagger file. Switching from
-staging to prod to a customer's tenant means doing all of it again.
+fulfillmenttools ships an [official Postman
+collection](https://docs.fulfillmenttools.com/documentation/getting-started/access-to-fulfillmenttools-apis),
+and it is good: import it, fill in an environment, and every request in the API is a click
+away. But a click is where it ends. You cannot pipe a response into `jq`, run the same
+request across 200 facilities, put it in a CI job, or hand it to an agent — and its token
+is yours to refresh by hand once an hour.
 
-`fft` replaces that. Set your projects up once, switch between them freely, and let the
-CLI obtain and refresh tokens invisibly.
+`fft` is that same API in your shell. Set your projects up once, switch between them with
+a flag, and let the CLI obtain and refresh tokens invisibly. stdout is data and nothing
+else, so a pipe is always safe.
 
 **Every one of the 557 API operations is reachable from day one.** Not "the ones someone
 got around to wrapping" — all of them.
