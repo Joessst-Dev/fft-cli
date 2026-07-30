@@ -18,8 +18,16 @@ function referenceSidebar() {
   }))
 }
 
+// Shared by og: and twitter:, which want the same sentence and would otherwise
+// drift apart.
+const SITE_URL = 'https://joessst-dev.github.io/fft-cli/'
+const SITE_TITLE = 'fft'
+const SOCIAL_TITLE = 'fft — one CLI for the fulfillmenttools API'
+const SOCIAL_DESCRIPTION =
+  "Every one of the fulfillmenttools API's 557 operations in your shell — one binary, one auth path, one output contract. Runs without a tenant."
+
 export default defineConfig({
-  title: 'fft',
+  title: SITE_TITLE,
   description: 'A command-line client for the fulfillmenttools API.',
 
   // Project page under joessst-dev.github.io/fft-cli/, not a user/apex site.
@@ -29,7 +37,55 @@ export default defineConfig({
   lastUpdated: true,
   ignoreDeadLinks: false,
 
-  head: [['link', { rel: 'icon', href: '/fft-cli/favicon.svg' }]],
+  // The og:/twitter: tags are what a crawler, a Slack unfurl or a search result
+  // shows — VitePress's `description` above only reaches <meta name=description>.
+  // Only the invariant ones live here; the title and url are per-page and are
+  // emitted by transformPageData below, which the description rides along with
+  // so a page can override it via frontmatter (none does today). Putting a tag
+  // in both places would ship it twice, and a consumer takes the first it sees.
+  //
+  // No og:image: there is no social card, and pointing one at the favicon.svg
+  // renders as a broken tile on every platform that rejects SVG — hence
+  // `summary` rather than `summary_large_image`.
+  head: [
+    ['link', { rel: 'icon', href: '/fft-cli/favicon.svg' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:site_name', content: 'fft' }],
+    ['meta', { name: 'twitter:card', content: 'summary' }],
+  ],
+
+  // A deep link is what actually gets shared — `/reference/commands/fft_facility_list`
+  // far more often than the home page — so each page unfurls as itself rather than
+  // as the site root. The URLs are absolute: a crawler or a chat client resolves
+  // them without the page's `base`, so a `/fft-cli/…` path would 404 for everything
+  // but a browser already on the site.
+  transformPageData(pageData) {
+    // cleanUrls is on, so the served path drops `.md` and collapses index files.
+    const path = pageData.relativePath
+      .replace(/(^|\/)index\.md$/, '$1')
+      .replace(/\.md$/, '')
+    const isHome = path === ''
+
+    // Mirror VitePress's own createTitle, or og:title contradicts the <title> it
+    // shadows: it joins with `|`, and it dedupes when a page's title already *is*
+    // the site title — `fft`'s own reference page is <title>fft</title>, not
+    // `fft | fft`.
+    const title = isHome
+      ? SOCIAL_TITLE
+      : pageData.title === SITE_TITLE
+        ? SITE_TITLE
+        : `${pageData.title} | ${SITE_TITLE}`
+    const description = pageData.frontmatter.description ?? SOCIAL_DESCRIPTION
+
+    pageData.frontmatter.head ??= []
+    pageData.frontmatter.head.push(
+      ['meta', { property: 'og:title', content: title }],
+      ['meta', { property: 'og:description', content: description }],
+      ['meta', { property: 'og:url', content: SITE_URL + path }],
+      ['meta', { name: 'twitter:title', content: title }],
+      ['meta', { name: 'twitter:description', content: description }],
+    )
+  },
 
   themeConfig: {
     nav: [

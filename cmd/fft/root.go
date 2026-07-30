@@ -26,9 +26,8 @@ import (
 
 const rootLong = `fft is a command-line client for the fulfillmenttools API.
 
-It replaces hand-rolled curl requests and Postman collections: set up your
-projects once, switch between them freely, and let fft obtain and refresh
-access tokens for you.
+It puts the whole API in your shell: set up your projects once, switch between
+them freely, and let fft obtain and refresh access tokens for you.
 
 Every command's --help explains what the underlying endpoint does, which
 permission it needs, and shows a sample request body.

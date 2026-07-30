@@ -150,6 +150,8 @@ dockers_v2:
       org.opencontainers.image.title: "{{ .ProjectName }}"
       org.opencontainers.image.description: "A CLI for the fulfillmenttools API — every operation reachable from your shell."
       org.opencontainers.image.source: "https://github.com/Joessst-Dev/fft-cli"
+      org.opencontainers.image.url: "https://joessst-dev.github.io/fft-cli/"
+      org.opencontainers.image.documentation: "https://joessst-dev.github.io/fft-cli/"
       org.opencontainers.image.version: "{{ .Version }}"
       org.opencontainers.image.revision: "{{ .FullCommit }}"
       org.opencontainers.image.created: "{{ .CommitDate }}"
