@@ -13085,9 +13085,9 @@ paths:
         content:
           application/json:
             schema:
-              anyOf:
-                - $ref: '#/components/schemas/StartItemReturnJobActionParameter'
+              oneOf:
                 - $ref: '#/components/schemas/FinishItemReturnJobActionParameter'
+                - $ref: '#/components/schemas/StartItemReturnJobActionParameter'
                 - $ref: '#/components/schemas/RestartItemReturnJobActionParameter'
                 - $ref: >-
                     #/components/schemas/ChangeLineItemsToNotReturnableInItemReturnJobActionParameter
@@ -13574,6 +13574,138 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: The requested entity was not found
       summary: Update returned line item
+      x-fft-permissions:
+        - RETURN_WRITE
+      tags:
+        - Returns (Operations)
+  /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}/returnednotreturnablelineitems:
+    put:
+      deprecated: false
+      description: >-
+        Replace returned not returnable line items of an item return of an item
+        return job.
+      operationId: replaceReturnedNotReturnableLineItems
+      parameters:
+        - in: path
+          name: itemReturnJobId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: itemReturnId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReplaceReturnedNotReturnableLineItems'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemReturnJob'
+          description: >-
+            The not returnable returned line items were successfully updated.
+            Updated item return job is returned.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Invalid input. See response for details.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: A version conflict occurred.
+      summary: Update returned not returnable line items
+      x-fft-permissions:
+        - RETURN_WRITE
+      tags:
+        - Returns (Operations)
+  /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}/returnednotreturnablelineitems/{returnedNotReturnableLineItemId}:
+    patch:
+      deprecated: false
+      description: >-
+        Patch for a ItemReturn LineItem. This is used to update a returned not
+        returnable line item.
+      operationId: updateItemReturnNotReturnableLineItem
+      parameters:
+        - in: path
+          name: itemReturnJobId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: itemReturnId
+          required: true
+          schema:
+            type: string
+        - description: id of the returnedLineItem
+          in: path
+          name: returnedNotReturnableLineItemId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemReturnNotReturnableLineItemForUpdate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemReturnJob'
+          description: Updated ItemReturnJob
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Invalid input. See response for details.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The requested entity was not found
+      summary: Update returned not returnable line item
       x-fft-permissions:
         - RETURN_WRITE
       tags:
@@ -16762,6 +16894,51 @@ paths:
       summary: Call order line item action
       x-fft-permissions:
         - ORDER_WRITE
+      tags:
+        - Orders (DOMS)
+  /api/orders/actions:
+    post:
+      description: Bulk action of orders
+      operationId: bulkOrdersAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkOrderActionsParameter'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/BulkOrderActionResult'
+                type: array
+          description: Updated Orders in the body.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Orders not found or expired
+      summary: Call bulk orders action
+      x-fft-permissions:
+        - ORDER_WRITE
+        - ORDER_CANCEL
+        - ORDER_FORCE_CANCEL
       tags:
         - Orders (DOMS)
   /api/orders/search:
@@ -32058,6 +32235,23 @@ components:
       title: BringCarrierConfiguration
       type: object
       description: BringCarrierConfiguration
+    BulkForceCancelOrderParameter:
+      properties:
+        cancelationReasonId:
+          description: ID of the cancellation reason
+          type: string
+        orderId:
+          type: string
+        version:
+          description: Version of the entity to be changed
+          minimum: 0
+          type: integer
+      required:
+        - orderId
+        - version
+      type: object
+      title: BulkForceCancelOrderParameter
+      description: BulkForceCancelOrderParameter
     BulkOperationError:
       properties:
         message:
@@ -32084,6 +32278,42 @@ components:
       type: string
       title: BulkOperationResultStatus
       description: BulkOperationResultStatus
+    BulkOrderActionResult:
+      properties:
+        orderId:
+          type: string
+        status:
+          $ref: '#/components/schemas/BulkOperationResultStatus'
+        summary:
+          type: string
+      required:
+        - orderId
+        - status
+      type: object
+      title: BulkOrderActionResult
+      description: BulkOrderActionResult
+    BulkOrderActionsParameter:
+      oneOf:
+        - $ref: '#/components/schemas/BulkOrderForceCancelActionParameter'
+      title: BulkOrderActionsParameter
+      description: BulkOrderActionsParameter
+    BulkOrderForceCancelActionParameter:
+      description: Action to force cancel orders.
+      properties:
+        name:
+          enum:
+            - BULK_FORCE_CANCEL
+          type: string
+        orders:
+          items:
+            $ref: '#/components/schemas/BulkForceCancelOrderParameter'
+          maxItems: 15
+          minItems: 1
+          type: array
+      required:
+        - name
+        - orders
+      title: BulkOrderForceCancelActionParameter
     BulkUpsertSummary:
       properties:
         created:
@@ -36112,6 +36342,11 @@ components:
             $ref: '#/components/schemas/CollectDelivery'
           maxItems: 1
           type: array
+        estimatedDeliveryDate:
+          description: Estimated delivery or pickup commitment.
+          example: 2020-02-03T09:45:51.525Z
+          format: date-time
+          type: string
         reservationPreferences:
           $ref: '#/components/schemas/DeliveryReservationPreferences'
         shipping:
@@ -47197,7 +47432,13 @@ components:
           items:
             $ref: '#/components/schemas/ItemReturnLineItem'
           maxItems: 100
-          minItems: 1
+          minItems: 0
+          type: array
+        returnedNotReturnableLineItems:
+          items:
+            $ref: '#/components/schemas/ItemReturnNotReturnableLineItem'
+          maxItems: 100
+          minItems: 0
           type: array
         returnFacilityRef:
           type: string
@@ -47238,7 +47479,13 @@ components:
           items:
             $ref: '#/components/schemas/ItemReturnLineItemForCreation'
           maxItems: 100
-          minItems: 1
+          minItems: 0
+          type: array
+        returnedNotReturnableLineItems:
+          items:
+            $ref: '#/components/schemas/ItemReturnLineItemForCreation'
+          maxItems: 100
+          minItems: 0
           type: array
         returnFacilityRef:
           type: string
@@ -47900,6 +48147,94 @@ components:
       title: ItemReturnLineItemReasonForUpsert
       type: object
       description: ItemReturnLineItemReasonForUpsert
+    ItemReturnNotReturnableLineItem:
+      properties:
+        itemConditionLocalized:
+          $ref: '#/components/schemas/LocaleString'
+        customAttributes:
+          description: >-
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
+          type: object
+        decisionReason:
+          $ref: '#/components/schemas/ItemReturnLineItemReason'
+        id:
+          example: a69006ba-7100-4b4d-a610-1ca28016a4eb
+          type: string
+        itemCondition:
+          example: Damaged
+          type: string
+        itemConditionComment:
+          example: Upper corner damaged
+          minLength: 1
+          type: string
+        itemReturnJobLineItemRefs:
+          example: a69006ba-7100-4b4d-a610-1ca28016a4eb
+          items:
+            type: string
+          maxItems: 100
+          minItems: 1
+          type: array
+        reasons:
+          items:
+            $ref: '#/components/schemas/ItemReturnLineItemReason'
+          maxItems: 20
+          type: array
+        recordableAttributes:
+          items:
+            $ref: '#/components/schemas/RecordableAttribute'
+          maxItems: 50
+          nullable: true
+          type: array
+        scannedCodes:
+          items:
+            type: string
+          maxItems: 50
+          type: array
+        status:
+          enum:
+            - OPEN
+            - IN_PROGRESS
+            - WAITING_FOR_INPUT
+            - REJECTED
+            - ACCEPTED
+            - CANCELED
+          type: string
+        tenantArticleId:
+          example: a69006ba-7100-4b4d-a610-1ca28016a4eb
+          type: string
+      required:
+        - id
+        - itemReturnJobLineItemRefs
+        - tenantArticleId
+        - status
+      title: ItemReturnNotReturnableLineItem
+      type: object
+      description: ItemReturnNotReturnableLineItem
+    ItemReturnNotReturnableLineItemForUpdate:
+      properties:
+        decisionReason:
+          $ref: '#/components/schemas/ItemReturnLineItemReasonForUpsert'
+        itemReturnJobVersion:
+          description: version of the overlaying itemReturnJob
+          example: 42
+          type: integer
+        status:
+          enum:
+            - OPEN
+            - IN_PROGRESS
+            - WAITING_FOR_INPUT
+            - REJECTED
+            - ACCEPTED
+            - CANCELED
+          type: string
+      required:
+        - itemReturnJobVersion
+      title: ItemReturnNotReturnableLineItemForUpdate
+      type: object
+      description: ItemReturnNotReturnableLineItemForUpdate
     ItemReturns:
       properties:
         itemReturns:
@@ -47953,7 +48288,13 @@ components:
           items:
             $ref: '#/components/schemas/ItemReturnLineItem'
           maxItems: 100
-          minItems: 1
+          minItems: 0
+          type: array
+        returnedNotReturnableLineItems:
+          items:
+            $ref: '#/components/schemas/ItemReturnNotReturnableLineItem'
+          maxItems: 100
+          minItems: 0
           type: array
         returnFacilityRef:
           type: string
@@ -68277,7 +68618,6 @@ components:
           type: array
       required:
         - status
-        - subStatusHistory
       type: object
       title: ProcessStatusDetail
       description: ProcessStatusDetail
@@ -70199,6 +70539,25 @@ components:
       title: ReplaceReturnedLineItems
       type: object
       description: ReplaceReturnedLineItems
+    ReplaceReturnedNotReturnableLineItems:
+      properties:
+        itemReturnJobVersion:
+          description: Version of the entity to be changed
+          example: 1
+          minimum: 0
+          type: integer
+        returnedNotReturnableLineItems:
+          items:
+            $ref: '#/components/schemas/ItemReturnLineItemForCreation'
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+        - itemReturnJobVersion
+        - returnedNotReturnableLineItems
+      title: ReplaceReturnedNotReturnableLineItems
+      type: object
+      description: ReplaceReturnedNotReturnableLineItems
     RequestedDate:
       properties:
         type:
@@ -74824,6 +75183,13 @@ components:
                 StandardPriorityRating: '#/components/schemas/RoutingStrategyStandardPriorityRating'
                 ToolkitPriorityRating: '#/components/schemas/RoutingStrategyToolkitPriorityRating'
           type: array
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br />
+          x-badges:
+            - color: red
+              label: ALPHA
         ratings:
           items:
             anyOf:
@@ -74940,6 +75306,13 @@ components:
                 ToolkitPriorityRating: '#/components/schemas/RoutingStrategyToolkitPriorityRating'
           maxItems: 100
           type: array
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br />
+          x-badges:
+            - color: red
+              label: ALPHA
         ratings:
           items:
             anyOf:
@@ -80675,6 +81048,13 @@ components:
           type: string
         fallbackCosts:
           $ref: '#/components/schemas/Money'
+        group:
+          description: >-
+            The group number identifying transfers that travel together in the
+            same delivery time window. Transfers with the same group number are
+            expected to be fulfilled within the same temporal delivery slot.
+          example: 0
+          type: integer
         lineItems:
           items:
             $ref: '#/components/schemas/HandledItem'
