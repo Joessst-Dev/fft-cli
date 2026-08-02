@@ -375,6 +375,21 @@ func (e BulkOperationResultStatus) Valid() bool {
 	}
 }
 
+// Defines values for BulkOrderForceCancelActionParameterName.
+const (
+	BULKFORCECANCEL BulkOrderForceCancelActionParameterName = "BULK_FORCE_CANCEL"
+)
+
+// Valid indicates whether the value is a known member of the BulkOrderForceCancelActionParameterName enum.
+func (e BulkOrderForceCancelActionParameterName) Valid() bool {
+	switch e {
+	case BULKFORCECANCEL:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for CarrierDeliveryType.
 const (
 	CarrierDeliveryTypeDELIVERY CarrierDeliveryType = "DELIVERY"
@@ -12830,6 +12845,16 @@ type BooleanFilter struct {
 	NotEq *bool `json:"notEq,omitempty"`
 }
 
+// BulkForceCancelOrderParameter BulkForceCancelOrderParameter
+type BulkForceCancelOrderParameter struct {
+	// CancelationReasonId ID of the cancellation reason
+	CancelationReasonId *string `json:"cancelationReasonId,omitempty"`
+	OrderId             string  `json:"orderId"`
+
+	// Version Version of the entity to be changed
+	Version int `json:"version"`
+}
+
 // BulkOperationError BulkOperationError
 type BulkOperationError struct {
 	Message string                 `json:"message"`
@@ -12841,6 +12866,29 @@ type BulkOperationErrorType string
 
 // BulkOperationResultStatus BulkOperationResultStatus
 type BulkOperationResultStatus string
+
+// BulkOrderActionResult BulkOrderActionResult
+type BulkOrderActionResult struct {
+	OrderId string `json:"orderId"`
+
+	// Status BulkOperationResultStatus
+	Status  BulkOperationResultStatus `json:"status"`
+	Summary *string                   `json:"summary,omitempty"`
+}
+
+// BulkOrderActionsParameter BulkOrderActionsParameter
+type BulkOrderActionsParameter struct {
+	union json.RawMessage
+}
+
+// BulkOrderForceCancelActionParameter Action to force cancel orders.
+type BulkOrderForceCancelActionParameter struct {
+	Name   BulkOrderForceCancelActionParameterName `json:"name"`
+	Orders []BulkForceCancelOrderParameter         `json:"orders"`
+}
+
+// BulkOrderForceCancelActionParameterName defines model for BulkOrderForceCancelActionParameter.Name.
+type BulkOrderForceCancelActionParameterName string
 
 // BulkUpsertSummary BulkUpsertSummary
 type BulkUpsertSummary struct {
@@ -13326,6 +13374,9 @@ type DeliveryEventDeliveryTrigger string
 // DeliveryPreferences DeliveryPreferences
 type DeliveryPreferences struct {
 	Collect *[]CollectDelivery `json:"collect,omitempty"`
+
+	// EstimatedDeliveryDate Estimated delivery or pickup commitment.
+	EstimatedDeliveryDate *time.Time `json:"estimatedDeliveryDate,omitempty"`
 
 	// ReservationPreferences DeliveryReservationPreferences
 	ReservationPreferences *DeliveryReservationPreferences `json:"reservationPreferences,omitempty"`
@@ -19928,7 +19979,9 @@ type RoutingStrategyNodeConfig struct {
 	Fences           []RoutingStrategyNodeConfig_Fences_Item `json:"fences"`
 
 	// OrderSplit RoutingStrategyOrderSplitConfig
-	OrderSplit      *RoutingStrategyOrderSplitConfig                  `json:"orderSplit,omitempty"`
+	OrderSplit *RoutingStrategyOrderSplitConfig `json:"orderSplit,omitempty"`
+
+	// PriorityRatings This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
 	PriorityRatings *[]RoutingStrategyNodeConfig_PriorityRatings_Item `json:"priorityRatings,omitempty"`
 	Ratings         []RoutingStrategyNodeConfig_Ratings_Item          `json:"ratings"`
 
@@ -20003,7 +20056,9 @@ type RoutingStrategyNodeConfigForUpsert struct {
 	Fences           []RoutingStrategyNodeConfigForUpsert_Fences_Item `json:"fences"`
 
 	// OrderSplit RoutingStrategyOrderSplitConfig
-	OrderSplit      *RoutingStrategyOrderSplitConfig                           `json:"orderSplit,omitempty"`
+	OrderSplit *RoutingStrategyOrderSplitConfig `json:"orderSplit,omitempty"`
+
+	// PriorityRatings This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
 	PriorityRatings *[]RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item `json:"priorityRatings,omitempty"`
 	Ratings         []RoutingStrategyNodeConfigForUpsert_Ratings_Item          `json:"ratings"`
 
@@ -21101,7 +21156,10 @@ type SourcingOptionTransfer struct {
 	FacilityConnectionRef *string                                `json:"facilityConnectionRef,omitempty"`
 
 	// FallbackCosts Money
-	FallbackCosts        *Money                                        `json:"fallbackCosts,omitempty"`
+	FallbackCosts *Money `json:"fallbackCosts,omitempty"`
+
+	// Group The group number identifying transfers that travel together in the same delivery time window. Transfers with the same group number are expected to be fulfilled within the same temporal delivery slot.
+	Group                *int                                          `json:"group,omitempty"`
 	LineItems            []HandledItem                                 `json:"lineItems"`
 	PackagingInformation []SourcingOptionsTransferPackagingInformation `json:"packagingInformation"`
 	SourceNodeRef        string                                        `json:"sourceNodeRef"`
@@ -23819,6 +23877,9 @@ type SearchListingJSONRequestBody = ListingSearchPayload
 // AddOrderJSONRequestBody defines body for AddOrder for application/json ContentType.
 type AddOrderJSONRequestBody = OrderForCreation
 
+// BulkOrdersActionJSONRequestBody defines body for BulkOrdersAction for application/json ContentType.
+type BulkOrdersActionJSONRequestBody = BulkOrderActionsParameter
+
 // SearchOrderJSONRequestBody defines body for SearchOrder for application/json ContentType.
 type SearchOrderJSONRequestBody = OrderSearchPayload
 
@@ -24037,6 +24098,42 @@ func (a StockForCreationVersionless_Properties) MarshalJSON() ([]byte, error) {
 		}
 	}
 	return json.Marshal(object)
+}
+
+// AsBulkOrderForceCancelActionParameter returns the union data inside the BulkOrderActionsParameter as a BulkOrderForceCancelActionParameter
+func (t BulkOrderActionsParameter) AsBulkOrderForceCancelActionParameter() (BulkOrderForceCancelActionParameter, error) {
+	var body BulkOrderForceCancelActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromBulkOrderForceCancelActionParameter overwrites any union data inside the BulkOrderActionsParameter as the provided BulkOrderForceCancelActionParameter
+func (t *BulkOrderActionsParameter) FromBulkOrderForceCancelActionParameter(v BulkOrderForceCancelActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeBulkOrderForceCancelActionParameter performs a merge with any union data inside the BulkOrderActionsParameter, using the provided BulkOrderForceCancelActionParameter
+func (t *BulkOrderActionsParameter) MergeBulkOrderForceCancelActionParameter(v BulkOrderForceCancelActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t BulkOrderActionsParameter) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *BulkOrderActionsParameter) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
 }
 
 // AsBooleanFilter returns the union data inside the CategorySearchQuery_CustomAttributes_AdditionalProperties as a BooleanFilter
@@ -30767,6 +30864,11 @@ type ClientInterface interface {
 
 	AddOrder(ctx context.Context, body AddOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// BulkOrdersActionWithBody request with any body
+	BulkOrdersActionWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	BulkOrdersAction(ctx context.Context, body BulkOrdersActionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// SearchOrderWithBody request with any body
 	SearchOrderWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -31693,6 +31795,30 @@ func (c *Client) AddOrderWithBody(ctx context.Context, contentType string, body 
 
 func (c *Client) AddOrder(ctx context.Context, body AddOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewAddOrderRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) BulkOrdersActionWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewBulkOrdersActionRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) BulkOrdersAction(ctx context.Context, body BulkOrdersActionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewBulkOrdersActionRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -34989,6 +35115,46 @@ func NewAddOrderRequestWithBody(server string, contentType string, body io.Reade
 	return req, nil
 }
 
+// NewBulkOrdersActionRequest calls the generic BulkOrdersAction builder with application/json body
+func NewBulkOrdersActionRequest(server string, body BulkOrdersActionJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewBulkOrdersActionRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewBulkOrdersActionRequestWithBody generates requests for BulkOrdersAction with any type of body
+func NewBulkOrdersActionRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/orders/actions")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewSearchOrderRequest calls the generic SearchOrder builder with application/json body
 func NewSearchOrderRequest(server string, body SearchOrderJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -37796,6 +37962,11 @@ type ClientWithResponsesInterface interface {
 
 	AddOrderWithResponse(ctx context.Context, body AddOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*AddOrderResponse, error)
 
+	// BulkOrdersActionWithBodyWithResponse request with any body
+	BulkOrdersActionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*BulkOrdersActionResponse, error)
+
+	BulkOrdersActionWithResponse(ctx context.Context, body BulkOrdersActionJSONRequestBody, reqEditors ...RequestEditorFn) (*BulkOrdersActionResponse, error)
+
 	// SearchOrderWithBodyWithResponse request with any body
 	SearchOrderWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SearchOrderResponse, error)
 
@@ -39351,6 +39522,39 @@ func (r AddOrderResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r AddOrderResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type BulkOrdersActionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]BulkOrderActionResult
+	JSON401      *ApiError
+	JSON403      *ApiError
+	JSON404      *ApiError
+}
+
+// Status returns HTTPResponse.Status
+func (r BulkOrdersActionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r BulkOrdersActionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r BulkOrdersActionResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -41596,6 +41800,23 @@ func (c *ClientWithResponses) AddOrderWithResponse(ctx context.Context, body Add
 		return nil, err
 	}
 	return ParseAddOrderResponse(rsp)
+}
+
+// BulkOrdersActionWithBodyWithResponse request with arbitrary body returning *BulkOrdersActionResponse
+func (c *ClientWithResponses) BulkOrdersActionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*BulkOrdersActionResponse, error) {
+	rsp, err := c.BulkOrdersActionWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseBulkOrdersActionResponse(rsp)
+}
+
+func (c *ClientWithResponses) BulkOrdersActionWithResponse(ctx context.Context, body BulkOrdersActionJSONRequestBody, reqEditors ...RequestEditorFn) (*BulkOrdersActionResponse, error) {
+	rsp, err := c.BulkOrdersAction(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseBulkOrdersActionResponse(rsp)
 }
 
 // SearchOrderWithBodyWithResponse request with arbitrary body returning *SearchOrderResponse
@@ -44164,6 +44385,53 @@ func ParseAddOrderResponse(rsp *http.Response) (*AddOrderResponse, error) {
 			return nil, err
 		}
 		response.JSON403 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseBulkOrdersActionResponse parses an HTTP response from a BulkOrdersActionWithResponse call
+func ParseBulkOrdersActionResponse(rsp *http.Response) (*BulkOrdersActionResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &BulkOrdersActionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []BulkOrderActionResult
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ApiError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
 
 	}
 
