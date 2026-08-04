@@ -81048,13 +81048,6 @@ components:
           type: string
         fallbackCosts:
           $ref: '#/components/schemas/Money'
-        group:
-          description: >-
-            The group number identifying transfers that travel together in the
-            same delivery time window. Transfers with the same group number are
-            expected to be fulfilled within the same temporal delivery slot.
-          example: 0
-          type: integer
         lineItems:
           items:
             $ref: '#/components/schemas/HandledItem'
@@ -81074,6 +81067,13 @@ components:
           type: string
         timeLine:
           $ref: '#/components/schemas/TransferTimeLine'
+        transferGroup:
+          description: >-
+            The transferGroup identifying transfers that travel together in the
+            same delivery time window. Transfers with the same transferGroup are
+            expected to be fulfilled within the same temporal delivery slot.
+          example: 0_xyz
+          type: string
       required:
         - sourceNodeRef
         - targetNodeRef

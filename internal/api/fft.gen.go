@@ -21156,10 +21156,7 @@ type SourcingOptionTransfer struct {
 	FacilityConnectionRef *string                                `json:"facilityConnectionRef,omitempty"`
 
 	// FallbackCosts Money
-	FallbackCosts *Money `json:"fallbackCosts,omitempty"`
-
-	// Group The group number identifying transfers that travel together in the same delivery time window. Transfers with the same group number are expected to be fulfilled within the same temporal delivery slot.
-	Group                *int                                          `json:"group,omitempty"`
+	FallbackCosts        *Money                                        `json:"fallbackCosts,omitempty"`
 	LineItems            []HandledItem                                 `json:"lineItems"`
 	PackagingInformation []SourcingOptionsTransferPackagingInformation `json:"packagingInformation"`
 	SourceNodeRef        string                                        `json:"sourceNodeRef"`
@@ -21168,6 +21165,9 @@ type SourcingOptionTransfer struct {
 
 	// TimeLine TransferTimeLine
 	TimeLine *TransferTimeLine `json:"timeLine,omitempty"`
+
+	// TransferGroup The transferGroup identifying transfers that travel together in the same delivery time window. Transfers with the same transferGroup are expected to be fulfilled within the same temporal delivery slot.
+	TransferGroup *string `json:"transferGroup,omitempty"`
 }
 
 // SourcingOptionTransferExistenceReason SourcingOptionTransferExistenceReason
