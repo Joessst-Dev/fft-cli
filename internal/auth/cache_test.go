@@ -160,6 +160,24 @@ var _ = Describe("the caching Firebase token source", func() {
 		})
 	})
 
+	// The read side of the same story, and the one every already-configured
+	// project hits: a user who copies their config onto a WSL box has a project
+	// fft knows about and a keychain it cannot ask. That must arrive as the
+	// machine problem it is — not as ErrReauthRequired, which would send them off
+	// to re-enter a password that is not the problem.
+	When("the keychain the password lives in is not there", func() {
+		BeforeEach(func() {
+			src = NewFirebaseTokenSource(g.client(clk.Now), testProjectConfig(), unreachableStore{}, clk.Now)
+		})
+
+		It("reports the missing keychain rather than demanding a fresh sign-in", func() {
+			_, err := src.Token(ctx)
+
+			Expect(err).To(MatchError(secrets.ErrKeyringUnavailable))
+			Expect(err).NotTo(MatchError(ErrReauthRequired))
+		})
+	})
+
 	When("Google is unreachable while refreshing", func() {
 		BeforeEach(func() {
 			Expect(store.Set(secrets.Key(testProject, secrets.KindRefreshToken), "still-good")).To(Succeed())
@@ -285,7 +303,28 @@ var _ = Describe("saveToken", func() {
 			secrets.Key("staging", secrets.KindIDTokenExp),
 		}))
 	})
+
+	// Deliberately unlike ErrReadOnly, which is tolerated because a CI runner has
+	// nowhere durable to put a token and signing in once per process is correct
+	// there. An unreachable keychain is not that: the password this token was
+	// minted from came out of the same store, so a store that answers a read and
+	// then cannot take a write is broken, and the user should hear about it.
+	It("reports an unreachable keychain rather than swallowing it", func() {
+		err := saveToken(unreachableStore{}, "staging", Token{ID: "id", Refresh: "ref"})
+
+		Expect(err).To(MatchError(secrets.ErrKeyringUnavailable))
+	})
 })
+
+// unreachableStore is a machine with no keychain on it. Reads fail the same way
+// writes do — the distinction that matters is against ErrNotFound, which would
+// mean the keychain answered and held nothing.
+type unreachableStore struct{}
+
+func (unreachableStore) Get(string) (string, error) { return "", secrets.ErrKeyringUnavailable }
+func (unreachableStore) Set(string, string) error   { return secrets.ErrKeyringUnavailable }
+func (unreachableStore) Delete(string) error        { return nil }
+func (unreachableStore) Kind() string               { return "keyring" }
 
 // orderRecordingStore records the order its keys are written in, and nothing else.
 type orderRecordingStore struct{ sets []string }

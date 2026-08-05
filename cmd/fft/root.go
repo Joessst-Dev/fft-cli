@@ -140,6 +140,25 @@ type Deps struct {
 	// cannot lower.
 	ReadOnlyEnv bool
 
+	// noKeyringFromConfig records that the 0600 file store was chosen by
+	// settings.noKeyring in the config file; explicitNoKeyring, that --no-keyring or
+	// FFT_NO_KEYRING was given for this run.
+	//
+	// The distinction is the whole point. config.yaml holds no secrets and is meant
+	// to be readable, editable and syncable — but this one setting decides whether
+	// credentials are kept in cleartext, and it travels with the file. On a second
+	// machine that picked it up, nobody is ever asked: the file store is open before
+	// the first command runs. So a run that is storing secrets in cleartext because
+	// of something nobody typed here says so, and one where the user said it does
+	// not.
+	noKeyringFromConfig bool
+	explicitNoKeyring   bool
+
+	// unused overrides the store [Deps.unusedSecrets] resolves to. A spec's Secrets
+	// is in memory and so has no counterpart to pair with; this is how the
+	// cross-store sweep gets exercised without a real keychain on the runner.
+	unused secrets.Store
+
 	// Update is the release checker behind the "a new version is available"
 	// notice, and behind `fft update check`. nil means the real one, reading and
 	// writing ~/.cache/fft/update.json; a spec points it at a fake GitHub.
@@ -334,7 +353,7 @@ func newRootCmd(deps *Deps) *cobra.Command {
 	pf.Bool("debug", false, "Log requests and responses to stderr")
 	pf.Duration("timeout", 30*time.Second, "Timeout for a single command")
 	pf.BoolP("yes", "y", false, "Assume yes for every confirmation prompt")
-	pf.Bool("no-keyring", false, "Store credentials in a 0600 file instead of the OS keychain")
+	pf.Bool("no-keyring", false, "Store credentials in a 0600 file instead of the OS keychain (settings.noKeyring makes it permanent)")
 	pf.Bool("read-only", false, "Refuse any request that would change data (can only tighten, never loosen)")
 
 	if err := cmd.RegisterFlagCompletionFunc("output", completeOutput); err != nil {
@@ -509,6 +528,7 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 		if d.Secrets, err = d.openSecrets(v.GetBool("no-keyring")); err != nil {
 			return err
 		}
+		d.noteInheritedFileStore()
 	}
 
 	d.flushComponentWarnings(cmd.ErrOrStderr())
@@ -530,6 +550,13 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 // every key it touches, which would quietly corrupt `activeProject` and
 // `baseUrl` if it were let anywhere near the config file itself.
 func (d *Deps) bindFlags(cmd *cobra.Command) (*viper.Viper, error) {
+	// Cleared on every run, absence included, for the same reason ReadOnlyFlag is:
+	// the spec harness reuses one Deps across commands, and a --no-keyring left over
+	// from a previous run would go on suppressing the warning that this run's store
+	// was chosen by the config file.
+	d.noKeyringFromConfig = false
+	d.explicitNoKeyring = false
+
 	v := viper.New()
 	v.SetEnvPrefix("FFT")
 	// So that --no-color reads FFT_NO_COLOR rather than FFT_NO-COLOR.
@@ -556,6 +583,28 @@ func (d *Deps) bindFlags(cmd *cobra.Command) (*viper.Viper, error) {
 		if cfg.Settings.Output != "" {
 			v.SetDefault("output", cfg.Settings.Output)
 		}
+		// Only when true, because setting it to false would be writing nothing:
+		// viper consults a default before the bound flag's own, which is false
+		// already. The guard says that out loud rather than leaving the next reader
+		// to work out why the setting is not simply passed straight through.
+		if cfg.Settings.NoKeyring {
+			v.SetDefault("no-keyring", true)
+			// Remembered so that [Deps.complete] can say so. A setting nobody typed on
+			// this machine, deciding where credentials are kept, should not be silent.
+			d.noKeyringFromConfig = true
+		}
+	}
+
+	// Viper ranks a changed flag and the environment above a default, so either of
+	// them means this run's store was not decided by the config file.
+	if f := cmd.Root().PersistentFlags().Lookup("no-keyring"); f != nil && f.Changed {
+		d.explicitNoKeyring = true
+	}
+	// Non-empty, because that is what viper itself requires before an env value
+	// beats a default: FFT_NO_KEYRING= would otherwise leave the config's choice
+	// standing and silence the warning about it at the same time.
+	if val, ok := os.LookupEnv("FFT_NO_KEYRING"); ok && val != "" {
+		d.explicitNoKeyring = true
 	}
 
 	return v, nil
@@ -569,6 +618,45 @@ func (d *Deps) openSecrets(noKeyring bool) (secrets.Store, error) {
 		return secrets.NewEnv(os.LookupEnv), nil
 	}
 	return secrets.Open(noKeyring)
+}
+
+// noteInheritedFileStore says, once per run, that credentials are being kept in
+// cleartext because of a config setting rather than anything typed here.
+//
+// It stays quiet when the user said so themselves for this run — a --no-keyring
+// or an FFT_NO_KEYRING is an answer, and repeating it back is noise. Which also
+// gives anyone who meant it a way to silence this: export FFT_NO_KEYRING=1 on the
+// machine where the file store is the deliberate choice.
+func (d *Deps) noteInheritedFileStore() {
+	if !d.noKeyringFromConfig || d.Secrets.Kind() != "file" {
+		return
+	}
+	// Viper ranks a changed flag and the environment above the config default, so
+	// either of them present means this run was not decided by the file.
+	if d.explicitNoKeyring {
+		return
+	}
+	// Warnf, not Notef: this is the same class of thing as the loose-permissions
+	// warning the file store raises — your credentials are less protected than you
+	// would assume — and it has to be noticeable on the machine nobody asked.
+	d.Printer.Warnf(
+		"credentials are stored in cleartext at %s, because settings.noKeyring is set in the config file.",
+		credentialsFilePath())
+}
+
+// reopenSecrets swaps the credential store for the 0600 file fallback.
+//
+// It exists for the one command that can only find out mid-run that there is no
+// keychain to write to: [Deps.complete] has to choose a store before cobra has
+// matched the arguments, and a keychain does not say it is missing until
+// something is actually stored in it.
+func (d *Deps) reopenSecrets() error {
+	store, err := d.openSecrets(true)
+	if err != nil {
+		return err
+	}
+	d.Secrets = store
+	return nil
 }
 
 // useColor decides whether to colour output. NO_COLOR (the cross-tool

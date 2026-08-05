@@ -40,11 +40,19 @@ func main() {
 
 	// Diagnostics go to stderr — always. stdout carries data only, so that
 	// `fft ... -o json | jq` is never contaminated by an error message.
-	writeError(os.Stderr, err)
-
+	//
 	// This is the only os.Exit in the program. Commands return errors; main
 	// decides what they mean.
-	os.Exit(exitcode.FromError(err))
+	os.Exit(report(os.Stderr, err))
+}
+
+// report writes err the way a user should see it and returns the exit code it
+// means. The spec harness calls this too, so a spec can never assert on a message
+// that no terminal would ever have shown.
+func report(w io.Writer, err error) int {
+	err = explainKeyring(err)
+	writeError(w, err)
+	return exitcode.FromError(err)
 }
 
 // writeError reports err the way a user should see it: the message, then the one

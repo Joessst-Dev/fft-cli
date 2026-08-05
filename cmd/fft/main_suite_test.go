@@ -20,7 +20,6 @@ import (
 	"github.com/Joessst-Dev/fft-cli/internal/auth"
 	"github.com/Joessst-Dev/fft-cli/internal/client"
 	"github.com/Joessst-Dev/fft-cli/internal/config"
-	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/prompt"
 	"github.com/Joessst-Dev/fft-cli/internal/secrets"
 )
@@ -294,13 +293,10 @@ func (c *cli) run(args ...string) int {
 	cmd.SetOut(&c.stdout)
 	cmd.SetErr(&c.stderr)
 
-	err := cmd.ExecuteContext(context.Background())
-	if err != nil {
-		// main writes the error to stderr; the specs assert on the message, so the
-		// harness has to do the same thing main does.
-		writeError(&c.stderr, err)
-	}
-	return exitcode.FromError(err)
+	// report is the same funnel main runs an error through — the translation, the
+	// message and the exit code — so the specs assert on exactly what a terminal
+	// would have shown.
+	return report(&c.stderr, cmd.ExecuteContext(context.Background()))
 }
 
 // out is everything the command wrote to stdout: the data a pipe would receive.

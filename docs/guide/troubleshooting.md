@@ -53,6 +53,28 @@ because somebody protected it. Ask.
 re-run `fft project add` to "refresh" it. `fft auth refresh` is the command; if it fails, the
 credentials themselves are the problem and the user has to fix them.
 
+## Exit 3, "no OS keychain is available"
+
+This is the **machine**, not the credentials. There is no keychain for fft to store
+anything in — commonly WSL, a container, or a headless Linux box, where nothing owns the
+D-Bus Secret Service. Retrying will fail identically, and nothing is wrong with the
+user's password.
+
+Do **not** re-prompt for credentials, and do not run `fft auth refresh` — there is
+nothing to refresh into. Do not silently add `--no-keyring` on the user's behalf either:
+it stores their password and refresh token in a **cleartext** `0600` file, which is
+theirs to agree to.
+
+Tell them what the error already says, and let them pick:
+
+```sh
+fft project add prd --base-url https://acme.api.fulfillmenttools.com --no-keyring
+```
+
+…or `noKeyring: true` under `settings:` in `~/.config/fft/config.yaml` to make it stick,
+or `gnome-keyring` plus a session D-Bus to keep a real keychain. On a terminal,
+`fft project add` asks this question itself and remembers the answer.
+
 ## Diagnosing
 
 ```sh

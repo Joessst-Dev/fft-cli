@@ -165,7 +165,9 @@ func runProjectAdd(cmd *cobra.Command, deps *Deps, flags *addFlags, name string)
 	}
 
 	if err := persistProject(deps, cfg, project, password); err != nil {
-		return err
+		if err := retryWithoutKeyring(deps, cfg, project, password, interactive, err); err != nil {
+			return err
+		}
 	}
 
 	return renderAdded(deps, cfg, project)
@@ -379,6 +381,62 @@ func persistProject(deps *Deps, cfg *config.Config, project config.Project, pass
 		}
 		return err
 	}
+	return nil
+}
+
+// retryWithoutKeyring is the second chance `project add` gets on a machine that
+// turns out to have no keychain — the one place fft can ask about it while the
+// user is still standing there, rather than making them read an error and start
+// again. Any other failure, and any user who says no, gets cause back untouched.
+//
+// On the path that brings anyone here, cfg arrives untouched: persistProject
+// writes the password before it upserts, and a keychain that is not there fails
+// that first write. The exception is its config-save leg, which upserts first and
+// can reach here too if the save *and* the rollback behind it both fail with the
+// sentinel — so nothing below may assume cfg is the on-disk set. The bystander
+// count is right either way because it asks cfg what it holds rather than
+// assuming, which is the property to keep if this is ever edited.
+func retryWithoutKeyring(deps *Deps, cfg *config.Config, project config.Project, password string, interactive bool, cause error) error {
+	if !errors.Is(cause, secrets.ErrKeyringUnavailable) {
+		return cause
+	}
+
+	// How many projects a yes moves that the user did not ask about. cfg is still
+	// the on-disk set, so a --force re-add is already in it and must not be counted
+	// as a bystander — claiming one on a machine that has only this project would
+	// make the disclosure false in the case it exists for.
+	others := len(cfg.Projects)
+	if _, exists := cfg.Find(project.Name); exists {
+		others--
+	}
+
+	// Captured before the offer, which is what replaces it.
+	previous := deps.Secrets
+
+	accepted, err := offerFileStore(deps, interactive, others)
+	if err != nil {
+		// Joined, not replaced. Failing to ask, or failing to open the file store
+		// afterwards, does not make the keychain any less absent — and dropping cause
+		// here would report "locate the credentials file" to a user whose actual
+		// problem, and whose three ways out, are the ones cause carries.
+		return errors.Join(cause, err)
+	}
+	if !accepted {
+		return cause
+	}
+
+	// Ride along on the save persistProject is about to do, so the project and the
+	// setting that decides where its credentials live land in one atomic write.
+	// There is no moment in which the config names a project it cannot reach.
+	cfg.Settings.NoKeyring = true
+	if err := persistProject(deps, cfg, project, password); err != nil {
+		return err
+	}
+
+	// The outcome is not this caller's to report: a keychain that could not be
+	// opened is the very condition that brought us here, and the user has already
+	// been told. A refusal has said so itself, inside.
+	_, _ = sweep(deps, previous, project.Name)
 	return nil
 }
 
