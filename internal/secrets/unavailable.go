@@ -89,7 +89,10 @@ func unavailableOn(err error, goos string) bool {
 	case errors.As(err, &dbusErr):
 		return knownAbsentName(dbusErr.Name)
 	case errors.As(err, &dbusErrPtr):
-		return knownAbsentName(dbusErrPtr.Name)
+		// errors.As is happy to hand back a typed nil, and this arm exists precisely
+		// for error shapes nothing in the tree produces today, so it is the last
+		// place to assume one is well-formed.
+		return dbusErrPtr != nil && knownAbsentName(dbusErrPtr.Name)
 	}
 
 	// On Linux the only binary this path runs is dbus-launch — godbus autolaunches

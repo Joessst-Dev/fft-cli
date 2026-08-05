@@ -301,17 +301,39 @@ var _ = Describe("fft project add on a machine with no keychain", func() {
 	// left behind in a store the user has just been told they are leaving — and
 	// which `project remove` stops looking in once noKeyring is set.
 	When("the keychain took the password before it went away", func() {
-		It("sweeps it out of the old store before writing to the new one", func() {
-			keychain := secrets.NewMem()
+		var keychain *secrets.MemStore
+
+		BeforeEach(func() {
+			keychain = secrets.NewMem()
 			c.deps.Secrets = &flickeringKeyring{Store: keychain, refusals: len(secrets.AllKinds())}
 			c.answer("s3cret", "y")
+		})
 
+		It("sweeps it out of the old store once the new one has the credentials", func() {
 			Expect(add()).To(Equal(exitcode.OK))
 
 			Expect(secrets.Has(keychain, "wsl")).To(BeFalse(),
 				"the password was left behind in a store fft has stopped looking in")
 			Expect(c.deps.Secrets.Kind()).To(Equal("file"))
 			Expect(secrets.Has(c.deps.Secrets, "wsl")).To(BeTrue())
+		})
+
+		// The sweep must never run on the strength of a write that has not landed.
+		// secrets.NewFile does no I/O, so the fallback store's first write is inside
+		// the retry — and if that fails for its own reasons, deleting first would
+		// leave the credentials in neither store. With --force that is a password the
+		// user still needed and cannot get back.
+		It("deletes nothing when the fallback store cannot be written", func() {
+			// A regular file where the credentials directory has to go: the file store
+			// cannot create a directory underneath it.
+			blocked := filepath.Join(GinkgoT().TempDir(), "not-a-directory")
+			Expect(os.WriteFile(blocked, nil, 0o600)).To(Succeed())
+			c.setenv("XDG_STATE_HOME", blocked)
+
+			Expect(add()).NotTo(Equal(exitcode.OK))
+
+			Expect(secrets.Has(keychain, "wsl")).To(BeTrue(),
+				"credentials were deleted for a write that never landed")
 		})
 	})
 

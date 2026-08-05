@@ -389,11 +389,13 @@ func persistProject(deps *Deps, cfg *config.Config, project config.Project, pass
 // user is still standing there, rather than making them read an error and start
 // again. Any other failure, and any user who says no, gets cause back untouched.
 //
-// cfg is untouched on the way in: persistProject writes the password before it
-// upserts, and a keychain that is not there fails that first write. It is not
-// quite impossible for the keychain to take one write and then vanish — its own
-// rollback can fail the same way the write did — so the retry sweeps the old
-// store rather than assuming it left nothing behind.
+// On the path that brings anyone here, cfg arrives untouched: persistProject
+// writes the password before it upserts, and a keychain that is not there fails
+// that first write. The exception is its config-save leg, which upserts first and
+// can reach here too if the save *and* the rollback behind it both fail with the
+// sentinel — so nothing below may assume cfg is the on-disk set. The bystander
+// count is right either way because it asks cfg what it holds rather than
+// assuming, which is the property to keep if this is ever edited.
 func retryWithoutKeyring(deps *Deps, cfg *config.Config, project config.Project, password string, interactive bool, cause error) error {
 	if !errors.Is(cause, secrets.ErrKeyringUnavailable) {
 		return cause
@@ -423,20 +425,42 @@ func retryWithoutKeyring(deps *Deps, cfg *config.Config, project config.Project,
 		return cause
 	}
 
-	// Best effort, and ignored on purpose: against a keychain that is really gone
-	// this does nothing, which is the usual case. It is here for the one where the
-	// keychain took the password and then went away — its own rollback would have
-	// failed too — so that a credential is not left behind in a store the user has
-	// just been told they are leaving, and which `project remove` will no longer
-	// look in once the setting below is written.
-
-	_ = secrets.DeleteAll(previous, project.Name)
-
 	// Ride along on the save persistProject is about to do, so the project and the
 	// setting that decides where its credentials live land in one atomic write.
 	// There is no moment in which the config names a project it cannot reach.
 	cfg.Settings.NoKeyring = true
-	return persistProject(deps, cfg, project, password)
+	if err := persistProject(deps, cfg, project, password); err != nil {
+		return err
+	}
+
+	sweep(deps, previous, project.Name)
+	return nil
+}
+
+// sweep removes a project's credentials from the store fft has just stopped
+// using, for the one case where there is anything to remove: the keychain took
+// the password and then went away, so persistProject's own rollback failed the
+// same way the write did. Left alone it would sit in a store `project remove` no
+// longer looks in, once noKeyring is set.
+//
+// It runs only after the new store has taken the credentials, and never before.
+// Deleting first would mean a fallback write that fails for its own reasons — a
+// read-only XDG_STATE_HOME, a full disk — leaves the project with credentials in
+// neither store, and `--force` makes that a password the user still needed. The
+// window this concedes is a crash between the two, which is the same orphan the
+// keychain going away leaves anyway.
+func sweep(deps *Deps, store secrets.Store, project string) {
+	err := secrets.DeleteAll(store, project)
+	// A keychain that is not there cannot be tidied, and saying so would be noise
+	// on the one path where the user has already been told. Anything else means it
+	// *is* there and refused — locked, or access denied — so something real is
+	// being left behind and only the user can clear it.
+	if err == nil || errors.Is(err, secrets.ErrKeyringUnavailable) {
+		return
+	}
+	deps.Printer.Notef(
+		"Left %q's old credentials in the keychain (%v); remove them there if you no longer want them.",
+		project, err)
 }
 
 func renderAdded(deps *Deps, cfg *config.Config, project config.Project) error {

@@ -43,6 +43,11 @@ var _ = Describe("classifying an unreachable keychain", func() {
 			&net.OpError{Op: "dial", Net: "unix", Err: syscall.ECONNREFUSED}, "linux"),
 		Entry("godbus could not find an address",
 			errors.New("dbus: couldn't determine address of session bus"), "linux"),
+		// The pointer form. Nothing produces it today — godbus reserves it for the
+		// server side — which is exactly why it needs a spec: without one the arm is
+		// dead code that could be deleted without turning anything red.
+		Entry("the same answer, in the shape godbus keeps for servers",
+			&dbus.Error{Name: dbusServiceUnknown, Body: []any{"the bus said so"}}, "linux"),
 	)
 
 	DescribeTable("the keychain is there and said no",
@@ -76,6 +81,14 @@ var _ = Describe("classifying an unreachable keychain", func() {
 		// the opposite of what the same shape means on Linux.
 		Entry("the macOS Keychain refused us", &exec.ExitError{}, "darwin"),
 		Entry("/usr/bin/security is missing", &exec.Error{Name: "security", Err: exec.ErrNotFound}, "darwin"),
+		// The same string that means "no bus" on Linux — the entry above asserts that
+		// — decides nothing on a Mac, which never opens a session bus. The pair is
+		// what pins the guard: without it the weakest match in the file would be
+		// free to fire on the one platform it cannot possibly be about.
+		Entry("a session-bus message on a Mac",
+			errors.New("dbus: couldn't determine address of session bus"), "darwin"),
+		// errors.As will match a typed nil in the chain and hand it back.
+		Entry("a typed-nil dbus error", fmt.Errorf("wrapped: %w", (*dbus.Error)(nil)), "linux"),
 	)
 })
 
