@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"syscall"
 
 	dbus "github.com/godbus/dbus/v5"
 	"github.com/zalando/go-keyring"
@@ -76,6 +77,10 @@ func unavailableOn(err error, goos string) bool {
 	// Everything under org.freedesktop.Secret.Error.* (IsLocked, NoSuchObject) is
 	// among those: a locked keychain is a keychain. So is AccessDenied, and so is
 	// NoReply — a prompter that hung is one that exists.
+	//
+	// Matched as a value, not a pointer: godbus delivers a remote error as a
+	// dbus.Error value (finalizeWithError), and reserves *dbus.Error for the
+	// server side. go-keyring passes it back unwrapped.
 	var dbusErr dbus.Error
 	if errors.As(err, &dbusErr) {
 		switch dbusErr.Name {
@@ -97,8 +102,19 @@ func unavailableOn(err error, goos string) bool {
 	if goos != "darwin" {
 		var execErr *exec.Error
 		var exitErr *exec.ExitError
+		if errors.As(err, &execErr) || errors.As(err, &exitErr) {
+			return true
+		}
+
+		// A dial that found nothing to dial, and only that. A read or a write error
+		// comes from a connection that was established, so the bus was there and
+		// something was on it; a dial refused with EACCES found a socket it was not
+		// allowed to open. Both are a keychain that exists — and mistaking a
+		// dbus-daemon restarted mid-session for "no keychain here" would offer a
+		// cleartext file to a user who has a working one.
 		var netErr *net.OpError
-		if errors.As(err, &execErr) || errors.As(err, &exitErr) || errors.As(err, &netErr) {
+		if errors.As(err, &netErr) && netErr.Op == "dial" &&
+			(errors.Is(netErr, syscall.ENOENT) || errors.Is(netErr, syscall.ECONNREFUSED)) {
 			return true
 		}
 	}

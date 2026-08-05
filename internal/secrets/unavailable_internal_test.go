@@ -39,6 +39,8 @@ var _ = Describe("classifying an unreachable keychain", func() {
 		Entry("dbus-launch failed", &exec.ExitError{}, "linux"),
 		Entry("the bus socket is not there",
 			&net.OpError{Op: "dial", Net: "unix", Err: syscall.ENOENT}, "linux"),
+		Entry("nothing is listening on the bus socket",
+			&net.OpError{Op: "dial", Net: "unix", Err: syscall.ECONNREFUSED}, "linux"),
 		Entry("godbus could not find an address",
 			errors.New("dbus: couldn't determine address of session bus"), "linux"),
 	)
@@ -58,6 +60,17 @@ var _ = Describe("classifying an unreachable keychain", func() {
 		Entry("the collection is locked", dbusErr("org.freedesktop.Secret.Error.IsLocked"), "linux"),
 		Entry("no such object", dbusErr("org.freedesktop.Secret.Error.NoSuchObject"), "linux"),
 		Entry("an unrecognised failure", errors.New("something else went wrong"), "linux"),
+		// A read or a write error means the connection was established, so the bus
+		// was there and something answered on it — a dbus-daemon restarted by a
+		// package upgrade mid-command, say. Offering a cleartext file to a user
+		// whose keychain is working is the one mistake this file exists to avoid.
+		Entry("the established connection dropped mid-call",
+			&net.OpError{Op: "read", Net: "unix", Err: syscall.ECONNRESET}, "linux"),
+		Entry("the established connection was written to after closing",
+			&net.OpError{Op: "write", Net: "unix", Err: syscall.EPIPE}, "linux"),
+		// The socket is there; we are not allowed to open it. That is a keychain
+		// somebody else owns, not a missing one.
+		Entry("the bus socket refused us", &net.OpError{Op: "dial", Net: "unix", Err: syscall.EACCES}, "linux"),
 		// The single most important entry here. go-keyring reaches the macOS Keychain
 		// by running /usr/bin/security, so a non-zero exit is the user clicking Deny —
 		// the opposite of what the same shape means on Linux.

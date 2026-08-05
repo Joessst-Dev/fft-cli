@@ -160,6 +160,24 @@ var _ = Describe("the caching Firebase token source", func() {
 		})
 	})
 
+	// The read side of the same story, and the one every already-configured
+	// project hits: a user who copies their config onto a WSL box has a project
+	// fft knows about and a keychain it cannot ask. That must arrive as the
+	// machine problem it is — not as ErrReauthRequired, which would send them off
+	// to re-enter a password that is not the problem.
+	When("the keychain the password lives in is not there", func() {
+		BeforeEach(func() {
+			src = NewFirebaseTokenSource(g.client(clk.Now), testProjectConfig(), unreachableStore{}, clk.Now)
+		})
+
+		It("reports the missing keychain rather than demanding a fresh sign-in", func() {
+			_, err := src.Token(ctx)
+
+			Expect(err).To(MatchError(secrets.ErrKeyringUnavailable))
+			Expect(err).NotTo(MatchError(ErrReauthRequired))
+		})
+	})
+
 	When("Google is unreachable while refreshing", func() {
 		BeforeEach(func() {
 			Expect(store.Set(secrets.Key(testProject, secrets.KindRefreshToken), "still-good")).To(Succeed())
@@ -298,10 +316,12 @@ var _ = Describe("saveToken", func() {
 	})
 })
 
-// unreachableStore is a machine whose keychain has gone away.
+// unreachableStore is a machine with no keychain on it. Reads fail the same way
+// writes do — the distinction that matters is against ErrNotFound, which would
+// mean the keychain answered and held nothing.
 type unreachableStore struct{}
 
-func (unreachableStore) Get(string) (string, error) { return "", secrets.ErrNotFound }
+func (unreachableStore) Get(string) (string, error) { return "", secrets.ErrKeyringUnavailable }
 func (unreachableStore) Set(string, string) error   { return secrets.ErrKeyringUnavailable }
 func (unreachableStore) Delete(string) error        { return nil }
 func (unreachableStore) Kind() string               { return "keyring" }

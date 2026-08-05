@@ -31,7 +31,7 @@ var _ = Describe("the advice given when there is no keychain", func() {
 	// inside WSL would otherwise get the other branch and a green build for the
 	// wrong reason.
 	It("names the flag, the setting, and what the file costs", func() {
-		hint := keyringHint(false)
+		hint := keyringHint(false, "/home/jane/.config/fft/config.yaml")
 
 		Expect(hint).To(ContainSubstring("--no-keyring"))
 		Expect(hint).To(ContainSubstring("FFT_NO_KEYRING=1"))
@@ -40,8 +40,17 @@ var _ = Describe("the advice given when there is no keychain", func() {
 	})
 
 	It("says why there is no keychain, when the machine is WSL", func() {
-		Expect(keyringHint(true)).To(ContainSubstring("WSL"))
-		Expect(keyringHint(false)).NotTo(ContainSubstring("WSL"))
+		Expect(keyringHint(true, "/tmp/config.yaml")).To(ContainSubstring("WSL"))
+		Expect(keyringHint(false, "/tmp/config.yaml")).NotTo(ContainSubstring("WSL"))
+	})
+
+	// A hint that names a file fft does not read is worse than no hint: the user
+	// edits it, nothing changes, and the setting looks broken.
+	It("names the config file fft would actually read, not a hardcoded path", func() {
+		dir := GinkgoT().TempDir()
+		GinkgoT().Setenv("XDG_CONFIG_HOME", dir)
+
+		Expect(keyringHint(false, hintConfigPath())).To(ContainSubstring(dir))
 	})
 })
 
@@ -187,6 +196,10 @@ var _ = Describe("fft project add on a machine with no keychain", func() {
 			Expect(c.errOut()).To(ContainSubstring("Store credentials in a 0600 file"))
 		})
 
+		It("does not claim a blast radius it does not have, on the first project", func() {
+			Expect(c.errOut()).NotTo(ContainSubstring("machine-wide"))
+		})
+
 		It("remembers the answer, so the next run does not ask again", func() {
 			cfg, err := config.NewStore(c.configPath).Load()
 
@@ -197,6 +210,35 @@ var _ = Describe("fft project add on a machine with no keychain", func() {
 		It("puts the credentials in the file store the setting now points at", func() {
 			Expect(c.deps.Secrets.Kind()).To(Equal("file"))
 			Expect(secrets.Has(c.deps.Secrets, "wsl")).To(BeTrue())
+		})
+	})
+
+	// settings.noKeyring is machine-wide, so a yes while adding one project moves
+	// every project's credentials. A user who is not told that finds `pre` and
+	// `prd` reporting "missing" the next time they look, with nothing pointing at
+	// the answer they gave while adding something else.
+	When("other projects are already configured", func() {
+		It("says the answer moves them too", func() {
+			Expect(os.MkdirAll(filepath.Dir(c.configPath), 0o700)).To(Succeed())
+			Expect(os.WriteFile(c.configPath, []byte(`version: 2
+activeProject: prd
+projects:
+    - name: prd
+      baseUrl: https://acme.api.fulfillmenttools.com
+      email: bot@ocff-acme-prd.com
+    - name: pre
+      baseUrl: https://pre.api.fulfillmenttools.com
+      email: bot@ocff-acme-pre.com
+settings:
+    output: table
+    updateCheck: false
+`), 0o600)).To(Succeed())
+			c.answer("s3cret", "n")
+
+			Expect(add()).To(Equal(exitcode.Config))
+
+			Expect(c.errOut()).To(ContainSubstring("machine-wide"))
+			Expect(c.errOut()).To(ContainSubstring("2 projects already configured"))
 		})
 	})
 

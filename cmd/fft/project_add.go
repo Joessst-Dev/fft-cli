@@ -398,7 +398,9 @@ func retryWithoutKeyring(deps *Deps, cfg *config.Config, project config.Project,
 		return cause
 	}
 
-	accepted, err := offerFileStore(deps, interactive)
+	// The projects already on this machine, which a yes moves too — cfg is still
+	// the on-disk set here, since persistProject failed before it upserted.
+	accepted, err := offerFileStore(deps, interactive, len(cfg.Projects))
 	if err != nil {
 		// Joined, not replaced. Failing to ask, or failing to open the file store
 		// afterwards, does not make the keychain any less absent — and dropping cause

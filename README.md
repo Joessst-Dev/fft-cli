@@ -362,10 +362,13 @@ Error: store the password for "prd": no OS keychain is available on this machine
 WSL ships no Secret Service, so there is no keychain for fft to use.
 
 Pass --no-keyring (or set FFT_NO_KEYRING=1) to store credentials in a 0600 file
-instead, or add "noKeyring: true" under "settings:" in ~/.config/fft/config.yaml to
+instead, or add "noKeyring: true" under "settings:" in /home/jane/.config/fft/config.yaml to
 make that permanent — that file holds your password and refresh token in cleartext.
 To keep a real keychain, install gnome-keyring and run fft inside a session D-Bus.
 ```
+
+The config path in that hint is **resolved**, not a guess: if you have set
+`XDG_CONFIG_HOME`, it names the file `fft` actually reads.
 
 On a terminal, `fft project add` asks instead of just failing, and writes
 `settings.noKeyring: true` when you say yes — so you are asked exactly **once**, per
@@ -382,10 +385,12 @@ the questions a command was always going to ask, not to downgrading where your c
 live. And a keychain that is merely **locked**, or a prompt you denied, is not this — that
 is a keychain that exists, and the answer there is to unlock it, not to write a file.
 
-One caveat if you sync `config.yaml` between machines — it holds no secrets, so committing
-it to a dotfiles repo is safe: `noKeyring` is a setting, not a fact about the machine. A
-`true` that follows you to a laptop that *does* have a keychain keeps `fft` reading the
-file store there. `--no-keyring=false` overrides it for one run.
+`noKeyring` is a **setting, not a fact about the machine**, and it is not scoped to the
+project you were adding — every project on that machine reads from the file store once it
+is on. The prompt says so when there are others to move. The same is true across machines
+if you sync `config.yaml` (which holds no secrets, so committing it to a dotfiles repo is
+safe): a `true` that follows you to a laptop that *does* have a keychain keeps `fft` reading
+the file there. `--no-keyring=false` overrides it for one run.
 
 If you would rather keep a real keychain under WSL, install `gnome-keyring` and give it a
 session bus (`dbus-run-session -- fft …`, or a systemd user session via `[boot] systemd=true`
