@@ -449,22 +449,22 @@ func (e CarrierStatus) Valid() bool {
 
 // Defines values for CarrierProductCategory.
 const (
-	EXPRESS    CarrierProductCategory = "EXPRESS"
-	FORWARDING CarrierProductCategory = "FORWARDING"
-	STANDARD   CarrierProductCategory = "STANDARD"
-	VALUE      CarrierProductCategory = "VALUE"
+	CarrierProductCategoryEXPRESS    CarrierProductCategory = "EXPRESS"
+	CarrierProductCategoryFORWARDING CarrierProductCategory = "FORWARDING"
+	CarrierProductCategorySTANDARD   CarrierProductCategory = "STANDARD"
+	CarrierProductCategoryVALUE      CarrierProductCategory = "VALUE"
 )
 
 // Valid indicates whether the value is a known member of the CarrierProductCategory enum.
 func (e CarrierProductCategory) Valid() bool {
 	switch e {
-	case EXPRESS:
+	case CarrierProductCategoryEXPRESS:
 		return true
-	case FORWARDING:
+	case CarrierProductCategoryFORWARDING:
 		return true
-	case STANDARD:
+	case CarrierProductCategorySTANDARD:
 		return true
-	case VALUE:
+	case CarrierProductCategoryVALUE:
 		return true
 	default:
 		return false
@@ -6675,6 +6675,24 @@ func (e RatingImplementation) Valid() bool {
 	case RatingImplementationWORKLOADBALANCING:
 		return true
 	case RatingImplementationZONE:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for RatingResultType.
+const (
+	RatingResultTypeSTANDARD RatingResultType = "STANDARD"
+	RatingResultTypeTOOLKIT  RatingResultType = "TOOLKIT"
+)
+
+// Valid indicates whether the value is a known member of the RatingResultType enum.
+func (e RatingResultType) Valid() bool {
+	switch e {
+	case RatingResultTypeSTANDARD:
+		return true
+	case RatingResultTypeTOOLKIT:
 		return true
 	default:
 		return false
@@ -18238,6 +18256,17 @@ type PriceRange struct {
 	To float32 `json:"to"`
 }
 
+// PriorityRatingResult PriorityRatingResult
+type PriorityRatingResult struct {
+	Id                     string  `json:"id"`
+	MatchesPriorityMinimum bool    `json:"matchesPriorityMinimum"`
+	Name                   *string `json:"name,omitempty"`
+	RoutingStrategyNodeId  string  `json:"routingStrategyNodeId"`
+
+	// Type RatingResultType
+	Type RatingResultType `json:"type"`
+}
+
 // ProcessDomainStatusesDomainStatusEnumFilter ProcessDomainStatusesDomainStatusEnumFilter
 type ProcessDomainStatusesDomainStatusEnumFilter struct {
 	// Eq Search by order
@@ -18737,6 +18766,9 @@ type ProcessReferencedStickerFilter struct {
 type ProcessSearchQuery struct {
 	And *[]ProcessSearchQuery `json:"and,omitempty"`
 
+	// CarrierManagementStatuses Search by carrierManagementStatuses
+	CarrierManagementStatuses *ProcessStatusEnumFilter `json:"carrierManagementStatuses,omitempty"`
+
 	// Created Search by created
 	Created *DateFilter `json:"created,omitempty"`
 
@@ -18941,6 +18973,9 @@ type RatingResult struct {
 	// Type The type of the rating, e.g. 'StandardRating' or 'ToolkitRating'
 	Type string `json:"type"`
 }
+
+// RatingResultType RatingResultType
+type RatingResultType string
 
 // RemoteConfigurationScopesFilter RemoteConfigurationScopesFilter
 type RemoteConfigurationScopesFilter struct {
@@ -21057,6 +21092,7 @@ type SourcingOption struct {
 	ListingDetails            *[]SourcingOptionListingDetails `json:"listingDetails,omitempty"`
 	Nodes                     []SourcingOptionNode            `json:"nodes"`
 	NonAssignedOrderLineItems *[]HandledItem                  `json:"nonAssignedOrderLineItems,omitempty"`
+	PriorityRatingResults     []PriorityRatingResult          `json:"priorityRatingResults"`
 	RatingResults             []RatingResult                  `json:"ratingResults"`
 	RunId                     string                          `json:"runId"`
 
