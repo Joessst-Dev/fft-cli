@@ -62,6 +62,13 @@ type Settings struct {
 	Output string `yaml:"output"`
 	// UpdateCheck enables the once-a-day check for a newer fft release.
 	UpdateCheck bool `yaml:"updateCheck"`
+
+	// NoKeyring stores credentials in a 0600 file rather than the OS keychain, for
+	// a machine that has none — WSL, a container, a headless server. It is what
+	// --no-keyring says, made permanent; the flag and FFT_NO_KEYRING still win.
+	//
+	// omitempty, so that adding this field churns no existing config file.
+	NoKeyring bool `yaml:"noKeyring,omitempty"`
 }
 
 // Project is one configured fulfillmenttools tenant. It holds no secrets: the

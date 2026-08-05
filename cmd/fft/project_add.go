@@ -165,7 +165,9 @@ func runProjectAdd(cmd *cobra.Command, deps *Deps, flags *addFlags, name string)
 	}
 
 	if err := persistProject(deps, cfg, project, password); err != nil {
-		return err
+		if err := retryWithoutKeyring(deps, cfg, project, password, interactive, err); err != nil {
+			return err
+		}
 	}
 
 	return renderAdded(deps, cfg, project)
@@ -380,6 +382,39 @@ func persistProject(deps *Deps, cfg *config.Config, project config.Project, pass
 		return err
 	}
 	return nil
+}
+
+// retryWithoutKeyring is the second chance `project add` gets on a machine that
+// turns out to have no keychain — the one place fft can ask about it while the
+// user is still standing there, rather than making them read an error and start
+// again. Any other failure, and any user who says no, gets cause back untouched.
+//
+// There is nothing to unwind before the retry. A missing keychain can only fail
+// the first write persistProject makes, which happens before it touches cfg — the
+// later SaveConfig branch would need a keychain that took two writes and then
+// vanished — so the second attempt starts from the state the first one did.
+func retryWithoutKeyring(deps *Deps, cfg *config.Config, project config.Project, password string, interactive bool, cause error) error {
+	if !errors.Is(cause, secrets.ErrKeyringUnavailable) {
+		return cause
+	}
+
+	accepted, err := offerFileStore(deps, interactive)
+	if err != nil {
+		// Joined, not replaced. Failing to ask, or failing to open the file store
+		// afterwards, does not make the keychain any less absent — and dropping cause
+		// here would report "locate the credentials file" to a user whose actual
+		// problem, and whose three ways out, are the ones cause carries.
+		return errors.Join(cause, err)
+	}
+	if !accepted {
+		return cause
+	}
+
+	// Ride along on the save persistProject is about to do, so the project and the
+	// setting that decides where its credentials live land in one atomic write.
+	// There is no moment in which the config names a project it cannot reach.
+	cfg.Settings.NoKeyring = true
+	return persistProject(deps, cfg, project, password)
 }
 
 func renderAdded(deps *Deps, cfg *config.Config, project config.Project) error {

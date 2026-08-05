@@ -334,7 +334,7 @@ func newRootCmd(deps *Deps) *cobra.Command {
 	pf.Bool("debug", false, "Log requests and responses to stderr")
 	pf.Duration("timeout", 30*time.Second, "Timeout for a single command")
 	pf.BoolP("yes", "y", false, "Assume yes for every confirmation prompt")
-	pf.Bool("no-keyring", false, "Store credentials in a 0600 file instead of the OS keychain")
+	pf.Bool("no-keyring", false, "Store credentials in a 0600 file instead of the OS keychain (settings.noKeyring makes it permanent)")
 	pf.Bool("read-only", false, "Refuse any request that would change data (can only tighten, never loosen)")
 
 	if err := cmd.RegisterFlagCompletionFunc("output", completeOutput); err != nil {
@@ -556,6 +556,13 @@ func (d *Deps) bindFlags(cmd *cobra.Command) (*viper.Viper, error) {
 		if cfg.Settings.Output != "" {
 			v.SetDefault("output", cfg.Settings.Output)
 		}
+		// Only when true, because setting it to false would be writing nothing:
+		// viper consults a default before the bound flag's own, which is false
+		// already. The guard says that out loud rather than leaving the next reader
+		// to work out why the setting is not simply passed straight through.
+		if cfg.Settings.NoKeyring {
+			v.SetDefault("no-keyring", true)
+		}
 	}
 
 	return v, nil
@@ -569,6 +576,21 @@ func (d *Deps) openSecrets(noKeyring bool) (secrets.Store, error) {
 		return secrets.NewEnv(os.LookupEnv), nil
 	}
 	return secrets.Open(noKeyring)
+}
+
+// reopenSecrets swaps the credential store for the 0600 file fallback.
+//
+// It exists for the one command that can only find out mid-run that there is no
+// keychain to write to: [Deps.complete] has to choose a store before cobra has
+// matched the arguments, and a keychain does not say it is missing until
+// something is actually stored in it.
+func (d *Deps) reopenSecrets() error {
+	store, err := d.openSecrets(true)
+	if err != nil {
+		return err
+	}
+	d.Secrets = store
+	return nil
 }
 
 // useColor decides whether to colour output. NO_COLOR (the cross-tool

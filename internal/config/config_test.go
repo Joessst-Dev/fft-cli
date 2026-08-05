@@ -182,6 +182,26 @@ var _ = Describe("Store", func() {
 			Expect(string(data)).NotTo(ContainSubstring("readOnly"))
 		})
 
+		// Likewise for the credential-store setting: adding it must not make every
+		// existing config file grow a `noKeyring: false` line on the next save.
+		It("writes no noKeyring key for a machine that has a keychain", func() {
+			data, err := os.ReadFile(path)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(string(data)).NotTo(ContainSubstring("noKeyring"))
+		})
+
+		It("round-trips the credential-store setting", func() {
+			cfg := sampleConfig()
+			cfg.Settings.NoKeyring = true
+			Expect(store.Save(cfg)).To(Succeed())
+
+			reloaded, err := store.Load()
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(reloaded.Settings.NoKeyring).To(BeTrue())
+		})
+
 		It("round-trips a read-only project", func() {
 			cfg := sampleConfig()
 			cfg.Projects[0].ReadOnly = true

@@ -69,8 +69,21 @@ NAME        BASE URL                                        EMAIL               
   mode `0600`. Plain YAML; safe to read, edit, and commit to a dotfiles repo — it contains
   no secrets.
 
-No keychain available (headless Linux, a container)? `--no-keyring` / `FFT_NO_KEYRING=1`
-falls back to a `0600` file — on Windows that mode buys you less than it looks like, see
+No keychain available (WSL, headless Linux, a container)? `--no-keyring` /
+`FFT_NO_KEYRING=1` falls back to a `0600` file, and `settings.noKeyring` in the config
+file makes that permanent so you never type the flag again:
+
+```yaml
+settings:
+  output: table
+  noKeyring: true
+```
+
+`fft` **tells you** when there is no keychain to talk to, rather than failing with a
+D-Bus error — and on an interactive `fft project add` it offers the fallback there and
+then, and remembers your answer. See
+[WSL and headless Linux: there is no Secret Service](./auth.md#wsl-and-headless-linux-there-is-no-secret-service).
+On Windows that `0600` buys you less than it looks like, see
 [On Windows, `--no-keyring` protects less than `0600` suggests](./auth.md#on-windows-no-keyring-protects-less-than-0600-suggests).
 In CI, skip projects entirely — see [CI and headless use](./ci.md).
 

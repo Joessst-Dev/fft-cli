@@ -33,7 +33,7 @@ fft [flags]
 ```
       --debug              Log requests and responses to stderr
       --no-color           Disable coloured output
-      --no-keyring         Store credentials in a 0600 file instead of the OS keychain
+      --no-keyring         Store credentials in a 0600 file instead of the OS keychain (settings.noKeyring makes it permanent)
   -o, --output string      Output format: table, json, yaml (default "table")
       --project string     Project to act on (default: the active project)
       --read-only          Refuse any request that would change data (can only tighten, never loosen)

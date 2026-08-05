@@ -36,6 +36,51 @@ does not refuse) if that fallback file, or its directory, is readable by other u
 restored backup, a shared `XDG_STATE_HOME`, or a stray `chmod -R` can loosen it after the
 fact, and the file holds your refresh token in cleartext.
 
+## WSL and headless Linux: there is no Secret Service
+
+A WSL distribution is Linux, so `fft` builds with the D-Bus Secret Service backend — and a
+stock distribution has nothing on the other end of it: no session bus, no `gnome-keyring`.
+The keychain is not merely locked there, it does not exist.
+
+`fft` says so. An unreachable keychain is a distinct condition, not a stray D-Bus error:
+it exits **3** and tells you the three ways out.
+
+```
+$ fft project add prd --base-url https://acme.api.fulfillmenttools.com …
+Error: store the password for "prd": no OS keychain is available on this machine: …
+
+WSL ships no Secret Service, so there is no keychain for fft to use.
+
+Pass --no-keyring (or set FFT_NO_KEYRING=1) to store credentials in a 0600 file
+instead, or add "noKeyring: true" under "settings:" in ~/.config/fft/config.yaml to
+make that permanent — that file holds your password and refresh token in cleartext.
+To keep a real keychain, install gnome-keyring and run fft inside a session D-Bus.
+```
+
+On a terminal, `fft project add` asks instead of just failing, and writes
+`settings.noKeyring: true` when you say yes — so you are asked exactly **once**, per
+machine, and never again:
+
+```
+No OS keychain is available. Store credentials in a 0600 file, in cleartext, instead? [y/N]:
+```
+
+Three things this deliberately does **not** do. It never falls back on its own — the file
+holds your password in cleartext, and landing there by accident is the thing the explicit
+opt-in exists to prevent. `--yes` does not answer that question either: `-y` is consent to
+the questions a command was always going to ask, not to downgrading where your credentials
+live. And a keychain that is merely **locked**, or a prompt you denied, is not this — that
+is a keychain that exists, and the answer there is to unlock it, not to write a file.
+
+One caveat if you sync `config.yaml` between machines — it holds no secrets, so committing
+it to a dotfiles repo is safe: `noKeyring` is a setting, not a fact about the machine. A
+`true` that follows you to a laptop that *does* have a keychain keeps `fft` reading the
+file store there. `--no-keyring=false` overrides it for one run.
+
+If you would rather keep a real keychain under WSL, install `gnome-keyring` and give it a
+session bus (`dbus-run-session -- fft …`, or a systemd user session via `[boot] systemd=true`
+in `/etc/wsl.conf`). `fft` needs nothing special once `org.freedesktop.secrets` answers.
+
 On macOS, a Keychain item `fft` stores is readable by **any process running as you**, with no
 per-access prompt — that is how the `security` framework's default access control works, and
 `fft` accepts it. The same-user threat is out of scope: a process running as you can already

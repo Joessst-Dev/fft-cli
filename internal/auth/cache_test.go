@@ -285,7 +285,26 @@ var _ = Describe("saveToken", func() {
 			secrets.Key("staging", secrets.KindIDTokenExp),
 		}))
 	})
+
+	// Deliberately unlike ErrReadOnly, which is tolerated because a CI runner has
+	// nowhere durable to put a token and signing in once per process is correct
+	// there. An unreachable keychain is not that: the password this token was
+	// minted from came out of the same store, so a store that answers a read and
+	// then cannot take a write is broken, and the user should hear about it.
+	It("reports an unreachable keychain rather than swallowing it", func() {
+		err := saveToken(unreachableStore{}, "staging", Token{ID: "id", Refresh: "ref"})
+
+		Expect(err).To(MatchError(secrets.ErrKeyringUnavailable))
+	})
 })
+
+// unreachableStore is a machine whose keychain has gone away.
+type unreachableStore struct{}
+
+func (unreachableStore) Get(string) (string, error) { return "", secrets.ErrNotFound }
+func (unreachableStore) Set(string, string) error   { return secrets.ErrKeyringUnavailable }
+func (unreachableStore) Delete(string) error        { return nil }
+func (unreachableStore) Kind() string               { return "keyring" }
 
 // orderRecordingStore records the order its keys are written in, and nothing else.
 type orderRecordingStore struct{ sets []string }

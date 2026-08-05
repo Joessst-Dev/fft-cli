@@ -193,8 +193,21 @@ NAME        BASE URL                                        EMAIL               
   mode `0600`. Plain YAML; safe to read, edit, and commit to a dotfiles repo — it contains
   no secrets.
 
-No keychain available (headless Linux, a container)? `--no-keyring` / `FFT_NO_KEYRING=1`
-falls back to a `0600` file — on Windows that mode buys you less than it looks like, see
+No keychain available (WSL, headless Linux, a container)? `--no-keyring` /
+`FFT_NO_KEYRING=1` falls back to a `0600` file, and `settings.noKeyring` in the config
+file makes that permanent so you never type the flag again:
+
+```yaml
+settings:
+  output: table
+  noKeyring: true
+```
+
+`fft` **tells you** when there is no keychain to talk to, rather than failing with a
+D-Bus error — and on an interactive `fft project add` it offers the fallback there and
+then, and remembers your answer. See
+[WSL and headless Linux: there is no Secret Service](#wsl-and-headless-linux-there-is-no-secret-service).
+On Windows that `0600` buys you less than it looks like, see
 [On Windows, `--no-keyring` protects less than `0600` suggests](#on-windows---no-keyring-protects-less-than-0600-suggests).
 In CI, skip projects entirely — see [CI and headless use](#ci-and-headless-use).
 
@@ -332,6 +345,51 @@ On a Linux box with no Secret Service (a headless server, a bare container), pas
 does not refuse) if that fallback file, or its directory, is readable by other users — a
 restored backup, a shared `XDG_STATE_HOME`, or a stray `chmod -R` can loosen it after the
 fact, and the file holds your refresh token in cleartext.
+
+### WSL and headless Linux: there is no Secret Service
+
+A WSL distribution is Linux, so `fft` builds with the D-Bus Secret Service backend — and a
+stock distribution has nothing on the other end of it: no session bus, no `gnome-keyring`.
+The keychain is not merely locked there, it does not exist.
+
+`fft` says so. An unreachable keychain is a distinct condition, not a stray D-Bus error:
+it exits **3** and tells you the three ways out.
+
+```
+$ fft project add prd --base-url https://acme.api.fulfillmenttools.com …
+Error: store the password for "prd": no OS keychain is available on this machine: …
+
+WSL ships no Secret Service, so there is no keychain for fft to use.
+
+Pass --no-keyring (or set FFT_NO_KEYRING=1) to store credentials in a 0600 file
+instead, or add "noKeyring: true" under "settings:" in ~/.config/fft/config.yaml to
+make that permanent — that file holds your password and refresh token in cleartext.
+To keep a real keychain, install gnome-keyring and run fft inside a session D-Bus.
+```
+
+On a terminal, `fft project add` asks instead of just failing, and writes
+`settings.noKeyring: true` when you say yes — so you are asked exactly **once**, per
+machine, and never again:
+
+```
+No OS keychain is available. Store credentials in a 0600 file, in cleartext, instead? [y/N]:
+```
+
+Three things this deliberately does **not** do. It never falls back on its own — the file
+holds your password in cleartext, and landing there by accident is the thing the explicit
+opt-in exists to prevent. `--yes` does not answer that question either: `-y` is consent to
+the questions a command was always going to ask, not to downgrading where your credentials
+live. And a keychain that is merely **locked**, or a prompt you denied, is not this — that
+is a keychain that exists, and the answer there is to unlock it, not to write a file.
+
+One caveat if you sync `config.yaml` between machines — it holds no secrets, so committing
+it to a dotfiles repo is safe: `noKeyring` is a setting, not a fact about the machine. A
+`true` that follows you to a laptop that *does* have a keychain keeps `fft` reading the
+file store there. `--no-keyring=false` overrides it for one run.
+
+If you would rather keep a real keychain under WSL, install `gnome-keyring` and give it a
+session bus (`dbus-run-session -- fft …`, or a systemd user session via `[boot] systemd=true`
+in `/etc/wsl.conf`). `fft` needs nothing special once `org.freedesktop.secrets` answers.
 
 On macOS, a Keychain item `fft` stores is readable by **any process running as you**, with no
 per-access prompt — that is how the `security` framework's default access control works, and
