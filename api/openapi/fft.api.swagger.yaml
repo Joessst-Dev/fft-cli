@@ -53868,6 +53868,9 @@ components:
         - ITEM_RETURN_JOB
         - PARCEL
         - RESERVATION
+        - PARCEL_INFORMATION
+        - LABEL
+        - TRACKING_INFORMATION
       type: string
       title: ModuleEntity
       description: ModuleEntity
@@ -53947,6 +53950,7 @@ components:
         - SERVICE_JOB
         - RESERVATION
         - ORDER
+        - SHIPPING
       type: string
       title: ModuleType
       description: ModuleType
@@ -54967,6 +54971,16 @@ components:
         name:
           description: The name of the OIDC provider
           type: string
+        roleManagementMode:
+          description: >-
+            Determines whether role assignments of this OIDC provider are
+            managed by the IDP (IDP_MANAGED, default) or locally in
+            fulfillmenttools (IDP_IDENTITY_ONLY). The ADMINISTRATOR role always
+            stays IDP-managed.
+          enum:
+            - IDP_MANAGED
+            - IDP_IDENTITY_ONLY
+          type: string
         status:
           description: The status of the OIDC provider
           enum:
@@ -55008,6 +55022,16 @@ components:
         name:
           description: The name of the OIDC provider
           type: string
+        roleManagementMode:
+          description: >-
+            Determines whether role assignments of this OIDC provider are
+            managed by the IDP (IDP_MANAGED, default) or locally in
+            fulfillmenttools (IDP_IDENTITY_ONLY). The ADMINISTRATOR role always
+            stays IDP-managed.
+          enum:
+            - IDP_MANAGED
+            - IDP_IDENTITY_ONLY
+          type: string
         status:
           description: The status of the OIDC provider
           enum:
@@ -55046,6 +55070,16 @@ components:
           type: string
         name:
           description: The name of the OIDC provider
+          type: string
+        roleManagementMode:
+          description: >-
+            Determines whether role assignments of this OIDC provider are
+            managed by the IDP (IDP_MANAGED, default) or locally in
+            fulfillmenttools (IDP_IDENTITY_ONLY). The ADMINISTRATOR role always
+            stays IDP-managed.
+          enum:
+            - IDP_MANAGED
+            - IDP_IDENTITY_ONLY
           type: string
         status:
           description: The status of the OIDC provider
@@ -66731,10 +66765,35 @@ components:
         name: PrioritizationRuleImplementation
       title: PrioritizationRuleImplementation
       description: PrioritizationRuleImplementation
+    PriorityRatingResult:
+      properties:
+        id:
+          type: string
+        matchesPriorityMinimum:
+          type: boolean
+        name:
+          type: string
+        routingStrategyNodeId:
+          type: string
+        type:
+          $ref: '#/components/schemas/RatingResultType'
+      required:
+        - id
+        - type
+        - routingStrategyNodeId
+        - matchesPriorityMinimum
+      title: PriorityRatingResult
+      description: PriorityRatingResult
     Process:
       allOf:
         - $ref: '#/components/schemas/VersionedResource'
       properties:
+        carrierManagementStatuses:
+          allOf:
+            - $ref: '#/components/schemas/ProcessStatusDetail'
+          description: >-
+            Carrier management domain status with aggregated sub-statuses from
+            modules.
         deletionDate:
           description: >-
             The date that defines when the entities will be or have been
@@ -68375,6 +68434,10 @@ components:
             $ref: '#/components/schemas/ProcessSearchQuery'
           maxItems: 500
           type: array
+        carrierManagementStatuses:
+          allOf:
+            - $ref: '#/components/schemas/ProcessStatusEnumFilter'
+          description: Search by carrierManagementStatuses
         created:
           allOf:
             - $ref: '#/components/schemas/DateFilter'
@@ -69445,6 +69508,8 @@ components:
         - STANDARD
         - TOOLKIT
       type: string
+      xml:
+        name: RatingResultType
       title: RatingResultType
       description: RatingResultType
     RatingStatistic:
@@ -80635,6 +80700,10 @@ components:
           items:
             $ref: '#/components/schemas/HandledItem'
           type: array
+        priorityRatingResults:
+          items:
+            $ref: '#/components/schemas/PriorityRatingResult'
+          type: array
         ratingResults:
           items:
             $ref: '#/components/schemas/RatingResult'
@@ -80663,6 +80732,7 @@ components:
         - nodes
         - transfers
         - ratingResults
+        - priorityRatingResults
       type: object
       title: SourcingOption
       description: SourcingOption
@@ -85054,6 +85124,16 @@ components:
           type: string
         name:
           description: The name of the OIDC provider
+          type: string
+        roleManagementMode:
+          description: >-
+            Determines whether role assignments of this OIDC provider are
+            managed by the IDP (IDP_MANAGED, default) or locally in
+            fulfillmenttools (IDP_IDENTITY_ONLY). The ADMINISTRATOR role always
+            stays IDP-managed.
+          enum:
+            - IDP_MANAGED
+            - IDP_IDENTITY_ONLY
           type: string
         status:
           description: The status of the OIDC provider
