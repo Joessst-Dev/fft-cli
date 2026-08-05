@@ -550,6 +550,13 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 // every key it touches, which would quietly corrupt `activeProject` and
 // `baseUrl` if it were let anywhere near the config file itself.
 func (d *Deps) bindFlags(cmd *cobra.Command) (*viper.Viper, error) {
+	// Cleared on every run, absence included, for the same reason ReadOnlyFlag is:
+	// the spec harness reuses one Deps across commands, and a --no-keyring left over
+	// from a previous run would go on suppressing the warning that this run's store
+	// was chosen by the config file.
+	d.noKeyringFromConfig = false
+	d.explicitNoKeyring = false
+
 	v := viper.New()
 	v.SetEnvPrefix("FFT")
 	// So that --no-color reads FFT_NO_COLOR rather than FFT_NO-COLOR.
@@ -593,7 +600,10 @@ func (d *Deps) bindFlags(cmd *cobra.Command) (*viper.Viper, error) {
 	if f := cmd.Root().PersistentFlags().Lookup("no-keyring"); f != nil && f.Changed {
 		d.explicitNoKeyring = true
 	}
-	if _, ok := os.LookupEnv("FFT_NO_KEYRING"); ok {
+	// Non-empty, because that is what viper itself requires before an env value
+	// beats a default: FFT_NO_KEYRING= would otherwise leave the config's choice
+	// standing and silence the warning about it at the same time.
+	if val, ok := os.LookupEnv("FFT_NO_KEYRING"); ok && val != "" {
 		d.explicitNoKeyring = true
 	}
 
@@ -631,17 +641,7 @@ func (d *Deps) noteInheritedFileStore() {
 	// would assume — and it has to be noticeable on the machine nobody asked.
 	d.Printer.Warnf(
 		"credentials are stored in cleartext at %s, because settings.noKeyring is set in the config file.",
-		d.credentialsPath())
-}
-
-// credentialsPath names the fallback file for a message, or a plain description
-// of it when the path cannot be resolved — a notice must not fail a command.
-func (d *Deps) credentialsPath() string {
-	path, err := secrets.DefaultFilePath()
-	if err != nil {
-		return "the fallback credentials file"
-	}
-	return path
+		credentialsFilePath())
 }
 
 // reopenSecrets swaps the credential store for the 0600 file fallback.

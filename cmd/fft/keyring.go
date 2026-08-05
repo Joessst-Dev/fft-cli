@@ -48,8 +48,25 @@ make that permanent — that file holds your password and refresh token in clear
 		"run fft inside a session D-Bus."
 }
 
-// sweep empties a project out of a credential store fft is not using any more,
-// and reports whether the store can now be said to hold nothing of that project's.
+// sweepResult is what became of a project's credentials in the store fft has
+// stopped using.
+//
+// Three outcomes and not two, because "the store said nothing was wrong" and
+// "fft could not open the store" are the same silence and mean opposite things.
+// Only one caller can tell them apart from context, so neither may be folded into
+// the other here.
+type sweepResult int
+
+const (
+	// swept: the store no longer holds anything of this project's.
+	swept sweepResult = iota
+	// unreachable: fft could not open the store, so it cannot say what is in it.
+	unreachable
+	// refused: the store is there and would not give the credentials up.
+	refused
+)
+
+// sweep empties a project out of a credential store fft is not using any more.
 //
 // Two callers, one job. `project add` uses it for the keychain that took a
 // password and then went away, so persistProject's own rollback failed the same
@@ -60,25 +77,50 @@ make that permanent — that file holds your password and refresh token in clear
 // It must run only after the new store has the credentials, never before:
 // deleting first would mean a write that fails for its own reasons leaves the
 // project with credentials in neither store.
-func sweep(deps *Deps, store secrets.Store, project string) bool {
+//
+// The refusal is reported here because it reads the same for either caller:
+// something real is being left behind, in a place only the user can clear. What
+// an unreachable store means is the caller's to say, or not.
+func sweep(deps *Deps, store secrets.Store, project string) sweepResult {
 	err := secrets.DeleteAll(store, project)
 	switch {
 	case err == nil:
-		return true
-	// A keychain that is not there cannot be tidied, and there is nothing in it to
-	// tidy — that is what unavailable means. Saying so on every removal on a WSL
-	// box would be noise about a store the user has already been told fft cannot
-	// reach.
+		return swept
 	case errors.Is(err, secrets.ErrKeyringUnavailable):
-		return true
+		return unreachable
 	}
-	// Anything else and the keychain *is* there and refused — locked, access
-	// denied — so something real is being left behind and only the user can clear
-	// it. Never fatal: the caller has already done the thing it was asked to do.
 	deps.Printer.Notef(
-		"Left %q's credentials in the keychain (%v); remove them there if you no longer want them.",
-		project, err)
-	return false
+		"Left %q's credentials in %s (%v); remove them there if you no longer want them.",
+		project, storeLocation(store), err)
+	return refused
+}
+
+// storeLocation names where a store keeps things, for a message telling someone
+// to go and look there.
+//
+// It has to ask the store rather than assume, because sweep runs against whichever
+// one this machine is not using: on a machine with a keychain, that is the
+// cleartext file. Sending a user to their keychain to clean up a password sitting
+// in ~/.local/state would be pointing them away from the one that matters.
+func storeLocation(store secrets.Store) string {
+	switch kind := store.Kind(); kind {
+	case "keyring":
+		return "the keychain"
+	case "file":
+		return credentialsFilePath()
+	default:
+		return "the " + kind + " store"
+	}
+}
+
+// credentialsFilePath names the 0600 fallback file, or describes it when the path
+// cannot be resolved — a message must not fail a command.
+func credentialsFilePath() string {
+	path, err := secrets.DefaultFilePath()
+	if err != nil {
+		return "the fallback credentials file"
+	}
+	return path
 }
 
 // unusedSecrets opens the credential store this machine is *not* configured to

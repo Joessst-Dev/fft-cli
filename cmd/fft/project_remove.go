@@ -18,9 +18,12 @@ left behind for a later project of the same name to inherit.
 
 Both stores are emptied, not just the one in use: a machine that switched to the
 0600 file (--no-keyring, settings.noKeyring) left whatever was already in its
-keychain behind, and this is where that gets cleared up. If the keychain is there
-but will not give them up — locked, or access denied — fft says so and stops
-claiming to have removed them.
+keychain behind, and this is where that gets cleared up.
+
+fft only claims to have removed the credentials when it actually did. If the
+other store refuses — a locked keychain, an unreadable file — or cannot be opened
+at all, as over SSH with no session bus, it says which store and where, because
+what is left there is beyond fft's reach and not beyond yours.
 
 Removing the active project leaves no project active; run 'fft project use' to
 pick another.`
@@ -75,9 +78,22 @@ func runProjectRemove(deps *Deps, name string) error {
 	// looks without moving what was already stored, so a project configured before
 	// the switch still has its password in the keychain — and this is the command
 	// that promises to leave nothing behind.
-	cleared := true
-	if other := deps.unusedSecrets(); other != nil {
-		cleared = sweep(deps, other, project.Name)
+	other := deps.unusedSecrets()
+	outcome := swept
+	if other != nil {
+		outcome = sweep(deps, other, project.Name)
+	}
+
+	// An unreachable store is not an empty one, and this is the command where the
+	// difference matters. A laptop whose credentials are in gnome-keyring, driven
+	// over SSH with no session bus, would otherwise be told its password had been
+	// destroyed while it sat there in a keychain the next desktop login can read.
+	// `project add` treats the same silence as "nothing to do" because there it
+	// means the write just failed on this machine; here it means fft cannot look.
+	if outcome == unreachable {
+		deps.Printer.Warnf(
+			"could not open %s, so anything %q had there is still there.",
+			storeLocation(other), project.Name)
 	}
 
 	cfg.Remove(project.Name)
@@ -85,9 +101,9 @@ func runProjectRemove(deps *Deps, name string) error {
 		return err
 	}
 
-	// Only claim the credentials when they are actually gone. sweep has already
-	// said where the rest are.
-	if cleared {
+	// Only claim the credentials when they are actually gone. Both other outcomes
+	// have already said where the rest are, and why.
+	if outcome == swept {
 		deps.Printer.Notef("Removed project %q and its stored credentials.", project.Name)
 	} else {
 		deps.Printer.Notef("Removed project %q.", project.Name)

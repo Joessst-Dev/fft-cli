@@ -25,6 +25,24 @@ func (noKeyringStore) Set(key, _ string) error {
 	return fmt.Errorf("store %q: %w", key, secrets.ErrKeyringUnavailable)
 }
 
+// unreachableKeyring is a keychain fft cannot open at all — no session bus, an
+// SSH login, a machine that never had one. Every operation reports the sentinel.
+type unreachableKeyring struct{ secrets.Store }
+
+func (unreachableKeyring) Kind() string        { return "keyring" }
+func (unreachableKeyring) Delete(string) error { return secrets.ErrKeyringUnavailable }
+func (unreachableKeyring) Get(string) (string, error) {
+	return "", secrets.ErrKeyringUnavailable
+}
+
+// refusingFileStore is the cleartext file, refusing to give up what it holds — a
+// credentials.json that will not parse, say. It reports its kind as the file
+// store, because that is what the user has to be sent to.
+type refusingFileStore struct{ secrets.Store }
+
+func (refusingFileStore) Kind() string        { return "file" }
+func (refusingFileStore) Delete(string) error { return errors.New("the file will not parse") }
+
 // flickeringKeyring is the only shape in which a credential can be left behind
 // *and* recovered: it takes the password, refuses the write after it, is still
 // refusing when persistProject tries to roll that password back — and is
@@ -45,6 +63,10 @@ type flickeringKeyring struct {
 	// keychain that is not there — which is what the ordinary flicker looks like.
 	refusal error
 }
+
+// Kind is the keychain's, not the in-memory store it is built on: it stands in
+// for a keychain, and messages now name the store they are about.
+func (*flickeringKeyring) Kind() string { return "keyring" }
 
 func (s *flickeringKeyring) refuse(key string) error {
 	if s.refusal != nil {
@@ -206,6 +228,39 @@ var _ = Describe("choosing the credential store", func() {
 		Entry("FFT_NO_KEYRING=1", func() { c.setenv("FFT_NO_KEYRING", "1") }),
 	)
 
+	// An answer given on one run must not go on answering for the next. Deps is
+	// reused across commands by the spec harness, so a --no-keyring left over from
+	// an earlier run would silently suppress the warning here — and these are the
+	// specs the rest of this feature leans on for its own correctness.
+	It("does not let one run's flag speak for the next", func() {
+		seedConfig("    output: table\n    noKeyring: true\n")
+
+		Expect(c.run("project", "list", "--no-keyring")).To(Equal(exitcode.OK))
+		Expect(c.errOut()).NotTo(ContainSubstring("settings.noKeyring"))
+
+		// The store is re-opened, as a second process would. What must not carry over
+		// is the *answer*: production gets a fresh Deps per command and the harness
+		// does not, so this is where a field that is only ever set true shows up.
+		c.deps.Secrets = nil
+
+		Expect(c.run("project", "list")).To(Equal(exitcode.OK))
+
+		Expect(c.errOut()).To(ContainSubstring("settings.noKeyring"))
+	})
+
+	// Viper ignores an empty env value and falls through to the default, so an
+	// exported-but-empty FFT_NO_KEYRING leaves the config's cleartext choice
+	// standing. Counting it as an answer would silence the one warning about it.
+	It("does not treat an empty FFT_NO_KEYRING as an answer", func() {
+		seedConfig("    output: table\n    noKeyring: true\n")
+		c.setenv("FFT_NO_KEYRING", "")
+
+		Expect(c.run("project", "list")).To(Equal(exitcode.OK))
+
+		Expect(c.deps.Secrets.Kind()).To(Equal("file"))
+		Expect(c.errOut()).To(ContainSubstring("settings.noKeyring"))
+	})
+
 	It("says nothing at all when the keychain is in use", func() {
 		seedConfig("    output: table\n")
 
@@ -272,6 +327,38 @@ var _ = Describe("fft project remove after the machine switched stores", func() 
 
 		Expect(keychain.Snapshot()).To(BeEmpty(), "credentials were left in the keychain")
 		Expect(c.errOut()).To(ContainSubstring("and its stored credentials"))
+	})
+
+	// The sentinel means "fft could not open that store", which is not the same as
+	// "that store is empty". On `project add` it may as well be — the write to it
+	// just failed on this machine — but here it is the difference between a
+	// password destroyed and a password still sitting in a keychain the next
+	// desktop login can read. A laptop driven over SSH with no session bus is the
+	// ordinary way to hit it.
+	It("does not claim to have destroyed credentials it could not even look at", func() {
+		c.deps.unused = unreachableKeyring{}
+
+		Expect(c.run("project", "remove", "staging", "--yes")).To(Equal(exitcode.OK))
+
+		Expect(c.errOut()).To(ContainSubstring(`Removed project "staging".`))
+		Expect(c.errOut()).NotTo(ContainSubstring("and its stored credentials"))
+		Expect(c.errOut()).To(ContainSubstring("could not open the keychain"))
+		Expect(c.errOut()).To(ContainSubstring("is still there"))
+	})
+
+	// sweep runs against whichever store this machine is not using, so on a machine
+	// with a working keychain the leftover is the cleartext file. Telling that user
+	// to go and look in their keychain would point them away from the password in
+	// ~/.local/state, which is the one that matters.
+	It("names the file, not the keychain, when the file is the store left behind", func() {
+		path := filepath.Join(GinkgoT().TempDir(), "state")
+		c.setenv("XDG_STATE_HOME", path)
+		c.deps.unused = refusingFileStore{secrets.NewMem()}
+
+		Expect(c.run("project", "remove", "staging", "--yes")).To(Equal(exitcode.OK))
+
+		Expect(c.errOut()).To(ContainSubstring(filepath.Join(path, "fft", "credentials.json")))
+		Expect(c.errOut()).NotTo(ContainSubstring("in the keychain"))
 	})
 
 	It("does not claim to have removed what it could not reach", func() {
