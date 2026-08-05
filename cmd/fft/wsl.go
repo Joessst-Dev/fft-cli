@@ -39,6 +39,11 @@ func onWSL(goos string, lookupEnv func(string) (string, bool), readFile func(str
 	// both. WSL1 reports "…-Microsoft" and WSL2 "…-microsoft-standard-WSL2" —
 	// neither has a Secret Service and both want the same advice, so they are not
 	// told apart here.
+	//
+	// "wsl" as well as "microsoft" because a hand-built WSL2 kernel carries
+	// whatever CONFIG_LOCALVERSION it was given, and the Microsoft branding is the
+	// first thing to go. Being wrong either way costs one sentence of advice, so
+	// the broader match is the cheaper mistake.
 	data, err := readFile(osReleasePath)
 	if err != nil {
 		return false

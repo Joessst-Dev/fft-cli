@@ -25,6 +25,38 @@ func (noKeyringStore) Set(key, _ string) error {
 	return fmt.Errorf("store %q: %w", key, secrets.ErrKeyringUnavailable)
 }
 
+// flickeringKeyring is the only shape in which a credential can be left behind
+// *and* recovered: it takes the password, refuses the write after it, is still
+// refusing when persistProject tries to roll that password back — and is
+// reachable again by the time the sweep runs.
+//
+// A keychain that simply stays gone leaves residue nothing can reach, which is
+// why the sweep is best effort rather than checked.
+type flickeringKeyring struct {
+	secrets.Store
+
+	writes int
+	// refusals is how many deletes are still to be refused: one per kind, which is
+	// exactly persistProject's rollback. The sweep that follows finds a bus again.
+	refusals int
+}
+
+func (s *flickeringKeyring) Set(key, val string) error {
+	s.writes++
+	if s.writes > 1 {
+		return fmt.Errorf("store %q: %w", key, secrets.ErrKeyringUnavailable)
+	}
+	return s.Store.Set(key, val)
+}
+
+func (s *flickeringKeyring) Delete(key string) error {
+	if s.refusals > 0 {
+		s.refusals--
+		return fmt.Errorf("delete %q: %w", key, secrets.ErrKeyringUnavailable)
+	}
+	return s.Store.Delete(key)
+}
+
 var _ = Describe("the advice given when there is no keychain", func() {
 	// keyringHint is asserted directly rather than through the environment,
 	// because hermeticEnv does not clear WSL_* — a developer running this suite
@@ -218,27 +250,68 @@ var _ = Describe("fft project add on a machine with no keychain", func() {
 	// `prd` reporting "missing" the next time they look, with nothing pointing at
 	// the answer they gave while adding something else.
 	When("other projects are already configured", func() {
-		It("says the answer moves them too", func() {
+		// seedProjects writes a config holding the named projects and nothing else.
+		seedProjects := func(names ...string) {
+			body := "version: 2\nactiveProject: " + names[0] + "\nprojects:\n"
+			for _, name := range names {
+				body += "    - name: " + name + "\n" +
+					"      baseUrl: https://" + name + ".api.fulfillmenttools.com\n" +
+					"      email: bot@ocff-acme-prd.com\n"
+			}
+			body += "settings:\n    output: table\n    updateCheck: false\n"
+
 			Expect(os.MkdirAll(filepath.Dir(c.configPath), 0o700)).To(Succeed())
-			Expect(os.WriteFile(c.configPath, []byte(`version: 2
-activeProject: prd
-projects:
-    - name: prd
-      baseUrl: https://acme.api.fulfillmenttools.com
-      email: bot@ocff-acme-prd.com
-    - name: pre
-      baseUrl: https://pre.api.fulfillmenttools.com
-      email: bot@ocff-acme-pre.com
-settings:
-    output: table
-    updateCheck: false
-`), 0o600)).To(Succeed())
+			Expect(os.WriteFile(c.configPath, []byte(body), 0o600)).To(Succeed())
+		}
+
+		It("says the answer moves them too", func() {
+			seedProjects("prd", "pre")
 			c.answer("s3cret", "n")
 
 			Expect(add()).To(Equal(exitcode.Config))
 
 			Expect(c.errOut()).To(ContainSubstring("machine-wide"))
 			Expect(c.errOut()).To(ContainSubstring("2 projects already configured"))
+		})
+
+		// The count is of bystanders, and a --force re-add is not one of them. This
+		// is the rotate-a-password-after-losing-the-keychain path, where getting it
+		// wrong makes the disclosure false in the case it exists for.
+		It("does not count the project being re-added with --force", func() {
+			seedProjects("wsl")
+			c.answer("s3cret", "n")
+
+			Expect(add("--force")).To(Equal(exitcode.Config))
+
+			Expect(c.errOut()).NotTo(ContainSubstring("machine-wide"))
+		})
+
+		It("counts only the bystanders when one of several is re-added", func() {
+			seedProjects("wsl", "prd", "pre")
+			c.answer("s3cret", "n")
+
+			Expect(add("--force")).To(Equal(exitcode.Config))
+
+			Expect(c.errOut()).To(ContainSubstring("2 projects already configured"))
+		})
+	})
+
+	// The keychain can take the password and then vanish before the API key, in
+	// which case persistProject's own rollback fails the same way. Nothing must be
+	// left behind in a store the user has just been told they are leaving — and
+	// which `project remove` stops looking in once noKeyring is set.
+	When("the keychain took the password before it went away", func() {
+		It("sweeps it out of the old store before writing to the new one", func() {
+			keychain := secrets.NewMem()
+			c.deps.Secrets = &flickeringKeyring{Store: keychain, refusals: len(secrets.AllKinds())}
+			c.answer("s3cret", "y")
+
+			Expect(add()).To(Equal(exitcode.OK))
+
+			Expect(secrets.Has(keychain, "wsl")).To(BeFalse(),
+				"the password was left behind in a store fft has stopped looking in")
+			Expect(c.deps.Secrets.Kind()).To(Equal("file"))
+			Expect(secrets.Has(c.deps.Secrets, "wsl")).To(BeTrue())
 		})
 	})
 

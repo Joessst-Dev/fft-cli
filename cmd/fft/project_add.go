@@ -389,18 +389,29 @@ func persistProject(deps *Deps, cfg *config.Config, project config.Project, pass
 // user is still standing there, rather than making them read an error and start
 // again. Any other failure, and any user who says no, gets cause back untouched.
 //
-// There is nothing to unwind before the retry. A missing keychain can only fail
-// the first write persistProject makes, which happens before it touches cfg — the
-// later SaveConfig branch would need a keychain that took two writes and then
-// vanished — so the second attempt starts from the state the first one did.
+// cfg is untouched on the way in: persistProject writes the password before it
+// upserts, and a keychain that is not there fails that first write. It is not
+// quite impossible for the keychain to take one write and then vanish — its own
+// rollback can fail the same way the write did — so the retry sweeps the old
+// store rather than assuming it left nothing behind.
 func retryWithoutKeyring(deps *Deps, cfg *config.Config, project config.Project, password string, interactive bool, cause error) error {
 	if !errors.Is(cause, secrets.ErrKeyringUnavailable) {
 		return cause
 	}
 
-	// The projects already on this machine, which a yes moves too — cfg is still
-	// the on-disk set here, since persistProject failed before it upserted.
-	accepted, err := offerFileStore(deps, interactive, len(cfg.Projects))
+	// How many projects a yes moves that the user did not ask about. cfg is still
+	// the on-disk set, so a --force re-add is already in it and must not be counted
+	// as a bystander — claiming one on a machine that has only this project would
+	// make the disclosure false in the case it exists for.
+	others := len(cfg.Projects)
+	if _, exists := cfg.Find(project.Name); exists {
+		others--
+	}
+
+	// Captured before the offer, which is what replaces it.
+	previous := deps.Secrets
+
+	accepted, err := offerFileStore(deps, interactive, others)
 	if err != nil {
 		// Joined, not replaced. Failing to ask, or failing to open the file store
 		// afterwards, does not make the keychain any less absent — and dropping cause
@@ -411,6 +422,15 @@ func retryWithoutKeyring(deps *Deps, cfg *config.Config, project config.Project,
 	if !accepted {
 		return cause
 	}
+
+	// Best effort, and ignored on purpose: against a keychain that is really gone
+	// this does nothing, which is the usual case. It is here for the one where the
+	// keychain took the password and then went away — its own rollback would have
+	// failed too — so that a credential is not left behind in a store the user has
+	// just been told they are leaving, and which `project remove` will no longer
+	// look in once the setting below is written.
+
+	_ = secrets.DeleteAll(previous, project.Name)
 
 	// Ride along on the save persistProject is about to do, so the project and the
 	// setting that decides where its credentials live land in one atomic write.

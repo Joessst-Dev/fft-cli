@@ -78,16 +78,18 @@ func unavailableOn(err error, goos string) bool {
 	// among those: a locked keychain is a keychain. So is AccessDenied, and so is
 	// NoReply — a prompter that hung is one that exists.
 	//
-	// Matched as a value, not a pointer: godbus delivers a remote error as a
-	// dbus.Error value (finalizeWithError), and reserves *dbus.Error for the
-	// server side. go-keyring passes it back unwrapped.
+	// Both shapes, because the property that only one of them reaches here is
+	// go-keyring's to change, not ours: godbus delivers a remote error as a
+	// dbus.Error value (finalizeWithError) and reserves *dbus.Error for the server
+	// side, so today only the value form arrives. Checking both costs a line and
+	// stops that staying true by accident.
 	var dbusErr dbus.Error
-	if errors.As(err, &dbusErr) {
-		switch dbusErr.Name {
-		case dbusServiceUnknown, dbusNameHasNoOwner, dbusNoServer:
-			return true
-		}
-		return false
+	var dbusErrPtr *dbus.Error
+	switch {
+	case errors.As(err, &dbusErr):
+		return knownAbsentName(dbusErr.Name)
+	case errors.As(err, &dbusErrPtr):
+		return knownAbsentName(dbusErrPtr.Name)
 	}
 
 	// On Linux the only binary this path runs is dbus-launch — godbus autolaunches
@@ -117,7 +119,26 @@ func unavailableOn(err error, goos string) bool {
 			(errors.Is(netErr, syscall.ENOENT) || errors.Is(netErr, syscall.ECONNREFUSED)) {
 			return true
 		}
+
+		// Guarded like the rest: this is an unanchored substring of a message, the
+		// weakest match in the file, and a session bus is a thing only the D-Bus
+		// backend has. There is no reading of it that should decide anything on a
+		// Mac, where go-keyring never opens one.
+		if strings.Contains(err.Error(), noSessionBusText) {
+			return true
+		}
 	}
 
-	return strings.Contains(err.Error(), noSessionBusText)
+	return false
+}
+
+// knownAbsentName reports whether a D-Bus error name means nothing is there to
+// answer, as opposed to something that answered and refused.
+func knownAbsentName(name string) bool {
+	switch name {
+	case dbusServiceUnknown, dbusNameHasNoOwner, dbusNoServer:
+		return true
+	default:
+		return false
+	}
 }

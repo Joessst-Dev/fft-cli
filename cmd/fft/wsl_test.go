@@ -42,6 +42,10 @@ var _ = Describe("detecting WSL", func() {
 			env(), proc("5.15.167.4-microsoft-standard-WSL2\n")),
 		Entry("nothing but the kernel's own name, WSL1",
 			env(), proc("4.4.0-19041-Microsoft\n")),
+		// A hand-built WSL2 kernel keeps whatever CONFIG_LOCALVERSION it was given,
+		// and the Microsoft branding is the first thing to go.
+		Entry("a custom kernel that kept only the wsl in its name",
+			env(), proc("6.6.36-wsl2-custom\n")),
 	)
 
 	DescribeTable("this is not WSL",
