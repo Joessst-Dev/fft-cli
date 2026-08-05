@@ -83,11 +83,12 @@ func runProjectRemove(deps *Deps, name string) error {
 	other, err := deps.unusedSecrets()
 	outcome := swept
 	location := "the other credential store"
+	reason := err
 	switch {
 	case err != nil:
 		outcome = unreachable
 	case other != nil:
-		outcome = sweep(deps, other, project.Name)
+		outcome, reason = sweep(deps, other, project.Name)
 		location = storeLocation(other)
 	}
 
@@ -102,10 +103,13 @@ func runProjectRemove(deps *Deps, name string) error {
 	// fallback, where every removal would reach this line. So this says what fft
 	// did and did not do, and claims nothing about what is in a store it could not
 	// open. A note, not a warning, because on those machines there is nothing wrong.
+	// The reason goes in, as it does in sweep's sibling message: "$HOME is not
+	// defined" is something the user can act on, and "could not open the other
+	// credential store" on its own is something they can only wonder about.
 	if outcome == unreachable {
 		deps.Printer.Notef(
-			"Could not open %s, so %q's credentials there, if it has any, are untouched.",
-			location, project.Name)
+			"Could not open %s (%v), so %q's credentials there, if it has any, are untouched.",
+			location, reason, project.Name)
 	}
 
 	cfg.Remove(project.Name)

@@ -433,7 +433,10 @@ func retryWithoutKeyring(deps *Deps, cfg *config.Config, project config.Project,
 		return err
 	}
 
-	sweep(deps, previous, project.Name)
+	// The outcome is not this caller's to report: a keychain that could not be
+	// opened is the very condition that brought us here, and the user has already
+	// been told. A refusal has said so itself, inside.
+	_, _ = sweep(deps, previous, project.Name)
 	return nil
 }
 

@@ -80,19 +80,20 @@ const (
 //
 // The refusal is reported here because it reads the same for either caller:
 // something real is being left behind, in a place only the user can clear. What
-// an unreachable store means is the caller's to say, or not.
-func sweep(deps *Deps, store secrets.Store, project string) sweepResult {
+// an unreachable store means is the caller's to say, or not — so the failure is
+// handed back rather than swallowed, for the caller that does say something.
+func sweep(deps *Deps, store secrets.Store, project string) (sweepResult, error) {
 	err := secrets.DeleteAll(store, project)
 	switch {
 	case err == nil:
-		return swept
+		return swept, nil
 	case onlyUnavailable(err):
-		return unreachable
+		return unreachable, err
 	}
 	deps.Printer.Notef(
 		"Left %q's credentials in %s (%v); remove them there if you no longer want them.",
 		project, storeLocation(store), err)
-	return refused
+	return refused, err
 }
 
 // onlyUnavailable reports whether every failure in err is the store being absent.
@@ -101,13 +102,18 @@ func sweep(deps *Deps, store secrets.Store, project string) sweepResult {
 // member — so a bus that dropped part-way through a loop that had already been
 // refused once would read as "nothing there" and lose the refusal. A refusal is
 // the outcome with something to say, so it wins ties.
+//
+// One level down and no further: the members of that join are ordinary wrapped
+// errors, and errors.Is walks the rest. Recursing would mean descending into
+// anything else that spells Unwrap() []error — which is why the secrets package
+// keeps that shape for lists of independent failures and nothing else.
 func onlyUnavailable(err error) bool {
 	joined, ok := err.(interface{ Unwrap() []error })
 	if !ok {
 		return errors.Is(err, secrets.ErrKeyringUnavailable)
 	}
 	for _, e := range joined.Unwrap() {
-		if !onlyUnavailable(e) {
+		if !errors.Is(e, secrets.ErrKeyringUnavailable) {
 			return false
 		}
 	}

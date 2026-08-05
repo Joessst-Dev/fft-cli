@@ -92,6 +92,36 @@ var _ = Describe("classifying an unreachable keychain", func() {
 	)
 })
 
+// The shape of this error is load-bearing outside the package. cmd/fft asks, of
+// the joined result of DeleteAll, whether *every* failure in it is an absent
+// store — a question that can only be asked of a list of independent failures.
+// If this error also spelled itself that way, with the sentinel as one member and
+// the cause as another, it would answer no to its own question and a machine with
+// no keychain would be reported as one refusing to co-operate.
+var _ = Describe("the shape of an unavailable-store error", func() {
+	cause := errors.New("dbus: couldn't determine address of session bus")
+	err := error(&unavailableError{cause})
+
+	It("carries the sentinel", func() {
+		Expect(err).To(MatchError(ErrKeyringUnavailable))
+	})
+
+	It("keeps the cause reachable, for a developer reading the message", func() {
+		Expect(err).To(MatchError(cause))
+		Expect(err.Error()).To(ContainSubstring("session bus"))
+	})
+
+	It("does not answer for a sentinel it is not", func() {
+		Expect(err).NotTo(MatchError(ErrNotFound))
+	})
+
+	It("does not present itself as a list of independent failures", func() {
+		_, isList := err.(interface{ Unwrap() []error })
+
+		Expect(isList).To(BeFalse(), "an errors.Join of this would be indistinguishable from it")
+	})
+})
+
 var _ = Describe("the keychain store, with no keychain behind it", func() {
 	// gone is a backend that is not there. The D-Bus shape, not the exec one, so
 	// that this reads the same on all three platforms CI runs: the exec shape is

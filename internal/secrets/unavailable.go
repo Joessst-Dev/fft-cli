@@ -50,10 +50,19 @@ func (e *unavailableError) Error() string {
 	return "no OS keychain is available on this machine: " + e.cause.Error()
 }
 
-// Unwrap returns both the sentinel and the cause, so that errors.Is finds
-// [ErrKeyringUnavailable] while the dbus text a developer needs is still in the
-// message.
-func (e *unavailableError) Unwrap() []error { return []error{ErrKeyringUnavailable, e.cause} }
+// Unwrap returns the cause, so the dbus error a developer needs is still
+// reachable through errors.Is and errors.As.
+func (e *unavailableError) Unwrap() error { return e.cause }
+
+// Is answers for the sentinel, which this error carries rather than wraps.
+//
+// Deliberately not an Unwrap() []error returning {sentinel, cause}, which would
+// read as the same shape errors.Join produces. A caller asking "is every failure
+// in here an absent store?" — as one does, of the joined result of [DeleteAll] —
+// has no way to tell a list of independent failures from a pair of sentinel and
+// cause, and would answer no for this error because its cause is a dbus failure
+// rather than the sentinel. One meaning per shape keeps that question answerable.
+func (e *unavailableError) Is(target error) bool { return target == ErrKeyringUnavailable }
 
 // unavailable reports whether err means there is no keychain to talk to.
 func unavailable(err error) bool { return unavailableOn(err, runtime.GOOS) }

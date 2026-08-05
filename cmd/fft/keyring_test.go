@@ -142,6 +142,28 @@ var _ = Describe("the advice given when there is no keychain", func() {
 	})
 })
 
+var _ = Describe("classifying what a sweep came back with", func() {
+	DescribeTable("weighing a join of one error per kind",
+		func(err error, want bool) {
+			Expect(onlyUnavailable(err)).To(Equal(want))
+		},
+		Entry("every kind unreachable",
+			errors.Join(
+				fmt.Errorf("delete password: %w", secrets.ErrKeyringUnavailable),
+				fmt.Errorf("delete idToken: %w", secrets.ErrKeyringUnavailable)),
+			true),
+		// The refusal is the outcome with something to say, so it survives being
+		// joined with kinds that merely could not be reached.
+		Entry("one kind refused among unreachable ones",
+			errors.Join(
+				fmt.Errorf("delete password: %w", errors.New("the collection is locked")),
+				fmt.Errorf("delete idToken: %w", secrets.ErrKeyringUnavailable)),
+			false),
+		Entry("a single failure, unreachable", fmt.Errorf("delete password: %w", secrets.ErrKeyringUnavailable), true),
+		Entry("a single failure, refused", errors.New("the collection is locked"), false),
+	)
+})
+
 var _ = Describe("report", func() {
 	It("turns an unreachable keychain into exit 3 and a way out", func() {
 		var stderr bytes.Buffer
@@ -429,6 +451,9 @@ var _ = Describe("fft project remove after the machine switched stores", func() 
 		Expect(c.errOut()).To(ContainSubstring(`Removed project "staging".`))
 		Expect(c.errOut()).NotTo(ContainSubstring("and its stored credentials"))
 		Expect(c.errOut()).To(ContainSubstring("Could not open the other credential store"))
+		// And why. "could not open the other credential store" on its own is
+		// something a user can only wonder about.
+		Expect(c.errOut()).To(ContainSubstring("locate the credentials file"))
 	})
 
 	// DeleteAll joins one error per kind, and errors.Is is satisfied by any single
