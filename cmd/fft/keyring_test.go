@@ -43,6 +43,25 @@ type refusingFileStore struct{ secrets.Store }
 func (refusingFileStore) Kind() string        { return "file" }
 func (refusingFileStore) Delete(string) error { return errors.New("the file will not parse") }
 
+// keyringKindStore is an ordinary working store that calls itself the keychain,
+// so that the pairing logic resolves the file store as its counterpart.
+type keyringKindStore struct{ secrets.Store }
+
+func (keyringKindStore) Kind() string { return "keyring" }
+
+// mixedKeyring refuses one kind and reports the other kinds unreachable — a bus
+// that dropped part-way through a loop that had already been told no. DeleteAll
+// joins them, and a refusal must survive being joined with the sentinel.
+type mixedKeyring struct{ secrets.Store }
+
+func (mixedKeyring) Kind() string { return "keyring" }
+func (mixedKeyring) Delete(key string) error {
+	if key == secrets.Key("staging", secrets.KindPassword) {
+		return errors.New("the collection is locked")
+	}
+	return secrets.ErrKeyringUnavailable
+}
+
 // flickeringKeyring is the only shape in which a credential can be left behind
 // *and* recovered: it takes the password, refuses the write after it, is still
 // refusing when persistProject tries to roll that password back — and is
@@ -299,8 +318,9 @@ var _ = Describe("fft project remove after the machine switched stores", func() 
 		func(inUse secrets.Store, want string) {
 			deps := &Deps{Secrets: inUse}
 
-			other := deps.unusedSecrets()
+			other, err := deps.unusedSecrets()
 
+			Expect(err).NotTo(HaveOccurred())
 			if want == "" {
 				Expect(other).To(BeNil())
 				return
@@ -315,6 +335,22 @@ var _ = Describe("fft project remove after the machine switched stores", func() 
 		Entry("memory has none", secrets.NewMem(), ""),
 		Entry("the environment has none", secrets.NewEnv(nil), ""),
 	)
+
+	// "There is no second store" and "there is one I could not open" are different
+	// answers, and folding them together is how a removal claims to have cleared a
+	// store nobody looked in.
+	It("reports a second store it cannot even locate, rather than pretending there is none", func() {
+		// No home to resolve the credentials file against.
+		for _, name := range []string{"HOME", "USERPROFILE", "XDG_STATE_HOME"} {
+			GinkgoT().Setenv(name, "")
+		}
+		deps := &Deps{Secrets: secrets.NewKeyring()}
+
+		other, err := deps.unusedSecrets()
+
+		Expect(err).To(HaveOccurred())
+		Expect(other).To(BeNil())
+	})
 
 	It("empties the store this machine is not using either", func() {
 		// The keychain the project was configured against, before the switch. It is
@@ -342,8 +378,25 @@ var _ = Describe("fft project remove after the machine switched stores", func() 
 
 		Expect(c.errOut()).To(ContainSubstring(`Removed project "staging".`))
 		Expect(c.errOut()).NotTo(ContainSubstring("and its stored credentials"))
-		Expect(c.errOut()).To(ContainSubstring("could not open the keychain"))
-		Expect(c.errOut()).To(ContainSubstring("is still there"))
+		Expect(c.errOut()).To(ContainSubstring("Could not open the keychain"))
+	})
+
+	// And does not claim the opposite either. fft cannot tell "no session bus right
+	// now" from "no keychain has ever existed here" — the classifier is coarse on
+	// purpose — and the second is the ordinary case on a WSL box that took the
+	// fallback, where every removal reaches this line. Asserting that credentials
+	// are "still there" would be as wrong as asserting they were removed, just in
+	// the other direction.
+	It("does not assert that anything is in a store it could not open", func() {
+		c.deps.unused = unreachableKeyring{}
+
+		Expect(c.run("project", "remove", "staging", "--yes")).To(Equal(exitcode.OK))
+
+		Expect(c.errOut()).To(ContainSubstring("if it has any"))
+		Expect(c.errOut()).NotTo(ContainSubstring("is still there"))
+		// A note, not a warning: on the machines this fires for every time, there is
+		// nothing wrong.
+		Expect(c.errOut()).NotTo(ContainSubstring("Warning: Could not open"))
 	})
 
 	// sweep runs against whichever store this machine is not using, so on a machine
@@ -359,6 +412,36 @@ var _ = Describe("fft project remove after the machine switched stores", func() 
 
 		Expect(c.errOut()).To(ContainSubstring(filepath.Join(path, "fft", "credentials.json")))
 		Expect(c.errOut()).NotTo(ContainSubstring("in the keychain"))
+	})
+
+	// The same conflation by a different route: a second store that cannot even be
+	// located is not a machine with only one store, and claiming the credentials
+	// were cleared from it would be the round-4 bug again.
+	It("does not claim success when it could not work out where the other store is", func() {
+		c.deps.Secrets = keyringKindStore{c.secrets}
+		// No home to resolve the credentials file against.
+		for _, name := range []string{"HOME", "USERPROFILE", "XDG_STATE_HOME"} {
+			c.setenv(name, "")
+		}
+
+		Expect(c.run("project", "remove", "staging", "--yes")).To(Equal(exitcode.OK))
+
+		Expect(c.errOut()).To(ContainSubstring(`Removed project "staging".`))
+		Expect(c.errOut()).NotTo(ContainSubstring("and its stored credentials"))
+		Expect(c.errOut()).To(ContainSubstring("Could not open the other credential store"))
+	})
+
+	// DeleteAll joins one error per kind, and errors.Is is satisfied by any single
+	// member — so one unreachable kind could hide another kind's refusal, and the
+	// "go and clear it yourself" message with it. The refusal is the outcome with
+	// something to say, so it wins.
+	It("reports a refusal even when the rest of the loop came back unreachable", func() {
+		c.deps.unused = mixedKeyring{}
+
+		Expect(c.run("project", "remove", "staging", "--yes")).To(Equal(exitcode.OK))
+
+		Expect(c.errOut()).To(ContainSubstring("the collection is locked"))
+		Expect(c.errOut()).NotTo(ContainSubstring("if it has any"))
 	})
 
 	It("does not claim to have removed what it could not reach", func() {

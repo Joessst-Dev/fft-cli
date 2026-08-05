@@ -21,9 +21,11 @@ Both stores are emptied, not just the one in use: a machine that switched to the
 keychain behind, and this is where that gets cleared up.
 
 fft only claims to have removed the credentials when it actually did. If the
-other store refuses — a locked keychain, an unreadable file — or cannot be opened
-at all, as over SSH with no session bus, it says which store and where, because
-what is left there is beyond fft's reach and not beyond yours.
+other store refuses — a locked keychain, an unreadable file — it names it and
+what it holds, because clearing that is yours to do and not fft's. If it cannot
+be opened at all, fft says only that: on a machine that has never had a keychain
+there was nothing in it to begin with, and fft cannot tell that apart from a
+keychain that is merely out of reach this run.
 
 Removing the active project leaves no project active; run 'fft project use' to
 pick another.`
@@ -78,22 +80,32 @@ func runProjectRemove(deps *Deps, name string) error {
 	// looks without moving what was already stored, so a project configured before
 	// the switch still has its password in the keychain — and this is the command
 	// that promises to leave nothing behind.
-	other := deps.unusedSecrets()
+	other, err := deps.unusedSecrets()
 	outcome := swept
-	if other != nil {
+	location := "the other credential store"
+	switch {
+	case err != nil:
+		outcome = unreachable
+	case other != nil:
 		outcome = sweep(deps, other, project.Name)
+		location = storeLocation(other)
 	}
 
 	// An unreachable store is not an empty one, and this is the command where the
-	// difference matters. A laptop whose credentials are in gnome-keyring, driven
-	// over SSH with no session bus, would otherwise be told its password had been
-	// destroyed while it sat there in a keychain the next desktop login can read.
-	// `project add` treats the same silence as "nothing to do" because there it
-	// means the write just failed on this machine; here it means fft cannot look.
+	// difference matters: a laptop whose credentials are in gnome-keyring, driven
+	// over SSH with no session bus, must not be told its password was destroyed
+	// while it sits there for the next desktop login to read.
+	//
+	// But it is not told the opposite either. fft cannot tell "no bus right now"
+	// from "no keychain has ever existed here" — the classifier is deliberately
+	// coarse — and the second is the ordinary case on a WSL box that took the
+	// fallback, where every removal would reach this line. So this says what fft
+	// did and did not do, and claims nothing about what is in a store it could not
+	// open. A note, not a warning, because on those machines there is nothing wrong.
 	if outcome == unreachable {
-		deps.Printer.Warnf(
-			"could not open %s, so anything %q had there is still there.",
-			storeLocation(other), project.Name)
+		deps.Printer.Notef(
+			"Could not open %s, so %q's credentials there, if it has any, are untouched.",
+			location, project.Name)
 	}
 
 	cfg.Remove(project.Name)

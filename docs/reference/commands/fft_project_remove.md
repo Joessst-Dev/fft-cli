@@ -17,9 +17,11 @@ Both stores are emptied, not just the one in use: a machine that switched to the
 keychain behind, and this is where that gets cleared up.
 
 fft only claims to have removed the credentials when it actually did. If the
-other store refuses — a locked keychain, an unreadable file — or cannot be opened
-at all, as over SSH with no session bus, it says which store and where, because
-what is left there is beyond fft's reach and not beyond yours.
+other store refuses — a locked keychain, an unreadable file — it names it and
+what it holds, because clearing that is yours to do and not fft's. If it cannot
+be opened at all, fft says only that: on a machine that has never had a keychain
+there was nothing in it to begin with, and fft cannot tell that apart from a
+keychain that is merely out of reach this run.
 
 Removing the active project leaves no project active; run 'fft project use' to
 pick another.

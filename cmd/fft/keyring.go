@@ -86,13 +86,32 @@ func sweep(deps *Deps, store secrets.Store, project string) sweepResult {
 	switch {
 	case err == nil:
 		return swept
-	case errors.Is(err, secrets.ErrKeyringUnavailable):
+	case onlyUnavailable(err):
 		return unreachable
 	}
 	deps.Printer.Notef(
 		"Left %q's credentials in %s (%v); remove them there if you no longer want them.",
 		project, storeLocation(store), err)
 	return refused
+}
+
+// onlyUnavailable reports whether every failure in err is the store being absent.
+//
+// DeleteAll joins one error per kind, and errors.Is is satisfied by any single
+// member — so a bus that dropped part-way through a loop that had already been
+// refused once would read as "nothing there" and lose the refusal. A refusal is
+// the outcome with something to say, so it wins ties.
+func onlyUnavailable(err error) bool {
+	joined, ok := err.(interface{ Unwrap() []error })
+	if !ok {
+		return errors.Is(err, secrets.ErrKeyringUnavailable)
+	}
+	for _, e := range joined.Unwrap() {
+		if !onlyUnavailable(e) {
+			return false
+		}
+	}
+	return true
 }
 
 // storeLocation names where a store keeps things, for a message telling someone
@@ -131,24 +150,30 @@ func credentialsFilePath() string {
 // every existing project's secrets in the keychain, and a command that says it
 // removed a project's credentials has to mean it.
 //
-// A spec's in-memory store, and headless mode's environment, have no counterpart
-// — and headless never reaches the commands that call this, which refuse to
-// touch the config file at all.
-func (d *Deps) unusedSecrets() secrets.Store {
+// A nil store and an error are different answers, and the difference is the same
+// one sweepResult draws: nil means there is genuinely no second store — a spec's
+// in-memory one, headless mode's environment — where nothing can have been left
+// behind, and an error means there is one that could not be opened. Returning nil
+// for both would quietly claim the credentials were cleared from a store nobody
+// looked in.
+//
+// Headless never reaches the commands that call this; they refuse to touch the
+// config file at all.
+func (d *Deps) unusedSecrets() (secrets.Store, error) {
 	if d.unused != nil {
-		return d.unused
+		return d.unused, nil
 	}
 	switch d.Secrets.Kind() {
 	case "keyring":
 		path, err := secrets.DefaultFilePath()
 		if err != nil {
-			return nil
+			return nil, fmt.Errorf("locate the credentials file: %w", err)
 		}
-		return secrets.NewFile(path)
+		return secrets.NewFile(path), nil
 	case "file":
-		return secrets.NewKeyring()
+		return secrets.NewKeyring(), nil
 	default:
-		return nil
+		return nil, nil
 	}
 }
 
