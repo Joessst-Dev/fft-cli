@@ -83,14 +83,30 @@ func (s *fileStore) Get(key string) (string, error) {
 }
 
 func (s *fileStore) Set(key, val string) error {
-	return s.update(func(values map[string]string) { values[key] = val })
+	return s.update(func(values map[string]string) bool {
+		values[key] = val
+		return true
+	})
 }
 
 func (s *fileStore) Delete(key string) error {
-	return s.update(func(values map[string]string) { delete(values, key) })
+	return s.update(func(values map[string]string) bool {
+		if _, ok := values[key]; !ok {
+			return false
+		}
+		delete(values, key)
+		return true
+	})
 }
 
-func (s *fileStore) update(mutate func(map[string]string)) error {
+// update applies mutate and saves, unless mutate reports it changed nothing.
+//
+// The nothing-changed case is not an optimisation. Deleting a key that is not
+// here must not bring the file into existence: fft asks one store to forget a
+// project even when the other store is the one holding it, and creating an empty
+// cleartext credentials file on a machine that has a working keychain would be a
+// surprising thing for a delete to do.
+func (s *fileStore) update(mutate func(map[string]string) bool) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -98,7 +114,9 @@ func (s *fileStore) update(mutate func(map[string]string)) error {
 	if err != nil {
 		return err
 	}
-	mutate(values)
+	if !mutate(values) {
+		return nil
+	}
 	return s.save(values)
 }
 

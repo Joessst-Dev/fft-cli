@@ -191,7 +191,9 @@ NAME        BASE URL                                        EMAIL               
 - **Secrets** (password, refresh token, ID token) → your **OS keychain**, one entry each.
 - **Everything else** (name, base URL, email, active project) → `~/.config/fft/config.yaml`,
   mode `0600`. Plain YAML; safe to read, edit, and commit to a dotfiles repo — it contains
-  no secrets.
+  no secrets. One caveat if you sync it: `settings.noKeyring` below is not a secret but it
+  *is* a security posture, and it travels with the file. `fft` says so on any run where the
+  config, rather than you, put it in cleartext.
 
 No keychain available (WSL, headless Linux, a container)? `--no-keyring` /
 `FFT_NO_KEYRING=1` falls back to a `0600` file, and `settings.noKeyring` in the config
@@ -385,12 +387,26 @@ the questions a command was always going to ask, not to downgrading where your c
 live. And a keychain that is merely **locked**, or a prompt you denied, is not this — that
 is a keychain that exists, and the answer there is to unlock it, not to write a file.
 
-`noKeyring` is a **setting, not a fact about the machine**, and it is not scoped to the
-project you were adding — every project on that machine reads from the file store once it
-is on. The prompt says so when there are others to move. The same is true across machines
-if you sync `config.yaml` (which holds no secrets, so committing it to a dotfiles repo is
-safe): a `true` that follows you to a laptop that *does* have a keychain keeps `fft` reading
-the file there. `--no-keyring=false` overrides it for one run.
+`noKeyring` is a **setting, not a fact about the machine**, it is not scoped to the project
+you were adding, and **it moves nothing**. Every project on that machine reads from the file
+store once it is on — including ones whose credentials are still sitting in the keychain,
+which will therefore need adding again. The prompt says all of that when there are other
+projects to affect, and `fft project remove` empties *both* stores so nothing is stranded in
+the one you left.
+
+The same travels across machines if you sync `config.yaml`: a `true` that follows you to a
+laptop that *does* have a keychain keeps `fft` reading the file there. Nobody is prompted on
+that machine — the file store is open before the first command runs — so `fft` prints a
+one-line notice on every such run instead:
+
+```
+Warning: credentials are stored in cleartext at /home/jane/.local/state/fft/credentials.json,
+because settings.noKeyring is set in the config file.
+```
+
+It stays quiet when *you* said so for that run, so `--no-keyring` or `FFT_NO_KEYRING=1`
+silences it on a machine where the file store is what you actually want.
+`--no-keyring=false` overrides the setting entirely for one run.
 
 If you would rather keep a real keychain under WSL, install `gnome-keyring` and give it a
 session bus (`dbus-run-session -- fft …`, or a systemd user session via `[boot] systemd=true`

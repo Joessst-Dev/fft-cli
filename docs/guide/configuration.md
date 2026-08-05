@@ -67,7 +67,9 @@ NAME        BASE URL                                        EMAIL               
 - **Secrets** (password, refresh token, ID token) → your **OS keychain**, one entry each.
 - **Everything else** (name, base URL, email, active project) → `~/.config/fft/config.yaml`,
   mode `0600`. Plain YAML; safe to read, edit, and commit to a dotfiles repo — it contains
-  no secrets.
+  no secrets. One caveat if you sync it: `settings.noKeyring` below is not a secret but it
+  *is* a security posture, and it travels with the file. `fft` says so on any run where the
+  config, rather than you, put it in cleartext.
 
 No keychain available (WSL, headless Linux, a container)? `--no-keyring` /
 `FFT_NO_KEYRING=1` falls back to a `0600` file, and `settings.noKeyring` in the config

@@ -38,7 +38,19 @@ type flickeringKeyring struct {
 	writes int
 	// refusals is how many deletes are still to be refused: one per kind, which is
 	// exactly persistProject's rollback. The sweep that follows finds a bus again.
+	// A negative count never runs out, for the keychain that is there and simply
+	// will not co-operate.
 	refusals int
+	// refusal is what a refused delete says. The zero value is the sentinel — a
+	// keychain that is not there — which is what the ordinary flicker looks like.
+	refusal error
+}
+
+func (s *flickeringKeyring) refuse(key string) error {
+	if s.refusal != nil {
+		return s.refusal
+	}
+	return fmt.Errorf("delete %q: %w", key, secrets.ErrKeyringUnavailable)
 }
 
 func (s *flickeringKeyring) Set(key, val string) error {
@@ -50,9 +62,12 @@ func (s *flickeringKeyring) Set(key, val string) error {
 }
 
 func (s *flickeringKeyring) Delete(key string) error {
+	if s.refusals < 0 {
+		return s.refuse(key)
+	}
 	if s.refusals > 0 {
 		s.refusals--
-		return fmt.Errorf("delete %q: %w", key, secrets.ErrKeyringUnavailable)
+		return s.refuse(key)
 	}
 	return s.Store.Delete(key)
 }
@@ -163,6 +178,42 @@ var _ = Describe("choosing the credential store", func() {
 		Entry("FFT_NO_KEYRING=0", func() { c.setenv("FFT_NO_KEYRING", "0") }),
 	)
 
+	// The setting travels in a file this repo tells people is safe to commit to a
+	// dotfiles repo. On the second machine to read it nobody is ever asked — the
+	// file store is open before the first command runs — so the run says what it is
+	// doing rather than leaving the CREDENTIAL column as the only sign.
+	It("says when the config, and not the user, chose cleartext", func() {
+		seedConfig("    output: table\n    noKeyring: true\n")
+
+		Expect(c.run("project", "list")).To(Equal(exitcode.OK))
+
+		Expect(c.errOut()).To(ContainSubstring("cleartext"))
+		Expect(c.errOut()).To(ContainSubstring("settings.noKeyring"))
+	})
+
+	DescribeTable("but stays quiet when the user said so for this run",
+		func(setup func(), args ...string) {
+			seedConfig("    output: table\n    noKeyring: true\n")
+			setup()
+
+			Expect(c.run(append([]string{"project", "list"}, args...)...)).To(Equal(exitcode.OK))
+
+			// Repeating an answer back to the person who just gave it is noise — and it
+			// is the way out for anyone who wants the file store on this machine.
+			Expect(c.errOut()).NotTo(ContainSubstring("settings.noKeyring"))
+		},
+		Entry("--no-keyring", func() {}, "--no-keyring"),
+		Entry("FFT_NO_KEYRING=1", func() { c.setenv("FFT_NO_KEYRING", "1") }),
+	)
+
+	It("says nothing at all when the keychain is in use", func() {
+		seedConfig("    output: table\n")
+
+		Expect(c.run("project", "list")).To(Equal(exitcode.OK))
+
+		Expect(c.errOut()).NotTo(ContainSubstring("cleartext"))
+	})
+
 	It("is overridden by headless mode, which touches neither", func() {
 		seedConfig("    output: table\n    noKeyring: true\n")
 		c.headless()
@@ -170,6 +221,72 @@ var _ = Describe("choosing the credential store", func() {
 		Expect(c.run("project", "current")).To(Equal(exitcode.OK))
 
 		Expect(c.deps.Secrets.Kind()).To(Equal("env"))
+	})
+})
+
+// Switching stores moves nothing, so a project configured before the switch
+// still has its password in the keychain. `project remove` is the command that
+// promises to leave nothing behind, and it has to mean it — otherwise it reports
+// having removed credentials it never looked at, and they sit in a store no fft
+// command opens again.
+var _ = Describe("fft project remove after the machine switched stores", func() {
+	var c *cli
+
+	BeforeEach(func() {
+		c = newCLI()
+		Expect(addStaging(c, "s3cret")).To(Equal(exitcode.OK))
+	})
+
+	// The pairing itself: which store is "the other one" is decided by the kind of
+	// the one in use, and getting it backwards would sweep the store fft is about
+	// to rely on.
+	DescribeTable("pairs the store in use with the one that is not",
+		func(inUse secrets.Store, want string) {
+			deps := &Deps{Secrets: inUse}
+
+			other := deps.unusedSecrets()
+
+			if want == "" {
+				Expect(other).To(BeNil())
+				return
+			}
+			Expect(other).NotTo(BeNil())
+			Expect(other.Kind()).To(Equal(want))
+		},
+		Entry("the keychain, so the file", secrets.NewKeyring(), "file"),
+		Entry("the file, so the keychain", secrets.NewFile("/tmp/none.json"), "keyring"),
+		// A spec's store, and headless mode's, have no counterpart — and headless
+		// never reaches a command that removes anything.
+		Entry("memory has none", secrets.NewMem(), ""),
+		Entry("the environment has none", secrets.NewEnv(nil), ""),
+	)
+
+	It("empties the store this machine is not using either", func() {
+		// The keychain the project was configured against, before the switch. It is
+		// what unusedSecrets resolves to once the file store is the one in use.
+		keychain := secrets.NewMem()
+		Expect(keychain.Set(secrets.Key("staging", secrets.KindPassword), "s3cret")).To(Succeed())
+		c.deps.unused = keychain
+
+		Expect(c.run("project", "remove", "staging", "--yes")).To(Equal(exitcode.OK))
+
+		Expect(keychain.Snapshot()).To(BeEmpty(), "credentials were left in the keychain")
+		Expect(c.errOut()).To(ContainSubstring("and its stored credentials"))
+	})
+
+	It("does not claim to have removed what it could not reach", func() {
+		keychain := &flickeringKeyring{
+			Store:    secrets.NewMem(),
+			refusals: -1,
+			refusal:  errors.New("the collection is locked"),
+		}
+		c.deps.unused = keychain
+
+		Expect(c.run("project", "remove", "staging", "--yes")).To(Equal(exitcode.OK))
+
+		Expect(c.errOut()).To(ContainSubstring(`Removed project "staging".`))
+		Expect(c.errOut()).NotTo(ContainSubstring("and its stored credentials"))
+		Expect(c.errOut()).To(ContainSubstring("the collection is locked"))
 	})
 })
 
@@ -302,10 +419,12 @@ var _ = Describe("fft project add on a machine with no keychain", func() {
 	// which `project remove` stops looking in once noKeyring is set.
 	When("the keychain took the password before it went away", func() {
 		var keychain *secrets.MemStore
+		var flickering *flickeringKeyring
 
 		BeforeEach(func() {
 			keychain = secrets.NewMem()
-			c.deps.Secrets = &flickeringKeyring{Store: keychain, refusals: len(secrets.AllKinds())}
+			flickering = &flickeringKeyring{Store: keychain, refusals: len(secrets.AllKinds())}
+			c.deps.Secrets = flickering
 			c.answer("s3cret", "y")
 		})
 
@@ -316,6 +435,19 @@ var _ = Describe("fft project add on a machine with no keychain", func() {
 				"the password was left behind in a store fft has stopped looking in")
 			Expect(c.deps.Secrets.Kind()).To(Equal("file"))
 			Expect(secrets.Has(c.deps.Secrets, "wsl")).To(BeTrue())
+		})
+
+		// The other half of sweep: a keychain that is *there* and refuses. Nothing
+		// can clear it but the user, so they have to be told — silence would leave a
+		// password sitting in a store no fft command looks in any more.
+		It("says so when the old store refuses to give the credentials up", func() {
+			flickering.refusals = -1 // never stops refusing
+			flickering.refusal = errors.New("the collection is locked")
+
+			Expect(add()).To(Equal(exitcode.OK))
+
+			Expect(c.errOut()).To(ContainSubstring(`Left "wsl"'s credentials in the keychain`))
+			Expect(c.errOut()).To(ContainSubstring("the collection is locked"))
 		})
 
 		// The sweep must never run on the strength of a write that has not landed.
@@ -334,6 +466,32 @@ var _ = Describe("fft project add on a machine with no keychain", func() {
 
 			Expect(secrets.Has(keychain, "wsl")).To(BeTrue(),
 				"credentials were deleted for a write that never landed")
+		})
+	})
+
+	// The sentinel guard is the whole of what keeps this prompt away from every
+	// other reason a write can fail. A locked keychain, a denied prompt, a failed
+	// config save — none of them are "there is nowhere to put this", and offering
+	// cleartext for any of them is the accident the rest of this design exists to
+	// prevent. Inverting or deleting that one `if` must not leave the suite green.
+	When("the store fails for a reason that is not a missing keychain", func() {
+		BeforeEach(func() {
+			c.deps.Secrets = failingSetStore{secrets.NewMem()}
+			c.answer("s3cret", "y")
+		})
+
+		It("never offers the cleartext file", func() {
+			Expect(add()).NotTo(Equal(exitcode.OK))
+
+			Expect(c.errOut()).NotTo(ContainSubstring("0600 file"))
+			Expect(c.errOut()).NotTo(ContainSubstring("no OS keychain"))
+		})
+
+		It("passes the original failure through untouched", func() {
+			Expect(add()).To(Equal(exitcode.General))
+
+			Expect(c.errOut()).To(ContainSubstring("keychain is locked"))
+			Expect(c.configPath).NotTo(BeAnExistingFile())
 		})
 	})
 

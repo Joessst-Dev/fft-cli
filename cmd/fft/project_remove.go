@@ -12,9 +12,15 @@ import (
 
 const projectRemoveLong = `Remove a project.
 
-Its entry in the config file goes, and so does every one of its keychain entries
-— the password, the refresh token, the cached id token and its expiry. Nothing is
+Its entry in the config file goes, and so does every one of its stored secrets —
+the password, the refresh token, the cached id token and its expiry. Nothing is
 left behind for a later project of the same name to inherit.
+
+Both stores are emptied, not just the one in use: a machine that switched to the
+0600 file (--no-keyring, settings.noKeyring) left whatever was already in its
+keychain behind, and this is where that gets cleared up. If the keychain is there
+but will not give them up — locked, or access denied — fft says so and stops
+claiming to have removed them.
 
 Removing the active project leaves no project active; run 'fft project use' to
 pick another.`
@@ -65,12 +71,27 @@ func runProjectRemove(deps *Deps, name string) error {
 		return fmt.Errorf("remove the stored credentials for %q: %w", project.Name, err)
 	}
 
+	// And the store this machine is not using. settings.noKeyring changes where fft
+	// looks without moving what was already stored, so a project configured before
+	// the switch still has its password in the keychain — and this is the command
+	// that promises to leave nothing behind.
+	cleared := true
+	if other := deps.unusedSecrets(); other != nil {
+		cleared = sweep(deps, other, project.Name)
+	}
+
 	cfg.Remove(project.Name)
 	if err := deps.SaveConfig(cfg); err != nil {
 		return err
 	}
 
-	deps.Printer.Notef("Removed project %q and its stored credentials.", project.Name)
+	// Only claim the credentials when they are actually gone. sweep has already
+	// said where the rest are.
+	if cleared {
+		deps.Printer.Notef("Removed project %q and its stored credentials.", project.Name)
+	} else {
+		deps.Printer.Notef("Removed project %q.", project.Name)
+	}
 	if cfg.ActiveProject == "" && len(cfg.Projects) > 0 {
 		deps.Printer.Notef("There is no active project now. Run 'fft project use <name>' to pick one.")
 	}

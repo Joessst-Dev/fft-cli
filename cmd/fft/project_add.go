@@ -437,32 +437,6 @@ func retryWithoutKeyring(deps *Deps, cfg *config.Config, project config.Project,
 	return nil
 }
 
-// sweep removes a project's credentials from the store fft has just stopped
-// using, for the one case where there is anything to remove: the keychain took
-// the password and then went away, so persistProject's own rollback failed the
-// same way the write did. Left alone it would sit in a store `project remove` no
-// longer looks in, once noKeyring is set.
-//
-// It runs only after the new store has taken the credentials, and never before.
-// Deleting first would mean a fallback write that fails for its own reasons — a
-// read-only XDG_STATE_HOME, a full disk — leaves the project with credentials in
-// neither store, and `--force` makes that a password the user still needed. The
-// window this concedes is a crash between the two, which is the same orphan the
-// keychain going away leaves anyway.
-func sweep(deps *Deps, store secrets.Store, project string) {
-	err := secrets.DeleteAll(store, project)
-	// A keychain that is not there cannot be tidied, and saying so would be noise
-	// on the one path where the user has already been told. Anything else means it
-	// *is* there and refused — locked, or access denied — so something real is
-	// being left behind and only the user can clear it.
-	if err == nil || errors.Is(err, secrets.ErrKeyringUnavailable) {
-		return
-	}
-	deps.Printer.Notef(
-		"Left %q's old credentials in the keychain (%v); remove them there if you no longer want them.",
-		project, err)
-}
-
 func renderAdded(deps *Deps, cfg *config.Config, project config.Project) error {
 	active := cfg.ActiveProject == project.Name
 	view := newProjectView(project, active, deps.Secrets)

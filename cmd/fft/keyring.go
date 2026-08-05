@@ -48,6 +48,68 @@ make that permanent — that file holds your password and refresh token in clear
 		"run fft inside a session D-Bus."
 }
 
+// sweep empties a project out of a credential store fft is not using any more,
+// and reports whether the store can now be said to hold nothing of that project's.
+//
+// Two callers, one job. `project add` uses it for the keychain that took a
+// password and then went away, so persistProject's own rollback failed the same
+// way the write did; `project remove` uses it for the store the machine is not
+// configured for, because switching stores does not move what was already in the
+// old one. Either way, what is left behind sits in a place no fft command looks.
+//
+// It must run only after the new store has the credentials, never before:
+// deleting first would mean a write that fails for its own reasons leaves the
+// project with credentials in neither store.
+func sweep(deps *Deps, store secrets.Store, project string) bool {
+	err := secrets.DeleteAll(store, project)
+	switch {
+	case err == nil:
+		return true
+	// A keychain that is not there cannot be tidied, and there is nothing in it to
+	// tidy — that is what unavailable means. Saying so on every removal on a WSL
+	// box would be noise about a store the user has already been told fft cannot
+	// reach.
+	case errors.Is(err, secrets.ErrKeyringUnavailable):
+		return true
+	}
+	// Anything else and the keychain *is* there and refused — locked, access
+	// denied — so something real is being left behind and only the user can clear
+	// it. Never fatal: the caller has already done the thing it was asked to do.
+	deps.Printer.Notef(
+		"Left %q's credentials in the keychain (%v); remove them there if you no longer want them.",
+		project, err)
+	return false
+}
+
+// unusedSecrets opens the credential store this machine is *not* configured to
+// use, or nil when there is no second one to speak of.
+//
+// It exists because settings.noKeyring switches where fft looks without moving
+// what is already stored: a machine that falls back to the file store leaves
+// every existing project's secrets in the keychain, and a command that says it
+// removed a project's credentials has to mean it.
+//
+// A spec's in-memory store, and headless mode's environment, have no counterpart
+// — and headless never reaches the commands that call this, which refuse to
+// touch the config file at all.
+func (d *Deps) unusedSecrets() secrets.Store {
+	if d.unused != nil {
+		return d.unused
+	}
+	switch d.Secrets.Kind() {
+	case "keyring":
+		path, err := secrets.DefaultFilePath()
+		if err != nil {
+			return nil
+		}
+		return secrets.NewFile(path)
+	case "file":
+		return secrets.NewKeyring()
+	default:
+		return nil
+	}
+}
+
 // offerFileStore asks whether to fall back to the 0600 file, and switches the
 // store over if the answer is yes. interactive is the caller's, not the
 // prompter's: `project add --password-stdin` has a terminal but no stdin left to
@@ -71,8 +133,13 @@ func offerFileStore(deps *Deps, interactive bool, others int) (bool, error) {
 
 	question := "No OS keychain is available. Store credentials in a 0600 file, in cleartext, instead?"
 	if others > 0 {
+		// Not just "they will read from the file too". Switching stores does not move
+		// what is already in the old one, so those projects will look in a file their
+		// credentials are not in and stop being able to sign in. That is the part a
+		// user needs before answering, not after.
 		question += fmt.Sprintf(
-			"\nThis setting is machine-wide: the %d %s already configured will read from that file too.",
+			"\nThis setting is machine-wide, and it moves nothing: the %d %s already configured"+
+				"\nwill look in that file too, where their credentials are not, and will need adding again.",
 			others, plural(others, "project", "projects"))
 	}
 
