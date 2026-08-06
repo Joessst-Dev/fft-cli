@@ -19017,7 +19017,8 @@ type RemoveFacilityCoordinatesActionParameter = AbstractFacilityActionsParameter
 type RerouteConfiguration struct {
 	Active bool `json:"active"`
 
-	// LeadTimeBeforeTimeTriggeredReroute How many minutes before a time triggered reroute a notification should be sent. Should be smaller than rerouteAfterMinutes
+	// LeadTimeBeforeTimeTriggeredReroute This setting is not supported anymore
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	LeadTimeBeforeTimeTriggeredReroute *float32 `json:"leadTimeBeforeTimeTriggeredReroute,omitempty"`
 
 	// RerouteAfterMinutes The amount of minutes after which an automated reroute is executed
@@ -20200,6 +20201,8 @@ type RoutingStrategyPathElementType string
 
 // RoutingStrategyPriorityRatingForUpsert A rating is used to rate a set of possible facilities against each other during routing of orders, ordered by priority.
 type RoutingStrategyPriorityRatingForUpsert struct {
+	Active bool `json:"active"`
+
 	// Configuration Base configuration for ratings. See documentation for details.
 	Configuration *AbstractRatingConfiguration `json:"configuration,omitempty"`
 
@@ -20301,6 +20304,8 @@ type RoutingStrategyStandardFenceType string
 
 // RoutingStrategyStandardPriorityRating A rating is used to rate a set of possible facilities against each other during routing of orders, ordered by priority.
 type RoutingStrategyStandardPriorityRating struct {
+	Active bool `json:"active"`
+
 	// Configuration Base configuration for ratings. See documentation for details.
 	Configuration *AbstractRatingConfiguration `json:"configuration,omitempty"`
 	Description   *string                      `json:"description,omitempty"`
@@ -20391,6 +20396,8 @@ type RoutingStrategyToolkitFenceType string
 
 // RoutingStrategyToolkitPriorityRating Routing Strategy Toolkit Rating, ordered by priority.
 type RoutingStrategyToolkitPriorityRating struct {
+	Active bool `json:"active"`
+
 	// ComparisonRule The rule, comparing the left and right path values, that will be evaluated applying a RuleOperator
 	ComparisonRule *ToolkitComparisonRule `json:"comparisonRule,omitempty"`
 

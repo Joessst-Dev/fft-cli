@@ -5289,6 +5289,91 @@ paths:
       summary: Update return note config
       tags:
         - Shipments Configuration (Operations)
+  /api/configurations/shipping:
+    get:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Retrieves the tenant-wide shipping configuration. A default
+        configuration is created automatically on first access.
+      operationId: getShippingConfiguration
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShippingConfiguration'
+          description: Successfully retrieved the shipping configuration.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+      summary: Get the shipping configuration
+      x-fft-permissions:
+        - SHIPMENT_READ
+      tags:
+        - ShippingConfiguration (carrier)
+      x-badges:
+        - color: red
+          label: ALPHA
+    patch:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Creates or updates the tenant-wide shipping configuration. The version
+        must match the currently persisted version.
+      operationId: upsertShippingConfiguration
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShippingConfigurationForUpdate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShippingConfiguration'
+          description: Successfully created or updated the shipping configuration.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+      summary: Create or update the shipping configuration
+      x-fft-permissions:
+        - SHIPMENT_READ
+      tags:
+        - ShippingConfiguration (carrier)
+      x-badges:
+        - color: red
+          label: ALPHA
   /api/configurations/stock:
     get:
       description: Read current stock configuration
@@ -29952,7 +30037,9 @@ components:
     AddFacilitiesToGroupActionParameter:
       properties:
         facilitiesToAdd:
-          description: Array of facility references to add to the group
+          description: >-
+            Array of facility references to add to the group. Each facility can
+            be assigned to at most 20 facility groups (default).
           items:
             type: string
           maxItems: 200
@@ -29977,7 +30064,9 @@ components:
     AddFacilitiesToGroupVersionlessActionParameter:
       properties:
         facilitiesToAdd:
-          description: Array of facility references to add to the group
+          description: >-
+            Array of facility references to add to the group. Each facility can
+            be assigned to at most 20 facility groups (default).
           items:
             type: string
           maxItems: 200
@@ -40025,7 +40114,8 @@ components:
         facilityRefs:
           description: >-
             Array of facility references belonging to this group. Cannot exceed
-            your quota, default 1000.
+            your quota, default 1000. Each facility can be assigned to at most
+            20 facility groups (default).
           example:
             - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
             - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
@@ -40104,7 +40194,8 @@ components:
         facilityRefs:
           description: >-
             Array of facility references belonging to this group. Cannot exceed
-            your quota, default 1000.
+            your quota, default 1000. Each facility can be assigned to at most
+            20 facility groups (default).
           example:
             - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
             - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
@@ -40140,7 +40231,8 @@ components:
         facilityRefs:
           description: >-
             Array of facility references belonging to this group. Cannot exceed
-            your quota, default 1000.
+            your quota, default 1000. Each facility can be assigned to at most
+            20 facility groups (default).
           example:
             - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
             - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
@@ -41166,6 +41258,8 @@ components:
       title: FacilityWentOnlineWebHookEvent
       description: FacilityWentOnlineWebHookEvent
     FallbackFacilityConfiguration:
+      deprecated: true
+      description: '@deprecated use RoutingStrategyFallbackFacilityConfiguration instead'
       properties:
         active:
           default: false
@@ -41188,8 +41282,9 @@ components:
         - active
         - fallbackAfterTime
       title: FallbackFacilityConfiguration
-      description: FallbackFacilityConfiguration
     FallbackFacilityConfigurationForPatch:
+      deprecated: true
+      description: '@deprecated use RoutingStrategyFallbackFacilityConfiguration instead'
       properties:
         active:
           type: boolean
@@ -41206,7 +41301,6 @@ components:
           pattern: ^P(?:(\d+W)|(\d+Y)?(\d+M)?(\d+D)?(?:T(\d+H)?(\d+M)?(\d+S)?)?)$
           type: string
       title: FallbackFacilityConfigurationForPatch
-      description: FallbackFacilityConfigurationForPatch
     Feature:
       allOf:
         - $ref: '#/components/schemas/VersionedResource'
@@ -52738,7 +52832,10 @@ components:
           required:
             - action
           type: object
-      description: Action to Modify the Global Routing Configuration.
+      deprecated: true
+      description: >-
+        @deprecated use RoutingStrategy configuration actions instead 'Action to
+        Modify the Global Routing Configuration.'
       title: ModifyGlobalRoutingConfigurationAction
     ModifyHandoverjob:
       additionalProperties: false
@@ -67225,6 +67322,7 @@ components:
         - PICKING_ABORTED_NO_ITEMS_PICKED
         - PICKING_RESET
         - PICKING_RESTART
+        - PICKING_CANCELLED
         - PACKING_CREATED
         - PACKING_IN_PROGRESS
         - PACKING_DONE
@@ -69662,6 +69760,25 @@ components:
       title: ReceiptForCreation
       type: object
       description: ReceiptForCreation
+    RecommendationConfiguration:
+      properties:
+        priceType:
+          description: >-
+            Defines the price attribute category of which the price value is
+            taken for carrier recommendation calculation
+          enum:
+            - customs
+            - insurance
+            - shop
+            - salesPrice
+            - basePrice
+            - tax
+          type: string
+      required:
+        - priceType
+      title: RecommendationConfiguration
+      type: object
+      description: RecommendationConfiguration
     RecommendedCarrier:
       properties:
         carrierProduct:
@@ -70790,9 +70907,8 @@ components:
         active:
           type: boolean
         leadTimeBeforeTimeTriggeredReroute:
-          description: >-
-            How many minutes before a time triggered reroute a notification
-            should be sent. Should be smaller than rerouteAfterMinutes
+          deprecated: true
+          description: This setting is not supported anymore
           example: '480'
           minimum: 1
           type: number
@@ -75534,6 +75650,8 @@ components:
         A rating is used to rate a set of possible facilities against each other
         during routing of orders, ordered by priority.
       properties:
+        active:
+          type: boolean
         configuration:
           $ref: '#/components/schemas/AbstractRatingConfiguration'
         implementation:
@@ -75546,6 +75664,7 @@ components:
           $ref: '#/components/schemas/RoutingStrategyStandardPriorityRatingType'
       required:
         - type
+        - active
         - implementation
         - priority
       title: RoutingStrategyPriorityRatingForUpsert
@@ -75729,6 +75848,8 @@ components:
         A rating is used to rate a set of possible facilities against each other
         during routing of orders, ordered by priority.
       properties:
+        active:
+          type: boolean
         configuration:
           $ref: '#/components/schemas/AbstractRatingConfiguration'
         description:
@@ -75744,6 +75865,7 @@ components:
         type:
           $ref: '#/components/schemas/RoutingStrategyStandardPriorityRatingType'
       required:
+        - active
         - priority
         - type
         - implementation
@@ -75859,6 +75981,8 @@ components:
           $ref: '#/components/schemas/LocaleString'
         descriptionLocalized:
           $ref: '#/components/schemas/LocaleString'
+        active:
+          type: boolean
         comparisonRule:
           $ref: '#/components/schemas/ToolkitComparisonRule'
         description:
@@ -75894,6 +76018,7 @@ components:
         type:
           $ref: '#/components/schemas/RoutingStrategyToolkitPriorityRatingType'
       required:
+        - active
         - priority
         - referenceId
         - nameLocalized
@@ -79245,6 +79370,53 @@ components:
           type: object
       title: ShipmentWithSearchPath
       description: ShipmentWithSearchPath
+    ShippingConfiguration:
+      properties:
+        created:
+          description: Creation date of this shippingConfiguration
+          example: 2020-02-03T09:45:51.525Z
+          format: date-time
+          type: string
+        id:
+          description: Unique identifier of this shippingConfiguration
+          example: 019f943c-687a-78cd-8d00-54323281eb27
+          type: string
+        lastModified:
+          description: Last modification date of this shippingConfiguration
+          example: 2020-02-03T09:45:51.525Z
+          format: date-time
+          type: string
+        recommendationConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/RecommendationConfiguration'
+          description: Configuration for the automatic carrier recommendation for shipments
+        version:
+          description: Version number of this shippingConfiguration
+          example: 1
+          type: number
+      required:
+        - id
+        - version
+        - created
+        - lastModified
+      title: ShippingConfiguration
+      type: object
+      description: ShippingConfiguration
+    ShippingConfigurationForUpdate:
+      properties:
+        recommendationConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/RecommendationConfiguration'
+          description: Configuration for the automatic carrier recommendation for shipments
+        version:
+          description: Version number of this shippingConfiguration
+          example: 1
+          type: number
+      required:
+        - version
+      title: ShippingConfigurationForUpdate
+      type: object
+      description: ShippingConfigurationForUpdate
     ShippingCosts:
       additionalProperties: false
       properties:
@@ -79335,6 +79507,10 @@ components:
             customer
           example: ABC123
           type: string
+        status:
+          description: The status of the shippingInformation
+          example: AVAILABLE
+          type: string
         tenantOrderId:
           description: >-
             Field can be used as a reference number in foreign systems, for
@@ -79354,6 +79530,7 @@ components:
         - processRef
         - operativeProcessRef
         - facilityRef
+        - status
         - carrierRecipientInformation
         - senderAddress
         - shippingInformationLineItems
@@ -79481,6 +79658,10 @@ components:
             A short identifier that helps assigning a shippingInformation to a
             customer
           example: ABC123
+          type: string
+        status:
+          description: The status of the shippingInformation
+          example: AVAILABLE
           type: string
         tenantOrderId:
           description: >-
