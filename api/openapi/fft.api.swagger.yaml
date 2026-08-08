@@ -88841,6 +88841,10 @@ components:
           description: Creation date of the user
           format: date-time
           type: string
+        customAttributes:
+          description: The custom attributes of the user
+          nullable: true
+          type: object
         customClaims:
           allOf:
             - $ref: '#/components/schemas/CustomClaims'
@@ -89296,6 +89300,10 @@ components:
           maxItems: 10
           minItems: 1
           type: array
+        customAttributes:
+          description: The custom attributes of the user
+          nullable: true
+          type: object
         email:
           description: The email of the user
           example: john.doe@example.com
