@@ -22993,6 +22993,9 @@ type User struct {
 	// Created Creation date of the user
 	Created *time.Time `json:"created,omitempty"`
 
+	// CustomAttributes The custom attributes of the user
+	CustomAttributes *map[string]interface{} `json:"customAttributes,omitempty"`
+
 	// CustomClaims Deprecated: Find all relevant information in assignedRoles instead
 	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	CustomClaims *CustomClaims `json:"customClaims,omitempty"`
@@ -23268,6 +23271,9 @@ type UserForCreation struct {
 
 	// AssignedRoles The roles which are assigned to the user
 	AssignedRoles *[]AssignedRoles `json:"assignedRoles,omitempty"`
+
+	// CustomAttributes The custom attributes of the user
+	CustomAttributes *map[string]interface{} `json:"customAttributes,omitempty"`
 
 	// Email The email of the user
 	Email *string `json:"email,omitempty"`
