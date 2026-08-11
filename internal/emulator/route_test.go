@@ -23,7 +23,6 @@ import (
 var knownCollections = []string{
 	"articles",
 	"audits",
-	"availabilitychannels",
 	"brands",
 	"cancelationreasons",
 	"carriers",

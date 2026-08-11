@@ -51,9 +51,7 @@ var knownMutatingPOSTs = []string{
 	"assignFacility",
 	"bulkOrdersAction",
 	"calculateBestCarrier",
-	"createAllocationUnderGroup",
 	"createAttachment",
-	"createAvailabilityChannel",
 	"createCarrierCountryServiceMapping",
 	"createCarrierToFacility",
 	"createCategory",
@@ -64,7 +62,6 @@ var knownMutatingPOSTs = []string{
 	"createEventScopeConfig",
 	"createExpiry",
 	"createFacilityCustomServiceConnection",
-	"createGroupUnderChannel",
 	"createHandoverContainer",
 	"createInboundProcess",
 	"createItemReturn",
@@ -233,7 +230,7 @@ var _ = Describe("Mutates", func() {
 			}
 		})
 
-		It("accounts for all 158 of the spec's POSTs", func() {
+		It("accounts for all 155 of the spec's POSTs", func() {
 			var posts int
 			for _, op := range Operations() {
 				if op.Method == http.MethodPost {

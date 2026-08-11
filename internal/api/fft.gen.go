@@ -2399,10 +2399,12 @@ func (e InboundProcessStatusTypeEnumFilterNotEq) Valid() bool {
 
 // Defines values for InterFacilityConnectionContextTypes.
 const (
-	InterFacilityConnectionContextTypesCATEGORY      InterFacilityConnectionContextTypes = "CATEGORY"
-	InterFacilityConnectionContextTypesFACILITY      InterFacilityConnectionContextTypes = "FACILITY"
-	InterFacilityConnectionContextTypesFACILITYGROUP InterFacilityConnectionContextTypes = "FACILITY_GROUP"
-	InterFacilityConnectionContextTypesTAGREFERENCE  InterFacilityConnectionContextTypes = "TAG_REFERENCE"
+	InterFacilityConnectionContextTypesCATEGORY         InterFacilityConnectionContextTypes = "CATEGORY"
+	InterFacilityConnectionContextTypesFACILITY         InterFacilityConnectionContextTypes = "FACILITY"
+	InterFacilityConnectionContextTypesFACILITYGROUP    InterFacilityConnectionContextTypes = "FACILITY_GROUP"
+	InterFacilityConnectionContextTypesTAGREFERENCE     InterFacilityConnectionContextTypes = "TAG_REFERENCE"
+	InterFacilityConnectionContextTypesTARGETCOUNTRY    InterFacilityConnectionContextTypes = "TARGET_COUNTRY"
+	InterFacilityConnectionContextTypesTARGETPOSTALCODE InterFacilityConnectionContextTypes = "TARGET_POSTALCODE"
 )
 
 // Valid indicates whether the value is a known member of the InterFacilityConnectionContextTypes enum.
@@ -2415,6 +2417,28 @@ func (e InterFacilityConnectionContextTypes) Valid() bool {
 	case InterFacilityConnectionContextTypesFACILITYGROUP:
 		return true
 	case InterFacilityConnectionContextTypesTAGREFERENCE:
+		return true
+	case InterFacilityConnectionContextTypesTARGETCOUNTRY:
+		return true
+	case InterFacilityConnectionContextTypesTARGETPOSTALCODE:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for InterFacilityConnectionTransferSurchargeType.
+const (
+	ABSOLUTESURCHARGETYPE InterFacilityConnectionTransferSurchargeType = "ABSOLUTE_SURCHARGE_TYPE"
+	RELATIVESURCHARGETYPE InterFacilityConnectionTransferSurchargeType = "RELATIVE_SURCHARGE_TYPE"
+)
+
+// Valid indicates whether the value is a known member of the InterFacilityConnectionTransferSurchargeType enum.
+func (e InterFacilityConnectionTransferSurchargeType) Valid() bool {
+	switch e {
+	case ABSOLUTESURCHARGETYPE:
+		return true
+	case RELATIVESURCHARGETYPE:
 		return true
 	default:
 		return false
@@ -14945,15 +14969,21 @@ type InterFacilityConnectionToCustomerForCreation struct {
 	FallbackCosts *[]InterFacilityConnectionDeliveryCost `json:"fallbackCosts,omitempty"`
 
 	// FallbackTransitTime CarrierTransitTime
-	FallbackTransitTime      *CarrierTransitTime                     `json:"fallbackTransitTime,omitempty"`
-	NonDeliveryDays          *[]NonDeliveryDaysPerCountryAndProvince `json:"nonDeliveryDays,omitempty"`
-	PackagingUnitsByContexts *[]PackagingUnitsByContext              `json:"packagingUnitsByContexts,omitempty"`
+	FallbackTransitTime      *CarrierTransitTime                                                        `json:"fallbackTransitTime,omitempty"`
+	NonDeliveryDays          *[]NonDeliveryDaysPerCountryAndProvince                                    `json:"nonDeliveryDays,omitempty"`
+	PackagingUnitsByContexts *[]PackagingUnitsByContext                                                 `json:"packagingUnitsByContexts,omitempty"`
+	SurchargesPerTransfer    *[]InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
 
 	// Target InterFacilityConnectionCustomerTarget
 	Target InterFacilityConnectionCustomerTarget `json:"target"`
 
 	// Type ConnectionType
 	Type ConnectionType `json:"type"`
+}
+
+// InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item defines model for InterFacilityConnectionToCustomerForCreation.surchargesPerTransfer.Item.
+type InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item struct {
+	union json.RawMessage
 }
 
 // InterFacilityConnectionToCustomerForUpdate InterFacilityConnectionToCustomerForUpdate
@@ -14973,9 +15003,10 @@ type InterFacilityConnectionToCustomerForUpdate struct {
 	FallbackCosts *[]InterFacilityConnectionDeliveryCost `json:"fallbackCosts,omitempty"`
 
 	// FallbackTransitTime CarrierTransitTime
-	FallbackTransitTime      *CarrierTransitTime                     `json:"fallbackTransitTime,omitempty"`
-	NonDeliveryDays          *[]NonDeliveryDaysPerCountryAndProvince `json:"nonDeliveryDays,omitempty"`
-	PackagingUnitsByContexts *[]PackagingUnitsByContext              `json:"packagingUnitsByContexts,omitempty"`
+	FallbackTransitTime      *CarrierTransitTime                                                      `json:"fallbackTransitTime,omitempty"`
+	NonDeliveryDays          *[]NonDeliveryDaysPerCountryAndProvince                                  `json:"nonDeliveryDays,omitempty"`
+	PackagingUnitsByContexts *[]PackagingUnitsByContext                                               `json:"packagingUnitsByContexts,omitempty"`
+	SurchargesPerTransfer    *[]InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
 
 	// Target InterFacilityConnectionCustomerTarget
 	Target InterFacilityConnectionCustomerTarget `json:"target"`
@@ -14983,6 +15014,11 @@ type InterFacilityConnectionToCustomerForUpdate struct {
 	// Type ConnectionType
 	Type    ConnectionType `json:"type"`
 	Version float32        `json:"version"`
+}
+
+// InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item defines model for InterFacilityConnectionToCustomerForUpdate.surchargesPerTransfer.Item.
+type InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item struct {
+	union json.RawMessage
 }
 
 // InterFacilityConnectionToManagedFacilityForCreation InterFacilityConnectionToManagedFacilityForCreation
@@ -15002,15 +15038,21 @@ type InterFacilityConnectionToManagedFacilityForCreation struct {
 	FallbackCosts *[]InterFacilityConnectionDeliveryCost `json:"fallbackCosts,omitempty"`
 
 	// FallbackTransitTime CarrierTransitTime
-	FallbackTransitTime      *CarrierTransitTime                     `json:"fallbackTransitTime,omitempty"`
-	NonDeliveryDays          *[]NonDeliveryDaysPerCountryAndProvince `json:"nonDeliveryDays,omitempty"`
-	PackagingUnitsByContexts *[]PackagingUnitsByContext              `json:"packagingUnitsByContexts,omitempty"`
+	FallbackTransitTime      *CarrierTransitTime                                                               `json:"fallbackTransitTime,omitempty"`
+	NonDeliveryDays          *[]NonDeliveryDaysPerCountryAndProvince                                           `json:"nonDeliveryDays,omitempty"`
+	PackagingUnitsByContexts *[]PackagingUnitsByContext                                                        `json:"packagingUnitsByContexts,omitempty"`
+	SurchargesPerTransfer    *[]InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
 
 	// Target InterFacilityConnectionManagedFacilityTarget
 	Target InterFacilityConnectionManagedFacilityTarget `json:"target"`
 
 	// Type ConnectionType
 	Type ConnectionType `json:"type"`
+}
+
+// InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item defines model for InterFacilityConnectionToManagedFacilityForCreation.surchargesPerTransfer.Item.
+type InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item struct {
+	union json.RawMessage
 }
 
 // InterFacilityConnectionToManagedFacilityForUpdate InterFacilityConnectionToManagedFacilityForUpdate
@@ -15030,9 +15072,10 @@ type InterFacilityConnectionToManagedFacilityForUpdate struct {
 	FallbackCosts *[]InterFacilityConnectionDeliveryCost `json:"fallbackCosts,omitempty"`
 
 	// FallbackTransitTime CarrierTransitTime
-	FallbackTransitTime      *CarrierTransitTime                     `json:"fallbackTransitTime,omitempty"`
-	NonDeliveryDays          *[]NonDeliveryDaysPerCountryAndProvince `json:"nonDeliveryDays,omitempty"`
-	PackagingUnitsByContexts *[]PackagingUnitsByContext              `json:"packagingUnitsByContexts,omitempty"`
+	FallbackTransitTime      *CarrierTransitTime                                                             `json:"fallbackTransitTime,omitempty"`
+	NonDeliveryDays          *[]NonDeliveryDaysPerCountryAndProvince                                         `json:"nonDeliveryDays,omitempty"`
+	PackagingUnitsByContexts *[]PackagingUnitsByContext                                                      `json:"packagingUnitsByContexts,omitempty"`
+	SurchargesPerTransfer    *[]InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
 
 	// Target InterFacilityConnectionManagedFacilityTarget
 	Target InterFacilityConnectionManagedFacilityTarget `json:"target"`
@@ -15040,6 +15083,11 @@ type InterFacilityConnectionToManagedFacilityForUpdate struct {
 	// Type ConnectionType
 	Type    ConnectionType `json:"type"`
 	Version float32        `json:"version"`
+}
+
+// InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item defines model for InterFacilityConnectionToManagedFacilityForUpdate.surchargesPerTransfer.Item.
+type InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item struct {
+	union json.RawMessage
 }
 
 // InterFacilityConnectionToSupplierForCreation InterFacilityConnectionToSupplierForCreation
@@ -15059,15 +15107,21 @@ type InterFacilityConnectionToSupplierForCreation struct {
 	FallbackCosts *[]InterFacilityConnectionDeliveryCost `json:"fallbackCosts,omitempty"`
 
 	// FallbackTransitTime CarrierTransitTime
-	FallbackTransitTime      *CarrierTransitTime                     `json:"fallbackTransitTime,omitempty"`
-	NonDeliveryDays          *[]NonDeliveryDaysPerCountryAndProvince `json:"nonDeliveryDays,omitempty"`
-	PackagingUnitsByContexts *[]PackagingUnitsByContext              `json:"packagingUnitsByContexts,omitempty"`
+	FallbackTransitTime      *CarrierTransitTime                                                        `json:"fallbackTransitTime,omitempty"`
+	NonDeliveryDays          *[]NonDeliveryDaysPerCountryAndProvince                                    `json:"nonDeliveryDays,omitempty"`
+	PackagingUnitsByContexts *[]PackagingUnitsByContext                                                 `json:"packagingUnitsByContexts,omitempty"`
+	SurchargesPerTransfer    *[]InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
 
 	// Target InterFacilityConnectionSupplierTarget
 	Target InterFacilityConnectionSupplierTarget `json:"target"`
 
 	// Type ConnectionType
 	Type ConnectionType `json:"type"`
+}
+
+// InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item defines model for InterFacilityConnectionToSupplierForCreation.surchargesPerTransfer.Item.
+type InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item struct {
+	union json.RawMessage
 }
 
 // InterFacilityConnectionToSupplierForUpdate InterFacilityConnectionToSupplierForUpdate
@@ -15087,9 +15141,10 @@ type InterFacilityConnectionToSupplierForUpdate struct {
 	FallbackCosts *[]InterFacilityConnectionDeliveryCost `json:"fallbackCosts,omitempty"`
 
 	// FallbackTransitTime CarrierTransitTime
-	FallbackTransitTime      *CarrierTransitTime                     `json:"fallbackTransitTime,omitempty"`
-	NonDeliveryDays          *[]NonDeliveryDaysPerCountryAndProvince `json:"nonDeliveryDays,omitempty"`
-	PackagingUnitsByContexts *[]PackagingUnitsByContext              `json:"packagingUnitsByContexts,omitempty"`
+	FallbackTransitTime      *CarrierTransitTime                                                      `json:"fallbackTransitTime,omitempty"`
+	NonDeliveryDays          *[]NonDeliveryDaysPerCountryAndProvince                                  `json:"nonDeliveryDays,omitempty"`
+	PackagingUnitsByContexts *[]PackagingUnitsByContext                                               `json:"packagingUnitsByContexts,omitempty"`
+	SurchargesPerTransfer    *[]InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
 
 	// Target InterFacilityConnectionSupplierTarget
 	Target InterFacilityConnectionSupplierTarget `json:"target"`
@@ -15099,12 +15154,47 @@ type InterFacilityConnectionToSupplierForUpdate struct {
 	Version float32        `json:"version"`
 }
 
+// InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item defines model for InterFacilityConnectionToSupplierForUpdate.surchargesPerTransfer.Item.
+type InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item struct {
+	union json.RawMessage
+}
+
+// InterFacilityConnectionTransferAbsoluteSurcharge InterFacilityConnectionTransferAbsoluteSurcharge
+type InterFacilityConnectionTransferAbsoluteSurcharge struct {
+	// Amount InterFacilityConnectionsMoney
+	Amount              InterFacilityConnectionsMoney                `json:"amount"`
+	TenantSurchargeType string                                       `json:"tenantSurchargeType"`
+	Type                InterFacilityConnectionTransferSurchargeType `json:"type"`
+}
+
+// InterFacilityConnectionTransferRelativeSurcharge InterFacilityConnectionTransferRelativeSurcharge
+type InterFacilityConnectionTransferRelativeSurcharge struct {
+	Percentage          float32                                      `json:"percentage"`
+	TenantSurchargeType string                                       `json:"tenantSurchargeType"`
+	Type                InterFacilityConnectionTransferSurchargeType `json:"type"`
+}
+
+// InterFacilityConnectionTransferSurchargeType InterFacilityConnectionTransferSurchargeType
+type InterFacilityConnectionTransferSurchargeType string
+
 // InterFacilityConnections InterFacilityConnections
 type InterFacilityConnections struct {
 	InterFacilityConnections []InterFacilityConnection `json:"interFacilityConnections"`
 
 	// Total Total number of entities found for this query
 	Total int `json:"total"`
+}
+
+// InterFacilityConnectionsMoney InterFacilityConnectionsMoney
+type InterFacilityConnectionsMoney struct {
+	// Currency The currency code is a three-letter code that represents a currency in the ISO 4217 standard.
+	Currency CurrencyCode `json:"currency"`
+
+	// DecimalPlaces Number of decimal places for the given currency
+	DecimalPlaces *int `json:"decimalPlaces,omitempty"`
+
+	// Value Value in the smallest subunit of the given currency, e.g. cents.
+	Value int `json:"value"`
 }
 
 // InventoryArticle InventoryArticle
@@ -25869,6 +25959,540 @@ func (t InboundProcessSearchQuery_CustomAttributes_AdditionalProperties) Marshal
 }
 
 func (t *InboundProcessSearchQuery_CustomAttributes_AdditionalProperties) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsInterFacilityConnectionTransferAbsoluteSurcharge returns the union data inside the InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferAbsoluteSurcharge
+func (t InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferAbsoluteSurcharge() (InterFacilityConnectionTransferAbsoluteSurcharge, error) {
+	var body InterFacilityConnectionTransferAbsoluteSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferAbsoluteSurcharge overwrites any union data inside the InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferAbsoluteSurcharge
+func (t *InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferAbsoluteSurcharge(v InterFacilityConnectionTransferAbsoluteSurcharge) error {
+	v.Type = "ABSOLUTE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferAbsoluteSurcharge performs a merge with any union data inside the InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferAbsoluteSurcharge
+func (t *InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferAbsoluteSurcharge(v InterFacilityConnectionTransferAbsoluteSurcharge) error {
+	v.Type = "ABSOLUTE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsInterFacilityConnectionTransferRelativeSurcharge returns the union data inside the InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferRelativeSurcharge
+func (t InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferRelativeSurcharge() (InterFacilityConnectionTransferRelativeSurcharge, error) {
+	var body InterFacilityConnectionTransferRelativeSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferRelativeSurcharge overwrites any union data inside the InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferRelativeSurcharge
+func (t *InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferRelativeSurcharge(v InterFacilityConnectionTransferRelativeSurcharge) error {
+	v.Type = "RELATIVE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferRelativeSurcharge performs a merge with any union data inside the InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferRelativeSurcharge
+func (t *InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferRelativeSurcharge(v InterFacilityConnectionTransferRelativeSurcharge) error {
+	v.Type = "RELATIVE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"type"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "ABSOLUTE_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferAbsoluteSurcharge()
+	case "RELATIVE_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferRelativeSurcharge()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsInterFacilityConnectionTransferAbsoluteSurcharge returns the union data inside the InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferAbsoluteSurcharge
+func (t InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferAbsoluteSurcharge() (InterFacilityConnectionTransferAbsoluteSurcharge, error) {
+	var body InterFacilityConnectionTransferAbsoluteSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferAbsoluteSurcharge overwrites any union data inside the InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferAbsoluteSurcharge
+func (t *InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferAbsoluteSurcharge(v InterFacilityConnectionTransferAbsoluteSurcharge) error {
+	v.Type = "ABSOLUTE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferAbsoluteSurcharge performs a merge with any union data inside the InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferAbsoluteSurcharge
+func (t *InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferAbsoluteSurcharge(v InterFacilityConnectionTransferAbsoluteSurcharge) error {
+	v.Type = "ABSOLUTE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsInterFacilityConnectionTransferRelativeSurcharge returns the union data inside the InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferRelativeSurcharge
+func (t InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferRelativeSurcharge() (InterFacilityConnectionTransferRelativeSurcharge, error) {
+	var body InterFacilityConnectionTransferRelativeSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferRelativeSurcharge overwrites any union data inside the InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferRelativeSurcharge
+func (t *InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferRelativeSurcharge(v InterFacilityConnectionTransferRelativeSurcharge) error {
+	v.Type = "RELATIVE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferRelativeSurcharge performs a merge with any union data inside the InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferRelativeSurcharge
+func (t *InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferRelativeSurcharge(v InterFacilityConnectionTransferRelativeSurcharge) error {
+	v.Type = "RELATIVE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"type"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "ABSOLUTE_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferAbsoluteSurcharge()
+	case "RELATIVE_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferRelativeSurcharge()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsInterFacilityConnectionTransferAbsoluteSurcharge returns the union data inside the InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferAbsoluteSurcharge
+func (t InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferAbsoluteSurcharge() (InterFacilityConnectionTransferAbsoluteSurcharge, error) {
+	var body InterFacilityConnectionTransferAbsoluteSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferAbsoluteSurcharge overwrites any union data inside the InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferAbsoluteSurcharge
+func (t *InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferAbsoluteSurcharge(v InterFacilityConnectionTransferAbsoluteSurcharge) error {
+	v.Type = "ABSOLUTE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferAbsoluteSurcharge performs a merge with any union data inside the InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferAbsoluteSurcharge
+func (t *InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferAbsoluteSurcharge(v InterFacilityConnectionTransferAbsoluteSurcharge) error {
+	v.Type = "ABSOLUTE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsInterFacilityConnectionTransferRelativeSurcharge returns the union data inside the InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferRelativeSurcharge
+func (t InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferRelativeSurcharge() (InterFacilityConnectionTransferRelativeSurcharge, error) {
+	var body InterFacilityConnectionTransferRelativeSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferRelativeSurcharge overwrites any union data inside the InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferRelativeSurcharge
+func (t *InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferRelativeSurcharge(v InterFacilityConnectionTransferRelativeSurcharge) error {
+	v.Type = "RELATIVE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferRelativeSurcharge performs a merge with any union data inside the InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferRelativeSurcharge
+func (t *InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferRelativeSurcharge(v InterFacilityConnectionTransferRelativeSurcharge) error {
+	v.Type = "RELATIVE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"type"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "ABSOLUTE_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferAbsoluteSurcharge()
+	case "RELATIVE_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferRelativeSurcharge()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsInterFacilityConnectionTransferAbsoluteSurcharge returns the union data inside the InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferAbsoluteSurcharge
+func (t InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferAbsoluteSurcharge() (InterFacilityConnectionTransferAbsoluteSurcharge, error) {
+	var body InterFacilityConnectionTransferAbsoluteSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferAbsoluteSurcharge overwrites any union data inside the InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferAbsoluteSurcharge
+func (t *InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferAbsoluteSurcharge(v InterFacilityConnectionTransferAbsoluteSurcharge) error {
+	v.Type = "ABSOLUTE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferAbsoluteSurcharge performs a merge with any union data inside the InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferAbsoluteSurcharge
+func (t *InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferAbsoluteSurcharge(v InterFacilityConnectionTransferAbsoluteSurcharge) error {
+	v.Type = "ABSOLUTE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsInterFacilityConnectionTransferRelativeSurcharge returns the union data inside the InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferRelativeSurcharge
+func (t InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferRelativeSurcharge() (InterFacilityConnectionTransferRelativeSurcharge, error) {
+	var body InterFacilityConnectionTransferRelativeSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferRelativeSurcharge overwrites any union data inside the InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferRelativeSurcharge
+func (t *InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferRelativeSurcharge(v InterFacilityConnectionTransferRelativeSurcharge) error {
+	v.Type = "RELATIVE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferRelativeSurcharge performs a merge with any union data inside the InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferRelativeSurcharge
+func (t *InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferRelativeSurcharge(v InterFacilityConnectionTransferRelativeSurcharge) error {
+	v.Type = "RELATIVE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"type"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "ABSOLUTE_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferAbsoluteSurcharge()
+	case "RELATIVE_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferRelativeSurcharge()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsInterFacilityConnectionTransferAbsoluteSurcharge returns the union data inside the InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferAbsoluteSurcharge
+func (t InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferAbsoluteSurcharge() (InterFacilityConnectionTransferAbsoluteSurcharge, error) {
+	var body InterFacilityConnectionTransferAbsoluteSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferAbsoluteSurcharge overwrites any union data inside the InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferAbsoluteSurcharge
+func (t *InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferAbsoluteSurcharge(v InterFacilityConnectionTransferAbsoluteSurcharge) error {
+	v.Type = "ABSOLUTE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferAbsoluteSurcharge performs a merge with any union data inside the InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferAbsoluteSurcharge
+func (t *InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferAbsoluteSurcharge(v InterFacilityConnectionTransferAbsoluteSurcharge) error {
+	v.Type = "ABSOLUTE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsInterFacilityConnectionTransferRelativeSurcharge returns the union data inside the InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferRelativeSurcharge
+func (t InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferRelativeSurcharge() (InterFacilityConnectionTransferRelativeSurcharge, error) {
+	var body InterFacilityConnectionTransferRelativeSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferRelativeSurcharge overwrites any union data inside the InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferRelativeSurcharge
+func (t *InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferRelativeSurcharge(v InterFacilityConnectionTransferRelativeSurcharge) error {
+	v.Type = "RELATIVE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferRelativeSurcharge performs a merge with any union data inside the InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferRelativeSurcharge
+func (t *InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferRelativeSurcharge(v InterFacilityConnectionTransferRelativeSurcharge) error {
+	v.Type = "RELATIVE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"type"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "ABSOLUTE_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferAbsoluteSurcharge()
+	case "RELATIVE_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferRelativeSurcharge()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsInterFacilityConnectionTransferAbsoluteSurcharge returns the union data inside the InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferAbsoluteSurcharge
+func (t InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferAbsoluteSurcharge() (InterFacilityConnectionTransferAbsoluteSurcharge, error) {
+	var body InterFacilityConnectionTransferAbsoluteSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferAbsoluteSurcharge overwrites any union data inside the InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferAbsoluteSurcharge
+func (t *InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferAbsoluteSurcharge(v InterFacilityConnectionTransferAbsoluteSurcharge) error {
+	v.Type = "ABSOLUTE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferAbsoluteSurcharge performs a merge with any union data inside the InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferAbsoluteSurcharge
+func (t *InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferAbsoluteSurcharge(v InterFacilityConnectionTransferAbsoluteSurcharge) error {
+	v.Type = "ABSOLUTE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsInterFacilityConnectionTransferRelativeSurcharge returns the union data inside the InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferRelativeSurcharge
+func (t InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferRelativeSurcharge() (InterFacilityConnectionTransferRelativeSurcharge, error) {
+	var body InterFacilityConnectionTransferRelativeSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferRelativeSurcharge overwrites any union data inside the InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferRelativeSurcharge
+func (t *InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferRelativeSurcharge(v InterFacilityConnectionTransferRelativeSurcharge) error {
+	v.Type = "RELATIVE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferRelativeSurcharge performs a merge with any union data inside the InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferRelativeSurcharge
+func (t *InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferRelativeSurcharge(v InterFacilityConnectionTransferRelativeSurcharge) error {
+	v.Type = "RELATIVE_SURCHARGE_TYPE"
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"type"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "ABSOLUTE_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferAbsoluteSurcharge()
+	case "RELATIVE_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferRelativeSurcharge()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
