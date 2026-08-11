@@ -382,832 +382,6 @@ paths:
       x-badges:
         - color: red
           label: ALPHA
-  /api/availabilitychannels:
-    get:
-      deprecated: true
-      description: >-
-        This part of the API is deprecated. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
-      operationId: getAvailabilityChannels
-      parameters:
-        - in: query
-          name: searchTerm
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: searchTermExact
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: strategy
-          required: false
-          schema:
-            enum:
-              - REGULAR
-              - IRON_RESERVE
-              - RESTRICT
-            type: string
-        - in: query
-          name: size
-          required: false
-          schema:
-            default: 25
-            example: 25
-            maximum: 100
-            minimum: 1
-            type: number
-        - in: query
-          name: startAfterId
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AvailabilityChannelPaginatedResult'
-          description: Available Availability Channels
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Your user is not allowed to operate against this API instance
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: >-
-            Your user, although recognized, is not authorized to use this
-            endpoint
-      summary: List availability channels
-      x-fft-permissions:
-        - AVAILABILITY_CHANNEL_READ
-      tags:
-        - Channel Availability (Inventory)
-    post:
-      deprecated: true
-      description: >-
-        This part of the API is deprecated. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
-      operationId: createAvailabilityChannel
-      parameters: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AvailabilityChannelForCreation'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AvailabilityChannel'
-          description: The created Availability Channel
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Your user is not allowed to operate against this API instance
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: >-
-            Your user, although recognized, is not authorized to use this
-            endpoint
-      summary: Create availability channel
-      x-fft-permissions:
-        - AVAILABILITY_CHANNEL_WRITE
-      tags:
-        - Channel Availability (Inventory)
-  /api/availabilitychannels/{availabilityChannelId}:
-    delete:
-      deprecated: true
-      description: >-
-        This part of the API is deprecated. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br
-        />Delete an existing Availability Channel. PLEASE NOTE: This will also
-        delete all groups and allocations under this channel.
-      operationId: deleteAvailabilityChannel
-      parameters:
-        - in: path
-          name: availabilityChannelId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: The channel has been deleted
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Your user is not allowed to operate against this API instance
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: >-
-            Your user, although recognized, is not authorized to use this
-            endpoint
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: The requested entity was not found
-      summary: Delete availability channel
-      x-fft-permissions:
-        - AVAILABILITY_CHANNEL_WRITE
-      tags:
-        - Channel Availability (Inventory)
-    get:
-      deprecated: true
-      description: >-
-        This part of the API is deprecated. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
-      operationId: getAvailabilityChannelById
-      parameters:
-        - in: path
-          name: availabilityChannelId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AvailabilityChannel'
-          description: The Availability Channel
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Your user is not allowed to operate against this API instance
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: >-
-            Your user, although recognized, is not authorized to use this
-            endpoint
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: The requested entity was not found
-      summary: Get availability channel
-      x-fft-permissions:
-        - AVAILABILITY_CHANNEL_READ
-      tags:
-        - Channel Availability (Inventory)
-    put:
-      deprecated: true
-      description: >-
-        This part of the API is deprecated. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
-      operationId: replaceAvailabilityChannel
-      parameters:
-        - in: path
-          name: availabilityChannelId
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AvailabilityChannelForReplacement'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AvailabilityChannel'
-          description: The replaced Availability Channel
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Your user is not allowed to operate against this API instance
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: >-
-            Your user, although recognized, is not authorized to use this
-            endpoint
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: The requested entity was not found
-      summary: Update availability channel
-      x-fft-permissions:
-        - AVAILABILITY_CHANNEL_WRITE
-      tags:
-        - Channel Availability (Inventory)
-  /api/availabilitychannels/{availabilityChannelId}/groups:
-    get:
-      deprecated: true
-      description: >-
-        This part of the API is deprecated. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
-      operationId: getGroupsUnderChannel
-      parameters:
-        - in: path
-          name: availabilityChannelId
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: searchTerm
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: searchTermExact
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: size
-          required: false
-          schema:
-            default: 25
-            example: 25
-            maximum: 100
-            minimum: 1
-            type: number
-        - in: query
-          name: startAfterId
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: >-
-                  #/components/schemas/AvailabilityAllocationGroupPaginatedResult
-          description: Available Groups
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Your user is not allowed to operate against this API instance
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: >-
-            Your user, although recognized, is not authorized to use this
-            endpoint
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: The requested entity was not found
-      summary: List channel groups
-      x-fft-permissions:
-        - AVAILABILITY_CHANNEL_READ
-      tags:
-        - Channel Availability (Inventory)
-    post:
-      deprecated: true
-      description: >-
-        This part of the API is deprecated. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
-      operationId: createGroupUnderChannel
-      parameters:
-        - in: path
-          name: availabilityChannelId
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: >-
-                #/components/schemas/AvailabilityAllocationGroupForCreationUnderChannel
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AvailabilityAllocationGroup'
-          description: The created Group
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Your user is not allowed to operate against this API instance
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: >-
-            Your user, although recognized, is not authorized to use this
-            endpoint
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: The requested entity was not found
-      summary: Create channel group
-      x-fft-permissions:
-        - AVAILABILITY_CHANNEL_WRITE
-      tags:
-        - Channel Availability (Inventory)
-  /api/availabilitychannels/{availabilityChannelId}/groups/{groupId}:
-    delete:
-      deprecated: true
-      description: >-
-        This part of the API is deprecated. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br
-        />Delete an existing Group and all its allocations under Channel
-      operationId: deleteGroupUnderChannel
-      parameters:
-        - in: path
-          name: groupId
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: availabilityChannelId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: The Group has been deleted.
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Your user is not allowed to operate against this API instance
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: >-
-            Your user, although recognized, is not authorized to use this
-            endpoint
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: The requested entity was not found
-      summary: Delete channel group
-      x-fft-permissions:
-        - AVAILABILITY_CHANNEL_WRITE
-      tags:
-        - Channel Availability (Inventory)
-    get:
-      deprecated: true
-      description: >-
-        This part of the API is deprecated. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />Get
-        Groups under Channel by its ID
-      operationId: getGroupUnderChannelById
-      parameters:
-        - in: path
-          name: availabilityChannelId
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: groupId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: >-
-                  #/components/schemas/AvailabilityAllocationGroupPaginatedResult
-          description: The Group
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Your user is not allowed to operate against this API instance
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: >-
-            Your user, although recognized, is not authorized to use this
-            endpoint
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: The requested entity was not found
-      summary: Get channel group
-      x-fft-permissions:
-        - AVAILABILITY_CHANNEL_READ
-      tags:
-        - Channel Availability (Inventory)
-    put:
-      deprecated: true
-      description: >-
-        This part of the API is deprecated. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
-      operationId: replaceGroupUnderChannel
-      parameters:
-        - in: path
-          name: availabilityChannelId
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: groupId
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AvailabilityAllocationGroupForReplacement'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AvailabilityAllocationGroup'
-          description: The replaced Group
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Your user is not allowed to operate against this API instance
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: >-
-            Your user, although recognized, is not authorized to use this
-            endpoint
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: The requested entity was not found
-      summary: Update channel group
-      x-fft-permissions:
-        - AVAILABILITY_CHANNEL_WRITE
-      tags:
-        - Channel Availability (Inventory)
-  /api/availabilitychannels/{availabilityChannelId}/groups/{groupId}/allocations:
-    get:
-      deprecated: true
-      description: >-
-        This part of the API is deprecated. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
-      operationId: getAllocationsUnderGroup
-      parameters:
-        - in: path
-          name: groupId
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: availabilityChannelId
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: searchTerm
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: searchTermExact
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: size
-          required: false
-          schema:
-            default: 25
-            example: 25
-            maximum: 100
-            minimum: 1
-            type: number
-        - in: query
-          name: startAfterId
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AvailabilityAllocationPaginatedResult'
-          description: Available Allocations
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Your user is not allowed to operate against this API instance
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: >-
-            Your user, although recognized, is not authorized to use this
-            endpoint
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: The requested entity was not found
-      summary: List group allocations
-      x-fft-permissions:
-        - AVAILABILITY_CHANNEL_READ
-      tags:
-        - Channel Availability (Inventory)
-    post:
-      deprecated: true
-      description: >-
-        This part of the API is deprecated. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
-      operationId: createAllocationUnderGroup
-      parameters:
-        - in: path
-          name: groupId
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: availabilityChannelId
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AvailabilityAllocationForCreationUnderGroup'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AvailabilityAllocation'
-          description: The created Allocation
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Your user is not allowed to operate against this API instance
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: >-
-            Your user, although recognized, is not authorized to use this
-            endpoint
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: The requested entity was not found
-      summary: Create group allocation
-      x-fft-permissions:
-        - AVAILABILITY_CHANNEL_WRITE
-      tags:
-        - Channel Availability (Inventory)
-  /api/availabilitychannels/{availabilityChannelId}/groups/{groupId}/allocations/{allocationId}:
-    delete:
-      deprecated: true
-      description: >-
-        This part of the API is deprecated. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
-      operationId: deleteAllocationUnderGroup
-      parameters:
-        - in: path
-          name: allocationId
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: groupId
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: availabilityChannelId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: The Allocation has been deleted
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Your user is not allowed to operate against this API instance
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: >-
-            Your user, although recognized, is not authorized to use this
-            endpoint
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: The requested entity was not found
-      summary: Delete group allocation
-      x-fft-permissions:
-        - AVAILABILITY_CHANNEL_WRITE
-      tags:
-        - Channel Availability (Inventory)
-    get:
-      deprecated: true
-      description: >-
-        This part of the API is deprecated. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
-      operationId: getAllocationUnderGroupById
-      parameters:
-        - in: path
-          name: groupId
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: allocationId
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: availabilityChannelId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AvailabilityAllocation'
-          description: The Allocation
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Your user is not allowed to operate against this API instance
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: >-
-            Your user, although recognized, is not authorized to use this
-            endpoint
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: The requested entity was not found
-      summary: List group allocations
-      x-fft-permissions:
-        - AVAILABILITY_CHANNEL_READ
-      tags:
-        - Channel Availability (Inventory)
-    put:
-      deprecated: true
-      description: >-
-        This part of the API is deprecated. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
-      operationId: replaceAllocationUnderGroup
-      parameters:
-        - in: path
-          name: groupId
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: allocationId
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: availabilityChannelId
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AvailabilityAllocationForReplacement'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AvailabilityAllocation'
-          description: The replaced Allocation
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Your user is not allowed to operate against this API instance
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: >-
-            Your user, although recognized, is not authorized to use this
-            endpoint
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: The requested entity was not found
-      summary: Update group allocation
-      x-fft-permissions:
-        - AVAILABILITY_CHANNEL_WRITE
-      tags:
-        - Channel Availability (Inventory)
   /api/brands:
     get:
       description: ''
@@ -8883,6 +8057,8 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: List facility connections
+      x-fft-permissions:
+        - FACILITY_READ
       tags:
         - Facilities (Core)
     post:
@@ -8939,6 +8115,8 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Create facility connection
+      x-fft-permissions:
+        - FACILITY_WRITE
       tags:
         - Facilities (Core)
   /api/facilities/{facilityId}/connections/{connectionId}:
@@ -45711,7 +44889,7 @@ components:
         context:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
           type: array
         customAttributes:
@@ -45725,6 +44903,7 @@ components:
         fallbackCosts:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionDeliveryCost'
+          maxItems: 500
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
@@ -45733,15 +44912,39 @@ components:
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
+          maxItems: 500
           type: array
         packagingUnitsByContexts:
           items:
             $ref: '#/components/schemas/PackagingUnitsByContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
           type: array
         sourceFacilityRef:
           type: string
+        surchargesPerTransfer:
+          items:
+            discriminator:
+              mapping:
+                ABSOLUTE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+                RELATIVE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+              propertyName: type
+            oneOf:
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+          maxItems: 500
+          type: array
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br />
+          x-badges:
+            - color: red
+              label: ALPHA
         target:
           oneOf:
             - $ref: '#/components/schemas/InterFacilityConnectionCustomerTarget'
@@ -45786,7 +44989,7 @@ components:
           $ref: '#/components/schemas/InterFacilityConnectionContextTypes'
         values:
           items:
-            maxItems: 2000
+            maxItems: 500
             minItems: 0
             type: string
           type: array
@@ -45802,6 +45005,8 @@ components:
         - FACILITY_GROUP
         - CATEGORY
         - TAG_REFERENCE
+        - TARGET_POSTALCODE
+        - TARGET_COUNTRY
       type: string
       title: InterFacilityConnectionContextTypes
       description: InterFacilityConnectionContextTypes
@@ -45874,7 +45079,7 @@ components:
         context:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
           type: array
         customAttributes:
@@ -45888,18 +45093,36 @@ components:
         fallbackCosts:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionDeliveryCost'
+          maxItems: 500
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
+          maxItems: 500
           type: array
         packagingUnitsByContexts:
           items:
             $ref: '#/components/schemas/PackagingUnitsByContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
+          type: array
+        surchargesPerTransfer:
+          items:
+            discriminator:
+              mapping:
+                ABSOLUTE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+                RELATIVE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+              propertyName: type
+            oneOf:
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+          maxItems: 500
           type: array
         type:
           $ref: '#/components/schemas/ConnectionType'
@@ -45926,7 +45149,7 @@ components:
         context:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
           type: array
         customAttributes:
@@ -45940,18 +45163,36 @@ components:
         fallbackCosts:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionDeliveryCost'
+          maxItems: 500
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
+          maxItems: 500
           type: array
         packagingUnitsByContexts:
           items:
             $ref: '#/components/schemas/PackagingUnitsByContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
+          type: array
+        surchargesPerTransfer:
+          items:
+            discriminator:
+              mapping:
+                ABSOLUTE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+                RELATIVE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+              propertyName: type
+            oneOf:
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+          maxItems: 500
           type: array
         type:
           $ref: '#/components/schemas/ConnectionType'
@@ -45972,10 +45213,12 @@ components:
         excludedFacilityGroupRefs:
           items:
             type: string
+          maxItems: 500
           type: array
         excludedFacilityRefs:
           items:
             type: string
+          maxItems: 500
           type: array
         facilityRef:
           type: string
@@ -46001,6 +45244,25 @@ components:
         name: InterFacilityConnection
       title: InterFacilityConnections
       description: InterFacilityConnections
+    InterFacilityConnectionsMoney:
+      properties:
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+        decimalPlaces:
+          description: Number of decimal places for the given currency
+          example: 2
+          minimum: 0
+          type: integer
+        value:
+          description: Value in the smallest subunit of the given currency, e.g. cents.
+          minimum: 0
+          type: integer
+      required:
+        - currency
+        - value
+      title: InterFacilityConnectionsMoney
+      type: object
+      description: InterFacilityConnectionsMoney
     InterFacilityConnectionSupplierTarget:
       allOf:
         - $ref: '#/components/schemas/InterFacilityConnectionBaseTarget'
@@ -46008,10 +45270,12 @@ components:
         excludedFacilityGroupRefs:
           items:
             type: string
+          maxItems: 500
           type: array
         excludedFacilityRefs:
           items:
             type: string
+          maxItems: 500
           type: array
         facilityRef:
           type: string
@@ -46034,7 +45298,7 @@ components:
         context:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
           type: array
         customAttributes:
@@ -46048,18 +45312,36 @@ components:
         fallbackCosts:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionDeliveryCost'
+          maxItems: 500
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
+          maxItems: 500
           type: array
         packagingUnitsByContexts:
           items:
             $ref: '#/components/schemas/PackagingUnitsByContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
+          type: array
+        surchargesPerTransfer:
+          items:
+            discriminator:
+              mapping:
+                ABSOLUTE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+                RELATIVE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+              propertyName: type
+            oneOf:
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+          maxItems: 500
           type: array
         target:
           $ref: '#/components/schemas/InterFacilityConnectionCustomerTarget'
@@ -46089,7 +45371,7 @@ components:
         context:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
           type: array
         customAttributes:
@@ -46103,18 +45385,36 @@ components:
         fallbackCosts:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionDeliveryCost'
+          maxItems: 500
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
+          maxItems: 500
           type: array
         packagingUnitsByContexts:
           items:
             $ref: '#/components/schemas/PackagingUnitsByContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
+          type: array
+        surchargesPerTransfer:
+          items:
+            discriminator:
+              mapping:
+                ABSOLUTE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+                RELATIVE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+              propertyName: type
+            oneOf:
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+          maxItems: 500
           type: array
         target:
           $ref: '#/components/schemas/InterFacilityConnectionCustomerTarget'
@@ -46147,7 +45447,7 @@ components:
         context:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
           type: array
         customAttributes:
@@ -46161,18 +45461,36 @@ components:
         fallbackCosts:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionDeliveryCost'
+          maxItems: 500
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
+          maxItems: 500
           type: array
         packagingUnitsByContexts:
           items:
             $ref: '#/components/schemas/PackagingUnitsByContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
+          type: array
+        surchargesPerTransfer:
+          items:
+            discriminator:
+              mapping:
+                ABSOLUTE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+                RELATIVE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+              propertyName: type
+            oneOf:
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+          maxItems: 500
           type: array
         target:
           $ref: '#/components/schemas/InterFacilityConnectionManagedFacilityTarget'
@@ -46202,7 +45520,7 @@ components:
         context:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
           type: array
         customAttributes:
@@ -46216,18 +45534,36 @@ components:
         fallbackCosts:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionDeliveryCost'
+          maxItems: 500
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
+          maxItems: 500
           type: array
         packagingUnitsByContexts:
           items:
             $ref: '#/components/schemas/PackagingUnitsByContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
+          type: array
+        surchargesPerTransfer:
+          items:
+            discriminator:
+              mapping:
+                ABSOLUTE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+                RELATIVE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+              propertyName: type
+            oneOf:
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+          maxItems: 500
           type: array
         target:
           $ref: '#/components/schemas/InterFacilityConnectionManagedFacilityTarget'
@@ -46260,7 +45596,7 @@ components:
         context:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
           type: array
         customAttributes:
@@ -46274,18 +45610,36 @@ components:
         fallbackCosts:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionDeliveryCost'
+          maxItems: 500
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
+          maxItems: 500
           type: array
         packagingUnitsByContexts:
           items:
             $ref: '#/components/schemas/PackagingUnitsByContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
+          type: array
+        surchargesPerTransfer:
+          items:
+            discriminator:
+              mapping:
+                ABSOLUTE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+                RELATIVE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+              propertyName: type
+            oneOf:
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+          maxItems: 500
           type: array
         target:
           $ref: '#/components/schemas/InterFacilityConnectionSupplierTarget'
@@ -46315,7 +45669,7 @@ components:
         context:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
           type: array
         customAttributes:
@@ -46329,18 +45683,36 @@ components:
         fallbackCosts:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionDeliveryCost'
+          maxItems: 500
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
+          maxItems: 500
           type: array
         packagingUnitsByContexts:
           items:
             $ref: '#/components/schemas/PackagingUnitsByContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
+          type: array
+        surchargesPerTransfer:
+          items:
+            discriminator:
+              mapping:
+                ABSOLUTE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+                RELATIVE_SURCHARGE_TYPE: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+              propertyName: type
+            oneOf:
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferAbsoluteSurcharge
+              - $ref: >-
+                  #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
+          maxItems: 500
           type: array
         target:
           $ref: '#/components/schemas/InterFacilityConnectionSupplierTarget'
@@ -46357,6 +45729,49 @@ components:
         name: InterFacilityConnectionToSupplierForUpdate
       title: InterFacilityConnectionToSupplierForUpdate
       description: InterFacilityConnectionToSupplierForUpdate
+    InterFacilityConnectionTransferAbsoluteSurcharge:
+      properties:
+        amount:
+          $ref: '#/components/schemas/InterFacilityConnectionsMoney'
+        tenantSurchargeType:
+          type: string
+        type:
+          allOf:
+            - $ref: >-
+                #/components/schemas/InterFacilityConnectionTransferSurchargeType
+      required:
+        - tenantSurchargeType
+        - type
+        - amount
+      title: InterFacilityConnectionTransferAbsoluteSurcharge
+      type: object
+      description: InterFacilityConnectionTransferAbsoluteSurcharge
+    InterFacilityConnectionTransferRelativeSurcharge:
+      properties:
+        percentage:
+          format: float
+          minimum: 0
+          type: number
+        tenantSurchargeType:
+          type: string
+        type:
+          allOf:
+            - $ref: >-
+                #/components/schemas/InterFacilityConnectionTransferSurchargeType
+      required:
+        - tenantSurchargeType
+        - type
+        - percentage
+      title: InterFacilityConnectionTransferRelativeSurcharge
+      type: object
+      description: InterFacilityConnectionTransferRelativeSurcharge
+    InterFacilityConnectionTransferSurchargeType:
+      enum:
+        - ABSOLUTE_SURCHARGE_TYPE
+        - RELATIVE_SURCHARGE_TYPE
+      title: InterFacilityConnectionTransferSurchargeType
+      type: string
+      description: InterFacilityConnectionTransferSurchargeType
     InventoryArticle:
       properties:
         titleLocalized:
@@ -59358,7 +58773,7 @@ components:
           $ref: '#/components/schemas/PackagingUnitContextTypes'
         values:
           items:
-            maxItems: 2000
+            maxItems: 500
             minItems: 0
             type: string
           type: array
@@ -59593,13 +59008,13 @@ components:
         context:
           items:
             $ref: '#/components/schemas/PackagingUnitContext'
-          maxItems: 2000
+          maxItems: 500
           minItems: 0
           type: array
         packagingUnits:
           items:
             $ref: '#/components/schemas/PackagingUnit'
-          maxItems: 2000
+          maxItems: 500
           minItems: 1
           type: array
       required:
@@ -86930,6 +86345,61 @@ components:
       type: object
       title: TimeTriggeredConfigurationContext
       description: TimeTriggeredConfigurationContext
+    TimeTriggeredRerouteFailedWebHookEvent:
+      allOf:
+        - $ref: '#/components/schemas/WebHookEvent'
+      properties:
+        payload:
+          $ref: '#/components/schemas/TimeTriggeredRerouteFailedWebHookEventPayload'
+      required:
+        - payload
+      type: object
+      title: TimeTriggeredRerouteFailedWebHookEvent
+      description: TimeTriggeredRerouteFailedWebHookEvent
+    TimeTriggeredRerouteFailedWebHookEventPayload:
+      properties:
+        facilityData:
+          properties:
+            facilityRef:
+              type: string
+            name:
+              type: string
+            timeZone:
+              type: string
+          required:
+            - name
+            - facilityRef
+            - timeZone
+        pickJobData:
+          properties:
+            created:
+              example: 2020-02-03T08:45:51.525Z
+              format: date-time
+              type: string
+            pickJobRef:
+              type: string
+            shortId:
+              type: string
+            tenantOrderId:
+              type: string
+          required:
+            - pickJobRef
+            - tenantOrderId
+            - shortId
+            - created
+        processRef:
+          type: string
+        rerouteDate:
+          example: 2020-02-03T08:45:51.525Z
+          format: date-time
+          type: string
+      required:
+        - processRef
+        - pickJobData
+        - facilityData
+        - rerouteDate
+      title: TimeTriggeredRerouteFailedWebHookEventPayload
+      description: TimeTriggeredRerouteFailedWebHookEventPayload
     TimeZone:
       description: Timezone for information retrieved e.g. by the Google Maps API
       properties:
@@ -88388,11 +87858,14 @@ components:
             - tenantOrderId
             - shortId
             - created
+        processRef:
+          type: string
         rerouteDate:
           example: 2020-02-03T08:45:51.525Z
           format: date-time
           type: string
       required:
+        - processRef
         - pickJobData
         - facilityData
         - rerouteDate
