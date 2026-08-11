@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-// knownMutatingPOSTs is the other half of the POST census: the 113 POST operations
+// knownMutatingPOSTs is the other half of the POST census: the 110 POST operations
 // that write. It is a fixture, not production code, and it exists so that the two
 // lists together must account for every POST in the spec.
 //
