@@ -18924,6 +18924,8 @@ paths:
               - ZONE_WRITE
               - SAFETY_STOCK_READ
               - SAFETY_STOCK_WRITE
+              - AVAILABILITY_THRESHOLDS_READ
+              - AVAILABILITY_THRESHOLDS_WRITE
             type: string
         - description: The group of the permission to filter by
           in: query
@@ -63135,6 +63137,8 @@ components:
             - ZONE_WRITE
             - SAFETY_STOCK_READ
             - SAFETY_STOCK_WRITE
+            - AVAILABILITY_THRESHOLDS_READ
+            - AVAILABILITY_THRESHOLDS_WRITE
           type: string
         operation:
           description: The operation of the permission
@@ -63248,6 +63252,7 @@ components:
             - PURCHASE_PRICE
             - ZONE
             - SAFETY_STOCK
+            - AVAILABILITY_THRESHOLDS
           type: string
       required:
         - operation
@@ -71881,6 +71886,8 @@ components:
               - ZONE_WRITE
               - SAFETY_STOCK_READ
               - SAFETY_STOCK_WRITE
+              - AVAILABILITY_THRESHOLDS_READ
+              - AVAILABILITY_THRESHOLDS_WRITE
             type: string
           maxItems: 500
           type: array
@@ -72110,6 +72117,8 @@ components:
               - ZONE_WRITE
               - SAFETY_STOCK_READ
               - SAFETY_STOCK_WRITE
+              - AVAILABILITY_THRESHOLDS_READ
+              - AVAILABILITY_THRESHOLDS_WRITE
             type: string
           maxItems: 500
           type: array
@@ -72330,6 +72339,8 @@ components:
               - ZONE_WRITE
               - SAFETY_STOCK_READ
               - SAFETY_STOCK_WRITE
+              - AVAILABILITY_THRESHOLDS_READ
+              - AVAILABILITY_THRESHOLDS_WRITE
             type: string
           maxItems: 500
           type: array
@@ -72556,6 +72567,8 @@ components:
               - ZONE_WRITE
               - SAFETY_STOCK_READ
               - SAFETY_STOCK_WRITE
+              - AVAILABILITY_THRESHOLDS_READ
+              - AVAILABILITY_THRESHOLDS_WRITE
             type: string
           maxItems: 500
           type: array
@@ -89131,6 +89144,8 @@ components:
               - ZONE_WRITE
               - SAFETY_STOCK_READ
               - SAFETY_STOCK_WRITE
+              - AVAILABILITY_THRESHOLDS_READ
+              - AVAILABILITY_THRESHOLDS_WRITE
             type: string
           type: array
       required:
