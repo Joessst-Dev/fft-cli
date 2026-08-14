@@ -4402,6 +4402,8 @@ const (
 	PermissionKeyAUDITREAD                       PermissionKey = "AUDIT_READ"
 	PermissionKeyAVAILABILITYCHANNELREAD         PermissionKey = "AVAILABILITY_CHANNEL_READ"
 	PermissionKeyAVAILABILITYCHANNELWRITE        PermissionKey = "AVAILABILITY_CHANNEL_WRITE"
+	PermissionKeyAVAILABILITYTHRESHOLDSREAD      PermissionKey = "AVAILABILITY_THRESHOLDS_READ"
+	PermissionKeyAVAILABILITYTHRESHOLDSWRITE     PermissionKey = "AVAILABILITY_THRESHOLDS_WRITE"
 	PermissionKeyBRANDREAD                       PermissionKey = "BRAND_READ"
 	PermissionKeyCARRIERREAD                     PermissionKey = "CARRIER_READ"
 	PermissionKeyCARRIERWRITE                    PermissionKey = "CARRIER_WRITE"
@@ -4571,6 +4573,10 @@ func (e PermissionKey) Valid() bool {
 	case PermissionKeyAVAILABILITYCHANNELREAD:
 		return true
 	case PermissionKeyAVAILABILITYCHANNELWRITE:
+		return true
+	case PermissionKeyAVAILABILITYTHRESHOLDSREAD:
+		return true
+	case PermissionKeyAVAILABILITYTHRESHOLDSWRITE:
 		return true
 	case PermissionKeyBRANDREAD:
 		return true
@@ -4952,6 +4958,7 @@ const (
 	PermissionSubGroupANALYTICSDASHBOARD         PermissionSubGroup = "ANALYTICS_DASHBOARD"
 	PermissionSubGroupAUDIT                      PermissionSubGroup = "AUDIT"
 	PermissionSubGroupAVAILABILITYCHANNEL        PermissionSubGroup = "AVAILABILITY_CHANNEL"
+	PermissionSubGroupAVAILABILITYTHRESHOLDS     PermissionSubGroup = "AVAILABILITY_THRESHOLDS"
 	PermissionSubGroupBRAND                      PermissionSubGroup = "BRAND"
 	PermissionSubGroupCARRIER                    PermissionSubGroup = "CARRIER"
 	PermissionSubGroupCATEGORY                   PermissionSubGroup = "CATEGORY"
@@ -5048,6 +5055,8 @@ func (e PermissionSubGroup) Valid() bool {
 	case PermissionSubGroupAUDIT:
 		return true
 	case PermissionSubGroupAVAILABILITYCHANNEL:
+		return true
+	case PermissionSubGroupAVAILABILITYTHRESHOLDS:
 		return true
 	case PermissionSubGroupBRAND:
 		return true
@@ -6733,6 +6742,8 @@ const (
 	RolePermissionsAUDITREAD                       RolePermissions = "AUDIT_READ"
 	RolePermissionsAVAILABILITYCHANNELREAD         RolePermissions = "AVAILABILITY_CHANNEL_READ"
 	RolePermissionsAVAILABILITYCHANNELWRITE        RolePermissions = "AVAILABILITY_CHANNEL_WRITE"
+	RolePermissionsAVAILABILITYTHRESHOLDSREAD      RolePermissions = "AVAILABILITY_THRESHOLDS_READ"
+	RolePermissionsAVAILABILITYTHRESHOLDSWRITE     RolePermissions = "AVAILABILITY_THRESHOLDS_WRITE"
 	RolePermissionsBRANDREAD                       RolePermissions = "BRAND_READ"
 	RolePermissionsCARRIERREAD                     RolePermissions = "CARRIER_READ"
 	RolePermissionsCARRIERWRITE                    RolePermissions = "CARRIER_WRITE"
@@ -6902,6 +6913,10 @@ func (e RolePermissions) Valid() bool {
 	case RolePermissionsAVAILABILITYCHANNELREAD:
 		return true
 	case RolePermissionsAVAILABILITYCHANNELWRITE:
+		return true
+	case RolePermissionsAVAILABILITYTHRESHOLDSREAD:
+		return true
+	case RolePermissionsAVAILABILITYTHRESHOLDSWRITE:
 		return true
 	case RolePermissionsBRANDREAD:
 		return true
@@ -7216,6 +7231,8 @@ const (
 	RoleForCreationPermissionsAUDITREAD                       RoleForCreationPermissions = "AUDIT_READ"
 	RoleForCreationPermissionsAVAILABILITYCHANNELREAD         RoleForCreationPermissions = "AVAILABILITY_CHANNEL_READ"
 	RoleForCreationPermissionsAVAILABILITYCHANNELWRITE        RoleForCreationPermissions = "AVAILABILITY_CHANNEL_WRITE"
+	RoleForCreationPermissionsAVAILABILITYTHRESHOLDSREAD      RoleForCreationPermissions = "AVAILABILITY_THRESHOLDS_READ"
+	RoleForCreationPermissionsAVAILABILITYTHRESHOLDSWRITE     RoleForCreationPermissions = "AVAILABILITY_THRESHOLDS_WRITE"
 	RoleForCreationPermissionsBRANDREAD                       RoleForCreationPermissions = "BRAND_READ"
 	RoleForCreationPermissionsCARRIERREAD                     RoleForCreationPermissions = "CARRIER_READ"
 	RoleForCreationPermissionsCARRIERWRITE                    RoleForCreationPermissions = "CARRIER_WRITE"
@@ -7385,6 +7402,10 @@ func (e RoleForCreationPermissions) Valid() bool {
 	case RoleForCreationPermissionsAVAILABILITYCHANNELREAD:
 		return true
 	case RoleForCreationPermissionsAVAILABILITYCHANNELWRITE:
+		return true
+	case RoleForCreationPermissionsAVAILABILITYTHRESHOLDSREAD:
+		return true
+	case RoleForCreationPermissionsAVAILABILITYTHRESHOLDSWRITE:
 		return true
 	case RoleForCreationPermissionsBRANDREAD:
 		return true
@@ -7699,6 +7720,8 @@ const (
 	RoleForPatchPermissionsAUDITREAD                       RoleForPatchPermissions = "AUDIT_READ"
 	RoleForPatchPermissionsAVAILABILITYCHANNELREAD         RoleForPatchPermissions = "AVAILABILITY_CHANNEL_READ"
 	RoleForPatchPermissionsAVAILABILITYCHANNELWRITE        RoleForPatchPermissions = "AVAILABILITY_CHANNEL_WRITE"
+	RoleForPatchPermissionsAVAILABILITYTHRESHOLDSREAD      RoleForPatchPermissions = "AVAILABILITY_THRESHOLDS_READ"
+	RoleForPatchPermissionsAVAILABILITYTHRESHOLDSWRITE     RoleForPatchPermissions = "AVAILABILITY_THRESHOLDS_WRITE"
 	RoleForPatchPermissionsBRANDREAD                       RoleForPatchPermissions = "BRAND_READ"
 	RoleForPatchPermissionsCARRIERREAD                     RoleForPatchPermissions = "CARRIER_READ"
 	RoleForPatchPermissionsCARRIERWRITE                    RoleForPatchPermissions = "CARRIER_WRITE"
@@ -7868,6 +7891,10 @@ func (e RoleForPatchPermissions) Valid() bool {
 	case RoleForPatchPermissionsAVAILABILITYCHANNELREAD:
 		return true
 	case RoleForPatchPermissionsAVAILABILITYCHANNELWRITE:
+		return true
+	case RoleForPatchPermissionsAVAILABILITYTHRESHOLDSREAD:
+		return true
+	case RoleForPatchPermissionsAVAILABILITYTHRESHOLDSWRITE:
 		return true
 	case RoleForPatchPermissionsBRANDREAD:
 		return true
@@ -8182,6 +8209,8 @@ const (
 	RoleForUpdatePermissionsAUDITREAD                       RoleForUpdatePermissions = "AUDIT_READ"
 	RoleForUpdatePermissionsAVAILABILITYCHANNELREAD         RoleForUpdatePermissions = "AVAILABILITY_CHANNEL_READ"
 	RoleForUpdatePermissionsAVAILABILITYCHANNELWRITE        RoleForUpdatePermissions = "AVAILABILITY_CHANNEL_WRITE"
+	RoleForUpdatePermissionsAVAILABILITYTHRESHOLDSREAD      RoleForUpdatePermissions = "AVAILABILITY_THRESHOLDS_READ"
+	RoleForUpdatePermissionsAVAILABILITYTHRESHOLDSWRITE     RoleForUpdatePermissions = "AVAILABILITY_THRESHOLDS_WRITE"
 	RoleForUpdatePermissionsBRANDREAD                       RoleForUpdatePermissions = "BRAND_READ"
 	RoleForUpdatePermissionsCARRIERREAD                     RoleForUpdatePermissions = "CARRIER_READ"
 	RoleForUpdatePermissionsCARRIERWRITE                    RoleForUpdatePermissions = "CARRIER_WRITE"
@@ -8351,6 +8380,10 @@ func (e RoleForUpdatePermissions) Valid() bool {
 	case RoleForUpdatePermissionsAVAILABILITYCHANNELREAD:
 		return true
 	case RoleForUpdatePermissionsAVAILABILITYCHANNELWRITE:
+		return true
+	case RoleForUpdatePermissionsAVAILABILITYTHRESHOLDSREAD:
+		return true
+	case RoleForUpdatePermissionsAVAILABILITYTHRESHOLDSWRITE:
 		return true
 	case RoleForUpdatePermissionsBRANDREAD:
 		return true
@@ -11323,6 +11356,8 @@ const (
 	UserRoleWithPermissionsPermissionsAUDITREAD                       UserRoleWithPermissionsPermissions = "AUDIT_READ"
 	UserRoleWithPermissionsPermissionsAVAILABILITYCHANNELREAD         UserRoleWithPermissionsPermissions = "AVAILABILITY_CHANNEL_READ"
 	UserRoleWithPermissionsPermissionsAVAILABILITYCHANNELWRITE        UserRoleWithPermissionsPermissions = "AVAILABILITY_CHANNEL_WRITE"
+	UserRoleWithPermissionsPermissionsAVAILABILITYTHRESHOLDSREAD      UserRoleWithPermissionsPermissions = "AVAILABILITY_THRESHOLDS_READ"
+	UserRoleWithPermissionsPermissionsAVAILABILITYTHRESHOLDSWRITE     UserRoleWithPermissionsPermissions = "AVAILABILITY_THRESHOLDS_WRITE"
 	UserRoleWithPermissionsPermissionsBRANDREAD                       UserRoleWithPermissionsPermissions = "BRAND_READ"
 	UserRoleWithPermissionsPermissionsCARRIERREAD                     UserRoleWithPermissionsPermissions = "CARRIER_READ"
 	UserRoleWithPermissionsPermissionsCARRIERWRITE                    UserRoleWithPermissionsPermissions = "CARRIER_WRITE"
@@ -11492,6 +11527,10 @@ func (e UserRoleWithPermissionsPermissions) Valid() bool {
 	case UserRoleWithPermissionsPermissionsAVAILABILITYCHANNELREAD:
 		return true
 	case UserRoleWithPermissionsPermissionsAVAILABILITYCHANNELWRITE:
+		return true
+	case UserRoleWithPermissionsPermissionsAVAILABILITYTHRESHOLDSREAD:
+		return true
+	case UserRoleWithPermissionsPermissionsAVAILABILITYTHRESHOLDSWRITE:
 		return true
 	case UserRoleWithPermissionsPermissionsBRANDREAD:
 		return true
@@ -12010,6 +12049,8 @@ const (
 	AUDITREAD                       GetPermissionsParamsKey = "AUDIT_READ"
 	AVAILABILITYCHANNELREAD         GetPermissionsParamsKey = "AVAILABILITY_CHANNEL_READ"
 	AVAILABILITYCHANNELWRITE        GetPermissionsParamsKey = "AVAILABILITY_CHANNEL_WRITE"
+	AVAILABILITYTHRESHOLDSREAD      GetPermissionsParamsKey = "AVAILABILITY_THRESHOLDS_READ"
+	AVAILABILITYTHRESHOLDSWRITE     GetPermissionsParamsKey = "AVAILABILITY_THRESHOLDS_WRITE"
 	BRANDREAD                       GetPermissionsParamsKey = "BRAND_READ"
 	CARRIERREAD                     GetPermissionsParamsKey = "CARRIER_READ"
 	CARRIERWRITE                    GetPermissionsParamsKey = "CARRIER_WRITE"
@@ -12179,6 +12220,10 @@ func (e GetPermissionsParamsKey) Valid() bool {
 	case AVAILABILITYCHANNELREAD:
 		return true
 	case AVAILABILITYCHANNELWRITE:
+		return true
+	case AVAILABILITYTHRESHOLDSREAD:
+		return true
+	case AVAILABILITYTHRESHOLDSWRITE:
 		return true
 	case BRANDREAD:
 		return true
