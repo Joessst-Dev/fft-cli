@@ -62,6 +62,13 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
           go-version: ${{ matrix.go }}
+          # Without this, "1.25" is satisfied by whatever 1.25.x the runner image
+          # happens to have cached, and setup-go never looks for a newer patch.
+          # setup-go also exports GOTOOLCHAIN=local, so once go.mod's floor moves
+          # past that stale patch the job cannot self-upgrade — it just dies with
+          # "go.mod requires go >= 1.25.13 (running go 1.25.12)". Resolve the patch
+          # from the manifest instead, so the floor lands wherever go.mod points.
+          check-latest: true
           # Keys off go.sum: the module cache and the build cache both persist.
           cache: true
 
