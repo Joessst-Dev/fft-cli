@@ -48,6 +48,17 @@ same two facilities.`
 // SUPPLIER — and names no facility for the supplier to be. It is not a body that can
 // be sent. An example that does not work is worse than no example, because the user
 // finds out one 400 later and does not know which half to doubt.
+//
+// surchargesPerTransfer is a discriminated oneOf of its own, so it gets the same
+// treatment, one variant per example rather than both stacked into one array: an
+// example is read as a template, and a template that ships two of something invites
+// keeping both. The CUSTOMER body carries none — the field is optional everywhere,
+// and the surcharge is per *transfer*, which the edge to the consumer is not.
+//
+// Both surcharge bodies below were sent to a tenant, read back and deleted, which is
+// the bar for an example here. It matters most for amount.value: that is the smallest
+// subunit of the currency, so 250 is €2.50, and an example somebody could read as
+// €250 would be the expensive kind of wrong.
 const (
 	connectionSupplierExample = `{
   "type": "SUPPLIER",
@@ -60,7 +71,18 @@ const (
   "fallbackTransitTime": {
     "minTransitDays": 1,
     "maxTransitDays": 3
-  }
+  },
+  "surchargesPerTransfer": [
+    {
+      "type": "ABSOLUTE_SURCHARGE_TYPE",
+      "tenantSurchargeType": "FUEL",
+      "amount": {
+        "currency": "EUR",
+        "value": 250,
+        "decimalPlaces": 2
+      }
+    }
+  ]
 }
 `
 
@@ -75,7 +97,14 @@ const (
   "fallbackTransitTime": {
     "minTransitDays": 1,
     "maxTransitDays": 2
-  }
+  },
+  "surchargesPerTransfer": [
+    {
+      "type": "RELATIVE_SURCHARGE_TYPE",
+      "tenantSurchargeType": "PEAK_SEASON",
+      "percentage": 12.5
+    }
+  ]
 }
 `
 

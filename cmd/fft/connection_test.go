@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -194,6 +195,45 @@ var _ = Describe("fft connection create", func() {
 					"the --type %s example is a body fft would refuse", typ)
 				Expect(docString(doc, "type")).To(Equal(typ))
 			}
+		})
+
+		// surchargesPerTransfer is a discriminated oneOf inside a discriminated oneOf,
+		// which is two more chances for a hand-written body to be wrong in a way only
+		// the tenant notices. Both of these were sent to a real tenant, read back and
+		// deleted before they were pinned here.
+		It("shows both surcharge variants, across the two types that transfer", func() {
+			surcharges := func(typ string) []any {
+				GinkgoHelper()
+
+				Expect(c.run("connection", "create", "--example", "--type", typ)).To(Equal(exitcode.OK))
+
+				doc, err := decodeDoc([]byte(c.out()), "the example")
+				Expect(err).NotTo(HaveOccurred())
+
+				list, _ := doc["surchargesPerTransfer"].([]any)
+				return list
+			}
+
+			abs := surcharges(typeSupplier)
+			Expect(abs).To(HaveLen(1))
+			Expect(abs[0]).To(HaveKeyWithValue("type", "ABSOLUTE_SURCHARGE_TYPE"))
+			Expect(abs[0]).To(HaveKeyWithValue("tenantSurchargeType", Not(BeEmpty())))
+
+			// The amount is in the currency's smallest subunit, so the example says 250
+			// and means €2.50. A float here would be the reading it exists to prevent.
+			amount, ok := abs[0].(map[string]any)["amount"].(map[string]any)
+			Expect(ok).To(BeTrue(), "the absolute surcharge carries no amount object")
+			Expect(amount).To(HaveKeyWithValue("currency", "EUR"))
+			Expect(amount["value"]).To(BeEquivalentTo(json.Number("250")))
+
+			rel := surcharges(typeManagedFacility)
+			Expect(rel).To(HaveLen(1))
+			Expect(rel[0]).To(HaveKeyWithValue("type", "RELATIVE_SURCHARGE_TYPE"))
+			Expect(rel[0]).To(HaveKeyWithValue("tenantSurchargeType", Not(BeEmpty())))
+			Expect(rel[0]).To(HaveKeyWithValue("percentage", BeEquivalentTo(json.Number("12.5"))))
+
+			// The surcharge is per transfer, and the edge to the consumer is not one.
+			Expect(surcharges(typeCustomer)).To(BeEmpty())
 		})
 
 		It("needs no project, no credentials and no network", func() {
