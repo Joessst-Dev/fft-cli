@@ -48,6 +48,20 @@ same two facilities.`
 // SUPPLIER — and names no facility for the supplier to be. It is not a body that can
 // be sent. An example that does not work is worse than no example, because the user
 // finds out one 400 later and does not know which half to doubt.
+//
+// surchargesPerTransfer is a discriminated oneOf of its own, so it gets the same
+// treatment, one variant per example rather than both stacked into one array: an
+// example is read as a template, and a template that ships two of something invites
+// keeping both. The CUSTOMER body carries none by choice, not because the API
+// forbids it there — InterFacilityConnectionToCustomerForCreation declares the same
+// field. Two variants are enough to show the shape; a third adds nothing new.
+//
+// Both surcharge bodies below were sent to a tenant, read back and deleted, which is
+// the bar for an example here — though that only settles what the API accepts, and it
+// would accept 25000 just as cheerfully. What 250 *means* comes from the schema:
+// amount.value is "the smallest subunit of the given currency, e.g. cents", so this is
+// €2.50, and an example somebody could read as €250 would be the expensive kind of
+// wrong.
 const (
 	connectionSupplierExample = `{
   "type": "SUPPLIER",
@@ -60,7 +74,18 @@ const (
   "fallbackTransitTime": {
     "minTransitDays": 1,
     "maxTransitDays": 3
-  }
+  },
+  "surchargesPerTransfer": [
+    {
+      "type": "ABSOLUTE_SURCHARGE_TYPE",
+      "tenantSurchargeType": "FUEL",
+      "amount": {
+        "currency": "EUR",
+        "value": 250,
+        "decimalPlaces": 2
+      }
+    }
+  ]
 }
 `
 
@@ -75,7 +100,14 @@ const (
   "fallbackTransitTime": {
     "minTransitDays": 1,
     "maxTransitDays": 2
-  }
+  },
+  "surchargesPerTransfer": [
+    {
+      "type": "RELATIVE_SURCHARGE_TYPE",
+      "tenantSurchargeType": "PEAK_SEASON",
+      "percentage": 12.5
+    }
+  ]
 }
 `
 
