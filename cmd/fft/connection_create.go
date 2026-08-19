@@ -56,9 +56,11 @@ same two facilities.`
 // and the surcharge is per *transfer*, which the edge to the consumer is not.
 //
 // Both surcharge bodies below were sent to a tenant, read back and deleted, which is
-// the bar for an example here. It matters most for amount.value: that is the smallest
-// subunit of the currency, so 250 is €2.50, and an example somebody could read as
-// €250 would be the expensive kind of wrong.
+// the bar for an example here — though that only settles what the API accepts, and it
+// would accept 25000 just as cheerfully. What 250 *means* comes from the schema:
+// amount.value is "the smallest subunit of the given currency, e.g. cents", so this is
+// €2.50, and an example somebody could read as €250 would be the expensive kind of
+// wrong.
 const (
 	connectionSupplierExample = `{
   "type": "SUPPLIER",

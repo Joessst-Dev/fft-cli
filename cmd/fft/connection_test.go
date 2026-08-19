@@ -201,7 +201,7 @@ var _ = Describe("fft connection create", func() {
 		// which is two more chances for a hand-written body to be wrong in a way only
 		// the tenant notices. Both of these were sent to a real tenant, read back and
 		// deleted before they were pinned here.
-		It("shows both surcharge variants, across the two types that transfer", func() {
+		It("shows both surcharge variants, and none on the edge that is not a transfer", func() {
 			surcharges := func(typ string) []any {
 				GinkgoHelper()
 
@@ -210,7 +210,13 @@ var _ = Describe("fft connection create", func() {
 				doc, err := decodeDoc([]byte(c.out()), "the example")
 				Expect(err).NotTo(HaveOccurred())
 
-				list, _ := doc["surchargesPerTransfer"].([]any)
+				raw, present := doc["surchargesPerTransfer"]
+				if !present {
+					return nil
+				}
+
+				list, ok := raw.([]any)
+				Expect(ok).To(BeTrue(), "the --type %s example carries surchargesPerTransfer, but not as an array", typ)
 				return list
 			}
 
@@ -221,16 +227,20 @@ var _ = Describe("fft connection create", func() {
 
 			// The amount is in the currency's smallest subunit, so the example says 250
 			// and means €2.50. A float here would be the reading it exists to prevent.
+			//
+			// Equal, not BeEquivalentTo: json.Number is a string underneath, so
+			// BeEquivalentTo converts a quoted "250" into one and passes — and a quoted
+			// value is a body the API rejects, this field being an integer.
 			amount, ok := abs[0].(map[string]any)["amount"].(map[string]any)
 			Expect(ok).To(BeTrue(), "the absolute surcharge carries no amount object")
 			Expect(amount).To(HaveKeyWithValue("currency", "EUR"))
-			Expect(amount["value"]).To(BeEquivalentTo(json.Number("250")))
+			Expect(amount["value"]).To(Equal(json.Number("250")))
 
 			rel := surcharges(typeManagedFacility)
 			Expect(rel).To(HaveLen(1))
 			Expect(rel[0]).To(HaveKeyWithValue("type", "RELATIVE_SURCHARGE_TYPE"))
 			Expect(rel[0]).To(HaveKeyWithValue("tenantSurchargeType", Not(BeEmpty())))
-			Expect(rel[0]).To(HaveKeyWithValue("percentage", BeEquivalentTo(json.Number("12.5"))))
+			Expect(rel[0]).To(HaveKeyWithValue("percentage", Equal(json.Number("12.5"))))
 
 			// The surcharge is per transfer, and the edge to the consumer is not one.
 			Expect(surcharges(typeCustomer)).To(BeEmpty())
