@@ -2372,11 +2372,12 @@ var operations = []Operation{
 		SampleResponse: "{\n  \"clickAndCollect\": {\n    \"hour\": 16,\n    \"minute\": 30\n  },\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"shipFromStore\": {\n    \"hour\": 16,\n    \"minute\": 30\n  },\n  \"version\": 42\n}\n",
 	},
 	{
-		ID:      "getDecisionlog",
-		Method:  "GET",
-		Path:    "/api/routingplans/{routingplanId}/decisionlogs/{routingRun}",
-		Tags:    []string{"Routing Plans (DOMS)"},
-		Summary: "List routing plan decision log",
+		ID:          "getDecisionlog",
+		Method:      "GET",
+		Path:        "/api/routingplans/{routingplanId}/decisionlogs/{routingRun}",
+		Tags:        []string{"Routing Plans (DOMS)"},
+		Summary:     "List routing plan decision log",
+		Description: "Retrieves in-depth information about the standard routing process",
 		Params: []Param{
 			{Name: "routingRun", In: InPath, Type: TypeInteger, Required: true, Description: "ID of the decision log you want to get"},
 			{Name: "routingplanId", In: InPath, Type: TypeString, Required: true, Description: "ID of the routing plan you want to get it's decision log"},
@@ -4043,7 +4044,7 @@ var operations = []Operation{
 		Path:        "/api/routing/decisionlogs",
 		Tags:        []string{"Routing Strategy (DOMS)"},
 		Summary:     "Get routing decision logs",
-		Description: "This part of the API is in Alpha status. For details, see the API release lifecycle documentation.",
+		Description: "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Retrieves in-depth information about the complex routing with combinatorics",
 		Params: []Param{
 			{Name: "orderRef", In: InQuery, Type: TypeString, Description: "All decision logs for given orderRef"},
 			{Name: "processRef", In: InQuery, Type: TypeString, Description: "All decision logs for given processRef"},

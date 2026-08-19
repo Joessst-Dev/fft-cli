@@ -23049,7 +23049,9 @@ paths:
       description: >-
         This part of the API is in Alpha status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Retrieves in-depth information about the complex routing with
+        combinatorics
       operationId: getRoutingDecisionLogs
       parameters:
         - description: All decision logs for given sourcingOptionRef
@@ -24016,7 +24018,7 @@ paths:
         - Routing Plans (DOMS)
   /api/routingplans/{routingplanId}/decisionlogs/{routingRun}:
     get:
-      description: ''
+      description: Retrieves in-depth information about the standard routing process
       operationId: getDecisionlog
       parameters:
         - description: ID of the routing plan you want to get it's decision log
