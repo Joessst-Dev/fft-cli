@@ -235,6 +235,7 @@ var _ = Describe("fft connection create", func() {
 			Expect(ok).To(BeTrue(), "the absolute surcharge carries no amount object")
 			Expect(amount).To(HaveKeyWithValue("currency", "EUR"))
 			Expect(amount["value"]).To(Equal(json.Number("250")))
+			Expect(amount["decimalPlaces"]).To(Equal(json.Number("2")))
 
 			rel := surcharges(typeManagedFacility)
 			Expect(rel).To(HaveLen(1))
