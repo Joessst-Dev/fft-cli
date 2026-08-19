@@ -269,6 +269,13 @@ func lookupConnection(ctx context.Context, c *client.Client, facility, id string
 // VersionedResource` — every field but created, lastModified and version is simply
 // gone — and it flattens the target union down to its discriminator, so the generated
 // target cannot even express the facility it points at. See the note on entityDoc.
+//
+// What it leaves out is a decision, not an oversight. The table answers whether an
+// edge can be used and how long it takes; it does not price it. So fallbackCosts is
+// absent, and so is surchargesPerTransfer — a SURCHARGES column beside no COSTS
+// column would be a summary that picks one half of the money at random. Both are in
+// the document `fft connection get -o json` prints, which is where a question about
+// cost is answered.
 type connectionView struct {
 	ID                string `json:"id"`
 	SourceFacilityRef string `json:"sourceFacilityRef"`

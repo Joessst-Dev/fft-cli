@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -194,6 +195,63 @@ var _ = Describe("fft connection create", func() {
 					"the --type %s example is a body fft would refuse", typ)
 				Expect(docString(doc, "type")).To(Equal(typ))
 			}
+		})
+
+		// surchargesPerTransfer is a discriminated oneOf inside a discriminated oneOf,
+		// which is two more chances for a hand-written body to be wrong in a way only
+		// the tenant notices. Both of these were sent to a real tenant, read back and
+		// deleted before they were pinned here.
+		It("shows both surcharge variants, and none on the edge that is not a transfer", func() {
+			exampleDoc := func(typ string) entityDoc {
+				GinkgoHelper()
+
+				Expect(c.run("connection", "create", "--example", "--type", typ)).To(Equal(exitcode.OK))
+
+				doc, err := decodeDoc([]byte(c.out()), "the example")
+				Expect(err).NotTo(HaveOccurred())
+				return doc
+			}
+
+			surcharges := func(typ string) []any {
+				GinkgoHelper()
+
+				raw, present := exampleDoc(typ)["surchargesPerTransfer"]
+				if !present {
+					return nil
+				}
+
+				list, ok := raw.([]any)
+				Expect(ok).To(BeTrue(), "the --type %s example carries surchargesPerTransfer, but not as an array", typ)
+				return list
+			}
+
+			abs := surcharges(typeSupplier)
+			Expect(abs).To(HaveLen(1))
+			Expect(abs[0]).To(HaveKeyWithValue("type", "ABSOLUTE_SURCHARGE_TYPE"))
+			Expect(abs[0]).To(HaveKeyWithValue("tenantSurchargeType", Not(BeEmpty())))
+
+			// The amount is in the currency's smallest subunit, so the example says 250
+			// and means €2.50. A float here would be the reading it exists to prevent.
+			//
+			// Equal, not BeEquivalentTo: json.Number is a string underneath, so
+			// BeEquivalentTo converts a quoted "250" into one and passes — and a quoted
+			// value is a body the API rejects, this field being an integer.
+			amount, ok := abs[0].(map[string]any)["amount"].(map[string]any)
+			Expect(ok).To(BeTrue(), "the absolute surcharge carries no amount object")
+			Expect(amount).To(HaveKeyWithValue("currency", "EUR"))
+			Expect(amount["value"]).To(Equal(json.Number("250")))
+			Expect(amount["decimalPlaces"]).To(Equal(json.Number("2")))
+
+			rel := surcharges(typeManagedFacility)
+			Expect(rel).To(HaveLen(1))
+			Expect(rel[0]).To(HaveKeyWithValue("type", "RELATIVE_SURCHARGE_TYPE"))
+			Expect(rel[0]).To(HaveKeyWithValue("tenantSurchargeType", Not(BeEmpty())))
+			Expect(rel[0]).To(HaveKeyWithValue("percentage", Equal(json.Number("12.5"))))
+
+			// The CUSTOMER example omits the field by choice, not because the API forbids
+			// it on that edge; asserting on the doc directly (not through the surcharges
+			// helper's absent-or-empty coercion) is what actually pins "carries none".
+			Expect(exampleDoc(typeCustomer)).NotTo(HaveKey("surchargesPerTransfer"))
 		})
 
 		It("needs no project, no credentials and no network", func() {
