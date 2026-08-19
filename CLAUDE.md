@@ -71,3 +71,16 @@ Tag `vX.Y.Z` and push — `.github/workflows/release.yml` runs GoReleaser (cross
 ## Conventions
 
 Go 1.25. Follow the `golang-*` skills. Comments in this codebase explain **why**, not what — match that bar (the existing files are the reference); a comment that restates the code is noise. Commit messages and PRs carry no Claude attribution.
+
+**Nothing that identifies a live tenant leaves the machine.** Checking a change against
+a real tenant is encouraged — it is the bar for a hand-written `--example` body — but
+the tenant's identity is not part of the finding. Base URLs, project ids, usernames,
+emails, and the ids of real facilities, connections and orders stay out of commit
+messages, PR and issue text, code comments and docs. "A pre-production tenant" carries
+exactly the same evidence, and examples use obvious placeholders (`BER-01`,
+`8f14e45f-ceea-467a-9575-25a1b5c8b3a1`) for the same reason.
+
+This repository is public, and the removal is never clean: GitHub keeps the pre-edit
+body of every issue, PR and comment and serves it through the content-edit history, so
+an identifier published by accident cannot be taken back without asking GitHub Support
+to purge it. Getting it right the first time is the whole of the control.
