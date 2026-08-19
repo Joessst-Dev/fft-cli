@@ -202,15 +202,20 @@ var _ = Describe("fft connection create", func() {
 		// the tenant notices. Both of these were sent to a real tenant, read back and
 		// deleted before they were pinned here.
 		It("shows both surcharge variants, and none on the edge that is not a transfer", func() {
-			surcharges := func(typ string) []any {
+			exampleDoc := func(typ string) entityDoc {
 				GinkgoHelper()
 
 				Expect(c.run("connection", "create", "--example", "--type", typ)).To(Equal(exitcode.OK))
 
 				doc, err := decodeDoc([]byte(c.out()), "the example")
 				Expect(err).NotTo(HaveOccurred())
+				return doc
+			}
 
-				raw, present := doc["surchargesPerTransfer"]
+			surcharges := func(typ string) []any {
+				GinkgoHelper()
+
+				raw, present := exampleDoc(typ)["surchargesPerTransfer"]
 				if !present {
 					return nil
 				}
@@ -243,8 +248,10 @@ var _ = Describe("fft connection create", func() {
 			Expect(rel[0]).To(HaveKeyWithValue("tenantSurchargeType", Not(BeEmpty())))
 			Expect(rel[0]).To(HaveKeyWithValue("percentage", Equal(json.Number("12.5"))))
 
-			// The surcharge is per transfer, and the edge to the consumer is not one.
-			Expect(surcharges(typeCustomer)).To(BeEmpty())
+			// The CUSTOMER example omits the field by choice, not because the API forbids
+			// it on that edge; asserting on the doc directly (not through the surcharges
+			// helper's absent-or-empty coercion) is what actually pins "carries none".
+			Expect(exampleDoc(typeCustomer)).NotTo(HaveKey("surchargesPerTransfer"))
 		})
 
 		It("needs no project, no credentials and no network", func() {

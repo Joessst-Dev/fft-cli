@@ -52,8 +52,9 @@ same two facilities.`
 // surchargesPerTransfer is a discriminated oneOf of its own, so it gets the same
 // treatment, one variant per example rather than both stacked into one array: an
 // example is read as a template, and a template that ships two of something invites
-// keeping both. The CUSTOMER body carries none — the field is optional everywhere,
-// and the surcharge is per *transfer*, which the edge to the consumer is not.
+// keeping both. The CUSTOMER body carries none by choice, not because the API
+// forbids it there — InterFacilityConnectionToCustomerForCreation declares the same
+// field. Two variants are enough to show the shape; a third adds nothing new.
 //
 // Both surcharge bodies below were sent to a tenant, read back and deleted, which is
 // the bar for an example here — though that only settles what the API accepts, and it
