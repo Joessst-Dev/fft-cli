@@ -61,6 +61,7 @@ var knownCollections = []string{
 	"permissions",
 	"pickjobs",
 	"pickruns",
+	"pickupservices",
 	"processes",
 	"purchaseorders",
 	"receipts",

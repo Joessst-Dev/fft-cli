@@ -18926,6 +18926,8 @@ paths:
               - SAFETY_STOCK_WRITE
               - AVAILABILITY_THRESHOLDS_READ
               - AVAILABILITY_THRESHOLDS_WRITE
+              - PICKUP_SERVICE_READ
+              - PICKUP_SERVICE_WRITE
             type: string
         - description: The group of the permission to filter by
           in: query
@@ -19893,6 +19895,156 @@ paths:
       summary: Update pick run pick jobs
       tags:
         - Picking (Operations)
+  /api/pickupservices:
+    post:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Creates a new pickupService.
+      operationId: createPickupService
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PickupServiceForCreation'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickupService'
+          description: Successfully created the pickupService.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+      summary: Create a pickupService
+      x-fft-permissions:
+        - PICKUP_SERVICE_WRITE
+      tags:
+        - PickupService (operations)
+      x-badges:
+        - color: red
+          label: ALPHA
+  /api/pickupservices/{id}:
+    get:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Retrieves a single pickupService using its unique identifier.
+      operationId: getPickupServiceById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickupService'
+          description: Successfully retrieved the pickupService.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The requested entity was not found
+      summary: Get a pickupService by its ID
+      x-fft-permissions:
+        - PICKUP_SERVICE_READ
+      tags:
+        - PickupService (operations)
+      x-badges:
+        - color: red
+          label: ALPHA
+    patch:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Updates a single pickupService using its unique identifier.
+      operationId: updatePickupService
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PickupServiceForUpdate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickupService'
+          description: Successfully updated the pickupService.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The requested entity was not found
+      summary: Update a pickupService by its ID
+      x-fft-permissions:
+        - PICKUP_SERVICE_WRITE
+      tags:
+        - PickupService (operations)
+      x-badges:
+        - color: red
+          label: ALPHA
   /api/process:
     get:
       description: Get a process by query parameters such as order or pickJob reference
@@ -41863,6 +42015,11 @@ components:
                 assigned to
               example: ca525716-7208-4a63-a2a6-11274eb37f67-0
               type: string
+            pickupServices:
+              items:
+                $ref: '#/components/schemas/HandoverJobPickupService'
+              maxItems: 100
+              type: array
             processId:
               description: >-
                 Id of the global process related to this entity. For example
@@ -41943,6 +42100,7 @@ components:
             #/components/schemas/UpdateHandoverLineItemRecordableAttributesActionParameter
         - $ref: '#/components/schemas/MoveHandoverJobLineItemsActionParameter'
         - $ref: '#/components/schemas/HandoverJobAddTargetTimeActionParameter'
+        - $ref: '#/components/schemas/HandoverJobModifyPickUpServicesActionParameter'
       title: HandoverJobActionsParameter
       description: HandoverJobActionsParameter
     HandoverJobAddTargetTimeActionEnum:
@@ -42460,6 +42618,33 @@ components:
       type: object
       title: HandoverJobLogCancellationPayload
       description: HandoverJobLogCancellationPayload
+    HandoverJobModifyPickUpServicesActionEnum:
+      enum:
+        - MODIFY_PICKUP_SERVICES
+      type: string
+      title: HandoverJobModifyPickUpServicesActionEnum
+      description: HandoverJobModifyPickUpServicesActionEnum
+    HandoverJobModifyPickUpServicesActionParameter:
+      additionalProperties: false
+      description: Action to update handoverJobs pickup services
+      properties:
+        name:
+          $ref: '#/components/schemas/HandoverJobModifyPickUpServicesActionEnum'
+        pickUpServiceUpdates:
+          items:
+            $ref: '#/components/schemas/PickUpServiceUpdate'
+          maxItems: 100
+          type: array
+        version:
+          description: Version of the entity to be changed
+          minimum: 0
+          type: integer
+      required:
+        - name
+        - version
+        - pickUpServiceUpdates
+      title: HandoverJobModifyPickUpServicesActionParameter
+      type: object
     HandoverJobOrderBy:
       description: STATUS_TARGET_TIME_LAST_MODIFIED_DATE is deprecated
       enum:
@@ -42555,6 +42740,39 @@ components:
         name: HandoverjobPatchActions
       title: HandoverjobPatchActions
       description: HandoverjobPatchActions
+    HandoverJobPickupService:
+      additionalProperties: false
+      properties:
+        descriptionLocalized:
+          $ref: '#/components/schemas/LocaleString'
+        nameLocalized:
+          $ref: '#/components/schemas/LocaleString'
+        applied:
+          description: indicates if the pickup service has been applied
+          example: true
+          type: boolean
+        description:
+          description: Localized description of pickup service
+          example: PickUpService
+          type: string
+        id:
+          description: Identifies the single HandoverJobPickupService of a HandoverJob
+          example: 019febed-b3cd-73c6-a95e-c236af3c4892
+          type: string
+        name:
+          description: Localized name of pickup service
+          example: PickUpService
+          type: string
+        type:
+          description: Type of the pickup service
+          example: SIGNATURE
+          type: string
+      required:
+        - id
+        - type
+        - applied
+      title: HandoverJobPickupService
+      description: HandoverJobPickupService
     HandoverJobRecipientAddressFilter:
       properties:
         companyName:
@@ -52268,6 +52486,13 @@ components:
             cannot be used within fulfillment processes, but it could be useful
             to have the informations carried here.
           type: object
+        fullIdentifier:
+          description: An information to identify the recipient
+          type: string
+        invoiceAddress:
+          $ref: '#/components/schemas/ConsumerAddress'
+        recipientAddress:
+          $ref: '#/components/schemas/ConsumerAddress'
         status:
           $ref: '#/components/schemas/HandoverjobStatus'
       required:
@@ -63141,6 +63366,8 @@ components:
             - SAFETY_STOCK_WRITE
             - AVAILABILITY_THRESHOLDS_READ
             - AVAILABILITY_THRESHOLDS_WRITE
+            - PICKUP_SERVICE_READ
+            - PICKUP_SERVICE_WRITE
           type: string
         operation:
           description: The operation of the permission
@@ -63255,6 +63482,7 @@ components:
             - ZONE
             - SAFETY_STOCK
             - AVAILABILITY_THRESHOLDS
+            - PICKUP_SERVICE
           type: string
       required:
         - operation
@@ -65917,6 +66145,195 @@ components:
         - batch
       type: string
       title: PickRunType
+    PickupService:
+      properties:
+        nameLocalized:
+          allOf:
+            - $ref: '#/components/schemas/LocaleString'
+          description: Localized name of this pickupService
+        descriptionLocalized:
+          allOf:
+            - $ref: '#/components/schemas/LocaleString'
+          description: Localized description of this pickupService
+        active:
+          description: Whether this pickupService is active
+          type: boolean
+        context:
+          description: The contexts in which this pickupService is available
+          items:
+            $ref: '#/components/schemas/PickupServiceContext'
+          type: array
+        created:
+          description: Creation date of this pickupService
+          format: date-time
+          type: string
+        description:
+          description: >-
+            Description of this pickupService, derived from descriptionLocalized
+            for the requested locale
+          type: string
+        id:
+          description: Unique identifier of this pickupService
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        lastModified:
+          description: Last modification date of this pickupService
+          format: date-time
+          type: string
+        name:
+          description: >-
+            Name of this pickupService, derived from nameLocalized for the
+            requested locale
+          type: string
+        type:
+          description: Type of this pickupService
+          enum:
+            - ID_CHECK
+            - SIGNATURE
+          type: string
+        version:
+          description: Version number of this pickupService
+          example: 1
+          type: number
+      required:
+        - id
+        - version
+        - created
+        - lastModified
+        - type
+        - descriptionLocalized
+        - nameLocalized
+        - active
+        - context
+      title: PickupService
+      type: object
+      description: PickupService
+    PickupServiceContext:
+      properties:
+        type:
+          description: Type of this pickupService context
+          enum:
+            - FACILITY_GROUP
+            - FACILITY
+            - TAG_REFERENCE
+          type: string
+        values:
+          description: Values of this pickupService context
+          items:
+            type: string
+          type: array
+      required:
+        - type
+        - values
+      title: PickupServiceContext
+      type: object
+      description: PickupServiceContext
+    PickupServiceContextInput:
+      properties:
+        type:
+          description: Type of this pickupService context
+          enum:
+            - FACILITY_GROUP
+            - FACILITY
+            - TAG_REFERENCE
+          type: string
+        values:
+          description: Values of this pickupService context
+          items:
+            type: string
+          maxItems: 500
+          type: array
+      required:
+        - type
+        - values
+      title: PickupServiceContextInput
+      type: object
+      description: PickupServiceContextInput
+    PickupServiceForCreation:
+      properties:
+        nameLocalized:
+          allOf:
+            - $ref: '#/components/schemas/LocaleString'
+          description: Localized name of this pickupService
+        descriptionLocalized:
+          allOf:
+            - $ref: '#/components/schemas/LocaleString'
+          description: Localized description of this pickupService
+        active:
+          description: Whether this pickupService is active
+          type: boolean
+        context:
+          description: The contexts in which this pickupService is available
+          items:
+            $ref: '#/components/schemas/PickupServiceContextInput'
+          maxItems: 100
+          type: array
+        type:
+          description: Type of this pickupService
+          enum:
+            - ID_CHECK
+            - SIGNATURE
+          type: string
+      required:
+        - type
+        - descriptionLocalized
+        - nameLocalized
+        - active
+        - context
+      title: PickupServiceForCreation
+      type: object
+      description: PickupServiceForCreation
+    PickupServiceForUpdate:
+      properties:
+        nameLocalized:
+          allOf:
+            - $ref: '#/components/schemas/LocaleString'
+          description: Localized name of this pickupService
+        descriptionLocalized:
+          allOf:
+            - $ref: '#/components/schemas/LocaleString'
+          description: Localized description of this pickupService
+        active:
+          description: Whether this pickupService is active
+          type: boolean
+        context:
+          description: The contexts in which this pickupService is available
+          items:
+            $ref: '#/components/schemas/PickupServiceContextInput'
+          maxItems: 100
+          type: array
+        type:
+          description: Type of this pickupService
+          enum:
+            - ID_CHECK
+            - SIGNATURE
+          type: string
+        version:
+          description: Version number of this pickupService
+          example: 1
+          type: number
+      required:
+        - version
+      title: PickupServiceForUpdate
+      type: object
+      description: PickupServiceForUpdate
+    PickUpServiceUpdate:
+      additionalProperties: false
+      properties:
+        applied:
+          description: indicates if pickup service has been applied
+          example: true
+          type: boolean
+        id:
+          description: id of the HandoverJobPickupServices you want to update
+          example: 019fec0c-5736-72fc-8f5d-6f548c7cb323
+          type: string
+      required:
+        - id
+        - applied
+      type: object
+      title: PickUpServiceUpdate
+      description: PickUpServiceUpdate
     PostalCodeValidation:
       properties:
         country:
@@ -71890,6 +72307,8 @@ components:
               - SAFETY_STOCK_WRITE
               - AVAILABILITY_THRESHOLDS_READ
               - AVAILABILITY_THRESHOLDS_WRITE
+              - PICKUP_SERVICE_READ
+              - PICKUP_SERVICE_WRITE
             type: string
           maxItems: 500
           type: array
@@ -72121,6 +72540,8 @@ components:
               - SAFETY_STOCK_WRITE
               - AVAILABILITY_THRESHOLDS_READ
               - AVAILABILITY_THRESHOLDS_WRITE
+              - PICKUP_SERVICE_READ
+              - PICKUP_SERVICE_WRITE
             type: string
           maxItems: 500
           type: array
@@ -72343,6 +72764,8 @@ components:
               - SAFETY_STOCK_WRITE
               - AVAILABILITY_THRESHOLDS_READ
               - AVAILABILITY_THRESHOLDS_WRITE
+              - PICKUP_SERVICE_READ
+              - PICKUP_SERVICE_WRITE
             type: string
           maxItems: 500
           type: array
@@ -72571,6 +72994,8 @@ components:
               - SAFETY_STOCK_WRITE
               - AVAILABILITY_THRESHOLDS_READ
               - AVAILABILITY_THRESHOLDS_WRITE
+              - PICKUP_SERVICE_READ
+              - PICKUP_SERVICE_WRITE
             type: string
           maxItems: 500
           type: array
@@ -89148,6 +89573,8 @@ components:
               - SAFETY_STOCK_WRITE
               - AVAILABILITY_THRESHOLDS_READ
               - AVAILABILITY_THRESHOLDS_WRITE
+              - PICKUP_SERVICE_READ
+              - PICKUP_SERVICE_WRITE
             type: string
           type: array
       required:

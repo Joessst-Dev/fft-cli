@@ -4498,6 +4498,8 @@ const (
 	PermissionKeyPICKJOBWRITE                    PermissionKey = "PICKJOB_WRITE"
 	PermissionKeyPICKRUNREAD                     PermissionKey = "PICKRUN_READ"
 	PermissionKeyPICKRUNWRITE                    PermissionKey = "PICKRUN_WRITE"
+	PermissionKeyPICKUPSERVICEREAD               PermissionKey = "PICKUP_SERVICE_READ"
+	PermissionKeyPICKUPSERVICEWRITE              PermissionKey = "PICKUP_SERVICE_WRITE"
 	PermissionKeyPROCESSLOGREAD                  PermissionKey = "PROCESS_LOG_READ"
 	PermissionKeyPROCESSREAD                     PermissionKey = "PROCESS_READ"
 	PermissionKeyPROCESSREROUTE                  PermissionKey = "PROCESS_REROUTE"
@@ -4766,6 +4768,10 @@ func (e PermissionKey) Valid() bool {
 		return true
 	case PermissionKeyPICKRUNWRITE:
 		return true
+	case PermissionKeyPICKUPSERVICEREAD:
+		return true
+	case PermissionKeyPICKUPSERVICEWRITE:
+		return true
 	case PermissionKeyPROCESSLOGREAD:
 		return true
 	case PermissionKeyPROCESSREAD:
@@ -5011,6 +5017,7 @@ const (
 	PermissionSubGroupPICKJOB1                   PermissionSubGroup = "PICK_JOB"
 	PermissionSubGroupPICKRUN                    PermissionSubGroup = "PICKRUN"
 	PermissionSubGroupPICKRUN1                   PermissionSubGroup = "PICK_RUN"
+	PermissionSubGroupPICKUPSERVICE              PermissionSubGroup = "PICKUP_SERVICE"
 	PermissionSubGroupPROCESS                    PermissionSubGroup = "PROCESS"
 	PermissionSubGroupPROCESSLOGS                PermissionSubGroup = "PROCESS_LOGS"
 	PermissionSubGroupPROMISESCONFIG             PermissionSubGroup = "PROMISES_CONFIG"
@@ -5161,6 +5168,8 @@ func (e PermissionSubGroup) Valid() bool {
 	case PermissionSubGroupPICKRUN:
 		return true
 	case PermissionSubGroupPICKRUN1:
+		return true
+	case PermissionSubGroupPICKUPSERVICE:
 		return true
 	case PermissionSubGroupPROCESS:
 		return true
@@ -6838,6 +6847,8 @@ const (
 	RolePermissionsPICKJOBWRITE                    RolePermissions = "PICKJOB_WRITE"
 	RolePermissionsPICKRUNREAD                     RolePermissions = "PICKRUN_READ"
 	RolePermissionsPICKRUNWRITE                    RolePermissions = "PICKRUN_WRITE"
+	RolePermissionsPICKUPSERVICEREAD               RolePermissions = "PICKUP_SERVICE_READ"
+	RolePermissionsPICKUPSERVICEWRITE              RolePermissions = "PICKUP_SERVICE_WRITE"
 	RolePermissionsPROCESSLOGREAD                  RolePermissions = "PROCESS_LOG_READ"
 	RolePermissionsPROCESSREAD                     RolePermissions = "PROCESS_READ"
 	RolePermissionsPROCESSREROUTE                  RolePermissions = "PROCESS_REROUTE"
@@ -7106,6 +7117,10 @@ func (e RolePermissions) Valid() bool {
 		return true
 	case RolePermissionsPICKRUNWRITE:
 		return true
+	case RolePermissionsPICKUPSERVICEREAD:
+		return true
+	case RolePermissionsPICKUPSERVICEWRITE:
+		return true
 	case RolePermissionsPROCESSLOGREAD:
 		return true
 	case RolePermissionsPROCESSREAD:
@@ -7327,6 +7342,8 @@ const (
 	RoleForCreationPermissionsPICKJOBWRITE                    RoleForCreationPermissions = "PICKJOB_WRITE"
 	RoleForCreationPermissionsPICKRUNREAD                     RoleForCreationPermissions = "PICKRUN_READ"
 	RoleForCreationPermissionsPICKRUNWRITE                    RoleForCreationPermissions = "PICKRUN_WRITE"
+	RoleForCreationPermissionsPICKUPSERVICEREAD               RoleForCreationPermissions = "PICKUP_SERVICE_READ"
+	RoleForCreationPermissionsPICKUPSERVICEWRITE              RoleForCreationPermissions = "PICKUP_SERVICE_WRITE"
 	RoleForCreationPermissionsPROCESSLOGREAD                  RoleForCreationPermissions = "PROCESS_LOG_READ"
 	RoleForCreationPermissionsPROCESSREAD                     RoleForCreationPermissions = "PROCESS_READ"
 	RoleForCreationPermissionsPROCESSREROUTE                  RoleForCreationPermissions = "PROCESS_REROUTE"
@@ -7595,6 +7612,10 @@ func (e RoleForCreationPermissions) Valid() bool {
 		return true
 	case RoleForCreationPermissionsPICKRUNWRITE:
 		return true
+	case RoleForCreationPermissionsPICKUPSERVICEREAD:
+		return true
+	case RoleForCreationPermissionsPICKUPSERVICEWRITE:
+		return true
 	case RoleForCreationPermissionsPROCESSLOGREAD:
 		return true
 	case RoleForCreationPermissionsPROCESSREAD:
@@ -7816,6 +7837,8 @@ const (
 	RoleForPatchPermissionsPICKJOBWRITE                    RoleForPatchPermissions = "PICKJOB_WRITE"
 	RoleForPatchPermissionsPICKRUNREAD                     RoleForPatchPermissions = "PICKRUN_READ"
 	RoleForPatchPermissionsPICKRUNWRITE                    RoleForPatchPermissions = "PICKRUN_WRITE"
+	RoleForPatchPermissionsPICKUPSERVICEREAD               RoleForPatchPermissions = "PICKUP_SERVICE_READ"
+	RoleForPatchPermissionsPICKUPSERVICEWRITE              RoleForPatchPermissions = "PICKUP_SERVICE_WRITE"
 	RoleForPatchPermissionsPROCESSLOGREAD                  RoleForPatchPermissions = "PROCESS_LOG_READ"
 	RoleForPatchPermissionsPROCESSREAD                     RoleForPatchPermissions = "PROCESS_READ"
 	RoleForPatchPermissionsPROCESSREROUTE                  RoleForPatchPermissions = "PROCESS_REROUTE"
@@ -8084,6 +8107,10 @@ func (e RoleForPatchPermissions) Valid() bool {
 		return true
 	case RoleForPatchPermissionsPICKRUNWRITE:
 		return true
+	case RoleForPatchPermissionsPICKUPSERVICEREAD:
+		return true
+	case RoleForPatchPermissionsPICKUPSERVICEWRITE:
+		return true
 	case RoleForPatchPermissionsPROCESSLOGREAD:
 		return true
 	case RoleForPatchPermissionsPROCESSREAD:
@@ -8305,6 +8332,8 @@ const (
 	RoleForUpdatePermissionsPICKJOBWRITE                    RoleForUpdatePermissions = "PICKJOB_WRITE"
 	RoleForUpdatePermissionsPICKRUNREAD                     RoleForUpdatePermissions = "PICKRUN_READ"
 	RoleForUpdatePermissionsPICKRUNWRITE                    RoleForUpdatePermissions = "PICKRUN_WRITE"
+	RoleForUpdatePermissionsPICKUPSERVICEREAD               RoleForUpdatePermissions = "PICKUP_SERVICE_READ"
+	RoleForUpdatePermissionsPICKUPSERVICEWRITE              RoleForUpdatePermissions = "PICKUP_SERVICE_WRITE"
 	RoleForUpdatePermissionsPROCESSLOGREAD                  RoleForUpdatePermissions = "PROCESS_LOG_READ"
 	RoleForUpdatePermissionsPROCESSREAD                     RoleForUpdatePermissions = "PROCESS_READ"
 	RoleForUpdatePermissionsPROCESSREROUTE                  RoleForUpdatePermissions = "PROCESS_REROUTE"
@@ -8572,6 +8601,10 @@ func (e RoleForUpdatePermissions) Valid() bool {
 	case RoleForUpdatePermissionsPICKRUNREAD:
 		return true
 	case RoleForUpdatePermissionsPICKRUNWRITE:
+		return true
+	case RoleForUpdatePermissionsPICKUPSERVICEREAD:
+		return true
+	case RoleForUpdatePermissionsPICKUPSERVICEWRITE:
 		return true
 	case RoleForUpdatePermissionsPROCESSLOGREAD:
 		return true
@@ -11452,6 +11485,8 @@ const (
 	UserRoleWithPermissionsPermissionsPICKJOBWRITE                    UserRoleWithPermissionsPermissions = "PICKJOB_WRITE"
 	UserRoleWithPermissionsPermissionsPICKRUNREAD                     UserRoleWithPermissionsPermissions = "PICKRUN_READ"
 	UserRoleWithPermissionsPermissionsPICKRUNWRITE                    UserRoleWithPermissionsPermissions = "PICKRUN_WRITE"
+	UserRoleWithPermissionsPermissionsPICKUPSERVICEREAD               UserRoleWithPermissionsPermissions = "PICKUP_SERVICE_READ"
+	UserRoleWithPermissionsPermissionsPICKUPSERVICEWRITE              UserRoleWithPermissionsPermissions = "PICKUP_SERVICE_WRITE"
 	UserRoleWithPermissionsPermissionsPROCESSLOGREAD                  UserRoleWithPermissionsPermissions = "PROCESS_LOG_READ"
 	UserRoleWithPermissionsPermissionsPROCESSREAD                     UserRoleWithPermissionsPermissions = "PROCESS_READ"
 	UserRoleWithPermissionsPermissionsPROCESSREROUTE                  UserRoleWithPermissionsPermissions = "PROCESS_REROUTE"
@@ -11719,6 +11754,10 @@ func (e UserRoleWithPermissionsPermissions) Valid() bool {
 	case UserRoleWithPermissionsPermissionsPICKRUNREAD:
 		return true
 	case UserRoleWithPermissionsPermissionsPICKRUNWRITE:
+		return true
+	case UserRoleWithPermissionsPermissionsPICKUPSERVICEREAD:
+		return true
+	case UserRoleWithPermissionsPermissionsPICKUPSERVICEWRITE:
 		return true
 	case UserRoleWithPermissionsPermissionsPROCESSLOGREAD:
 		return true
@@ -12145,6 +12184,8 @@ const (
 	PICKJOBWRITE                    GetPermissionsParamsKey = "PICKJOB_WRITE"
 	PICKRUNREAD                     GetPermissionsParamsKey = "PICKRUN_READ"
 	PICKRUNWRITE                    GetPermissionsParamsKey = "PICKRUN_WRITE"
+	PICKUPSERVICEREAD               GetPermissionsParamsKey = "PICKUP_SERVICE_READ"
+	PICKUPSERVICEWRITE              GetPermissionsParamsKey = "PICKUP_SERVICE_WRITE"
 	PROCESSLOGREAD                  GetPermissionsParamsKey = "PROCESS_LOG_READ"
 	PROCESSREAD                     GetPermissionsParamsKey = "PROCESS_READ"
 	PROCESSREROUTE                  GetPermissionsParamsKey = "PROCESS_REROUTE"
@@ -12412,6 +12453,10 @@ func (e GetPermissionsParamsKey) Valid() bool {
 	case PICKRUNREAD:
 		return true
 	case PICKRUNWRITE:
+		return true
+	case PICKUPSERVICEREAD:
+		return true
+	case PICKUPSERVICEWRITE:
 		return true
 	case PROCESSLOGREAD:
 		return true
