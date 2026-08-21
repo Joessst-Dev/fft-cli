@@ -180,7 +180,12 @@ jobs:
 
       - uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
         with:
-          version: v2.12.2
+          # Must be bumped by hand whenever Go releases a new major: golangci-lint
+          # type-checks against its own vendored go/types, so a release that predates
+          # the `stable` toolchain above dies on the stdlib itself — not on our code —
+          # and every job goes red at once. Dependabot cannot see this: it tracks the
+          # action ref, not this input.
+          version: v2.13.1
 
   vulncheck:
     name: govulncheck
