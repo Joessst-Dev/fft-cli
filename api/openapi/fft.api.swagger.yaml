@@ -40020,6 +40020,10 @@ components:
               - $ref: '#/components/schemas/DateFilter'
           description: Search by custom attributes
           type: object
+        facilityGroupIds:
+          allOf:
+            - $ref: '#/components/schemas/StringListFilter'
+          description: Filter facilities by facility group membership
         id:
           allOf:
             - $ref: '#/components/schemas/StringFilter'
@@ -73917,6 +73921,17 @@ components:
       title: RoutingPlanEarliestPickingStartFilter
       type: object
       description: RoutingPlanEarliestPickingStartFilter
+    RoutingPlanFailedRerouteWebHookEvent:
+      allOf:
+        - $ref: '#/components/schemas/WebHookEvent'
+      properties:
+        payload:
+          $ref: '#/components/schemas/RoutingPlan'
+      required:
+        - payload
+      type: object
+      title: RoutingPlanFailedRerouteWebHookEvent
+      description: RoutingPlanFailedRerouteWebHookEvent
     RoutingPlanFallbackRoutingWebHookEvent:
       allOf:
         - $ref: '#/components/schemas/WebHookEvent'
