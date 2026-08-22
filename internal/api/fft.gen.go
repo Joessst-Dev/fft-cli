@@ -14270,6 +14270,9 @@ type FacilitySearchQuery struct {
 	// CustomAttributes Search by custom attributes
 	CustomAttributes *map[string]FacilitySearchQuery_CustomAttributes_AdditionalProperties `json:"customAttributes,omitempty"`
 
+	// FacilityGroupIds Filter facilities by facility group membership
+	FacilityGroupIds *StringListFilter `json:"facilityGroupIds,omitempty"`
+
 	// Id Search by id
 	Id *StringFilter `json:"id,omitempty"`
 
