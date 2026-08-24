@@ -3,14 +3,14 @@ module github.com/Joessst-Dev/fft-cli
 go 1.25.13
 
 require (
-	cloud.google.com/go/pubsub/v2 v2.6.1
+	cloud.google.com/go/pubsub/v2 v2.6.2
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.10.0
 	github.com/fatih/color v1.19.0
-	github.com/getkin/kin-openapi v0.146.0
+	github.com/getkin/kin-openapi v0.147.0
 	github.com/godbus/dbus/v5 v5.2.2
 	github.com/gofiber/fiber/v2 v2.52.15
 	github.com/google/uuid v1.6.0
-	github.com/oapi-codegen/runtime v1.6.0
+	github.com/oapi-codegen/runtime v1.7.0
 	github.com/onsi/ginkgo/v2 v2.32.1
 	github.com/onsi/gomega v1.42.1
 	github.com/spf13/cobra v1.10.2
@@ -20,7 +20,7 @@ require (
 	golang.org/x/mod v0.40.0
 	golang.org/x/term v0.45.0
 	google.golang.org/api v0.293.0
-	google.golang.org/grpc v1.83.0
+	google.golang.org/grpc v1.83.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
