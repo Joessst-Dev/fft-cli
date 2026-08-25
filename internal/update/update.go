@@ -202,6 +202,11 @@ type Error struct {
 }
 
 // wrap builds an [Error] around a cause, which may be nil.
+//
+// The message is a Sprintf, not an Errorf: %w does not work here, and a call site
+// that reaches for it out of habit gets %!w(...) printed at the user rather than a
+// wrapped error. Pass the cause twice — once to wrap, once as %s — because
+// Unwrap's copy is the one errors.Is walks.
 func wrap(cause error, format string, args ...any) *Error {
 	return &Error{msg: fmt.Sprintf(format, args...), err: cause}
 }
@@ -235,7 +240,7 @@ func (e *Error) Hint() string {
 	if !e.RateLimited() {
 		return ""
 	}
-	return "GitHub's limit is per IP address, shared with every unauthenticated caller on it — gh, another tool's update check, a NAT'd network. Wait for the reset, or set FFT_NO_UPDATE_CHECK=1 to stop the background check from asking at all."
+	return "The limit is shared with every unauthenticated caller on this address — gh, another tool's update check, a NAT'd network — so fft asking once a day is unlikely to be what spent it. Wait for the reset, or set FFT_NO_UPDATE_CHECK=1 to stop the background check from asking at all."
 }
 
 // release is the sliver of GitHub's release payload fft needs.
@@ -294,8 +299,15 @@ func (c *Checker) statusError(res *http.Response) error {
 
 	e.rateLimited = true
 	e.Limit = headerInt(res, "X-RateLimit-Limit")
-	if secs := headerInt(res, "X-RateLimit-Reset"); secs > 0 {
+	switch secs := headerInt(res, "X-RateLimit-Reset"); {
+	case secs > 0:
 		e.Reset = time.Unix(int64(secs), 0)
+	default:
+		// The secondary limit names no reset — it carries Retry-After instead, as a
+		// number of seconds to wait rather than a moment to wait for.
+		if after := headerInt(res, "Retry-After"); after > 0 {
+			e.Reset = c.now().Add(time.Duration(after) * time.Second)
+		}
 	}
 	e.msg = fmt.Sprintf("%s: %s", askOp, c.rateLimitReason(e))
 	return e
@@ -308,7 +320,7 @@ func (c *Checker) statusError(res *http.Response) error {
 func (c *Checker) rateLimitReason(e *Error) string {
 	var details []string
 	if e.Limit > 0 {
-		details = append(details, fmt.Sprintf("%d requests an hour", e.Limit))
+		details = append(details, fmt.Sprintf("%d unauthenticated requests an hour", e.Limit))
 	}
 	if !e.Reset.IsZero() {
 		if in := e.Reset.Sub(c.now()); in > 0 {
@@ -316,7 +328,9 @@ func (c *Checker) rateLimitReason(e *Error) string {
 		}
 	}
 
-	reason := "GitHub's unauthenticated rate limit is exhausted"
+	// True of both limits, and of the one detail that matters either way: the
+	// budget belongs to the address, not to fft.
+	reason := "GitHub is rate limiting this IP address"
 	if len(details) == 0 {
 		return reason
 	}
@@ -341,21 +355,32 @@ func retryPhrase(d time.Duration) string {
 	return fmt.Sprintf("%dh%dm", int(d.Hours()), int(d.Minutes())%60)
 }
 
-// rateLimited reports whether res is GitHub's primary rate limit rather than a
-// refusal of its own: a 403 or 429 with the hour's budget spent. A 403 with
-// requests still remaining is something else, and calling that one a rate limit
-// would be the same mistake in the other direction.
+// rateLimited reports whether GitHub is holding fft off rather than refusing it.
+//
+// The two statuses need different evidence. A 429 is GitHub asking for a slower
+// pace — the secondary limit, which watches how fast requests arrive rather than
+// how many — and this endpoint has no other reason to send one, so it counts on
+// its own; the hourly counter it carries is usually untouched. A 403 is both the
+// primary limit's status and GitHub's plain refusal, and only the spent counter
+// tells those apart. Calling a 403 with requests still in hand a rate limit would
+// be #157's mistake in the other direction.
 func rateLimited(res *http.Response) bool {
 	switch res.StatusCode {
-	case http.StatusForbidden, http.StatusTooManyRequests:
+	case http.StatusTooManyRequests:
+		return true
+	case http.StatusForbidden:
+		return strings.TrimSpace(res.Header.Get("X-RateLimit-Remaining")) == "0"
 	default:
 		return false
 	}
-	return strings.TrimSpace(res.Header.Get("X-RateLimit-Remaining")) == "0"
 }
 
 // headerInt reads one of GitHub's numeric rate-limit headers, or 0 when it is
-// absent or is not a number. Every caller treats 0 as "not said".
+// absent, is not a number, or is negative. Every caller treats 0 as "not said" —
+// which is the whole reason a negative is folded in with the rest: a budget of
+// "-1 requests an hour", or a reset before the epoch, is a header fft has no
+// business repeating at the user, and dropping the clause says less but says only
+// true things.
 func headerInt(res *http.Response, name string) int {
 	n, err := strconv.Atoi(strings.TrimSpace(res.Header.Get(name)))
 	if err != nil || n < 0 {

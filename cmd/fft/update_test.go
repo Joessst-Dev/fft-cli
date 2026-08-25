@@ -685,10 +685,10 @@ var _ = Describe("fft update check", func() {
 		Expect(c.run("update", "check")).To(Equal(exitcode.Unavailable))
 
 		Expect(c.out()).To(BeEmpty())
-		Expect(c.errOut()).To(ContainSubstring("rate limit is exhausted"))
-		Expect(c.errOut()).To(ContainSubstring("60 requests an hour"))
+		Expect(c.errOut()).To(ContainSubstring("rate limiting this IP address"))
+		Expect(c.errOut()).To(ContainSubstring("60 unauthenticated requests an hour"))
 		Expect(c.errOut()).To(ContainSubstring("resets in 43m"))
-		Expect(c.errOut()).To(ContainSubstring("per IP address"))
+		Expect(c.errOut()).To(ContainSubstring("shared with every unauthenticated caller"))
 		Expect(c.errOut()).To(ContainSubstring("FFT_NO_UPDATE_CHECK=1"))
 		Expect(c.errOut()).NotTo(ContainSubstring("Forbidden"))
 	})

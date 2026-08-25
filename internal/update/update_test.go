@@ -285,8 +285,8 @@ var _ = Describe("update.Checker", func() {
 
 				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
 
-				Expect(err).To(MatchError(ContainSubstring("rate limit is exhausted")))
-				Expect(err).To(MatchError(ContainSubstring("60 requests an hour")))
+				Expect(err).To(MatchError(ContainSubstring("rate limiting this IP address")))
+				Expect(err).To(MatchError(ContainSubstring("60 unauthenticated requests an hour")))
 				Expect(err).To(MatchError(ContainSubstring("resets in 43m")))
 				Expect(err).NotTo(MatchError(ContainSubstring("Forbidden")))
 			})
@@ -300,16 +300,44 @@ var _ = Describe("update.Checker", func() {
 				Expect(errors.As(err, &updateErr)).To(BeTrue())
 				Expect(updateErr.RateLimited()).To(BeTrue())
 				Expect(updateErr.Limit).To(Equal(60))
-				Expect(updateErr.Hint()).To(ContainSubstring("per IP address"))
+				Expect(updateErr.Hint()).To(ContainSubstring("shared with every unauthenticated caller"))
 				Expect(updateErr.Hint()).To(ContainSubstring("FFT_NO_UPDATE_CHECK=1"))
 			})
 
-			It("reads a 429 the same way: GitHub uses both for the same refusal", func() {
+			It("reads a 429 the same way: it is the same limit, one status over", func() {
 				gh := fakeGitHub(refusal(http.StatusTooManyRequests, exhausted()))
 
 				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
 
-				Expect(err).To(MatchError(ContainSubstring("rate limit is exhausted")))
+				Expect(err).To(MatchError(ContainSubstring("rate limiting this IP address")))
+			})
+
+			It("takes a 429 at its word, counter or no counter", func() {
+				// The secondary limit — the one that watches the pace of requests
+				// rather than their count — answers 429 with the hourly counter
+				// untouched. Requiring a spent counter here would report it as a bare
+				// "429 Too Many Requests": #157's failure mode, one status over.
+				gh := fakeGitHub(refusal(http.StatusTooManyRequests, map[string]string{
+					"X-RateLimit-Limit":     "60",
+					"X-RateLimit-Remaining": "57",
+					"Retry-After":           "90",
+				}))
+
+				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
+
+				Expect(err).To(MatchError(ContainSubstring("rate limiting this IP address")))
+				Expect(err).To(MatchError(ContainSubstring("resets in 2m")))
+			})
+
+			It("falls back to Retry-After when GitHub named no reset", func() {
+				headers := exhausted()
+				delete(headers, "X-RateLimit-Reset")
+				headers["Retry-After"] = "120"
+				gh := fakeGitHub(refusal(http.StatusForbidden, headers))
+
+				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
+
+				Expect(err).To(MatchError(ContainSubstring("resets in 2m")))
 			})
 
 			It("leaves a 403 with requests still in hand as the refusal it is", func() {
@@ -339,9 +367,9 @@ var _ = Describe("update.Checker", func() {
 
 				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
 
-				Expect(err).To(MatchError(ContainSubstring("rate limit is exhausted")))
+				Expect(err).To(MatchError(ContainSubstring("rate limiting this IP address")))
 				Expect(err).NotTo(MatchError(ContainSubstring("resets")))
-				Expect(err).NotTo(MatchError(ContainSubstring("requests an hour")))
+				Expect(err).NotTo(MatchError(ContainSubstring("unauthenticated requests an hour")))
 			})
 
 			It("drops the countdown when the reset header is not a time", func() {
@@ -351,7 +379,7 @@ var _ = Describe("update.Checker", func() {
 
 				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
 
-				Expect(err).To(MatchError(ContainSubstring("60 requests an hour")))
+				Expect(err).To(MatchError(ContainSubstring("60 unauthenticated requests an hour")))
 				Expect(err).NotTo(MatchError(ContainSubstring("resets")))
 			})
 
@@ -363,6 +391,19 @@ var _ = Describe("update.Checker", func() {
 				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
 
 				Expect(err).To(MatchError(ContainSubstring("resets in under a minute")))
+			})
+
+			It("reports a reset further out than the window itself, rather than hiding it", func() {
+				// Only a local clock that disagrees with GitHub's puts the reset more
+				// than an hour away, since the window *is* an hour. Saying what the
+				// header said beats inventing a number fft finds more plausible.
+				headers := exhausted()
+				headers["X-RateLimit-Reset"] = strconv.FormatInt(now.Add(65*time.Minute).Unix(), 10)
+				gh := fakeGitHub(refusal(http.StatusForbidden, headers))
+
+				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
+
+				Expect(err).To(MatchError(ContainSubstring("resets in 1h5m")))
 			})
 
 			It("stamps the cache, like every other answer that is not one", func() {
