@@ -21557,6 +21557,7 @@ type Stock struct {
 	ReceiptDate *time.Time `json:"receiptDate,omitempty"`
 
 	// Reserved amount of this stock reserved for customer orders
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	Reserved float32 `json:"reserved"`
 
 	// ScannableCodes scannableCodes such as barcodes that identify this stock
