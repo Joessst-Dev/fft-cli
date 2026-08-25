@@ -326,17 +326,19 @@ func (c *Checker) rateLimitReason(e *Error) string {
 // retryPhrase is how long until the limit lifts, at the precision the user can
 // act on: a countdown to the second would be stale by the time it is read.
 func retryPhrase(d time.Duration) string {
-	switch {
-	case d < time.Minute:
+	if d < time.Minute {
 		return "under a minute"
-	case d < time.Hour:
-		return fmt.Sprintf("%dm", int(d.Round(time.Minute).Minutes()))
-	default:
-		// The window is an hour, so this is a clock that disagrees with GitHub's
-		// rather than a real wait. Say what the header said anyway.
-		d = d.Round(time.Minute)
-		return fmt.Sprintf("%dh%dm", int(d.Hours()), int(d.Minutes())%60)
 	}
+	// Rounded once, up front, so the branch below and the number it prints always
+	// agree — a reset at 59m31s must not choose the "%dm" branch on the unrounded
+	// duration and then print a rounded-up "60m".
+	d = d.Round(time.Minute)
+	if d < time.Hour {
+		return fmt.Sprintf("%dm", int(d.Minutes()))
+	}
+	// The window is an hour, so this is a clock that disagrees with GitHub's
+	// rather than a real wait. Say what the header said anyway.
+	return fmt.Sprintf("%dh%dm", int(d.Hours()), int(d.Minutes())%60)
 }
 
 // rateLimited reports whether res is GitHub's primary rate limit rather than a

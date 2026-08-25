@@ -280,9 +280,7 @@ var _ = Describe("the update notice", func() {
 			Entry("404, because there are no releases yet", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusNotFound)
 			})),
-			Entry("403, the unauthenticated rate limit", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-				w.WriteHeader(http.StatusForbidden)
-			})),
+			Entry("403, the unauthenticated rate limit", http.HandlerFunc(rateLimited)),
 			Entry("a body that is not a release", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				_, err := w.Write([]byte(`<html>`))
 				Expect(err).NotTo(HaveOccurred())
