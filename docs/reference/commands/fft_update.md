@@ -21,6 +21,10 @@ FFT_NO_UPDATE_CHECK is set, and when settings.updateCheck is false in
 This command asks now, regardless of all of that, and ignores the once-a-day
 cache.
 
+The release endpoint is unauthenticated, and GitHub allows 60 unauthenticated
+requests an hour per IP address — a budget shared with every other tool on the
+machine. A check GitHub could not answer, that one included, exits 9.
+
 ## Usage
 
 ```

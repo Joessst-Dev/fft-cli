@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -140,6 +141,15 @@ func (c *cli) cached() (update.State, error) {
 func (c *cli) configure(cfg *config.Config) {
 	GinkgoHelper()
 	Expect(config.NewStore(c.configPath).Save(cfg)).To(Succeed())
+}
+
+// rateLimited is GitHub with the hour's unauthenticated budget spent: a 403 whose
+// headers say the refusal is arithmetic rather than permission.
+func rateLimited(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("X-RateLimit-Limit", "60")
+	w.Header().Set("X-RateLimit-Remaining", "0")
+	w.Header().Set("X-RateLimit-Reset", strconv.FormatInt(testNow.Add(43*time.Minute).Unix(), 10))
+	w.WriteHeader(http.StatusForbidden)
 }
 
 // latestRelease is GitHub answering that the newest release is v1.3.0.
@@ -657,9 +667,31 @@ var _ = Describe("fft update check", func() {
 			w.WriteHeader(http.StatusForbidden)
 		})
 
-		Expect(c.run("update", "check")).NotTo(Equal(exitcode.OK))
+		// Unavailable, not General: a script wrapping this needs to tell "GitHub had
+		// no answer, ask later" from "fft is broken". A 403 with requests still in
+		// hand is a refusal of GitHub's own, so the status is still the news.
+		Expect(c.run("update", "check")).To(Equal(exitcode.Unavailable))
 
 		Expect(c.errOut()).To(ContainSubstring("403"))
 		Expect(c.out()).To(BeEmpty())
+	})
+
+	It("explains a rate-limited 403 instead of reporting it as 'Forbidden'", func() {
+		// The report behind #157. The hourly budget belongs to the machine's IP
+		// address and is shared with every other unauthenticated caller on it, so the
+		// message has to say which limit was hit, when it lifts, and whose it is —
+		// "403 Forbidden" sent users looking for a permission fft never needed.
+		c = newCLI()
+		c.fakeGitHub(rateLimited)
+
+		Expect(c.run("update", "check")).To(Equal(exitcode.Unavailable))
+
+		Expect(c.out()).To(BeEmpty())
+		Expect(c.errOut()).To(ContainSubstring("rate limit is exhausted"))
+		Expect(c.errOut()).To(ContainSubstring("60 requests an hour"))
+		Expect(c.errOut()).To(ContainSubstring("resets in 43m"))
+		Expect(c.errOut()).To(ContainSubstring("per IP address"))
+		Expect(c.errOut()).To(ContainSubstring("FFT_NO_UPDATE_CHECK=1"))
+		Expect(c.errOut()).NotTo(ContainSubstring("Forbidden"))
 	})
 })
