@@ -3,15 +3,18 @@ package update_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/testsupport"
 	"github.com/Joessst-Dev/fft-cli/internal/update"
 )
@@ -55,6 +58,31 @@ func releaseJSON(tag string) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 		_, err := w.Write([]byte(`{"tag_name":"` + tag + `","html_url":"https://github.com/Joessst-Dev/fft-cli/releases/tag/` + tag + `"}`))
 		Expect(err).NotTo(HaveOccurred())
+	}
+}
+
+// refusal is GitHub answering status with the given headers — the shape of a
+// rate-limited answer, whose headers are the only thing that distinguishes it
+// from a refusal of any other kind.
+func refusal(status int, headers map[string]string) http.HandlerFunc {
+	return func(w http.ResponseWriter, _ *http.Request) {
+		for name, value := range headers {
+			w.Header().Set(name, value)
+		}
+		w.WriteHeader(status)
+		// GitHub's own body names the IP address the budget belongs to. fft does not
+		// repeat it: the user cannot act on it, and it is not fft's to publish.
+		_, _ = w.Write([]byte(`{"message":"API rate limit exceeded for 203.0.113.4."}`))
+	}
+}
+
+// exhausted are the headers on a 403 whose hour is spent: 60 allowed, none left,
+// and a reset 43 minutes after the moment every spec pretends it is.
+func exhausted() map[string]string {
+	return map[string]string{
+		"X-RateLimit-Limit":     "60",
+		"X-RateLimit-Remaining": "0",
+		"X-RateLimit-Reset":     strconv.FormatInt(now.Add(43*time.Minute).Unix(), 10),
 	}
 }
 
@@ -246,6 +274,191 @@ var _ = Describe("update.Checker", func() {
 			Entry("200 with a body that is not JSON", http.StatusOK, `<html>`),
 			Entry("200 with a release that has no tag", http.StatusOK, `{"html_url":"https://example.com"}`),
 		)
+
+		Describe("the unauthenticated rate limit", func() {
+			// The bug this pins (#157): 403 is the status GitHub answers with when the
+			// hour's budget is spent, and "403 Forbidden" reads as a permission fft
+			// needs and does not have. It is nothing of the kind — the budget belongs
+			// to the IP address, not to fft, and it refills on its own.
+			It("names the limit and when it lifts, instead of 'Forbidden'", func() {
+				gh := fakeGitHub(refusal(http.StatusForbidden, exhausted()))
+
+				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
+
+				Expect(err).To(MatchError(ContainSubstring("rate limiting this IP address")))
+				Expect(err).To(MatchError(ContainSubstring("60 unauthenticated requests an hour")))
+				Expect(err).To(MatchError(ContainSubstring("resets in 43m")))
+				Expect(err).NotTo(MatchError(ContainSubstring("Forbidden")))
+			})
+
+			It("carries the hint that names whose budget it actually is", func() {
+				gh := fakeGitHub(refusal(http.StatusForbidden, exhausted()))
+
+				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
+
+				var updateErr *update.Error
+				Expect(errors.As(err, &updateErr)).To(BeTrue())
+				Expect(updateErr.RateLimited()).To(BeTrue())
+				Expect(updateErr.Limit).To(Equal(60))
+				Expect(updateErr.Hint()).To(ContainSubstring("shared with every unauthenticated caller"))
+				Expect(updateErr.Hint()).To(ContainSubstring("FFT_NO_UPDATE_CHECK=1"))
+			})
+
+			It("reads a 429 the same way: it is the same limit, one status over", func() {
+				gh := fakeGitHub(refusal(http.StatusTooManyRequests, exhausted()))
+
+				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
+
+				Expect(err).To(MatchError(ContainSubstring("rate limiting this IP address")))
+			})
+
+			It("takes a 429 at its word, counter or no counter", func() {
+				// The secondary limit — the one that watches the pace of requests
+				// rather than their count — answers 429 with the hourly counter
+				// untouched. Requiring a spent counter here would report it as a bare
+				// "429 Too Many Requests": #157's failure mode, one status over.
+				gh := fakeGitHub(refusal(http.StatusTooManyRequests, map[string]string{
+					"X-RateLimit-Limit":     "60",
+					"X-RateLimit-Remaining": "57",
+					"Retry-After":           "90",
+				}))
+
+				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
+
+				Expect(err).To(MatchError(ContainSubstring("rate limiting this IP address")))
+				Expect(err).To(MatchError(ContainSubstring("resets in 2m")))
+			})
+
+			It("falls back to Retry-After when GitHub named no reset", func() {
+				headers := exhausted()
+				delete(headers, "X-RateLimit-Reset")
+				headers["Retry-After"] = "120"
+				gh := fakeGitHub(refusal(http.StatusForbidden, headers))
+
+				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
+
+				Expect(err).To(MatchError(ContainSubstring("resets in 2m")))
+			})
+
+			It("leaves a 403 with requests still in hand as the refusal it is", func() {
+				// The mistake in the other direction: GitHub really can say no for a
+				// reason of its own, and calling that a rate limit would send the user
+				// away to wait for a reset that is not coming.
+				gh := fakeGitHub(refusal(http.StatusForbidden, map[string]string{
+					"X-RateLimit-Limit":     "60",
+					"X-RateLimit-Remaining": "57",
+				}))
+
+				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
+
+				Expect(err).To(MatchError(ContainSubstring("403 Forbidden")))
+				Expect(err).NotTo(MatchError(ContainSubstring("rate limit")))
+
+				var updateErr *update.Error
+				Expect(errors.As(err, &updateErr)).To(BeTrue())
+				Expect(updateErr.RateLimited()).To(BeFalse())
+				Expect(updateErr.Hint()).To(BeEmpty())
+			})
+
+			It("invents no reset time when GitHub named none", func() {
+				gh := fakeGitHub(refusal(http.StatusForbidden, map[string]string{
+					"X-RateLimit-Remaining": "0",
+				}))
+
+				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
+
+				Expect(err).To(MatchError(ContainSubstring("rate limiting this IP address")))
+				Expect(err).NotTo(MatchError(ContainSubstring("resets")))
+				Expect(err).NotTo(MatchError(ContainSubstring("unauthenticated requests an hour")))
+			})
+
+			It("drops the countdown when the reset header is not a time", func() {
+				headers := exhausted()
+				headers["X-RateLimit-Reset"] = "soon"
+				gh := fakeGitHub(refusal(http.StatusForbidden, headers))
+
+				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
+
+				Expect(err).To(MatchError(ContainSubstring("60 unauthenticated requests an hour")))
+				Expect(err).NotTo(MatchError(ContainSubstring("resets")))
+			})
+
+			It("says 'under a minute' rather than counting seconds", func() {
+				headers := exhausted()
+				headers["X-RateLimit-Reset"] = strconv.FormatInt(now.Add(20*time.Second).Unix(), 10)
+				gh := fakeGitHub(refusal(http.StatusForbidden, headers))
+
+				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
+
+				Expect(err).To(MatchError(ContainSubstring("resets in under a minute")))
+			})
+
+			It("reports a reset further out than the window itself, rather than hiding it", func() {
+				// Only a local clock that disagrees with GitHub's puts the reset more
+				// than an hour away, since the window *is* an hour. Saying what the
+				// header said beats inventing a number fft finds more plausible.
+				headers := exhausted()
+				headers["X-RateLimit-Reset"] = strconv.FormatInt(now.Add(65*time.Minute).Unix(), 10)
+				gh := fakeGitHub(refusal(http.StatusForbidden, headers))
+
+				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
+
+				Expect(err).To(MatchError(ContainSubstring("resets in 1h5m")))
+			})
+
+			It("stamps the cache, like every other answer that is not one", func() {
+				gh := fakeGitHub(refusal(http.StatusForbidden, exhausted()))
+
+				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
+				Expect(err).To(HaveOccurred())
+
+				Expect(readCache().CheckedAt).To(Equal(now))
+			})
+		})
+
+		Describe("what a failed check exits with", func() {
+			// Exit 9 across the board, because every one of these means the same thing
+			// to whatever is reading it: fft is fine, GitHub had no answer, ask later.
+			// Exit 1 told a script nothing at all.
+			It("is Unavailable for a status GitHub refused with", func() {
+				gh := fakeGitHub(refusal(http.StatusForbidden, exhausted()))
+
+				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
+
+				Expect(exitcode.FromError(err)).To(Equal(exitcode.Unavailable))
+			})
+
+			It("is Unavailable when there is no network at all", func() {
+				_, err := checker("v1.2.1", deadURL()).Refresh(context.Background())
+
+				Expect(exitcode.FromError(err)).To(Equal(exitcode.Unavailable))
+			})
+
+			It("is Unavailable when the answer is not a release", func() {
+				gh := fakeGitHub(func(w http.ResponseWriter, _ *http.Request) {
+					_, err := w.Write([]byte(`<html>`))
+					Expect(err).NotTo(HaveOccurred())
+				})
+
+				_, err := checker("v1.2.1", gh.url).Refresh(context.Background())
+
+				Expect(exitcode.FromError(err)).To(Equal(exitcode.Unavailable))
+			})
+
+			It("is Interrupted when the user pressed Ctrl-C", func() {
+				// The regression guard on Unwrap: exitcode.FromError asks about
+				// context.Canceled before it asks the error for its own code, and a
+				// wrapper that hid the cause would turn every Ctrl-C into an exit 9.
+				gh := fakeGitHub(releaseJSON("v1.3.0"))
+
+				ctx, cancel := context.WithCancel(context.Background())
+				cancel()
+
+				_, err := checker("v1.2.1", gh.url).Refresh(ctx)
+
+				Expect(exitcode.FromError(err)).To(Equal(exitcode.Interrupted))
+			})
+		})
 
 		When("the network is not there", func() {
 			It("fails, and still stamps the cache so that we do not ask again today", func() {
