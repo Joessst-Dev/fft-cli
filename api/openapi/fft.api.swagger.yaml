@@ -47011,9 +47011,6 @@ components:
           description: facility in which the stock is located
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
-        facilityWideReserved:
-          deprecated: true
-          type: number
         id:
           type: string
         lastModified:
@@ -47040,9 +47037,6 @@ components:
           example: 2026-06-17T12:00:00.000Z
           format: date-time
           type: string
-        reserved:
-          description: amount of this stock reserved for customer orders
-          type: number
         scannableCodes:
           description: scannableCodes such as barcodes that identify this stock
           items:
@@ -47104,8 +47098,6 @@ components:
       required:
         - tenantArticleId
         - value
-        - reserved
-        - facilityWideReserved
         - facilityRef
         - facility
         - available
@@ -81563,6 +81555,7 @@ components:
           format: date-time
           type: string
         reserved:
+          deprecated: true
           description: amount of this stock reserved for customer orders
           type: number
         scannableCodes:
@@ -81626,8 +81619,6 @@ components:
       required:
         - tenantArticleId
         - value
-        - reserved
-        - facilityWideReserved
         - facilityRef
         - facility
         - available
@@ -81637,6 +81628,8 @@ components:
         - lastModified
         - traits
         - serializedProperties
+        - reserved
+        - facilityWideReserved
       title: Stock
       type: object
       description: Stock
