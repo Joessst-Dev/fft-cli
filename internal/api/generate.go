@@ -4,8 +4,8 @@
 // Everything in this package with a .gen.go suffix is generated — do not edit it by
 // hand. Two generators write here, and they cover different things:
 //
-//   - fft.gen.go is oapi-codegen's typed client. It is filtered to five tags (see
-//     api/openapi/oapi-codegen.yaml), which is 106 methods of the API's 559
+//   - fft.gen.go is oapi-codegen's typed client. It is filtered to eight tags (see
+//     api/openapi/oapi-codegen.yaml), which is 95 methods of the API's 559
 //     operations.
 //   - opmeta.gen.go is tools/specgen's metadata table, and it covers all 559 —
 //     method, path, parameters (with the per-parameter explode that decides what a

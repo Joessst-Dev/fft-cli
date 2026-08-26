@@ -12,10 +12,11 @@ import (
 //
 // # Why this exists at all
 //
-// The generated client covers five tags: facilities, listings, stocks, health and
-// user management. That is 106 methods out of the API's 559 operations. Tier-2 and
-// Tier-3 commands have to reach the other 453, and they cannot do it through a
-// typed client that does not have them.
+// The generated client covers eight tags: facilities, listings, stocks, health,
+// user management, sourcing options, orders and routing strategy. That is 95
+// methods out of the API's 559 operations. Tier-2 and Tier-3 commands have to
+// reach the other 464, and they cannot do it through a typed client that does not
+// have them.
 //
 // So they build requests from metadata instead: method, path template, parameters,
 // and — the part that is easy to get wrong and impossible to notice — the
