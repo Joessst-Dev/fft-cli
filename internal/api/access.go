@@ -14,8 +14,8 @@ import "net/http"
 // whole list tier of the CLI is built on that. POST /api/facilities creates a
 // facility. The method alone therefore cannot answer the question.
 //
-// Nor can the path: "does it end in /search?" catches 31 of the 43 reads and
-// misses the rest. Nor can the status code: 41 of the mutating POSTs answer 200
+// Nor can the path: "does it end in /search?" catches 34 of the 46 reads and
+// misses the rest. Nor can the status code: 43 of the mutating POSTs answer 200
 // rather than 201, so a "200 means read" heuristic would wave through creates.
 //
 // So a POST is a mutation unless its operationId is in [readPOSTs], and that list
@@ -41,7 +41,7 @@ func (o Operation) Mutates() bool {
 //
 // What earns a place here:
 //
-//   - the 31 search* operations — POST-bodied cursor searches, the read path
+//   - the 34 search* operations — POST-bodied cursor searches, the read path
 //     behind every list command fft has.
 //   - the promise calculators. They compute delivery and collect options; the
 //     docs are explicit that only a partial routing is performed and the

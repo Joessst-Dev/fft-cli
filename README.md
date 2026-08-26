@@ -518,8 +518,8 @@ does not silently disarm prod.
 **Reads keep working, and that includes the searches.** The fulfillmenttools API runs
 its cursor searches over `POST` — `POST /api/facilities/search` is a read — so being
 read-only is *not* the same as refusing to `POST`. Which POST is which cannot be
-guessed from the path (only 31 of the 43 read-POSTs end in `/search`) nor from the
-status code (41 mutating POSTs answer `200`, not `201`), so `fft` carries an explicit,
+guessed from the path (only 34 of the 46 read-POSTs end in `/search`) nor from the
+status code (43 mutating POSTs answer `200`, not `201`), so `fft` carries an explicit,
 hand-curated allowlist of the POSTs that read, and treats every other one as a write.
 `postDeliveryPromise` sits in the same family as the pure delivery calculators and
 reserves stock, so it is blocked; `evaluateRoutingStrategy` is a dry run, so it is not.
