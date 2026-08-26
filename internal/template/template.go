@@ -95,7 +95,39 @@ func Decode(data []byte) (*Template, error) {
 	if t.Body == nil {
 		return nil, fmt.Errorf("the template has no %q", "body")
 	}
+	if err := t.validateParams(); err != nil {
+		return nil, fmt.Errorf("read the template: %w", err)
+	}
 	return &t, nil
+}
+
+// validateParams keeps the one namespace resolve reads unambiguous.
+//
+// A project-scope template arrives via `git clone` — i.e. as untrusted input
+// relative to whoever later runs `fft template render` — so this cannot rely on
+// the save-time checks in cmd/fft's declaredParams: a hand-written file never
+// goes through them. Same rule, enforced again at the actual trust boundary.
+func (t *Template) validateParams() error {
+	body, _ := t.Body.(map[string]any)
+	for name, p := range t.Params {
+		if name == "" {
+			return fmt.Errorf("a parameter needs a name")
+		}
+		for _, r := range name {
+			if r == '.' || r == '\\' {
+				return fmt.Errorf(
+					"parameter %q cannot contain %q, because that is what makes it a path and not a name",
+					name, string(r))
+			}
+		}
+		if _, clash := body[name]; clash && name != p.Path {
+			return fmt.Errorf(
+				"parameter %q is already a top-level field of the body, so it cannot also point at %q "+
+					"without making --set %s= ambiguous",
+				name, p.Path, name)
+		}
+	}
+	return nil
 }
 
 // Encode renders a template for the disk: indented, key-sorted and newline

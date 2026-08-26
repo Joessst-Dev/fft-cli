@@ -134,6 +134,30 @@ func warnProjectMismatch(deps *Deps, saved template.Saved) {
 		"Ids in the body may not resolve there.", saved.Name, saved.Project, active)
 }
 
+// warnShadowing says so when the template just resolved is a project one hiding
+// a personal template of the same name.
+//
+// store.Resolve prefers the project scope silently, on the reasoning that
+// whoever committed the template meant this repository to use it. But a project
+// template arrives via git clone — untrusted input — and a same-named personal
+// template going quietly unused the moment its owner cds into a repository that
+// happens to commit one is exactly the channel a committed template could use to
+// substitute itself for a trusted one. render and show are where that actually
+// matters: they are what puts the body somewhere. list already reports this via
+// its Shadowed list; this is the same check for the two commands a script or an
+// operator actually pipes from.
+func warnShadowing(deps *Deps, store *template.Store, saved template.Saved) {
+	if saved.Scope != template.ScopeProject {
+		return
+	}
+	if hidden, err := store.Exists(saved.Name, template.ScopeUser); err == nil && hidden {
+		deps.Printer.Warnf(
+			"%s resolved to the project template %s, which shadows a user template of the same name. "+
+				"Rename one of them if that project template is not the one you meant.",
+			saved.Name, saved.Path)
+	}
+}
+
 // reportProblems names the files in a template directory fft could not read.
 //
 // One unparseable file must not make the whole command useless, and it must not

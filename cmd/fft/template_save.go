@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -87,6 +89,7 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			body = unwrapShownTemplate(body)
 
 			declared, err := declaredParams(body, params, required)
 			if err != nil {
@@ -96,7 +99,23 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 			if _, carried := body["version"]; carried {
 				delete(body, "version")
 				deps.Printer.Notef(
-					"Dropped the top-level \"version\": replaying a saved version is a guaranteed 409.")
+					"Dropped the top-level \"version\": replaying a saved version is a guaranteed 409. " +
+						"A handful of fulfillmenttools schemas require it instead; re-supply it with " +
+						"--set version=N at render time if this template fails to send with a missing-field error.")
+			}
+
+			if scope.scope() == template.ScopeProject {
+				if paths := credentialLikePaths(body); len(paths) > 0 {
+					ok, err := confirmDestructive(deps, fmt.Sprintf(
+						"%s looks like it may carry a credential in %s. Save it to the committed project scope anyway?",
+						name, quotedNames(paths)))
+					if err != nil {
+						return err
+					}
+					if !ok {
+						return exitcode.UsageError{Err: fmt.Errorf("cancelled")}
+					}
+				}
 			}
 
 			path, err := store.Write(name, scope.scope(), &template.Template{
@@ -238,6 +257,79 @@ func declaredParams(body entityDoc, params, required []string) (map[string]templ
 		return nil, nil
 	}
 	return out, nil
+}
+
+// unwrapShownTemplate recognises the envelope `fft template show -o json`
+// prints and takes the body back out of it.
+//
+// templateShowLong promises that `show -o json` round-trips through
+// `save --file -`. Without this, that pipe would nest the whole shown
+// document — schemaVersion, params, the original body and all — one level
+// deeper as the new template's body, which is not a round trip at all. The
+// identity check is name-shaped rather than a flag, because a template file
+// carries nothing that says "I was printed by show": schemaVersion plus a body
+// is what any template file looks like, on disk or piped from show alike, and
+// a real fulfillmenttools request body has no plausible reason to declare a
+// top-level "schemaVersion" of its own.
+func unwrapShownTemplate(body entityDoc) entityDoc {
+	sv, ok := body["schemaVersion"].(json.Number)
+	if !ok {
+		return body
+	}
+	if n, err := sv.Int64(); err != nil || n <= 0 || n > template.Version {
+		return body
+	}
+	inner, ok := body["body"].(map[string]any)
+	if !ok {
+		return body
+	}
+	return inner
+}
+
+// credentialFieldPatterns are key-name substrings, matched case-insensitively,
+// that a real fulfillmenttools credential-shaped field carries — a password on
+// user creation, a clientSecret or firebaseWebApiKey on SSO/OIDC config, a
+// bearer token, an Authorization header value.
+var credentialFieldPatterns = []string{"password", "secret", "apikey", "token", "authorization"}
+
+// credentialLikePaths lists the dotted paths in body whose key looks like it
+// might hold a credential, so save --local can ask before writing one into a
+// file whose whole purpose is `git add`.
+//
+// It is a name-shaped heuristic, not a value-shaped one: fft cannot tell a real
+// secret from a placeholder, and the point is to put the file in front of the
+// person about to commit it, not to block them.
+func credentialLikePaths(body entityDoc) []string {
+	var out []string
+
+	var walk func(node any, path string)
+	walk = func(node any, path string) {
+		switch n := node.(type) {
+		case map[string]any:
+			for key, v := range n {
+				sub := key
+				if path != "" {
+					sub = path + "." + key
+				}
+				lower := strings.ToLower(key)
+				for _, pattern := range credentialFieldPatterns {
+					if strings.Contains(lower, pattern) {
+						out = append(out, sub)
+						break
+					}
+				}
+				walk(v, sub)
+			}
+		case []any:
+			for i, v := range n {
+				walk(v, fmt.Sprintf("%s.%d", path, i))
+			}
+		}
+	}
+	walk(map[string]any(body), "")
+
+	slices.Sort(out)
+	return out
 }
 
 // validateParamName keeps the one namespace --set reads unambiguous.

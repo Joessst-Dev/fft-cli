@@ -79,6 +79,17 @@ var _ = Describe("the --set path grammar", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(p.String()).To(Equal(`customAttributes.order\.source`))
 		})
+
+		It("refuses a path with an implausible number of segments", func() {
+			raw := strings.Repeat("a.", 100) + "a"
+			_, err := template.ParsePath(raw)
+			Expect(err).To(MatchError(ContainSubstring("more than")))
+		})
+
+		It("refuses an implausibly long path outright", func() {
+			_, err := template.ParsePath(strings.Repeat("a", 5000))
+			Expect(err).To(MatchError(ContainSubstring("characters")))
+		})
 	})
 
 	Describe("applying", func() {

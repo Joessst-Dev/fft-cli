@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -22,6 +23,16 @@ import (
 // typing dotted paths at jq.
 type Path []string
 
+// maxPathLen and maxPathSegments bound a path. A request body a person
+// actually writes by hand never needs either anywhere close to this: they exist
+// so that a committed template — arriving via git clone, i.e. as untrusted
+// input — cannot declare a pathologically deep or long parameter path and make
+// every future render of it burn CPU walking it.
+const (
+	maxPathLen      = 4096
+	maxPathSegments = 64
+)
+
 // ParsePath reads the --set path grammar.
 //
 // Every failure here is a typo the user can see, so each one names the position
@@ -29,6 +40,9 @@ type Path []string
 func ParsePath(raw string) (Path, error) {
 	if raw == "" {
 		return nil, fmt.Errorf("a path cannot be empty")
+	}
+	if len(raw) > maxPathLen {
+		return nil, fmt.Errorf("a path can be at most %d characters, and this one is %d", maxPathLen, len(raw))
 	}
 
 	var (
@@ -53,6 +67,9 @@ func ParsePath(raw string) (Path, error) {
 			if seg.Len() == 0 {
 				return nil, fmt.Errorf("%q has an empty segment at position %d", raw, i+1)
 			}
+			if len(out) == maxPathSegments {
+				return nil, fmt.Errorf("%q has more than %d segments", raw, maxPathSegments)
+			}
 			out = append(out, seg.String())
 			seg.Reset()
 		default:
@@ -65,6 +82,9 @@ func ParsePath(raw string) (Path, error) {
 	}
 	if seg.Len() == 0 {
 		return nil, fmt.Errorf("%q ends in an empty segment", raw)
+	}
+	if len(out) == maxPathSegments {
+		return nil, fmt.Errorf("%q has more than %d segments", raw, maxPathSegments)
 	}
 	return append(out, seg.String()), nil
 }
@@ -111,19 +131,49 @@ func Apply(doc any, path Path, value any) (any, error) {
 	return set(doc, path, value, nil)
 }
 
+// donePath is the path already traversed, threaded through set as a cons list
+// rather than a slice rebuilt at every level.
+//
+// The old `append(append(Path{}, done...), seg)` copied the whole prefix walked
+// so far at every single level, which made a render O(depth²) even though the
+// copy is only ever read back on the rare path that produces an error — with
+// maxPathSegments this is no longer enough to matter on its own, but there is
+// no reason to keep paying for it. Pushing is O(1); [donePath.path] walks the
+// list and materializes a real Path, only when an error actually needs one.
+type donePath struct {
+	seg    string
+	parent *donePath
+}
+
+func (d *donePath) push(seg string) *donePath {
+	return &donePath{seg: seg, parent: d}
+}
+
+// path materializes the segments walked so far, outermost first. A nil
+// receiver — the root, nothing walked yet — is the empty path.
+func (d *donePath) path() Path {
+	var segs []string
+	for p := d; p != nil; p = p.parent {
+		segs = append(segs, p.seg)
+	}
+	slices.Reverse(segs)
+	return Path(segs)
+}
+
+func (d *donePath) String() string { return d.path().String() }
+
 // set walks one segment and recurses. done is the prefix already traversed, and
 // exists only so that an error can name the part of the path that went wrong
 // rather than the whole of it.
-func set(node any, path Path, value any, done Path) (any, error) {
+func set(node any, path Path, value any, done *donePath) (any, error) {
 	if len(path) == 0 {
 		return value, nil
 	}
 	seg, rest := path[0], path[1:]
-	here := append(append(Path{}, done...), seg)
 
 	switch n := node.(type) {
 	case map[string]any:
-		child, err := set(n[seg], rest, value, here)
+		child, err := set(n[seg], rest, value, done.push(seg))
 		if err != nil {
 			return nil, err
 		}
@@ -145,13 +195,13 @@ func set(node any, path Path, value any, done Path) (any, error) {
 		case i == len(n):
 			// Appending at exactly the end is how a caller builds a list up one
 			// --set at a time, which is the only ergonomic way to do it.
-			child, err := set(nil, rest, value, here)
+			child, err := set(nil, rest, value, done.push(seg))
 			if err != nil {
 				return nil, err
 			}
 			return append(n, child), nil
 		default:
-			child, err := set(n[i], rest, value, here)
+			child, err := set(n[i], rest, value, done.push(seg))
 			if err != nil {
 				return nil, err
 			}
@@ -175,7 +225,7 @@ func set(node any, path Path, value any, done Path) (any, error) {
 		// A scalar. Replacing it with a container would delete a field the user
 		// still has, silently, on what is nearly always a typo.
 		return nil, fmt.Errorf("%s is %s, so %s has nowhere to go",
-			done.String(), describe(node), here.String())
+			done.String(), describe(node), done.push(seg).String())
 	}
 }
 

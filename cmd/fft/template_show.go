@@ -41,9 +41,19 @@ func newTemplateShowCmd(deps *Deps) *cobra.Command {
 			}
 
 			warnProjectMismatch(deps, saved)
+			warnShadowing(deps, store, saved)
 
 			if deps.Printer.Format() != output.Table {
-				return deps.Printer.Render(output.Rows{}, saved)
+				// The file's own encoded bytes, not the Go Saved value: Encode already
+				// key-sorts and, critically, never round-trips a json.Number through a
+				// Go struct where -o yaml would quote it and -o json would re-marshal
+				// it. RenderRaw re-indents rather than re-encoding, the same way a read
+				// command avoids re-encoding the API's own document.
+				raw, err := template.Encode(saved.Template)
+				if err != nil {
+					return err
+				}
+				return deps.Printer.RenderRaw(output.Rows{}, raw)
 			}
 
 			writeTemplate(cmd.OutOrStdout(), saved, deps.Printer.Style())
@@ -61,12 +71,16 @@ func writeTemplate(out io.Writer, saved template.Saved, style output.Style) {
 	fmt.Fprintf(out, "%s\n  %s (%s scope)\n  %s\n",
 		label("TEMPLATE"), saved.Name, saved.Scope, style.Faint(saved.Path))
 
-	if saved.Description != "" {
-		fmt.Fprintf(out, "\n%s\n%s\n", label("PURPOSE"), indent(wrap(saved.Description, helpWidth-2), "  "))
+	// Description, OperationID and Project come from the template file, which for
+	// the project scope arrives via git clone — untrusted relative to whoever is
+	// running show to read it before trusting it. output.Sanitize keeps a crafted
+	// file from using a control byte to rewrite or hide what was already printed.
+	if description := output.Sanitize(saved.Description); description != "" {
+		fmt.Fprintf(out, "\n%s\n%s\n", label("PURPOSE"), indent(wrap(description, helpWidth-2), "  "))
 	}
 
-	if saved.OperationID != "" {
-		fmt.Fprintf(out, "\n%s\n  %s", label("OPERATION"), saved.OperationID)
+	if operationID := output.Sanitize(saved.OperationID); operationID != "" {
+		fmt.Fprintf(out, "\n%s\n  %s", label("OPERATION"), operationID)
 		if op, ok := api.LookupOperation(saved.OperationID); ok {
 			fmt.Fprintf(out, "  %s %s", op.Method, op.Path)
 		} else {
@@ -75,8 +89,8 @@ func writeTemplate(out io.Writer, saved template.Saved, style output.Style) {
 		fmt.Fprintln(out)
 	}
 
-	if saved.Project != "" {
-		fmt.Fprintf(out, "\n%s\n  %s\n", label("SAVED UNDER"), saved.Project)
+	if project := output.Sanitize(saved.Project); project != "" {
+		fmt.Fprintf(out, "\n%s\n  %s\n", label("SAVED UNDER"), project)
 	}
 
 	if names := paramNames(saved); len(names) > 0 {
@@ -100,8 +114,8 @@ func writeTemplate(out io.Writer, saved template.Saved, style output.Style) {
 // goes, and whether the template will refuse to render without it.
 func describeTemplateParam(name string, p template.Param, width int, style output.Style) string {
 	var b strings.Builder
-	b.WriteString(style.Bold(name))
-	fmt.Fprintf(&b, "%s  %s", strings.Repeat(" ", width-len(name)), style.Faint(p.Path))
+	b.WriteString(style.Bold(output.Sanitize(name)))
+	fmt.Fprintf(&b, "%s  %s", strings.Repeat(" ", width-len(name)), style.Faint(output.Sanitize(p.Path)))
 
 	switch {
 	case p.Required:
@@ -112,8 +126,8 @@ func describeTemplateParam(name string, p template.Param, width int, style outpu
 		}
 	}
 
-	if p.Description != "" {
-		fmt.Fprintf(&b, "\n    %s", style.Faint(p.Description))
+	if description := output.Sanitize(p.Description); description != "" {
+		fmt.Fprintf(&b, "\n    %s", style.Faint(description))
 	}
 	return b.String()
 }

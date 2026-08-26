@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/prompt"
@@ -38,7 +39,7 @@ command that reads JSON.
 Called with no name on a terminal, it asks which template to render.`
 
 func newTemplateRenderCmd(deps *Deps) *cobra.Command {
-	var sets, setStrings []string
+	var sets setFlags
 
 	cmd := &cobra.Command{
 		Use:               "render [name]",
@@ -62,7 +63,7 @@ func newTemplateRenderCmd(deps *Deps) *cobra.Command {
 				return err
 			}
 
-			overrides, err := parseSets(sets, setStrings)
+			overrides, err := sets.parse()
 			if err != nil {
 				return err
 			}
@@ -76,6 +77,7 @@ func newTemplateRenderCmd(deps *Deps) *cobra.Command {
 			// terminal reads them above the thing they are about.
 			operationSummary(deps, saved)
 			warnProjectMismatch(deps, saved)
+			warnShadowing(deps, store, saved)
 
 			// Not Printer.RenderDocument: that honours -o yaml, and YAML is not
 			// something `--file -` can read. The output of this command is a
@@ -86,38 +88,70 @@ func newTemplateRenderCmd(deps *Deps) *cobra.Command {
 	}
 
 	f := cmd.Flags()
-	f.StringArrayVar(&sets, "set", nil,
+	f.Var(sets.value(false), "set",
 		"Set a parameter or a path: --set email=a@b.de (repeatable)")
-	f.StringArrayVar(&setStrings, "set-string", nil,
+	f.Var(sets.value(true), "set-string",
 		"Set a value as a string, whatever it looks like: --set-string id=12345 (repeatable)")
 
 	return cmd
 }
 
-// parseSets turns the --set and --set-string flags into the overrides to apply,
-// keeping the order they were typed in so that the last one for a path wins.
+// setFlags collects --set and --set-string in the single order pflag actually
+// parses them in.
 //
-// The two flags are read from pflag's own slices rather than merged blindly,
-// because their relative order is what decides which of two settings of one path
-// survives.
-func parseSets(sets, asStrings []string) ([]template.Set, error) {
-	out := make([]template.Set, 0, len(sets)+len(asStrings))
+// template.Render's "last one for a path wins" has to mean the order the two
+// flags were interleaved on the command line, not "every --set-string after
+// every --set" — which is what reading each flag into its own []string and
+// concatenating them would silently give you.
+type setFlags struct {
+	raw []rawSet
+}
 
-	for _, arg := range sets {
-		name, value, err := pair("set", arg)
+type rawSet struct {
+	arg      string
+	asString bool
+}
+
+// value is a pflag.Value that appends into the shared, order-preserving raw
+// slice. --set and --set-string both get one of these, over the same setFlags,
+// so pflag records both flags' occurrences in one real timeline.
+func (s *setFlags) value(asString bool) pflag.Value {
+	return &setFlagValue{sets: s, asString: asString}
+}
+
+type setFlagValue struct {
+	sets     *setFlags
+	asString bool
+}
+
+func (v *setFlagValue) String() string { return "" }
+func (v *setFlagValue) Type() string   { return "stringArray" }
+
+func (v *setFlagValue) Set(arg string) error {
+	v.sets.raw = append(v.sets.raw, rawSet{arg: arg, asString: v.asString})
+	return nil
+}
+
+// parse turns the collected --set/--set-string arguments into overrides, in the
+// order they were typed.
+func (s *setFlags) parse() ([]template.Set, error) {
+	out := make([]template.Set, 0, len(s.raw))
+	for _, r := range s.raw {
+		flag := "set"
+		if r.asString {
+			flag = "set-string"
+		}
+		name, value, err := pair(flag, r.arg)
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, template.Set{Key: name, Value: template.ParseValue(value)})
-	}
-	for _, arg := range asStrings {
-		name, value, err := pair("set-string", arg)
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, template.Set{Key: name, Value: value})
-	}
 
+		var v any = value
+		if !r.asString {
+			v = template.ParseValue(value)
+		}
+		out = append(out, template.Set{Key: name, Value: v})
+	}
 	return out, nil
 }
 

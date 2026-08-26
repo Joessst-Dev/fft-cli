@@ -32,6 +32,13 @@ const (
 // directory is somebody else's file and is left alone.
 const ext = ".json"
 
+// maxTemplateBytes bounds a template file. A project template arrives via git
+// clone — untrusted input — and a real request body never approaches this size;
+// a file that does is already unreadable to the human this design relies on
+// reading it before trusting it, and reading it in full regardless is a cheap
+// way for a committed file to cost every future `list`/`show`/`render` real CPU.
+const maxTemplateBytes = 4 << 20 // 4 MiB
+
 // projectDirName is the repository-local directory templates live under. It sits
 // beside .git rather than inside .claude or .config because it is a project
 // artifact: the point of the scope is that it gets committed.
@@ -351,6 +358,16 @@ func (s *Store) names() []string {
 
 // read loads and decodes one template file.
 func read(path, name string, scope Scope) (Saved, error) {
+	if info, err := os.Stat(path); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return Saved{}, err
+		}
+		return Saved{}, fmt.Errorf("read %s: %w", path, err)
+	} else if info.Size() > maxTemplateBytes {
+		return Saved{}, fmt.Errorf("%s is %d bytes, more than the %d fft reads as a template",
+			path, info.Size(), maxTemplateBytes)
+	}
+
 	// The path is a template name ValidateName has already refused a separator,
 	// a leading dot and everything outside [A-Za-z0-9._-] in, joined onto a
 	// directory fft chose. That is the guard; gosec cannot see it.

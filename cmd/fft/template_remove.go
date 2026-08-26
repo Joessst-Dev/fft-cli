@@ -47,7 +47,8 @@ func newTemplateRemoveCmd(deps *Deps) *cobra.Command {
 				if hint := templateScopeHint(store, name, scope.scope()); hint != nil {
 					return hint
 				}
-				return &template.NotFoundError{Name: name}
+				// Fall through to store.Remove below rather than construct the error
+				// here: it already knows every template name for the "did you mean".
 			}
 
 			path, err := store.Path(name, scope.scope())

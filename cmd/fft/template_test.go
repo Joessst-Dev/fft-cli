@@ -88,6 +88,28 @@ var _ = Describe("fft template", func() {
 			Expect(c.errOut()).To(ContainSubstring("consumer emails"))
 		})
 
+		It("refuses without a terminal to confirm a credential-shaped field bound for the project scope", func() {
+			c.stdin.Reset()
+			c.stdin.WriteString(`{"clientSecret":"shh","facility":"BER-01"}`)
+			Expect(c.run("template", "save", "creds", "--local", "--file", "-")).To(Equal(exitcode.Usage))
+			Expect(userPath("creds")).NotTo(BeAnExistingFile())
+			Expect(filepath.Join(".fft", "templates", "creds.json")).NotTo(BeAnExistingFile())
+		})
+
+		It("writes a credential-shaped field to the project scope with --yes", func() {
+			c.stdin.Reset()
+			c.stdin.WriteString(`{"clientSecret":"shh","facility":"BER-01"}`)
+			Expect(c.run("template", "save", "creds", "--local", "--file", "-", "--yes")).To(Equal(exitcode.OK))
+			Expect(filepath.Join(".fft", "templates", "creds.json")).To(BeAnExistingFile())
+		})
+
+		It("does not scan a template bound for the user's own scope", func() {
+			c.stdin.Reset()
+			c.stdin.WriteString(`{"clientSecret":"shh"}`)
+			Expect(c.run("template", "save", "creds", "--file", "-")).To(Equal(exitcode.OK))
+			Expect(userPath("creds")).To(BeAnExistingFile())
+		})
+
 		It("records the active project so a later render can compare", func() {
 			c.readOnlyProject(false)
 			Expect(save("rush", "--file", "-")).To(Equal(exitcode.OK))
@@ -228,6 +250,18 @@ var _ = Describe("fft template", func() {
 			Expect(c.out()).To(ContainSubstring(`"tenantOrderId": "12345"`))
 		})
 
+		It("lets the later of --set and --set-string win, whichever flag it was", func() {
+			Expect(c.run("template", "render", "rush", "--set", "email=a@b.de",
+				"--set-string", "order.tenantOrderId=00123", "--set", "order.tenantOrderId=456")).
+				To(Equal(exitcode.OK))
+			Expect(c.out()).To(ContainSubstring(`"tenantOrderId": 456`))
+
+			Expect(c.run("template", "render", "rush", "--set", "email=a@b.de",
+				"--set", "order.tenantOrderId=456", "--set-string", "order.tenantOrderId=00123")).
+				To(Equal(exitcode.OK))
+			Expect(c.out()).To(ContainSubstring(`"tenantOrderId": "00123"`))
+		})
+
 		It("creates the objects a path needs on the way", func() {
 			Expect(c.run("template", "render", "rush",
 				"--set", "email=a@b.de", "--set", "order.address.city=Berlin")).To(Equal(exitcode.OK))
@@ -320,13 +354,36 @@ var _ = Describe("fft template", func() {
 			Expect(c.out()).To(ContainSubstring("required"))
 		})
 
+		It("keeps a 19-digit id a number under -o yaml, not a quoted string", func() {
+			Expect(c.run("template", "show", "rush", "-o", "yaml")).To(Equal(exitcode.OK))
+			Expect(c.out()).To(ContainSubstring("id: 9007199254740993"))
+			Expect(c.out()).NotTo(ContainSubstring(`id: "9007199254740993"`))
+			Expect(c.out()).To(ContainSubstring("schemaVersion: 1"))
+		})
+
+		It("warns when a project template shadows a user template of the same name", func() {
+			Expect(save("rush", "--local", "--file", "-")).To(Equal(exitcode.OK))
+
+			Expect(c.run("template", "show", "rush")).To(Equal(exitcode.OK))
+			Expect(c.errOut()).To(ContainSubstring("shadows a user template"))
+		})
+
 		It("round-trips through save under -o json", func() {
 			Expect(c.run("template", "show", "rush", "-o", "json")).To(Equal(exitcode.OK))
+			shown := c.out()
 
-			c.stdin.WriteString(c.out())
+			c.stdin.WriteString(shown)
 			Expect(c.run("template", "save", "copy", "--file", "-")).To(Equal(exitcode.OK))
-			Expect(c.run("template", "show", "copy", "-o", "json")).To(Equal(exitcode.OK))
-			Expect(c.out()).To(ContainSubstring("A-1"))
+
+			// copy carries no --require of its own, so it renders with no --set at
+			// all — which only holds if save unwrapped show's envelope rather than
+			// nesting the whole thing (schemaVersion, params, path and all) as the
+			// new template's body.
+			Expect(c.run("template", "render", "copy")).To(Equal(exitcode.OK))
+			copied := c.out()
+
+			Expect(c.run("template", "render", "rush", "--set", "email=old@example.de")).To(Equal(exitcode.OK))
+			Expect(copied).To(MatchJSON(c.out()))
 		})
 	})
 
@@ -349,6 +406,11 @@ var _ = Describe("fft template", func() {
 			Expect(c.run("template", "remove", "rush", "--local", "--yes")).To(Equal(exitcode.Usage))
 			Expect(c.errOut()).To(ContainSubstring("pass no --local"))
 			Expect(userPath("rush")).To(BeAnExistingFile())
+		})
+
+		It("names the templates that do exist for a typo, same as render does", func() {
+			Expect(c.run("template", "remove", "rsuh", "--yes")).To(Equal(exitcode.NotFound))
+			Expect(c.errOut()).To(ContainSubstring("Saved templates: rush."))
 		})
 	})
 
