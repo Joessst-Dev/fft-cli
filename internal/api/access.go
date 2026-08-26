@@ -49,8 +49,10 @@ func (o Operation) Mutates() bool {
 //   - the routing dry-runs, which return an evaluation result and create no
 //     resource.
 //   - validatePostalCode, getNeedsPacking, downloadMergedDocuments (it merges
-//     documents it is given and hands back the PDF), and createSourcingOptionsRequest
-//     (it reserves no stock).
+//     documents it is given and hands back the PDF), createSourcingOptionsRequest
+//     (it reserves no stock), and createSignaturePdf (renders a pickup-receipt PDF
+//     from a fully self-contained body — no path parameter, no entity reference, no
+//     way to retrieve one later — and hands back the bytes).
 //
 // What is deliberately absent, despite reading like a read — named here so that
 // nobody adds them later on the strength of the name alone:
@@ -70,6 +72,14 @@ func (o Operation) Mutates() bool {
 //     be a mis-assigned permission. But the doctrine of this file is that a POST is a
 //     write until a human can say otherwise, and "the only evidence available says
 //     write" is not otherwise. A read-scoped token would be refused it anyway.
+//   - createHandoverjobSignature reads like createSignaturePdf's twin — same
+//     PDF-render shape, guarded by a _READ permission too — but it binds to a
+//     specific handoverJobId, and Handoverjob carries a documents []PrintableDocument
+//     array plus a DocumentCategory enum with SIGNATURE_DRAFT/SIGNATURE_SIGNED values
+//     built for exactly this pickup-receipt distinction. The spec cannot confirm the
+//     append (the response is opaque PDF bytes, not JSON), so this is the fail-closed
+//     case: unlike createSignaturePdf, there is a plausible resource for it to attach
+//     itself to, and "plausible" is enough to keep it out of this list.
 var readPOSTs = map[string]bool{
 	// Cursor searches.
 	"searchAudit":                    true,
@@ -123,4 +133,5 @@ var readPOSTs = map[string]bool{
 	"getNeedsPacking":              true,
 	"downloadMergedDocuments":      true,
 	"createSourcingOptionsRequest": true,
+	"createSignaturePdf":           true,
 }
