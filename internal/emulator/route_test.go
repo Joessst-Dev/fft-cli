@@ -78,7 +78,9 @@ var knownCollections = []string{
 	"servicejobs",
 	"shipments",
 	"shippinginformation",
-	"signatures",
+	"signatures", // POST-only PDF render with no GET; wants kindStateless, but singletons
+	// requires a SampleResponse and specgen synthesizes none for a binary reply — see
+	// classify's "gives every singleton a sample to answer with" spec.
 	"stacks",
 	"stocks",
 	"stowjobs",
