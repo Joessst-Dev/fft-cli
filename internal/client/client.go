@@ -57,7 +57,7 @@ type Client struct {
 	retry  Retry
 
 	// baseURL and hc are the raw request path ([Client.DoRaw]): the generated client
-	// covers five tags, and the other 451 operations are reached by building the
+	// covers five tags, and the other 453 operations are reached by building the
 	// request from spec metadata and sending it with the same signed, logged,
 	// TLS-floored HTTP client the generated one uses.
 	baseURL string

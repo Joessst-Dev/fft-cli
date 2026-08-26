@@ -1,6 +1,6 @@
 ---
 name: fft
-description: Drive the fft CLI against a fulfillmenttools tenant - read and change orders, facilities, interfacility connections, listings, stock, pick jobs, pack jobs and handovers, manage and activate routing strategies, simulate how an order would be routed, and reach any of the API's 557 operations. Use whenever the user mentions fulfillmenttools, fft, an order, a pickjob or packjob, a handover, a listing, stock levels, a routing strategy, or a facility or warehouse in that system - and whenever they ask why an order was routed or sourced the way it was, or where an order would be fulfilled from.
+description: Drive the fft CLI against a fulfillmenttools tenant - read and change orders, facilities, interfacility connections, listings, stock, pick jobs, pack jobs and handovers, manage and activate routing strategies, simulate how an order would be routed, and reach any of the API's 559 operations. Use whenever the user mentions fulfillmenttools, fft, an order, a pickjob or packjob, a handover, a listing, stock levels, a routing strategy, or a facility or warehouse in that system - and whenever they ask why an order was routed or sourced the way it was, or where an order would be fulfilled from.
 ---
 
 # Driving fft
@@ -186,7 +186,7 @@ Node) that installs and runs straight away. See
 - [references/commands.md](references/commands.md) — the curated commands, and the
   addressing rules that will otherwise bite you (a listing has no id of its own).
 - [references/discovery.md](references/discovery.md) — getting from a word the user said to
-  a command, across all 557 operations.
+  a command, across all 559 operations.
 - [references/recipes.md](references/recipes.md) — whole tasks: set up a project, bulk
   upsert, page a large result, run in CI.
 - [references/troubleshooting.md](references/troubleshooting.md) — every exit code, and what

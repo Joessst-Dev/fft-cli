@@ -24,7 +24,7 @@ const SITE_URL = 'https://joessst-dev.github.io/fft-cli/'
 const SITE_TITLE = 'fft'
 const SOCIAL_TITLE = 'fft — one CLI for the fulfillmenttools API'
 const SOCIAL_DESCRIPTION =
-  "Every one of the fulfillmenttools API's 557 operations in your shell — one binary, one auth path, one output contract. Runs without a tenant."
+  "Every one of the fulfillmenttools API's 559 operations in your shell — one binary, one auth path, one output contract. Runs without a tenant."
 
 export default defineConfig({
   title: SITE_TITLE,

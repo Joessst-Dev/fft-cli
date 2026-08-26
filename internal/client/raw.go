@@ -12,11 +12,11 @@ import (
 	"strings"
 )
 
-// The raw request path: how fft reaches the 451 operations the typed client does
+// The raw request path: how fft reaches the 453 operations the typed client does
 // not have.
 //
 // oapi-codegen is filtered to five tags, so it has a Go method for 106 of the
-// API's 557 operations. Tier-2 and Tier-3 commands reach the rest by building the
+// API's 559 operations. Tier-2 and Tier-3 commands reach the rest by building the
 // request from the spec metadata in internal/api — method, path template,
 // parameters, body.
 //

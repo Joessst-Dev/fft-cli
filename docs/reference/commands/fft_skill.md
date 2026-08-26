@@ -9,7 +9,7 @@ Install the agent skill that teaches an AI to use fft
 Install the fft agent skill, so an AI coding assistant can drive fft.
 
 A skill is documentation an agent loads when it needs it: what the commands are, how
-to discover the API's 557 operations, how to read an exit code — and the things no
+to discover the API's 559 operations, how to read an exit code — and the things no
 --help can teach it, like the fact that stdout is data, that a POST is not
 necessarily a write, and that it must ask before it changes anything.
 

@@ -20,7 +20,7 @@ hand once an hour.
 a flag, and let the CLI obtain and refresh tokens invisibly. stdout is data and nothing
 else, so a pipe is always safe.
 
-**Every one of the 557 API operations is reachable from day one.** Not "the ones someone
+**Every one of the 559 API operations is reachable from day one.** Not "the ones someone
 got around to wrapping" — all of them.
 
 **And you can drive all of them without a tenant.** `fft emulator` is a local, in-memory
@@ -225,7 +225,7 @@ fft completion fish > ~/.config/fish/completions/fft.fish
 
 ## The three-tier command surface
 
-Hand-writing 557 commands does not converge, so coverage comes in three tiers. They
+Hand-writing 559 commands does not converge, so coverage comes in three tiers. They
 share one binary, one auth path, and one output contract.
 
 **Tier 1 — curated.** Hand-written UX for the core entities: typed flags, validation,
@@ -283,7 +283,7 @@ It is the answer to "what am I supposed to POST here?"
 ## Letting an AI agent drive
 
 `fft` ships an **agent skill**: the documentation an AI coding assistant reads before it
-runs `fft` on your behalf. It covers the command surface, how to discover the API's 557
+runs `fft` on your behalf. It covers the command surface, how to discover the API's 559
 operations, and the things no `--help` can teach it — that stdout is data and stderr is
 everything else, that a POST is not necessarily a write, that exit 8 means *some* of a bulk
 write landed, and that it must ask you before it changes anything.

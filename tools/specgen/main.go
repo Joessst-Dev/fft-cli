@@ -2,7 +2,7 @@
 // metadata table that lets fft reach every operation the typed client does not have.
 //
 // oapi-codegen generates a typed client for five tags — 106 methods of the API's
-// 557 operations. The other 451 have no Go method to call, so a command that wants
+// 559 operations. The other 453 have no Go method to call, so a command that wants
 // to reach them has to build the request itself: method, path template, parameters
 // and body. That is what this table carries.
 //

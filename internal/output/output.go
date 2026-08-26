@@ -141,7 +141,7 @@ func (p *Printer) RenderRaw(table Rows, raw []byte) error {
 }
 
 // RenderDocument writes an API answer that fft has no view model for — what the
-// Tier-2 and Tier-3 commands get back from the 451 operations nobody has curated.
+// Tier-2 and Tier-3 commands get back from the 453 operations nobody has curated.
 //
 // There is no table here, and there deliberately is not going to be one: a table
 // needs a hand-written view model, and an operation fft knows nothing about but
