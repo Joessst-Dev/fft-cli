@@ -162,6 +162,19 @@ func (d *donePath) path() Path {
 
 func (d *donePath) String() string { return d.path().String() }
 
+// subject names the part of the document an error is about.
+//
+// At the root nothing has been walked yet, so [donePath.String] is the empty
+// string and the message it builds loses its subject: " has 2 elements, so
+// index 9 is past its end" reads as a rendering bug rather than as the report
+// that the body itself is the array that is too short.
+func (d *donePath) subject() string {
+	if d == nil {
+		return "the body"
+	}
+	return d.String()
+}
+
 // set walks one segment and recurses. done is the prefix already traversed, and
 // exists only so that an error can name the part of the path that went wrong
 // rather than the whole of it.
@@ -184,14 +197,14 @@ func set(node any, path Path, value any, done *donePath) (any, error) {
 		i, ok := index(seg)
 		if !ok {
 			return nil, fmt.Errorf("%s is an array, and %q is not an index into one",
-				done.String(), seg)
+				done.subject(), seg)
 		}
 		switch {
 		case i > len(n):
 			// Padding with nulls would build a body the API rejects with an opaque
 			// 400, which is a worse place to learn about the typo than here.
 			return nil, fmt.Errorf("%s has %d %s, so index %d is past its end",
-				done.String(), len(n), plural(len(n), "element"), i)
+				done.subject(), len(n), plural(len(n), "element"), i)
 		case i == len(n):
 			// Appending at exactly the end is how a caller builds a list up one
 			// --set at a time, which is the only ergonomic way to do it.
@@ -225,7 +238,7 @@ func set(node any, path Path, value any, done *donePath) (any, error) {
 		// A scalar. Replacing it with a container would delete a field the user
 		// still has, silently, on what is nearly always a typo.
 		return nil, fmt.Errorf("%s is %s, so %s has nowhere to go",
-			done.String(), describe(node), done.push(seg).String())
+			done.subject(), describe(node), done.push(seg).String())
 	}
 }
 

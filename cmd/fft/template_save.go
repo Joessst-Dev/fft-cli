@@ -99,6 +99,18 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 				operationID = envelope.OperationID
 			}
 
+			// Before declaredParams, not after: the name-clash check reads the
+			// body's top-level keys, and "version" is not one of them by the time
+			// this template is written. Checking first would refuse
+			// `--param version=order.version` over a field that no longer exists.
+			if _, carried := body["version"]; carried {
+				delete(body, "version")
+				deps.Printer.Notef(
+					"Dropped the top-level \"version\": replaying a saved version is a guaranteed 409. " +
+						"A handful of fulfillmenttools schemas require it instead; re-supply it with " +
+						"--set version=N at render time if this template fails to send with a missing-field error.")
+			}
+
 			declared, err := declaredParams(body, params, required)
 			if err != nil {
 				return err
@@ -110,14 +122,6 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 					}
 				}
 				declared = envelope.Params
-			}
-
-			if _, carried := body["version"]; carried {
-				delete(body, "version")
-				deps.Printer.Notef(
-					"Dropped the top-level \"version\": replaying a saved version is a guaranteed 409. " +
-						"A handful of fulfillmenttools schemas require it instead; re-supply it with " +
-						"--set version=N at render time if this template fails to send with a missing-field error.")
 			}
 
 			if scope.scope() == template.ScopeProject {

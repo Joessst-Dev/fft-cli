@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
+	"github.com/Joessst-Dev/fft-cli/internal/output"
 	"github.com/Joessst-Dev/fft-cli/internal/prompt"
 	"github.com/Joessst-Dev/fft-cli/internal/template"
 )
@@ -194,10 +195,16 @@ func templateName(deps *Deps, store *template.Store, args []string) (string, err
 			"there are no templates yet: run 'fft template save <name> --file body.json' to add one")}
 	}
 
+	// The picker is one entry per line and a human answers it by number, so a
+	// description or operationId out of a project template — which arrives via
+	// git clone — goes through SanitizeCell, not Sanitize: a newline the latter
+	// keeps would let a crafted file write its own numbered entry under a name
+	// nobody saved, and the answer typed is which template gets rendered.
 	deps.Printer.Notef("Templates:")
 	for i, saved := range listing.Found {
 		deps.Printer.Notef("  %d) %s  %s", i+1, saved.Name,
-			field(deps.Printer.Style(), firstNonEmpty(saved.Description, saved.OperationID)))
+			field(deps.Printer.Style(), firstNonEmpty(
+				output.SanitizeCell(saved.Description), output.SanitizeCell(saved.OperationID))))
 	}
 
 	answer, err := deps.Prompt.Validated("Which one", func(s string) error {

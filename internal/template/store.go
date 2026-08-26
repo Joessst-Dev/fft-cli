@@ -57,6 +57,21 @@ const (
 // read back to a colleague is not doing its job anyway.
 const maxNameLen = 64
 
+// windowsReservedStems are the DOS device names Windows still resolves ahead of
+// a real file, in every directory and whatever the extension: on the Windows
+// binaries fft releases, opening templates\nul.json opens the null device, so
+// `fft template save nul` reports success and stores nothing, and every later
+// read of it says the template is not there.
+//
+// A name is refused on every platform rather than only on Windows. A project
+// template is committed and cloned, and one a colleague cannot use is worse than
+// one nobody could save in the first place — where the error names the reason.
+var windowsReservedStems = []string{
+	"con", "prn", "aux", "nul",
+	"com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9",
+	"lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9",
+}
+
 // ValidateName refuses a name that cannot safely become a filename.
 //
 // This is the path-traversal guard, and it runs before any path is joined:
@@ -85,6 +100,15 @@ func ValidateName(name string) error {
 			return exitcode.UsageError{Err: fmt.Errorf(
 				"a template name cannot start with a dot, and %q does", name)}
 		}
+	}
+
+	// Windows reads a device name off the part before the first dot, so nul.json
+	// and nul.backup.json are both the null device — the stem is what has to be
+	// checked, not the whole name.
+	if stem, _, _ := strings.Cut(strings.ToLower(name), "."); slices.Contains(windowsReservedStems, stem) {
+		return exitcode.UsageError{Err: fmt.Errorf(
+			"%q is a reserved device name on Windows, where %q would open the device instead of a file",
+			name, name+ext)}
 	}
 	return nil
 }

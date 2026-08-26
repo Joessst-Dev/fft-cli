@@ -28,3 +28,21 @@ func Sanitize(s string) string {
 		}
 	}, s)
 }
+
+// SanitizeCell is [Sanitize] for a string going into one cell of a table or one
+// entry of a numbered list — anywhere the layout is one record per line.
+//
+// The tab and newline Sanitize keeps are exactly what such a layout cannot
+// survive: a newline in a cell is not multi-line text, it is a row the printer
+// never counted and the reader cannot tell from a real one, which is how a
+// crafted description forges a table row on a stdout that is supposed to be
+// only data. A tab is the column separator itself. Both fold to a space, so the
+// value stays inside the cell it was printed in.
+func SanitizeCell(s string) string {
+	return strings.Map(func(r rune) rune {
+		if r == '\t' || r == '\n' {
+			return ' '
+		}
+		return r
+	}, Sanitize(s))
+}

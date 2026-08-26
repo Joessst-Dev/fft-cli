@@ -21,3 +21,21 @@ var _ = Describe("Sanitize", func() {
 			"a\tb\nc", "a\tb\nc"),
 	)
 })
+
+var _ = Describe("SanitizeCell", func() {
+	DescribeTable("keeping a value inside the one line its cell occupies",
+		func(in, want string) {
+			Expect(output.SanitizeCell(in)).To(Equal(want))
+		},
+		Entry("plain text is untouched", "harmless", "harmless"),
+		Entry("a newline that would forge a second row", "real\nforged", "real forged"),
+		Entry("a tab, which is the column separator itself", "a\tb", "a b"),
+		Entry("the control bytes Sanitize strips are still stripped",
+			"a\rb\x1b[31mc", "ab[31mc"),
+		Entry("a run of newlines stays one cell", "a\n\nb", "a  b"),
+	)
+
+	It("strips rather than folds a carriage return, exactly as Sanitize does", func() {
+		Expect(output.SanitizeCell("a\rb")).To(Equal("ab"))
+	})
+})

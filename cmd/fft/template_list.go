@@ -86,14 +86,16 @@ func templateTable(deps *Deps, rows []templateRow) output.Rows {
 		// OperationID, Project and Description come from the template file, which
 		// for the project scope arrives via git clone — untrusted relative to
 		// whoever is running list to survey what fft can see before trusting any
-		// of it. output.Sanitize keeps a crafted file from using a control byte to
-		// rewrite or hide what was already printed, the same as template_show.go.
+		// of it. SanitizeCell rather than Sanitize because this is a table: the
+		// newline Sanitize deliberately keeps for multi-line text would end the
+		// row here and let a crafted description write the rest of the table
+		// itself, which is the one thing "stdout is data" cannot allow.
 		table.Rows = append(table.Rows, []string{
 			r.Name,
 			string(r.Scope),
-			field(style, output.Sanitize(r.OperationID)),
-			field(style, output.Sanitize(r.Project)),
-			field(style, output.Sanitize(r.Description)),
+			field(style, output.SanitizeCell(r.OperationID)),
+			field(style, output.SanitizeCell(r.Project)),
+			field(style, output.SanitizeCell(r.Description)),
 		})
 	}
 	return table

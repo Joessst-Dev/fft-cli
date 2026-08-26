@@ -179,6 +179,18 @@ var _ = Describe("fft template", func() {
 			Expect(save("rush", "--file", "-", "--param", "qty=order..quantity")).
 				To(Equal(exitcode.Usage))
 		})
+
+		// The name-clash check reads the body's top-level keys, and the version is
+		// dropped on the way in — so it is not a top-level key of the template that
+		// gets written, and a parameter named for it is not ambiguous with anything.
+		It("takes a parameter named for the version it drops, since that field is gone by then", func() {
+			Expect(save("rush", "--file", "-", "--param", "version=order.items.0.quantity")).
+				To(Equal(exitcode.OK))
+
+			Expect(c.run("template", "render", "rush", "--set", "version=5")).To(Equal(exitcode.OK))
+			Expect(c.out()).To(ContainSubstring(`"quantity": 5`))
+			Expect(c.out()).NotTo(ContainSubstring(`"version"`))
+		})
 	})
 
 	Describe("list", func() {
@@ -221,6 +233,21 @@ var _ = Describe("fft template", func() {
 			Expect(c.out()).To(ContainSubstring("harmlessSAFE"))
 			Expect(c.out()).NotTo(ContainSubstring("\r"))
 			Expect(c.out()).NotTo(ContainSubstring("\x1b"))
+		})
+
+		// Sanitize keeps a newline on purpose, so that multi-line text stays
+		// multi-line where show wraps it. A table row is one line by construction,
+		// so here the same newline is a row the printer never counted and the
+		// reader cannot tell from a real one — which is the whole of "stdout is
+		// data". The cell keeps its text; it just cannot leave its line.
+		It("folds a newline in a template's fields into the row it belongs to", func() {
+			Expect(save("rush", "--file", "-",
+				"--description", "Rush order\nzz-forged   user    -   -   Not a real template")).
+				To(Equal(exitcode.OK))
+
+			Expect(c.run("template", "list")).To(Equal(exitcode.OK))
+			Expect(strings.Split(strings.TrimSuffix(c.out(), "\n"), "\n")).To(HaveLen(2))
+			Expect(c.out()).To(ContainSubstring("Rush order zz-forged"))
 		})
 
 		It("reports a file it cannot read and lists the rest", func() {
@@ -359,6 +386,21 @@ var _ = Describe("fft template", func() {
 			Expect(c.errOut()).To(ContainSubstring("1) rush"))
 			Expect(c.out()).To(ContainSubstring("a@b.de"))
 		})
+
+		// The picker is one entry per line and the human answers it by number, so a
+		// description carrying a newline could write an entry of its own under a
+		// name nobody saved — and the number typed decides what gets rendered.
+		It("folds a newline in a description into the picker entry it belongs to", func() {
+			Expect(save("rush", "--file", "-", "--force",
+				"--require", "email=order.consumer.email",
+				"--description", "Rush order\n  2) prod-order  the one you want")).To(Equal(exitcode.OK))
+			c.answer("1")
+
+			Expect(c.run("template", "render", "--set", "email=a@b.de")).To(Equal(exitcode.OK))
+			Expect(c.errOut()).To(ContainSubstring("1) rush"))
+			Expect(c.errOut()).NotTo(MatchRegexp(`(?m)^\s*2\) `))
+			Expect(c.out()).To(ContainSubstring("a@b.de"))
+		})
 	})
 
 	Describe("show", func() {
@@ -381,6 +423,18 @@ var _ = Describe("fft template", func() {
 			Expect(c.out()).To(ContainSubstring("id: 9007199254740993"))
 			Expect(c.out()).NotTo(ContainSubstring(`id: "9007199254740993"`))
 			Expect(c.out()).To(ContainSubstring("schemaVersion: 1"))
+		})
+
+		// The column is padded to a width, and the width has to be measured on the
+		// string that is actually printed: len() counts the two bytes of "ö" twice
+		// over, so a multi-byte name pads every other row one column too far.
+		It("aligns the parameter column on what prints, not on the bytes of a multi-byte name", func() {
+			Expect(os.WriteFile(userPath("uml"), []byte(
+				`{"schemaVersion":1,"body":{"order":{}},"params":{
+				   "größe":{"path":"order.size"},"qty":{"path":"order.qty"}}}`), 0o600)).To(Succeed())
+
+			Expect(c.run("template", "show", "uml")).To(Equal(exitcode.OK))
+			Expect(c.out()).To(ContainSubstring("  größe  order.size\n  qty    order.qty\n"))
 		})
 
 		It("warns when a project template shadows a user template of the same name", func() {

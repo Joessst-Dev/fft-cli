@@ -126,6 +126,18 @@ func (t *Template) validateParams() error {
 					"without making --set %s= ambiguous",
 				name, p.Path, name)
 		}
+		// The contradiction --require already refuses at save time. [Missing]
+		// treats a defaulted parameter as satisfied, so a hand-written file
+		// declaring both gets a parameter that is required of nobody: the default
+		// is sent, and the "required" the reader of that file is relying on never
+		// fires. The condition is [Missing]'s own, so what is refused here is
+		// exactly what would otherwise pass silently.
+		if p.Required && p.Default != nil {
+			return fmt.Errorf(
+				"parameter %q is required and also carries a default, so nothing would ever ask for it: "+
+					"drop one of the two",
+				name)
+		}
 	}
 	return nil
 }

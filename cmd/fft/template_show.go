@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/spf13/cobra"
 
@@ -96,9 +97,13 @@ func writeTemplate(out io.Writer, saved template.Saved, style output.Style) {
 	if names := paramNames(saved); len(names) > 0 {
 		fmt.Fprintf(out, "\n%s\n", label("PARAMETERS"))
 
+		// Measured on the string that is actually printed, in runes: len(name)
+		// counts the bytes of a multi-byte rune twice over and counts the control
+		// bytes SanitizeCell is about to drop, either of which pads the column
+		// against characters the terminal never draws and skews every row.
 		width := 0
 		for _, name := range names {
-			width = max(width, len(name))
+			width = max(width, utf8.RuneCountInString(output.SanitizeCell(name)))
 		}
 		for _, name := range names {
 			fmt.Fprintf(out, "  %s\n", describeTemplateParam(name, saved.Params[name], width, style))
@@ -114,8 +119,15 @@ func writeTemplate(out io.Writer, saved template.Saved, style output.Style) {
 // goes, and whether the template will refuse to render without it.
 func describeTemplateParam(name string, p template.Param, width int, style output.Style) string {
 	var b strings.Builder
-	b.WriteString(style.Bold(output.Sanitize(name)))
-	fmt.Fprintf(&b, "%s  %s", strings.Repeat(" ", width-len(name)), style.Faint(output.Sanitize(p.Path)))
+
+	// Name and path are the two aligned columns of this block, so they are cells:
+	// a newline in either — a hand-written template declares its own parameter
+	// names, and Decode only refuses a dot and a backslash in one — would break
+	// the alignment out of the block entirely.
+	safe := output.SanitizeCell(name)
+	b.WriteString(style.Bold(safe))
+	pad := max(0, width-utf8.RuneCountInString(safe))
+	fmt.Fprintf(&b, "%s  %s", strings.Repeat(" ", pad), style.Faint(output.SanitizeCell(p.Path)))
 
 	switch {
 	case p.Required:

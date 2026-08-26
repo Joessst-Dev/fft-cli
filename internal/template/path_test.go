@@ -143,6 +143,27 @@ var _ = Describe("the --set path grammar", func() {
 			_, err := apply(decode(`{"name":"BER-01"}`), "name.first", "x")
 			Expect(err).To(MatchError(ContainSubstring("name is a string")))
 		})
+
+		// Nothing has been walked at the root, so the traversed prefix is the empty
+		// path — which as a subject reads as a rendering bug ("  has 2 elements")
+		// rather than as a report about the body. Matched exactly, so that the
+		// missing word and the double space it leaves behind both fail.
+		Describe("when the failure is at the root of the document", func() {
+			It("names the body as the array that is too short", func() {
+				_, err := apply(decode(`["a","b"]`), "9", "x")
+				Expect(err).To(MatchError("the body has 2 elements, so index 9 is past its end"))
+			})
+
+			It("names the body as the array a key cannot index", func() {
+				_, err := apply(decode(`[]`), "first", "x")
+				Expect(err).To(MatchError(`the body is an array, and "first" is not an index into one`))
+			})
+
+			It("names the body as the scalar the path has nowhere to go inside", func() {
+				_, err := apply(decode(`"BER-01"`), "a", "x")
+				Expect(err).To(MatchError("the body is a string, so a has nowhere to go"))
+			})
+		})
 	})
 
 	Describe("parsing a value", func() {

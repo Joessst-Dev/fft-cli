@@ -66,6 +66,27 @@ var _ = Describe("the template store", func() {
 			}
 		})
 
+		// Windows resolves a device name ahead of a file in every directory, so
+		// templates\nul.json is the null device: the save reports success and
+		// stores nothing. Refused on every platform, because a project template is
+		// committed and cloned onto machines this one is not.
+		It("refuses a Windows device name, whatever the case and whatever follows the dot", func() {
+			for _, name := range []string{
+				"nul", "NUL", "Nul", "con", "CON", "aux", "prn",
+				"com1", "COM9", "lpt1", "LPT9", "nul.backup", "CON.json",
+			} {
+				err := template.ValidateName(name)
+				Expect(err).To(HaveOccurred(), "expected %q to be refused", name)
+				Expect(exitcode.FromError(err)).To(Equal(exitcode.Usage))
+			}
+		})
+
+		It("still accepts a name that merely begins with a device name", func() {
+			for _, name := range []string{"console", "com10", "com0", "nullish", "aux-order", "prnt"} {
+				Expect(template.ValidateName(name)).To(Succeed(), "expected %q to be accepted", name)
+			}
+		})
+
 		It("never joins a refused name onto a path", func() {
 			_, err := store.Path("../../escape", template.ScopeUser)
 			Expect(err).To(HaveOccurred())
