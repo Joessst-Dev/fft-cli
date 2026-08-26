@@ -190,6 +190,28 @@ fft stock actions --file action.json
   overwritten. If the user is describing a real-world event, this is usually the endpoint.
 - `stock upsert` is bulk and chunked; exit 8 means some items landed.
 
+## Templates
+
+A saved request body with parameters. `render` prints the finished body on stdout, so it
+composes with any command that takes `--file`:
+
+```sh
+fft template save rush-order --file body.json --require email=order.consumer.email
+fft template list
+fft template show rush-order
+fft template render rush-order --set email=a@b.de | fft order create --file -
+fft template remove rush-order
+```
+
+- Rendering makes **no request**: no project, no credentials, no network, and a read-only
+  project cannot refuse it. The command receiving the body is still gated as it was.
+- `--set` takes a declared parameter or a path (`--set order.items.0.quantity=3`). An id
+  made only of digits needs `--set-string`, or it goes out as a number.
+- Saving strips a top-level `version`, because replaying a stale one is a guaranteed 409.
+- `--local` writes `./.fft/templates`, which the repository commits. Read one before you
+  commit it: a body captured from real work carries real ids and consumer emails.
+- Full rules in [templates.md](./templates.md).
+
 ## Paging
 
 Every list and search takes the same flags:

@@ -380,6 +380,7 @@ func newRootCmd(deps *Deps) *cobra.Command {
 		newPingCmd(deps),
 		newAPICmd(deps),
 		newSkillCmd(deps),
+		newTemplateCmd(deps),
 		newUpdateCmd(deps),
 		newComponentCmd(deps),
 		newGenDocsCmd(deps),

@@ -189,6 +189,9 @@ NAME        BASE URL                                        EMAIL               
 ### Where things are kept
 
 - **Secrets** (password, refresh token, ID token) → your **OS keychain**, one entry each.
+- **Templates** (saved request bodies) → `~/.local/share/fft/templates`, mode `0600`, or
+  `./.fft/templates` for the ones a repository commits. See
+  [Request templates](#request-templates).
 - **Everything else** (name, base URL, email, active project) → `~/.config/fft/config.yaml`,
   mode `0600`. Plain YAML; safe to read, edit, and commit to a dotfiles repo — it contains
   no secrets. One caveat if you sync it: `settings.noKeyring` below is not a secret but it
@@ -277,6 +280,37 @@ fft stock create --file stock.json
 
 This works identically across all three tiers — `fft api addPickJob --example` too.
 It is the answer to "what am I supposed to POST here?"
+
+---
+
+## Request templates
+
+A body you send often is worth keeping. `fft template` saves one as a JSON file and fills
+in the parts that change:
+
+```sh
+fft template save rush-order --file body.json --require email=order.consumer.email
+fft template render rush-order --set email=a@b.de | fft order create --file -
+```
+
+Rendering makes **no request**: no project, no credentials, no network, and a read-only
+project cannot refuse it. What it prints is a body, and the command on the other side of
+the pipe is gated exactly as it always was.
+
+- `--set` takes a declared parameter or a path into the body
+  (`--set order.orderLineItems.0.quantity=3`). One index past the end of an array appends;
+  further past it is a usage error rather than a body padded with nulls. An id made only of
+  digits needs `--set-string`, or it goes out as a number.
+- Saving strips a top-level `version` — replaying a stale one is a guaranteed 409.
+- `--local` writes `./.fft/templates`, which the repository commits and the whole team
+  gets; without it templates are yours alone under `$XDG_DATA_HOME/fft/templates`. A
+  project template of the same name wins.
+- A template records the project it was saved under and warns on stderr when you render it
+  under another one. Ids do not cross tenants.
+
+**Read a project template before you commit it.** A body captured from real work carries
+real facility ids, order ids and consumer emails, and git history is not something you can
+quietly edit later.
 
 ---
 

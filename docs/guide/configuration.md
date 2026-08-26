@@ -65,6 +65,9 @@ NAME        BASE URL                                        EMAIL               
 ## Where things are kept
 
 - **Secrets** (password, refresh token, ID token) → your **OS keychain**, one entry each.
+- **Templates** (saved request bodies) → `~/.local/share/fft/templates`, mode `0600`, or
+  `./.fft/templates` for the ones a repository commits. See
+  [Request templates](https://github.com/Joessst-Dev/fft-cli/blob/main/README.md#request-templates).
 - **Everything else** (name, base URL, email, active project) → `~/.config/fft/config.yaml`,
   mode `0600`. Plain YAML; safe to read, edit, and commit to a dotfiles repo — it contains
   no secrets. One caveat if you sync it: `settings.noKeyring` below is not a secret but it

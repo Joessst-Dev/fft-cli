@@ -64,6 +64,17 @@ var commandsWithoutOperation = map[string]string{
 	"fft skill install": "copies the embedded skill onto the local disk; no network",
 	"fft skill show":    "prints the embedded skill; no network",
 
+	// A template is a file on this machine, not an entity in the tenant. None of
+	// these builds a request — which is also why `save` is allowed on a read-only
+	// project: the local disk is not the tenant, exactly as it is not for
+	// `fft project add`. What `render` prints is gated where it is sent, by the
+	// command that receives it.
+	"fft template list":   "reads the local template directory; no network",
+	"fft template show":   "reads one local template file; no network",
+	"fft template render": "renders a saved body to stdout; makes no request",
+	"fft template save":   "writes a local template file; no network",
+	"fft template remove": "deletes a local template file; no network",
+
 	"fft update check": "asks GitHub for the latest release",
 
 	// Renders the command tree to Markdown for the docs site. Builds a tree and
