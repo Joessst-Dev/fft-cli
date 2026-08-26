@@ -12,11 +12,11 @@ import (
 	"strings"
 )
 
-// The raw request path: how fft reaches the 451 operations the typed client does
+// The raw request path: how fft reaches the 464 operations the typed client does
 // not have.
 //
-// oapi-codegen is filtered to five tags, so it has a Go method for 106 of the
-// API's 557 operations. Tier-2 and Tier-3 commands reach the rest by building the
+// oapi-codegen is filtered to eight tags, so it has a Go method for 95 of the
+// API's 559 operations. Tier-2 and Tier-3 commands reach the rest by building the
 // request from the spec metadata in internal/api — method, path template,
 // parameters, body.
 //
@@ -45,7 +45,7 @@ type QueryParam struct {
 	//
 	// The comma really does go over the wire percent-encoded: the values become one
 	// string, and url.Values.Encode escapes the separator along with everything else.
-	// It is what oapi-codegen's runtime already sends for the five tags it covers, and
+	// It is what oapi-codegen's runtime already sends for the eight tags it covers, and
 	// it was confirmed against the live tenant on 2026-07-13 — getStockSummaries
 	// filtered by facilityStatus=ONLINE%2COFFLINE answers 384,279 of 383,484 rows,
 	// which is the union of the two statuses and emphatically not the zero an

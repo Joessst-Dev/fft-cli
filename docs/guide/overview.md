@@ -185,7 +185,7 @@ Node) that installs and runs straight away. See
 - [references/commands.md](./commands.md) — the curated commands, and the
   addressing rules that will otherwise bite you (a listing has no id of its own).
 - [references/discovery.md](./discovery.md) — getting from a word the user said to
-  a command, across all 557 operations.
+  a command, across all 559 operations.
 - [references/recipes.md](./recipes.md) — whole tasks: set up a project, bulk
   upsert, page a large result, run in CI.
 - [references/troubleshooting.md](./troubleshooting.md) — every exit code, and what
