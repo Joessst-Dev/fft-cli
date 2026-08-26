@@ -47,8 +47,13 @@ func newTemplateRemoveCmd(deps *Deps) *cobra.Command {
 				if hint := templateScopeHint(store, name, scope.scope()); hint != nil {
 					return hint
 				}
-				// Fall through to store.Remove below rather than construct the error
-				// here: it already knows every template name for the "did you mean".
+				// store.Remove below builds the NotFoundError, since it already knows
+				// every template name for the "did you mean" — but return straight to
+				// it rather than falling into the confirmation prompt further down,
+				// which would ask to delete a file that was never there and mask the
+				// not-found exit code behind a "no terminal to confirm" one instead.
+				_, err := store.Remove(name, scope.scope())
+				return err
 			}
 
 			path, err := store.Path(name, scope.scope())

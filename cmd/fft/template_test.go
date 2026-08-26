@@ -125,6 +125,18 @@ var _ = Describe("fft template", func() {
 			Expect(c.out()).To(ContainSubstring(`"operationId": "addFacility"`))
 		})
 
+		It("carries the operationId through show's round trip too", func() {
+			Expect(c.run("template", "save", "fac", "--from", "addFacility")).To(Equal(exitcode.OK))
+			Expect(c.run("template", "show", "fac", "-o", "json")).To(Equal(exitcode.OK))
+			shown := c.out()
+
+			c.stdin.WriteString(shown)
+			Expect(c.run("template", "save", "copy", "--file", "-")).To(Equal(exitcode.OK))
+
+			Expect(c.run("template", "show", "copy", "-o", "json")).To(Equal(exitcode.OK))
+			Expect(c.out()).To(ContainSubstring(`"operationId": "addFacility"`))
+		})
+
 		It("refuses a body it was never given", func() {
 			Expect(c.run("template", "save", "rush")).To(Equal(exitcode.Usage))
 			Expect(c.errOut()).To(ContainSubstring("--file, --data or --from"))
@@ -199,6 +211,16 @@ var _ = Describe("fft template", func() {
 			Expect(c.out()).To(ContainSubstring("Ours"))
 			Expect(c.out()).NotTo(ContainSubstring("Mine"))
 			Expect(c.errOut()).To(ContainSubstring(`Hidden by a project template of the same name: "rush"`))
+		})
+
+		It("strips a control byte out of a template file's fields before printing them", func() {
+			Expect(save("rush", "--file", "-", "--description", "harmless\rSAFE\x1b[31m")).
+				To(Equal(exitcode.OK))
+
+			Expect(c.run("template", "list")).To(Equal(exitcode.OK))
+			Expect(c.out()).To(ContainSubstring("harmlessSAFE"))
+			Expect(c.out()).NotTo(ContainSubstring("\r"))
+			Expect(c.out()).NotTo(ContainSubstring("\x1b"))
 		})
 
 		It("reports a file it cannot read and lists the rest", func() {
@@ -368,22 +390,42 @@ var _ = Describe("fft template", func() {
 			Expect(c.errOut()).To(ContainSubstring("shadows a user template"))
 		})
 
-		It("round-trips through save under -o json", func() {
+		It("round-trips through save under -o json, description and required params included", func() {
 			Expect(c.run("template", "show", "rush", "-o", "json")).To(Equal(exitcode.OK))
 			shown := c.out()
 
 			c.stdin.WriteString(shown)
 			Expect(c.run("template", "save", "copy", "--file", "-")).To(Equal(exitcode.OK))
 
-			// copy carries no --require of its own, so it renders with no --set at
-			// all — which only holds if save unwrapped show's envelope rather than
-			// nesting the whole thing (schemaVersion, params, path and all) as the
-			// new template's body.
-			Expect(c.run("template", "render", "copy")).To(Equal(exitcode.OK))
+			// copy carries rush's own --require, since round-tripping through show
+			// preserves the envelope's description and declared params — not just
+			// its body — and neither nests the whole shown document (schemaVersion,
+			// params, path and all) one level deeper as the new template's body.
+			Expect(c.run("template", "render", "copy")).To(Equal(exitcode.Usage))
+			Expect(c.errOut()).To(ContainSubstring(`"email"`))
+
+			Expect(c.run("template", "show", "copy")).To(Equal(exitcode.OK))
+			Expect(c.out()).To(ContainSubstring("Rush order"))
+
+			Expect(c.run("template", "render", "copy", "--set", "email=old@example.de")).To(Equal(exitcode.OK))
 			copied := c.out()
 
 			Expect(c.run("template", "render", "rush", "--set", "email=old@example.de")).To(Equal(exitcode.OK))
 			Expect(copied).To(MatchJSON(c.out()))
+		})
+
+		It("lets an explicit --param/--require replace the params carried in from show, rather than merge", func() {
+			Expect(c.run("template", "show", "rush", "-o", "json")).To(Equal(exitcode.OK))
+			shown := c.out()
+
+			c.stdin.WriteString(shown)
+			Expect(c.run("template", "save", "copy", "--file", "-",
+				"--param", "qty=order.items.0.quantity=1")).To(Equal(exitcode.OK))
+
+			// No --require was passed this time, so the one carried in from rush's
+			// envelope must not survive alongside it.
+			Expect(c.run("template", "render", "copy")).To(Equal(exitcode.OK))
+			Expect(c.out()).To(ContainSubstring(`"quantity": 1`))
 		})
 	})
 
@@ -411,6 +453,12 @@ var _ = Describe("fft template", func() {
 		It("names the templates that do exist for a typo, same as render does", func() {
 			Expect(c.run("template", "remove", "rsuh", "--yes")).To(Equal(exitcode.NotFound))
 			Expect(c.errOut()).To(ContainSubstring("Saved templates: rush."))
+		})
+
+		It("exits not-found for a typo without asking to confirm deleting nothing", func() {
+			Expect(c.run("template", "remove", "rsuh")).To(Equal(exitcode.NotFound))
+			Expect(c.errOut()).To(ContainSubstring("Saved templates: rush."))
+			Expect(c.errOut()).NotTo(ContainSubstring("Remove the template"))
 		})
 	})
 

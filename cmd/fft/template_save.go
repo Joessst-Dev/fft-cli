@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"slices"
@@ -36,7 +37,8 @@ render time with --set version=N if you really want that.
 --local writes ./.fft/templates instead of your own directory. That file is meant to
 be committed, so read it first: a body captured from real work carries real facility
 ids, order ids and consumer emails, and git history is not something you can quietly
-edit later.`
+edit later. A body that looks like it carries a credential (a password, secret, API
+key, token or Authorization header) is refused outright for --local without --yes.`
 
 func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 	var (
@@ -89,11 +91,25 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			body = unwrapShownTemplate(body)
+			body, envelope := unwrapShownTemplate(body)
+			if description == "" {
+				description = envelope.Description
+			}
+			if operationID == "" {
+				operationID = envelope.OperationID
+			}
 
 			declared, err := declaredParams(body, params, required)
 			if err != nil {
 				return err
+			}
+			if len(declared) == 0 && len(envelope.Params) > 0 {
+				for name, p := range envelope.Params {
+					if err := validateParamName(name, p.Path, body); err != nil {
+						return err
+					}
+				}
+				declared = envelope.Params
 			}
 
 			if _, carried := body["version"]; carried {
@@ -260,30 +276,47 @@ func declaredParams(body entityDoc, params, required []string) (map[string]templ
 }
 
 // unwrapShownTemplate recognises the envelope `fft template show -o json`
-// prints and takes the body back out of it.
+// prints and takes the original template's fields back out of it, not just
+// its body.
 //
 // templateShowLong promises that `show -o json` round-trips through
 // `save --file -`. Without this, that pipe would nest the whole shown
 // document — schemaVersion, params, the original body and all — one level
-// deeper as the new template's body, which is not a round trip at all. The
-// identity check is name-shaped rather than a flag, because a template file
-// carries nothing that says "I was printed by show": schemaVersion plus a body
-// is what any template file looks like, on disk or piped from show alike, and
-// a real fulfillmenttools request body has no plausible reason to declare a
-// top-level "schemaVersion" of its own.
-func unwrapShownTemplate(body entityDoc) entityDoc {
+// deeper as the new template's body, which is not a round trip at all; and
+// even unwrapping only the body would silently drop the description,
+// operationId and every declared parameter (including a --require), which is
+// not a round trip either. The identity check is name-shaped rather than a
+// flag, because a template file carries nothing that says "I was printed by
+// show": schemaVersion plus a body is what any template file looks like, on
+// disk or piped from show alike, and a real fulfillmenttools request body has
+// no plausible reason to declare a top-level "schemaVersion" of its own.
+//
+// The caller decides what to do with the returned envelope: an explicit flag
+// (--description, --param, --require) still wins over what was carried in.
+func unwrapShownTemplate(body entityDoc) (entityDoc, template.Template) {
 	sv, ok := body["schemaVersion"].(json.Number)
 	if !ok {
-		return body
+		return body, template.Template{}
 	}
 	if n, err := sv.Int64(); err != nil || n <= 0 || n > template.Version {
-		return body
+		return body, template.Template{}
 	}
 	inner, ok := body["body"].(map[string]any)
 	if !ok {
-		return body
+		return body, template.Template{}
 	}
-	return inner
+
+	// Re-decoded with UseNumber, the same way template.Decode reads a template
+	// off disk: a plain json.Unmarshal would turn a numeric --param default
+	// into a float64 and lose precision on a 64-bit one, same as it would for
+	// the body itself.
+	var envelope template.Template
+	if raw, err := json.Marshal(body); err == nil {
+		dec := json.NewDecoder(bytes.NewReader(raw))
+		dec.UseNumber()
+		_ = dec.Decode(&envelope) // best effort: inner is authoritative for the body regardless
+	}
+	return inner, envelope
 }
 
 // credentialFieldPatterns are key-name substrings, matched case-insensitively,

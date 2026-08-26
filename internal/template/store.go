@@ -160,9 +160,10 @@ func (s *Store) Path(name string, scope Scope) (string, error) {
 	return filepath.Join(s.Dir(scope), name+ext), nil
 }
 
-// Saved is a template and where it was found. It is what list and show render,
-// and the embedded template is flattened into the JSON so that a script reads
-// one object rather than one wrapped in another.
+// Saved is a template and where it was found. Resolve and List return it, and
+// it is what `fft template show`'s table form renders. Under -o json/yaml,
+// show instead renders the template file's own encoded bytes — not this
+// struct — so that `show -o json` round-trips through `save --file -`.
 type Saved struct {
 	Name  string `json:"name"`
 	Scope Scope  `json:"scope"`

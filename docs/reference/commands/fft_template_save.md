@@ -29,7 +29,8 @@ render time with --set version=N if you really want that.
 --local writes ./.fft/templates instead of your own directory. That file is meant to
 be committed, so read it first: a body captured from real work carries real facility
 ids, order ids and consumer emails, and git history is not something you can quietly
-edit later.
+edit later. A body that looks like it carries a credential (a password, secret, API
+key, token or Authorization header) is refused outright for --local without --yes.
 
 ## Usage
 

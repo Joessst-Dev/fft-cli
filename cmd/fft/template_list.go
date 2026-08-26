@@ -83,12 +83,17 @@ func templateTable(deps *Deps, rows []templateRow) output.Rows {
 
 	table := output.Rows{Headers: []string{"NAME", "SCOPE", "OPERATION", "PROJECT", "DESCRIPTION"}}
 	for _, r := range rows {
+		// OperationID, Project and Description come from the template file, which
+		// for the project scope arrives via git clone — untrusted relative to
+		// whoever is running list to survey what fft can see before trusting any
+		// of it. output.Sanitize keeps a crafted file from using a control byte to
+		// rewrite or hide what was already printed, the same as template_show.go.
 		table.Rows = append(table.Rows, []string{
 			r.Name,
 			string(r.Scope),
-			field(style, r.OperationID),
-			field(style, r.Project),
-			field(style, r.Description),
+			field(style, output.Sanitize(r.OperationID)),
+			field(style, output.Sanitize(r.Project)),
+			field(style, output.Sanitize(r.Description)),
 		})
 	}
 	return table
