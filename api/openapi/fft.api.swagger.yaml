@@ -11429,6 +11429,64 @@ paths:
       summary: Call handover job action
       tags:
         - Handovers (Operations)
+  /api/handoverjobs/{handoverJobId}/signature:
+    post:
+      description: >-
+        Generates a PDF pickup receipt for the handover job, with a blank
+        rectangle reserved for the signature.
+      operationId: createHandoverjobSignature
+      parameters:
+        - description: ID of the handoverjob you want to create a signature pdf for
+          in: path
+          name: handoverJobId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HandoverjobSignatureForCreation'
+        required: false
+      responses:
+        '201':
+          content:
+            application/pdf:
+              schema:
+                format: binary
+                type: string
+          description: The signature pdf was successfully created.
+        '400':
+          content:
+            application/pdf:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Invalid input. See response for details
+        '401':
+          content:
+            application/pdf:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/pdf:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/pdf:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Entity not found
+      summary: Create handover job signature pdf
+      x-fft-permissions:
+        - HANDOVERJOB_READ
+      tags:
+        - Handovers (Operations)
   /api/handoverjobs/search:
     post:
       deprecated: false
@@ -25954,6 +26012,59 @@ paths:
       x-badges:
         - color: orange
           label: BETA
+  /api/signatures:
+    post:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Generates a PDF pickup receipt containing order, retailer, customer
+        and item details, with a blank rectangle reserved for the signature.
+      operationId: createSignaturePdf
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignatureForCreation'
+        required: true
+      responses:
+        '201':
+          content:
+            application/pdf:
+              schema:
+                format: binary
+                type: string
+          description: Successfully created the signature PDF.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Invalid input. See response for details.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+      summary: Create a signature pickup-receipt PDF
+      x-fft-permissions:
+        - DOCUMENT_SET_READ
+      tags:
+        - Signature (Operations)
+      x-badges:
+        - color: red
+          label: ALPHA
   /api/simulations/orders:
     get:
       deprecated: false
@@ -30127,6 +30238,17 @@ components:
       title: ArticleAttributeItemContext
       type: object
       description: ArticleAttributeItemContext
+    ArticleAttributeItemType:
+      description: The type of the attribute.
+      enum:
+        - STRING
+        - NUMBER
+        - CURRENCY
+        - BOOLEAN
+      type: string
+      xml:
+        name: ArticleAttributeItemType
+      title: ArticleAttributeItemType
     ArticleAvailabilityStockValues:
       properties:
         availableForPicking:
@@ -36106,6 +36228,8 @@ components:
         - RETURNLABEL
         - TRANSFERLABEL
         - CUSTOMS
+        - SIGNATURE_DRAFT
+        - SIGNATURE_SIGNED
       type: string
       title: DocumentCategory
       description: DocumentCategory
@@ -42959,6 +43083,36 @@ components:
       title: HandoverJobSearchQuery
       type: object
       description: HandoverJobSearchQuery
+    HandoverjobSignatureForCreation:
+      additionalProperties: false
+      properties:
+        signatureImage:
+          $ref: '#/components/schemas/HandoverjobSignatureImage'
+      type: object
+      title: HandoverjobSignatureForCreation
+      description: HandoverjobSignatureForCreation
+    HandoverjobSignatureImage:
+      additionalProperties: false
+      description: >-
+        The signature image (PNG, JPG/JPEG, or single-page PDF) to draw into the
+        signature rectangle of the generated signature pdf.
+      properties:
+        content:
+          description: File content base64 encoded
+          type: string
+        type:
+          description: File type of the base64 encoded content.
+          enum:
+            - PNG
+            - JPG
+            - JPEG
+            - PDF
+          type: string
+      required:
+        - content
+        - type
+      type: object
+      title: HandoverjobSignatureImage
     HandoverJobSort:
       properties:
         targetTime:
@@ -46499,10 +46653,14 @@ components:
             - finalUnitPrice
             - finalLineItemPrice
           type: string
+        context:
+          $ref: '#/components/schemas/InventoryListingAttributeItemContext'
         key:
           type: string
         priority:
           type: number
+        type:
+          $ref: '#/components/schemas/ArticleAttributeItemType'
         value:
           type: string
       required:
@@ -46511,6 +46669,22 @@ components:
       title: InventoryListingAttributeItem
       type: object
       description: InventoryListingAttributeItem
+    InventoryListingAttributeItemContext:
+      properties:
+        type:
+          enum:
+            - FACILITY_GROUP
+            - FACILITY
+            - TAG_REFERENCE
+          type: string
+        value:
+          type: string
+      required:
+        - type
+        - value
+      title: InventoryListingAttributeItemContext
+      type: object
+      description: InventoryListingAttributeItemContext
     InventoryListingEventPayload:
       properties:
         titleLocalized:
@@ -68553,6 +68727,11 @@ components:
             - ASC
             - DESC
           type: string
+        created:
+          enum:
+            - ASC
+            - DESC
+          type: string
         domsStatus:
           enum:
             - ASC
@@ -79881,6 +80060,167 @@ components:
       type: object
       title: ShortPickReasonForUpsert
       description: ShortPickReasonForUpsert
+    SignatureCompanyAddress:
+      properties:
+        city:
+          type: string
+        country:
+          type: string
+        houseNumber:
+          type: string
+        name:
+          description: Name of the retailer/company.
+          type: string
+        postalCode:
+          type: string
+        street:
+          type: string
+      required:
+        - name
+        - street
+        - houseNumber
+        - postalCode
+        - city
+        - country
+      title: SignatureCompanyAddress
+      type: object
+      description: SignatureCompanyAddress
+    SignatureDeliveryAddress:
+      properties:
+        city:
+          type: string
+        companyName:
+          type: string
+        firstName:
+          type: string
+        houseNumber:
+          type: string
+        lastName:
+          type: string
+        personalTitle:
+          type: string
+        postalCode:
+          type: string
+        street:
+          type: string
+      required:
+        - street
+        - houseNumber
+        - postalCode
+        - city
+      title: SignatureDeliveryAddress
+      type: object
+      description: SignatureDeliveryAddress
+    SignatureForCreation:
+      properties:
+        companyAddress:
+          allOf:
+            - $ref: '#/components/schemas/SignatureCompanyAddress'
+          description: Address of the retailer issuing the receipt.
+        deliveryAddress:
+          allOf:
+            - $ref: '#/components/schemas/SignatureDeliveryAddress'
+          description: Address of the customer the receipt is printed for.
+        facilityName:
+          description: Name of the specific facility the customer picked up the order from.
+          type: string
+        facilityTimeZoneId:
+          description: >-
+            IANA time zone id for setting the signed time. If not present
+            defaulted to Europe/Berlin.
+          example: Europe/Berlin
+          pattern: ^[A-Za-z_]+(?:/[A-Za-z0-9_+-]+){0,2}$
+          type: string
+        items:
+          items:
+            $ref: '#/components/schemas/SignatureItem'
+          maxItems: 100
+          type: array
+        orderInformation:
+          $ref: '#/components/schemas/SignatureOrderInformation'
+        pickupDateTime:
+          description: >-
+            Date and time the customer picked up the order, fixing the moment
+            the risk passes (§ 446 BGB).
+          example: 2026-06-17T12:00:00.000Z
+          format: date-time
+          type: string
+        signatureImage:
+          allOf:
+            - $ref: '#/components/schemas/SignatureImage'
+          description: >-
+            The signature image to draw into the signature rectangle. Optional,
+            but if provided both base64 and type must be set.
+        signeeName:
+          description: Name of the person who signed for and picked up the order.
+          type: string
+      required:
+        - companyAddress
+        - facilityName
+        - orderInformation
+        - deliveryAddress
+        - items
+        - pickupDateTime
+        - signeeName
+      title: SignatureForCreation
+      type: object
+      description: SignatureForCreation
+    SignatureImage:
+      properties:
+        fileContent:
+          description: >-
+            Base64-encoded signature (PNG, JPG/JPEG image, or single-page PDF)
+            to draw into the signature rectangle.
+          type: string
+        type:
+          description: File type of base64.
+          enum:
+            - PNG
+            - JPG
+            - JPEG
+            - PDF
+          type: string
+      required:
+        - fileContent
+        - type
+      title: SignatureImage
+      type: object
+      description: SignatureImage
+    SignatureItem:
+      properties:
+        id:
+          type: string
+        quantity:
+          type: string
+        substitutes:
+          description: Title of the item which is substituted through this item.
+          type: string
+        title:
+          type: string
+      required:
+        - id
+        - title
+        - quantity
+      title: SignatureItem
+      type: object
+      description: SignatureItem
+    SignatureOrderInformation:
+      properties:
+        orderDate:
+          description: The date the order was created.
+          example: 2026-06-17T12:00:00.000Z
+          format: date-time
+          type: string
+        orderNumber:
+          description: >-
+            An identifier for the order (tenantOrderId or a shorter order
+            number).
+          type: string
+      required:
+        - orderNumber
+      title: SignatureOrderInformation
+      type: object
+      description: SignatureOrderInformation
     SimulationOrder:
       properties:
         consumer:

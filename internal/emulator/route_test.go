@@ -78,6 +78,7 @@ var knownCollections = []string{
 	"servicejobs",
 	"shipments",
 	"shippinginformation",
+	"signatures",
 	"stacks",
 	"stocks",
 	"stowjobs",
