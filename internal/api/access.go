@@ -51,8 +51,8 @@ func (o Operation) Mutates() bool {
 //   - validatePostalCode, getNeedsPacking, downloadMergedDocuments (it merges
 //     documents it is given and hands back the PDF), createSourcingOptionsRequest
 //     (it reserves no stock), and createSignaturePdf (renders a pickup-receipt PDF
-//     from a fully self-contained body — no path parameter, no entity reference, no
-//     way to retrieve one later — and hands back the bytes).
+//     from a fully self-contained body — no path parameter, no *Ref field, no way to
+//     retrieve one later — and hands back the bytes).
 //
 // What is deliberately absent, despite reading like a read — named here so that
 // nobody adds them later on the strength of the name alone:

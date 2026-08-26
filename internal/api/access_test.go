@@ -257,12 +257,14 @@ var _ = Describe("Mutates", func() {
 		Entry("createLookupRecord is an upsert that answers 200", "createLookupRecord", true),
 		Entry("executeGraphQLCommand can carry a mutation", "executeGraphQLCommand", true),
 		Entry("calculateBestCarrier reads like a calculator and is guarded CARRIER_WRITE", "calculateBestCarrier", true),
+		Entry("createHandoverjobSignature can append a SIGNATURE_* document to the job", "createHandoverjobSignature", true),
 
 		Entry("searchFacility is a POST that reads", "searchFacility", false),
 		Entry("postCheckoutOptions only computes options", "postCheckoutOptions", false),
 		Entry("evaluateRoutingStrategy is a dry run", "evaluateRoutingStrategy", false),
 		Entry("createSourcingOptionsRequest reserves no stock", "createSourcingOptionsRequest", false),
 		Entry("downloadMergedDocuments hands back a PDF", "downloadMergedDocuments", false),
+		Entry("createSignaturePdf renders a self-contained PDF", "createSignaturePdf", false),
 	)
 
 	// Three operationIds in the spec contain spaces. They are map keys and annotation
