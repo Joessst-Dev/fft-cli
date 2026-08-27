@@ -74,13 +74,18 @@ func writeTemplate(out io.Writer, saved template.Saved, style output.Style) {
 
 	// Description, OperationID and Project come from the template file, which for
 	// the project scope arrives via git clone — untrusted relative to whoever is
-	// running show to read it before trusting it. output.Sanitize keeps a crafted
-	// file from using a control byte to rewrite or hide what was already printed.
+	// running show to read it before trusting it. PURPOSE alone can keep the
+	// newlines output.Sanitize preserves: wrap() runs strings.Fields on the
+	// description first, which collapses them before indent() re-adds one
+	// prefixed line at a time, so an embedded newline can never reach column 0.
+	// OperationID and Project print with only their first line indented, so a
+	// newline in either would forge a second, unindented block — SanitizeCell
+	// folds it to a space instead.
 	if description := output.Sanitize(saved.Description); description != "" {
 		fmt.Fprintf(out, "\n%s\n%s\n", label("PURPOSE"), indent(wrap(description, helpWidth-2), "  "))
 	}
 
-	if operationID := output.Sanitize(saved.OperationID); operationID != "" {
+	if operationID := output.SanitizeCell(saved.OperationID); operationID != "" {
 		fmt.Fprintf(out, "\n%s\n  %s", label("OPERATION"), operationID)
 		if op, ok := api.LookupOperation(saved.OperationID); ok {
 			fmt.Fprintf(out, "  %s %s", op.Method, op.Path)
@@ -90,7 +95,7 @@ func writeTemplate(out io.Writer, saved template.Saved, style output.Style) {
 		fmt.Fprintln(out)
 	}
 
-	if project := output.Sanitize(saved.Project); project != "" {
+	if project := output.SanitizeCell(saved.Project); project != "" {
 		fmt.Fprintf(out, "\n%s\n  %s\n", label("SAVED UNDER"), project)
 	}
 
@@ -138,7 +143,11 @@ func describeTemplateParam(name string, p template.Param, width int, style outpu
 		}
 	}
 
-	if description := output.Sanitize(p.Description); description != "" {
+	// Only the first line of this whole return value gets a "  " prefix (see the
+	// caller), so an embedded newline here would forge output ahead of the real
+	// BODY section rather than staying inside the block — SanitizeCell, not
+	// Sanitize.
+	if description := output.SanitizeCell(p.Description); description != "" {
 		fmt.Fprintf(&b, "\n    %s", style.Faint(description))
 	}
 	return b.String()

@@ -437,6 +437,58 @@ var _ = Describe("fft template", func() {
 			Expect(c.out()).To(ContainSubstring("  größe  order.size\n  qty    order.qty\n"))
 		})
 
+		// OPERATION and SAVED UNDER print with only their first line indented,
+		// unlike PURPOSE, which wrap() reflows into a newline-free string before
+		// indent() re-adds one prefix per line. A newline surviving into either
+		// would forge a second, unindented block a reader cannot tell from a real
+		// one — output.SanitizeCell has to fold it before it gets that far.
+		It("folds a newline in the operation id and project into the line they belong to", func() {
+			Expect(os.WriteFile(userPath("evil"), []byte(
+				`{"schemaVersion":1,"body":{},"operationId":"addFacility","project":"prod"}`),
+				0o600)).To(Succeed())
+			Expect(c.run("template", "show", "evil")).To(Equal(exitcode.OK))
+			clean := c.out()
+
+			Expect(os.WriteFile(userPath("evil"), []byte(
+				`{"schemaVersion":1,"body":{},`+
+					`"operationId":"addFacility\nTEMPLATE\n  zz-forged (user scope)",`+
+					`"project":"prod\nOPERATION\n  zz-forged"}`), 0o600)).To(Succeed())
+			Expect(c.run("template", "show", "evil")).To(Equal(exitcode.OK))
+			injected := c.out()
+
+			// The embedded newlines are folded to spaces, not dropped: the line
+			// count is unchanged from the clean run, so nothing was inserted.
+			Expect(strings.Count(injected, "\n")).To(Equal(strings.Count(clean, "\n")))
+			Expect(injected).NotTo(ContainSubstring("\nTEMPLATE\n"))
+			Expect(injected).NotTo(ContainSubstring("\nOPERATION\n  zz-forged"))
+			Expect(injected).To(ContainSubstring("zz-forged"))
+		})
+
+		// The whole PARAMETERS line for one name gets a "  " prefix only at its
+		// start (see describeTemplateParam), so a newline in a parameter's
+		// description has the same forging reach as OPERATION/SAVED UNDER above —
+		// and BODY prints unconditionally right after, which is what an attacker
+		// would use it to imitate.
+		It("folds a newline in a parameter's description into the line it belongs to", func() {
+			Expect(os.WriteFile(userPath("evil"), []byte(
+				`{"schemaVersion":1,"body":{"order":{}},"params":{`+
+					`"qty":{"path":"order.qty","description":"fake"}}}`), 0o600)).To(Succeed())
+			Expect(c.run("template", "show", "evil")).To(Equal(exitcode.OK))
+			clean := c.out()
+
+			Expect(os.WriteFile(userPath("evil"), []byte(
+				`{"schemaVersion":1,"body":{"order":{}},"params":{`+
+					`"qty":{"path":"order.qty","description":"fake\nBODY\n{\"harmless\":true}"}}}`),
+				0o600)).To(Succeed())
+			Expect(c.run("template", "show", "evil")).To(Equal(exitcode.OK))
+			injected := c.out()
+
+			Expect(strings.Count(injected, "\n")).To(Equal(strings.Count(clean, "\n")))
+			Expect(injected).NotTo(ContainSubstring("\nBODY\n{\"harmless\":true}"))
+			Expect(strings.Count(injected, "BODY\n")).To(Equal(1))
+			Expect(injected).To(ContainSubstring("fake BODY"))
+		})
+
 		It("warns when a project template shadows a user template of the same name", func() {
 			Expect(save("rush", "--local", "--file", "-")).To(Equal(exitcode.OK))
 
