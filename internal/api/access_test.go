@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-// knownMutatingPOSTs is the other half of the POST census: the 111 POST operations
+// knownMutatingPOSTs is the other half of the POST census: the 112 POST operations
 // that write. It is a fixture, not production code, and it exists so that the two
 // lists together must account for every POST in the spec.
 //
@@ -63,6 +63,7 @@ var knownMutatingPOSTs = []string{
 	"createExpiry",
 	"createFacilityCustomServiceConnection",
 	"createHandoverContainer",
+	"createHandoverjobSignature",
 	"createInboundProcess",
 	"createItemReturn",
 	"createItemReturnJob",
@@ -231,7 +232,7 @@ var _ = Describe("Mutates", func() {
 			}
 		})
 
-		It("accounts for all 156 of the spec's POSTs", func() {
+		It("accounts for all 158 of the spec's POSTs", func() {
 			var posts int
 			for _, op := range Operations() {
 				if op.Method == http.MethodPost {
@@ -239,6 +240,9 @@ var _ = Describe("Mutates", func() {
 				}
 			}
 			Expect(posts).To(Equal(len(readPOSTs) + len(knownMutatingPOSTs)))
+			// Pin the literal in the spec's own name too: the check above is purely
+			// relational and would stay green even if this description's number drifted.
+			Expect(posts).To(Equal(158))
 		})
 	})
 
@@ -256,12 +260,14 @@ var _ = Describe("Mutates", func() {
 		Entry("createLookupRecord is an upsert that answers 200", "createLookupRecord", true),
 		Entry("executeGraphQLCommand can carry a mutation", "executeGraphQLCommand", true),
 		Entry("calculateBestCarrier reads like a calculator and is guarded CARRIER_WRITE", "calculateBestCarrier", true),
+		Entry("createHandoverjobSignature can append a SIGNATURE_* document to the job", "createHandoverjobSignature", true),
 
 		Entry("searchFacility is a POST that reads", "searchFacility", false),
 		Entry("postCheckoutOptions only computes options", "postCheckoutOptions", false),
 		Entry("evaluateRoutingStrategy is a dry run", "evaluateRoutingStrategy", false),
 		Entry("createSourcingOptionsRequest reserves no stock", "createSourcingOptionsRequest", false),
 		Entry("downloadMergedDocuments hands back a PDF", "downloadMergedDocuments", false),
+		Entry("createSignaturePdf renders a self-contained PDF", "createSignaturePdf", false),
 	)
 
 	// Three operationIds in the spec contain spaces. They are map keys and annotation

@@ -16,7 +16,7 @@ const apiLong = `Call any operation of the fulfillmenttools API by its operation
 This is the escape hatch. fft curates the entities it knows well (facility,
 listing, stock) and generates a command for every other operation, but when the
 spec moves faster than fft does, this reaches whatever the spec says exists —
-all 557 operations of it.
+all 559 operations of it.
 
   fft api list --tag picking              # what is there?
   fft api describe getPickJob             # what does it take?
@@ -129,7 +129,7 @@ func newAPICmd(deps *Deps) *cobra.Command {
 // findOperation resolves an operationId, or says what the user probably meant.
 //
 // A typo is exit 2, not a 404: the operation does not exist in the spec, so nothing
-// was ever going to be sent. The suggestion is the point — there are 557 ids and
+// was ever going to be sent. The suggestion is the point — there are 559 ids and
 // nobody remembers whether it is getPickJob or getPickjob.
 func findOperation(id string) (api.Operation, error) {
 	op, ok := api.LookupOperation(strings.TrimSpace(id))

@@ -82,7 +82,7 @@ var _ = Describe("Client.DoRaw", func() {
 
 			// One parameter, two values, joined with a comma. The comma is percent-encoded,
 			// which is what url.Values.Encode does and what the generated client already
-			// sends for the five tags it covers.
+			// sends for the eight tags it covers.
 			Expect(fake.rawQuery(0)).To(Equal("status=OPEN%2CIN_PROGRESS"))
 		})
 

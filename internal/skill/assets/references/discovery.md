@@ -1,6 +1,6 @@
 # Finding the operation you need
 
-557 operations. You are not expected to know them, and you must not guess them. Everything
+559 operations. You are not expected to know them, and you must not guess them. Everything
 here reads the spec compiled into the binary: it works offline, needs no project, sends no
 request, and is free.
 

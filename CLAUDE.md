@@ -26,7 +26,7 @@ go test ./cmd/fft/ -run TestFFT -args -ginkgo.focus="fft connection list"
 
 ## The three-tier command surface
 
-This is the central design idea, and most changes touch it. The API has 557 operations; hand-writing 557 commands does not converge, so coverage comes in three tiers that share one binary:
+This is the central design idea, and most changes touch it. The API has 559 operations; hand-writing 559 commands does not converge, so coverage comes in three tiers that share one binary:
 
 - **Tier 1 — curated** (`fft facility`, `fft connection`, `fft listing`, `fft stock`, `fft sourcing`). Hand-written UX: typed flags, validation, readable tables. One file set per noun under `cmd/fft/` (`<noun>.go` + `<noun>_<verb>.go` + `<noun>_test.go`), modelled on the facility set.
 - **Tier 2 — generated** (`cmd/fft/generated.go`). A command per remaining operation, auto-registered from the spec at startup, with real flags and a `--file`/`--example`.

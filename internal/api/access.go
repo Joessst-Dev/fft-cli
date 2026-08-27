@@ -14,8 +14,8 @@ import "net/http"
 // whole list tier of the CLI is built on that. POST /api/facilities creates a
 // facility. The method alone therefore cannot answer the question.
 //
-// Nor can the path: "does it end in /search?" catches 31 of the 43 reads and
-// misses the rest. Nor can the status code: 41 of the mutating POSTs answer 200
+// Nor can the path: "does it end in /search?" catches 34 of the 46 reads and
+// misses the rest. Nor can the status code: 43 of the mutating POSTs answer 200
 // rather than 201, so a "200 means read" heuristic would wave through creates.
 //
 // So a POST is a mutation unless its operationId is in [readPOSTs], and that list
@@ -41,7 +41,7 @@ func (o Operation) Mutates() bool {
 //
 // What earns a place here:
 //
-//   - the 31 search* operations — POST-bodied cursor searches, the read path
+//   - the 34 search* operations — POST-bodied cursor searches, the read path
 //     behind every list command fft has.
 //   - the promise calculators. They compute delivery and collect options; the
 //     docs are explicit that only a partial routing is performed and the
@@ -49,8 +49,10 @@ func (o Operation) Mutates() bool {
 //   - the routing dry-runs, which return an evaluation result and create no
 //     resource.
 //   - validatePostalCode, getNeedsPacking, downloadMergedDocuments (it merges
-//     documents it is given and hands back the PDF), and createSourcingOptionsRequest
-//     (it reserves no stock).
+//     documents it is given and hands back the PDF), createSourcingOptionsRequest
+//     (it reserves no stock), and createSignaturePdf (renders a pickup-receipt PDF
+//     from a fully self-contained body — no path parameter, no *Ref field, no way to
+//     retrieve one later — and hands back the bytes).
 //
 // What is deliberately absent, despite reading like a read — named here so that
 // nobody adds them later on the strength of the name alone:
@@ -70,6 +72,14 @@ func (o Operation) Mutates() bool {
 //     be a mis-assigned permission. But the doctrine of this file is that a POST is a
 //     write until a human can say otherwise, and "the only evidence available says
 //     write" is not otherwise. A read-scoped token would be refused it anyway.
+//   - createHandoverjobSignature reads like createSignaturePdf's twin — same
+//     PDF-render shape, guarded by a _READ permission too — but it binds to a
+//     specific handoverJobId, and Handoverjob carries a documents []PrintableDocument
+//     array plus a DocumentCategory enum with SIGNATURE_DRAFT/SIGNATURE_SIGNED values
+//     built for exactly this pickup-receipt distinction. The spec cannot confirm the
+//     append (the response is opaque PDF bytes, not JSON), so this is the fail-closed
+//     case: unlike createSignaturePdf, there is a plausible resource for it to attach
+//     itself to, and "plausible" is enough to keep it out of this list.
 var readPOSTs = map[string]bool{
 	// Cursor searches.
 	"searchAudit":                    true,
@@ -123,4 +133,5 @@ var readPOSTs = map[string]bool{
 	"getNeedsPacking":              true,
 	"downloadMergedDocuments":      true,
 	"createSourcingOptionsRequest": true,
+	"createSignaturePdf":           true,
 }

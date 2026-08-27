@@ -4,7 +4,7 @@ layout: home
 hero:
   name: fft
   text: One CLI for the fulfillmenttools API
-  tagline: One binary, one auth path, one output contract — reaching every one of the API's 557 operations from day one.
+  tagline: One binary, one auth path, one output contract — reaching every one of the API's 559 operations from day one.
   actions:
     - theme: brand
       text: Get started

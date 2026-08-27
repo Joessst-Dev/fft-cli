@@ -42,7 +42,7 @@ var _ = Describe("fft api", func() {
 
 	Describe("calling an operation the typed client does not have", func() {
 		It("reaches an endpoint that is in no generated method at all", func() {
-			// queryPickJobs is not one of the five tags oapi-codegen was pointed at, so
+			// queryPickJobs is not one of the eight tags oapi-codegen was pointed at, so
 			// there is no Go method for it anywhere. This is the whole point of the tier.
 			t := answers(`{"pickJobs":[{"id":"pj-1"}],"total":1}`)
 
