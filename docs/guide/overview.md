@@ -86,6 +86,17 @@ Rules that are not optional:
 - **Exit 8** is a partial bulk write: some items in the file landed and some did not. Read
   the per-item results and fix those items. Do not re-send the whole file blindly.
 
+A body the user sends often is worth saving. `fft template` keeps one as a file and fills
+in the parts that change, and rendering it reaches nothing — it prints a body you then pipe
+into the same commands as always:
+
+```sh
+fft template save rush-order --file stock.json --require email=order.consumer.email
+fft template render rush-order --set email=a@b.de | fft order create --file -
+```
+
+See [references/templates.md](./templates.md).
+
 ## Routing
 
 The live routing strategy is what decides where every order is sourced. `fft routing`
@@ -195,3 +206,5 @@ Node) that installs and runs straight away. See
 - [references/components.md](./components.md) — the components installed alongside
   fft: what one is allowed to do, and why installing one is the user's decision and not
   yours.
+- [references/templates.md](./templates.md) — saving a request body and sending it
+  again with the parts that change filled in.

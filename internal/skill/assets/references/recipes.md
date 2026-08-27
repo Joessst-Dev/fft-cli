@@ -123,6 +123,29 @@ version survives exactly as it was sent. Anything that parses JSON numbers as fl
 JavaScript, a careless `jq` expression, a spreadsheet — will silently round it, and the
 resulting id addresses a different object or none. Keep ids as strings, and use `jq -r`.
 
+## Save a body and send it again
+
+A body the user sends often — the same order shape with a different consumer, the same
+stock correction against a different facility — belongs in a template rather than in a
+scratch file somebody has to find again.
+
+```sh
+# Once: save it, and name the parts that change.
+fft order get ORDER-1 -o json | fft template save rush-order --file - --description "Rush order" --require email=order.consumer.email --param qty=order.orderLineItems.0.quantity=1
+
+# Every time after that:
+fft template render rush-order --set email=a@b.de --set qty=3 | fft order create --file -
+```
+
+- Read `fft template show rush-order` before typing a `--set`: it prints the declared
+  parameters, their defaults, and which are required.
+- Saving drops a top-level `version`. Replaying a saved version is a guaranteed 409 — the
+  entity has moved on since.
+- The template records the project it was saved under, and warns on stderr if you render it
+  while another one is active. Ids do not cross tenants.
+- `--set-string` for an id made only of digits, always. See
+  [Ids are not numbers](#ids-are-not-numbers).
+
 ## Setting up a project
 
 Only with the user. Never invent a tenant, and never put a password on a command line —

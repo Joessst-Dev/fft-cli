@@ -115,6 +115,7 @@ export default defineConfig({
             { text: 'Commands', link: '/guide/commands' },
             { text: 'Discovery', link: '/guide/discovery' },
             { text: 'Recipes', link: '/guide/recipes' },
+            { text: 'Templates', link: '/guide/templates' },
             { text: 'Emulator', link: '/guide/emulator' },
             { text: 'Components', link: '/guide/components' },
             { text: 'Troubleshooting', link: '/guide/troubleshooting' },
