@@ -375,6 +375,21 @@ func (e BulkOperationResultStatus) Valid() bool {
 	}
 }
 
+// Defines values for BulkOrderCancelActionParameterName.
+const (
+	BULKCANCEL BulkOrderCancelActionParameterName = "BULK_CANCEL"
+)
+
+// Valid indicates whether the value is a known member of the BulkOrderCancelActionParameterName enum.
+func (e BulkOrderCancelActionParameterName) Valid() bool {
+	switch e {
+	case BULKCANCEL:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for BulkOrderForceCancelActionParameterName.
 const (
 	BULKFORCECANCEL BulkOrderForceCancelActionParameterName = "BULK_FORCE_CANCEL"
@@ -12977,6 +12992,16 @@ type BooleanFilter struct {
 	NotEq *bool `json:"notEq,omitempty"`
 }
 
+// BulkCancelOrderParameter BulkCancelOrderParameter
+type BulkCancelOrderParameter struct {
+	// CancelationReasonId ID of the cancellation reason
+	CancelationReasonId *string `json:"cancelationReasonId,omitempty"`
+	OrderId             string  `json:"orderId"`
+
+	// Version Version of the entity to be changed
+	Version int `json:"version"`
+}
+
 // BulkForceCancelOrderParameter BulkForceCancelOrderParameter
 type BulkForceCancelOrderParameter struct {
 	// CancelationReasonId ID of the cancellation reason
@@ -13012,6 +13037,15 @@ type BulkOrderActionResult struct {
 type BulkOrderActionsParameter struct {
 	union json.RawMessage
 }
+
+// BulkOrderCancelActionParameter Action to cancel orders.
+type BulkOrderCancelActionParameter struct {
+	Name   BulkOrderCancelActionParameterName `json:"name"`
+	Orders []BulkCancelOrderParameter         `json:"orders"`
+}
+
+// BulkOrderCancelActionParameterName defines model for BulkOrderCancelActionParameter.Name.
+type BulkOrderCancelActionParameterName string
 
 // BulkOrderForceCancelActionParameter Action to force cancel orders.
 type BulkOrderForceCancelActionParameter struct {
@@ -24349,6 +24383,32 @@ func (t *BulkOrderActionsParameter) FromBulkOrderForceCancelActionParameter(v Bu
 
 // MergeBulkOrderForceCancelActionParameter performs a merge with any union data inside the BulkOrderActionsParameter, using the provided BulkOrderForceCancelActionParameter
 func (t *BulkOrderActionsParameter) MergeBulkOrderForceCancelActionParameter(v BulkOrderForceCancelActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsBulkOrderCancelActionParameter returns the union data inside the BulkOrderActionsParameter as a BulkOrderCancelActionParameter
+func (t BulkOrderActionsParameter) AsBulkOrderCancelActionParameter() (BulkOrderCancelActionParameter, error) {
+	var body BulkOrderCancelActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromBulkOrderCancelActionParameter overwrites any union data inside the BulkOrderActionsParameter as the provided BulkOrderCancelActionParameter
+func (t *BulkOrderActionsParameter) FromBulkOrderCancelActionParameter(v BulkOrderCancelActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeBulkOrderCancelActionParameter performs a merge with any union data inside the BulkOrderActionsParameter, using the provided BulkOrderCancelActionParameter
+func (t *BulkOrderActionsParameter) MergeBulkOrderCancelActionParameter(v BulkOrderCancelActionParameter) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err

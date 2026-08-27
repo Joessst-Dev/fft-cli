@@ -31780,6 +31780,23 @@ components:
       title: BringCarrierConfiguration
       type: object
       description: BringCarrierConfiguration
+    BulkCancelOrderParameter:
+      properties:
+        cancelationReasonId:
+          description: ID of the cancellation reason
+          type: string
+        orderId:
+          type: string
+        version:
+          description: Version of the entity to be changed
+          minimum: 0
+          type: integer
+      required:
+        - orderId
+        - version
+      type: object
+      title: BulkCancelOrderParameter
+      description: BulkCancelOrderParameter
     BulkForceCancelOrderParameter:
       properties:
         cancelationReasonId:
@@ -31840,8 +31857,26 @@ components:
     BulkOrderActionsParameter:
       oneOf:
         - $ref: '#/components/schemas/BulkOrderForceCancelActionParameter'
+        - $ref: '#/components/schemas/BulkOrderCancelActionParameter'
       title: BulkOrderActionsParameter
       description: BulkOrderActionsParameter
+    BulkOrderCancelActionParameter:
+      description: Action to cancel orders.
+      properties:
+        name:
+          enum:
+            - BULK_CANCEL
+          type: string
+        orders:
+          items:
+            $ref: '#/components/schemas/BulkCancelOrderParameter'
+          maxItems: 15
+          minItems: 1
+          type: array
+      required:
+        - name
+        - orders
+      title: BulkOrderCancelActionParameter
     BulkOrderForceCancelActionParameter:
       description: Action to force cancel orders.
       properties:
