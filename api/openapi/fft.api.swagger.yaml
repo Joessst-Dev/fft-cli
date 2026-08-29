@@ -16260,6 +16260,7 @@ paths:
         - ORDER_WRITE
         - ORDER_CANCEL
         - ORDER_FORCE_CANCEL
+        - ORDER_UNLOCK
       tags:
         - Orders (DOMS)
   /api/orders/search:
@@ -31858,6 +31859,7 @@ components:
       oneOf:
         - $ref: '#/components/schemas/BulkOrderForceCancelActionParameter'
         - $ref: '#/components/schemas/BulkOrderCancelActionParameter'
+        - $ref: '#/components/schemas/BulkOrderUnlockActionParameter'
       title: BulkOrderActionsParameter
       description: BulkOrderActionsParameter
     BulkOrderCancelActionParameter:
@@ -31894,6 +31896,42 @@ components:
         - name
         - orders
       title: BulkOrderForceCancelActionParameter
+    BulkOrderUnlockActionParameter:
+      description: Action to unlock orders.
+      properties:
+        name:
+          enum:
+            - BULK_UNLOCK
+          type: string
+        orders:
+          items:
+            $ref: '#/components/schemas/BulkUnlockOrderParameter'
+          maxItems: 15
+          minItems: 1
+          type: array
+      required:
+        - name
+        - orders
+      title: BulkOrderUnlockActionParameter
+    BulkUnlockOrderParameter:
+      properties:
+        orderId:
+          type: string
+        targetTime:
+          description: Time to be set as a targetTime for the delivery preferences.
+          example: 2025-01-15T00:00:00.000Z
+          format: date-time
+          type: string
+        version:
+          description: Version of the entity to be changed
+          minimum: 0
+          type: integer
+      required:
+        - orderId
+        - version
+      type: object
+      title: BulkUnlockOrderParameter
+      description: BulkUnlockOrderParameter
     BulkUpsertSummary:
       properties:
         created:
@@ -42747,6 +42785,12 @@ components:
         lineItem:
           additionalProperties: false
           properties:
+            handedOverQuantity:
+              description: quantity of the specific item that has been handed over
+              example: 20
+              format: int64
+              minimum: 0
+              type: integer
             id:
               type: string
             refused:
@@ -43481,6 +43525,12 @@ components:
       description: HandoverSubstituteLineItemForCreation
     HandoverSubstituteLineItemForUpdate:
       properties:
+        handedOverQuantity:
+          description: quantity of the specific item that has been handed over
+          example: 20
+          format: int64
+          minimum: 0
+          type: integer
         id:
           type: string
         refused:

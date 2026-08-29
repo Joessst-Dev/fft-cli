@@ -405,6 +405,21 @@ func (e BulkOrderForceCancelActionParameterName) Valid() bool {
 	}
 }
 
+// Defines values for BulkOrderUnlockActionParameterName.
+const (
+	BULKUNLOCK BulkOrderUnlockActionParameterName = "BULK_UNLOCK"
+)
+
+// Valid indicates whether the value is a known member of the BulkOrderUnlockActionParameterName enum.
+func (e BulkOrderUnlockActionParameterName) Valid() bool {
+	switch e {
+	case BULKUNLOCK:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for CarrierDeliveryType.
 const (
 	CarrierDeliveryTypeDELIVERY CarrierDeliveryType = "DELIVERY"
@@ -13056,6 +13071,26 @@ type BulkOrderForceCancelActionParameter struct {
 // BulkOrderForceCancelActionParameterName defines model for BulkOrderForceCancelActionParameter.Name.
 type BulkOrderForceCancelActionParameterName string
 
+// BulkOrderUnlockActionParameter Action to unlock orders.
+type BulkOrderUnlockActionParameter struct {
+	Name   BulkOrderUnlockActionParameterName `json:"name"`
+	Orders []BulkUnlockOrderParameter         `json:"orders"`
+}
+
+// BulkOrderUnlockActionParameterName defines model for BulkOrderUnlockActionParameter.Name.
+type BulkOrderUnlockActionParameterName string
+
+// BulkUnlockOrderParameter BulkUnlockOrderParameter
+type BulkUnlockOrderParameter struct {
+	OrderId string `json:"orderId"`
+
+	// TargetTime Time to be set as a targetTime for the delivery preferences.
+	TargetTime *time.Time `json:"targetTime,omitempty"`
+
+	// Version Version of the entity to be changed
+	Version int `json:"version"`
+}
+
 // BulkUpsertSummary BulkUpsertSummary
 type BulkUpsertSummary struct {
 	// Created The number of operations that led to an insertion
@@ -24409,6 +24444,32 @@ func (t *BulkOrderActionsParameter) FromBulkOrderCancelActionParameter(v BulkOrd
 
 // MergeBulkOrderCancelActionParameter performs a merge with any union data inside the BulkOrderActionsParameter, using the provided BulkOrderCancelActionParameter
 func (t *BulkOrderActionsParameter) MergeBulkOrderCancelActionParameter(v BulkOrderCancelActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsBulkOrderUnlockActionParameter returns the union data inside the BulkOrderActionsParameter as a BulkOrderUnlockActionParameter
+func (t BulkOrderActionsParameter) AsBulkOrderUnlockActionParameter() (BulkOrderUnlockActionParameter, error) {
+	var body BulkOrderUnlockActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromBulkOrderUnlockActionParameter overwrites any union data inside the BulkOrderActionsParameter as the provided BulkOrderUnlockActionParameter
+func (t *BulkOrderActionsParameter) FromBulkOrderUnlockActionParameter(v BulkOrderUnlockActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeBulkOrderUnlockActionParameter performs a merge with any union data inside the BulkOrderActionsParameter, using the provided BulkOrderUnlockActionParameter
+func (t *BulkOrderActionsParameter) MergeBulkOrderUnlockActionParameter(v BulkOrderUnlockActionParameter) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
