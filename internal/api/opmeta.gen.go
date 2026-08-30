@@ -516,7 +516,7 @@ var operations = []Operation{
 		Tags:           []string{"Orders (DOMS)"},
 		Summary:        "Call bulk orders action",
 		Description:    "Bulk action of orders",
-		Permissions:    []string{"ORDER_CANCEL", "ORDER_FORCE_CANCEL", "ORDER_WRITE"},
+		Permissions:    []string{"ORDER_CANCEL", "ORDER_FORCE_CANCEL", "ORDER_UNLOCK", "ORDER_WRITE"},
 		HasBody:        true,
 		SampleBody:     "{\n  \"name\": \"BULK_FORCE_CANCEL\",\n  \"orders\": [\n    {\n      \"orderId\": \"string\",\n      \"version\": 1\n    }\n  ]\n}\n",
 		SampleResponse: "[\n  {\n    \"orderId\": \"string\",\n    \"status\": \"UPDATED\"\n  }\n]\n",
