@@ -3663,6 +3663,19 @@ var operations = []Operation{
 		},
 	},
 	{
+		ID:          "getPackingTargetContainerIdentifierDocument",
+		Method:      "GET",
+		Path:        "/api/packjobs/{packJobId}/targetcontainers/{targetcontainerId}/identifierdocument",
+		Tags:        []string{"Packing (Operations)"},
+		Summary:     "Get target container identifier document",
+		Description: "Get the identifier document related to this target container",
+		Permissions: []string{"PACKJOB_READ"},
+		Params: []Param{
+			{Name: "packJobId", In: InPath, Type: TypeString, Required: true, Description: "ID of the pack job of the related container for which you want to get the identifier document"},
+			{Name: "targetcontainerId", In: InPath, Type: TypeString, Required: true, Description: "ID of the packingTargetContainer for which you want to get the identifier document"},
+		},
+	},
+	{
 		ID:      "getPackingTargetContainerTransferLabel",
 		Method:  "GET",
 		Path:    "/api/packjobs/{packJobId}/targetcontainers/{targetcontainerId}/transferlabel",
