@@ -207,7 +207,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"channel\": \"DELIVERY\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"paid\": false,\n  \"parcelRef\": \"2fOge2ZGW54K4TgvDTQw\",\n  \"pickJobRef\": \"ca525716-7208-4a63-a2a6-11274eb37f67-0\",\n  \"routingPlanRef\": \"ca525716-7208-4a63-a2a6-11274eb37f67-0\",\n  \"shipmentRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"targetTime\": \"2026-01-01T00:00:00Z\",\n  \"tenantOrderId\": \"R456728546\"\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"channel\": \"DELIVERY\",\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"95EWrieX09OmeriXIUbb\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"paid\": false,\n  \"parcelRef\": \"2fOge2ZGW54K4TgvDTQw\",\n  \"pickJobRef\": \"ca525716-7208-4a63-a2a6-11274eb37f67-0\",\n  \"shipmentRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"status\": \"OPEN\",\n  \"targetTime\": \"2026-01-01T00:00:00Z\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"channel\": \"DELIVERY\",\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"95EWrieX09OmeriXIUbb\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"paid\": false,\n  \"parcelRef\": \"2fOge2ZGW54K4TgvDTQw\",\n  \"pickJobRef\": \"ca525716-7208-4a63-a2a6-11274eb37f67-0\",\n  \"pickupIdentifier\": \"H7K29XQRM4\",\n  \"shipmentRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"status\": \"OPEN\",\n  \"targetTime\": \"2026-01-01T00:00:00Z\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:             "addLabel",
@@ -2936,7 +2936,19 @@ var operations = []Operation{
 		Params: []Param{
 			{Name: "handoverjobId", In: InPath, Type: TypeString, Required: true, Description: "ID of the handoverjob you want to get"},
 		},
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"channel\": \"DELIVERY\",\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"95EWrieX09OmeriXIUbb\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"paid\": false,\n  \"parcelRef\": \"2fOge2ZGW54K4TgvDTQw\",\n  \"pickJobRef\": \"ca525716-7208-4a63-a2a6-11274eb37f67-0\",\n  \"shipmentRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"status\": \"OPEN\",\n  \"targetTime\": \"2026-01-01T00:00:00Z\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"channel\": \"DELIVERY\",\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"95EWrieX09OmeriXIUbb\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"paid\": false,\n  \"parcelRef\": \"2fOge2ZGW54K4TgvDTQw\",\n  \"pickJobRef\": \"ca525716-7208-4a63-a2a6-11274eb37f67-0\",\n  \"pickupIdentifier\": \"H7K29XQRM4\",\n  \"shipmentRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"status\": \"OPEN\",\n  \"targetTime\": \"2026-01-01T00:00:00Z\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+	},
+	{
+		ID:          "getHandoverjobPickupIdentifierLabel",
+		Method:      "GET",
+		Path:        "/api/handoverjobs/{handoverjobId}/pickupidentifier",
+		Tags:        []string{"Handovers (Operations)"},
+		Summary:     "Get handover job pickupIdentifier label",
+		Description: "Get the pickupIdentifier label PDF for a handover job.",
+		Permissions: []string{"HANDOVERJOB_READ"},
+		Params: []Param{
+			{Name: "handoverjobId", In: InPath, Type: TypeString, Required: true, Description: "ID of the handoverjob you want to get the pickupIdentifier label for"},
+		},
 	},
 	{
 		ID:          "getInboundProcess",
@@ -4736,7 +4748,7 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		SampleBody:     "{\n  \"name\": \"CANCEL\",\n  \"payload\": {\n    \"handoverJobCancelReason\": \"CONSUMER_NO_SHOW\"\n  },\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"channel\": \"DELIVERY\",\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"95EWrieX09OmeriXIUbb\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"paid\": false,\n  \"parcelRef\": \"2fOge2ZGW54K4TgvDTQw\",\n  \"pickJobRef\": \"ca525716-7208-4a63-a2a6-11274eb37f67-0\",\n  \"shipmentRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"status\": \"OPEN\",\n  \"targetTime\": \"2026-01-01T00:00:00Z\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"channel\": \"DELIVERY\",\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"95EWrieX09OmeriXIUbb\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"paid\": false,\n  \"parcelRef\": \"2fOge2ZGW54K4TgvDTQw\",\n  \"pickJobRef\": \"ca525716-7208-4a63-a2a6-11274eb37f67-0\",\n  \"pickupIdentifier\": \"H7K29XQRM4\",\n  \"shipmentRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"status\": \"OPEN\",\n  \"targetTime\": \"2026-01-01T00:00:00Z\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:             "healthCheck",
@@ -5026,7 +5038,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"actions\": [\n    {\n      \"action\": \"ModifyHandoverjob\"\n    }\n  ],\n  \"version\": 42\n}\n",
-		SampleResponse: "{\n  \"anonymized\": false,\n  \"channel\": \"DELIVERY\",\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"95EWrieX09OmeriXIUbb\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"paid\": false,\n  \"parcelRef\": \"2fOge2ZGW54K4TgvDTQw\",\n  \"pickJobRef\": \"ca525716-7208-4a63-a2a6-11274eb37f67-0\",\n  \"shipmentRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"status\": \"OPEN\",\n  \"targetTime\": \"2026-01-01T00:00:00Z\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
+		SampleResponse: "{\n  \"anonymized\": false,\n  \"channel\": \"DELIVERY\",\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"id\": \"95EWrieX09OmeriXIUbb\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n  \"paid\": false,\n  \"parcelRef\": \"2fOge2ZGW54K4TgvDTQw\",\n  \"pickJobRef\": \"ca525716-7208-4a63-a2a6-11274eb37f67-0\",\n  \"pickupIdentifier\": \"H7K29XQRM4\",\n  \"shipmentRef\": \"Esb20gpHBL94X5NdMp3C\",\n  \"status\": \"OPEN\",\n  \"targetTime\": \"2026-01-01T00:00:00Z\",\n  \"tenantOrderId\": \"R456728546\",\n  \"version\": 42,\n  \"workflowInformation\": {\n    \"instanceRef\": \"64c13ab08edf48a008793cac\"\n  }\n}\n",
 	},
 	{
 		ID:          "patchLabel",
@@ -6398,7 +6410,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"query\": {\n    \"facilityRef\": {},\n    \"id\": {},\n    \"pickJobRef\": {},\n    \"targetTime\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",
-		SampleResponse: "{\n  \"handoverJobs\": [\n    {\n      \"anonymized\": false,\n      \"channel\": \"DELIVERY\",\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"id\": \"95EWrieX09OmeriXIUbb\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n      \"paid\": false,\n      \"parcelRef\": \"2fOge2ZGW54K4TgvDTQw\",\n      \"pickJobRef\": \"ca525716-7208-4a63-a2a6-11274eb37f67-0\",\n      \"shipmentRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"status\": \"OPEN\",\n      \"targetTime\": \"2026-01-01T00:00:00Z\",\n      \"tenantOrderId\": \"R456728546\",\n      \"version\": 42,\n      \"workflowInformation\": {\n        \"instanceRef\": \"64c13ab08edf48a008793cac\"\n      }\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
+		SampleResponse: "{\n  \"handoverJobs\": [\n    {\n      \"anonymized\": false,\n      \"channel\": \"DELIVERY\",\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"facilityRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"id\": \"95EWrieX09OmeriXIUbb\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"orderDate\": \"2020-02-03T08:45:50.525Z\",\n      \"paid\": false,\n      \"parcelRef\": \"2fOge2ZGW54K4TgvDTQw\",\n      \"pickJobRef\": \"ca525716-7208-4a63-a2a6-11274eb37f67-0\",\n      \"pickupIdentifier\": \"H7K29XQRM4\",\n      \"shipmentRef\": \"Esb20gpHBL94X5NdMp3C\",\n      \"status\": \"OPEN\",\n      \"targetTime\": \"2026-01-01T00:00:00Z\",\n      \"tenantOrderId\": \"R456728546\",\n      \"version\": 42,\n      \"workflowInformation\": {\n        \"instanceRef\": \"64c13ab08edf48a008793cac\"\n      }\n    }\n  ],\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  }\n}\n",
 	},
 	{
 		ID:             "searchInboundProcess",

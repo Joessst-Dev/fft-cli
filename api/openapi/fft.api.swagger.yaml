@@ -11429,6 +11429,47 @@ paths:
       summary: Call handover job action
       tags:
         - Handovers (Operations)
+  /api/handoverjobs/{handoverjobId}/pickupidentifier:
+    get:
+      description: Get the pickupIdentifier label PDF for a handover job.
+      operationId: getHandoverjobPickupIdentifierLabel
+      parameters:
+        - description: ID of the handoverjob you want to get the pickupIdentifier label for
+          in: path
+          name: handoverjobId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/pdf: {}
+          description: The pickupIdentifier label for the given handover job
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Entity not found
+      summary: Get handover job pickupIdentifier label
+      x-fft-permissions:
+        - HANDOVERJOB_READ
+      tags:
+        - Handovers (Operations)
   /api/handoverjobs/{handoverJobId}/signature:
     post:
       description: >-
@@ -36351,6 +36392,7 @@ components:
         - SENDLABEL
         - RETURNLABEL
         - TRANSFERLABEL
+        - PICKUPIDENTIFIER
         - CUSTOMS
         - SIGNATURE_DRAFT
         - SIGNATURE_SIGNED
@@ -42270,6 +42312,21 @@ components:
                 assigned to
               example: ca525716-7208-4a63-a2a6-11274eb37f67-0
               type: string
+            pickupIdentifier:
+              description: >-
+                A short, human readable code used to identify this handoverjob
+                when a customer collects the order at the facility, either by
+                scanning a QR code or by typing the code into a search. It is
+                generated automatically during creation and cannot be set or
+                changed by clients. Consists of 10 characters from the alphabet
+                0123456789ABCDEFGHJKMNPQRSTVWXYZ, which omits the easily
+                confused letters I, L, O and U. Clients may display it grouped,
+                for example H7K29-XQRM4. The code is drawn at random from a
+                space of 32^10 and uniqueness is not enforced, so a lookup by
+                pickupIdentifier can in rare cases return more than one
+                handoverjob and clients should be able to handle that.
+              example: H7K29XQRM4
+              type: string
             pickupServices:
               items:
                 $ref: '#/components/schemas/HandoverJobPickupService'
@@ -42282,6 +42339,12 @@ components:
               type: string
             recipientAddress:
               $ref: '#/components/schemas/ConsumerAddress'
+            scannableCodes:
+              description: Codes that can be used for scanning this handover job
+              items:
+                type: string
+              maxItems: 20
+              type: array
             shipmentRef:
               description: >-
                 This part of the API is deprecated. For details, see the <a
@@ -42605,6 +42668,12 @@ components:
             assigned to
           example: ca525716-7208-4a63-a2a6-11274eb37f67-0
           type: string
+        scannableCodes:
+          description: Codes that can be used for scanning this handoverjob
+          items:
+            type: string
+          maxItems: 20
+          type: array
         shipmentRef:
           description: >-
             This part of the API is deprecated. For details, see the <a
@@ -43191,6 +43260,10 @@ components:
             - $ref: '#/components/schemas/StringEqFilter'
           description: Search by pickJobRef
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+        pickupIdentifier:
+          allOf:
+            - $ref: '#/components/schemas/StringEqFilter'
+          description: Search by pickupIdentifier
         recipientAddress:
           allOf:
             - $ref: '#/components/schemas/HandoverJobRecipientAddressFilter'
@@ -67989,6 +68062,10 @@ components:
       description: ProcessReferencedFilter
     ProcessReferencedHandoverJobFilter:
       properties:
+        pickupIdentifier:
+          allOf:
+            - $ref: '#/components/schemas/StringSearchFilter'
+          description: Search by pickupIdentifier
         status:
           allOf:
             - $ref: >-
@@ -85465,6 +85542,21 @@ components:
                 The reference to the pickjob for which the handoverjob is
                 assigned to
               example: ca525716-7208-4a63-a2a6-11274eb37f67-0
+              type: string
+            pickupIdentifier:
+              description: >-
+                A short, human readable code used to identify this handoverjob
+                when a customer collects the order at the facility, either by
+                scanning a QR code or by typing the code into a search. It is
+                generated automatically during creation and cannot be set or
+                changed by clients. Consists of 10 characters from the alphabet
+                0123456789ABCDEFGHJKMNPQRSTVWXYZ, which omits the easily
+                confused letters I, L, O and U. Clients may display it grouped,
+                for example H7K29-XQRM4. The code is drawn at random from a
+                space of 32^10 and uniqueness is not enforced, so a lookup by
+                pickupIdentifier can in rare cases return more than one
+                handoverjob and clients should be able to handle that.
+              example: H7K29XQRM4
               type: string
             recipientAddress:
               $ref: '#/components/schemas/ConsumerAddress'
