@@ -14771,6 +14771,9 @@ type HandoverJobSearchQuery struct {
 	// PickJobRef Search by pickJobRef
 	PickJobRef *StringEqFilter `json:"pickJobRef,omitempty"`
 
+	// PickupIdentifier Search by pickupIdentifier
+	PickupIdentifier *StringEqFilter `json:"pickupIdentifier,omitempty"`
+
 	// RecipientAddress Nested search by recipientAddress
 	RecipientAddress *HandoverJobRecipientAddressFilter `json:"recipientAddress,omitempty"`
 
@@ -18671,6 +18674,9 @@ type ProcessReferencedFilter struct {
 
 // ProcessReferencedHandoverJobFilter ProcessReferencedHandoverJobFilter
 type ProcessReferencedHandoverJobFilter struct {
+	// PickupIdentifier Search by pickupIdentifier
+	PickupIdentifier *StringSearchFilter `json:"pickupIdentifier,omitempty"`
+
 	// Status Search by status
 	Status *ProcessReferencedHandoverJobHandoverjobStatusEnumListFilter `json:"status,omitempty"`
 }
