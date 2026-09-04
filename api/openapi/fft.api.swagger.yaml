@@ -21409,7 +21409,7 @@ paths:
         - Checkout Options (DOMS)
   /api/promises/deliverypromise:
     post:
-      description: ''
+      description: Endpoint to create a promise order.
       operationId: postDeliveryPromise
       requestBody:
         content:
@@ -21424,7 +21424,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseForDeliveryPromise'
-          description: The order promise was created URL of the order promse.
+          description: The order promise was created URL of the order promise.
         '400':
           content:
             application/json:
@@ -56381,6 +56381,7 @@ components:
         customServices:
           items:
             $ref: '#/components/schemas/CustomServiceReferenceForCreation'
+          maxItems: 100
           minItems: 1
           type: array
         deliveryPreferences:
@@ -56393,6 +56394,7 @@ components:
         orderLineItems:
           items:
             $ref: '#/components/schemas/OrderLineItemForCreation'
+          maxItems: 100
           type: array
         paymentInfo:
           $ref: '#/components/schemas/OrderPaymentInfoForCreation'
@@ -56403,6 +56405,7 @@ components:
         statusReasons:
           items:
             $ref: '#/components/schemas/OrderStatusReason'
+          maxItems: 100
           type: array
         stickers:
           items:
@@ -56420,6 +56423,7 @@ components:
         tags:
           items:
             $ref: '#/components/schemas/TagReference'
+          maxItems: 100
           minItems: 1
           type: array
       required:
@@ -69294,6 +69298,7 @@ components:
         customServices:
           items:
             $ref: '#/components/schemas/CustomServiceReferenceForCreation'
+          maxItems: 100
           minItems: 1
           type: array
         deliveryPreferences:
@@ -69306,9 +69311,12 @@ components:
         orderLineItems:
           items:
             $ref: '#/components/schemas/OrderLineItemForCreation'
+          maxItems: 100
           type: array
         paymentInfo:
           $ref: '#/components/schemas/OrderPaymentInfoForCreation'
+        pricing:
+          $ref: '#/components/schemas/OrderPricingForCreation'
         promisesOptions:
           $ref: '#/components/schemas/OrderPromisesOptions'
         status:
@@ -69316,6 +69324,7 @@ components:
         statusReasons:
           items:
             $ref: '#/components/schemas/OrderStatusReason'
+          maxItems: 100
           type: array
         stickers:
           items:
@@ -69333,6 +69342,7 @@ components:
         tags:
           items:
             $ref: '#/components/schemas/TagReference'
+          maxItems: 100
           minItems: 1
           type: array
       required:
@@ -71845,6 +71855,8 @@ components:
           type: string
         orderVersion:
           type: number
+        pricing:
+          $ref: '#/components/schemas/OrderPricing'
         promisesOptions:
           $ref: '#/components/schemas/OrderPromisesOptions'
         shipToCustomer:
@@ -73766,6 +73778,8 @@ components:
             - PROCESS_MANUAL_ASSIGNED
             - TASK_MANUAL_REROUTED
             - PICKJOB_REJECTED
+            - PICKJOB_SHORTPICKED
+            - PICKJOB_ABORTED
           type: string
         created:
           description: Creation date of this routing journal entry
@@ -80515,6 +80529,10 @@ components:
         paymentInfo:
           $ref: '#/components/schemas/OrderPaymentInfoForCreation'
           description: Payment information for the order
+        pricing:
+          allOf:
+            - $ref: '#/components/schemas/OrderPricing'
+          description: Pricing information for the order
         promisesOptions:
           $ref: '#/components/schemas/OrderPromisesOptions'
           description: Promise options for the order
@@ -80791,6 +80809,10 @@ components:
         paymentInfo:
           $ref: '#/components/schemas/OrderPaymentInfoForCreation'
           description: Payment information for the order
+        pricing:
+          allOf:
+            - $ref: '#/components/schemas/OrderPricingForCreation'
+          description: Pricing information for the order
         promisesOptions:
           $ref: '#/components/schemas/OrderPromisesOptions'
           description: Promise options for the order
@@ -80863,6 +80885,10 @@ components:
         paymentInfo:
           $ref: '#/components/schemas/OrderPaymentInfoForCreation'
           description: Payment information for the order
+        pricing:
+          allOf:
+            - $ref: '#/components/schemas/OrderPricingForCreation'
+          description: Pricing information for the order
         promisesOptions:
           $ref: '#/components/schemas/OrderPromisesOptions'
           description: Promise options for the order
@@ -80937,6 +80963,10 @@ components:
         paymentInfo:
           $ref: '#/components/schemas/OrderPaymentInfoForCreation'
           description: Payment information for the order
+        pricing:
+          allOf:
+            - $ref: '#/components/schemas/OrderPricingForCreation'
+          description: Pricing information for the order
         promisesOptions:
           $ref: '#/components/schemas/OrderPromisesOptions'
           description: Promise options for the order
@@ -81354,8 +81384,9 @@ components:
           type: array
         validUntil:
           description: >-
-            The latest date at which this option is still valid in UTC (ISO8601
-            format).
+            The latest date at which this option is still valid, as an ISO8601
+            UTC timestamp string.
+          example: 2025-02-05T08:45:50.525Z
           type: string
       required:
         - id

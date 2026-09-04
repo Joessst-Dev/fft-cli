@@ -19193,6 +19193,9 @@ type PromiseRequest struct {
 	// PaymentInfo OrderPaymentInfoForCreation
 	PaymentInfo *OrderPaymentInfoForCreation `json:"paymentInfo,omitempty"`
 
+	// Pricing This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Customer-provided order-level pricing inputs. All arrays are optional — if a pricing feature block is missing, OMS treats the feature as not relevant. On update, pricing uses partial-merge semantics: only the provided arrays are replaced, omitted arrays retain their previous values.
+	Pricing *OrderPricingForCreation `json:"pricing,omitempty"`
+
 	// PromisesOptions OrderPromisesOptions
 	PromisesOptions *OrderPromisesOptions `json:"promisesOptions,omitempty"`
 
@@ -19346,6 +19349,9 @@ type ResponseForDeliveryPromise struct {
 	Collect      *DeliveryPromiseCollect `json:"collect,omitempty"`
 	OrderRef     string                  `json:"orderRef"`
 	OrderVersion float32                 `json:"orderVersion"`
+
+	// Pricing This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Order pricing with customer-provided inputs and OMS-calculated totals.
+	Pricing *OrderPricing `json:"pricing,omitempty"`
 
 	// PromisesOptions OrderPromisesOptions
 	PromisesOptions *OrderPromisesOptions      `json:"promisesOptions,omitempty"`
@@ -21368,7 +21374,7 @@ type SourcingOption struct {
 	TotalPenalty float32                  `json:"totalPenalty"`
 	Transfers    []SourcingOptionTransfer `json:"transfers"`
 
-	// ValidUntil The latest date at which this option is still valid in UTC (ISO8601 format).
+	// ValidUntil The latest date at which this option is still valid, as an ISO8601 UTC timestamp string.
 	ValidUntil *string `json:"validUntil,omitempty"`
 }
 
