@@ -6339,6 +6339,222 @@ func (e ProcessReferencedReturnJobItemReturnJobStatusEnumFilterNotEq) Valid() bo
 	}
 }
 
+// Defines values for ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq.
+const (
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqCANCELED         ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "CANCELED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqFAILED           ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "FAILED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqFAILEDREROUTE    ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "FAILED_REROUTE"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqFALLBACKROUTING  ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "FALLBACK_ROUTING"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqINITIAL          ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "INITIAL"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqINPREPARATION    ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "IN_PREPARATION"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqLOCKED           ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "LOCKED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqMANUALPLANNED    ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "MANUAL_PLANNED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqNOTROUTABLE      ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "NOT_ROUTABLE"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqOBSOLETE         ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "OBSOLETE"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqPLANNED          ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "PLANNED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqPRIORITIZED      ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "PRIORITIZED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqPROMISED         ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "PROMISED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqPROPOSED         ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "PROPOSED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqREDUNDANTREROUTE ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "REDUNDANT_REROUTE"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqREROUTED         ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "REROUTED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqRETRYABLE        ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "RETRYABLE"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqROUTED           ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "ROUTED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqROUTING          ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "ROUTING"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqWAITING          ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq = "WAITING"
+)
+
+// Valid indicates whether the value is a known member of the ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq enum.
+func (e ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq) Valid() bool {
+	switch e {
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqCANCELED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqFAILED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqFAILEDREROUTE:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqFALLBACKROUTING:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqINITIAL:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqINPREPARATION:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqLOCKED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqMANUALPLANNED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqNOTROUTABLE:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqOBSOLETE:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqPLANNED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqPRIORITIZED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqPROMISED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqPROPOSED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqREDUNDANTREROUTE:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqREROUTED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqRETRYABLE:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqROUTED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqROUTING:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEqWAITING:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn.
+const (
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInCANCELED         ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "CANCELED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInFAILED           ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "FAILED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInFAILEDREROUTE    ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "FAILED_REROUTE"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInFALLBACKROUTING  ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "FALLBACK_ROUTING"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInINITIAL          ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "INITIAL"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInINPREPARATION    ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "IN_PREPARATION"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInLOCKED           ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "LOCKED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInMANUALPLANNED    ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "MANUAL_PLANNED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInNOTROUTABLE      ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "NOT_ROUTABLE"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInOBSOLETE         ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "OBSOLETE"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInPLANNED          ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "PLANNED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInPRIORITIZED      ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "PRIORITIZED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInPROMISED         ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "PROMISED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInPROPOSED         ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "PROPOSED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInREDUNDANTREROUTE ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "REDUNDANT_REROUTE"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInREROUTED         ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "REROUTED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInRETRYABLE        ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "RETRYABLE"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInROUTED           ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "ROUTED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInROUTING          ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "ROUTING"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInWAITING          ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn = "WAITING"
+)
+
+// Valid indicates whether the value is a known member of the ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn enum.
+func (e ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn) Valid() bool {
+	switch e {
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInCANCELED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInFAILED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInFAILEDREROUTE:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInFALLBACKROUTING:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInINITIAL:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInINPREPARATION:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInLOCKED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInMANUALPLANNED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInNOTROUTABLE:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInOBSOLETE:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInPLANNED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInPRIORITIZED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInPROMISED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInPROPOSED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInREDUNDANTREROUTE:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInREROUTED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInRETRYABLE:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInROUTED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInROUTING:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterInWAITING:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq.
+const (
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqCANCELED         ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "CANCELED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqFAILED           ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "FAILED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqFAILEDREROUTE    ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "FAILED_REROUTE"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqFALLBACKROUTING  ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "FALLBACK_ROUTING"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqINITIAL          ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "INITIAL"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqINPREPARATION    ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "IN_PREPARATION"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqLOCKED           ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "LOCKED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqMANUALPLANNED    ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "MANUAL_PLANNED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqNOTROUTABLE      ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "NOT_ROUTABLE"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqOBSOLETE         ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "OBSOLETE"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqPLANNED          ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "PLANNED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqPRIORITIZED      ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "PRIORITIZED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqPROMISED         ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "PROMISED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqPROPOSED         ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "PROPOSED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqREDUNDANTREROUTE ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "REDUNDANT_REROUTE"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqREROUTED         ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "REROUTED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqRETRYABLE        ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "RETRYABLE"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqROUTED           ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "ROUTED"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqROUTING          ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "ROUTING"
+	ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqWAITING          ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq = "WAITING"
+)
+
+// Valid indicates whether the value is a known member of the ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq enum.
+func (e ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq) Valid() bool {
+	switch e {
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqCANCELED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqFAILED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqFAILEDREROUTE:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqFALLBACKROUTING:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqINITIAL:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqINPREPARATION:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqLOCKED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqMANUALPLANNED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqNOTROUTABLE:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqOBSOLETE:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqPLANNED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqPRIORITIZED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqPROMISED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqPROPOSED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqREDUNDANTREROUTE:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqREROUTED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqRETRYABLE:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqROUTED:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqROUTING:
+		return true
+	case ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEqWAITING:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ProcessReferencedServiceJobServiceJobStatusEnumFilterEq.
 const (
 	ProcessReferencedServiceJobServiceJobStatusEnumFilterEqCANCELLED       ProcessReferencedServiceJobServiceJobStatusEnumFilterEq = "CANCELLED"
@@ -10622,25 +10838,25 @@ func (e StowJobStatusTypeEnumFilterIn) Valid() bool {
 
 // Defines values for StowJobStatusTypeEnumFilterNotEq.
 const (
-	StowJobStatusTypeEnumFilterNotEqCANCELED   StowJobStatusTypeEnumFilterNotEq = "CANCELED"
-	StowJobStatusTypeEnumFilterNotEqCLOSED     StowJobStatusTypeEnumFilterNotEq = "CLOSED"
-	StowJobStatusTypeEnumFilterNotEqINPROGRESS StowJobStatusTypeEnumFilterNotEq = "IN_PROGRESS"
-	StowJobStatusTypeEnumFilterNotEqOPEN       StowJobStatusTypeEnumFilterNotEq = "OPEN"
-	StowJobStatusTypeEnumFilterNotEqPAUSED     StowJobStatusTypeEnumFilterNotEq = "PAUSED"
+	CANCELED   StowJobStatusTypeEnumFilterNotEq = "CANCELED"
+	CLOSED     StowJobStatusTypeEnumFilterNotEq = "CLOSED"
+	INPROGRESS StowJobStatusTypeEnumFilterNotEq = "IN_PROGRESS"
+	OPEN       StowJobStatusTypeEnumFilterNotEq = "OPEN"
+	PAUSED     StowJobStatusTypeEnumFilterNotEq = "PAUSED"
 )
 
 // Valid indicates whether the value is a known member of the StowJobStatusTypeEnumFilterNotEq enum.
 func (e StowJobStatusTypeEnumFilterNotEq) Valid() bool {
 	switch e {
-	case StowJobStatusTypeEnumFilterNotEqCANCELED:
+	case CANCELED:
 		return true
-	case StowJobStatusTypeEnumFilterNotEqCLOSED:
+	case CLOSED:
 		return true
-	case StowJobStatusTypeEnumFilterNotEqINPROGRESS:
+	case INPROGRESS:
 		return true
-	case StowJobStatusTypeEnumFilterNotEqOPEN:
+	case OPEN:
 		return true
-	case StowJobStatusTypeEnumFilterNotEqPAUSED:
+	case PAUSED:
 		return true
 	default:
 		return false
@@ -16849,7 +17065,7 @@ type Order struct {
 	// PaymentInfo OrderPaymentInfo
 	PaymentInfo *OrderPaymentInfo `json:"paymentInfo,omitempty"`
 
-	// Pricing This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
+	// Pricing This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
 	Pricing *OrderPricing `json:"pricing,omitempty"`
 
 	// ProcessId Id of the global process related to this entity. For example used for starting the GDPR process and others.
@@ -17055,7 +17271,7 @@ type OrderForCreation struct {
 	// PaymentInfo OrderPaymentInfoForCreation
 	PaymentInfo *OrderPaymentInfoForCreation `json:"paymentInfo,omitempty"`
 
-	// Pricing This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
+	// Pricing This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
 	Pricing *OrderPricingForCreation `json:"pricing,omitempty"`
 
 	// PromisesOptions OrderPromisesOptions
@@ -17149,7 +17365,7 @@ type OrderForUpdate struct {
 	// PreferredHandlingTime Updates the preferred handling time for ship-from-store orders or the provisioning time for click-and-collect orders.
 	PreferredHandlingTime *time.Time `json:"preferredHandlingTime,omitempty"`
 
-	// Pricing This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
+	// Pricing This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
 	Pricing *OrderPricingForCreation `json:"pricing,omitempty"`
 
 	// Version The version of the document to be used in optimistic locking mechanisms.
@@ -17399,11 +17615,11 @@ type OrderPricing struct {
 	Fees      *[]OrderPricingFee      `json:"fees,omitempty"`
 	Taxes     *[]OrderPricingTax      `json:"taxes,omitempty"`
 
-	// Total This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />OrderPricingTotal
+	// Total This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />OrderPricingTotal
 	Total *OrderPricingTotal `json:"total,omitempty"`
 }
 
-// OrderPricingDiscount This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />OrderPricingDiscount
+// OrderPricingDiscount This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />OrderPricingDiscount
 type OrderPricingDiscount struct {
 	// Code Discount code
 	Code *string `json:"code,omitempty"`
@@ -17433,7 +17649,7 @@ type OrderPricingDiscount struct {
 // OrderPricingDiscountType Type of the discount. ABSOLUTE requires value, PERCENTAGE requires percentage.
 type OrderPricingDiscountType string
 
-// OrderPricingFee This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />OrderPricingFee
+// OrderPricingFee This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />OrderPricingFee
 type OrderPricingFee struct {
 	// Name Name of the fee
 	Name *string `json:"name,omitempty"`
@@ -17442,14 +17658,14 @@ type OrderPricingFee struct {
 	Value *MonetaryValue `json:"value,omitempty"`
 }
 
-// OrderPricingForCreation This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Customer-provided order-level pricing inputs. All arrays are optional — if a pricing feature block is missing, OMS treats the feature as not relevant. On update, pricing uses partial-merge semantics: only the provided arrays are replaced, omitted arrays retain their previous values.
+// OrderPricingForCreation This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Customer-provided order-level pricing inputs. All arrays are optional — if a pricing feature block is missing, OMS treats the feature as not relevant. On update, pricing uses partial-merge semantics: only the provided arrays are replaced, omitted arrays retain their previous values.
 type OrderPricingForCreation struct {
 	Discounts *[]OrderPricingDiscount `json:"discounts,omitempty"`
 	Fees      *[]OrderPricingFee      `json:"fees,omitempty"`
 	Taxes     *[]OrderPricingTax      `json:"taxes,omitempty"`
 }
 
-// OrderPricingTax This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />OrderPricingTax
+// OrderPricingTax This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />OrderPricingTax
 type OrderPricingTax struct {
 	// RatePercent Tax rate as percentage
 	RatePercent *float32 `json:"ratePercent,omitempty"`
@@ -17467,13 +17683,13 @@ type OrderPricingTax struct {
 	Value MonetaryValue `json:"value"`
 }
 
-// OrderPricingTotal This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />OrderPricingTotal
+// OrderPricingTotal This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />OrderPricingTotal
 type OrderPricingTotal struct {
-	// PriceBreakdown This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Calculated order price breakdown. All fields are optional — if a derived field cannot be calculated, it is omitted.
+	// PriceBreakdown This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Calculated order price breakdown. All fields are optional — if a derived field cannot be calculated, it is omitted.
 	PriceBreakdown *OrderPricingTotals `json:"priceBreakdown,omitempty"`
 }
 
-// OrderPricingTotals This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Calculated order price breakdown. All fields are optional — if a derived field cannot be calculated, it is omitted.
+// OrderPricingTotals This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Calculated order price breakdown. All fields are optional — if a derived field cannot be calculated, it is omitted.
 type OrderPricingTotals struct {
 	SubTotal                *MonetaryValue       `json:"subTotal,omitempty"`
 	Total                   *MonetaryValue       `json:"total,omitempty"`
@@ -17717,7 +17933,7 @@ type OrderTagsListFilter struct {
 	Exists *bool `json:"exists,omitempty"`
 }
 
-// OrderTotalDiscounts This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Aggregate discount total with a breakdown by source. Values follow the negative-or-zero discount convention.
+// OrderTotalDiscounts This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Aggregate discount total with a breakdown by source. Values follow the negative-or-zero discount convention.
 type OrderTotalDiscounts struct {
 	Breakdown *struct {
 		LineItemDiscounts *MonetaryValue `json:"lineItemDiscounts,omitempty"`
@@ -18650,6 +18866,9 @@ type ProcessReferencedFilter struct {
 	// ReturnJob Nested search by returnJob
 	ReturnJob *ProcessReferencedReturnJobFilter `json:"returnJob,omitempty"`
 
+	// RoutingPlan Nested search by routingPlan
+	RoutingPlan *ProcessReferencedRoutingPlanFilter `json:"routingPlan,omitempty"`
+
 	// ServiceJob Nested search by serviceJob
 	ServiceJob *ProcessReferencedServiceJobFilter `json:"serviceJob,omitempty"`
 
@@ -18674,11 +18893,23 @@ type ProcessReferencedFilter struct {
 
 // ProcessReferencedHandoverJobFilter ProcessReferencedHandoverJobFilter
 type ProcessReferencedHandoverJobFilter struct {
+	// FacilityRefs Search by facilityRefs
+	FacilityRefs *StringListFilter `json:"facilityRefs,omitempty"`
+
+	// GlobalActor Nested search by globalActor
+	GlobalActor *ProcessReferencedHandoverJobGlobalActorFilter `json:"globalActor,omitempty"`
+
 	// PickupIdentifier Search by pickupIdentifier
 	PickupIdentifier *StringSearchFilter `json:"pickupIdentifier,omitempty"`
 
 	// Status Search by status
 	Status *ProcessReferencedHandoverJobHandoverjobStatusEnumListFilter `json:"status,omitempty"`
+}
+
+// ProcessReferencedHandoverJobGlobalActorFilter ProcessReferencedHandoverJobGlobalActorFilter
+type ProcessReferencedHandoverJobGlobalActorFilter struct {
+	// Id Search by id
+	Id *StringSearchFilter `json:"id,omitempty"`
 }
 
 // ProcessReferencedHandoverJobHandoverjobStatusEnumFilter ProcessReferencedHandoverJobHandoverjobStatusEnumFilter
@@ -18716,6 +18947,12 @@ type ProcessReferencedOrderFilter struct {
 	// DesiredDeliveryTime Search by desiredDeliveryTime
 	DesiredDeliveryTime *DateFilter `json:"desiredDeliveryTime,omitempty"`
 
+	// FacilityRefs Search by facilityRefs
+	FacilityRefs *StringListFilter `json:"facilityRefs,omitempty"`
+
+	// GlobalActor Nested search by globalActor
+	GlobalActor *ProcessReferencedOrderGlobalActorFilter `json:"globalActor,omitempty"`
+
 	// OrderDate Search by orderDate
 	OrderDate *DateFilter `json:"orderDate,omitempty"`
 
@@ -18730,6 +18967,12 @@ type ProcessReferencedOrderFilter struct {
 
 	// TenantOrderId Search by tenantOrderId
 	TenantOrderId *StringSearchFilter `json:"tenantOrderId,omitempty"`
+}
+
+// ProcessReferencedOrderGlobalActorFilter ProcessReferencedOrderGlobalActorFilter
+type ProcessReferencedOrderGlobalActorFilter struct {
+	// Id Search by id
+	Id *StringSearchFilter `json:"id,omitempty"`
 }
 
 // ProcessReferencedOrderOrderStatusEnumFilter ProcessReferencedOrderOrderStatusEnumFilter
@@ -18761,8 +19004,20 @@ type ProcessReferencedOrderOrderStatusEnumListFilter struct {
 
 // ProcessReferencedPackJobFilter ProcessReferencedPackJobFilter
 type ProcessReferencedPackJobFilter struct {
+	// FacilityRefs Search by facilityRefs
+	FacilityRefs *StringListFilter `json:"facilityRefs,omitempty"`
+
+	// GlobalActor Nested search by globalActor
+	GlobalActor *ProcessReferencedPackJobGlobalActorFilter `json:"globalActor,omitempty"`
+
 	// Status Search by status
 	Status *ProcessReferencedPackJobPackJobStatusEnumListFilter `json:"status,omitempty"`
+}
+
+// ProcessReferencedPackJobGlobalActorFilter ProcessReferencedPackJobGlobalActorFilter
+type ProcessReferencedPackJobGlobalActorFilter struct {
+	// Id Search by id
+	Id *StringSearchFilter `json:"id,omitempty"`
 }
 
 // ProcessReferencedPackJobPackJobStatusEnumFilter ProcessReferencedPackJobPackJobStatusEnumFilter
@@ -18854,11 +19109,23 @@ type ProcessReferencedParcelTrackingStatusEnumListFilter struct {
 
 // ProcessReferencedPickJobFilter ProcessReferencedPickJobFilter
 type ProcessReferencedPickJobFilter struct {
+	// FacilityRefs Search by facilityRefs
+	FacilityRefs *StringListFilter `json:"facilityRefs,omitempty"`
+
+	// GlobalActor Nested search by globalActor
+	GlobalActor *ProcessReferencedPickJobGlobalActorFilter `json:"globalActor,omitempty"`
+
 	// ShortId Search by shortId
 	ShortId *StringSearchFilter `json:"shortId,omitempty"`
 
 	// Status Search by status
 	Status *ProcessReferencedPickJobPickJobStatusEnumListFilter `json:"status,omitempty"`
+}
+
+// ProcessReferencedPickJobGlobalActorFilter ProcessReferencedPickJobGlobalActorFilter
+type ProcessReferencedPickJobGlobalActorFilter struct {
+	// Id Search by id
+	Id *StringSearchFilter `json:"id,omitempty"`
 }
 
 // ProcessReferencedPickJobPickJobStatusEnumFilter ProcessReferencedPickJobPickJobStatusEnumFilter
@@ -18890,8 +19157,20 @@ type ProcessReferencedPickJobPickJobStatusEnumListFilter struct {
 
 // ProcessReferencedReturnJobFilter ProcessReferencedReturnJobFilter
 type ProcessReferencedReturnJobFilter struct {
+	// GlobalActor Nested search by globalActor
+	GlobalActor *ProcessReferencedReturnJobGlobalActorFilter `json:"globalActor,omitempty"`
+
+	// ReturnFacilityRefs Search by returnFacilityRefs
+	ReturnFacilityRefs *StringListFilter `json:"returnFacilityRefs,omitempty"`
+
 	// Status Search by status
 	Status *ProcessReferencedReturnJobItemReturnJobStatusEnumListFilter `json:"status,omitempty"`
+}
+
+// ProcessReferencedReturnJobGlobalActorFilter ProcessReferencedReturnJobGlobalActorFilter
+type ProcessReferencedReturnJobGlobalActorFilter struct {
+	// Id Search by id
+	Id *StringSearchFilter `json:"id,omitempty"`
 }
 
 // ProcessReferencedReturnJobItemReturnJobStatusEnumFilter ProcessReferencedReturnJobItemReturnJobStatusEnumFilter
@@ -18921,10 +19200,67 @@ type ProcessReferencedReturnJobItemReturnJobStatusEnumListFilter struct {
 	Contains *ProcessReferencedReturnJobItemReturnJobStatusEnumFilter `json:"contains,omitempty"`
 }
 
+// ProcessReferencedRoutingPlanFilter ProcessReferencedRoutingPlanFilter
+type ProcessReferencedRoutingPlanFilter struct {
+	// FacilityRefs Search by facilityRefs
+	FacilityRefs *StringListFilter `json:"facilityRefs,omitempty"`
+
+	// GlobalActor Nested search by globalActor
+	GlobalActor *ProcessReferencedRoutingPlanGlobalActorFilter `json:"globalActor,omitempty"`
+
+	// Status Search by status
+	Status *ProcessReferencedRoutingPlanRoutingPlanStatusEnumListFilter `json:"status,omitempty"`
+}
+
+// ProcessReferencedRoutingPlanGlobalActorFilter ProcessReferencedRoutingPlanGlobalActorFilter
+type ProcessReferencedRoutingPlanGlobalActorFilter struct {
+	// Id Search by id
+	Id *StringSearchFilter `json:"id,omitempty"`
+}
+
+// ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilter ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilter
+type ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilter struct {
+	// Eq Search by status
+	Eq *ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq `json:"eq,omitempty"`
+
+	// In Search by status
+	In *[]ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn `json:"in,omitempty"`
+
+	// NotEq Search by status
+	NotEq *ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq `json:"notEq,omitempty"`
+}
+
+// ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq Search by status
+type ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterEq string
+
+// ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn defines model for ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilter.In.
+type ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterIn string
+
+// ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq Search by status
+type ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilterNotEq string
+
+// ProcessReferencedRoutingPlanRoutingPlanStatusEnumListFilter ProcessReferencedRoutingPlanRoutingPlanStatusEnumListFilter
+type ProcessReferencedRoutingPlanRoutingPlanStatusEnumListFilter struct {
+	// Contains Search by status
+	Contains *ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilter `json:"contains,omitempty"`
+}
+
 // ProcessReferencedServiceJobFilter ProcessReferencedServiceJobFilter
 type ProcessReferencedServiceJobFilter struct {
+	// FacilityRefs Search by facilityRefs
+	FacilityRefs *StringListFilter `json:"facilityRefs,omitempty"`
+
+	// GlobalActor Nested search by globalActor
+	GlobalActor *ProcessReferencedServiceJobGlobalActorFilter `json:"globalActor,omitempty"`
+
 	// Status Search by status
 	Status *ProcessReferencedServiceJobServiceJobStatusEnumListFilter `json:"status,omitempty"`
+}
+
+// ProcessReferencedServiceJobGlobalActorFilter ProcessReferencedServiceJobGlobalActorFilter
+type ProcessReferencedServiceJobGlobalActorFilter struct {
+	// Id Search by id
+	Id *StringSearchFilter `json:"id,omitempty"`
 }
 
 // ProcessReferencedServiceJobServiceJobStatusEnumFilter ProcessReferencedServiceJobServiceJobStatusEnumFilter
@@ -19193,7 +19529,7 @@ type PromiseRequest struct {
 	// PaymentInfo OrderPaymentInfoForCreation
 	PaymentInfo *OrderPaymentInfoForCreation `json:"paymentInfo,omitempty"`
 
-	// Pricing This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Customer-provided order-level pricing inputs. All arrays are optional — if a pricing feature block is missing, OMS treats the feature as not relevant. On update, pricing uses partial-merge semantics: only the provided arrays are replaced, omitted arrays retain their previous values.
+	// Pricing This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Customer-provided order-level pricing inputs. All arrays are optional — if a pricing feature block is missing, OMS treats the feature as not relevant. On update, pricing uses partial-merge semantics: only the provided arrays are replaced, omitted arrays retain their previous values.
 	Pricing *OrderPricingForCreation `json:"pricing,omitempty"`
 
 	// PromisesOptions OrderPromisesOptions
@@ -19350,7 +19686,7 @@ type ResponseForDeliveryPromise struct {
 	OrderRef     string                  `json:"orderRef"`
 	OrderVersion float32                 `json:"orderVersion"`
 
-	// Pricing This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Order pricing with customer-provided inputs and OMS-calculated totals.
+	// Pricing This part of the API is in Beta status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Order pricing with customer-provided inputs and OMS-calculated totals.
 	Pricing *OrderPricing `json:"pricing,omitempty"`
 
 	// PromisesOptions OrderPromisesOptions
