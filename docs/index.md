@@ -31,3 +31,22 @@ features:
   - title: Built for agents too
     details: Ships an agent skill an AI reads before driving fft, compiled into the binary so it can never describe commands you don't have.
 ---
+
+## Why this exists
+
+fulfillmenttools ships an [official Postman
+collection](https://docs.fulfillmenttools.com/documentation/getting-started/access-to-fulfillmenttools-apis),
+and it is good: import it, fill in an environment, and every request in the API is a click
+away — Newman will even run a collection from CI. But it stays inside Postman. A response
+lands in a result pane or a run report, never on stdout, so there is nothing to pipe into
+`jq`, compose into a script, or hand to an agent. And its token is yours to refresh by
+hand once an hour.
+
+`fft` is that same API in your shell. Set your projects up once, switch between them with
+a flag, and let the CLI obtain and refresh tokens invisibly. stdout is data and nothing
+else, so a pipe is always safe.
+
+**And you can drive it without a tenant.** `fft emulator` is a local, in-memory stand-in
+for the API — no account, no credentials, no network.
+
+[Get started →](/guide/install) · [Try it without a tenant →](/guide/try-offline)

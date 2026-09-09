@@ -116,8 +116,10 @@ export default defineConfig({
             { text: 'Discovery', link: '/guide/discovery' },
             { text: 'Recipes', link: '/guide/recipes' },
             { text: 'Templates', link: '/guide/templates' },
+            { text: 'Read-only projects', link: '/guide/read-only' },
             { text: 'Emulator', link: '/guide/emulator' },
             { text: 'Components', link: '/guide/components' },
+            { text: 'AI agents', link: '/guide/agents' },
             { text: 'Troubleshooting', link: '/guide/troubleshooting' },
           ],
         },
@@ -134,9 +136,14 @@ export default defineConfig({
 
     search: { provider: 'local' },
 
+    // A guide page is either generated from a skill asset — which stamps a
+    // `source:` into its front matter — or hand-written, in which case the page
+    // itself is the source. Sending both to the same file (it used to be the
+    // README) means the link is wrong for one of them; ask the page.
     editLink: {
-      pattern: 'https://github.com/Joessst-Dev/fft-cli/edit/main/README.md',
-      text: 'These pages are generated — edit the source',
+      pattern: ({ frontmatter, filePath }) =>
+        `https://github.com/Joessst-Dev/fft-cli/edit/main/${frontmatter.source ?? `docs/${filePath}`}`,
+      text: 'Edit this page on GitHub',
     },
 
     footer: {

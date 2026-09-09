@@ -171,7 +171,7 @@ sboms:
 #
 # Only checksums.txt is signed (artifacts: checksum), so verification is two steps:
 # verify the checksums file's signature, then check the archive against it. This is
-# the procedure README.md's "Verifying a download" documents — do not imply a
+# the procedure the install guide's "Verifying a download" documents — do not imply a
 # per-archive signature exists; none is produced.
 #
 # cosign v3 emits a single Sigstore bundle (cert + signature + Rekor entry in one
@@ -277,7 +277,7 @@ homebrew_casks:
     # archive (there isn't one), and `generate_completions_from_executable` renders a
     # Formula-only DSL call into a Cask. Neither can be verified without publishing a
     # tap. A cask that fails to install is far worse than one without completions, so
-    # the README tells users to run `fft completion <shell>` themselves. Revisit once
+    # the setup guide tells users to run `fft completion <shell>` themselves. Revisit once
     # the tap exists and `brew audit --cask` can adjudicate.
     hooks:
       post:

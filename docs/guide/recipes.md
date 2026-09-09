@@ -1,5 +1,6 @@
 ---
 title: Recipes
+source: internal/skill/assets/references/recipes.md
 ---
 
 # Recipes
@@ -148,7 +149,7 @@ fft template render rush-order --set email=a@b.de --set qty=3 | fft order create
 - The template records the project it was saved under, and warns on stderr if you render it
   while another one is active. Ids do not cross tenants.
 - `--set-string` for an id made only of digits, always. See
-  [Ids are not numbers](https://github.com/Joessst-Dev/fft-cli/blob/main/README.md#ids-are-not-numbers).
+  [Ids are not numbers](#ids-are-not-numbers).
 
 ## Setting up a project
 

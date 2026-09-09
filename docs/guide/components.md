@@ -1,5 +1,6 @@
 ---
 title: Components
+source: internal/skill/assets/references/components.md
 ---
 
 # Components

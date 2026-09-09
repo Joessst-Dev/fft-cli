@@ -25,7 +25,7 @@ sudo mv fft /usr/local/bin/
 ```
 
 Archives are checksummed, SBOM'd, and signed with [cosign](https://docs.sigstore.dev/)
-keylessly — see [Verifying a download](https://github.com/Joessst-Dev/fft-cli/blob/main/README.md#verifying-a-download).
+keylessly — see [Verifying a download](#verifying-a-download).
 
 Confirm it worked:
 
@@ -36,4 +36,26 @@ fft version
 fft tells you when a newer release exists (at most once a day, on stderr, never in your
 way). Set `FFT_NO_UPDATE_CHECK=1` to turn that off.
 
----
+## Verifying a download
+
+Releases are signed keylessly: there is no private key, and the signature is bound to
+this repository and the exact workflow that produced it, in Sigstore's public
+transparency log.
+
+```sh
+cosign verify-blob \
+  --bundle checksums.txt.bundle \
+  --certificate-identity-regexp 'https://github.com/Joessst-Dev/fft-cli/.*' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  checksums.txt
+
+sha256sum --check checksums.txt --ignore-missing
+```
+
+The signature ships as a single Sigstore bundle (`checksums.txt.bundle`) — cert,
+signature and transparency-log entry in one file.
+
+The Homebrew cask strips the `com.apple.quarantine` attribute on install, so macOS
+Gatekeeper does not second-guess the binary — the sha256 and cosign chain above are the
+substitute for notarization. That is standard for an unnotarized tool; if you would rather
+Gatekeeper vet it, download the archive in a browser and verify it by hand instead.

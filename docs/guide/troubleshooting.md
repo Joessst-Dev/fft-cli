@@ -1,5 +1,6 @@
 ---
 title: Troubleshooting
+source: internal/skill/assets/references/troubleshooting.md
 ---
 
 # When something goes wrong

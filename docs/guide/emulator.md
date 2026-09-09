@@ -1,5 +1,6 @@
 ---
 title: Emulator
+source: internal/skill/assets/references/emulator.md
 ---
 
 # The emulator
@@ -31,7 +32,7 @@ fft component install emulator
 
 The container image has it pre-installed, so `docker run …/fft emulator` needs no step.
 Delivering events to a **local** Pub/Sub or Azure Service Bus emulator needs one more
-component each — see [Eventing](https://github.com/Joessst-Dev/fft-cli/blob/main/README.md#eventing).
+component each — see [Eventing](#eventing).
 
 ## Starting it
 

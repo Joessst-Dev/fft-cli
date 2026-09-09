@@ -1,5 +1,6 @@
 ---
 title: Discovery
+source: internal/skill/assets/references/discovery.md
 ---
 
 # Finding the operation you need
