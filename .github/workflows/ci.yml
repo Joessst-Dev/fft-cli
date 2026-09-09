@@ -202,13 +202,27 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - uses: golang/govulncheck-action@032d45514ae346b1db93c04b0c90b841c370344f # v1
-        with:
-          # go-version-input defaults to `stable`; setup-go prefers go-version over
-          # go-version-file, so clear it explicitly to let the floor win.
-          go-version-input: ""
-          go-version-file: go.mod
-          go-package: ./...
+      # golang/govulncheck-action is deliberately not used. It hardcodes
+      # `go install golang.org/x/vuln/cmd/govulncheck@latest` with no input to pin a
+      # version, and it builds the tool with the same toolchain it then scans with.
+      # Those two facts together are a time bomb: x/vuln's own go directive runs
+      # ahead of our floor (v1.8.0 requires Go 1.26; the floor here is 1.25), and
+      # setup-go exports GOTOOLCHAIN=local, so the install fails before a single
+      # package is scanned — every run red, on a green tree. Splitting the build of
+      # the tool from the scan keeps both halves on the version each one needs.
+      - name: Install govulncheck
+        # GOTOOLCHAIN=auto applies to this step only, and only to building the
+        # scanner: go fetches whatever toolchain x/vuln declares. None of our code
+        # is compiled here, so the floor is not weakened by it.
+        env:
+          GOTOOLCHAIN: auto
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Run govulncheck
+        # No GOTOOLCHAIN override: setup-go left it at `local`, so the scan runs on
+        # the floor toolchain and the stdlib govulncheck compares against is the one
+        # go.mod declares — the whole point of the pin above.
+        run: govulncheck ./...
 
   release-build:
     name: release build (snapshot)
