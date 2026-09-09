@@ -16307,11 +16307,7 @@ paths:
   /api/orders/search:
     post:
       deprecated: false
-      description: >-
-        This part of the API is in Beta status. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br
-        />Search for Order
+      description: Search for Order
       operationId: searchOrder
       parameters: []
       requestBody:
@@ -16346,9 +16342,6 @@ paths:
         - ADMIN_MODULES_READ
       tags:
         - Orders (DOMS)
-      x-badges:
-        - color: orange
-          label: BETA
   /api/packagingunits:
     get:
       deprecated: false
@@ -21088,7 +21081,7 @@ paths:
     post:
       deprecated: false
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />Search for Process
@@ -21127,8 +21120,8 @@ paths:
       tags:
         - Processes (Core)
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
   /api/promises/checkoutoptions:
     post:
       deprecated: true
@@ -55806,13 +55799,13 @@ components:
               allOf:
                 - $ref: '#/components/schemas/OrderPricing'
               description: >-
-                This part of the API is in Alpha status. For details, see the <a
+                This part of the API is in Beta status. For details, see the <a
                 href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
                 target="_blank">API release lifecycle documentation</a>.<br
                 /><br />
               x-badges:
-                - color: red
-                  label: ALPHA
+                - color: orange
+                  label: BETA
             processId:
               description: >-
                 Id of the global process related to this entity. For example
@@ -56281,12 +56274,12 @@ components:
           allOf:
             - $ref: '#/components/schemas/OrderPricingForCreation'
           description: >-
-            This part of the API is in Alpha status. For details, see the <a
+            This part of the API is in Beta status. For details, see the <a
             href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
             target="_blank">API release lifecycle documentation</a>.<br /><br />
           x-badges:
-            - color: red
-              label: ALPHA
+            - color: orange
+              label: BETA
         promisesOptions:
           $ref: '#/components/schemas/OrderPromisesOptions'
         source:
@@ -56468,12 +56461,12 @@ components:
           allOf:
             - $ref: '#/components/schemas/OrderPricingForCreation'
           description: >-
-            This part of the API is in Alpha status. For details, see the <a
+            This part of the API is in Beta status. For details, see the <a
             href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
             target="_blank">API release lifecycle documentation</a>.<br /><br />
           x-badges:
-            - color: red
-              label: ALPHA
+            - color: orange
+              label: BETA
         version:
           description: >-
             The version of the document to be used in optimistic locking
@@ -56966,14 +56959,14 @@ components:
               $ref: '#/components/schemas/OrderPricingTotal'
           type: object
       description: >
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />Order pricing with customer-provided inputs and OMS-calculated totals.
       title: OrderPricing
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
     OrderPricingDiscount:
       properties:
         nameLocalized:
@@ -57009,13 +57002,13 @@ components:
       type: object
       title: OrderPricingDiscount
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />OrderPricingDiscount
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
     OrderPricingFee:
       properties:
         name:
@@ -57026,16 +57019,16 @@ components:
       type: object
       title: OrderPricingFee
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />OrderPricingFee
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
     OrderPricingForCreation:
       description: >
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />Customer-provided order-level pricing inputs. All arrays are optional
@@ -57062,8 +57055,8 @@ components:
       type: object
       title: OrderPricingForCreation
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
     OrderPricingTax:
       properties:
         ratePercent:
@@ -57084,13 +57077,13 @@ components:
       type: object
       title: OrderPricingTax
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />OrderPricingTax
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
     OrderPricingTotal:
       properties:
         priceBreakdown:
@@ -57098,16 +57091,16 @@ components:
       type: object
       title: OrderPricingTotal
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />OrderPricingTotal
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
     OrderPricingTotals:
       description: >
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />Calculated order price breakdown. All fields are optional — if a
@@ -57146,8 +57139,8 @@ components:
       type: object
       title: OrderPricingTotals
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
     OrderPromisesOptions:
       additionalProperties: false
       properties:
@@ -58989,7 +58982,7 @@ components:
       description: OrderTagsListFilter
     OrderTotalDiscounts:
       description: >
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />Aggregate discount total with a breakdown by source. Values follow the
@@ -59016,8 +59009,8 @@ components:
       type: object
       title: OrderTotalDiscounts
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
     OrderUnlockActionParameter:
       allOf:
         - $ref: '#/components/schemas/AbstractOrderActionsParameter'
@@ -68031,6 +68024,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ProcessReferencedReturnJobFilter'
           description: Nested search by returnJob
+        routingPlan:
+          allOf:
+            - $ref: '#/components/schemas/ProcessReferencedRoutingPlanFilter'
+          description: Nested search by routingPlan
         serviceJob:
           allOf:
             - $ref: '#/components/schemas/ProcessReferencedServiceJobFilter'
@@ -68066,6 +68063,18 @@ components:
       description: ProcessReferencedFilter
     ProcessReferencedHandoverJobFilter:
       properties:
+        facilityRefs:
+          allOf:
+            - $ref: '#/components/schemas/StringListFilter'
+          description: Search by facilityRefs
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+        globalActor:
+          allOf:
+            - $ref: >-
+                #/components/schemas/ProcessReferencedHandoverJobGlobalActorFilter
+          description: Nested search by globalActor
         pickupIdentifier:
           allOf:
             - $ref: '#/components/schemas/StringSearchFilter'
@@ -68078,6 +68087,16 @@ components:
       title: ProcessReferencedHandoverJobFilter
       type: object
       description: ProcessReferencedHandoverJobFilter
+    ProcessReferencedHandoverJobGlobalActorFilter:
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/StringSearchFilter'
+          description: Search by id
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+      title: ProcessReferencedHandoverJobGlobalActorFilter
+      type: object
+      description: ProcessReferencedHandoverJobGlobalActorFilter
     ProcessReferencedHandoverJobHandoverjobStatusEnumFilter:
       properties:
         eq:
@@ -68134,6 +68153,17 @@ components:
             - $ref: '#/components/schemas/DateFilter'
           description: Search by desiredDeliveryTime
           example: 2026-06-17T12:00:00.000Z
+        facilityRefs:
+          allOf:
+            - $ref: '#/components/schemas/StringListFilter'
+          description: Search by facilityRefs
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+        globalActor:
+          allOf:
+            - $ref: '#/components/schemas/ProcessReferencedOrderGlobalActorFilter'
+          description: Nested search by globalActor
         orderDate:
           allOf:
             - $ref: '#/components/schemas/DateFilter'
@@ -68161,6 +68191,16 @@ components:
       title: ProcessReferencedOrderFilter
       type: object
       description: ProcessReferencedOrderFilter
+    ProcessReferencedOrderGlobalActorFilter:
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/StringSearchFilter'
+          description: Search by id
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+      title: ProcessReferencedOrderGlobalActorFilter
+      type: object
+      description: ProcessReferencedOrderGlobalActorFilter
     ProcessReferencedOrderOrderStatusEnumFilter:
       properties:
         eq:
@@ -68207,6 +68247,17 @@ components:
       description: ProcessReferencedOrderOrderStatusEnumListFilter
     ProcessReferencedPackJobFilter:
       properties:
+        facilityRefs:
+          allOf:
+            - $ref: '#/components/schemas/StringListFilter'
+          description: Search by facilityRefs
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+        globalActor:
+          allOf:
+            - $ref: '#/components/schemas/ProcessReferencedPackJobGlobalActorFilter'
+          description: Nested search by globalActor
         status:
           allOf:
             - $ref: >-
@@ -68215,6 +68266,16 @@ components:
       title: ProcessReferencedPackJobFilter
       type: object
       description: ProcessReferencedPackJobFilter
+    ProcessReferencedPackJobGlobalActorFilter:
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/StringSearchFilter'
+          description: Search by id
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+      title: ProcessReferencedPackJobGlobalActorFilter
+      type: object
+      description: ProcessReferencedPackJobGlobalActorFilter
     ProcessReferencedPackJobPackJobStatusEnumFilter:
       properties:
         eq:
@@ -68395,6 +68456,17 @@ components:
       description: ProcessReferencedParcelTrackingStatusEnumListFilter
     ProcessReferencedPickJobFilter:
       properties:
+        facilityRefs:
+          allOf:
+            - $ref: '#/components/schemas/StringListFilter'
+          description: Search by facilityRefs
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+        globalActor:
+          allOf:
+            - $ref: '#/components/schemas/ProcessReferencedPickJobGlobalActorFilter'
+          description: Nested search by globalActor
         shortId:
           allOf:
             - $ref: '#/components/schemas/StringSearchFilter'
@@ -68407,6 +68479,16 @@ components:
       title: ProcessReferencedPickJobFilter
       type: object
       description: ProcessReferencedPickJobFilter
+    ProcessReferencedPickJobGlobalActorFilter:
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/StringSearchFilter'
+          description: Search by id
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+      title: ProcessReferencedPickJobGlobalActorFilter
+      type: object
+      description: ProcessReferencedPickJobGlobalActorFilter
     ProcessReferencedPickJobPickJobStatusEnumFilter:
       properties:
         eq:
@@ -68478,6 +68560,17 @@ components:
       description: ProcessReferencedPickJobPickJobStatusEnumListFilter
     ProcessReferencedReturnJobFilter:
       properties:
+        globalActor:
+          allOf:
+            - $ref: '#/components/schemas/ProcessReferencedReturnJobGlobalActorFilter'
+          description: Nested search by globalActor
+        returnFacilityRefs:
+          allOf:
+            - $ref: '#/components/schemas/StringListFilter'
+          description: Search by returnFacilityRefs
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
         status:
           allOf:
             - $ref: >-
@@ -68486,6 +68579,16 @@ components:
       title: ProcessReferencedReturnJobFilter
       type: object
       description: ProcessReferencedReturnJobFilter
+    ProcessReferencedReturnJobGlobalActorFilter:
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/StringSearchFilter'
+          description: Search by id
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+      title: ProcessReferencedReturnJobGlobalActorFilter
+      type: object
+      description: ProcessReferencedReturnJobGlobalActorFilter
     ProcessReferencedReturnJobItemReturnJobStatusEnumFilter:
       properties:
         eq:
@@ -68528,8 +68631,142 @@ components:
       title: ProcessReferencedReturnJobItemReturnJobStatusEnumListFilter
       type: object
       description: ProcessReferencedReturnJobItemReturnJobStatusEnumListFilter
+    ProcessReferencedRoutingPlanFilter:
+      properties:
+        facilityRefs:
+          allOf:
+            - $ref: '#/components/schemas/StringListFilter'
+          description: Search by facilityRefs
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+        globalActor:
+          allOf:
+            - $ref: >-
+                #/components/schemas/ProcessReferencedRoutingPlanGlobalActorFilter
+          description: Nested search by globalActor
+        status:
+          allOf:
+            - $ref: >-
+                #/components/schemas/ProcessReferencedRoutingPlanRoutingPlanStatusEnumListFilter
+          description: Search by status
+      title: ProcessReferencedRoutingPlanFilter
+      type: object
+      description: ProcessReferencedRoutingPlanFilter
+    ProcessReferencedRoutingPlanGlobalActorFilter:
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/StringSearchFilter'
+          description: Search by id
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+      title: ProcessReferencedRoutingPlanGlobalActorFilter
+      type: object
+      description: ProcessReferencedRoutingPlanGlobalActorFilter
+    ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilter:
+      properties:
+        eq:
+          description: Search by status
+          enum:
+            - IN_PREPARATION
+            - INITIAL
+            - PRIORITIZED
+            - ROUTING
+            - PROPOSED
+            - PLANNED
+            - ROUTED
+            - NOT_ROUTABLE
+            - MANUAL_PLANNED
+            - FAILED
+            - REDUNDANT_REROUTE
+            - FAILED_REROUTE
+            - RETRYABLE
+            - FALLBACK_ROUTING
+            - WAITING
+            - OBSOLETE
+            - CANCELED
+            - LOCKED
+            - PROMISED
+            - REROUTED
+          type: string
+        in:
+          description: Search by status
+          items:
+            enum:
+              - IN_PREPARATION
+              - INITIAL
+              - PRIORITIZED
+              - ROUTING
+              - PROPOSED
+              - PLANNED
+              - ROUTED
+              - NOT_ROUTABLE
+              - MANUAL_PLANNED
+              - FAILED
+              - REDUNDANT_REROUTE
+              - FAILED_REROUTE
+              - RETRYABLE
+              - FALLBACK_ROUTING
+              - WAITING
+              - OBSOLETE
+              - CANCELED
+              - LOCKED
+              - PROMISED
+              - REROUTED
+            type: string
+          maxItems: 500
+          type: array
+        notEq:
+          description: Search by status
+          enum:
+            - IN_PREPARATION
+            - INITIAL
+            - PRIORITIZED
+            - ROUTING
+            - PROPOSED
+            - PLANNED
+            - ROUTED
+            - NOT_ROUTABLE
+            - MANUAL_PLANNED
+            - FAILED
+            - REDUNDANT_REROUTE
+            - FAILED_REROUTE
+            - RETRYABLE
+            - FALLBACK_ROUTING
+            - WAITING
+            - OBSOLETE
+            - CANCELED
+            - LOCKED
+            - PROMISED
+            - REROUTED
+          type: string
+      title: ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilter
+      type: object
+      description: ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilter
+    ProcessReferencedRoutingPlanRoutingPlanStatusEnumListFilter:
+      properties:
+        contains:
+          allOf:
+            - $ref: >-
+                #/components/schemas/ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilter
+          description: Search by status
+      title: ProcessReferencedRoutingPlanRoutingPlanStatusEnumListFilter
+      type: object
+      description: ProcessReferencedRoutingPlanRoutingPlanStatusEnumListFilter
     ProcessReferencedServiceJobFilter:
       properties:
+        facilityRefs:
+          allOf:
+            - $ref: '#/components/schemas/StringListFilter'
+          description: Search by facilityRefs
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+        globalActor:
+          allOf:
+            - $ref: >-
+                #/components/schemas/ProcessReferencedServiceJobGlobalActorFilter
+          description: Nested search by globalActor
         status:
           allOf:
             - $ref: >-
@@ -68538,6 +68775,16 @@ components:
       title: ProcessReferencedServiceJobFilter
       type: object
       description: ProcessReferencedServiceJobFilter
+    ProcessReferencedServiceJobGlobalActorFilter:
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/StringSearchFilter'
+          description: Search by id
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+      title: ProcessReferencedServiceJobGlobalActorFilter
+      type: object
+      description: ProcessReferencedServiceJobGlobalActorFilter
     ProcessReferencedServiceJobServiceJobStatusEnumFilter:
       properties:
         eq:
