@@ -164,7 +164,11 @@ func writePage(dir, name, title, source, body string) error {
 		content += "\n"
 	}
 	// #nosec G703 -- dir is this build tool's own -out flag and name is a
-	// constant from skillPages; there is no untrusted path here.
+	// constant from skillPages; there is no untrusted path here. G703 is the
+	// taint-analysis rule gosec grew in the v2.2x line (it does not exist in
+	// v2.22 and earlier, where the ids stop at G601) and it, not G304, is what
+	// tracks os.WriteFile — so the id is deliberate and is not interchangeable
+	// with the G304 above.
 	return os.WriteFile(filepath.Join(dir, name), []byte(content), 0o600)
 }
 
