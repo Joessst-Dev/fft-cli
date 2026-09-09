@@ -52,9 +52,9 @@ jobs:
         # Credential Manager, Secret Service. A green Linux run proves nothing about
         # the other two, so all three are first-class.
         os: [ubuntu-latest, macos-latest, windows-latest]
-        # "1.25" is the floor declared in go.mod; "stable" catches breakage in the
+        # "1.26" is the floor declared in go.mod; "stable" catches breakage in the
         # Go release that users will actually have.
-        go: ["1.25", "stable"]
+        go: ["1.26", "stable"]
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -62,11 +62,11 @@ jobs:
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
           go-version: ${{ matrix.go }}
-          # Without this, "1.25" is satisfied by whatever 1.25.x the runner image
+          # Without this, "1.26" is satisfied by whatever 1.26.x the runner image
           # happens to have cached, and setup-go never looks for a newer patch.
           # setup-go also exports GOTOOLCHAIN=local, so once go.mod's floor moves
           # past that stale patch the job cannot self-upgrade — it just dies with
-          # "go.mod requires go >= 1.25.13 (running go 1.25.12)". Resolve the patch
+          # "go.mod requires go >= 1.26.4 (running go 1.26.0)". Resolve the patch
           # from the manifest instead, so the floor lands wherever go.mod points.
           check-latest: true
           # Keys off go.sum: the module cache and the build cache both persist.
@@ -205,11 +205,13 @@ jobs:
       # golang/govulncheck-action is deliberately not used. It hardcodes
       # `go install golang.org/x/vuln/cmd/govulncheck@latest` with no input to pin a
       # version, and it builds the tool with the same toolchain it then scans with.
-      # Those two facts together are a time bomb: x/vuln's own go directive runs
-      # ahead of our floor (v1.8.0 requires Go 1.26; the floor here is 1.25), and
-      # setup-go exports GOTOOLCHAIN=local, so the install fails before a single
-      # package is scanned — every run red, on a green tree. Splitting the build of
-      # the tool from the scan keeps both halves on the version each one needs.
+      # Those two facts together are a time bomb: x/vuln's go directive moves ahead
+      # of our floor on its own schedule (v1.8.0 required Go 1.26 while the floor was
+      # still 1.25), and setup-go exports GOTOOLCHAIN=local, so the install fails
+      # before a single package is scanned — every run red, on a green tree. The floor
+      # has since caught up, but it will fall behind again on the next x/vuln bump.
+      # Splitting the build of the tool from the scan keeps both halves on the version
+      # each one needs, whatever the gap happens to be.
       - name: Install govulncheck
         # GOTOOLCHAIN=auto applies to this step only, and only to building the
         # scanner: go fetches whatever toolchain x/vuln declares. None of our code

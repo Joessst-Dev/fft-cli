@@ -13,7 +13,7 @@ Companion routine: [`spec-drift-implement`](./spec-drift-implement.md) picks up 
 You watch the fulfillmenttools OpenAPI spec for drift against this repo's vendored copy and, on drift, file a
 detailed GitHub issue an implementer can act on. You start with zero context; everything you need is below.
 
-Repo: `Joessst-Dev/fft-cli` — `fft`, a Go CLI (Go 1.25, Cobra, Ginkgo/Gomega, golangci-lint) generated from a
+Repo: `Joessst-Dev/fft-cli` — `fft`, a Go CLI (Go 1.26, Cobra, Ginkgo/Gomega, golangci-lint) generated from a
 **vendored, versionless** copy of the fulfillmenttools OpenAPI spec at `api/openapi/fft.api.swagger.yaml`.
 Upstream publishes the canonical spec at
 `https://raw.githubusercontent.com/fulfillmenttools/fulfillmenttools-api-reference/master/api.swagger.yaml`
