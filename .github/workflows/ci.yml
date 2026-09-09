@@ -52,22 +52,29 @@ jobs:
         # Credential Manager, Secret Service. A green Linux run proves nothing about
         # the other two, so all three are first-class.
         os: [ubuntu-latest, macos-latest, windows-latest]
-        # "1.26" is the floor declared in go.mod; "stable" catches breakage in the
-        # Go release that users will actually have.
-        go: ["1.26", "stable"]
+        # Deliberately version-free. "floor" reads go.mod below, so moving the
+        # floor is a one-line edit there and nothing here changes; "stable" catches
+        # breakage in the Go release users will actually have. These two words end
+        # up in the job names, and the job names are the required status checks in
+        # branch protection — spelling a version here means every floor bump also
+        # needs a settings change, and until someone makes it the required check
+        # simply never reports and no PR can merge.
+        go: [floor, stable]
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
-          go-version: ${{ matrix.go }}
-          # Without this, "1.26" is satisfied by whatever 1.26.x the runner image
-          # happens to have cached, and setup-go never looks for a newer patch.
-          # setup-go also exports GOTOOLCHAIN=local, so once go.mod's floor moves
-          # past that stale patch the job cannot self-upgrade — it just dies with
-          # "go.mod requires go >= 1.26.4 (running go 1.26.0)". Resolve the patch
-          # from the manifest instead, so the floor lands wherever go.mod points.
+          # Exactly one of these is non-empty per leg; setup-go ignores an empty
+          # input and prefers go-version when both are set, so the floor leg has to
+          # leave go-version empty to let go.mod win.
+          go-version: ${{ matrix.go == 'stable' && 'stable' || '' }}
+          go-version-file: ${{ matrix.go == 'floor' && 'go.mod' || '' }}
+          # Resolve the patch from the manifest rather than accepting whatever the
+          # runner image cached. setup-go exports GOTOOLCHAIN=local, so a stale
+          # cached patch cannot self-upgrade — it just dies with "go.mod requires
+          # go >= 1.26.4 (running go 1.26.0)".
           check-latest: true
           # Keys off go.sum: the module cache and the build cache both persist.
           cache: true
