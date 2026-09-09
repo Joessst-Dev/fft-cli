@@ -140,9 +140,15 @@ export default defineConfig({
     // `source:` into its front matter — or hand-written, in which case the page
     // itself is the source. Sending both to the same file (it used to be the
     // README) means the link is wrong for one of them; ask the page.
+    //
+    // Reference/commands/* pages are a third kind: `fft gen-docs` stamps only
+    // `title:`, so the `source` fallback would otherwise send editors to the
+    // drift-gated generated file itself. Point those at the generator instead.
     editLink: {
       pattern: ({ frontmatter, filePath }) =>
-        `https://github.com/Joessst-Dev/fft-cli/edit/main/${frontmatter.source ?? `docs/${filePath}`}`,
+        filePath.startsWith('reference/commands/')
+          ? 'https://github.com/Joessst-Dev/fft-cli/edit/main/cmd/fft/gendocs.go'
+          : `https://github.com/Joessst-Dev/fft-cli/edit/main/${frontmatter.source ?? `docs/${filePath}`}`,
       text: 'Edit this page on GitHub',
     },
 

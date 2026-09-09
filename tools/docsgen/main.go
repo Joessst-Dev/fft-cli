@@ -141,7 +141,10 @@ func hasSourceKey(file string) (bool, error) {
 	defer func() { _ = f.Close() }()
 
 	sc := bufio.NewScanner(f)
-	if !sc.Scan() || sc.Text() != "---" {
+	if !sc.Scan() {
+		return false, sc.Err()
+	}
+	if sc.Text() != "---" {
 		return false, nil
 	}
 	for sc.Scan() {
