@@ -1,12 +1,12 @@
 module github.com/Joessst-Dev/fft-cli
 
-go 1.25.13
+go 1.26.6
 
 require (
 	cloud.google.com/go/pubsub/v2 v2.7.0
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.10.0
 	github.com/fatih/color v1.19.0
-	github.com/getkin/kin-openapi v0.148.0
+	github.com/getkin/kin-openapi v0.149.0
 	github.com/godbus/dbus/v5 v5.2.2
 	github.com/gofiber/fiber/v2 v2.52.15
 	github.com/google/uuid v1.6.0
@@ -19,7 +19,7 @@ require (
 	github.com/zalando/go-keyring v0.2.8
 	golang.org/x/mod v0.40.0
 	golang.org/x/term v0.45.0
-	google.golang.org/api v0.294.0
+	google.golang.org/api v0.297.0
 	google.golang.org/grpc v1.83.2
 	gopkg.in/yaml.v3 v3.0.1
 )

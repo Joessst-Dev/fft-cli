@@ -70,7 +70,7 @@ Tag `vX.Y.Z` and push — `.github/workflows/release.yml` runs GoReleaser (cross
 
 ## Conventions
 
-Go 1.25. Follow the `golang-*` skills. Comments in this codebase explain **why**, not what — match that bar (the existing files are the reference); a comment that restates the code is noise. Commit messages and PRs carry no Claude attribution.
+Go 1.26. Follow the `golang-*` skills. Comments in this codebase explain **why**, not what — match that bar (the existing files are the reference); a comment that restates the code is noise. Commit messages and PRs carry no Claude attribution.
 
 **Nothing that identifies a live tenant leaves the machine.** Checking a change against
 a real tenant is encouraged — it is the bar for a hand-written `--example` body — but

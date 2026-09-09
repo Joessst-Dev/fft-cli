@@ -41,7 +41,7 @@ reference.
 brew install Joessst-Dev/tap/fft
 ```
 
-**Go** (any platform, needs Go 1.25+):
+**Go** (any platform, needs Go 1.26+):
 
 ```sh
 go install github.com/Joessst-Dev/fft-cli/cmd/fft@latest
