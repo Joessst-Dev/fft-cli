@@ -31,6 +31,12 @@ FFT_NO_UPDATE_CHECK is set, and when settings.updateCheck is false in
 This command asks now, regardless of all of that, and ignores the once-a-day
 cache.
 
+The upgrade command it names is the one for how this fft was installed —
+Homebrew, Scoop, WinGet, go install or the container image — worked out from
+where the binary sits. When that cannot be told, it points at the install guide
+instead. Set FFT_INSTALL_METHOD to homebrew, scoop, winget, go or docker to
+override the guess.
+
 The release endpoint is unauthenticated, and GitHub allows 60 unauthenticated
 requests an hour per IP address — a budget shared with every other tool on the
 machine. A check GitHub could not answer, that one included, exits 9.`
@@ -47,6 +53,11 @@ type updateView struct {
 	Latest   string `json:"latest" yaml:"latest"`
 	UpToDate *bool  `json:"upToDate" yaml:"upToDate"`
 	URL      string `json:"url,omitempty" yaml:"url,omitempty"`
+
+	// The command that would perform the upgrade, for how this fft was installed.
+	// Present only when there is an upgrade to perform: on an up-to-date build it
+	// would be advice about nothing.
+	Upgrade string `json:"upgrade,omitempty" yaml:"upgrade,omitempty"`
 }
 
 func newUpdateCmd(deps *Deps) *cobra.Command {
@@ -99,6 +110,9 @@ func runUpdateCheck(cmd *cobra.Command, deps *Deps) error {
 	if update.Comparable(current) {
 		view.UpToDate = ptr(notice == "")
 	}
+	if notice != "" {
+		view.Upgrade = checker.UpgradeHint()
+	}
 
 	if err := deps.Printer.Render(updateRows(view), view); err != nil {
 		return err
@@ -113,6 +127,10 @@ func runUpdateCheck(cmd *cobra.Command, deps *Deps) error {
 	return nil
 }
 
+// Three columns, not four. The upgrade command already reaches the human through
+// the Notef above, which fires exactly when the table format is in effect — so a
+// fourth column would print the same sentence twice, and would be blank on the
+// up-to-date path, which is the common one.
 var updateHeaders = []string{"CURRENT", "LATEST", "STATUS"}
 
 func updateRows(v updateView) output.Rows {

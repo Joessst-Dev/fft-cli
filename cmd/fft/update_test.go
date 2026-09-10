@@ -57,9 +57,13 @@ func (c *cli) fakeGitHub(handler http.HandlerFunc) *github {
 	c.deps.Terminal = ptr(true)
 
 	c.updateCache = filepath.Join(GinkgoT().TempDir(), "fft", "update.json")
+	// The install method is pinned rather than detected. hermeticEnv clears every
+	// FFT_ variable but not GOBIN, GOPATH, SCOOP or LOCALAPPDATA, so a detected
+	// method would make testNotice depend on the machine running the suite.
 	c.deps.Update = update.New(testVersion, c.updateCache,
 		update.WithURL(srv.URL),
 		update.WithClock(func() time.Time { return testNow }),
+		update.WithInstallMethod(update.MethodHomebrew),
 	)
 
 	// The background check outlives the command on purpose — in production the
@@ -563,6 +567,7 @@ var _ = Describe("fft update check", func() {
 			Latest   string `json:"latest"`
 			UpToDate bool   `json:"upToDate"`
 			URL      string `json:"url"`
+			Upgrade  string `json:"upgrade"`
 		}
 		Expect(json.Unmarshal([]byte(c.out()), &view)).To(Succeed())
 
@@ -570,6 +575,23 @@ var _ = Describe("fft update check", func() {
 		Expect(view.Latest).To(Equal("v1.3.0"))
 		Expect(view.UpToDate).To(BeFalse())
 		Expect(view.URL).To(ContainSubstring("releases/tag/v1.3.0"))
+		// The command to run, so a script need not parse the banner — which is on
+		// stderr, and deliberately absent under -o json.
+		Expect(view.Upgrade).To(Equal("brew upgrade fft"))
+	})
+
+	It("leaves the upgrade command out of the payload when there is nothing to upgrade", func() {
+		c = newCLI()
+		gh = c.fakeGitHub(func(w http.ResponseWriter, _ *http.Request) {
+			_, err := w.Write([]byte(`{"tag_name":"v1.2.1"}`))
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		Expect(c.run("update", "check", "-o", "json")).To(Equal(exitcode.OK))
+
+		// Not "" but absent: advice about an upgrade that is not available is not
+		// advice, and omitempty is what keeps it out.
+		Expect(c.out()).NotTo(ContainSubstring("upgrade"))
 	})
 
 	It("reports that fft is up to date when it is", func() {

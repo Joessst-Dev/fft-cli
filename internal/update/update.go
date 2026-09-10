@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/mod/semver"
@@ -64,6 +65,7 @@ type Checker struct {
 	url       string
 	client    *http.Client
 	now       func() time.Time
+	method    func() Method
 }
 
 // Option configures a [Checker].
@@ -79,6 +81,16 @@ func WithURL(url string) Option {
 // sleeping.
 func WithClock(now func() time.Time) Option {
 	return func(c *Checker) { c.now = now }
+}
+
+// WithInstallMethod pins how fft believes it was installed.
+//
+// Two reasons, and the second is the load-bearing one: a spec can assert the
+// Scoop banner on a Linux runner, and the command specs — whose executable is a
+// test binary in a temp directory — get a stable notice instead of one that
+// depends on the machine running them.
+func WithInstallMethod(m Method) Option {
+	return func(c *Checker) { c.method = func() Method { return m } }
 }
 
 // New returns a Checker for the running fft version, caching its answer in the
@@ -101,6 +113,13 @@ func New(version, cachePath string, opts ...Option) *Checker {
 		// both.
 		client: &http.Client{},
 		now:    time.Now,
+
+		// Memoised, and lazy. `fft update check` builds the notice twice — once for
+		// the table's STATUS column, once for the Notef under it — and the answer
+		// cannot change inside one process. Lazy is the point: detection never runs
+		// at all on the overwhelmingly common "you are up to date" path, so no
+		// ordinary command pays for the EvalSymlinks.
+		method: sync.OnceValue(InstallMethod),
 	}
 	for _, opt := range opts {
 		opt(c)
@@ -410,9 +429,17 @@ func (c *Checker) Notice(s State) string {
 	if !Newer(c.version, s.LatestVersion) {
 		return ""
 	}
-	return fmt.Sprintf("⚡ fft %s is available (you have %s) — brew upgrade fft",
-		canonical(s.LatestVersion), canonical(c.version))
+	return fmt.Sprintf("⚡ fft %s is available (you have %s) — %s",
+		canonical(s.LatestVersion), canonical(c.version), c.UpgradeHint())
 }
+
+// UpgradeHint is the command that upgrades this fft, for however it was
+// installed.
+//
+// Exported because `fft update check` puts it in the -o json payload too, where
+// a script can read it without parsing a banner that was never meant to be
+// parsed.
+func (c *Checker) UpgradeHint() string { return c.method().UpgradeHint() }
 
 // Comparable reports whether v has a place in the version ordering at all — that
 // is, whether it is a real semver version rather than "dev", "", or a branch

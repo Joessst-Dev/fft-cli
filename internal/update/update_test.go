@@ -99,10 +99,25 @@ var _ = Describe("update.Checker", func() {
 
 	// checker builds the thing under test: the given fft version, the temp cache,
 	// and a fake GitHub whose clock the spec controls.
+	//
+	// The install method is pinned rather than detected. Otherwise the banner these
+	// specs assert would depend on where the test binary happens to sit and what
+	// GOBIN the developer running them has set.
 	checker := func(version, url string) *update.Checker {
 		return update.New(version, cachePath,
 			update.WithURL(url),
 			update.WithClock(func() time.Time { return clock }),
+			update.WithInstallMethod(update.MethodHomebrew),
+		)
+	}
+
+	// checkerVia is checker, for a spec that cares which package manager is
+	// installed rather than which versions are involved.
+	checkerVia := func(version string, m update.Method) *update.Checker {
+		return update.New(version, cachePath,
+			update.WithURL("http://127.0.0.1:1"),
+			update.WithClock(func() time.Time { return clock }),
+			update.WithInstallMethod(m),
 		)
 	}
 
@@ -527,6 +542,26 @@ var _ = Describe("update.Checker", func() {
 			Entry("nothing at all when the release is older", "v1.3.0", "v1.2.1", ""),
 			Entry("nothing at all on a dev build", "dev", "v1.3.0", ""),
 			Entry("nothing at all when nothing is known yet", "v1.2.1", "", ""),
+		)
+
+		DescribeTable("it names the upgrade command for how fft was installed",
+			func(m update.Method, expected string) {
+				c := checkerVia("v1.2.1", m)
+
+				Expect(c.Notice(update.State{LatestVersion: "v1.3.0"})).To(Equal(
+					"⚡ fft v1.3.0 is available (you have v1.2.1) — " + expected))
+			},
+			Entry("Homebrew", update.MethodHomebrew, "brew upgrade fft"),
+			Entry("Scoop", update.MethodScoop, "scoop update fft"),
+			Entry("WinGet", update.MethodWinGet, "winget upgrade Joessst-Dev.fft"),
+			Entry("go install", update.MethodGoInstall,
+				"go install github.com/Joessst-Dev/fft-cli/cmd/fft@latest"),
+			Entry("the container image", update.MethodDocker,
+				"docker pull ghcr.io/joessst-dev/fft:latest"),
+			// The point of the fallback: a tarball user is pointed at the guide
+			// rather than at a package manager they do not have.
+			Entry("an install nothing can identify", update.MethodUnknown,
+				"see https://joessst-dev.github.io/fft-cli/guide/install"),
 		)
 	})
 

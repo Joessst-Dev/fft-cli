@@ -17,10 +17,24 @@ go install github.com/Joessst-Dev/fft-cli/cmd/fft@latest
 ```
 
 **Binary download** — darwin/linux/windows × amd64/arm64, from the
-[releases page](https://github.com/Joessst-Dev/fft-cli/releases):
+[releases page](https://github.com/Joessst-Dev/fft-cli/releases).
+
+The archive name carries the version, so there is no version-independent
+`latest/download/` URL to fetch — name the release you want, or let
+[`gh`](https://cli.github.com) pick the newest one:
 
 ```sh
-curl -sSL https://github.com/Joessst-Dev/fft-cli/releases/latest/download/fft_Linux_x86_64.tar.gz | tar xz
+gh release download --repo Joessst-Dev/fft-cli --pattern 'fft_*_linux_amd64.tar.gz'
+tar xzf fft_*_linux_amd64.tar.gz
+sudo mv fft /usr/local/bin/
+```
+
+By hand, substituting the release and the architecture you want:
+
+```sh
+VERSION=0.7.0
+curl -sSLO "https://github.com/Joessst-Dev/fft-cli/releases/download/v$VERSION/fft_${VERSION}_linux_amd64.tar.gz"
+tar xzf "fft_${VERSION}_linux_amd64.tar.gz"
 sudo mv fft /usr/local/bin/
 ```
 
@@ -34,7 +48,9 @@ fft version
 ```
 
 fft tells you when a newer release exists (at most once a day, on stderr, never in your
-way). Set `FFT_NO_UPDATE_CHECK=1` to turn that off.
+way), and names the upgrade command for how it was installed. Set
+`FFT_NO_UPDATE_CHECK=1` to turn that off, or `FFT_INSTALL_METHOD` to
+`homebrew`/`scoop`/`winget`/`go` if it guesses wrong.
 
 ## Verifying a download
 

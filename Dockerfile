@@ -37,6 +37,12 @@ COPY ${TARGETOS}/${TARGETARCH}/bin/fft-emulator-servicebus /opt/fft/components/e
 # components are pre-installed, so nothing writes to it at run time.
 ENV FFT_COMPONENT_DIR=/opt/fft/components
 
+# The image's fft sits at /usr/bin/fft, which is indistinguishable from a hand-unpacked
+# tarball — so the update banner would tell an image user to "see the install guide"
+# when their upgrade is a docker pull. We are the ones who put the binary there, so this
+# is the only signal that can tell the two apart.
+ENV FFT_INSTALL_METHOD=docker
+
 # The emulator binds 8080, above 1024, so the nonroot user can serve it without extra
 # privileges. The ENTRYPOINT is fft, so `docker run …/fft emulator --host 0.0.0.0` and a
 # compose `command: ["emulator", …]` both append their args to it.

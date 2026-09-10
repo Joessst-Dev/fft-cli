@@ -22,6 +22,12 @@ FFT_NO_UPDATE_CHECK is set, and when settings.updateCheck is false in
 This command asks now, regardless of all of that, and ignores the once-a-day
 cache.
 
+The upgrade command it names is the one for how this fft was installed —
+Homebrew, Scoop, WinGet, go install or the container image — worked out from
+where the binary sits. When that cannot be told, it points at the install guide
+instead. Set FFT_INSTALL_METHOD to homebrew, scoop, winget, go or docker to
+override the guess.
+
 The release endpoint is unauthenticated, and GitHub allows 60 unauthenticated
 requests an hour per IP address — a budget shared with every other tool on the
 machine. A check GitHub could not answer, that one included, exits 9.
