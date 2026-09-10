@@ -31,7 +31,7 @@ var _ = Describe("specgen", func() {
 			Expect(op.Summary).To(Equal("Get thing"))
 		})
 
-		It("carries x-fft-permissions, which 321 of the real spec's operations declare", func() {
+		It("carries x-fft-permissions, which 323 of the 561 operations declare", func() {
 			Expect(find(ops, "getThing").Permissions).To(Equal([]string{"AUDIT_READ", "THING_READ"}))
 		})
 
@@ -307,7 +307,7 @@ var _ = Describe("specgen", func() {
 
 	Describe("the whole real spec", func() {
 		It("loads, and every sample body it produces is valid JSON", func() {
-			// The synthesizer is recursive over 2,725 schemas. "It terminates" and "what it
+			// The synthesizer is recursive over thousands of schemas. "It terminates" and "what it
 			// emits parses" are not things a mini-spec can prove.
 			real, err := load("../../api/openapi/fft.api.swagger.yaml")
 			Expect(err).NotTo(HaveOccurred())

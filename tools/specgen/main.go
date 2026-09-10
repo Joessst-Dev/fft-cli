@@ -2,14 +2,14 @@
 // metadata table that lets fft reach every operation the typed client does not have.
 //
 // oapi-codegen generates a typed client for eight tags — 95 methods of the API's
-// 559 operations. The other 464 have no Go method to call, so a command that wants
+// 561 operations. The other 466 have no Go method to call, so a command that wants
 // to reach them has to build the request itself: method, path template, parameters
 // and body. That is what this table carries.
 //
 // It also carries something the spec does not: a **sample request body** for each
-// of the 271 operations that take one. The spec has 1,556 field-level `example:`
-// values and not a single request-body example, so there was nothing to copy; the
-// bodies are synthesized from the schemas (see sample.go).
+// of the 278 operations that take one. The spec has thousands of field-level
+// `example:` values and not a single request-body example, so there is nothing to
+// copy; the bodies are synthesized from the schemas (see sample.go).
 //
 // Run it through `make generate`. CI re-runs it and fails on a diff, so the output
 // must be a deterministic function of the spec.

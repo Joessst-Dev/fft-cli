@@ -1,6 +1,6 @@
 # Codegen contract for the fulfillmenttools API client.
 #
-# The spec has 346 paths and 2,725 schemas. Generating all of it at once
+# The spec has hundreds of paths and thousands of schemas. Generating all of it at once
 # produces an unusable amount of code, so we filter to the tags we have
 # commands for and let oapi-codegen prune the unreachable schemas.
 #
@@ -29,7 +29,7 @@ output-options:
     - Routing Strategy (DOMS)
 
   # Drop the schemas the included operations cannot reach. Without this the
-  # full 2,725-schema component set is emitted regardless of the tag filter.
+  # full component schema set is emitted regardless of the tag filter.
   skip-prune: false
 
   # Prune misses self-referential schemas: it removes components by ref count,

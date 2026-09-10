@@ -372,7 +372,7 @@ func printExample(cmd *cobra.Command, op api.Operation) error {
 	if op.SampleBody == "" {
 		// Asking a GET for its request body is a usage mistake (exit 2), not a
 		// failure — `fft api getPickJob --example` reaches this, and every one of the
-		// 271 operations that does take a body has one to show.
+		// 278 operations that does take a body has one to show.
 		return exitcode.UsageError{Err: fmt.Errorf(
 			"%s %s takes no request body, so there is no example of one", op.Method, op.Path)}
 	}

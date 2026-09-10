@@ -5,9 +5,9 @@
 // hand. Two generators write here, and they cover different things:
 //
 //   - fft.gen.go is oapi-codegen's typed client. It is filtered to eight tags (see
-//     api/openapi/oapi-codegen.yaml), which is 95 methods of the API's 559
+//     api/openapi/oapi-codegen.yaml), which is 95 methods of the API's 561
 //     operations.
-//   - opmeta.gen.go is tools/specgen's metadata table, and it covers all 559 —
+//   - opmeta.gen.go is tools/specgen's metadata table, and it covers all 561 —
 //     method, path, parameters (with the per-parameter explode that decides what a
 //     filter means), permissions, and a synthesized sample request body. It is what
 //     `fft api` and the generated commands build their requests from.

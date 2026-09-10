@@ -45,8 +45,8 @@ const contentTypeJSON = "application/json"
 
 // synthesizer builds a sample request body from a schema.
 //
-// The spec has 1,556 field-level `example:` values and zero request-body examples,
-// so there is nothing to copy: every body fft shows under `--example` is built
+// The spec has thousands of field-level `example:` values and zero request-body
+// examples, so there is nothing to copy: every body fft shows under `--example` is built
 // here. The rules, in the order they are tried for any one value:
 //
 //  1. the schema's own `example`, then its `default`, then its first `enum` value;
