@@ -15582,6 +15582,35 @@ type HandledItem struct {
 	TenantArticleId string   `json:"tenantArticleId"`
 }
 
+// HandoverJobAdditionalHandoverJobLineItemsArticleFilter HandoverJobAdditionalHandoverJobLineItemsArticleFilter
+type HandoverJobAdditionalHandoverJobLineItemsArticleFilter struct {
+	// TenantArticleId Search by tenantArticleId
+	//
+	// Example: MY_ARTICLE_ID
+	TenantArticleId *StringSearchFilter `json:"tenantArticleId,omitempty"`
+
+	// Title Search by title
+	Title *StringSearchFilter `json:"title,omitempty"`
+}
+
+// HandoverJobAdditionalHandoverJobLineItemsFilter HandoverJobAdditionalHandoverJobLineItemsFilter
+type HandoverJobAdditionalHandoverJobLineItemsFilter struct {
+	// Article Nested search by article
+	Article *HandoverJobAdditionalHandoverJobLineItemsArticleFilter `json:"article,omitempty"`
+
+	// ScannableCodes Search by scannableCodes
+	ScannableCodes *StringListFilter `json:"scannableCodes,omitempty"`
+}
+
+// HandoverJobAdditionalHandoverJobLineItemsListFilter HandoverJobAdditionalHandoverJobLineItemsListFilter
+type HandoverJobAdditionalHandoverJobLineItemsListFilter struct {
+	// Contains Contains returns if at least one entry matches
+	Contains *HandoverJobAdditionalHandoverJobLineItemsFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
+}
+
 // HandoverJobAssignedUsersFilter HandoverJobAssignedUsersFilter
 type HandoverJobAssignedUsersFilter struct {
 	// UserId Search by userId
@@ -15752,7 +15781,9 @@ type HandoverJobRecipientAddressFilter struct {
 
 // HandoverJobSearchQuery HandoverJobSearchQuery
 type HandoverJobSearchQuery struct {
-	And *[]HandoverJobSearchQuery `json:"and,omitempty"`
+	// AdditionalHandoverJobLineItems Nested list search by additionalHandoverJobLineItems
+	AdditionalHandoverJobLineItems *HandoverJobAdditionalHandoverJobLineItemsListFilter `json:"additionalHandoverJobLineItems,omitempty"`
+	And                            *[]HandoverJobSearchQuery                            `json:"and,omitempty"`
 
 	// Anonymized Search by anonymized
 	Anonymized *BooleanFilter `json:"anonymized,omitempty"`
