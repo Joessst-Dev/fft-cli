@@ -8,8 +8,8 @@
 //
 // It also carries something the spec does not: a **sample request body** for each
 // of the 278 operations that take one. The spec has thousands of field-level
-// `example:` values and not a single request-body example, so nothing to copy; the
-// bodies are synthesized from the schemas (see sample.go).
+// `example:` values and not a single request-body example, so there is nothing to
+// copy; the bodies are synthesized from the schemas (see sample.go).
 //
 // Run it through `make generate`. CI re-runs it and fails on a diff, so the output
 // must be a deterministic function of the spec.
