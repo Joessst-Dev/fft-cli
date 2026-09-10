@@ -1,5 +1,6 @@
 ---
 title: Commands
+source: internal/skill/assets/references/commands.md
 ---
 
 # The curated commands

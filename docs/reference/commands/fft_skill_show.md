@@ -1,5 +1,6 @@
 ---
 title: fft skill show
+editLink: false
 ---
 
 # fft skill show

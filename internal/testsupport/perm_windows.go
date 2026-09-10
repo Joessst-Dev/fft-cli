@@ -18,8 +18,8 @@ import (
 const permSkip = "Windows has no POSIX mode bits: file security is an ACL, os.Stat " +
 	"synthesises 0666 for every regular file, and fft sets no ACL of its own — " +
 	"the file is protected only by what it inherits from its parent directory. " +
-	"README, 'On Windows, --no-keyring protects less than 0600 suggests', has " +
-	"the consequences."
+	"the docs site, guide/auth, 'On Windows, --no-keyring protects less than " +
+	"0600 suggests', has the consequences."
 
 func expectPerm(_ string, _ fs.FileMode) {
 	ginkgo.GinkgoHelper()

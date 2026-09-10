@@ -1,6 +1,6 @@
 // Package docsmd holds the small Markdown transforms shared by the two
-// documentation-site generators — tools/docsgen (guide pages from the skill and
-// README) and fft gen-docs (the CLI reference).
+// documentation-site generators — tools/docsgen (guide pages from the skill
+// assets) and fft gen-docs (the CLI reference).
 package docsmd
 
 import "strings"

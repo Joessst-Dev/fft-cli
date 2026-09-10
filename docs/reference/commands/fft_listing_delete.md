@@ -1,5 +1,6 @@
 ---
 title: fft listing delete
+editLink: false
 ---
 
 # fft listing delete

@@ -1,5 +1,6 @@
 ---
 title: fft skill install
+editLink: false
 ---
 
 # fft skill install

@@ -1,5 +1,6 @@
 ---
 title: fft connection get
+editLink: false
 ---
 
 # fft connection get

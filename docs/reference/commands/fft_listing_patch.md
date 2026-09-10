@@ -1,5 +1,6 @@
 ---
 title: fft listing patch
+editLink: false
 ---
 
 # fft listing patch

@@ -1,5 +1,6 @@
 ---
 title: fft order search
+editLink: false
 ---
 
 # fft order search

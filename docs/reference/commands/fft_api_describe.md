@@ -1,5 +1,6 @@
 ---
 title: fft api describe
+editLink: false
 ---
 
 # fft api describe

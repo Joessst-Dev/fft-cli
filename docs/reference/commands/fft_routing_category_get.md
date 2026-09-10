@@ -1,5 +1,6 @@
 ---
 title: fft routing category get
+editLink: false
 ---
 
 # fft routing category get

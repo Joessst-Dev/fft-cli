@@ -1,5 +1,6 @@
 ---
 title: fft routing category create
+editLink: false
 ---
 
 # fft routing category create

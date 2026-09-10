@@ -1,5 +1,6 @@
 ---
 title: fft facility coordinates
+editLink: false
 ---
 
 # fft facility coordinates

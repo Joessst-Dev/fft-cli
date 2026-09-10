@@ -1,5 +1,6 @@
 ---
 title: Overview
+source: internal/skill/assets/SKILL.md
 ---
 
 # Driving fft

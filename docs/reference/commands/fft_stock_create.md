@@ -1,5 +1,6 @@
 ---
 title: fft stock create
+editLink: false
 ---
 
 # fft stock create

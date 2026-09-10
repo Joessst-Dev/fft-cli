@@ -1,5 +1,6 @@
 ---
 title: fft connection update
+editLink: false
 ---
 
 # fft connection update

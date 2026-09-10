@@ -9,7 +9,6 @@ on:
     paths:
       - "docs/**"
       - "internal/skill/assets/**"
-      - "README.md"
       - "tools/docsgen/**"
       - "cmd/fft/gendocs.go"
       - ".github/workflows/docs.yml"

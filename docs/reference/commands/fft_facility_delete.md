@@ -1,5 +1,6 @@
 ---
 title: fft facility delete
+editLink: false
 ---
 
 # fft facility delete

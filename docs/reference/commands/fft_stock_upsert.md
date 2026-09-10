@@ -1,5 +1,6 @@
 ---
 title: fft stock upsert
+editLink: false
 ---
 
 # fft stock upsert
