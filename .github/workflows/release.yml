@@ -85,3 +85,12 @@ jobs:
           # it is scoped to this repository only. This must be a PAT with `contents:
           # write` on the tap repo — see CONTRIBUTING.md, "Releasing".
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          # Pushes bucket/fft.json to Joessst-Dev/scoop-bucket. A second fine-grained
+          # PAT rather than a widened HOMEBREW_TAP_TOKEN: one repo per token, so a leak
+          # costs one publishing surface instead of two.
+          SCOOP_BUCKET_TOKEN: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+          # Pushes a branch to the winget-pkgs fork and opens the PR against
+          # microsoft/winget-pkgs. A classic PAT on a bot account: opening a PR against
+          # a repository we do not own needs a permission a fine-grained PAT cannot be
+          # scoped to. See CONTRIBUTING.md, "Releasing", for the tradeoff.
+          WINGET_PKGS_TOKEN: ${{ secrets.WINGET_PKGS_TOKEN }}

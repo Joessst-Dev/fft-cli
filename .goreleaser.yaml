@@ -245,7 +245,8 @@ changelog:
 # Homebrew. Note this is `homebrew_casks`, not `brews`: GoReleaser deprecated the
 # formula pipe, and `goreleaser check` (a CI gate) fails on deprecated properties.
 # Two consequences worth knowing:
-#   - Casks are macOS-only. Linux users install via `go install` or the tarball.
+#   - Casks are macOS-only. Windows is served by the scoops/winget blocks below;
+#     Linux users install via `go install` or the tarball.
 #   - Casks have no `test do` block; the install is verified by `brew audit` and by
 #     the post-install hook below rather than by running `fft version`.
 homebrew_casks:
@@ -289,14 +290,164 @@ homebrew_casks:
             system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/fft"]
           end
 
+# Scoop, the Windows counterpart to the cask above. Same shape and same bargain: fft
+# never replaces its own binary (see internal/update), so every upgrade path is a
+# package manager's — and Windows had none until this block.
+#
+# `ids: [fft]` is load-bearing. Seven archives leave this release, and without the
+# filter the pipe would try to make a manifest out of fft-component-emulator_*.zip as
+# well: a component is installed by `fft component install`, not by scoop.
+#
+# The manifest points at the windows *zip*, which the archives block above already
+# guarantees via format_overrides. Scoop cannot unpack a tar.gz.
+scoops:
+  - name: fft
+    ids: [fft]
+    repository:
+      owner: Joessst-Dev
+      name: scoop-bucket
+      branch: main
+      # A second fine-grained PAT rather than a widened HOMEBREW_TAP_TOKEN. That one
+      # is scoped to the tap repo, so it cannot write here, and widening it would
+      # make its name a lie and cost two publishing surfaces per leak instead of one.
+      token: "{{ .Env.SCOOP_BUCKET_TOKEN }}"
+    # Named explicitly rather than left to the default, because which of bucket/ and
+    # the repo root the default is has changed across GoReleaser versions — and a
+    # manifest in the wrong place makes `scoop bucket list` report 0 manifests
+    # instead of failing.
+    directory: bucket
+    homepage: https://github.com/Joessst-Dev/fft-cli
+    description: A CLI for the fulfillmenttools API — every operation reachable from your shell.
+    license: MIT
+    commit_author:
+      name: goreleaser-bot
+      email: bot@goreleaser.com
+    commit_msg_template: "scoop: fft {{ .Tag }}"
+    # A prerelease must never become `scoop install fft`, exactly as for the cask.
+    skip_upload: auto
+    # Deliberately no depends/persist/shortcuts/pre_install/post_install, mirroring
+    # the cask's minimalism. In particular there is no Scoop equivalent of the cask's
+    # xattr hook and none is needed: SmartScreen keys on download reputation, not on
+    # an extended attribute, and Scoop's own sha256 check is the integrity control.
+
+# WinGet. Unlike the tap and the bucket, the destination is not ours: manifests live
+# in microsoft/winget-pkgs, and the only way in is a pull request from a fork. So
+# `repository:` names *our fork* — where GoReleaser pushes a branch — and
+# `pull_request.base:` names upstream, where it opens the PR.
+#
+# The first submission is reviewed by a human at Microsoft and takes days; every one
+# after it is mostly automated, provided the manifests keep validating. A manifest
+# rejected upstream is fixed by editing the PR — it never requires re-tagging fft.
+#
+# The installer is the windows zip, consumed as a nested *portable*: winget unpacks
+# the archive, finds fft.exe inside it, and aliases it as `fft`, having verified the
+# sha256 from checksums.txt first.
+winget:
+  - name: fft
+    package_identifier: Joessst-Dev.fft
+    # Same filter, same reason as the scoop block above.
+    ids: [fft]
+
+    publisher: Joessst-Dev
+    publisher_url: https://github.com/Joessst-Dev
+    publisher_support_url: https://github.com/Joessst-Dev/fft-cli/issues
+
+    homepage: https://joessst-dev.github.io/fft-cli/
+    license: MIT
+    license_url: https://github.com/Joessst-Dev/fft-cli/blob/main/LICENSE
+
+    # ASCII on purpose (- rather than the em dash used everywhere else here): the
+    # manifests are UTF-8 and an em dash is legal, but `winget search` renders into
+    # consoles with legacy code pages, and upstream validation is fussier about the
+    # locale manifest than about anything else. Not worth spending a first review on.
+    short_description: A CLI for the fulfillmenttools API - every operation reachable from your shell.
+    description: |
+      fft is a command-line client for the fulfillmenttools fulfillment API. Sign in
+      once, then reach every one of the API's operations from your shell - orders,
+      facilities, interfacility connections, listings, stock, pick and pack jobs,
+      handovers and routing strategies - not the ones someone got around to wrapping,
+      all of them.
+
+      stdout is data and nothing else, so a pipe is always safe. Credentials go to the
+      Windows Credential Manager, never to a config file.
+
+      Not an official fulfillmenttools product: an independent, open-source community
+      project, not affiliated with or supported by OC fulfillment tools GmbH.
+    release_notes_url: "https://github.com/Joessst-Dev/fft-cli/releases/tag/{{ .Tag }}"
+
+    # winget caps tags at 16, 40 characters each, and prefers lowercase.
+    tags:
+      - cli
+      - api
+      - api-client
+      - fulfillment
+      - fulfillmenttools
+      - logistics
+      - warehouse
+      - ecommerce
+      - golang
+
+    repository:
+      # The bot's fork — not upstream, and not an account of ours. See below on why
+      # the token cannot belong to a human's account.
+      owner: FFT_WINGET_BOT_ACCOUNT
+      name: winget-pkgs
+      # One branch per version, so two releases in flight never share a PR head.
+      branch: "fft-{{ .Version }}"
+      # A classic PAT with `public_repo`, minted on a bot account that is a
+      # collaborator nowhere else. Opening a PR whose base is microsoft/winget-pkgs
+      # needs `pull_requests: write` on a repository we do not own, and a
+      # fine-grained PAT cannot be scoped to that — so the scope is unavoidably broad
+      # and the mitigation is that it grants access to an account holding nothing.
+      # See CONTRIBUTING.md, "Releasing".
+      token: "{{ .Env.WINGET_PKGS_TOKEN }}"
+      pull_request:
+        enabled: true
+        draft: false
+        base:
+          owner: microsoft
+          name: winget-pkgs
+          branch: master
+
+    commit_author:
+      name: goreleaser-bot
+      email: bot@goreleaser.com
+    # winget-pkgs' own convention for the commit and PR title. The identifier is
+    # spelled out rather than templated, because whether the winget pipe exposes
+    # .PackageIdentifier as a template variable is not something to discover on a tag.
+    commit_msg_template: "New version: Joessst-Dev.fft version {{ .Version }}"
+
+    # The single most important line in this block: an rc tag that opened a PR
+    # against microsoft/winget-pkgs would be a moderator's problem, not ours to undo.
+    skip_upload: auto
+
+    # `path:` deliberately unset. GoReleaser derives
+    # manifests/j/Joessst-Dev/fft/<version>/ from the identifier, which is exactly the
+    # layout winget-pkgs requires; setting it by hand is a way to get it wrong.
+
 release:
   draft: false
   prerelease: auto
   footer: |
     ## Install
 
+    macOS:
+
     ```sh
     brew install Joessst-Dev/tap/fft
+    ```
+
+    Windows:
+
+    ```powershell
+    scoop bucket add joessst https://github.com/Joessst-Dev/scoop-bucket
+    scoop install fft
+    ```
+
+    Anywhere, with Go 1.26+:
+
+    ```sh
+    go install github.com/Joessst-Dev/fft-cli/cmd/fft@latest
     ```
 
     **Full changelog**: https://github.com/Joessst-Dev/fft-cli/compare/{{ .PreviousTag }}...{{ .Tag }}
