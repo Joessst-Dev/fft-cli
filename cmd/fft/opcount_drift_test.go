@@ -42,22 +42,21 @@ const codegenPath = repoRoot + "/api/openapi/oapi-codegen.yaml"
 // must be one the spec still makes true. A number that was true of an older
 // swagger stops being in that set, which is exactly the drift to catch.
 //
-// The same reasoning applies to the spec's path and schema counts — also quoted
-// in prose (oapi-codegen.yaml, specgen_test.go) and just as prone to going stale
-// on a silent regen, as the 2,725-vs-2,255 schema count transposition did. They
-// get their own regexes rather than folding into countRE/ofTheRE: the phrasing
-// differs ("NNN paths", "N,NNN schemas" with a thousands comma), so a shared
-// pattern would either miss the comma or over-match operation counts.
+// Only the operation counts are gated. The spec's path and schema totals move on
+// almost every sync — 346 to 356 and 2,255 to 2,264 in one — while the operation
+// count held at 561 across the same sync. Gating a figure that volatile buys
+// accuracy in two incidental "how big is this" comments at the cost of reddening
+// every future sync, so those two now say "hundreds" and "thousands" and state no
+// integer to go stale. The operation count is the one that is load-bearing: it is
+// in the README, the docs site and the GitHub repo description.
 //
 // \d{3,4} rather than \d{3}: at 561 today a 3-digit pattern is enough, but this
 // gate exists to survive the count changing, including past 1,000 — \b\d{3}\b
 // cannot match inside a longer digit run, so a 4-digit figure would silently
 // stop being checked at all.
 var (
-	countRE   = regexp.MustCompile(`\b(\d{3,4}) operations\b`)
-	ofTheRE   = regexp.MustCompile(`\b(\d{3,4}) of the \d{3,4} operations\b`)
-	pathsRE   = regexp.MustCompile(`\b(\d{3,4}) paths\b`)
-	schemasRE = regexp.MustCompile(`\b(\d{1,3}(?:,\d{3})*) schemas\b`)
+	countRE = regexp.MustCompile(`\b(\d{3,4}) operations\b`)
+	ofTheRE = regexp.MustCompile(`\b(\d{3,4}) of the \d{3,4} operations\b`)
 )
 
 var _ = Describe("the operation counts the repo documents", func() {
@@ -68,20 +67,15 @@ var _ = Describe("the operation counts the repo documents", func() {
 			strconv.Itoa(c.total - c.typed): "operations with no typed method",
 			strconv.Itoa(c.withBody):        "operations taking a request body",
 			strconv.Itoa(c.permissions):     "operations declaring a permission",
-			strconv.Itoa(c.paths):           "paths declared by the spec",
-			strconv.Itoa(c.schemas):         "component schemas the spec declares",
 		}
 
 		var wrong []string
 		for _, f := range prose() {
 			body, err := os.ReadFile(f) // #nosec G304 -- a repo file this gate walks
 			Expect(err).NotTo(HaveOccurred())
-			for _, re := range []*regexp.Regexp{countRE, ofTheRE, pathsRE, schemasRE} {
+			for _, re := range []*regexp.Regexp{countRE, ofTheRE} {
 				for _, m := range re.FindAllStringSubmatch(string(body), -1) {
-					// Strip the schemas count's thousands comma before the lookup;
-					// the other three patterns never match one, so this is a no-op there.
-					n := strings.ReplaceAll(m[1], ",", "")
-					if _, ok := valid[n]; !ok {
+					if _, ok := valid[m[1]]; !ok {
 						wrong = append(wrong, strings.TrimPrefix(f, repoRoot+"/")+": "+m[0])
 					}
 				}
@@ -146,7 +140,7 @@ func prose() []string {
 
 // specCounts are the figures the design comments quote, all read from the one
 // spec so they can never disagree with each other.
-type specCounts struct{ total, typed, permissions, withBody, paths, schemas int }
+type specCounts struct{ total, typed, permissions, withBody int }
 
 func countSpec() specCounts {
 	data, err := os.ReadFile(specPath)
@@ -156,9 +150,6 @@ func countSpec() specCounts {
 			Tags        []string       `yaml:"tags"`
 			RequestBody map[string]any `yaml:"requestBody"`
 		} `yaml:"paths"`
-		Components struct {
-			Schemas map[string]any `yaml:"schemas"`
-		} `yaml:"components"`
 	}
 	Expect(yaml.Unmarshal(data, &spec)).To(Succeed())
 
@@ -178,8 +169,6 @@ func countSpec() specCounts {
 	methods := map[string]bool{"get": true, "put": true, "post": true, "delete": true, "patch": true, "head": true, "options": true, "trace": true}
 
 	var c specCounts
-	c.paths = len(spec.Paths)
-	c.schemas = len(spec.Components.Schemas)
 	for _, item := range spec.Paths {
 		for method, op := range item {
 			if !methods[strings.ToLower(method)] {

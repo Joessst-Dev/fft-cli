@@ -46,6 +46,9 @@ do not widen the mechanical scope in step 4.
      `knownMutatingPOSTs`. Consult the **`fulfillment-tools-consultant`** agent to confirm the endpoint's real
      semantics before deciding. **Fail closed** — if still unsure, treat it as a write. Remove ids for POSTs
      that no longer exist in the spec. Update the pinned POST total in `access_test.go`.
+   - Update the operation counts the repo documents. `cmd/fft/opcount_drift_test.go` fails with the list of
+     files and the numbers that are now true — apply them. The count appears in the README, the docs site, the
+     agent skill (run `make docs` after touching `internal/skill/assets/`) and a dozen Go comments.
    - `make fmt`, then iterate `make test` (`go test -race -shuffle=on ./...`) and `make lint` until both are
      clean. **Do not weaken or edit a guard test to make it pass** — fix the classification/count instead.
 
@@ -57,7 +60,10 @@ do not widen the mechanical scope in step 4.
 5. **COMMIT + PR:**
    - Conventional-commit message: `chore: sync fulfillmenttools OpenAPI spec`.
    - Push the branch and `gh pr create` against `main`. PR body summarizes: what changed, the POST
-     classifications you made, the census-count update, and the "Needs human follow-up" items. End the body with
+     classifications you made, the census-count update, and the "Needs human follow-up" items. If the operation
+     total changed, say so under "Needs human follow-up": the **GitHub repo description** quotes it and no test
+     or `make` target can reach it, so it must be edited by hand (`gh repo edit --description ...`).
+     End the body with
      `Closes #<n>`.
    - Opt the PR into the automated review→fix loop by adding the **`auto-review`** label (create it first so this
      is idempotent — it must match the definition [`pr-review`](./pr-review.md) expects):

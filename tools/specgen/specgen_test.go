@@ -307,7 +307,7 @@ var _ = Describe("specgen", func() {
 
 	Describe("the whole real spec", func() {
 		It("loads, and every sample body it produces is valid JSON", func() {
-			// The synthesizer is recursive over 2,264 schemas. "It terminates" and "what it
+			// The synthesizer is recursive over thousands of schemas. "It terminates" and "what it
 			// emits parses" are not things a mini-spec can prove.
 			real, err := load("../../api/openapi/fft.api.swagger.yaml")
 			Expect(err).NotTo(HaveOccurred())
