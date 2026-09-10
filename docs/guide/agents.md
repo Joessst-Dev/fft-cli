@@ -5,7 +5,7 @@ title: AI agents
 # Letting an AI agent drive fft
 
 `fft` ships an **agent skill**: the documentation an AI coding assistant reads before it
-runs `fft` on your behalf. It covers the command surface, how to discover the API's 559
+runs `fft` on your behalf. It covers the command surface, how to discover the API's 561
 operations, and the things no `--help` can teach it — that stdout is data and stderr is
 everything else, that a POST is not necessarily a write, that exit 8 means *some* of a
 bulk write landed, and that it must ask you before it changes anything.

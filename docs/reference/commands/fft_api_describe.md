@@ -14,9 +14,9 @@ Everything comes from the spec, so this works offline and needs no project.
   fft api describe getPickJob
   fft api describe addPickJob -o json | jq -r .sampleBody
 
-The EXAMPLE BODY is synthesized from the request schema — the spec ships 1,556
-field-level examples and not one request-body example, so there was nothing to
-copy. It is a body you can send: every required field is there, and the values
+The EXAMPLE BODY is synthesized from the request schema — the spec ships
+thousands of field-level examples and not one request-body example, so there was
+nothing to copy. It is a body you can send: every required field is there, and the values
 come from the spec's own examples wherever it has one.
 
 To get just that body, use --example on the command itself:

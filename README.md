@@ -1,7 +1,7 @@
 # fft
 
 A command-line client for the [fulfillmenttools](https://fulfillmenttools.com) API.
-Sign in once, then reach **every one of the API's 559 operations** from your shell —
+Sign in once, then reach **every one of the API's 561 operations** from your shell —
 not the ones someone got around to wrapping, all of them. stdout is data and nothing
 else, so a pipe is always safe.
 
