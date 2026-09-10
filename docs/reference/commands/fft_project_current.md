@@ -1,5 +1,6 @@
 ---
 title: fft project current
+editLink: false
 ---
 
 # fft project current

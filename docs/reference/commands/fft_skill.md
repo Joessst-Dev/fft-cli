@@ -1,5 +1,6 @@
 ---
 title: fft skill
+editLink: false
 ---
 
 # fft skill

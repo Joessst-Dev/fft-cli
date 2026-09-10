@@ -1,5 +1,6 @@
 ---
 title: fft connection list
+editLink: false
 ---
 
 # fft connection list

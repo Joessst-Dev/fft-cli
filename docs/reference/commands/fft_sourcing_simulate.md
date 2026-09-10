@@ -1,5 +1,6 @@
 ---
 title: fft sourcing simulate
+editLink: false
 ---
 
 # fft sourcing simulate

@@ -1,5 +1,6 @@
 ---
 title: fft stock actions
+editLink: false
 ---
 
 # fft stock actions

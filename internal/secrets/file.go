@@ -26,8 +26,8 @@ import (
 // and this store sets no ACL of its own — so the file is protected by whatever
 // it inherits from its parent directory. Under the default %USERPROFILE% that
 // inheritance is sound; point XDG_STATE_HOME at a shared directory and it is
-// not, where 0600 on Linux would still hold. See the README section "On Windows,
-// --no-keyring protects less than 0600 suggests".
+// not, where 0600 on Linux would still hold. See the docs site, guide/auth,
+// "On Windows, --no-keyring protects less than 0600 suggests".
 type fileStore struct {
 	path string
 
@@ -149,7 +149,7 @@ func (s *fileStore) warnIfLoose() {
 	// Windows has no POSIX mode bits: os.Stat there synthesizes 0666 for a file and
 	// 0777 for a directory, so this check would fire on every single invocation. The
 	// Credential Manager is the real protection on Windows, and the 0600 story does
-	// not apply — see the README section on --no-keyring on Windows.
+	// not apply — see guide/auth on the docs site, on --no-keyring on Windows.
 	if runtime.GOOS == "windows" {
 		return
 	}

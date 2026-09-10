@@ -1,5 +1,6 @@
 ---
 title: fft routing
+editLink: false
 ---
 
 # fft routing

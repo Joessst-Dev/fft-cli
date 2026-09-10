@@ -1,5 +1,6 @@
 ---
 title: fft routing strategy get
+editLink: false
 ---
 
 # fft routing strategy get

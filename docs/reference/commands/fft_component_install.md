@@ -1,5 +1,6 @@
 ---
 title: fft component install
+editLink: false
 ---
 
 # fft component install

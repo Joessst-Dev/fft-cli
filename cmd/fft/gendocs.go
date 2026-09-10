@@ -115,7 +115,11 @@ func writeCommandPage(dir string, cmd *cobra.Command) error {
 
 	var b strings.Builder
 
-	fmt.Fprintf(&b, "---\ntitle: %s\n---\n\n", path)
+	// editLink: false because this page has no editable source. A guide page
+	// generated from the skill names that asset in a source: key and its edit
+	// link goes there; a reference page is rendered from the command tree, so
+	// the only thing to "edit" would be this drift-gated file itself.
+	fmt.Fprintf(&b, "---\ntitle: %s\neditLink: false\n---\n\n", path)
 	fmt.Fprintf(&b, "# %s\n\n", path)
 
 	if cmd.Short != "" {

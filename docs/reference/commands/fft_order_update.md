@@ -1,5 +1,6 @@
 ---
 title: fft order update
+editLink: false
 ---
 
 # fft order update

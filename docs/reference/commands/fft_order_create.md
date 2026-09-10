@@ -1,5 +1,6 @@
 ---
 title: fft order create
+editLink: false
 ---
 
 # fft order create

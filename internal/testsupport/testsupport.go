@@ -12,7 +12,7 @@
 // so there is nothing to assert. ExpectOwnerOnly* therefore skip the calling
 // spec on Windows, loudly and with a reason, rather than assert a guarantee the
 // platform does not make. What that means for fft's secrets on Windows is
-// written down in the README, under the keychain section — a skipped security
+// written down on the docs site, under guide/auth — a skipped security
 // assertion must not be the only record that the guarantee is weaker.
 //
 // Making a directory unwritable. This one is not a mode-bits problem and does

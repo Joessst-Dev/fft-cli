@@ -1,5 +1,6 @@
 ---
 title: fft routing strategy create
+editLink: false
 ---
 
 # fft routing strategy create

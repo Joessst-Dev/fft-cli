@@ -1,5 +1,6 @@
 ---
 title: fft listing get
+editLink: false
 ---
 
 # fft listing get

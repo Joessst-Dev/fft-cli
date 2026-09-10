@@ -62,7 +62,11 @@ Tier 2 and Tier 3 already reach every operation. To give a tag a *typed generate
 
 ## Documentation site
 
-`docs/` is a VitePress site published to GitHub Pages (`.github/workflows/docs.yml`). It is **not a second copy of the docs** — every page under `docs/guide/` and `docs/reference/` is generated from a real source, committed, and drift-gated by CI's `docs` job exactly like `make generate`. `make docs` runs two generators: `tools/docsgen` syncs the skill assets (`internal/skill/assets/`) and README sections into the guide pages, and the hidden `fft gen-docs` command (`cmd/fft/gendocs.go`) renders the curated command tree into the CLI reference. So after editing a skill file or one of the README sections docsgen slices (Install, Setting up a project, Authentication, CI, …), run `make docs` and commit, or the build goes red. Only `docs/index.md`, `docs/reference/index.md`, and `docs/.vitepress/` are hand-written. `docsgen` fails loudly if a README heading it expects has been renamed.
+`docs/` is a VitePress site published to GitHub Pages (`.github/workflows/docs.yml`), and `make docs` runs the two generators that feed it, both drift-gated by CI's `docs` job exactly like `make generate`. `tools/docsgen` renders the skill assets (`internal/skill/assets/`) into guide pages; the hidden `fft gen-docs` command (`cmd/fft/gendocs.go`) renders the curated command tree into `docs/reference/commands/`. Edit a skill asset, run `make docs`, commit — or the build goes red.
+
+**A guide page's front matter says who owns it.** A `source:` key names the skill asset it was generated from: edit that asset, never the page, and `docsgen` deletes such a page when its source goes away. A page *without* a `source:` key — `install`, `prerequisites`, `getting-started`, `configuration`, `auth`, `ci`, `try-offline`, `read-only`, `agents` — is hand-written, edited in place, and `docsgen` never touches it; add a new one to the sidebar in `docs/.vitepress/config.mts` by hand, since nothing generates that list. `docs/index.md`, `docs/reference/index.md` and `docs/.vitepress/` are hand-written too.
+
+**The README is not a source for the site.** It was until the guide pages were inverted; it is now a ~130-line getting-started page that links out, and `CONTRIBUTING.md` holds the contributor material. Deep prose belongs in a guide page, not in the README — and note that nothing drift-gates README examples against the command tree the way `skill_drift_test.go` does for the skill.
 
 ## Release
 

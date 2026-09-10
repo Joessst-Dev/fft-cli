@@ -1,5 +1,6 @@
 ---
 title: fft api list
+editLink: false
 ---
 
 # fft api list

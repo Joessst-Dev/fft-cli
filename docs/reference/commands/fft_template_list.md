@@ -1,5 +1,6 @@
 ---
 title: fft template list
+editLink: false
 ---
 
 # fft template list

@@ -1,5 +1,6 @@
 ---
 title: fft project remove
+editLink: false
 ---
 
 # fft project remove

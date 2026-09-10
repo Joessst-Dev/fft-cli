@@ -1,5 +1,6 @@
 ---
 title: fft template remove
+editLink: false
 ---
 
 # fft template remove

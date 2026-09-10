@@ -1,5 +1,6 @@
 ---
 title: Templates
+source: internal/skill/assets/references/templates.md
 ---
 
 # Templates: saving a body and sending it again

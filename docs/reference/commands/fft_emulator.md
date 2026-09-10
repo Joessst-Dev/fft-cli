@@ -1,5 +1,6 @@
 ---
 title: fft emulator
+editLink: false
 ---
 
 # fft emulator

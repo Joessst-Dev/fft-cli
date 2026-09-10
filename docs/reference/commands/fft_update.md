@@ -1,5 +1,6 @@
 ---
 title: fft update
+editLink: false
 ---
 
 # fft update

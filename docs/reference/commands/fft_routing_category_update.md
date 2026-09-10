@@ -1,5 +1,6 @@
 ---
 title: fft routing category update
+editLink: false
 ---
 
 # fft routing category update

@@ -1,5 +1,6 @@
 ---
 title: fft order get
+editLink: false
 ---
 
 # fft order get

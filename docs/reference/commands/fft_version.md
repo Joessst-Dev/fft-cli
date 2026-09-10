@@ -1,5 +1,6 @@
 ---
 title: fft version
+editLink: false
 ---
 
 # fft version

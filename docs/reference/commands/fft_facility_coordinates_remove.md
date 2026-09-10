@@ -1,5 +1,6 @@
 ---
 title: fft facility coordinates remove
+editLink: false
 ---
 
 # fft facility coordinates remove

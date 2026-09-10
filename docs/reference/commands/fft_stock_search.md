@@ -1,5 +1,6 @@
 ---
 title: fft stock search
+editLink: false
 ---
 
 # fft stock search
