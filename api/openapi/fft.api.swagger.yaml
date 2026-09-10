@@ -29629,6 +29629,37 @@ components:
       title: AddItemReturnToItemReturnJob
       type: object
       description: AddItemReturnToItemReturnJob
+    AdditionalHandoverJobLineItem:
+      allOf:
+        - $ref: '#/components/schemas/MandatoryLineItem'
+      properties:
+        article:
+          $ref: '#/components/schemas/HandoverLineItemArticle'
+        quantity:
+          format: int64
+          minimum: 1
+          type: integer
+      required:
+        - id
+        - article
+        - quantity
+      title: AdditionalHandoverJobLineItem
+      description: AdditionalHandoverJobLineItem
+    AdditionalHandoverJobLineItemForCreation:
+      allOf:
+        - $ref: '#/components/schemas/MandatoryLineItemForCreation'
+      properties:
+        article:
+          $ref: '#/components/schemas/HandoverLineItemArticle'
+        quantity:
+          format: int64
+          minimum: 1
+          type: integer
+      required:
+        - article
+        - quantity
+      title: AdditionalHandoverJobLineItemForCreation
+      description: AdditionalHandoverJobLineItemForCreation
     AdditionalInformation:
       properties:
         nameLocalized:
@@ -42175,6 +42206,12 @@ components:
       allOf:
         - $ref: '#/components/schemas/VersionedResource'
         - properties:
+            additionalHandoverJobLineItems:
+              items:
+                $ref: '#/components/schemas/AdditionalHandoverJobLineItem'
+              maxItems: 100
+              minItems: 0
+              type: array
             anonymized:
               description: Indicates if gdpr related data was anonymized
               example: false
@@ -42412,8 +42449,83 @@ components:
         - $ref: '#/components/schemas/MoveHandoverJobLineItemsActionParameter'
         - $ref: '#/components/schemas/HandoverJobAddTargetTimeActionParameter'
         - $ref: '#/components/schemas/HandoverJobModifyPickUpServicesActionParameter'
+        - $ref: >-
+            #/components/schemas/HandoverJobRemoveAdditionalLineItemsActionParameter
+        - $ref: >-
+            #/components/schemas/HandoverJobAddAdditionalLineItemsActionParameter
       title: HandoverJobActionsParameter
       description: HandoverJobActionsParameter
+    HandoverJobAddAdditionalLineItemsActionEnum:
+      enum:
+        - ADD_ADDITIONAL_HANDOVER_JOB_LINE_ITEMS
+      type: string
+      title: HandoverJobAddAdditionalLineItemsActionEnum
+      description: HandoverJobAddAdditionalLineItemsActionEnum
+    HandoverJobAddAdditionalLineItemsActionParameter:
+      additionalProperties: false
+      description: Action to add line items to additionalHandoverJobLineItems
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/AdditionalHandoverJobLineItemForCreation'
+          maxItems: 100
+          minItems: 1
+          type: array
+        name:
+          $ref: '#/components/schemas/HandoverJobAddAdditionalLineItemsActionEnum'
+        version:
+          description: Version of the entity to be changed
+          minimum: 0
+          type: integer
+      required:
+        - name
+        - version
+        - items
+      title: HandoverJobAddAdditionalLineItemsActionParameter
+      type: object
+    HandoverJobAdditionalHandoverJobLineItemsArticleFilter:
+      properties:
+        tenantArticleId:
+          allOf:
+            - $ref: '#/components/schemas/StringSearchFilter'
+          description: Search by tenantArticleId
+          example: MY_ARTICLE_ID
+        title:
+          allOf:
+            - $ref: '#/components/schemas/StringSearchFilter'
+          description: Search by title
+      title: HandoverJobAdditionalHandoverJobLineItemsArticleFilter
+      type: object
+      description: HandoverJobAdditionalHandoverJobLineItemsArticleFilter
+    HandoverJobAdditionalHandoverJobLineItemsFilter:
+      properties:
+        article:
+          allOf:
+            - $ref: >-
+                #/components/schemas/HandoverJobAdditionalHandoverJobLineItemsArticleFilter
+          description: Nested search by article
+        scannableCodes:
+          allOf:
+            - $ref: '#/components/schemas/StringListFilter'
+          description: Search by scannableCodes
+      title: HandoverJobAdditionalHandoverJobLineItemsFilter
+      type: object
+      description: HandoverJobAdditionalHandoverJobLineItemsFilter
+    HandoverJobAdditionalHandoverJobLineItemsListFilter:
+      properties:
+        contains:
+          allOf:
+            - $ref: >-
+                #/components/schemas/HandoverJobAdditionalHandoverJobLineItemsFilter
+          description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
+      title: HandoverJobAdditionalHandoverJobLineItemsListFilter
+      type: object
+      description: HandoverJobAdditionalHandoverJobLineItemsListFilter
     HandoverJobAddTargetTimeActionEnum:
       enum:
         - ADD_TARGET_TIME
@@ -43118,6 +43230,34 @@ components:
       title: HandoverJobRecipientAddressFilter
       type: object
       description: HandoverJobRecipientAddressFilter
+    HandoverJobRemoveAdditionalLineItemsActionEnum:
+      enum:
+        - REMOVE_ADDITIONAL_HANDOVER_JOB_LINE_ITEMS
+      type: string
+      title: HandoverJobRemoveAdditionalLineItemsActionEnum
+      description: HandoverJobRemoveAdditionalLineItemsActionEnum
+    HandoverJobRemoveAdditionalLineItemsActionParameter:
+      additionalProperties: false
+      description: Action to remove line items from additionalHandoverJobLineItems
+      properties:
+        lineItemIds:
+          items:
+            type: string
+          maxItems: 100
+          minItems: 1
+          type: array
+        name:
+          $ref: '#/components/schemas/HandoverJobRemoveAdditionalLineItemsActionEnum'
+        version:
+          description: Version of the entity to be changed
+          minimum: 0
+          type: integer
+      required:
+        - name
+        - version
+        - lineItemIds
+      title: HandoverJobRemoveAdditionalLineItemsActionParameter
+      type: object
     HandoverJobReplaceAssignedUsersActionEnum:
       enum:
         - REPLACE_ASSIGNED_USERS
@@ -43200,6 +43340,11 @@ components:
       description: HandoverJobSearchPayload
     HandoverJobSearchQuery:
       properties:
+        additionalHandoverJobLineItems:
+          allOf:
+            - $ref: >-
+                #/components/schemas/HandoverJobAdditionalHandoverJobLineItemsListFilter
+          description: Nested list search by additionalHandoverJobLineItems
         and:
           items:
             $ref: '#/components/schemas/HandoverJobSearchQuery'
@@ -52059,7 +52204,7 @@ components:
     MandatoryLineItemForCreation:
       properties:
         article:
-          type: object
+          $ref: '#/components/schemas/LineItemArticle'
         customAttributes:
           description: >-
             Attributes that can be added to the lineItem. These attributes
@@ -74027,6 +74172,7 @@ components:
             - PICKJOB_REJECTED
             - PICKJOB_SHORTPICKED
             - PICKJOB_ABORTED
+            - TIME_TRIGGERED_REROUTE
           type: string
         created:
           description: Creation date of this routing journal entry
