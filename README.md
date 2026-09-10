@@ -21,6 +21,13 @@ else, so a pipe is always safe.
 brew install Joessst-Dev/tap/fft
 ```
 
+**Windows** — [Scoop](https://scoop.sh) or [WinGet](https://learn.microsoft.com/windows/package-manager/):
+
+```powershell
+scoop bucket add joessst https://github.com/Joessst-Dev/scoop-bucket; scoop install fft
+winget install Joessst-Dev.fft
+```
+
 **Go** (any platform, needs Go 1.26+):
 
 ```sh
