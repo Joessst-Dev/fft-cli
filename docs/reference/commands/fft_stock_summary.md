@@ -1,5 +1,6 @@
 ---
 title: fft stock summary
+editLink: false
 ---
 
 # fft stock summary

@@ -1,5 +1,6 @@
 ---
 title: fft component remove
+editLink: false
 ---
 
 # fft component remove

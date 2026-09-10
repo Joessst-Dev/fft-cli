@@ -1,5 +1,6 @@
 ---
 title: fft facility create
+editLink: false
 ---
 
 # fft facility create

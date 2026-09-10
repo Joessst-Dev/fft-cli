@@ -1,5 +1,6 @@
 ---
 title: fft auth refresh
+editLink: false
 ---
 
 # fft auth refresh

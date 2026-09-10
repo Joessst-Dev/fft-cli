@@ -1,5 +1,6 @@
 ---
 title: fft listing upsert
+editLink: false
 ---
 
 # fft listing upsert

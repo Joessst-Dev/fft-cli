@@ -1,5 +1,6 @@
 ---
 title: fft stock
+editLink: false
 ---
 
 # fft stock

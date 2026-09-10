@@ -1,5 +1,6 @@
 ---
 title: fft component upgrade
+editLink: false
 ---
 
 # fft component upgrade

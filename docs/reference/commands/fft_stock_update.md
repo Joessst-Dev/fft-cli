@@ -1,5 +1,6 @@
 ---
 title: fft stock update
+editLink: false
 ---
 
 # fft stock update

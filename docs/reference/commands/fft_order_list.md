@@ -1,5 +1,6 @@
 ---
 title: fft order list
+editLink: false
 ---
 
 # fft order list

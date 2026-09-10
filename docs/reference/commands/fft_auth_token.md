@@ -1,5 +1,6 @@
 ---
 title: fft auth token
+editLink: false
 ---
 
 # fft auth token

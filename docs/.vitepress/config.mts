@@ -141,14 +141,12 @@ export default defineConfig({
     // itself is the source. Sending both to the same file (it used to be the
     // README) means the link is wrong for one of them; ask the page.
     //
-    // Reference/commands/* pages are a third kind: `fft gen-docs` stamps only
-    // `title:`, so the `source` fallback would otherwise send editors to the
-    // drift-gated generated file itself. Point those at the generator instead.
+    // A CLI reference page is a third kind and is handled at the source: it has
+    // no editable file, so `fft gen-docs` stamps `editLink: false` and no link
+    // renders at all.
     editLink: {
       pattern: ({ frontmatter, filePath }) =>
-        filePath.startsWith('reference/commands/')
-          ? 'https://github.com/Joessst-Dev/fft-cli/edit/main/cmd/fft/gendocs.go'
-          : `https://github.com/Joessst-Dev/fft-cli/edit/main/${frontmatter.source ?? `docs/${filePath}`}`,
+        `https://github.com/Joessst-Dev/fft-cli/edit/main/${frontmatter.source ?? `docs/${filePath}`}`,
       text: 'Edit this page on GitHub',
     },
 

@@ -1,5 +1,6 @@
 ---
 title: fft connection delete
+editLink: false
 ---
 
 # fft connection delete

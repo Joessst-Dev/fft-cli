@@ -1,5 +1,6 @@
 ---
 title: fft stock delete
+editLink: false
 ---
 
 # fft stock delete

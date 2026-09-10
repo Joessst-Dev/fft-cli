@@ -1,5 +1,6 @@
 ---
 title: fft component init
+editLink: false
 ---
 
 # fft component init

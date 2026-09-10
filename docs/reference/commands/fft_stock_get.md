@@ -1,5 +1,6 @@
 ---
 title: fft stock get
+editLink: false
 ---
 
 # fft stock get

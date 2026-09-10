@@ -1,5 +1,6 @@
 ---
 title: fft listing
+editLink: false
 ---
 
 # fft listing

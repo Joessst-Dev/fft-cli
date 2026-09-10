@@ -1,5 +1,6 @@
 ---
 title: fft routing strategy evaluate-node
+editLink: false
 ---
 
 # fft routing strategy evaluate-node

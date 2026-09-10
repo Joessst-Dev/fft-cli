@@ -1,5 +1,6 @@
 ---
 title: fft routing category
+editLink: false
 ---
 
 # fft routing category

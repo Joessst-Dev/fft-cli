@@ -1,5 +1,6 @@
 ---
 title: fft stock list
+editLink: false
 ---
 
 # fft stock list

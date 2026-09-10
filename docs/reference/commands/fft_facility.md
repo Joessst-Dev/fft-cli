@@ -1,5 +1,6 @@
 ---
 title: fft facility
+editLink: false
 ---
 
 # fft facility

@@ -1,5 +1,6 @@
 ---
 title: fft project use
+editLink: false
 ---
 
 # fft project use

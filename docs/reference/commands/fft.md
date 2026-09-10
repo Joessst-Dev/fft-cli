@@ -1,5 +1,6 @@
 ---
 title: fft
+editLink: false
 ---
 
 # fft

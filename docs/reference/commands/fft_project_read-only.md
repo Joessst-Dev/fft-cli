@@ -1,5 +1,6 @@
 ---
 title: fft project read-only
+editLink: false
 ---
 
 # fft project read-only

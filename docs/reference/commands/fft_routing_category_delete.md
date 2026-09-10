@@ -1,5 +1,6 @@
 ---
 title: fft routing category delete
+editLink: false
 ---
 
 # fft routing category delete

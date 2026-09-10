@@ -1,5 +1,6 @@
 ---
 title: fft auth whoami
+editLink: false
 ---
 
 # fft auth whoami

@@ -1,5 +1,6 @@
 ---
 title: fft connection
+editLink: false
 ---
 
 # fft connection

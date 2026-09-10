@@ -1,5 +1,6 @@
 ---
 title: fft routing strategy update
+editLink: false
 ---
 
 # fft routing strategy update

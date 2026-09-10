@@ -1,5 +1,6 @@
 ---
 title: fft component info
+editLink: false
 ---
 
 # fft component info

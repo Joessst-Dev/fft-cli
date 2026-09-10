@@ -1,5 +1,6 @@
 ---
 title: fft sourcing get
+editLink: false
 ---
 
 # fft sourcing get
