@@ -2486,6 +2486,30 @@ func (e InterFacilityConnectionContextTypes) Valid() bool {
 	}
 }
 
+// Defines values for InterFacilityConnectionSurchargeContextTypes.
+const (
+	InterFacilityConnectionSurchargeContextTypesCATEGORY         InterFacilityConnectionSurchargeContextTypes = "CATEGORY"
+	InterFacilityConnectionSurchargeContextTypesTAGREFERENCE     InterFacilityConnectionSurchargeContextTypes = "TAG_REFERENCE"
+	InterFacilityConnectionSurchargeContextTypesTARGETCOUNTRY    InterFacilityConnectionSurchargeContextTypes = "TARGET_COUNTRY"
+	InterFacilityConnectionSurchargeContextTypesTARGETPOSTALCODE InterFacilityConnectionSurchargeContextTypes = "TARGET_POSTALCODE"
+)
+
+// Valid indicates whether the value is a known member of the InterFacilityConnectionSurchargeContextTypes enum.
+func (e InterFacilityConnectionSurchargeContextTypes) Valid() bool {
+	switch e {
+	case InterFacilityConnectionSurchargeContextTypesCATEGORY:
+		return true
+	case InterFacilityConnectionSurchargeContextTypesTAGREFERENCE:
+		return true
+	case InterFacilityConnectionSurchargeContextTypesTARGETCOUNTRY:
+		return true
+	case InterFacilityConnectionSurchargeContextTypesTARGETPOSTALCODE:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for InterFacilityConnectionTransferSurchargeType.
 const (
 	ABSOLUTESURCHARGETYPE InterFacilityConnectionTransferSurchargeType = "ABSOLUTE_SURCHARGE_TYPE"
@@ -16270,6 +16294,19 @@ type InterFacilityConnectionSupplierTarget struct {
 	Type ConnectionType `json:"type"`
 }
 
+// InterFacilityConnectionSurchargeContext InterFacilityConnectionSurchargeContext
+type InterFacilityConnectionSurchargeContext struct {
+	// Operator The operator used to define how the context values are evaluated or compared.
+	Operator *ContextOperator `json:"operator,omitempty"`
+
+	// Type InterFacilityConnectionSurchargeContextTypes
+	Type   InterFacilityConnectionSurchargeContextTypes `json:"type"`
+	Values []string                                     `json:"values"`
+}
+
+// InterFacilityConnectionSurchargeContextTypes InterFacilityConnectionSurchargeContextTypes
+type InterFacilityConnectionSurchargeContextTypes string
+
 // InterFacilityConnectionToCustomerForCreation InterFacilityConnectionToCustomerForCreation
 type InterFacilityConnectionToCustomerForCreation struct {
 	// CarrierKey The key of the carrier that is used for this connection. References known and configured carriers in the system.
@@ -16505,12 +16542,14 @@ type InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item struc
 type InterFacilityConnectionTransferAbsoluteSurcharge struct {
 	// Amount InterFacilityConnectionsMoney
 	Amount              InterFacilityConnectionsMoney                `json:"amount"`
+	Context             *[]InterFacilityConnectionSurchargeContext   `json:"context,omitempty"`
 	TenantSurchargeType string                                       `json:"tenantSurchargeType"`
 	Type                InterFacilityConnectionTransferSurchargeType `json:"type"`
 }
 
 // InterFacilityConnectionTransferRelativeSurcharge InterFacilityConnectionTransferRelativeSurcharge
 type InterFacilityConnectionTransferRelativeSurcharge struct {
+	Context             *[]InterFacilityConnectionSurchargeContext   `json:"context,omitempty"`
 	Percentage          float32                                      `json:"percentage"`
 	TenantSurchargeType string                                       `json:"tenantSurchargeType"`
 	Type                InterFacilityConnectionTransferSurchargeType `json:"type"`

@@ -12261,11 +12261,47 @@ paths:
       description: Returns the item return jobs matching the given parameters.
       operationId: getItemReturnJobs
       parameters:
-        - description: facility to filter the results
+        - description: number of entities to show
+          in: query
+          name: size
+          required: false
+          schema:
+            default: 25
+            example: 25
+            maximum: 500
+            minimum: 1
+            type: integer
+        - description: entity to start after
+          in: query
+          name: startAfterId
+          required: false
+          schema:
+            example: 6db6a29b-143d-4ffd-ab8b-45cd299cdb00
+            minLength: 1
+            type: string
+        - description: Term by which to search through the fields
+          in: query
+          name: searchTerm
+          required: false
+          schema:
+            example: John Doe
+            minLength: 1
+            type: string
+        - description: show anonymized entities or not
+          in: query
+          name: anonymized
+          required: false
+          schema:
+            default: false
+            example: true
+            type: boolean
+        - description: origin facility to filter to
           in: query
           name: facilityId
           required: false
           schema:
+            example: 6027cece-93b8-4628-9314-a3f455af9e46
+            minLength: 1
             type: string
         - description: scannableCodes of the item return job to filter the results
           in: query
@@ -12274,6 +12310,8 @@ paths:
           schema:
             items:
               type: string
+            maxItems: 50
+            minItems: 0
             type: array
         - description: scannableCodes of the item return to filter the results
           in: query
@@ -12282,6 +12320,8 @@ paths:
           schema:
             items:
               type: string
+            maxItems: 50
+            minItems: 0
             type: array
         - description: ItemReturnJobStatus to filter the results
           in: query
@@ -12289,7 +12329,14 @@ paths:
           required: false
           schema:
             items:
+              enum:
+                - OPEN
+                - IN_PROGRESS
+                - FINISHED
+                - CANCELED
               type: string
+            maxItems: 4
+            minItems: 0
             type: array
         - description: ItemReturnStatus of an included ItemReturn to filter the results
           in: query
@@ -12297,33 +12344,73 @@ paths:
           required: false
           schema:
             items:
+              enum:
+                - ANNOUNCED
+                - OPEN
+                - IN_PROGRESS
+                - PAUSED
+                - FINISHED
+                - WAITING_FOR_INPUT
+                - CANCELED
+                - OBSOLETE
               type: string
+            maxItems: 8
+            minItems: 0
             type: array
-        - description: Term by which to search through the fields
+        - description: Start created date range for item return jobs
           in: query
-          name: searchTerm
+          name: startCreated
           required: false
           schema:
+            example: 2020-02-03T08:45:50.525Z
+            format: date-time
             type: string
-        - description: entity to start after
+        - description: End created date range for item return jobs
           in: query
-          name: startAfterId
+          name: endCreated
           required: false
           schema:
+            example: 2020-02-03T08:45:50.525Z
+            format: date-time
             type: string
-        - description: show anonymized entities or not
+        - description: >-
+            ItemReturnLineItemStatus of an included ItemReturn line item to
+            filter the results
           in: query
-          name: anonymized
+          name: itemReturnLineItemStatus
           required: false
           schema:
-            type: boolean
-        - description: number of entities to show
+            items:
+              enum:
+                - OPEN
+                - IN_PROGRESS
+                - WAITING_FOR_INPUT
+                - REJECTED
+                - ACCEPTED
+                - CANCELED
+              type: string
+            maxItems: 6
+            minItems: 0
+            type: array
+        - description: return facility to filter to
           in: query
-          name: size
+          name: returnFacilityId
           required: false
           schema:
-            default: 25
-            type: integer
+            example: 6027cece-93b8-4628-9314-a3f455af9e46
+            minLength: 1
+            type: string
+        - description: >-
+            Country to filter for. A two-digit country code as per ISO 3166-1
+            alpha-2
+          in: query
+          name: country
+          required: false
+          schema:
+            example: DE
+            maxLength: 2
+            minLength: 2
+            type: string
       responses:
         '200':
           content:
@@ -46014,6 +46101,34 @@ components:
       type: object
       title: InterFacilityConnectionSupplierTarget
       description: InterFacilityConnectionSupplierTarget
+    InterFacilityConnectionSurchargeContext:
+      additionalProperties: false
+      properties:
+        operator:
+          $ref: '#/components/schemas/ContextOperator'
+        type:
+          $ref: '#/components/schemas/InterFacilityConnectionSurchargeContextTypes'
+        values:
+          items:
+            maxItems: 500
+            minItems: 0
+            type: string
+          type: array
+      required:
+        - type
+        - values
+      type: object
+      title: InterFacilityConnectionSurchargeContext
+      description: InterFacilityConnectionSurchargeContext
+    InterFacilityConnectionSurchargeContextTypes:
+      enum:
+        - CATEGORY
+        - TAG_REFERENCE
+        - TARGET_POSTALCODE
+        - TARGET_COUNTRY
+      type: string
+      title: InterFacilityConnectionSurchargeContextTypes
+      description: InterFacilityConnectionSurchargeContextTypes
     InterFacilityConnectionToCustomerForCreation:
       additionalProperties: false
       properties:
@@ -46465,6 +46580,12 @@ components:
       properties:
         amount:
           $ref: '#/components/schemas/InterFacilityConnectionsMoney'
+        context:
+          items:
+            $ref: '#/components/schemas/InterFacilityConnectionSurchargeContext'
+          maxItems: 500
+          minItems: 0
+          type: array
         tenantSurchargeType:
           type: string
         type:
@@ -46480,6 +46601,12 @@ components:
       description: InterFacilityConnectionTransferAbsoluteSurcharge
     InterFacilityConnectionTransferRelativeSurcharge:
       properties:
+        context:
+          items:
+            $ref: '#/components/schemas/InterFacilityConnectionSurchargeContext'
+          maxItems: 500
+          minItems: 0
+          type: array
         percentage:
           format: float
           minimum: 0
@@ -59571,6 +59698,14 @@ components:
       properties:
         amount:
           $ref: '#/components/schemas/PackagingUnitsMoney'
+        context:
+          description: >-
+            Restricts the surcharge to the given contexts. If omitted, the
+            surcharge always applies.
+          items:
+            $ref: '#/components/schemas/PackagingUnitSurchargeContext'
+          maxItems: 500
+          type: array
         tenantSurchargeType:
           description: The tenant specific identifier for the surcharge type.
           type: string
@@ -59708,6 +59843,14 @@ components:
       description: PackagingUnitDetailPricingByZone
     PackagingUnitDetailRelativeSurcharge:
       properties:
+        context:
+          description: >-
+            Restricts the surcharge to the given contexts. If omitted, the
+            surcharge always applies.
+          items:
+            $ref: '#/components/schemas/PackagingUnitSurchargeContext'
+          maxItems: 500
+          type: array
         percentage:
           description: The percentage of the surcharge.
           type: number
@@ -59803,6 +59946,41 @@ components:
       title: PackagingUnitsMoney
       type: object
       description: PackagingUnitsMoney
+    PackagingUnitSurchargeContext:
+      properties:
+        operator:
+          description: >-
+            The operator used to define how the context values are evaluated or
+            compared.
+          enum:
+            - NOT
+          type: string
+        type:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitSurchargeContextTypes'
+          description: The kind of context the values refer to.
+        values:
+          description: The values the context is matched against.
+          items:
+            type: string
+          maxItems: 500
+          minItems: 1
+          type: array
+      required:
+        - type
+        - values
+      title: PackagingUnitSurchargeContext
+      type: object
+      description: PackagingUnitSurchargeContext
+    PackagingUnitSurchargeContextTypes:
+      description: The kind of context the values refer to.
+      enum:
+        - CATEGORY
+        - TAG_REFERENCE
+        - TARGET_POSTALCODE
+        - TARGET_COUNTRY
+      title: PackagingUnitSurchargeContextTypes
+      type: string
     PackingConfigurations:
       allOf:
         - $ref: '#/components/schemas/VersionedResource'
