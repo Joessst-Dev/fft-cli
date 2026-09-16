@@ -440,6 +440,7 @@ func newRootCmd(deps *Deps) *cobra.Command {
 		newUpdateCmd(deps),
 		newComponentCmd(deps),
 		newGenDocsCmd(deps),
+		newTUICmd(deps),
 	} {
 		c.GroupID = groupCore
 		cmd.AddCommand(c)

@@ -59,6 +59,7 @@ fft [flags]
 - [fft sourcing](./fft_sourcing.md) — Simulate how an order would be routed
 - [fft stock](./fft_stock.md) — Manage stocks (the quantity of an article at a facility)
 - [fft template](./fft_template.md) — Save request bodies and render them with parameters
+- [fft tui](./fft_tui.md) — Browse and send requests in an interactive terminal UI
 - [fft update](./fft_update.md) — Check whether a newer fft release is available
 - [fft version](./fft_version.md) — Print the fft version
 

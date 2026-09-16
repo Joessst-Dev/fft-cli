@@ -77,6 +77,10 @@ var commandsWithoutOperation = map[string]string{
 
 	"fft update check": "asks GitHub for the latest release",
 
+	// The UI sends nothing itself. Every request it makes is an fft command line run
+	// through the tree, so each is gated by the annotation of the command it names.
+	"fft tui": "runs other fft commands, each of which passes the read-only gate on its own",
+
 	// Renders the command tree to Markdown for the docs site. Builds a tree and
 	// prints it — no project, no network, nothing that reaches the tenant.
 	"fft gen-docs": "writes the CLI reference to local disk; no network",
