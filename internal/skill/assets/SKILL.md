@@ -53,6 +53,9 @@ fastest route from a word the user said to a command line you can run:
 fft api list --search handover -o json
 ```
 
+What this user normally runs is on record: `fft history top -o json` lists the operations
+used most in the current project, with the `command` behind each.
+
 1. **Curated** — `fft order`, `fft facility`, `fft connection`, `fft listing`, `fft stock`, `fft sourcing`, `fft routing`.
    Typed flags, real tables. Use these when they fit; see [commands](references/commands.md).
 2. **Generated** — every other operation, as `fft <group> <operation>`, e.g.

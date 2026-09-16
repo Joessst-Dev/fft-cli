@@ -68,6 +68,8 @@ NAME        BASE URL                                        EMAIL               
 - **Templates** (saved request bodies) → `~/.local/share/fft/templates`, mode `0600`, or
   `./.fft/templates` for the ones a repository commits. See
   [Request templates](./templates.md).
+- **Request history** (what `fft history` shows) → `~/.local/state/fft/history.jsonl`, mode
+  `0600`. See [Request history](#request-history) below.
 - **Everything else** (name, base URL, email, active project) → `~/.config/fft/config.yaml`,
   mode `0600`. Plain YAML; safe to read, edit, and commit to a dotfiles repo — it contains
   no secrets. One caveat if you sync it: `settings.noKeyring` below is not a secret but it
@@ -91,6 +93,43 @@ then, and remembers your answer. See
 On Windows that `0600` buys you less than it looks like, see
 [On Windows, `--no-keyring` protects less than `0600` suggests](./auth.md#on-windows-no-keyring-protects-less-than-0600-suggests).
 In CI, skip projects entirely — see [CI and headless use](./ci.md).
+
+## Request history
+
+`fft` records every command that sent an API operation — typed in a shell or sent from
+`fft tui` — so that `fft history list` can show what ran and `fft history top` which
+operations you reach for most:
+
+```sh
+fft history list --limit 10     # the latest requests, every project
+fft history top                 # the most used operations in the current project
+fft history top --all-projects -o json
+fft history clear               # asks first; --yes in a script
+```
+
+An entry holds the time, the project name, the operation, the command with its flags, the
+HTTP status, the exit code and the duration. It never holds a request or response body,
+and inline `--data` bodies, header values, template values and credential-shaped flags
+are stored as `<redacted>`. The file is `$XDG_STATE_HOME/fft/history.jsonl` (by default
+`~/.local/state/fft/history.jsonl`), mode `0600`; it is trimmed to its newest half once it
+passes 1 MiB, and it never leaves the machine. It does name your projects and the ids you
+passed on the command line, which is worth knowing before you share a home directory.
+
+Recording is switched off:
+
+- by `settings.noHistory: true` in the config file,
+
+  ```yaml
+  settings:
+    noHistory: true
+  ```
+
+- by `FFT_HISTORY=off`, everywhere — the environment wins over the config file;
+- in headless mode (`FFT_BASE_URL` and friends), unless `FFT_HISTORY=on` asks for it: a CI
+  job's history is a file on a runner nobody reads.
+
+Whether or not an entry can be written never changes what a command prints or how it
+exits.
 
 ## Shell completion
 

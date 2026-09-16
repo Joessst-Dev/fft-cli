@@ -242,6 +242,8 @@ fft auth whoami
 fft ping
 fft version
 fft component list
+fft history top -o json
+fft history list --limit 10 -o json
 ```
 
 - `fft auth whoami` prints the permissions the current credentials actually have. When
@@ -253,5 +255,11 @@ fft component list
 - `fft component list` says which components are installed, and whether fft ships them or
   somebody else does — a command in `--help` that came from a component is somebody else's
   code. See [components](components.md).
+- `fft history top -o json` lists the operations used most in the current project, each with
+  `operationId`, `command`, `count` and `lastUsed` — a quick way to learn what a user
+  normally does before suggesting a command. `--all-projects` counts every project.
+  `fft history list -o json` prints the recent requests, newest first. Neither holds a
+  request body, and inline `--data`, header values and credential-shaped flags appear as
+  `<redacted>`; history is off in headless mode, so in CI both print `[]`.
 - `fft component init pricing` scaffolds a new component (a command or a transport, in shell,
   Go, Python or Node) that installs and runs straight away. See [components](components.md).
