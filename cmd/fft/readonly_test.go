@@ -205,7 +205,7 @@ func (c *cli) readOnlyProject(readOnly bool) *tenant {
 		body, err := io.ReadAll(r.Body)
 		Expect(err).NotTo(HaveOccurred())
 
-		t.calls = append(t.calls, call{Method: r.Method, Path: r.URL.Path, Body: body})
+		t.record(call{Method: r.Method, Path: r.URL.Path, Body: body})
 
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"facilities":[],"total":0}`))

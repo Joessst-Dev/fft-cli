@@ -10,7 +10,9 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -227,8 +229,28 @@ type call struct {
 // It differs from [cli.fakeAPI] in keeping each request's *body*: a spec that
 // must prove fft sent the version it read, or the URN rather than the raw id,
 // can only do so by reading what went over the wire.
+//
+// Requests are recorded under a lock, because the TUI's runner sends them
+// concurrently. A spec that reads calls directly does so after its command has
+// returned, when nothing else is writing; one that runs commands side by side
+// reads [tenant.recorded] instead.
 type tenant struct {
+	mu    sync.Mutex
 	calls []call
+}
+
+func (t *tenant) record(c call) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.calls = append(t.calls, c)
+}
+
+// recorded is a copy of the calls so far, safe to take while requests are still
+// arriving.
+func (t *tenant) recorded() []call {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	return slices.Clone(t.calls)
 }
 
 // fakeTenant starts the tenant and points the commands at it. handle answers each
@@ -240,7 +262,7 @@ func (c *cli) fakeTenant(handle func(w http.ResponseWriter, r *http.Request, bod
 		body, err := io.ReadAll(r.Body)
 		Expect(err).NotTo(HaveOccurred())
 
-		t.calls = append(t.calls, call{
+		t.record(call{
 			Method:   r.Method,
 			Path:     r.URL.Path,
 			Query:    r.URL.Query(),

@@ -21,6 +21,7 @@ import (
 	"github.com/Joessst-Dev/fft-cli/internal/output"
 	"github.com/Joessst-Dev/fft-cli/internal/prompt"
 	"github.com/Joessst-Dev/fft-cli/internal/secrets"
+	"github.com/Joessst-Dev/fft-cli/internal/tui"
 	"github.com/Joessst-Dev/fft-cli/internal/update"
 )
 
@@ -67,6 +68,13 @@ type InstallerFunc func(root string) *component.Installer
 // overrides only what it cares about. Printer is the exception: it is rebuilt
 // from the command's streams on every run, because that is what lets a spec
 // capture the output with cmd.SetOut.
+//
+// A Deps is not safe for concurrent runs: [Deps.complete] rewrites a good part of
+// it on every one. `fft tui` runs commands side by side, so each gets its own copy
+// from [Deps.forRun] — and that copy is an explicit list of fields, not a struct
+// copy. A new field must therefore be classified there as shared, set per run, or
+// rebuilt by complete; a field nobody classified is simply absent from a TUI run,
+// which is a bug that is found, rather than state that is silently shared.
 type Deps struct {
 	Config         *config.Store
 	Secrets        secrets.Store
@@ -176,6 +184,14 @@ type Deps struct {
 	// stderr — which is the whole contract.
 	Terminal *bool
 
+	// StartTUI shows the interactive UI. nil means [tui.Run]; a spec replaces it,
+	// because a real one needs a real terminal.
+	StartTUI func(ctx context.Context, opts tui.Options) error
+
+	// observeStatus, when set, is told the HTTP status of every response the API
+	// client receives. The TUI's runner uses it to report what a run got back.
+	observeStatus func(status int)
+
 	// cfg caches the parsed config file, so that a command reading it twice does
 	// not read the disk twice and a mutation followed by a save sees its own
 	// writes.
@@ -199,6 +215,46 @@ type Deps struct {
 	// finished — under the specs that is a race with Ginkgo's temp-directory
 	// cleanup, and a goroutine that can be joined is simply a goroutine one owns.
 	updateDone chan struct{}
+}
+
+// forRun returns the Deps one concurrent run of the command tree should use,
+// reading its standard input from in.
+//
+// Every field is accounted for, in one of three groups. What is shared is safe to
+// share: stores that serialise their own access, pure functions, and seams a spec
+// set. What is set per run is what makes a run inside the UI different from one
+// in a shell. Everything else is left zero, because [Deps.complete] and
+// [newRootCmd] rebuild it from the run's own flags and streams — and sharing it
+// would be a data race between runs, or one run's --project leaking into another.
+func (d *Deps) forRun(in io.Reader) *Deps {
+	return &Deps{
+		// Shared.
+		Config:         d.Config,
+		Secrets:        d.Secrets,
+		Clock:          d.Clock,
+		Verify:         d.Verify,
+		NewTokenSource: d.NewTokenSource,
+		NewInstaller:   d.NewInstaller,
+		Retry:          d.Retry,
+		Update:         d.Update,
+		unused:         d.unused,
+		// Read-only once discovered, and discovering it costs a directory walk per
+		// run. A component installed from inside the UI therefore appears only in the
+		// next session, which is also when its commands could first be run.
+		Components: d.Components,
+
+		// Per run. A run inside the UI has no terminal of its own: nothing may prompt,
+		// and no update notice may be drawn over the screen.
+		In:       in,
+		Terminal: ptr(false),
+
+		// Rebuilt by complete, or by newRootCmd, from this run's flags and streams:
+		// Printer, Prompt, Debug, Project, Ephemeral, Timeout, AssumeYes,
+		// ReadOnlyFlag, ReadOnlyEnv, noKeyringFromConfig, explicitNoKeyring, cfg,
+		// componentWarnings and the update-check plumbing. StartTUI stays nil — a
+		// run cannot open a second UI, it has no terminal — and observeStatus is the
+		// caller's to set.
+	}
 }
 
 // LoadConfig returns the parsed config file, reading it at most once.
