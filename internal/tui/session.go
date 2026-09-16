@@ -106,8 +106,8 @@ type sentRequest struct {
 	op  Operation
 	inv Invocation
 
-	// project is the project selected when it was sent, "" when fft's own
-	// resolution chose. The run's result says which one that was.
+	// project is the project it was pinned to, "" when fft's own resolution
+	// chose. The run's result says which one that was.
 	project string
 }
 
@@ -150,6 +150,17 @@ func (s *session) currentProject() string {
 		return s.project
 	}
 	return s.resolved
+}
+
+// target is the project a request is pinned to: the one the UI names, so that it
+// goes where the screen said it would. It is "" when fft's own resolution must
+// decide — headless, where the environment names the project and the config file
+// is not consulted, and before the UI has learnt which project is active.
+func (s *session) target() string {
+	if s.headless {
+		return ""
+	}
+	return s.currentProject()
 }
 
 // readOnly reports whether writes to the current project are refused.

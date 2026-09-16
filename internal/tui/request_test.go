@@ -193,15 +193,37 @@ var _ = Describe("the Request screen", func() {
 			Expect(h.last().Args).To(Equal([]string{"picking", "get-pick-job", "--pick-job-id=-1"}))
 		})
 
-		It("leaves the project to the runner, and shows the one it acts on", func() {
+		It("pins it to the project the UI selected, and shows that project", func() {
 			h = newHarness(Options{Project: "staging"})
 			h.loaded(twoProjects, validToken)
 			h.request(opGetPickJob)
 			h.fill(0, "pj-1")
 			h.press("s")
 
-			Expect(h.last().Args).NotTo(ContainElement("--project"))
+			Expect(h.last().Project).To(Equal("staging"))
+			Expect(h.last().Args).NotTo(ContainElement("--project"), "the project travels beside the command line")
 			Expect(h.view()).To(ContainSubstring("fft picking get-pick-job --pick-job-id pj-1 --project staging"))
+		})
+
+		It("pins it to the active project when the UI has selected none", func() {
+			h.request(opGetPickJob)
+			h.fill(0, "pj-1")
+			Expect(h.view()).To(ContainSubstring("$ fft picking get-pick-job --pick-job-id pj-1 --project staging"))
+			h.press("s")
+
+			Expect(h.last().Project).To(Equal("staging"))
+		})
+
+		It("leaves the project to the environment when fft runs headless", func() {
+			h = newHarness(Options{Headless: true})
+			h.loaded(`[{"name":"env","active":true,"baseUrl":"https://env.example.com","credential":"env"}]`, validToken)
+			h.request(opGetPickJob)
+			h.fill(0, "pj-1")
+			h.press("s")
+
+			Expect(h.last().Project).To(BeEmpty())
+			Expect(h.view()).To(ContainSubstring("$ fft picking get-pick-job --pick-job-id pj-1"))
+			Expect(h.view()).NotTo(ContainSubstring("--project"))
 		})
 	})
 
@@ -219,8 +241,19 @@ var _ = Describe("the Request screen", func() {
 			view := h.view()
 			Expect(view).To(ContainSubstring("Send Delete a facility to staging?"))
 			Expect(view).To(ContainSubstring("DELETE /api/facilities/{facilityId} changes data on the tenant."))
-			Expect(view).To(ContainSubstring("runs: fft facility delete BER-01 --yes"))
+			Expect(view).To(ContainSubstring("runs: fft facility delete BER-01 --yes --project staging"))
 			Expect(h.m.owner()).To(Equal(ownerFocused))
+		})
+
+		It("sends it to the project the question named, whatever is selected by the time it goes", func() {
+			h.press("s")
+			Expect(h.view()).To(ContainSubstring("Send Delete a facility to staging?"))
+			// A switch the user asked for before, finishing while the question is open.
+			h.m.s.selectProject("prod")
+			h.press("y")
+
+			Expect(h.last().Project).To(Equal("staging"))
+			Expect(h.m.response.entry().display.String()).To(ContainSubstring("--project staging"))
 		})
 
 		It("sends nothing on no", func() {
@@ -250,7 +283,7 @@ var _ = Describe("the Request screen", func() {
 			h.request(opAddPickJob)
 			h.m.request.body = []byte(`{"pickLineItems":[]}`)
 			h.press("s")
-			Expect(h.view()).To(ContainSubstring("runs: fft picking add-pick-job --file -"))
+			Expect(h.view()).To(ContainSubstring("runs: fft picking add-pick-job --file - --project staging"))
 			h.press("y")
 
 			Expect(h.last().Args).To(Equal([]string{"picking", "add-pick-job", "--file", "-"}))

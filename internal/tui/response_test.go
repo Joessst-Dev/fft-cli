@@ -157,8 +157,8 @@ var _ = Describe("the Response screen", func() {
 		})
 
 		It("shows the command it ran, to copy", func() {
-			Expect(h.view()).To(ContainSubstring("$ fft facility list"))
-			Expect(clipboard(h.press("y"))).To(Equal("fft facility list"))
+			Expect(h.view()).To(ContainSubstring("$ fft facility list --project staging"))
+			Expect(clipboard(h.press("y"))).To(Equal("fft facility list --project staging"))
 		})
 
 		It("goes back to the request with esc", func() {

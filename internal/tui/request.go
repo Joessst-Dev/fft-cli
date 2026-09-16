@@ -523,6 +523,12 @@ func (r *requestScreen) args(confirmed bool) []string {
 }
 
 // send sends the request, asking first when it is a write.
+//
+// The project is decided once, here, and everything after uses that one value:
+// the question names it, the command shown is built for it, and the run is pinned
+// to it. A run left to the runner's own choice would act on whatever is selected
+// when it is dequeued, and a `project use` queued ahead of it can change that
+// after the user said yes to a different project.
 func (r *requestScreen) send() tea.Cmd {
 	if r.busy {
 		r.say("The editor has the body: finish there first.")
@@ -532,41 +538,46 @@ func (r *requestScreen) send() tea.Cmd {
 	if len(r.problems) > 0 {
 		return nil
 	}
+	project := r.s.target()
 	if !r.op.Mutates {
-		return r.start(false)
+		return r.start(project)
 	}
 
-	project := r.s.currentProject()
-	if project == "" {
-		project = "the active project"
+	named := r.s.currentProject()
+	if named == "" {
+		named = "the active project"
 	}
 	detail := fmt.Sprintf("%s %s changes data on the tenant.", r.op.Method, r.op.Path)
 	if r.s.readOnly() {
 		detail += " This project or session is read-only, so fft will refuse it and send nothing."
 	}
 	r.dialog = &confirmDialog{
-		question: fmt.Sprintf("Send %s to %s?", firstNonEmpty(r.op.Summary, r.op.ID), project),
+		question: fmt.Sprintf("Send %s to %s?", firstNonEmpty(r.op.Summary, r.op.ID), named),
 		detail:   detail,
-		command:  r.display(true),
-		onYes:    func() tea.Cmd { return r.start(true) },
+		command:  r.display(project, true),
+		onYes:    func() tea.Cmd { return r.start(project) },
 	}
 	return nil
 }
 
-func (r *requestScreen) display(confirmed bool) shellCommand {
-	return r.s.displayFor(r.args(confirmed), r.s.project)
+func (r *requestScreen) display(project string, confirmed bool) shellCommand {
+	return r.s.displayFor(r.args(confirmed), project)
 }
 
-func (r *requestScreen) start(confirmed bool) tea.Cmd {
+// start sends the request to project, "" to leave the choice to fft's own
+// resolution.
+func (r *requestScreen) start(project string) tea.Cmd {
+	confirmed := r.op.Mutates
 	sent := &sentRequest{
 		op: *r.op,
 		inv: Invocation{
-			Args:  r.args(confirmed),
-			Stdin: bytes.Clone(r.body),
+			Args:    r.args(confirmed),
+			Stdin:   bytes.Clone(r.body),
+			Project: project,
 		},
-		project: r.s.project,
+		project: project,
 	}
-	a := action{inv: sent.inv, display: r.display(confirmed)}
+	a := action{inv: sent.inv, display: r.display(project, confirmed)}
 	r.notice, r.failure = "", nil
 	return r.s.sendRequest(r.nav, a, sent)
 }
@@ -610,7 +621,7 @@ func (r *requestScreen) equivalent() shellCommand {
 	case r.op == nil:
 		return shellCommand{}
 	}
-	return r.display(false)
+	return r.display(r.s.target(), false)
 }
 
 func (r *requestScreen) view(width, _ int) string {
