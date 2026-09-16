@@ -167,6 +167,43 @@ var _ = Describe("the UI", func() {
 			Expect(h.view()).To(ContainSubstring("fft · prod · RO · token ?"))
 		})
 
+		It("keeps the fresh credential state when a read from before the switch answers last", func() {
+			h.press("ctrl+r")
+			stale := h.lookup("auth", "status")
+			h.press("enter")
+			h.finish(ok(""), "project", "use", "prod")
+			h.finish(ok(`{}`), "auth", "whoami")
+			h.finish(ok(`{"project":"prod","store":"keyring","signIn":"password","token":"valid",
+				"expiresAt":"2026-07-12T13:00:00Z"}`), "auth", "status")
+			Expect(h.view()).To(ContainSubstring("token 1h00m left"))
+
+			h.finishID(stale, ok(validToken))
+			Expect(h.view()).To(ContainSubstring("fft · prod · RO · token 1h00m left"))
+		})
+
+		It("does not report a failed read from before the switch", func() {
+			h.press("ctrl+r")
+			stale := h.lookup("auth", "status")
+			h.press("enter")
+			h.finish(ok(""), "project", "use", "prod")
+			h.finishID(stale, failed(exitcode.Auth, "Error: staging's keychain entry is unreadable"))
+
+			Expect(h.view()).NotTo(ContainSubstring("failed"))
+			Expect(h.view()).NotTo(ContainSubstring("staging's keychain"))
+		})
+
+		It("names the project a sign-in failed for, even after switching on", func() {
+			h.press("enter")
+			h.finish(ok(""), "project", "use", "prod")
+			signIn := h.lookup("auth", "whoami")
+			h.press("up", "enter")
+			h.finish(ok(""), "project", "use", "staging")
+			h.finishID(signIn, failed(exitcode.Auth, "Error: INVALID_PASSWORD"))
+
+			Expect(h.view()).To(ContainSubstring("signing in to prod failed: exit 4"))
+			Expect(h.view()).NotTo(ContainSubstring("signing in to staging failed"))
+		})
+
 		It("shows why a switch failed, with the exit code's meaning, and selects nothing", func() {
 			h.press("enter")
 			h.finish(failed(exitcode.Config, "Error: project \"prod\" is not configured\nRun 'fft project list'."),

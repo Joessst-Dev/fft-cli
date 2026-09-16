@@ -243,7 +243,14 @@ func (p *projectsScreen) syncCurrent() int {
 // signs in, if the next authenticated run would have to: see [projectsScreen.warmUp].
 func (p *projectsScreen) refreshStatus(startup bool) tea.Cmd {
 	a := p.s.scoped("auth", "status")
+	asked := p.s.switches
 	return p.s.start(a, func(r Result) tea.Cmd {
+		// First, before anything is cleared or reported: an answer read before a
+		// switch is about the project the UI left, and the switch reads the state
+		// again. Neither its success nor its failure may touch what that read says.
+		if p.s.switches != asked {
+			return nil
+		}
 		p.s.status = nil
 		switch r.ExitCode {
 		case exitcode.OK:
@@ -260,7 +267,8 @@ func (p *projectsScreen) refreshStatus(startup bool) tea.Cmd {
 			return nil
 		}
 		if cur := p.s.currentProject(); cur != "" && st.Project != cur {
-			// Read before a switch and answered after it: the switch reads it again.
+			// fft's own resolution moved under a read the UI did not switch for — the
+			// active project removed, say. What moved it reads the state again.
 			return nil
 		}
 		p.s.status = &st
@@ -289,9 +297,12 @@ func (p *projectsScreen) warmUp() tea.Cmd {
 	p.warmed = true
 	a := p.s.scoped("auth", "whoami")
 	a.inv.Exclusive = true
+	// Named now: by the time it answers, the UI may have switched on, and a failure
+	// must name the project that failed, not the one in use.
+	name := p.s.currentProject()
 	return p.s.start(a, func(r Result) tea.Cmd {
 		if r.ExitCode != exitcode.OK {
-			p.fail("signing in to "+p.s.currentProject(), r)
+			p.fail("signing in to "+name, r)
 		}
 		return p.refreshStatus(false)
 	})

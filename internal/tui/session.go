@@ -55,6 +55,11 @@ type session struct {
 	// reported it.
 	resolved string
 
+	// switches counts the UI's project selections. A run that reads something
+	// about the current project notes it when it starts, and an answer that
+	// arrives after a switch is about a project the UI has left.
+	switches uint64
+
 	// readOnlyFloor is fft tui --read-only or FFT_READ_ONLY: every project is
 	// read-only for this session, whatever its configuration says.
 	readOnlyFloor bool
@@ -106,6 +111,7 @@ func (s *session) readOnly() bool {
 // about the previous one no longer applies.
 func (s *session) selectProject(name string) {
 	s.project = name
+	s.switches++
 	s.status = nil
 	s.runner.SetProject(name)
 }
