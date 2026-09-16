@@ -17,14 +17,20 @@ cheap question to ask before a command that would have to sign in first.
 
 TOKEN is one of:
   valid      the cached id token will be used as it is
-  expiring   it has less than five minutes left, so the next command renews it
-  expired    the next command renews it, or fails with exit 4 if it cannot
-  unknown    there is an id token but nothing says when it expires
-  none       no id token is cached; the next command signs in
+  expiring   it has less than five minutes left
+  expired    its expiry has passed
+  unknown    there is an id token but nothing readable says when it expires
+  none       no id token is cached
+
+With a stored password (SIGN-IN "password"), the next command signs in again
+when the token is expiring, expired, unknown or none, and fails with exit 4 if
+it cannot.
 
 A project running from the environment (FFT_BASE_URL and friends) reports the
 "env" store. With FFT_ID_TOKEN and no password, SIGN-IN is "id token": that token
-is used as it is and cannot be renewed.
+is used as it is and nothing renews it, so once it has expired every command
+fails with exit 4. Its expiry is FFT_ID_TOKEN_EXPIRES_AT, or else the token's
+own exp claim.
 
 No credential is ever printed, in any output format.
 

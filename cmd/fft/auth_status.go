@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -23,14 +24,20 @@ cheap question to ask before a command that would have to sign in first.
 
 TOKEN is one of:
   valid      the cached id token will be used as it is
-  expiring   it has less than five minutes left, so the next command renews it
-  expired    the next command renews it, or fails with exit 4 if it cannot
-  unknown    there is an id token but nothing says when it expires
-  none       no id token is cached; the next command signs in
+  expiring   it has less than five minutes left
+  expired    its expiry has passed
+  unknown    there is an id token but nothing readable says when it expires
+  none       no id token is cached
+
+With a stored password (SIGN-IN "password"), the next command signs in again
+when the token is expiring, expired, unknown or none, and fails with exit 4 if
+it cannot.
 
 A project running from the environment (FFT_BASE_URL and friends) reports the
 "env" store. With FFT_ID_TOKEN and no password, SIGN-IN is "id token": that token
-is used as it is and cannot be renewed.
+is used as it is and nothing renews it, so once it has expired every command
+fails with exit 4. Its expiry is FFT_ID_TOKEN_EXPIRES_AT, or else the token's
+own exp claim.
 
 No credential is ever printed, in any output format.`
 
@@ -91,24 +98,29 @@ func runAuthStatus(deps *Deps) error {
 		return err
 	}
 
-	has := func(kind string) (string, bool, error) {
-		v, err := lookupSecret(deps.Secrets, project.Name, kind)
-		return v, v != "", err
+	// Asked without reading the secrets where the store allows it: a status line
+	// has no use for a password.
+	has := func(kind string) (bool, error) {
+		ok, err := secrets.Exists(deps.Secrets, secrets.Key(project.Name, kind))
+		if err != nil {
+			return false, fmt.Errorf("check the %s for project %q: %w", kind, project.Name, err)
+		}
+		return ok, nil
 	}
 
-	_, hasPassword, err := has(secrets.KindPassword)
+	hasPassword, err := has(secrets.KindPassword)
 	if err != nil {
 		return err
 	}
-	_, hasRefresh, err := has(secrets.KindRefreshToken)
+	hasRefresh, err := has(secrets.KindRefreshToken)
 	if err != nil {
 		return err
 	}
-	idToken, hasID, err := has(secrets.KindIDToken)
+	hasID, err := has(secrets.KindIDToken)
 	if err != nil {
 		return err
 	}
-	storedExpiry, _, err := has(secrets.KindIDTokenExp)
+	storedExpiry, err := lookupSecret(deps.Secrets, project.Name, secrets.KindIDTokenExp)
 	if err != nil {
 		return err
 	}
@@ -132,30 +144,37 @@ func runAuthStatus(deps *Deps) error {
 		view.SignIn = signInNone
 	}
 
-	view.setToken(idToken, storedExpiry, deps.Clock())
+	if !hasID {
+		view.Token = tokenNone
+		return deps.Printer.Render(authStatusRows(view), view)
+	}
+
+	// The same parse the token cache uses.
+	exp, err := time.Parse(time.RFC3339, storedExpiry)
+	known := err == nil
+	if !known && view.SignIn == signInIDToken {
+		// A token used as it is — FFT_ID_TOKEN, minted elsewhere by a CI job — may
+		// come with no stored expiry, and its own claim is then the only word on it.
+		// With a password the claim is not consulted: the token cache treats an
+		// expiry it cannot read as no expiry and signs in again, whatever the token
+		// says, so the claim would promise a token the next command will not use.
+		idToken, err := lookupSecret(deps.Secrets, project.Name, secrets.KindIDToken)
+		if err != nil {
+			return err
+		}
+		exp, known = jwtExpiry(idToken)
+	}
+	if known {
+		view.setExpiry(exp, deps.Clock())
+	} else {
+		view.Token = tokenUnknown
+	}
 
 	return deps.Printer.Render(authStatusRows(view), view)
 }
 
-// setToken fills in the token's state. The id token itself is only ever read for
-// its expiry, and only when the store does not say.
-func (v *authStatusView) setToken(idToken, storedExpiry string, now time.Time) {
-	if idToken == "" {
-		v.Token = tokenNone
-		return
-	}
-
-	// The same parse the token cache uses: an expiry it cannot read is one it treats
-	// as stale, so this reports what the next command will actually do.
-	exp, err := time.Parse(time.RFC3339, storedExpiry)
-	if err != nil {
-		var ok bool
-		if exp, ok = jwtExpiry(idToken); !ok {
-			v.Token = tokenUnknown
-			return
-		}
-	}
-
+// setExpiry fills in the state of an id token that expires at exp.
+func (v *authStatusView) setExpiry(exp, now time.Time) {
 	exp = exp.UTC()
 	v.ExpiresAt = &exp
 	left := exp.Sub(now)
@@ -172,11 +191,15 @@ func (v *authStatusView) setToken(idToken, storedExpiry string, now time.Time) {
 	}
 }
 
+// maxJWTExpiry is the last second of the year 9999, the latest time JSON and
+// YAML can carry as RFC 3339. A claim past it is not a date fft can report.
+const maxJWTExpiry = 253402300799
+
 // jwtExpiry reads the exp claim of a JWT without verifying it.
 //
-// This is for a status line and nothing else. The token is only decoded where it
-// is — FFT_ID_TOKEN, handed over by a CI job that minted it elsewhere, comes with no
-// stored expiry — and a claim that is missing or malformed is simply not reported.
+// This is for a status line and nothing else, and only for a token used as it is.
+// A claim that is missing, malformed, not positive or past the year 9999 is simply
+// not reported.
 func jwtExpiry(token string) (time.Time, bool) {
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
@@ -194,7 +217,7 @@ func jwtExpiry(token string) (time.Time, bool) {
 		return time.Time{}, false
 	}
 	secs, err := claims.Exp.Int64()
-	if err != nil || secs <= 0 {
+	if err != nil || secs <= 0 || secs > maxJWTExpiry {
 		return time.Time{}, false
 	}
 	return time.Unix(secs, 0), true

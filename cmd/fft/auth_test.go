@@ -336,6 +336,33 @@ var _ = Describe("fft auth status", func() {
 		Expect(statusDoc()).To(HaveKeyWithValue("token", "expired"))
 	})
 
+	It("does not read a signed-in token's own claim when its stored expiry is unreadable", func() {
+		// The token cache treats that token as stale and signs in again, whatever the
+		// claim says, so "valid" would be a promise the next command does not keep.
+		Expect(addStaging(c, password)).To(Equal(exitcode.OK))
+		cache("not a time")
+
+		doc := statusDoc()
+		Expect(doc).To(HaveKeyWithValue("signIn", "password"))
+		Expect(doc).To(HaveKeyWithValue("token", "unknown"))
+		Expect(doc).NotTo(HaveKey("expiresAt"))
+	})
+
+	It("asks the store whether the credentials are there without reading them", func() {
+		Expect(addStaging(c, password)).To(Equal(exitcode.OK))
+		cache(now.Add(time.Hour).Format(time.RFC3339))
+		reads := &readRecorder{MemStore: c.secrets}
+		c.deps.Secrets = reads
+
+		doc := statusDoc()
+		Expect(doc).To(HaveKeyWithValue("hasPassword", true))
+		Expect(doc).To(HaveKeyWithValue("hasRefreshToken", true))
+		Expect(doc).To(HaveKeyWithValue("token", "valid"))
+		for _, kind := range []string{secrets.KindPassword, secrets.KindRefreshToken, secrets.KindIDToken} {
+			Expect(reads.keys).NotTo(ContainElement(secrets.Key("staging", kind)))
+		}
+	})
+
 	It("reports an id token whose expiry nothing records as unknown", func() {
 		Expect(addStaging(c, password)).To(Equal(exitcode.OK))
 		idToken = "opaque-token-must-not-appear"
@@ -426,6 +453,31 @@ var _ = Describe("fft auth status", func() {
 				Expect(c.out()).NotTo(ContainSubstring(idToken))
 			})
 
+			DescribeTable("reports a claim it cannot carry as a date as unknown, in any format",
+				func(exp int64) {
+					c.setenv(config.EnvIDToken, jwtWithExpiry(time.Unix(exp, 0)))
+
+					doc := statusDoc()
+					Expect(doc).To(HaveKeyWithValue("token", "unknown"))
+					Expect(doc).NotTo(HaveKey("expiresAt"))
+					for _, format := range []string{"table", "yaml"} {
+						Expect(c.run("auth", "status", "-o", format)).To(Equal(exitcode.OK), c.errOut())
+					}
+				},
+				Entry("past the year 9999", int64(253402300800)),
+				Entry("far past it", int64(1)<<62),
+				Entry("before 1970", int64(-1)),
+				Entry("zero", int64(0)),
+			)
+
+			It("still reports the last second of the year 9999", func() {
+				c.setenv(config.EnvIDToken, jwtWithExpiry(time.Unix(253402300799, 0)))
+
+				doc := statusDoc()
+				Expect(doc).To(HaveKeyWithValue("token", "valid"))
+				Expect(doc).To(HaveKeyWithValue("expiresAt", "9999-12-31T23:59:59Z"))
+			})
+
 			It("prefers FFT_ID_TOKEN_EXPIRES_AT when it is set", func() {
 				c.setenv("FFT_ID_TOKEN_EXPIRES_AT", now.Add(-time.Second).Format(time.RFC3339))
 
@@ -434,6 +486,18 @@ var _ = Describe("fft auth status", func() {
 		})
 	})
 })
+
+// readRecorder is the spec's store, noting every key a command reads a secret
+// from. Asking whether one exists is not a read.
+type readRecorder struct {
+	*secrets.MemStore
+	keys []string
+}
+
+func (r *readRecorder) Get(key string) (string, error) {
+	r.keys = append(r.keys, key)
+	return r.MemStore.Get(key)
+}
 
 // jwtWithExpiry builds an unsigned token whose only claim that matters is exp.
 func jwtWithExpiry(exp time.Time) string {
