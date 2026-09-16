@@ -569,6 +569,11 @@ func registerEnumCompletion(cmd *cobra.Command, flag string, values []string) {
 const (
 	flagAnnotationRequired = "fft_required"
 	flagAnnotationEnum     = "fft_enum"
+
+	// flagAnnotationPairs marks a repeatable name=value flag. A value may hold a
+	// comma of its own — --query status=OPEN,CLOSED — so the form must not split
+	// one at every comma, as it does a plain list.
+	flagAnnotationPairs = "fft_pairs"
 )
 
 // annotateFlag sets an annotation on one of cmd's own flags.

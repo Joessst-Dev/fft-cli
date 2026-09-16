@@ -386,6 +386,18 @@ var (
 			Args: []Arg{{Name: "id", Required: true}},
 		},
 	}
+	opAPIGetPickJobs = Operation{
+		ID: "getPickJobs", Summary: "List pick jobs", Method: "GET", Path: "/api/pickjobs",
+		Tag: "Picking (Operations)",
+		Command: Command{
+			Path: []string{"api", "getPickJobs"},
+			Flags: []Flag{
+				{Name: "header", Kind: FlagPairs},
+				{Name: "param", Kind: FlagPairs},
+				{Name: "query", Kind: FlagPairs},
+			},
+		},
+	}
 	opGetPickJob = Operation{
 		ID: "getPickJob", Summary: "Get a pick job", Method: "GET", Path: "/api/pickjobs/{pickJobId}",
 		Tag: "Picking (Operations)",

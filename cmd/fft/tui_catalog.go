@@ -181,9 +181,13 @@ func describeCommand(cmd *cobra.Command, op api.Operation, global map[string]boo
 }
 
 func describeFlag(f *pflag.Flag, requiredByUse bool) tui.Flag {
+	kind := flagKind(f.Value.Type())
+	if kind == tui.FlagList && len(f.Annotations[flagAnnotationPairs]) > 0 {
+		kind = tui.FlagPairs
+	}
 	out := tui.Flag{
 		Name:        f.Name,
-		Kind:        flagKind(f.Value.Type()),
+		Kind:        kind,
 		Usage:       f.Usage,
 		Required:    requiredByUse || len(f.Annotations[flagAnnotationRequired]) > 0,
 		Enum:        slices.Clone(f.Annotations[flagAnnotationEnum]),

@@ -185,6 +185,17 @@ var _ = Describe("the Request screen", func() {
 			Expect(h.last().Args).To(Equal([]string{"picking", "get-pick-job", "--pick-job-id", "pj-1"}))
 		})
 
+		It("keeps a name=value pair whole, commas and all, and starts a new one at the next name=", func() {
+			h.request(opAPIGetPickJobs)
+			Expect(h.view()).To(MatchRegexp(`--query\s+name=value, comma-separated`))
+			h.fill(2, "status=OPEN,CLOSED, orderRef=a,b=")
+
+			h.press("s")
+			Expect(h.last().Args).To(Equal([]string{
+				"api", "getPickJobs", "--query", "status=OPEN,CLOSED", "--query", "orderRef=a", "--query", "b=",
+			}))
+		})
+
 		It("joins a value that starts with a dash to its flag", func() {
 			h.request(opGetPickJob)
 			h.fill(0, "-1")
@@ -679,6 +690,22 @@ var _ = Describe("the Request screen", func() {
 		})
 	})
 })
+
+var _ = DescribeTable("splitting name=value pairs",
+	func(value string, want []string) {
+		Expect(splitPairs(value)).To(Equal(want))
+	},
+	Entry("one pair", "status=OPEN", []string{"status=OPEN"}),
+	Entry("a list value", "status=OPEN,CLOSED", []string{"status=OPEN,CLOSED"}),
+	Entry("two pairs", "status=OPEN, size=5", []string{"status=OPEN", " size=5"}),
+	Entry("a list, then a pair", "status=OPEN,CLOSED,size=5", []string{"status=OPEN,CLOSED", "size=5"}),
+	Entry("a header value with commas and equals signs", "Accept=text/html;q=0.9,application/json",
+		[]string{"Accept=text/html;q=0.9,application/json"}),
+	Entry("a value that is only commas", "tags=,,", []string{"tags=,,"}),
+	Entry("a bracketed name", "a=1,filter[x]=2", []string{"a=1", "filter[x]=2"}),
+	Entry("a comma before something with a space in its name", "a=1,b c=2", []string{"a=1,b c=2"}),
+	Entry("no pair at all", "", []string{""}),
+)
 
 var _ = DescribeTable("splitting an editor setting into words",
 	func(value string, backslashes bool, want []string) {

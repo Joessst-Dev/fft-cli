@@ -114,6 +114,9 @@ func newAPICmd(deps *Deps) *cobra.Command {
 	f.StringArrayVar(&params, "param", nil, "Path parameter, as name=value (repeatable)")
 	f.StringArrayVar(&query, "query", nil, "Query parameter, as name=value (repeatable; name=a,b for a list)")
 	f.StringArrayVar(&headers, "header", nil, "Request header, as name=value (repeatable)")
+	for _, name := range []string{"param", "query", "header"} {
+		annotateFlag(cmd, name, flagAnnotationPairs, []string{"true"})
+	}
 	f.StringVar(&file, "file", "", "JSON file holding the request body ('-' for stdin)")
 	f.StringVar(&data, "data", "", "Request body: inline JSON, @file, or '-' for stdin")
 	f.BoolVar(&example, "example", false, "Print a sample request body and exit")

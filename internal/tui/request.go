@@ -162,6 +162,8 @@ func placeholderFor(f Flag) string {
 		hint = strings.Join(f.Enum, " | ")
 	case f.Kind == FlagList:
 		hint = "comma-separated"
+	case f.Kind == FlagPairs:
+		hint = "name=value, comma-separated"
 	}
 	if f.Default != "" {
 		hint += ", default " + f.Default
@@ -466,9 +468,13 @@ func (r *requestScreen) fieldArgs(f *requestField) []string {
 		}
 	case f.value() == "":
 		return nil
-	case f.flag.Kind == FlagList:
+	case f.flag.Kind == FlagList, f.flag.Kind == FlagPairs:
+		values := strings.Split(f.value(), ",")
+		if f.flag.Kind == FlagPairs {
+			values = splitPairs(f.value())
+		}
 		var out []string
-		for v := range strings.SplitSeq(f.value(), ",") {
+		for _, v := range values {
 			if v = strings.TrimSpace(v); v != "" {
 				out = append(out, flagArg(name, v)...)
 			}
@@ -477,6 +483,44 @@ func (r *requestScreen) fieldArgs(f *requestField) []string {
 	default:
 		return flagArg(name, f.value())
 	}
+}
+
+// splitPairs splits "a=1, b=x,y" into "a=1" and " b=x,y": a comma separates two
+// pairs only when what follows it starts with a name and an equals sign, so that a
+// list value — status=OPEN,CLOSED — stays one pair. A value whose own comma is
+// followed by something that looks like a name= is split; the form cannot tell it
+// from a second pair, and the command line shows what was made of it.
+func splitPairs(s string) []string {
+	var pairs []string
+	start := 0
+	for i := 0; i < len(s); i++ {
+		if s[i] != ',' {
+			continue
+		}
+		name, _, found := strings.Cut(strings.TrimLeft(s[i+1:], " "), "=")
+		if found && isPairName(name) {
+			pairs = append(pairs, s[start:i])
+			start = i + 1
+		}
+	}
+	return append(pairs, s[start:])
+}
+
+// isPairName reports whether s can be the name in a name=value pair: a query
+// parameter, a path parameter or a header name.
+func isPairName(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9':
+		case strings.ContainsRune("-_.[]", r):
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 // flagArg spells a flag and its value. A value that starts with a dash is joined

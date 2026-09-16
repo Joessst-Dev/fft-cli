@@ -103,8 +103,13 @@ const (
 	FlagFloat
 	// FlagDuration takes a Go duration: 30s, 2m.
 	FlagDuration
-	// FlagList takes the flag once per value.
+	// FlagList takes the flag once per value. The form takes the values
+	// comma-separated.
 	FlagList
+	// FlagPairs takes the flag once per name=value pair. A value may hold commas
+	// of its own, so the form starts a new pair only at a comma followed by a name
+	// and an equals sign.
+	FlagPairs
 )
 
 // Flag is one flag the user may give.

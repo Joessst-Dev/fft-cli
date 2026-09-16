@@ -381,6 +381,8 @@ func kindName(k FlagKind) string {
 		return "duration"
 	case FlagList:
 		return "list"
+	case FlagPairs:
+		return "name=value pairs"
 	default:
 		return "text"
 	}

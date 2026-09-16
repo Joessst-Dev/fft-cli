@@ -112,6 +112,9 @@ var _ = Describe("the TUI's catalog of operations", func() {
 				Expect(cmd.Body).To(Equal(op.HasBody))
 				Expect(cmd.BodyRequired).To(Equal(op.BodyRequired))
 				Expect(flagNames(cmd)).To(ConsistOf("header", "param", "query"))
+				for _, f := range cmd.Flags {
+					Expect(f.Kind).To(Equal(tui.FlagPairs), "--%s takes name=value pairs, which may hold commas", f.Name)
+				}
 			}
 		})
 	})
