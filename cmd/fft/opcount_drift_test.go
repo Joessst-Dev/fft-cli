@@ -34,8 +34,8 @@ const specPath = repoRoot + "/api/openapi/fft.api.swagger.yaml"
 // between "reachable through a Go method" and "reachable only through opmeta".
 const codegenPath = repoRoot + "/api/openapi/oapi-codegen.yaml"
 
-// The repo states three different quantities in the same words — "561
-// operations" (the whole API), "466 operations" (the ones with no typed method),
+// The repo states three different quantities in the same words — "562
+// operations" (the whole API), "467 operations" (the ones with no typed method),
 // "278 operations" (the ones taking a body) — so the gate cannot tell them apart
 // by phrasing, and trying to would break on the next reworded comment. It checks
 // the weaker, sturdier property instead: every operation count the repo states
@@ -50,7 +50,7 @@ const codegenPath = repoRoot + "/api/openapi/oapi-codegen.yaml"
 // integer to go stale. The operation count is the one that is load-bearing: it is
 // in the README, the docs site and the GitHub repo description.
 //
-// \d{3,4} rather than \d{3}: at 561 today a 3-digit pattern is enough, but this
+// \d{3,4} rather than \d{3}: at 562 today a 3-digit pattern is enough, but this
 // gate exists to survive the count changing, including past 1,000 — \b\d{3}\b
 // cannot match inside a longer digit run, so a 4-digit figure would silently
 // stop being checked at all.
