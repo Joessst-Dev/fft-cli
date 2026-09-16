@@ -20,13 +20,15 @@ type editorDoneMsg struct {
 }
 
 // editorCommand is the editor to open a file in, as a program and its first
-// arguments: $EDITOR, else $VISUAL, else one every system of its kind has.
+// arguments: $VISUAL, else $EDITOR, else one every system of its kind has. $VISUAL
+// comes first by the same convention git and crontab follow: it names the editor
+// for a full-screen terminal, which is what the UI hands over.
 //
 // The variable is split into words here, and never handed to a shell. A shell
 // would also expand whatever else the variable holds — $(…), ;, a redirection —
 // and an editor setting is not where a command line should be able to hide.
 func editorCommand(getenv func(string) string) ([]string, error) {
-	for _, name := range []string{"EDITOR", "VISUAL"} {
+	for _, name := range []string{"VISUAL", "EDITOR"} {
 		value := strings.TrimSpace(getenv(name))
 		if value == "" {
 			continue

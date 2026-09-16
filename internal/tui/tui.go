@@ -46,8 +46,8 @@ type Options struct {
 	Now func() time.Time
 
 	// The editor seams, for the specs: how the editor takes over the terminal
-	// (tea.ExecProcess), where $EDITOR is read from (os.Getenv), and where the file
-	// it edits is written ("" for the system's temporary directory).
+	// (tea.ExecProcess), where $VISUAL and $EDITOR are read from (os.Getenv), and
+	// where the file it edits is written ("" for the system's temporary directory).
 	execProcess func(*exec.Cmd, tea.ExecCallback) tea.Cmd
 	getenv      func(string) string
 	tempDir     string

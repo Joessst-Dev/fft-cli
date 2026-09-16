@@ -17,7 +17,7 @@ The first screen manages projects: switch, protect, remove and add them, and
 refresh the current token. The Operations screen lists every operation of the
 API by tag; press / to search it, D to describe one and enter to fill in its
 request. The Request screen builds the command from its flags, opens the body in
-$EDITOR (then $VISUAL) and asks before it sends a write. A command that asks its
+$VISUAL (then $EDITOR) and asks before it sends a write. A command that asks its
 own question, such as facility delete, asks it in the UI once it has looked up what
 it is about to change; one that cannot be undone wants its verb typed back. The
 Response screen shows

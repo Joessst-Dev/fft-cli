@@ -771,12 +771,12 @@ var _ = Describe("choosing the editor", func() {
 		return func(name string) string { return vars[name] }
 	}
 
-	It("takes $EDITOR first", func() {
-		Expect(editorCommand(env(map[string]string{"EDITOR": "nano", "VISUAL": "code -w"}))).To(Equal([]string{"nano"}))
+	It("takes $VISUAL first", func() {
+		Expect(editorCommand(env(map[string]string{"EDITOR": "nano", "VISUAL": "code -w"}))).To(Equal([]string{"code", "-w"}))
 	})
 
-	It("takes $VISUAL when $EDITOR is not set", func() {
-		Expect(editorCommand(env(map[string]string{"EDITOR": "  ", "VISUAL": "code -w"}))).To(Equal([]string{"code", "-w"}))
+	It("takes $EDITOR when $VISUAL is not set", func() {
+		Expect(editorCommand(env(map[string]string{"EDITOR": "nano", "VISUAL": "  "}))).To(Equal([]string{"nano"}))
 	})
 
 	It("falls back to one the system has", func() {
