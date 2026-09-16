@@ -136,11 +136,37 @@ func DeleteAll(s Store, project string) error {
 	return errors.Join(errs...)
 }
 
+// Checker is implemented by a store that can say whether a key holds a secret
+// without handing the secret over.
+type Checker interface {
+	// Exists reports whether key holds a non-empty secret.
+	Exists(key string) (bool, error)
+}
+
+// Exists reports whether key holds a non-empty secret in s, which is how fft
+// decides that a credential is there. A store that implements [Checker] answers
+// without returning the secret. The OS keychain cannot: its API has no such
+// question, so it is asked for the secret, which is dropped at once — a keychain
+// prompt, if the system raises one, is the same either way.
+func Exists(s Store, key string) (bool, error) {
+	if c, ok := s.(Checker); ok {
+		return c.Exists(key)
+	}
+	v, err := s.Get(key)
+	switch {
+	case errors.Is(err, ErrNotFound):
+		return false, nil
+	case err != nil:
+		return false, err
+	}
+	return v != "", nil
+}
+
 // Has reports whether the project has any credential at all in the store — a
 // password to sign in with, or an id token to use directly.
 func Has(s Store, project string) bool {
 	for _, kind := range []string{KindPassword, KindIDToken} {
-		if v, err := s.Get(Key(project, kind)); err == nil && v != "" {
+		if ok, err := Exists(s, Key(project, kind)); err == nil && ok {
 			return true
 		}
 	}

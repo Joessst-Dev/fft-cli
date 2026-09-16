@@ -99,6 +99,19 @@ func (s *fileStore) Get(key string) (string, error) {
 	return val, nil
 }
 
+// Exists implements [Checker]. The file is read whole either way; what this
+// saves is the secret leaving the store.
+func (s *fileStore) Exists(key string) (bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	values, err := s.load()
+	if err != nil {
+		return false, err
+	}
+	return values[key] != "", nil
+}
+
 func (s *fileStore) Set(key, val string) error {
 	return s.update(func(values map[string]string) bool {
 		values[key] = val
