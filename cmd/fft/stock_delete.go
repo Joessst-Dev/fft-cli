@@ -29,7 +29,10 @@ func newStockDeleteCmd(deps *Deps) *cobra.Command {
 		Args:    usageArgs(cobra.ExactArgs(1)),
 		Aliases: []string{"rm"},
 
-		Annotations: map[string]string{annotationOperationID: "deleteStock"},
+		Annotations: map[string]string{
+			annotationOperationID: "deleteStock",
+			annotationConfirms:    "true",
+		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id := args[0]

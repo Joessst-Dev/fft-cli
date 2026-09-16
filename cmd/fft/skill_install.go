@@ -51,6 +51,9 @@ func newSkillInstallCmd(deps *Deps) *cobra.Command {
 		Short: "Install the skill for an AI assistant to read",
 		Long:  skillInstallLong,
 		Args:  usageArgs(cobra.NoArgs),
+
+		Annotations: map[string]string{annotationConfirms: "true"},
+
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			// --dir "" is a flag given and a directory not named. Falling through to the
 			// home directory would install the skill somewhere the user did not ask for

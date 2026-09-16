@@ -28,7 +28,10 @@ func newFacilityDeleteCmd(deps *Deps) *cobra.Command {
 		Args:    usageArgs(cobra.ExactArgs(1)),
 		Aliases: []string{"rm"},
 
-		Annotations: map[string]string{annotationOperationID: "deleteFacility"},
+		Annotations: map[string]string{
+			annotationOperationID: "deleteFacility",
+			annotationConfirms:    "true",
+		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ref := client.FacilityRef(args[0])

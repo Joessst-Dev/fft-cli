@@ -141,6 +141,34 @@ var _ = Describe("the TUI's command runner", func() {
 		Expect(doc).To(HaveKeyWithValue("id", "pj-1"))
 	})
 
+	It("runs a curated list whose table, read back from its JSON, is the one the shell prints", func() {
+		c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+			writeJSON(w, http.StatusOK, searchPage(
+				[]string{fixture("facility_managed.json"), fixture("facility_supplier.json")}, false, "", nil))
+		})
+		r := c.newRunner()
+
+		id := start(r, tui.Invocation{Args: []string{"facility", "list"}})
+		res := awaitDone(r, id)[id]
+		Expect(res.ExitCode).To(Equal(exitcode.OK), "stderr: %s", res.Stderr)
+
+		var list tui.Command
+		for _, g := range r.Catalog().Groups() {
+			for _, op := range g.Operations {
+				if slices.Equal(op.Command.Path, []string{"facility", "list"}) {
+					list = op.Command
+				}
+			}
+		}
+		Expect(list.Table).To(BeTrue())
+		table, err := r.Catalog().Table(list, res.Stdout)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(c.run("facility", "list")).To(Equal(exitcode.OK), c.errOut())
+		Expect(table).To(Equal(c.out()))
+		Expect(table).To(ContainSubstring("BER-01"))
+	})
+
 	It("never puts what a run reads on stdin into an event", func() {
 		const body = `{"pickLineItems":[],"note":"stdin-must-not-appear"}`
 		c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {

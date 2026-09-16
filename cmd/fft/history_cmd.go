@@ -146,11 +146,14 @@ func newHistoryTopCmd(deps *Deps) *cobra.Command {
 
 func newHistoryClearCmd(deps *Deps) *cobra.Command {
 	return &cobra.Command{
-		Use:         "clear",
-		Short:       "Delete the request history",
-		Long:        historyClearLong,
-		Args:        usageArgs(cobra.NoArgs),
-		Annotations: map[string]string{annotationExclusive: exclusiveHistory},
+		Use:   "clear",
+		Short: "Delete the request history",
+		Long:  historyClearLong,
+		Args:  usageArgs(cobra.NoArgs),
+		Annotations: map[string]string{
+			annotationExclusive: exclusiveHistory,
+			annotationConfirms:  "true",
+		},
 		RunE: func(_ *cobra.Command, _ []string) error {
 			ok, err := confirmHistoryClear(deps)
 			if err != nil || !ok {

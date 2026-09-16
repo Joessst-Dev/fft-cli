@@ -54,11 +54,14 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:         "save <name>",
-		Annotations: map[string]string{annotationExclusive: exclusiveTemplates},
-		Short:       "Save a request body as a template",
-		Long:        templateSaveLong,
-		Args:        usageArgs(cobra.ExactArgs(1)),
+		Use: "save <name>",
+		Annotations: map[string]string{
+			annotationExclusive: exclusiveTemplates,
+			annotationConfirms:  "true",
+		},
+		Short: "Save a request body as a template",
+		Long:  templateSaveLong,
+		Args:  usageArgs(cobra.ExactArgs(1)),
 		RunE: func(_ *cobra.Command, args []string) error {
 			name := args[0]
 			if err := template.ValidateName(name); err != nil {

@@ -48,6 +48,12 @@ var errRunnerClosed = errors.New("the command runner has been shut down")
 // until it carries this.
 const annotationExclusive = "exclusive"
 
+// annotationConfirms marks a command that asks before it acts unless --yes is
+// given. The TUI asks in its place, and gives --yes to the run the user confirmed
+// only when the command carries this; confirms_test.go finds every command that
+// asks and fails until it does.
+const annotationConfirms = "confirms"
+
 const (
 	// exclusiveConfig is the config file.
 	exclusiveConfig = "config"
@@ -100,6 +106,9 @@ type cliRunner struct {
 	// under mu.
 	catalog *cobra.Command
 
+	// ops is what the UI lists and builds its forms from, read off catalog once.
+	ops *cliCatalog
+
 	// lastExclusive is closed once the most recently started exclusive run has
 	// finished, nil when there has been none.
 	lastExclusive chan struct{}
@@ -138,6 +147,7 @@ type job struct {
 // started with; see [Deps.forRun].
 func newCLIRunner(ctx context.Context, deps *Deps, session uiRun) *cliRunner {
 	ctx, stop := context.WithCancel(ctx)
+	tree := newRootCmd(deps.forRun(nil, session))
 	return &cliRunner{
 		deps:    deps,
 		session: session,
@@ -146,7 +156,10 @@ func newCLIRunner(ctx context.Context, deps *Deps, session uiRun) *cliRunner {
 		events:  make(chan tui.RunEvent, runnerEventBuffer),
 		slots:   make(chan struct{}, runnerSlots),
 		cancels: make(map[tui.RunID]context.CancelFunc),
-		catalog: newRootCmd(deps.forRun(nil, session)),
+		catalog: tree,
+		// Before the runner is returned, and so before Start can walk the same tree
+		// from another goroutine.
+		ops: newCLICatalog(tree),
 
 		stdoutLimit: runnerStdoutLimit,
 		stderrLimit: runnerStderrLimit,
@@ -213,6 +226,9 @@ func (r *cliRunner) Cancel(id tui.RunID) {
 		cancel()
 	}
 }
+
+// Catalog is every operation the runner can send, and the command that sends it.
+func (r *cliRunner) Catalog() tui.Catalog { return r.ops }
 
 // Events implements [tui.Runner].
 func (r *cliRunner) Events() <-chan tui.RunEvent { return r.events }

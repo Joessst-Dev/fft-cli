@@ -59,6 +59,7 @@ func newTUICmd(deps *Deps) *cobra.Command {
 			}
 			return start(cmd.Context(), tui.Options{
 				Runner:   runner,
+				Catalog:  runner.Catalog(),
 				In:       cmd.InOrStdin(),
 				Out:      cmd.ErrOrStderr(),
 				Project:  deps.Project,

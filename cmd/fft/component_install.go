@@ -37,6 +37,9 @@ func newComponentInstallCmd(deps *Deps) *cobra.Command {
 		Short: "Install a component",
 		Long:  componentInstallLong,
 		Args:  usageArgs(cobra.MaximumNArgs(1)),
+
+		Annotations: map[string]string{annotationConfirms: "true"},
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			src, err := installSource(args, path)
 			if err != nil {

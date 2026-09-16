@@ -38,7 +38,10 @@ func newOrderCancelCmd(deps *Deps) *cobra.Command {
 		Long:  orderCancelLong,
 		Args:  usageArgs(cobra.ExactArgs(1)),
 
-		Annotations: map[string]string{annotationOperationID: "orderAction"},
+		Annotations: map[string]string{
+			annotationOperationID: "orderAction",
+			annotationConfirms:    "true",
+		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := version.check(); err != nil {

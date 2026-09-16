@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmp"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -193,19 +194,7 @@ func renderSourcing(deps *Deps, raw []byte) error {
 		return deps.Printer.Empty("sourcing options")
 	}
 
-	// Ascending: it is a penalty, so the router's favourite is the one at the top.
-	options := slices.Clone(res.Result.Options)
-	slices.SortStableFunc(options, func(a, b sourcingOption) int {
-		switch {
-		case a.TotalPenalty < b.TotalPenalty:
-			return -1
-		case a.TotalPenalty > b.TotalPenalty:
-			return 1
-		default:
-			return 0
-		}
-	})
-
+	options := rankedOptions(res.Result.Options)
 	rows, err := sourcingRows(deps.Printer.Style(), options)
 	if err != nil {
 		return err
@@ -218,6 +207,16 @@ func renderSourcing(deps *Deps, raw []byte) error {
 	}
 
 	return deps.Printer.RenderRaw(rows, raw)
+}
+
+// rankedOptions is the options in the order the table lists them: ascending by
+// penalty, so that the router's favourite is the one at the top.
+func rankedOptions(options []sourcingOption) []sourcingOption {
+	ranked := slices.Clone(options)
+	slices.SortStableFunc(ranked, func(a, b sourcingOption) int {
+		return cmp.Compare(a.TotalPenalty, b.TotalPenalty)
+	})
+	return ranked
 }
 
 var sourcingHeaders = []string{"#", "PENALTY", "ROUTE", "SOURCED", "UNSOURCED", "COST", "ETA", "VALID UNTIL", "ID"}

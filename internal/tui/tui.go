@@ -14,6 +14,9 @@ type Options struct {
 	// Runner executes the commands the UI builds.
 	Runner Runner
 
+	// Catalog is every operation the UI can send.
+	Catalog Catalog
+
 	// In is where keystrokes come from; it must be a terminal.
 	In io.Reader
 
@@ -47,6 +50,9 @@ type Options struct {
 func Run(ctx context.Context, opts Options) error {
 	if opts.Runner == nil {
 		return errors.New("tui: no runner to execute commands with")
+	}
+	if opts.Catalog == nil {
+		return errors.New("tui: no catalog of operations to offer")
 	}
 	p := tea.NewProgram(newApp(opts),
 		tea.WithContext(ctx),

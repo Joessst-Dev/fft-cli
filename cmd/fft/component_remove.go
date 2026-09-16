@@ -25,6 +25,9 @@ func newComponentRemoveCmd(deps *Deps) *cobra.Command {
 		Long:    componentRemoveLong,
 		Aliases: []string{"rm", "uninstall"},
 		Args:    usageArgs(cobra.ExactArgs(1)),
+
+		Annotations: map[string]string{annotationConfirms: "true"},
+
 		RunE: func(_ *cobra.Command, args []string) error {
 			return runComponentRemove(deps, args[0])
 		},

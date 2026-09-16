@@ -32,7 +32,10 @@ func newListingDeleteCmd(deps *Deps) *cobra.Command {
 		Args:    usageArgs(cobra.ExactArgs(1)),
 		Aliases: []string{"rm"},
 
-		Annotations: map[string]string{annotationOperationID: "deleteFacilityListing"},
+		Annotations: map[string]string{
+			annotationOperationID: "deleteFacilityListing",
+			annotationConfirms:    "true",
+		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ref, err := requireFacility(cmd, facility)

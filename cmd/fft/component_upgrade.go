@@ -26,6 +26,9 @@ func newComponentUpgradeCmd(deps *Deps) *cobra.Command {
 		Short: "Upgrade an installed component",
 		Long:  componentUpgradeLong,
 		Args:  usageArgs(cobra.ExactArgs(1)),
+
+		Annotations: map[string]string{annotationConfirms: "true"},
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			src, err := upgradeSource(deps, args[0])
 			if err != nil {

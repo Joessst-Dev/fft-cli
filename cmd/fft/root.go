@@ -558,6 +558,24 @@ func registerEnumCompletion(cmd *cobra.Command, flag string, values []string) {
 		// error, and one better found at startup than never.
 		panic(fmt.Sprintf("register --%s completion on %q: %v", flag, cmd.Name(), err))
 	}
+	// The same values, where the TUI's form can read them without calling the
+	// completion function.
+	annotateFlag(cmd, flag, flagAnnotationEnum, values)
+}
+
+// Flag annotations fft sets for the TUI's request form. cobra reads its own
+// annotations off the same map, so these carry a prefix of their own.
+const (
+	flagAnnotationRequired = "fft_required"
+	flagAnnotationEnum     = "fft_enum"
+)
+
+// annotateFlag sets an annotation on one of cmd's own flags.
+func annotateFlag(cmd *cobra.Command, flag, key string, values []string) {
+	if err := cmd.Flags().SetAnnotation(flag, key, values); err != nil {
+		// As above: only a flag name that does not exist can get here.
+		panic(fmt.Sprintf("annotate --%s on %q: %v", flag, cmd.Name(), err))
+	}
 }
 
 // complete fills in whatever the caller did not supply. It runs before every

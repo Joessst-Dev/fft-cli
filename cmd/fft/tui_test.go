@@ -53,11 +53,13 @@ var _ = Describe("fft tui", func() {
 			c.deps.Terminal = ptr(true)
 		})
 
-		It("hands the UI a runner and the stderr stream to draw on", func() {
+		It("hands the UI a runner, its catalog and the stderr stream to draw on", func() {
 			Expect(c.run("tui")).To(Equal(exitcode.OK))
 
 			Expect(started).To(HaveLen(1))
 			Expect(started[0].Runner).NotTo(BeNil())
+			Expect(started[0].Catalog).NotTo(BeNil())
+			Expect(started[0].Catalog.Groups()).NotTo(BeEmpty())
 			Expect(started[0].Out).To(BeIdenticalTo(&c.stderr))
 			Expect(started[0].In).To(BeIdenticalTo(c.stdin))
 			Expect(c.out()).To(BeEmpty())

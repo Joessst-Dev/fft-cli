@@ -22,8 +22,11 @@ func newTemplateRemoveCmd(deps *Deps) *cobra.Command {
 	var scope scopeFlag
 
 	cmd := &cobra.Command{
-		Use:               "remove <name>",
-		Annotations:       map[string]string{annotationExclusive: exclusiveTemplates},
+		Use: "remove <name>",
+		Annotations: map[string]string{
+			annotationExclusive: exclusiveTemplates,
+			annotationConfirms:  "true",
+		},
 		Aliases:           []string{"rm", "delete"},
 		Short:             "Delete a saved template",
 		Long:              templateRemoveLong,
