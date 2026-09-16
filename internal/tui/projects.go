@@ -419,6 +419,10 @@ func (p *projectsScreen) bindings() []key.Binding {
 		return p.form.bindings()
 	}
 	k := p.keys
+	if p.s.headless {
+		// The changes are refused here, so the help does not offer them.
+		return []key.Binding{k.up, k.refresh, k.reload}
+	}
 	return []key.Binding{k.up, k.use, k.readOnly, k.remove, k.refresh, k.add, k.reload}
 }
 

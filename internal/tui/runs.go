@@ -217,8 +217,8 @@ func (p *runsPanel) row(st styles, e *runEntry, spin string, selected bool, widt
 // elapsed renders a duration as briefly as its size allows.
 func elapsed(d time.Duration) string {
 	switch {
-	case d < 0:
-		return "0s"
+	case d < time.Millisecond:
+		return "<1ms"
 	case d < time.Second:
 		return d.Round(time.Millisecond).String()
 	case d < time.Minute:

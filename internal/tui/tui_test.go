@@ -375,6 +375,11 @@ var _ = Describe("the UI", func() {
 			Expect(view).To(MatchRegexp(`Name\s+qa`))
 		})
 
+		It("shows each empty field's placeholder in full", func() {
+			Expect(h.view()).To(ContainSubstring("https://acme.api.fulfillmenttools.com"))
+			Expect(h.view()).To(ContainSubstring("the Firebase Web API key"))
+		})
+
 		It("signs in with an email when switched to one, and passes the optional flags", func() {
 			h.typeText("qa")
 			h.press("tab")
@@ -445,8 +450,11 @@ var _ = Describe("the UI", func() {
 				`{"project":"env","store":"env","signIn":"idToken","token":"unknown"}`)
 		})
 
-		It("says the projects are read-only here", func() {
+		It("says the projects are read-only here, and offers no key that would change them", func() {
 			Expect(h.view()).To(ContainSubstring("Running from the environment"))
+			Expect(h.view()).To(ContainSubstring("R refresh token"))
+			Expect(h.view()).NotTo(ContainSubstring("enter use"))
+			Expect(h.view()).NotTo(ContainSubstring("a add"))
 			Expect(h.view()).To(ContainSubstring("fft · env (environment) · fixed token expiry unknown"))
 		})
 

@@ -11,6 +11,9 @@ import (
 	"github.com/Joessst-Dev/fft-cli/internal/secrets"
 )
 
+// formInputWidth is how many cells a text row scrolls within: a base URL fits.
+const formInputWidth = 60
+
 // formField is one row of the add form.
 type formField struct {
 	label string
@@ -97,6 +100,8 @@ func newAddForm(st styles) *addForm {
 		in := textinput.New()
 		in.Prompt = ""
 		in.Placeholder = placeholder
+		// Without a width, bubbles shows only a placeholder's first character.
+		in.SetWidth(formInputWidth)
 		in.SetStyles(st.input)
 		if kind == fieldSecret {
 			in.EchoMode = textinput.EchoPassword
