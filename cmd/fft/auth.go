@@ -125,8 +125,8 @@ func (d *Deps) apiClient(p config.Project, src auth.TokenSource) (*client.Client
 	if d.Debug != nil {
 		opts = append(opts, client.WithDebug(d.Debug))
 	}
-	if d.observeStatus != nil {
-		opts = append(opts, client.WithObserver(d.observeStatus))
+	if d.run != nil || d.observeStatus != nil {
+		opts = append(opts, client.WithObserver(d.observe))
 	}
 
 	c, err := client.New(p.BaseURL, opts...)

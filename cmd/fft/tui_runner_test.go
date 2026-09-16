@@ -555,6 +555,9 @@ var runDepsClassification = map[string]string{
 	"updateDone":          "rebuilt",
 	"StartTUI":            "zero",
 	"observeStatus":       "caller",
+	"HistoryPath":         "shared",
+	"historyMaxBytes":     "shared",
+	"run":                 "rebuilt",
 	"ui":                  "per run",
 }
 

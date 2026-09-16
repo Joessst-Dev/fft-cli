@@ -38,10 +38,10 @@ var configSavers = map[string]string{
 	"migrateAPIKeys": "",
 }
 
-// templateWriters are the commands that rewrite the template directory. They are
-// listed by hand: the template store's Write and Remove are names too common to
-// find reliably in the source, and the directory has only these two writers.
-var templateWriters = []string{"fft template save", "fft template remove"}
+// otherWriters are the commands that rewrite the template directory or the request
+// history. They are listed by hand: the stores' Write, Remove and Clear are names
+// too common to find reliably in the source, and each has only these writers.
+var otherWriters = []string{"fft template save", "fft template remove", "fft history clear"}
 
 // configSaveCallers returns the name of every function in this package, outside
 // the specs, that saves the config file.
@@ -110,7 +110,7 @@ var _ = Describe("commands that rewrite a shared file", func() {
 	})
 
 	It("marks every one of them to run alone", func() {
-		paths := slices.Concat(slices.Collect(maps.Values(configSavers)), templateWriters)
+		paths := slices.Concat(slices.Collect(maps.Values(configSavers)), otherWriters)
 		for _, path := range paths {
 			if path == "" {
 				continue

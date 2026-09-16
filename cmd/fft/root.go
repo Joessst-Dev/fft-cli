@@ -192,6 +192,18 @@ type Deps struct {
 	// client receives. The TUI's runner uses it to report what a run got back.
 	observeStatus func(status int)
 
+	// HistoryPath is the request history file. "" means the real one in the state
+	// directory; a spec points it somewhere it can read, or somewhere unwritable.
+	HistoryPath string
+
+	// historyMaxBytes is the size at which the history is compacted, 0 for the
+	// real limit. A spec lowers it rather than write a megabyte.
+	historyMaxBytes int64
+
+	// run collects what this run's history entry needs to know. [execute] sets a
+	// fresh one for every command line.
+	run *runRecord
+
 	// ui is set on a run that `fft tui` started, and nil on a command line typed in
 	// a shell. Unlike the fields complete rebuilds, it is never reset: it is how a
 	// flag given to the session reaches a run that parses only its own flags.
@@ -269,6 +281,9 @@ func (d *Deps) forRun(in io.Reader, ui uiRun) *Deps {
 		Retry:          d.Retry,
 		Update:         d.Update,
 		unused:         d.unused,
+		HistoryPath:    d.HistoryPath,
+
+		historyMaxBytes: d.historyMaxBytes,
 		// Read-only once discovered, and discovering it costs a directory walk per
 		// run. A component installed from inside the UI therefore appears only in the
 		// next session, which is also when its commands could first be run.
@@ -280,7 +295,8 @@ func (d *Deps) forRun(in io.Reader, ui uiRun) *Deps {
 		Terminal: ptr(false),
 		ui:       &ui,
 
-		// Rebuilt by complete, or by newRootCmd, from this run's flags and streams:
+		// Rebuilt by complete, by newRootCmd or by execute, from this run's flags and
+		// streams — run among them:
 		// Printer, Prompt, Debug, Project, Ephemeral, Timeout, AssumeYes,
 		// ReadOnlyFlag, ReadOnlyEnv, noKeyringFromConfig, explicitNoKeyring, cfg,
 		// componentWarnings and the update-check plumbing. StartTUI stays nil — a
@@ -321,6 +337,7 @@ func (d *Deps) SaveConfig(cfg *config.Config) error {
 // the environment wins, which is what makes a CI job deterministic.
 func (d *Deps) ActiveProject() (config.Project, error) {
 	if d.Ephemeral != nil && (d.Project == "" || d.Project == d.Ephemeral.Name) {
+		d.noteProject(d.Ephemeral.Name)
 		return *d.Ephemeral, nil
 	}
 
@@ -350,7 +367,15 @@ func (d *Deps) ActiveProject() (config.Project, error) {
 		key = p.LegacyFirebaseAPIKey
 	}
 	p.FirebaseAPIKey = key
+	d.noteProject(p.Name)
 	return p, nil
+}
+
+// noteProject remembers the project this run acts on, for its history entry.
+func (d *Deps) noteProject(name string) {
+	if d.run != nil {
+		d.run.project.Store(&name)
+	}
 }
 
 // Context bounds the command's work by --timeout. A zero timeout means no bound.
@@ -473,6 +498,7 @@ func newRootCmd(deps *Deps) *cobra.Command {
 		newComponentCmd(deps),
 		newGenDocsCmd(deps),
 		newTUICmd(deps),
+		newHistoryCmd(deps),
 	} {
 		c.GroupID = groupCore
 		cmd.AddCommand(c)

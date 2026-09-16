@@ -77,6 +77,12 @@ var commandsWithoutOperation = map[string]string{
 
 	"fft update check": "asks GitHub for the latest release",
 
+	// The request history is a file on this machine that fft writes after a request,
+	// not a request of its own.
+	"fft history list":  "reads the local request history; no network",
+	"fft history top":   "reads the local request history; no network",
+	"fft history clear": "deletes the local request history; no network",
+
 	// The UI sends nothing itself. Every request it makes is an fft command line run
 	// through the tree, so each is gated by the annotation of the command it names.
 	"fft tui": "runs other fft commands, each of which passes the read-only gate on its own",

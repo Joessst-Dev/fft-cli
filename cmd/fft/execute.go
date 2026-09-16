@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"io"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -15,7 +16,7 @@ import (
 // run — holds for all three, and every spec in the suite exercises the path the
 // shell and the UI take.
 func execute(ctx context.Context, deps *Deps, args []string, in io.Reader, out, errw io.Writer) int {
-	return executeRoot(ctx, newRootCmd(deps), args, in, out, errw)
+	return executeRoot(ctx, deps, newRootCmd(deps), args, in, out, errw)
 }
 
 // executeRoot is [execute] on a tree the caller has already built against its
@@ -27,7 +28,9 @@ func execute(ctx context.Context, deps *Deps, args []string, in io.Reader, out, 
 // writes to the output stream only when one was set, and to stderr otherwise; so
 // setting the process's own stdout would move those messages onto the stream a
 // script is piping into jq. The process therefore names no streams at all.
-func executeRoot(ctx context.Context, root *cobra.Command, args []string, in io.Reader, out, errw io.Writer) int {
+//
+// root must have been built against deps.
+func executeRoot(ctx context.Context, deps *Deps, root *cobra.Command, args []string, in io.Reader, out, errw io.Writer) int {
 	root.SetArgs(args)
 	if in != nil {
 		root.SetIn(in)
@@ -42,9 +45,17 @@ func executeRoot(ctx context.Context, root *cobra.Command, args []string, in io.
 	// ExecuteContextC rather than ExecuteContext: it returns the command that ran
 	// even when it failed, which is what request history needs to name the
 	// operation a run addressed.
-	_, err := root.ExecuteContextC(ctx)
+	deps.run = &runRecord{}
+	started := time.Now()
+	cmd, err := root.ExecuteContextC(ctx)
+	elapsed := time.Since(started)
 
 	// Diagnostics go to stderr — always. stdout carries data only, so that
 	// `fft ... -o json | jq` is never contaminated by an error message.
-	return report(root.ErrOrStderr(), err)
+	code := report(root.ErrOrStderr(), err)
+
+	// After the exit code is decided and everything is said, so that nothing about
+	// recording can change either.
+	deps.recordHistory(cmd, code, elapsed)
+	return code
 }

@@ -46,6 +46,12 @@ const (
 	// of one name side by side would both find it free, and the second would
 	// overwrite the first without the --force it would otherwise have required.
 	exclusiveTemplates = "templates"
+
+	// exclusiveHistory is the request history. Clearing it reads the file for the
+	// count it reports and then deletes it; a run finishing in between would be
+	// recorded and deleted uncounted, or recorded into the history after the clear
+	// although it ran before it.
+	exclusiveHistory = "history"
 )
 
 // cliRunner is the TUI's [tui.Runner]: it executes each invocation through
@@ -215,7 +221,7 @@ func (r *cliRunner) execute(ctx context.Context, inv tui.Invocation) tui.Result 
 
 	var stdout, stderr bytes.Buffer
 	started := time.Now()
-	code := executeRoot(ctx, root, inv.Args, in, &stdout, &stderr)
+	code := executeRoot(ctx, deps, root, inv.Args, in, &stdout, &stderr)
 
 	return tui.Result{
 		ExitCode: code,
