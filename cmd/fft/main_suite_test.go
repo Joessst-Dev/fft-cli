@@ -287,16 +287,10 @@ func (c *cli) run(args ...string) int {
 	// must find it, which a registry discovered by the previous run would not.
 	c.deps.Components = nil
 
-	cmd := newRootCmd(c.deps)
-	cmd.SetArgs(args)
-	cmd.SetIn(c.stdin)
-	cmd.SetOut(&c.stdout)
-	cmd.SetErr(&c.stderr)
-
-	// report is the same funnel main runs an error through — the translation, the
-	// message and the exit code — so the specs assert on exactly what a terminal
-	// would have shown.
-	return report(&c.stderr, cmd.ExecuteContext(context.Background()))
+	// execute is the same funnel main runs a command line through — the tree, the
+	// error's translation, the message and the exit code — so the specs assert on
+	// exactly what a terminal would have shown.
+	return execute(context.Background(), c.deps, args, c.stdin, &c.stdout, &c.stderr)
 }
 
 // out is everything the command wrote to stdout: the data a pipe would receive.

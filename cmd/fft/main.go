@@ -36,14 +36,10 @@ func main() {
 
 	// The zero Deps is completed with the real config store, keychain and printer
 	// once the global flags have been parsed. Specs pass a Deps of fakes instead.
-	err := newRootCmd(&Deps{}).ExecuteContext(ctx)
-
-	// Diagnostics go to stderr — always. stdout carries data only, so that
-	// `fft ... -o json | jq` is never contaminated by an error message.
 	//
-	// This is the only os.Exit in the program. Commands return errors; main
+	// This is the only os.Exit in the program. Commands return errors; execute
 	// decides what they mean.
-	os.Exit(report(os.Stderr, err))
+	os.Exit(execute(ctx, &Deps{}, os.Args[1:], os.Stdin, os.Stdout, os.Stderr))
 }
 
 // report writes err the way a user should see it and returns the exit code it
