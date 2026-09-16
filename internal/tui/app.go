@@ -318,13 +318,13 @@ func (m *app) View() tea.View {
 	case m.height > 0 && owner >= ownerFocused && lipgloss.Height(body) > bodyHeight:
 		// A question that does not fit beside the chrome gets the whole terminal:
 		// the tabs and the help can go, the question the next key answers cannot.
-		content = fitExactly(body, m.height)
+		content = fit(body, m.height)
 	case m.height > 0:
 		parts := []string{tabs, ""}
 		if bodyHeight > 0 {
-			parts = append(parts, fitExactly(body, bodyHeight))
+			parts = append(parts, fit(body, bodyHeight))
 		}
-		content = fitExactly(strings.Join(append(parts, status, helpLine), "\n"), m.height)
+		content = fit(strings.Join(append(parts, status, helpLine), "\n"), m.height)
 	default:
 		content = strings.Join([]string{tabs, "", body, status, helpLine}, "\n")
 	}
@@ -343,12 +343,12 @@ func (m *app) withPanel(body string, bodyHeight int) string {
 		return body + "\n" + m.panel.view(m.st, m.spin.View(), m.width, 5)
 	}
 	panelHeight := min(max(bodyHeight/2, 5), bodyHeight)
-	panel := fitExactly(m.panel.view(m.st, m.spin.View(), m.width, panelHeight), panelHeight)
+	panel := fit(m.panel.view(m.st, m.spin.View(), m.width, panelHeight), panelHeight)
 	above := bodyHeight - panelHeight
 	if above <= 0 {
 		return panel
 	}
-	return fitExactly(body, above) + "\n" + panel
+	return fit(body, above) + "\n" + panel
 }
 
 func (m *app) tabBar() string {
@@ -414,17 +414,8 @@ func (m *app) quitDialog() string {
 }
 
 // fit makes s exactly height lines tall: cut when it is longer, padded when it is
-// shorter, so that what comes after it stays where it is. A height of zero or less
-// means the height is not known yet, and s is left alone.
+// shorter, so that what comes after it stays where it is.
 func fit(s string, height int) string {
-	if height <= 0 {
-		return s
-	}
-	return fitExactly(s, height)
-}
-
-// fitExactly is fit for a height that is known, however small.
-func fitExactly(s string, height int) string {
 	lines := strings.Split(s, "\n")
 	if len(lines) > height {
 		lines = lines[:max(height, 0)]
