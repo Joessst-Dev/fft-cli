@@ -175,7 +175,7 @@ type failure struct {
 func (f failure) view(st styles, width int) string {
 	var b strings.Builder
 	b.WriteString(st.errorText.Render(fmt.Sprintf("%s failed: exit %d (%s)",
-		f.what, f.result.ExitCode, exitcode.Meaning(f.result.ExitCode))))
+		output.SanitizeCell(f.what), f.result.ExitCode, exitcode.Meaning(f.result.ExitCode))))
 	for _, line := range stderrTail(f.result.Stderr, 6) {
 		b.WriteString("\n  ")
 		b.WriteString(clip(line, width-2))

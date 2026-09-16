@@ -376,7 +376,8 @@ func (m *app) statusBar() string {
 	if m.s.readOnly() {
 		parts = append(parts, m.st.badge.Render("RO"))
 	}
-	parts = append(parts, m.s.status.tokenSummary(m.s.now()))
+	// The token's state is read from a command's JSON, like any other response.
+	parts = append(parts, output.SanitizeCell(m.s.status.tokenSummary(m.s.now())))
 	if n := m.s.runs.inFlight(); n > 0 {
 		parts = append(parts, fmt.Sprintf("%s %d running", m.spin.View(), n))
 	}

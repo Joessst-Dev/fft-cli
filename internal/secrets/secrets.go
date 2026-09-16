@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"unicode"
 )
 
 // ErrNotFound is returned by Get when the key holds no secret. Every
@@ -76,10 +77,14 @@ func Key(project, kind string) string {
 //
 // The key format reserves the colon as its separator (fft:<project>:<kind>), so a
 // colon in the name breaks the round-trip — [ParseKey], which the env-backed store
-// uses to recover a secret's kind, would mis-split it. A control character has no
-// place in a keychain item name and a keyring backend may refuse it. The check
-// lives at the one door names enter through — `fft project add` — so [Key] can stay
-// a pure join.
+// uses to recover a secret's kind, would mis-split it. A control character, C0 or
+// C1, has no place in a keychain item name and a keyring backend may refuse it.
+// A bidirectional override or isolate would make the name display as something
+// else wherever it is printed. The check lives at the one door names enter
+// through — `fft project add` — so [Key] can stay a pure join. A name written into
+// the config file by hand is not refused on load, since that would lock the user
+// out of the `fft project remove` that fixes it; every place fft prints a name
+// sanitizes it instead.
 func ValidateProjectName(name string) error {
 	if strings.TrimSpace(name) == "" {
 		return errors.New("the project name is empty")
@@ -88,11 +93,21 @@ func ValidateProjectName(name string) error {
 		return fmt.Errorf("the project name %q contains a colon, which fft uses to separate the parts of a stored secret key", name)
 	}
 	for _, r := range name {
-		if r < 0x20 || r == 0x7f {
+		switch {
+		case unicode.IsControl(r):
 			return fmt.Errorf("the project name %q contains a control character", name)
+		case isBidiControl(r):
+			return fmt.Errorf("the project name %q contains a character that reorders how text is displayed", name)
 		}
 	}
 	return nil
+}
+
+// isBidiControl reports whether r is an explicit bidirectional embedding,
+// override or isolate. It matches output.IsBidiControl, which this package does
+// not import: a credential store has no business depending on the renderer.
+func isBidiControl(r rune) bool {
+	return (r >= 0x202a && r <= 0x202e) || (r >= 0x2066 && r <= 0x2069)
 }
 
 // ParseKey splits a key produced by [Key] back into its parts.

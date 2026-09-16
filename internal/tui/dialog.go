@@ -6,6 +6,8 @@ import (
 	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/Joessst-Dev/fft-cli/internal/output"
 )
 
 // dialog is a question that has the keyboard until it is answered.
@@ -50,12 +52,12 @@ func (d *confirmDialog) update(msg tea.Msg) (bool, tea.Cmd) {
 }
 
 func (d *confirmDialog) view(st styles, width int) string {
-	lines := []string{st.title.Render(d.question)}
+	lines := []string{st.title.Render(output.SanitizeCell(d.question))}
 	if d.detail != "" {
-		lines = append(lines, d.detail)
+		lines = append(lines, output.SanitizeCell(d.detail))
 	}
 	if !d.command.empty() {
-		lines = append(lines, "", st.dim.Render("runs: "+d.command.String()))
+		lines = append(lines, "", st.dim.Render("runs: "+output.SanitizeCell(d.command.String())))
 	}
 	lines = append(lines, "", "y yes · n no")
 	return st.dialog.Width(dialogWidth(width)).Render(strings.Join(lines, "\n"))
@@ -114,15 +116,16 @@ func (d *typeNameDialog) update(msg tea.Msg) (bool, tea.Cmd) {
 }
 
 func (d *typeNameDialog) view(st styles, width int) string {
-	lines := []string{st.title.Render(d.question)}
+	// A project name comes from the config file, which may have been edited by hand.
+	lines := []string{st.title.Render(output.SanitizeCell(d.question))}
 	if d.detail != "" {
-		lines = append(lines, d.detail)
+		lines = append(lines, output.SanitizeCell(d.detail))
 	}
-	lines = append(lines, "Type "+d.name+" to confirm.", d.input.View())
+	lines = append(lines, "Type "+output.SanitizeCell(d.name)+" to confirm.", d.input.View())
 	if d.mismatch {
 		lines = append(lines, st.errorText.Render("That is not the name; nothing was sent."))
 	}
-	lines = append(lines, "", st.dim.Render("runs: "+d.command.String()), "", "enter confirm · esc cancel")
+	lines = append(lines, "", st.dim.Render("runs: "+output.SanitizeCell(d.command.String())), "", "enter confirm · esc cancel")
 	return st.dialog.Width(dialogWidth(width)).Render(strings.Join(lines, "\n"))
 }
 

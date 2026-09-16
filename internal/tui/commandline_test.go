@@ -44,7 +44,7 @@ var _ = DescribeTable("commandLine marks what no quoting keeps intact in every s
 	Entry("a typographic quote, which PowerShell takes for a quote", "it’s", "'it’s'"),
 	Entry("a control character, dropped from what is shown", "a\x1b[2Jb", "'a[2Jb'"),
 	Entry("a newline, folded", "a\nb", "'a b'"),
-	Entry("a bidi override", "a\u202eb", "'a\u202eb'"),
+	Entry("a bidi override, dropped from what is shown", "a\u202eb", "'ab'"),
 )
 
 // roundTrip has shell read printf's arguments as spelled by shellQuote, and

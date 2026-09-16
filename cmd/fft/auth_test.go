@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -361,6 +362,24 @@ var _ = Describe("fft auth status", func() {
 		Entry("as JSON", "-o", "json"),
 		Entry("as YAML", "-o", "yaml"),
 	)
+
+	It("keeps a project name edited into the config file by hand from steering the terminal", func() {
+		const name = "evil\x1b]52;c;cGF5bG9hZA==\a\u202e\nforged"
+		cfg := config.New()
+		cfg.ActiveProject = name
+		cfg.Upsert(config.Project{Name: name, BaseURL: "https://acme.api.fulfillmenttools.com", Email: "bot@example.com"})
+		Expect(c.deps.Config.Save(cfg)).To(Succeed())
+
+		Expect(c.run("auth", "status")).To(Equal(exitcode.OK), c.errOut())
+
+		lines := strings.Split(strings.TrimRight(c.out(), "\n"), "\n")
+		Expect(lines).To(HaveLen(2), "a newline in the name forged a row")
+		Expect(lines[1]).To(HavePrefix("evil]52;c;cGF5bG9hZA== forged"))
+		Expect(c.out()).NotTo(ContainSubstring("\x1b"))
+		Expect(c.out()).NotTo(ContainSubstring("\u202e"))
+
+		Expect(statusDoc()).To(HaveKeyWithValue("project", name), "JSON carries the name as it is")
+	})
 
 	When("no project is configured", func() {
 		It("exits 3", func() {

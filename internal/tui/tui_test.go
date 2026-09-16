@@ -95,6 +95,46 @@ var _ = Describe("the UI", func() {
 		})
 	})
 
+	Describe("a project name edited into the config file by hand", func() {
+		const evil = "evil\x1b]52;c;cGF5bG9hZA==\a\u202e"
+
+		BeforeEach(func() {
+			h.loaded(`[{"name":"evil\u001b]52;c;cGF5bG9hZA==\u0007\u202e","active":true,"readOnly":true}]`,
+				`{"project":"evil\u001b]52;c;cGF5bG9hZA==\u0007\u202e","store":"keyring","signIn":"password",`+
+					`"token":"\u001b[2Jvalid"}`)
+		})
+
+		expectHarmless := func() {
+			GinkgoHelper()
+			content := h.m.View().Content
+			Expect(content).NotTo(ContainSubstring("\x1b]"))
+			Expect(content).NotTo(ContainSubstring("\x1b[2J"))
+			Expect(content).NotTo(ContainSubstring("\a"))
+			Expect(content).NotTo(ContainSubstring("\u202e"))
+		}
+
+		It("does not steer the terminal from the list or the status bar", func() {
+			Expect(h.view()).To(ContainSubstring("evil]52;c;cGF5bG9hZA=="))
+			expectHarmless()
+		})
+
+		It("does not steer it from a dialog", func() {
+			h.press("r")
+			Expect(h.view()).To(ContainSubstring("Allow writes to evil]52;c;cGF5bG9hZA== again?"))
+			expectHarmless()
+		})
+
+		It("does not steer it from a notice or a failure", func() {
+			h.press("enter")
+			Expect(h.view()).To(ContainSubstring("Switching to evil]52"))
+			expectHarmless()
+
+			h.finish(failed(exitcode.Config, ""), "project", "use", evil)
+			Expect(h.view()).To(ContainSubstring("switching to evil]52;c;cGF5bG9hZA== failed"))
+			expectHarmless()
+		})
+	})
+
 	Describe("switching screens", func() {
 		It("goes to a screen by its number, and says what is still to come", func() {
 			h.press("2")

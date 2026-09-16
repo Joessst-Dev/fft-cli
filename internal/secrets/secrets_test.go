@@ -45,6 +45,7 @@ var _ = Describe("ValidateProjectName", func() {
 		Entry("simple", "staging"),
 		Entry("with a dash and dot", "acme-prod.eu"),
 		Entry("with underscores", "acme_prod_1"),
+		Entry("in another script", "склад-берлин"),
 	)
 
 	DescribeTable("rejects a name that would break the storage key",
@@ -57,6 +58,10 @@ var _ = Describe("ValidateProjectName", func() {
 		Entry("blank", "   "),
 		Entry("with a control character", "acme\x00prod"),
 		Entry("with a newline", "acme\nprod"),
+		Entry("with a delete", "acme\x7fprod"),
+		Entry("with a C1 control, which some terminals read as an escape", "acme\u009bprod"),
+		Entry("with a right-to-left override", "acme\u202eprod"),
+		Entry("with a bidi isolate", "acme\u2067prod"),
 	)
 })
 

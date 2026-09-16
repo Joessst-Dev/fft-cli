@@ -8,6 +8,7 @@ import (
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
 
+	"github.com/Joessst-Dev/fft-cli/internal/output"
 	"github.com/Joessst-Dev/fft-cli/internal/secrets"
 )
 
@@ -368,7 +369,7 @@ func (f *addForm) view(width int) string {
 		lines = append(lines, st.dim.Render("Adding the project and checking its credentials…"))
 	}
 	for _, p := range f.problems {
-		lines = append(lines, st.errorText.Render("• "+p))
+		lines = append(lines, st.errorText.Render("• "+output.SanitizeCell(p)))
 	}
 	if f.failure != nil {
 		lines = append(lines, f.failure.view(st, width))

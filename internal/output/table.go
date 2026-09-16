@@ -54,11 +54,17 @@ func (p *Printer) table(t Rows) error {
 	if len(t.Headers) > 0 {
 		header := make([]string, len(t.Headers))
 		for i, h := range t.Headers {
-			header[i] = style.Bold(h)
+			header[i] = style.Bold(p.safeCell(h))
 		}
 		lines = append(lines, header)
 	}
-	lines = append(lines, t.Rows...)
+	for _, row := range t.Rows {
+		safe := make([]string, len(row))
+		for i, cell := range row {
+			safe[i] = p.safeCell(cell)
+		}
+		lines = append(lines, safe)
+	}
 
 	widths := columnWidths(lines)
 
@@ -79,6 +85,30 @@ func (p *Printer) table(t Rows) error {
 		return fmt.Errorf("render the table: %w", err)
 	}
 	return nil
+}
+
+// safeCell keeps a cell on its own row and away from the terminal's controls,
+// whatever the value it came from — most cells are the API's data, and a
+// newline in one forges a row on a stdout that is supposed to be only data.
+//
+// With colour on, the SGR sequences a row builder painted with [Style] must
+// survive, so those are kept and everything between them is sanitized. A value
+// that carries an SGR sequence of its own keeps it too: it can change a colour,
+// but not move the cursor, write the clipboard or add a row. With colour off no
+// cell has a reason to hold one, and none survives.
+func (p *Printer) safeCell(cell string) string {
+	if !p.color {
+		return SanitizeCell(cell)
+	}
+	var b strings.Builder
+	last := 0
+	for _, loc := range sgr.FindAllStringIndex(cell, -1) {
+		b.WriteString(SanitizeCell(cell[last:loc[0]]))
+		b.WriteString(cell[loc[0]:loc[1]])
+		last = loc[1]
+	}
+	b.WriteString(SanitizeCell(cell[last:]))
+	return b.String()
 }
 
 // columnWidths measures each column across every line. A ragged row — one with

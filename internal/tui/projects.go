@@ -514,7 +514,7 @@ func (p *projectsScreen) view(width, _ int) string {
 
 	lines = append(lines, "")
 	if p.notice != "" {
-		lines = append(lines, st.okText.Render(p.notice))
+		lines = append(lines, wrap(st.okText.Render(output.SanitizeCell(p.notice)), width))
 	}
 	if p.refused {
 		lines = append(lines, wrap(st.warnText.Render("Nothing was sent: "+headlessExplanation), width))
