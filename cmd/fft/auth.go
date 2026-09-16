@@ -39,6 +39,7 @@ func newAuthCmd(deps *Deps) *cobra.Command {
 
 	cmd.AddCommand(
 		newAuthWhoamiCmd(deps),
+		newAuthStatusCmd(deps),
 		newAuthTokenCmd(deps),
 		newAuthRefreshCmd(deps),
 	)

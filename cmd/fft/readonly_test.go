@@ -53,6 +53,9 @@ var commandsWithoutOperation = map[string]string{
 
 	"fft auth token":   "mints a token at Google, never at the tenant",
 	"fft auth refresh": "mints a token at Google, never at the tenant",
+	// The one auth command that makes no request at all: the TUI asks it for the
+	// token's state on every project switch, which must not cost a sign-in.
+	"fft auth status": "reads the credential store; no network",
 
 	"fft api list":     "reads the embedded spec table; no network",
 	"fft api describe": "reads the embedded spec table; no network",

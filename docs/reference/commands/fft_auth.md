@@ -28,6 +28,7 @@ fft auth
 ## Subcommands
 
 - [fft auth refresh](./fft_auth_refresh.md) — Mint a new id token now
+- [fft auth status](./fft_auth_status.md) — Show the stored credentials' state, offline
 - [fft auth token](./fft_auth_token.md) — Print the current id token
 - [fft auth whoami](./fft_auth_whoami.md) — Show the authenticated user and their permissions
 

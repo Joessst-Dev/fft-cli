@@ -244,6 +244,7 @@ fft project current
 fft project use staging
 fft project read-only prod
 fft auth whoami
+fft auth status -o json
 fft ping
 fft version
 fft component list
@@ -253,6 +254,12 @@ fft history list --limit 10 -o json
 
 - `fft auth whoami` prints the permissions the current credentials actually have. When
   something exits 5, this is the command that explains why.
+- `fft auth status -o json` says what is stored to sign in with — `store`, `signIn`
+  (`password`, `idToken` or `none`), `hasPassword`, `hasRefreshToken`, `hasIdToken` — and the
+  cached token's `token` state (`valid`, `expiring`, `expired`, `unknown`, `none`) with its
+  `expiresAt`. It sends nothing and mints nothing, so it is the cheap check before a long
+  run; `expired: true` is not an error, the next command renews the token. It never prints a
+  credential.
 - `fft ping` needs no credentials at all. It is the way to tell "the tenant is down" apart
   from "my token is wrong".
 - `fft project read-only prod` marks a project read-only for good, in the config file. It is
