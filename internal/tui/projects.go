@@ -330,40 +330,59 @@ func (p *projectsScreen) use(name string) tea.Cmd {
 }
 
 func (p *projectsScreen) readOnlyDialog(row projectRow) dialog {
+	if row.ReadOnly {
+		return p.allowWritesDialog(row)
+	}
 	args := []string{"project", "read-only", row.Name}
-	d := &confirmDialog{
+	a := action{inv: Invocation{Args: args, Exclusive: true}, display: commandLine(args)}
+	return &confirmDialog{
 		question: fmt.Sprintf("Make %s read-only?", row.Name),
 		detail:   "fft will refuse every request that would change it.",
+		command:  a.display,
+		onYes: func() tea.Cmd {
+			return p.startReadOnly(a, row.Name, row.Name+" is read-only.")
+		},
 	}
-	done := row.Name + " is read-only."
-	if row.ReadOnly {
-		// The command asks before re-arming writes, and a run has no terminal to ask
-		// on. This dialog is that question, so its yes is the --yes.
-		args = append(args, "--off", "--yes")
-		d.question = fmt.Sprintf("Allow writes to %s again?", row.Name)
-		d.detail = "fft will send creates, updates and deletes to it again."
-		done = row.Name + " accepts writes again."
-	}
+}
+
+// allowWritesDialog asks before a project's writes are armed again. That takes a
+// protection away, so it is confirmed the way a removal is: by typing the name.
+func (p *projectsScreen) allowWritesDialog(row projectRow) dialog {
+	// The command asks before re-arming writes, and a run has no terminal to ask
+	// on. This dialog is that question, so its answer is the --yes.
+	args := []string{"project", "read-only", row.Name, "--off", "--yes"}
 	a := action{inv: Invocation{Args: args, Exclusive: true}, display: commandLine(args)}
-	d.command = a.display
-	d.onYes = func() tea.Cmd {
-		return p.s.start(a, func(r Result) tea.Cmd {
-			if r.ExitCode != exitcode.OK {
-				p.fail("changing "+row.Name, r)
-			} else {
-				p.succeed(done)
-			}
-			return p.reload()
-		})
-	}
-	return d
+	question := fmt.Sprintf("Allow writes to %s again?", row.Name)
+	detail := "fft will send creates, updates and deletes to it again."
+	return newTypeNameDialog(p.st, question, detail, row.Name, a.display, func() tea.Cmd {
+		done := row.Name + " accepts writes again."
+		if p.s.readOnlyFloor {
+			// The project's own setting is off, but the session's floor is not, and a
+			// notice that said only the first would promise writes that are refused.
+			done = row.Name + " accepts writes again, but this session still refuses every write " +
+				"(fft tui --read-only or FFT_READ_ONLY)."
+		}
+		return p.startReadOnly(a, row.Name, done)
+	})
+}
+
+// startReadOnly runs a read-only change, and reloads the list either way.
+func (p *projectsScreen) startReadOnly(a action, name, done string) tea.Cmd {
+	return p.s.start(a, func(r Result) tea.Cmd {
+		if r.ExitCode != exitcode.OK {
+			p.fail("changing "+name, r)
+		} else {
+			p.succeed(done)
+		}
+		return p.reload()
+	})
 }
 
 func (p *projectsScreen) removeDialog(row projectRow) dialog {
 	args := []string{"project", "remove", row.Name, "--yes"}
 	a := action{inv: Invocation{Args: args, Exclusive: true}, display: commandLine(args)}
 	question := fmt.Sprintf("Remove %s and its stored credentials?", row.Name)
-	return newTypeNameDialog(p.st, question, row.Name, a.display, func() tea.Cmd {
+	return newTypeNameDialog(p.st, question, "", row.Name, a.display, func() tea.Cmd {
 		return p.s.start(a, func(r Result) tea.Cmd {
 			if r.ExitCode != exitcode.OK {
 				p.fail("removing "+row.Name, r)

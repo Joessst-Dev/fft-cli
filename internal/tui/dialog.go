@@ -66,9 +66,11 @@ func (d *confirmDialog) bindings() []key.Binding { return []key.Binding{yesKey, 
 func (d *confirmDialog) equivalent() string { return d.command }
 
 // typeNameDialog asks for a name to be typed back before something that cannot be
-// undone. A y is too easy to give by accident; the name of the thing is not.
+// undone, or that takes a protection away. A y is too easy to give by accident —
+// it is also the key that copies a command — and the name of the thing is not.
 type typeNameDialog struct {
 	question string
+	detail   string
 	name     string
 	command  string
 	input    textinput.Model
@@ -76,12 +78,19 @@ type typeNameDialog struct {
 	onMatch  func() tea.Cmd
 }
 
-func newTypeNameDialog(st styles, question, name, command string, onMatch func() tea.Cmd) *typeNameDialog {
+func newTypeNameDialog(st styles, question, detail, name, command string, onMatch func() tea.Cmd) *typeNameDialog {
 	in := textinput.New()
 	in.Prompt = "> "
 	in.SetStyles(st.input)
 	in.Focus()
-	return &typeNameDialog{question: question, name: name, command: command, input: in, onMatch: onMatch}
+	return &typeNameDialog{
+		question: question,
+		detail:   detail,
+		name:     name,
+		command:  command,
+		input:    in,
+		onMatch:  onMatch,
+	}
 }
 
 func (d *typeNameDialog) update(msg tea.Msg) (bool, tea.Cmd) {
@@ -105,13 +114,13 @@ func (d *typeNameDialog) update(msg tea.Msg) (bool, tea.Cmd) {
 }
 
 func (d *typeNameDialog) view(st styles, width int) string {
-	lines := []string{
-		st.title.Render(d.question),
-		"Type " + d.name + " to confirm.",
-		d.input.View(),
+	lines := []string{st.title.Render(d.question)}
+	if d.detail != "" {
+		lines = append(lines, d.detail)
 	}
+	lines = append(lines, "Type "+d.name+" to confirm.", d.input.View())
 	if d.mismatch {
-		lines = append(lines, st.errorText.Render("That is not the name; nothing was removed."))
+		lines = append(lines, st.errorText.Render("That is not the name; nothing was sent."))
 	}
 	lines = append(lines, "", st.dim.Render("runs: "+d.command), "", "enter confirm · esc cancel")
 	return st.dialog.Width(dialogWidth(width)).Render(strings.Join(lines, "\n"))

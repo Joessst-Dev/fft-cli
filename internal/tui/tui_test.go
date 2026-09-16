@@ -270,16 +270,50 @@ var _ = Describe("the UI", func() {
 			h.lookup("project", "list")
 		})
 
-		It("allows writes again only after a yes, which becomes the command's --yes", func() {
-			h.press("down", "r")
-			Expect(h.view()).To(ContainSubstring("Allow writes to prod again?"))
-			Expect(h.view()).To(ContainSubstring("runs: fft project read-only prod --off --yes"))
-			Expect(h.r.commandLines()).To(HaveLen(2))
+		When("the project is read-only", func() {
+			BeforeEach(func() {
+				h.press("down", "r")
+			})
 
-			h.press("y")
-			id := h.lookup("project", "read-only", "prod", "--off", "--yes")
-			h.finishID(id, ok(""))
-			Expect(h.view()).To(ContainSubstring("prod accepts writes again."))
+			It("asks for the name to be typed, and takes no y for an answer", func() {
+				Expect(h.view()).To(ContainSubstring("Allow writes to prod again?"))
+				Expect(h.view()).To(ContainSubstring("Type prod to confirm."))
+				Expect(h.view()).To(ContainSubstring("runs: fft project read-only prod --off --yes"))
+
+				h.press("y", "enter")
+				Expect(h.view()).To(ContainSubstring("That is not the name; nothing was sent."))
+				Expect(h.r.commandLines()).To(HaveLen(2))
+			})
+
+			It("sends nothing when cancelled", func() {
+				h.typeText("prod")
+				h.press("esc")
+
+				Expect(h.view()).NotTo(ContainSubstring("Allow writes"))
+				Expect(h.r.commandLines()).To(HaveLen(2))
+			})
+
+			It("allows writes again once the name matches, with the typed name as the command's --yes", func() {
+				h.typeText("prod")
+				h.press("enter")
+
+				id := h.lookup("project", "read-only", "prod", "--off", "--yes")
+				Expect(h.r.exclusive(id)).To(BeTrue())
+				h.finishID(id, ok(""))
+				Expect(h.view()).To(ContainSubstring("prod accepts writes again."))
+				Expect(h.view()).NotTo(ContainSubstring("still refuses"))
+			})
+		})
+
+		It("says the session still refuses writes when it was started read-only", func() {
+			h = newHarness(Options{ReadOnly: true})
+			h.loaded(twoProjects, validToken)
+			h.press("down", "r")
+			h.typeText("prod")
+			h.press("enter")
+			h.finish(ok(""), "project", "read-only", "prod", "--off", "--yes")
+
+			Expect(h.view()).To(ContainSubstring("prod accepts writes again, but this session still refuses every write"))
 		})
 	})
 
@@ -295,7 +329,7 @@ var _ = Describe("the UI", func() {
 
 			h.typeText("staging")
 			h.press("enter")
-			Expect(h.view()).To(ContainSubstring("That is not the name; nothing was removed."))
+			Expect(h.view()).To(ContainSubstring("That is not the name; nothing was sent."))
 			Expect(h.r.commandLines()).To(HaveLen(2))
 		})
 
