@@ -276,13 +276,26 @@ var _ = Describe("fft project add", func() {
 				"--api-key-stdin", "--password-stdin"),
 			Entry("an empty key line", "\ns3cret", "held no API key",
 				"--api-key-stdin", "--password-stdin"),
-			Entry("a key and an empty password line", "AIzaSyPiped\n\n", "stdin was empty",
+			Entry("a key and an empty password line", "AIzaSyPiped\n\n", "stdin held the API key but no password after it",
 				"--api-key-stdin", "--password-stdin"),
-			Entry("the key alone, with nothing left to read a password from", "AIzaSyPiped",
-				"--password-stdin", "--api-key-stdin"),
 			Entry("the key both piped and given", "AIzaSyPiped\ns3cret", "api-key",
 				"--api-key", "AIzaSyFlag", "--api-key-stdin", "--password-stdin"),
 		)
+
+		It("exits 2 without reading stdin when the password is not piped in with the key", func() {
+			c.stdin.WriteString("AIzaSyPiped\ns3cret")
+
+			Expect(add("--api-key-stdin")).To(Equal(exitcode.Usage))
+			Expect(c.errOut()).To(ContainSubstring("--api-key-stdin requires --password-stdin"))
+			Expect(c.stdin.String()).To(Equal("AIzaSyPiped\ns3cret"), "stdin was read")
+			Expect(c.secrets.Snapshot()).To(BeEmpty())
+			Expect(c.configPath).NotTo(BeAnExistingFile())
+		})
+
+		It("says so in its help", func() {
+			Expect(c.run("project", "add", "--help")).To(Equal(exitcode.OK))
+			Expect(c.out()).To(MatchRegexp(`--api-key-stdin\s+Read the API key from the first line of stdin.*requires --password-stdin`))
+		})
 	})
 
 	When("the base URL is plain http to a real host", func() {

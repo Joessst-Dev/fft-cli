@@ -54,7 +54,7 @@ fft project add [name] [flags]
 
 ```
       --api-key string      fulfillmenttools API key
-      --api-key-stdin       Read the API key from stdin (its first line, when --password-stdin is given too)
+      --api-key-stdin       Read the API key from the first line of stdin, and the password from the rest; requires --password-stdin
       --base-url string     API root, e.g. https://acme.api.fulfillmenttools.com
       --email string        Email address to sign in with (use instead of --username)
       --env string          Environment, e.g. pre or prd
