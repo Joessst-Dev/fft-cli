@@ -36,6 +36,14 @@ import (
 // rather than an annotation; it gates itself with [Deps.guardOperation].
 func (d *Deps) guard(cmd *cobra.Command, args []string) error {
 	if name, ok := cmd.Annotations[annotationComponent]; ok {
+		if d.ui != nil {
+			// A component is another process, and it would inherit the terminal the UI
+			// is drawing on. Refused here, inside the run, so that nothing the runner
+			// concluded about the command line beforehand can be what lets it through.
+			return exitcode.UsageError{Err: fmt.Errorf(
+				"%q runs the %s component, which needs a terminal of its own; run it from a shell",
+				cmd.CommandPath(), name)}
+		}
 		return d.guardComponent(cmd, name, args)
 	}
 

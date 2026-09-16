@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"slices"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -176,26 +174,21 @@ func (r *cliRunner) run(ctx context.Context, id tui.RunID, inv tui.Invocation) {
 
 func (r *cliRunner) execute(ctx context.Context, inv tui.Invocation) tui.Result {
 	in := bytes.NewReader(inv.Stdin)
-	deps := r.deps.forRun(in, r.session)
+
+	ui := r.session
+	if p := r.project.Load(); p != nil {
+		ui.project = *p
+	}
+	deps := r.deps.forRun(in, ui)
 
 	var status atomic.Int64
 	deps.observeStatus = func(code int) { status.Store(int64(code)) }
 
-	var stdout, stderr bytes.Buffer
 	root := newRootCmd(deps)
 
+	// The command line is run exactly as given — the run's Deps carries what the UI
+	// decides — so what Find resolves here is what executes below.
 	target, _, findErr := root.Find(inv.Args)
-	if findErr == nil {
-		// A component is another process, and it would inherit the real terminal —
-		// the one the UI is drawing on.
-		if name, ok := target.Annotations[annotationComponent]; ok {
-			err := exitcode.UsageError{Err: fmt.Errorf(
-				"%q runs the %s component, which needs a terminal of its own; run it from a shell",
-				target.CommandPath(), name)}
-			return tui.Result{ExitCode: report(&stderr, err), Stderr: stderr.Bytes()}
-		}
-	}
-
 	if inv.Exclusive || (findErr == nil && target.Annotations[annotationExclusive] != "") {
 		r.config.Lock()
 		defer r.config.Unlock()
@@ -211,8 +204,9 @@ func (r *cliRunner) execute(ctx context.Context, inv tui.Invocation) tui.Result 
 		return tui.Result{ExitCode: exitcode.Interrupted}
 	}
 
+	var stdout, stderr bytes.Buffer
 	started := time.Now()
-	code := executeRoot(ctx, root, r.argv(inv.Args), in, &stdout, &stderr)
+	code := executeRoot(ctx, root, inv.Args, in, &stdout, &stderr)
 
 	return tui.Result{
 		ExitCode: code,
@@ -221,31 +215,6 @@ func (r *cliRunner) execute(ctx context.Context, inv tui.Invocation) tui.Result 
 		Stderr:   stderr.Bytes(),
 		Duration: time.Since(started),
 	}
-}
-
-// argv is args with the flags every run inside the UI needs: the API's own JSON,
-// which the UI parses, and the project the user selected unless args names one.
-//
-// They go before a "--", after which cobra would take them for positional
-// arguments.
-func (r *cliRunner) argv(args []string) []string {
-	head, tail := args, []string(nil)
-	if i := slices.Index(args, "--"); i >= 0 {
-		head, tail = args[:i], args[i:]
-	}
-
-	out := slices.Concat(head, []string{"-o", "json", "--no-color"})
-	if p := r.project.Load(); p != nil && *p != "" && !namesFlag(head, "project") {
-		out = append(out, "--project", *p)
-	}
-	return append(out, tail...)
-}
-
-// namesFlag reports whether args sets the long flag name, in either spelling.
-func namesFlag(args []string, name string) bool {
-	return slices.ContainsFunc(args, func(arg string) bool {
-		return arg == "--"+name || strings.HasPrefix(arg, "--"+name+"=")
-	})
 }
 
 func (r *cliRunner) finish(id tui.RunID, inv tui.Invocation, res tui.Result) {

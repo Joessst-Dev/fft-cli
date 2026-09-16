@@ -223,11 +223,22 @@ type Deps struct {
 }
 
 // uiRun is what makes a run inside `fft tui` differ from the same command line in
-// a shell: the flags the session was started with.
+// a shell: the project the UI selected, and the flags the session was started with.
 //
 // They cannot simply be copied onto the run's Deps, because [Deps.complete]
 // rewrites those fields from the run's own command line — which never saw them.
+// Nor can they be appended to that command line: a value-taking flag left
+// dangling at its end would swallow the first of them, and the rest would be
+// parsed as something else entirely.
+//
+// A run inside the UI also always answers in JSON, which the UI parses, and never
+// starts a component, which would inherit the terminal the UI is drawing on.
 type uiRun struct {
+	// project is the project the UI selected, "" to leave the choice to fft's own
+	// resolution. It decides; a run's own --project is refused rather than weighed
+	// against it.
+	project string
+
 	// readOnly is `fft tui --read-only`: a floor under every run in the session,
 	// which a run's own --read-only=false may not lower, exactly like FFT_READ_ONLY.
 	readOnly bool
@@ -569,7 +580,14 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 		return err
 	}
 
+	if err := d.refuseUIOwnedFlags(cmd); err != nil {
+		return err
+	}
+
 	d.Project = v.GetString("project")
+	if d.ui != nil && d.ui.project != "" {
+		d.Project = d.ui.project
+	}
 	d.Timeout = v.GetDuration("timeout")
 	if d.ui != nil && d.ui.timeout != nil && !rootFlagChanged(cmd, "timeout") {
 		d.Timeout = *d.ui.timeout
@@ -597,14 +615,18 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 		d.Debug = cmd.ErrOrStderr()
 	}
 
-	format, err := output.ParseFormat(v.GetString("output"))
+	formatName := v.GetString("output")
+	if d.ui != nil {
+		formatName = string(output.JSON)
+	}
+	format, err := output.ParseFormat(formatName)
 	if err != nil {
 		return exitcode.UsageError{Err: err}
 	}
 	// The printer is rebuilt from the command's streams on every run, so a spec
 	// that calls cmd.SetOut captures the output without constructing one.
 	out := cmd.OutOrStdout()
-	d.Printer = output.New(out, cmd.ErrOrStderr(), format, useColor(v, out))
+	d.Printer = output.New(out, cmd.ErrOrStderr(), format, d.ui == nil && useColor(v, out))
 
 	if d.Secrets == nil {
 		if d.Secrets, err = d.openSecrets(v.GetBool("no-keyring")); err != nil {
@@ -621,6 +643,29 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 	if d.Ephemeral == nil {
 		if err := d.migrateAPIKeys(); err != nil {
 			return err
+		}
+	}
+	return nil
+}
+
+// uiOwnedFlags are the global flags a run inside `fft tui` may not give, because
+// the session decides them: the project is the one selected in the UI, the output
+// is the JSON the UI parses, and the credential store is the one the session
+// opened. Refused rather than ignored — a flag that silently does nothing is a
+// command line that says one thing and does another.
+var uiOwnedFlags = []string{"project", "output", "no-keyring"}
+
+// refuseUIOwnedFlags rejects a run inside the UI that gives one of [uiOwnedFlags].
+// It asks the parsed flag set, never the raw arguments: "--project" can just as
+// well be the value of the flag before it.
+func (d *Deps) refuseUIOwnedFlags(cmd *cobra.Command) error {
+	if d.ui == nil {
+		return nil
+	}
+	for _, name := range uiOwnedFlags {
+		if rootFlagChanged(cmd, name) {
+			return exitcode.UsageError{Err: fmt.Errorf(
+				"--%s cannot be given to a command run from fft tui, which decides it for every run", name)}
 		}
 	}
 	return nil

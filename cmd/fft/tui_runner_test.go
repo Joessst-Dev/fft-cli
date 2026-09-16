@@ -201,6 +201,18 @@ var _ = Describe("the TUI's command runner", func() {
 		Expect(c.activeProject()).To(Equal("prod"), "a cancelled switch went ahead")
 	})
 
+	It("refuses a component's command inside the run itself, whatever resolved it beforehand", func() {
+		c.installFake(fakeManifest("hello"))
+		var stdout, stderr bytes.Buffer
+
+		code := execute(context.Background(), c.deps.forRun(bytes.NewReader(nil), uiRun{}),
+			[]string{"hello"}, nil, &stdout, &stderr)
+
+		Expect(code).To(Equal(exitcode.Usage))
+		Expect(stderr.String()).To(ContainSubstring("hello component"))
+		Expect(stdout.String()).To(BeEmpty(), "the component ran anyway")
+	})
+
 	It("refuses a component's command, which would take over the terminal", func() {
 		c.installFake(fakeManifest("hello"))
 		r := c.newRunner()
@@ -276,27 +288,87 @@ var _ = Describe("the TUI's command runner", func() {
 			r = c.newRunner()
 		})
 
-		DescribeTable("adds the flags the UI depends on",
-			func(project string, args, want []string) {
-				r.SetProject(project)
-				Expect(r.argv(args)).To(Equal(want))
+		It("answers in the API's JSON, whatever the config file prefers", func() {
+			t := c.configuredTenant(func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"facilities":[{"id":"f-1","name":"Berlin"}],"total":1}`))
+			})
+			cfg, err := c.deps.Config.Load()
+			Expect(err).NotTo(HaveOccurred())
+			cfg.Settings.Output = "table"
+			Expect(c.deps.Config.Save(cfg)).To(Succeed())
+
+			id := start(r, tui.Invocation{Args: []string{"facility", "list"}})
+			res := awaitDone(r, id)[id]
+
+			Expect(res.ExitCode).To(Equal(exitcode.OK), "stderr: %s", res.Stderr)
+			Expect(t.recorded()).To(HaveLen(1))
+			Expect(json.Valid(res.Stdout)).To(BeTrue(), "stdout was not JSON: %s", res.Stdout)
+		})
+
+		It("acts on the project the UI selected", func() {
+			t := c.configuredTenant(func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"facilities":[],"total":0}`))
+			})
+			r.SetProject("other")
+
+			id := start(r, tui.Invocation{Args: []string{"facility", "list"}})
+			res := awaitDone(r, id)[id]
+
+			Expect(res.ExitCode).To(Equal(exitcode.OK), "stderr: %s", res.Stderr)
+			Expect(t.recorded()).To(ConsistOf(HaveField("Path", HavePrefix("/other/"))))
+		})
+
+		// A --project that is really the value of the flag before it used to hide the
+		// selection from a runner that looked for the flag by name, and the run then
+		// went to the active project instead of the selected one.
+		It("acts on the selected project when --project is only another flag's value", func() {
+			t := c.configuredTenant(func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"facilities":[],"total":0}`))
+			})
+			r.SetProject("other")
+
+			id := start(r, tui.Invocation{Args: []string{"facility", "list", "--tenant-facility-id", "--project"}})
+			res := awaitDone(r, id)[id]
+
+			Expect(res.ExitCode).To(Equal(exitcode.OK), "stderr: %s", res.Stderr)
+			Expect(t.recorded()).To(ConsistOf(HaveField("Path", HavePrefix("/other/"))))
+		})
+
+		DescribeTable("refuses a global flag the UI decides, sending nothing",
+			func(flag ...string) {
+				t := c.configuredTenant(func(w http.ResponseWriter, _ *http.Request) {
+					w.WriteHeader(http.StatusInternalServerError)
+				})
+				r.SetProject("other")
+
+				id := start(r, tui.Invocation{Args: append([]string{"facility", "list"}, flag...)})
+				res := awaitDone(r, id)[id]
+
+				Expect(res.ExitCode).To(Equal(exitcode.Usage), "stderr: %s", res.Stderr)
+				Expect(string(res.Stderr)).To(ContainSubstring("fft tui"))
+				Expect(t.recorded()).To(BeEmpty())
 			},
-			Entry("with no project selected",
-				"", []string{"facility", "list"},
-				[]string{"facility", "list", "-o", "json", "--no-color"}),
-			Entry("with a project selected",
-				"prod", []string{"facility", "list"},
-				[]string{"facility", "list", "-o", "json", "--no-color", "--project", "prod"}),
-			Entry("unless the command names its own project",
-				"prod", []string{"facility", "list", "--project", "staging"},
-				[]string{"facility", "list", "--project", "staging", "-o", "json", "--no-color"}),
-			Entry("unless it names it with an equals sign",
-				"prod", []string{"facility", "list", "--project=staging"},
-				[]string{"facility", "list", "--project=staging", "-o", "json", "--no-color"}),
-			Entry("before a --, after which they would be arguments",
-				"prod", []string{"api", "getFacility", "--", "--project"},
-				[]string{"api", "getFacility", "-o", "json", "--no-color", "--project", "prod", "--", "--project"}),
+			Entry("--project", "--project", "prod"),
+			Entry("--project=", "--project=prod"),
+			Entry("-o", "-o", "table"),
+			Entry("--no-keyring", "--no-keyring"),
 		)
+
+		// A value-taking flag at the end of a command line used to swallow the first
+		// flag the runner appended, and the one after that became the command: with a
+		// component named after an output format, `--timeout` ran it.
+		It("does not run a component a dangling flag would have led to", func() {
+			c.installFake(fakeManifest("json"))
+
+			id := start(r, tui.Invocation{Args: []string{"--timeout"}})
+			res := awaitDone(r, id)[id]
+
+			Expect(res.ExitCode).To(Equal(exitcode.Usage), "stderr: %s", res.Stderr)
+			Expect(res.Stdout).To(BeEmpty(), "the component ran")
+		})
 
 		It("does not let the caller rewrite a queued command through its own slice", func() {
 			args := []string{"version"}
