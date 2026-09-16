@@ -11,6 +11,7 @@ import (
 
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/output"
+	"github.com/Joessst-Dev/fft-cli/internal/secrets"
 	"github.com/Joessst-Dev/fft-cli/internal/template"
 )
 
@@ -324,12 +325,6 @@ func unwrapShownTemplate(body entityDoc) (entityDoc, template.Template) {
 	return inner, envelope
 }
 
-// credentialFieldPatterns are key-name substrings, matched case-insensitively,
-// that a real fulfillmenttools credential-shaped field carries — a password on
-// user creation, a clientSecret or firebaseWebApiKey on SSO/OIDC config, a
-// bearer token, an Authorization header value.
-var credentialFieldPatterns = []string{"password", "secret", "apikey", "token", "authorization"}
-
 // credentialLikePaths lists the dotted paths in body whose key looks like it
 // might hold a credential, so save --local can ask before writing one into a
 // file whose whole purpose is `git add`.
@@ -349,12 +344,8 @@ func credentialLikePaths(body entityDoc) []string {
 				if path != "" {
 					sub = path + "." + key
 				}
-				lower := strings.ToLower(key)
-				for _, pattern := range credentialFieldPatterns {
-					if strings.Contains(lower, pattern) {
-						out = append(out, sub)
-						break
-					}
+				if secrets.LooksLikeCredential(key) {
+					out = append(out, sub)
 				}
 				walk(v, sub)
 			}

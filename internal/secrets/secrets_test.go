@@ -277,3 +277,19 @@ var _ = Describe("storing a project's secrets", func() {
 		})
 	})
 })
+
+var _ = Describe("LooksLikeCredential", func() {
+	DescribeTable("recognises a name that holds a credential, however it is spelled",
+		func(name string, want bool) {
+			Expect(secrets.LooksLikeCredential(name)).To(Equal(want))
+		},
+		Entry("a JSON key", "clientSecret", true),
+		Entry("a camel-cased key", "firebaseWebApiKey", true),
+		Entry("a flag", "firebase-api-key", true),
+		Entry("a snake-cased name", "ID_TOKEN", true),
+		Entry("a header", "Authorization", true),
+		Entry("a password field", "newPassword", true),
+		Entry("an ordinary field", "tenantFacilityId", false),
+		Entry("a key that is not an API key", "keyboard", false),
+	)
+})
