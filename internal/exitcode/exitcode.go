@@ -1,4 +1,8 @@
-// Package exitcode maps errors to the process exit codes documented in `fft help exit-codes`.
+// Package exitcode maps errors to fft's process exit codes.
+//
+// The codes are documented for scripts and agents in the skill's troubleshooting
+// reference (internal/skill/assets/references/troubleshooting.md), which the docs
+// site publishes as the Troubleshooting guide.
 package exitcode
 
 import (
@@ -58,8 +62,9 @@ func FromError(err error) int {
 	return General
 }
 
-// meanings are the short descriptions `fft help exit-codes` and the agent skill's
-// troubleshooting table give each code.
+// meanings are the short descriptions the troubleshooting reference's table gives
+// each code. Every constant above must have one; a spec reads the const block to
+// hold that.
 var meanings = map[int]string{
 	OK:          "success",
 	General:     "unclassified failure",
