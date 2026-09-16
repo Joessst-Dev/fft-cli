@@ -11065,6 +11065,59 @@ paths:
       x-badges:
         - color: orange
           label: BETA
+  /api/handovercontainers/{handoverContainerId}/identifierdocument:
+    get:
+      deprecated: false
+      description: >-
+        This part of the API is in Beta status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br />Get
+        the identifier document (PDF) of a given handover container, if
+        available
+      operationId: getIdentifierDocumentForHandoverContainer
+      parameters:
+        - description: id of the handover container
+          in: path
+          name: handoverContainerId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                format: binary
+                type: string
+          description: Identifier document (PDF) for the given handoverContainer.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The requested entity was not found
+      summary: Get handover container identifier document
+      x-fft-permissions:
+        - HANDOVER_CONTAINER_READ
+      tags:
+        - Handovers (Operations)
+      x-badges:
+        - color: orange
+          label: BETA
   /api/handovercontainers/{handoverContainerId}/stack:
     get:
       deprecated: false
@@ -29275,6 +29328,25 @@ components:
       title: AbortPickJob
       xml:
         name: AbortPickJob
+    AbsoluteSurchargeCostDetail:
+      allOf:
+        - $ref: '#/components/schemas/AbstractCostDetail'
+      description: A fixed surcharge, charged as the tenant configured it.
+      properties:
+        tenantSurchargeType:
+          description: The tenant surcharge id
+          example: island
+          type: string
+        type:
+          enum:
+            - ABSOLUTE_SURCHARGE
+          type: string
+      required:
+        - id
+        - type
+        - amount
+        - tenantSurchargeType
+      title: AbsoluteSurchargeCostDetail
     AbstractArticle:
       properties:
         titleLocalized:
@@ -29358,6 +29430,28 @@ components:
       title: AbstractCarrierCredentials
       type: object
       description: AbstractCarrierCredentials
+    AbstractCostDetail:
+      description: >-
+        One addend of a transport cost, so that a price can be reconciled
+        against the tariff it was resolved from.
+      discriminator:
+        propertyName: type
+      properties:
+        amount:
+          $ref: '#/components/schemas/Money'
+        id:
+          description: >-
+            Position of this detail within its own costDetails list, referenced
+            by appliedToCostDetailIds
+          example: '0'
+          type: string
+        type:
+          type: string
+      required:
+        - id
+        - type
+        - amount
+      title: AbstractCostDetail
     AbstractFacilityActionsParameter:
       discriminator:
         propertyName: name
@@ -31682,6 +31776,27 @@ components:
       type: object
       title: BaseOperationalContainer
       description: BaseOperationalContainer
+    BasePriceCostDetail:
+      allOf:
+        - $ref: '#/components/schemas/AbstractCostDetail'
+      description: >-
+        The price the tariff charges for the weight or volume tier the goods
+        fell into.
+      properties:
+        matchedThreshold:
+          description: The resolved weight or volume tier
+          example: 5000
+          format: int64
+          type: integer
+        type:
+          enum:
+            - BASE_PRICE
+          type: string
+      required:
+        - id
+        - type
+        - amount
+      title: BasePriceCostDetail
     BaseValidation:
       properties:
         validationType:
@@ -34985,12 +35100,48 @@ components:
         - lon
       type: object
       title: Coordinates
+    CostCoefficientCostDetail:
+      allOf:
+        - $ref: '#/components/schemas/AbstractCostDetail'
+      description: >-
+        The configured rate charged per measurement unit, applied to the
+        measured value.
+      properties:
+        coefficient:
+          description: The configured rate
+          example: 0.0001
+          type: number
+        measurementUnit:
+          $ref: '#/components/schemas/CostMeasurementUnit'
+        measurementValue:
+          description: The weight or volume the coefficient was multiplied by
+          example: 4000
+          type: number
+        type:
+          enum:
+            - COST_COEFFICIENT
+          type: string
+      required:
+        - id
+        - type
+        - amount
+        - coefficient
+        - measurementUnit
+        - measurementValue
+      title: CostCoefficientCostDetail
     CostCoefficientMeasurementUnit:
       description: The unit of measurement for the coefficient
       enum:
         - GRAM
       type: string
       title: CostCoefficientMeasurementUnit
+    CostMeasurementUnit:
+      enum:
+        - GRAM
+        - CUBIC_METER
+      type: string
+      title: CostMeasurementUnit
+      description: CostMeasurementUnit
     CountryCode:
       description: ISO 3166 ALPHA-2 of country
       example: DE
@@ -41295,6 +41446,7 @@ components:
         - PRESELECTED-FACILITY
         - SAMEDAY-POSSIBLE
         - AVOID-ZERO-STOCK
+        - PACKAGING-POSSIBLE
       type: string
       xml:
         name: FenceImplementation
@@ -41979,6 +42131,12 @@ components:
           type: string
         dimensions:
           $ref: '#/components/schemas/ContainerDimensions'
+        documentsRef:
+          description: >-
+            References to the documents that are related to this handover
+            container.
+          example: 01a05806-7346-73f8-89dd-67d52d2de7cb
+          type: string
         facilityRef:
           description: Linked Facility through reference
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
@@ -41994,6 +42152,11 @@ components:
         id:
           description: Unique identifier of the handover container
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        identifierCode:
+          description: >-
+            The identifier code generated for this container at creation time,
+            used to render its identifier document.
           type: string
         lastModified:
           description: >-
@@ -59565,6 +59728,22 @@ components:
       title: OutOfStockConfigPreorder2
       type: object
       description: OutOfStockConfigPreorder2
+    OverflowCostDetail:
+      allOf:
+        - $ref: '#/components/schemas/AbstractCostDetail'
+      description: >-
+        What the goods beyond the highest configured tier cost on top of the
+        base price.
+      properties:
+        type:
+          enum:
+            - OVERFLOW
+          type: string
+      required:
+        - id
+        - type
+        - amount
+      title: OverflowCostDetail
     PackageCost:
       additionalProperties: false
       properties:
@@ -60479,6 +60658,11 @@ components:
                 The id of this packing source container. It is generated during
                 creation automatically and suits as the primary identifier of
                 the described entity.
+              type: string
+            identifierCode:
+              description: >-
+                The identifier code generated for this container at creation
+                time, used to render its identifier document.
               type: string
             lineItems:
               items:
@@ -70882,6 +71066,40 @@ components:
       title: RelatedRefs
       type: object
       description: RelatedRefs
+    RelativeSurchargeCostDetail:
+      allOf:
+        - $ref: '#/components/schemas/AbstractCostDetail'
+      description: A surcharge of the configured percentage of calculationBaseAmount.
+      properties:
+        appliedToCostDetailIds:
+          description: >-
+            The same-level cost details that make up calculationBaseAmount.
+            Empty when the base is not itself a cost detail.
+          items:
+            type: string
+          type: array
+        calculationBaseAmount:
+          $ref: '#/components/schemas/Money'
+        percentage:
+          description: The configured percentage
+          example: 12.5
+          type: number
+        tenantSurchargeType:
+          description: The tenant surcharge id
+          example: diesel
+          type: string
+        type:
+          enum:
+            - RELATIVE_SURCHARGE
+          type: string
+      required:
+        - id
+        - type
+        - amount
+        - tenantSurchargeType
+        - percentage
+        - calculationBaseAmount
+      title: RelativeSurchargeCostDetail
     RemoteConfiguration:
       properties:
         created:
@@ -77404,6 +77622,7 @@ components:
         - HANDOVERJOB
         - PARCEL
         - PACKING_TARGET_CONTAINER
+        - HANDOVER_CONTAINER
       type: string
       title: Section
       description: Section
@@ -82256,6 +82475,24 @@ components:
       description: SourcingOptionsTransferDeliveryCost
     SourcingOptionsTransferPackagingInformation:
       properties:
+        costDetails:
+          description: The cost components that add up to totalCosts
+          items:
+            discriminator:
+              mapping:
+                ABSOLUTE_SURCHARGE: '#/components/schemas/AbsoluteSurchargeCostDetail'
+                BASE_PRICE: '#/components/schemas/BasePriceCostDetail'
+                COST_COEFFICIENT: '#/components/schemas/CostCoefficientCostDetail'
+                OVERFLOW: '#/components/schemas/OverflowCostDetail'
+                RELATIVE_SURCHARGE: '#/components/schemas/RelativeSurchargeCostDetail'
+              propertyName: type
+            oneOf:
+              - $ref: '#/components/schemas/BasePriceCostDetail'
+              - $ref: '#/components/schemas/OverflowCostDetail'
+              - $ref: '#/components/schemas/CostCoefficientCostDetail'
+              - $ref: '#/components/schemas/AbsoluteSurchargeCostDetail'
+              - $ref: '#/components/schemas/RelativeSurchargeCostDetail'
+          type: array
         packagingUnit:
           $ref: '#/components/schemas/SourcingOptionsTransferPackagingUnit'
         packedItems:
@@ -82361,6 +82598,26 @@ components:
             carrierName:
               type: string
           type: object
+        costDetails:
+          description: >-
+            The cost components of this transfer that are not part of a
+            packaging unit, such as transfer surcharges.
+          items:
+            discriminator:
+              mapping:
+                ABSOLUTE_SURCHARGE: '#/components/schemas/AbsoluteSurchargeCostDetail'
+                BASE_PRICE: '#/components/schemas/BasePriceCostDetail'
+                COST_COEFFICIENT: '#/components/schemas/CostCoefficientCostDetail'
+                OVERFLOW: '#/components/schemas/OverflowCostDetail'
+                RELATIVE_SURCHARGE: '#/components/schemas/RelativeSurchargeCostDetail'
+              propertyName: type
+            oneOf:
+              - $ref: '#/components/schemas/BasePriceCostDetail'
+              - $ref: '#/components/schemas/OverflowCostDetail'
+              - $ref: '#/components/schemas/CostCoefficientCostDetail'
+              - $ref: '#/components/schemas/AbsoluteSurchargeCostDetail'
+              - $ref: '#/components/schemas/RelativeSurchargeCostDetail'
+          type: array
         existenceReason:
           $ref: '#/components/schemas/SourcingOptionTransferExistenceReason'
         facilityConnectionRef:
@@ -82387,6 +82644,8 @@ components:
           type: string
         timeLine:
           $ref: '#/components/schemas/TransferTimeLine'
+        totalCosts:
+          $ref: '#/components/schemas/Money'
         transferGroup:
           description: >-
             The transferGroup identifying transfers that travel together in the

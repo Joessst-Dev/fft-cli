@@ -20,6 +20,21 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for AbsoluteSurchargeCostDetailType.
+const (
+	ABSOLUTESURCHARGE AbsoluteSurchargeCostDetailType = "ABSOLUTE_SURCHARGE"
+)
+
+// Valid indicates whether the value is a known member of the AbsoluteSurchargeCostDetailType enum.
+func (e AbsoluteSurchargeCostDetailType) Valid() bool {
+	switch e {
+	case ABSOLUTESURCHARGE:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for AbstractModificationActionAction.
 const (
 	AbstractModificationActionActionAddAllowedValueToTag             AbstractModificationActionAction = "AddAllowedValueToTag"
@@ -317,6 +332,21 @@ func (e AvailableUntilCalculationBase) Valid() bool {
 	case AvailableUntilCalculationBaseCREATION:
 		return true
 	case AvailableUntilCalculationBaseEXPIRY:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for BasePriceCostDetailType.
+const (
+	BASEPRICE BasePriceCostDetailType = "BASE_PRICE"
+)
+
+// Valid indicates whether the value is a known member of the BasePriceCostDetailType enum.
+func (e BasePriceCostDetailType) Valid() bool {
+	switch e {
+	case BASEPRICE:
 		return true
 	default:
 		return false
@@ -671,15 +701,48 @@ func (e ContextOperator) Valid() bool {
 	}
 }
 
+// Defines values for CostCoefficientCostDetailType.
+const (
+	COSTCOEFFICIENT CostCoefficientCostDetailType = "COST_COEFFICIENT"
+)
+
+// Valid indicates whether the value is a known member of the CostCoefficientCostDetailType enum.
+func (e CostCoefficientCostDetailType) Valid() bool {
+	switch e {
+	case COSTCOEFFICIENT:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for CostCoefficientMeasurementUnit.
 const (
-	GRAM CostCoefficientMeasurementUnit = "GRAM"
+	CostCoefficientMeasurementUnitGRAM CostCoefficientMeasurementUnit = "GRAM"
 )
 
 // Valid indicates whether the value is a known member of the CostCoefficientMeasurementUnit enum.
 func (e CostCoefficientMeasurementUnit) Valid() bool {
 	switch e {
-	case GRAM:
+	case CostCoefficientMeasurementUnitGRAM:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CostMeasurementUnit.
+const (
+	CostMeasurementUnitCUBICMETER CostMeasurementUnit = "CUBIC_METER"
+	CostMeasurementUnitGRAM       CostMeasurementUnit = "GRAM"
+)
+
+// Valid indicates whether the value is a known member of the CostMeasurementUnit enum.
+func (e CostMeasurementUnit) Valid() bool {
+	switch e {
+	case CostMeasurementUnitCUBICMETER:
+		return true
+	case CostMeasurementUnitGRAM:
 		return true
 	default:
 		return false
@@ -2013,6 +2076,7 @@ const (
 	FenceImplementationFACILITYCARRIERAVAILABILITY FenceImplementation = "FACILITY-CARRIERAVAILABILITY"
 	FenceImplementationFACILITYCOUNTRY             FenceImplementation = "FACILITY-COUNTRY"
 	FenceImplementationFACILITYPICKINGTIMECAPACITY FenceImplementation = "FACILITY-PICKING-TIME-CAPACITY"
+	FenceImplementationPACKAGINGPOSSIBLE           FenceImplementation = "PACKAGING-POSSIBLE"
 	FenceImplementationPRESELECTEDFACILITY         FenceImplementation = "PRESELECTED-FACILITY"
 	FenceImplementationSAMEDAYPOSSIBLE             FenceImplementation = "SAMEDAY-POSSIBLE"
 	FenceImplementationSTOCKAVAILABILITY           FenceImplementation = "STOCK-AVAILABILITY"
@@ -2030,6 +2094,8 @@ func (e FenceImplementation) Valid() bool {
 	case FenceImplementationFACILITYCOUNTRY:
 		return true
 	case FenceImplementationFACILITYPICKINGTIMECAPACITY:
+		return true
+	case FenceImplementationPACKAGINGPOSSIBLE:
 		return true
 	case FenceImplementationPRESELECTEDFACILITY:
 		return true
@@ -4418,6 +4484,21 @@ func (e OutOfStockBehaviourContextType) Valid() bool {
 	case OutOfStockBehaviourContextTypeFACILITYGROUP:
 		return true
 	case OutOfStockBehaviourContextTypeTAGREFERENCE:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for OverflowCostDetailType.
+const (
+	OVERFLOW OverflowCostDetailType = "OVERFLOW"
+)
+
+// Valid indicates whether the value is a known member of the OverflowCostDetailType enum.
+func (e OverflowCostDetailType) Valid() bool {
+	switch e {
+	case OVERFLOW:
 		return true
 	default:
 		return false
@@ -7259,6 +7340,21 @@ func (e RatingResultType) Valid() bool {
 	case RatingResultTypeSTANDARD:
 		return true
 	case RatingResultTypeTOOLKIT:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for RelativeSurchargeCostDetailType.
+const (
+	RELATIVESURCHARGE RelativeSurchargeCostDetailType = "RELATIVE_SURCHARGE"
+)
+
+// Valid indicates whether the value is a known member of the RelativeSurchargeCostDetailType enum.
+func (e RelativeSurchargeCostDetailType) Valid() bool {
+	switch e {
+	case RELATIVESURCHARGE:
 		return true
 	default:
 		return false
@@ -13277,6 +13373,26 @@ func (e GetStockSummariesParamsFacilityStatus) Valid() bool {
 	}
 }
 
+// AbsoluteSurchargeCostDetail A fixed surcharge, charged as the tenant configured it.
+type AbsoluteSurchargeCostDetail struct {
+	// Amount Money
+	Amount Money `json:"amount"`
+
+	// Id Position of this detail within its own costDetails list, referenced by appliedToCostDetailIds
+	//
+	// Example: 0
+	Id string `json:"id"`
+
+	// TenantSurchargeType The tenant surcharge id
+	//
+	// Example: island
+	TenantSurchargeType string                          `json:"tenantSurchargeType"`
+	Type                AbsoluteSurchargeCostDetailType `json:"type"`
+}
+
+// AbsoluteSurchargeCostDetailType defines model for AbsoluteSurchargeCostDetail.Type.
+type AbsoluteSurchargeCostDetailType string
+
 // AbstractArticle AbstractArticle
 type AbstractArticle struct {
 	// CustomAttributes Attributes that can be added to this entity. These attributes **cannot** be used within fulfillment processes, but enable you to attach custom data from your systems to fulfillmenttools entities.
@@ -13335,6 +13451,18 @@ type AbstractArticleForCreation struct {
 type AbstractCarrierCredentials struct {
 	// Key The key identifying the carrier credentials type
 	Key string `json:"key"`
+}
+
+// AbstractCostDetail One addend of a transport cost, so that a price can be reconciled against the tariff it was resolved from.
+type AbstractCostDetail struct {
+	// Amount Money
+	Amount Money `json:"amount"`
+
+	// Id Position of this detail within its own costDetails list, referenced by appliedToCostDetailIds
+	//
+	// Example: 0
+	Id   string `json:"id"`
+	Type string `json:"type"`
 }
 
 // AbstractFacilityActionsParameter AbstractFacilityActionsParameter
@@ -13646,6 +13774,26 @@ type AvailableUntilDefinition struct {
 type Backordered struct {
 	LineItems []DeliveryPromiseLineItem `json:"lineItems"`
 }
+
+// BasePriceCostDetail The price the tariff charges for the weight or volume tier the goods fell into.
+type BasePriceCostDetail struct {
+	// Amount Money
+	Amount Money `json:"amount"`
+
+	// Id Position of this detail within its own costDetails list, referenced by appliedToCostDetailIds
+	//
+	// Example: 0
+	Id string `json:"id"`
+
+	// MatchedThreshold The resolved weight or volume tier
+	//
+	// Example: 5000
+	MatchedThreshold *int64                  `json:"matchedThreshold,omitempty"`
+	Type             BasePriceCostDetailType `json:"type"`
+}
+
+// BasePriceCostDetailType defines model for BasePriceCostDetail.Type.
+type BasePriceCostDetailType string
 
 // BasicDeliveryPromiseShipment BasicDeliveryPromiseShipment
 type BasicDeliveryPromiseShipment struct {
@@ -14244,8 +14392,39 @@ type Coordinates struct {
 	Lon float32 `json:"lon"`
 }
 
+// CostCoefficientCostDetail The configured rate charged per measurement unit, applied to the measured value.
+type CostCoefficientCostDetail struct {
+	// Amount Money
+	Amount Money `json:"amount"`
+
+	// Coefficient The configured rate
+	//
+	// Example: 0.0001
+	Coefficient float32 `json:"coefficient"`
+
+	// Id Position of this detail within its own costDetails list, referenced by appliedToCostDetailIds
+	//
+	// Example: 0
+	Id string `json:"id"`
+
+	// MeasurementUnit CostMeasurementUnit
+	MeasurementUnit CostMeasurementUnit `json:"measurementUnit"`
+
+	// MeasurementValue The weight or volume the coefficient was multiplied by
+	//
+	// Example: 4000
+	MeasurementValue float32                       `json:"measurementValue"`
+	Type             CostCoefficientCostDetailType `json:"type"`
+}
+
+// CostCoefficientCostDetailType defines model for CostCoefficientCostDetail.Type.
+type CostCoefficientCostDetailType string
+
 // CostCoefficientMeasurementUnit The unit of measurement for the coefficient
 type CostCoefficientMeasurementUnit string
+
+// CostMeasurementUnit CostMeasurementUnit
+type CostMeasurementUnit string
 
 // CurrencyCode The currency code is a three-letter code that represents a currency in the ISO 4217 standard.
 type CurrencyCode string
@@ -19717,6 +19896,21 @@ type OutOfStockConfigPreorder2 struct {
 	AvailabilityTimeframe AvailabilityTimeframe2 `json:"availabilityTimeframe"`
 }
 
+// OverflowCostDetail What the goods beyond the highest configured tier cost on top of the base price.
+type OverflowCostDetail struct {
+	// Amount Money
+	Amount Money `json:"amount"`
+
+	// Id Position of this detail within its own costDetails list, referenced by appliedToCostDetailIds
+	//
+	// Example: 0
+	Id   string                 `json:"id"`
+	Type OverflowCostDetailType `json:"type"`
+}
+
+// OverflowCostDetailType defines model for OverflowCostDetail.Type.
+type OverflowCostDetailType string
+
 // PackJobInvoiceFilter PackJobInvoiceFilter
 type PackJobInvoiceFilter struct {
 	// CompanyName Search by companyName
@@ -21455,6 +21649,37 @@ type RatingResult struct {
 
 // RatingResultType RatingResultType
 type RatingResultType string
+
+// RelativeSurchargeCostDetail A surcharge of the configured percentage of calculationBaseAmount.
+type RelativeSurchargeCostDetail struct {
+	// Amount Money
+	Amount Money `json:"amount"`
+
+	// AppliedToCostDetailIds The same-level cost details that make up calculationBaseAmount. Empty when the base is not itself a cost detail.
+	AppliedToCostDetailIds *[]string `json:"appliedToCostDetailIds,omitempty"`
+
+	// CalculationBaseAmount Money
+	CalculationBaseAmount Money `json:"calculationBaseAmount"`
+
+	// Id Position of this detail within its own costDetails list, referenced by appliedToCostDetailIds
+	//
+	// Example: 0
+	Id string `json:"id"`
+
+	// Percentage The configured percentage
+	//
+	// Example: 12.5
+	Percentage float32 `json:"percentage"`
+
+	// TenantSurchargeType The tenant surcharge id
+	//
+	// Example: diesel
+	TenantSurchargeType string                          `json:"tenantSurchargeType"`
+	Type                RelativeSurchargeCostDetailType `json:"type"`
+}
+
+// RelativeSurchargeCostDetailType defines model for RelativeSurchargeCostDetail.Type.
+type RelativeSurchargeCostDetailType string
 
 // RemoteConfigurationScopesFilter RemoteConfigurationScopesFilter
 type RemoteConfigurationScopesFilter struct {
@@ -24034,6 +24259,9 @@ type SourcingOptionTransfer struct {
 		CarrierName *string `json:"carrierName,omitempty"`
 	} `json:"carrier,omitempty"`
 
+	// CostDetails The cost components of this transfer that are not part of a packaging unit, such as transfer surcharges.
+	CostDetails *[]SourcingOptionTransfer_CostDetails_Item `json:"costDetails,omitempty"`
+
 	// ExistenceReason SourcingOptionTransferExistenceReason
 	ExistenceReason *SourcingOptionTransferExistenceReason `json:"existenceReason,omitempty"`
 
@@ -24057,10 +24285,18 @@ type SourcingOptionTransfer struct {
 	// TimeLine TransferTimeLine
 	TimeLine *TransferTimeLine `json:"timeLine,omitempty"`
 
+	// TotalCosts Money
+	TotalCosts *Money `json:"totalCosts,omitempty"`
+
 	// TransferGroup The transferGroup identifying transfers that travel together in the same delivery time window. Transfers with the same transferGroup are expected to be fulfilled within the same temporal delivery slot.
 	//
 	// Example: 0_xyz
 	TransferGroup *string `json:"transferGroup,omitempty"`
+}
+
+// SourcingOptionTransfer_CostDetails_Item defines model for SourcingOptionTransfer.costDetails.Item.
+type SourcingOptionTransfer_CostDetails_Item struct {
+	union json.RawMessage
 }
 
 // SourcingOptionTransferExistenceReason SourcingOptionTransferExistenceReason
@@ -24128,12 +24364,20 @@ type SourcingOptionsTransferDeliveryCost struct {
 
 // SourcingOptionsTransferPackagingInformation SourcingOptionsTransferPackagingInformation
 type SourcingOptionsTransferPackagingInformation struct {
+	// CostDetails The cost components that add up to totalCosts
+	CostDetails *[]SourcingOptionsTransferPackagingInformation_CostDetails_Item `json:"costDetails,omitempty"`
+
 	// PackagingUnit SourcingOptionsTransferPackagingUnit
 	PackagingUnit SourcingOptionsTransferPackagingUnit `json:"packagingUnit"`
 	PackedItems   []HandledItem                        `json:"packedItems"`
 
 	// TotalCosts Money
 	TotalCosts Money `json:"totalCosts"`
+}
+
+// SourcingOptionsTransferPackagingInformation_CostDetails_Item defines model for SourcingOptionsTransferPackagingInformation.costDetails.Item.
+type SourcingOptionsTransferPackagingInformation_CostDetails_Item struct {
+	union json.RawMessage
 }
 
 // SourcingOptionsTransferPackagingUnit SourcingOptionsTransferPackagingUnit
@@ -32482,6 +32726,424 @@ func (t SourcingOptionSalesPrice_Discount_Item) MarshalJSON() ([]byte, error) {
 }
 
 func (t *SourcingOptionSalesPrice_Discount_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsBasePriceCostDetail returns the union data inside the SourcingOptionTransfer_CostDetails_Item as a BasePriceCostDetail
+func (t SourcingOptionTransfer_CostDetails_Item) AsBasePriceCostDetail() (BasePriceCostDetail, error) {
+	var body BasePriceCostDetail
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromBasePriceCostDetail overwrites any union data inside the SourcingOptionTransfer_CostDetails_Item as the provided BasePriceCostDetail
+func (t *SourcingOptionTransfer_CostDetails_Item) FromBasePriceCostDetail(v BasePriceCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"BASE_PRICE"}`))
+	t.union = b
+	return err
+}
+
+// MergeBasePriceCostDetail performs a merge with any union data inside the SourcingOptionTransfer_CostDetails_Item, using the provided BasePriceCostDetail
+func (t *SourcingOptionTransfer_CostDetails_Item) MergeBasePriceCostDetail(v BasePriceCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"BASE_PRICE"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsOverflowCostDetail returns the union data inside the SourcingOptionTransfer_CostDetails_Item as a OverflowCostDetail
+func (t SourcingOptionTransfer_CostDetails_Item) AsOverflowCostDetail() (OverflowCostDetail, error) {
+	var body OverflowCostDetail
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOverflowCostDetail overwrites any union data inside the SourcingOptionTransfer_CostDetails_Item as the provided OverflowCostDetail
+func (t *SourcingOptionTransfer_CostDetails_Item) FromOverflowCostDetail(v OverflowCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"OVERFLOW"}`))
+	t.union = b
+	return err
+}
+
+// MergeOverflowCostDetail performs a merge with any union data inside the SourcingOptionTransfer_CostDetails_Item, using the provided OverflowCostDetail
+func (t *SourcingOptionTransfer_CostDetails_Item) MergeOverflowCostDetail(v OverflowCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"OVERFLOW"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsCostCoefficientCostDetail returns the union data inside the SourcingOptionTransfer_CostDetails_Item as a CostCoefficientCostDetail
+func (t SourcingOptionTransfer_CostDetails_Item) AsCostCoefficientCostDetail() (CostCoefficientCostDetail, error) {
+	var body CostCoefficientCostDetail
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCostCoefficientCostDetail overwrites any union data inside the SourcingOptionTransfer_CostDetails_Item as the provided CostCoefficientCostDetail
+func (t *SourcingOptionTransfer_CostDetails_Item) FromCostCoefficientCostDetail(v CostCoefficientCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"COST_COEFFICIENT"}`))
+	t.union = b
+	return err
+}
+
+// MergeCostCoefficientCostDetail performs a merge with any union data inside the SourcingOptionTransfer_CostDetails_Item, using the provided CostCoefficientCostDetail
+func (t *SourcingOptionTransfer_CostDetails_Item) MergeCostCoefficientCostDetail(v CostCoefficientCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"COST_COEFFICIENT"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsAbsoluteSurchargeCostDetail returns the union data inside the SourcingOptionTransfer_CostDetails_Item as a AbsoluteSurchargeCostDetail
+func (t SourcingOptionTransfer_CostDetails_Item) AsAbsoluteSurchargeCostDetail() (AbsoluteSurchargeCostDetail, error) {
+	var body AbsoluteSurchargeCostDetail
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromAbsoluteSurchargeCostDetail overwrites any union data inside the SourcingOptionTransfer_CostDetails_Item as the provided AbsoluteSurchargeCostDetail
+func (t *SourcingOptionTransfer_CostDetails_Item) FromAbsoluteSurchargeCostDetail(v AbsoluteSurchargeCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"ABSOLUTE_SURCHARGE"}`))
+	t.union = b
+	return err
+}
+
+// MergeAbsoluteSurchargeCostDetail performs a merge with any union data inside the SourcingOptionTransfer_CostDetails_Item, using the provided AbsoluteSurchargeCostDetail
+func (t *SourcingOptionTransfer_CostDetails_Item) MergeAbsoluteSurchargeCostDetail(v AbsoluteSurchargeCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"ABSOLUTE_SURCHARGE"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsRelativeSurchargeCostDetail returns the union data inside the SourcingOptionTransfer_CostDetails_Item as a RelativeSurchargeCostDetail
+func (t SourcingOptionTransfer_CostDetails_Item) AsRelativeSurchargeCostDetail() (RelativeSurchargeCostDetail, error) {
+	var body RelativeSurchargeCostDetail
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromRelativeSurchargeCostDetail overwrites any union data inside the SourcingOptionTransfer_CostDetails_Item as the provided RelativeSurchargeCostDetail
+func (t *SourcingOptionTransfer_CostDetails_Item) FromRelativeSurchargeCostDetail(v RelativeSurchargeCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"RELATIVE_SURCHARGE"}`))
+	t.union = b
+	return err
+}
+
+// MergeRelativeSurchargeCostDetail performs a merge with any union data inside the SourcingOptionTransfer_CostDetails_Item, using the provided RelativeSurchargeCostDetail
+func (t *SourcingOptionTransfer_CostDetails_Item) MergeRelativeSurchargeCostDetail(v RelativeSurchargeCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"RELATIVE_SURCHARGE"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t SourcingOptionTransfer_CostDetails_Item) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"type"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t SourcingOptionTransfer_CostDetails_Item) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "ABSOLUTE_SURCHARGE":
+		return t.AsAbsoluteSurchargeCostDetail()
+	case "BASE_PRICE":
+		return t.AsBasePriceCostDetail()
+	case "COST_COEFFICIENT":
+		return t.AsCostCoefficientCostDetail()
+	case "OVERFLOW":
+		return t.AsOverflowCostDetail()
+	case "RELATIVE_SURCHARGE":
+		return t.AsRelativeSurchargeCostDetail()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t SourcingOptionTransfer_CostDetails_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *SourcingOptionTransfer_CostDetails_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsBasePriceCostDetail returns the union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item as a BasePriceCostDetail
+func (t SourcingOptionsTransferPackagingInformation_CostDetails_Item) AsBasePriceCostDetail() (BasePriceCostDetail, error) {
+	var body BasePriceCostDetail
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromBasePriceCostDetail overwrites any union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item as the provided BasePriceCostDetail
+func (t *SourcingOptionsTransferPackagingInformation_CostDetails_Item) FromBasePriceCostDetail(v BasePriceCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"BASE_PRICE"}`))
+	t.union = b
+	return err
+}
+
+// MergeBasePriceCostDetail performs a merge with any union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item, using the provided BasePriceCostDetail
+func (t *SourcingOptionsTransferPackagingInformation_CostDetails_Item) MergeBasePriceCostDetail(v BasePriceCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"BASE_PRICE"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsOverflowCostDetail returns the union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item as a OverflowCostDetail
+func (t SourcingOptionsTransferPackagingInformation_CostDetails_Item) AsOverflowCostDetail() (OverflowCostDetail, error) {
+	var body OverflowCostDetail
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOverflowCostDetail overwrites any union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item as the provided OverflowCostDetail
+func (t *SourcingOptionsTransferPackagingInformation_CostDetails_Item) FromOverflowCostDetail(v OverflowCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"OVERFLOW"}`))
+	t.union = b
+	return err
+}
+
+// MergeOverflowCostDetail performs a merge with any union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item, using the provided OverflowCostDetail
+func (t *SourcingOptionsTransferPackagingInformation_CostDetails_Item) MergeOverflowCostDetail(v OverflowCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"OVERFLOW"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsCostCoefficientCostDetail returns the union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item as a CostCoefficientCostDetail
+func (t SourcingOptionsTransferPackagingInformation_CostDetails_Item) AsCostCoefficientCostDetail() (CostCoefficientCostDetail, error) {
+	var body CostCoefficientCostDetail
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCostCoefficientCostDetail overwrites any union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item as the provided CostCoefficientCostDetail
+func (t *SourcingOptionsTransferPackagingInformation_CostDetails_Item) FromCostCoefficientCostDetail(v CostCoefficientCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"COST_COEFFICIENT"}`))
+	t.union = b
+	return err
+}
+
+// MergeCostCoefficientCostDetail performs a merge with any union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item, using the provided CostCoefficientCostDetail
+func (t *SourcingOptionsTransferPackagingInformation_CostDetails_Item) MergeCostCoefficientCostDetail(v CostCoefficientCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"COST_COEFFICIENT"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsAbsoluteSurchargeCostDetail returns the union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item as a AbsoluteSurchargeCostDetail
+func (t SourcingOptionsTransferPackagingInformation_CostDetails_Item) AsAbsoluteSurchargeCostDetail() (AbsoluteSurchargeCostDetail, error) {
+	var body AbsoluteSurchargeCostDetail
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromAbsoluteSurchargeCostDetail overwrites any union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item as the provided AbsoluteSurchargeCostDetail
+func (t *SourcingOptionsTransferPackagingInformation_CostDetails_Item) FromAbsoluteSurchargeCostDetail(v AbsoluteSurchargeCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"ABSOLUTE_SURCHARGE"}`))
+	t.union = b
+	return err
+}
+
+// MergeAbsoluteSurchargeCostDetail performs a merge with any union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item, using the provided AbsoluteSurchargeCostDetail
+func (t *SourcingOptionsTransferPackagingInformation_CostDetails_Item) MergeAbsoluteSurchargeCostDetail(v AbsoluteSurchargeCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"ABSOLUTE_SURCHARGE"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsRelativeSurchargeCostDetail returns the union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item as a RelativeSurchargeCostDetail
+func (t SourcingOptionsTransferPackagingInformation_CostDetails_Item) AsRelativeSurchargeCostDetail() (RelativeSurchargeCostDetail, error) {
+	var body RelativeSurchargeCostDetail
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromRelativeSurchargeCostDetail overwrites any union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item as the provided RelativeSurchargeCostDetail
+func (t *SourcingOptionsTransferPackagingInformation_CostDetails_Item) FromRelativeSurchargeCostDetail(v RelativeSurchargeCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"RELATIVE_SURCHARGE"}`))
+	t.union = b
+	return err
+}
+
+// MergeRelativeSurchargeCostDetail performs a merge with any union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item, using the provided RelativeSurchargeCostDetail
+func (t *SourcingOptionsTransferPackagingInformation_CostDetails_Item) MergeRelativeSurchargeCostDetail(v RelativeSurchargeCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"RELATIVE_SURCHARGE"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t SourcingOptionsTransferPackagingInformation_CostDetails_Item) Discriminator() (string, error) {
+	var discriminator struct {
+		Discriminator string `json:"type"`
+	}
+	err := json.Unmarshal(t.union, &discriminator)
+	return discriminator.Discriminator, err
+}
+
+func (t SourcingOptionsTransferPackagingInformation_CostDetails_Item) ValueByDiscriminator() (interface{}, error) {
+	discriminator, err := t.Discriminator()
+	if err != nil {
+		return nil, err
+	}
+	switch discriminator {
+	case "ABSOLUTE_SURCHARGE":
+		return t.AsAbsoluteSurchargeCostDetail()
+	case "BASE_PRICE":
+		return t.AsBasePriceCostDetail()
+	case "COST_COEFFICIENT":
+		return t.AsCostCoefficientCostDetail()
+	case "OVERFLOW":
+		return t.AsOverflowCostDetail()
+	case "RELATIVE_SURCHARGE":
+		return t.AsRelativeSurchargeCostDetail()
+	default:
+		return nil, errors.New("unknown discriminator value: " + discriminator)
+	}
+}
+
+func (t SourcingOptionsTransferPackagingInformation_CostDetails_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *SourcingOptionsTransferPackagingInformation_CostDetails_Item) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
