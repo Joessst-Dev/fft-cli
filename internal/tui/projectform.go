@@ -132,7 +132,32 @@ func (f *addForm) value(row int) string {
 	return strings.TrimSpace(f.fields[row].input.Value())
 }
 
-func (f *addForm) update(msg tea.KeyPressMsg) (formEvent, tea.Cmd) {
+func (f *addForm) update(msg tea.Msg) (formEvent, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyPressMsg:
+		return f.key(msg)
+	case tea.PasteMsg:
+		return formEditing, f.paste(msg)
+	default:
+		return formEditing, nil
+	}
+}
+
+// paste types pasted text into the focused text row. A copied line usually brings
+// its line break along, which the field would keep as a trailing space — and a
+// password must arrive exactly as it was copied, so the break is dropped.
+func (f *addForm) paste(msg tea.PasteMsg) tea.Cmd {
+	field := f.fields[f.focus]
+	if field.kind != fieldText && field.kind != fieldSecret {
+		return nil
+	}
+	msg.Content = strings.TrimRight(msg.Content, "\r\n")
+	var cmd tea.Cmd
+	field.input, cmd = field.input.Update(msg)
+	return cmd
+}
+
+func (f *addForm) key(msg tea.KeyPressMsg) (formEvent, tea.Cmd) {
 	switch {
 	case key.Matches(msg, f.keys.cancel):
 		return formCancelled, nil

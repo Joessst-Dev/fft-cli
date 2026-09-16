@@ -215,6 +215,14 @@ var _ = Describe("the UI", func() {
 			Expect(h.r.commandLines()).To(HaveLen(2))
 		})
 
+		It("is not answered by pasted text", func() {
+			h.press("r")
+			h.send(tea.PasteMsg{Content: "y"})
+
+			Expect(h.view()).To(ContainSubstring("Make staging read-only?"))
+			Expect(h.r.commandLines()).To(HaveLen(2))
+		})
+
 		It("makes a project read-only on yes, without a --yes it does not need", func() {
 			h.press("r", "y")
 
@@ -265,6 +273,15 @@ var _ = Describe("the UI", func() {
 		It("takes the keyboard, so a q in the name is typed rather than quitting", func() {
 			h.typeText("q")
 			Expect(h.view()).To(ContainSubstring("> q"))
+		})
+
+		It("takes a pasted name, and still waits for enter", func() {
+			h.send(tea.PasteMsg{Content: "prod"})
+			Expect(h.view()).To(ContainSubstring("> prod"))
+			Expect(h.r.commandLines()).To(HaveLen(2))
+
+			h.press("enter")
+			h.lookup("project", "remove", "prod", "--yes")
 		})
 
 		It("removes the project with --yes once the name matches", func() {
@@ -374,6 +391,16 @@ var _ = Describe("the UI", func() {
 			Expect(view).NotTo(ContainSubstring("hunter2"))
 			Expect(view).To(ContainSubstring("•••"))
 			Expect(view).To(MatchRegexp(`Name\s+qa`))
+		})
+
+		It("takes a pasted value into the focused field, without the line break it was copied with", func() {
+			h.send(tea.PasteMsg{Content: "pasted-name"})
+			Expect(h.view()).To(MatchRegexp(`Name\s+pasted-name`))
+
+			fill()
+			h.send(tea.PasteMsg{Content: "-and-more\r\n"})
+			h.press("ctrl+s")
+			Expect(h.r.stdin(3)).To(Equal(apiKey + "\n" + password + "-and-more"))
 		})
 
 		It("shows each empty field's placeholder in full", func() {
@@ -606,6 +633,14 @@ var _ = Describe("the UI", func() {
 			h.typeText("qa")
 			Expect(h.view()).To(ContainSubstring("runs: fft project add qa --base-url '' --username ''"))
 		})
+	})
+
+	It("reads nothing into pasted text while no field has the keyboard", func() {
+		h.loaded(twoProjects, validToken)
+		h.send(tea.PasteMsg{Content: "dq"})
+
+		Expect(h.view()).NotTo(ContainSubstring("Remove"))
+		Expect(h.r.commandLines()).To(HaveLen(2))
 	})
 
 	DescribeTable("never draws past the terminal's last row",

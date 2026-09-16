@@ -19,7 +19,8 @@ var screenNames = []string{"Projects", "Operations", "Request", "Response", "Tem
 
 // screen is one tab of the UI.
 type screen interface {
-	update(msg tea.KeyPressMsg) tea.Cmd
+	// update handles a key, or text pasted while the screen is focused.
+	update(msg tea.Msg) tea.Cmd
 	view(width, height int) string
 	bindings() []key.Binding
 
@@ -37,10 +38,10 @@ type comingSoon struct {
 	what string
 }
 
-func (c comingSoon) update(tea.KeyPressMsg) tea.Cmd { return nil }
-func (c comingSoon) bindings() []key.Binding        { return nil }
-func (c comingSoon) equivalent() string             { return "" }
-func (c comingSoon) focused() bool                  { return false }
+func (c comingSoon) update(tea.Msg) tea.Cmd  { return nil }
+func (c comingSoon) bindings() []key.Binding { return nil }
+func (c comingSoon) equivalent() string      { return "" }
+func (c comingSoon) focused() bool           { return false }
 
 func (c comingSoon) view(int, int) string {
 	return c.name + "\n\nComing soon: " + c.what + "."
@@ -127,6 +128,12 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, cmd)
 	case tea.KeyPressMsg:
 		cmds = append(cmds, m.key(msg))
+	case tea.PasteMsg:
+		// A paste is typing, so it goes where typing goes: to a focused field. With
+		// nothing focused, pasted text would be read as a burst of commands.
+		if m.owner() == ownerFocused {
+			cmds = append(cmds, m.screens[m.current].update(msg))
+		}
 	}
 
 	if m.s.runs.inFlight() > 0 && !m.spinning {

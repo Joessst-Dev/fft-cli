@@ -10,9 +10,9 @@ import (
 
 // dialog is a question that has the keyboard until it is answered.
 type dialog interface {
-	// update handles a key. It returns whether the dialog is finished, and what
-	// answering it started.
-	update(msg tea.KeyPressMsg) (finished bool, cmd tea.Cmd)
+	// update handles a key or a paste. It returns whether the dialog is finished,
+	// and what answering it started.
+	update(msg tea.Msg) (finished bool, cmd tea.Cmd)
 	view(st styles, width int) string
 	bindings() []key.Binding
 
@@ -36,11 +36,14 @@ type confirmDialog struct {
 	onYes    func() tea.Cmd
 }
 
-func (d *confirmDialog) update(msg tea.KeyPressMsg) (bool, tea.Cmd) {
+func (d *confirmDialog) update(msg tea.Msg) (bool, tea.Cmd) {
+	keyMsg, isKey := msg.(tea.KeyPressMsg)
 	switch {
-	case key.Matches(msg, yesKey):
+	case !isKey:
+		// Pasted text answers nothing: only a key pressed on purpose may say yes.
+	case key.Matches(keyMsg, yesKey):
 		return true, d.onYes()
-	case key.Matches(msg, noKey):
+	case key.Matches(keyMsg, noKey):
 		return true, nil
 	}
 	return false, nil
@@ -81,11 +84,14 @@ func newTypeNameDialog(st styles, question, name, command string, onMatch func()
 	return &typeNameDialog{question: question, name: name, command: command, input: in, onMatch: onMatch}
 }
 
-func (d *typeNameDialog) update(msg tea.KeyPressMsg) (bool, tea.Cmd) {
+func (d *typeNameDialog) update(msg tea.Msg) (bool, tea.Cmd) {
+	keyMsg, isKey := msg.(tea.KeyPressMsg)
 	switch {
-	case key.Matches(msg, cancelKey):
+	case !isKey:
+		// A pasted name is typed, not submitted: enter is still the user's to press.
+	case key.Matches(keyMsg, cancelKey):
 		return true, nil
-	case key.Matches(msg, submitKey):
+	case key.Matches(keyMsg, submitKey):
 		if d.input.Value() != d.name {
 			d.mismatch = true
 			return false, nil

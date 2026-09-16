@@ -91,7 +91,7 @@ func (p *projectsScreen) selected() (projectRow, bool) {
 	return p.rows[p.cursor], true
 }
 
-func (p *projectsScreen) update(msg tea.KeyPressMsg) tea.Cmd {
+func (p *projectsScreen) update(msg tea.Msg) tea.Cmd {
 	if d := p.dialog; d != nil {
 		finished, cmd := d.update(msg)
 		// An answer may have opened the next question; only this one is closed.
@@ -112,6 +112,15 @@ func (p *projectsScreen) update(msg tea.KeyPressMsg) tea.Cmd {
 		}
 	}
 
+	keyMsg, isKey := msg.(tea.KeyPressMsg)
+	if !isKey {
+		return nil
+	}
+	return p.listKey(keyMsg)
+}
+
+// listKey handles a key on the list, with neither a dialog nor the form open.
+func (p *projectsScreen) listKey(msg tea.KeyPressMsg) tea.Cmd {
 	row, ok := p.selected()
 	switch {
 	case key.Matches(msg, p.keys.up):
