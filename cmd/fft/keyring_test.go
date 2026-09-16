@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -14,6 +15,7 @@ import (
 	"github.com/Joessst-Dev/fft-cli/internal/config"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/secrets"
+	"github.com/Joessst-Dev/fft-cli/internal/tui"
 )
 
 // noKeyringStore is a machine with no keychain on it: every write reports the
@@ -741,5 +743,47 @@ var _ = Describe("the cleartext store's loose-permissions warning", func() {
 
 		Expect(c.errOut()).To(ContainSubstring("chmod 600"))
 		Expect(c.out()).NotTo(ContainSubstring("chmod 600"))
+	})
+})
+
+// Under `fft tui` the command's stderr is the screen. The runs share the session's
+// credential store, so a warning that store raised during a run would be drawn
+// straight over the UI; it has to be said before the UI takes the screen.
+var _ = Describe("the loose-permissions warning under fft tui", func() {
+	var c *cli
+
+	BeforeEach(func() {
+		if runtime.GOOS == "windows" {
+			Skip("POSIX mode bits do not apply on Windows")
+		}
+
+		c = newCLI()
+		c.deps.Secrets = nil
+		c.deps.Terminal = ptr(true)
+		c.readOnlyProject(false)
+
+		stateHome := GinkgoT().TempDir()
+		c.setenv("XDG_STATE_HOME", stateHome)
+		dir := filepath.Join(stateHome, "fft")
+		Expect(os.MkdirAll(dir, 0o700)).To(Succeed())
+		Expect(os.WriteFile(filepath.Join(dir, "credentials.json"),
+			[]byte(`{"`+secrets.Key("prod", secrets.KindAPIKey)+`":"AIzaSyExample"}`), 0o644)).To(Succeed())
+	})
+
+	It("is printed before the UI starts, and never while it is drawing", func() {
+		var beforeUI string
+		var run tui.Result
+		c.deps.StartTUI = func(_ context.Context, opts tui.Options) error {
+			beforeUI = c.errOut()
+			id := start(opts.Runner, tui.Invocation{Args: []string{"facility", "list"}})
+			run = awaitDone(opts.Runner, id)[id]
+			return nil
+		}
+
+		Expect(c.run("tui", "--no-keyring")).To(Equal(exitcode.OK))
+
+		Expect(run.ExitCode).To(Equal(exitcode.OK), "stderr: %s", run.Stderr)
+		Expect(beforeUI).To(ContainSubstring("chmod 600"))
+		Expect(c.errOut()).To(Equal(beforeUI), "something was written over the UI")
 	})
 })

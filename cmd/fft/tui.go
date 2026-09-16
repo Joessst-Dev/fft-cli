@@ -7,6 +7,7 @@ import (
 
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/prompt"
+	"github.com/Joessst-Dev/fft-cli/internal/secrets"
 	"github.com/Joessst-Dev/fft-cli/internal/tui"
 )
 
@@ -35,6 +36,8 @@ func newTUICmd(deps *Deps) *cobra.Command {
 					"fft tui needs a terminal on stdin and stderr; in a script, run the fft command itself")}
 			}
 
+			announceSecretsWarnings(deps.Secrets)
+
 			runner := newCLIRunner(cmd.Context(), deps, sessionFlags(cmd, deps))
 			defer runner.Close()
 			runner.SetProject(deps.Project)
@@ -50,6 +53,24 @@ func newTUICmd(deps *Deps) *cobra.Command {
 			})
 		},
 	}
+}
+
+// announceSecretsWarnings has the credential store say now whatever it has to say
+// about itself, while stderr is still a plain stream.
+//
+// The runs share this command's store, and its warning sink writes to this
+// command's stderr — which, once the UI starts, is the screen. The file store warns
+// about loose permissions at most once, on its first read, so reading it here is
+// what keeps that warning out of the frame and in the scrollback the user returns
+// to. The keychain has nothing to warn about, and asking it anything now could
+// raise a system dialog before the UI has even appeared.
+func announceSecretsWarnings(store secrets.Store) {
+	if store == nil || store.Kind() != "file" {
+		return
+	}
+	// Only the read matters, not its answer: a file that cannot be read fails again,
+	// with its context, in the first run that needs a credential from it.
+	_, _ = store.Get(secrets.Key("", secrets.KindAPIKey))
 }
 
 // sessionFlags is what the global flags given to `fft tui` itself mean for the runs

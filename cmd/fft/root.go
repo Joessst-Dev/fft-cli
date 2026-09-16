@@ -708,7 +708,10 @@ func (d *Deps) openSecrets(noKeyring bool) (secrets.Store, error) {
 		return secrets.NewEnv(os.LookupEnv), nil
 	}
 	// Through the printer, not the process's stderr: whoever built this run chose
-	// where its notices go, and the file store has no way to know.
+	// where its notices go, and the file store has no way to know. The printer is
+	// read when the warning is raised, not now — it does not exist yet. Under
+	// `fft tui` that printer draws on the screen, which is why the UI makes the
+	// store warn before it starts; see [announceSecretsWarnings].
 	return secrets.Open(noKeyring, secrets.WithWarn(func(msg string) {
 		d.Printer.Notef("%s", msg)
 	}))
