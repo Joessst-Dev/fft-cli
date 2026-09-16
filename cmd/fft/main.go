@@ -39,7 +39,13 @@ func main() {
 	//
 	// This is the only os.Exit in the program. Commands return errors; execute
 	// decides what they mean.
-	os.Exit(execute(ctx, &Deps{}, os.Args[1:], os.Stdin, os.Stdout, os.Stderr))
+	os.Exit(runProcess(ctx, &Deps{}, os.Args[1:]))
+}
+
+// runProcess runs args on the process's own streams — which it does by naming no
+// streams at all, for the reason given on [executeRoot].
+func runProcess(ctx context.Context, deps *Deps, args []string) int {
+	return execute(ctx, deps, args, nil, nil, nil)
 }
 
 // report writes err the way a user should see it and returns the exit code it

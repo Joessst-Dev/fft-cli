@@ -21,11 +21,23 @@ func execute(ctx context.Context, deps *Deps, args []string, in io.Reader, out, 
 // executeRoot is [execute] on a tree the caller has already built against its
 // deps — the TUI's runner builds it first to find out what the command line
 // resolves to, and building the whole tree a second time would buy nothing.
+//
+// A nil stream leaves cobra's default in place, and for out that is not the same
+// thing as os.Stdout. Cobra's Print family — an unknown help topic, for one —
+// writes to the output stream only when one was set, and to stderr otherwise; so
+// setting the process's own stdout would move those messages onto the stream a
+// script is piping into jq. The process therefore names no streams at all.
 func executeRoot(ctx context.Context, root *cobra.Command, args []string, in io.Reader, out, errw io.Writer) int {
 	root.SetArgs(args)
-	root.SetIn(in)
-	root.SetOut(out)
-	root.SetErr(errw)
+	if in != nil {
+		root.SetIn(in)
+	}
+	if out != nil {
+		root.SetOut(out)
+	}
+	if errw != nil {
+		root.SetErr(errw)
+	}
 
 	// ExecuteContextC rather than ExecuteContext: it returns the command that ran
 	// even when it failed, which is what request history needs to name the
@@ -34,5 +46,5 @@ func executeRoot(ctx context.Context, root *cobra.Command, args []string, in io.
 
 	// Diagnostics go to stderr — always. stdout carries data only, so that
 	// `fft ... -o json | jq` is never contaminated by an error message.
-	return report(errw, err)
+	return report(root.ErrOrStderr(), err)
 }
