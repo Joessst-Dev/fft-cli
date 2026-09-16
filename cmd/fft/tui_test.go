@@ -82,6 +82,53 @@ var _ = Describe("fft tui", func() {
 			Expect(c.errOut()).To(ContainSubstring("the terminal went away"))
 		})
 
+		DescribeTable("tells the UI what the session was started with",
+			func(setup func(), args []string, want tui.Options) {
+				setup()
+				Expect(c.run(append([]string{"tui"}, args...)...)).To(Equal(exitcode.OK), c.errOut())
+
+				Expect(started).To(HaveLen(1))
+				Expect(started[0].Project).To(Equal(want.Project))
+				Expect(started[0].ReadOnly).To(Equal(want.ReadOnly))
+				Expect(started[0].Color).To(Equal(want.Color))
+			},
+			Entry("nothing", func() {}, nil, tui.Options{Color: true}),
+			Entry("--project", func() {}, []string{"--project", "staging"},
+				tui.Options{Project: "staging", Color: true}),
+			Entry("--read-only", func() {}, []string{"--read-only"}, tui.Options{ReadOnly: true, Color: true}),
+			Entry("FFT_READ_ONLY", func() { c.setenv("FFT_READ_ONLY", "1") }, nil,
+				tui.Options{ReadOnly: true, Color: true}),
+			Entry("--no-color", func() {}, []string{"--no-color"}, tui.Options{}),
+			Entry("FFT_NO_COLOR", func() { c.setenv("FFT_NO_COLOR", "true") }, nil, tui.Options{}),
+			Entry("NO_COLOR", func() { c.setenv("NO_COLOR", "1") }, nil, tui.Options{}),
+		)
+
+		It("cancels what is still running when the UI returns, and reports how it ended", func() {
+			blocking := c.fakeTenant(func(_ http.ResponseWriter, r *http.Request, _ []byte) {
+				<-r.Context().Done()
+			})
+			var runner tui.Runner
+			var id tui.RunID
+			c.deps.StartTUI = func(_ context.Context, opts tui.Options) error {
+				runner = opts.Runner
+				id = start(runner, tui.Invocation{Args: []string{"facility", "list"}})
+				awaitState(runner, id, tui.RunRunning)
+				Eventually(blocking.recorded).WithTimeout(runTimeout).Should(HaveLen(1))
+				return nil
+			}
+
+			Expect(c.run("tui")).To(Equal(exitcode.OK))
+
+			// Close has already waited for the run, so its last event is buffered.
+			var last tui.RunEvent
+			for ev := range runner.Events() {
+				last = ev
+			}
+			Expect(last.ID).To(Equal(id))
+			Expect(last.State).To(Equal(tui.RunDone))
+			Expect(last.Result.ExitCode).To(Equal(exitcode.Interrupted))
+		})
+
 		It("takes no arguments", func() {
 			Expect(c.run("tui", "facility")).To(Equal(exitcode.Usage))
 			Expect(started).To(BeEmpty())

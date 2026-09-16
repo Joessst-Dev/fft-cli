@@ -2,6 +2,8 @@ package main
 
 import (
 	"errors"
+	"os"
+	"strconv"
 
 	"github.com/spf13/cobra"
 
@@ -16,6 +18,11 @@ const tuiLong = `Open fft's interactive mode: a full-screen UI in the terminal.
 Every request the UI sends is an fft command line, run through the same command
 tree as in a shell: the read-only gate, the exit codes and the validation all
 apply unchanged.
+
+The first screen manages projects: switch, protect, remove and add them, and
+refresh the current token. Press ? for every key, i for the commands that are
+running, and y to copy the fft command the focused action stands for. Secrets you
+type are passed to that command on stdin, never on its command line.
 
 The UI is drawn on stderr and needs a terminal on both stdin and stderr. It
 writes nothing to stdout.`
@@ -38,7 +45,11 @@ func newTUICmd(deps *Deps) *cobra.Command {
 
 			announceSecretsWarnings(deps.Secrets)
 
-			runner := newCLIRunner(cmd.Context(), deps, sessionFlags(cmd, deps))
+			session := sessionFlags(cmd, deps)
+			// Closing cancels whatever the user left running when they quit, and waits
+			// for it: a write interrupted mid-flight still reports how it ended, to a
+			// history entry if nowhere else.
+			runner := newCLIRunner(cmd.Context(), deps, session)
 			defer runner.Close()
 			runner.SetProject(deps.Project)
 
@@ -47,9 +58,12 @@ func newTUICmd(deps *Deps) *cobra.Command {
 				start = tui.Run
 			}
 			return start(cmd.Context(), tui.Options{
-				Runner: runner,
-				In:     cmd.InOrStdin(),
-				Out:    cmd.ErrOrStderr(),
+				Runner:   runner,
+				In:       cmd.InOrStdin(),
+				Out:      cmd.ErrOrStderr(),
+				Project:  deps.Project,
+				ReadOnly: session.readOnly || deps.ReadOnlyEnv,
+				Color:    uiColor(cmd),
 			})
 		},
 	}
@@ -96,6 +110,20 @@ func sessionFlags(cmd *cobra.Command, deps *Deps) uiRun {
 		session.timeout = ptr(deps.Timeout)
 	}
 	return session
+}
+
+// uiColor reports whether the UI may draw in colour. It is asked of the UI's own
+// stream rather than taken from the printer, whose answer is about stdout — and a
+// UI on stderr with stdout redirected is still a UI on a terminal. The switches are
+// the ones every other command honours: --no-color, FFT_NO_COLOR and NO_COLOR.
+func uiColor(cmd *cobra.Command) bool {
+	if f := cmd.Root().PersistentFlags().Lookup("no-color"); f != nil && f.Value.String() == "true" {
+		return false
+	}
+	if off, err := strconv.ParseBool(os.Getenv("FFT_NO_COLOR")); err == nil && off {
+		return false
+	}
+	return os.Getenv("NO_COLOR") == ""
 }
 
 // interactiveTerminal reports whether someone is at a terminal to drive the UI:
