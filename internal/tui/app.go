@@ -164,6 +164,7 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width, m.height = msg.Width, msg.Height
 		m.help.SetWidth(msg.Width)
 	case runEventMsg:
+		m.response.observe(RunEvent(msg))
 		cmds = append(cmds, m.s.handle(RunEvent(msg)), waitForEvent(m.events))
 	case runnerClosedMsg:
 		// The runner is shut down only as the UI goes; there is nothing left to wait for.
@@ -204,7 +205,14 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.owner() == ownerQuestion {
 		m.s.asking().dialog.arm()
 	}
+	m.operations.resize(m.width, m.bodyHeight(m.help.View(m.bindings())))
 	return m, tea.Batch(cmds...)
+}
+
+// bodyHeight is how many rows the screen gets under the tabs and above the status
+// bar and helpLine: none on a terminal too small for more than those.
+func (m *app) bodyHeight(helpLine string) int {
+	return max(m.height-3-lipgloss.Height(helpLine), 0)
 }
 
 // keyOwner is the part of the UI the next key goes to.
@@ -378,8 +386,7 @@ func (m *app) View() tea.View {
 	// Tabs, a blank line, the body, the status bar and the help. On a terminal too
 	// small for all of it the body gets nothing, and the frame is cut to the height
 	// below, so that nothing is ever drawn past the last row.
-	chrome := 3 + lipgloss.Height(helpLine)
-	bodyHeight := max(m.height-chrome, 0)
+	bodyHeight := m.bodyHeight(helpLine)
 
 	owner := m.owner()
 	var body string

@@ -137,11 +137,30 @@ func (p *responseScreen) tabs() []responseTab {
 	return []responseTab{tabJSON, tabStderr}
 }
 
+// current is the view on display: the one chosen, or the JSON when the table
+// chosen has gone with the run's request.
+func (p *responseScreen) current() responseTab {
+	if slices.Contains(p.tabs(), p.tab) {
+		return p.tab
+	}
+	return tabJSON
+}
+
+// observe takes a run event, and says what a cancel did once the run it was
+// pressed on has ended.
+func (p *responseScreen) observe(ev RunEvent) {
+	if ev.ID != p.id || ev.State != RunDone || !p.cancelled {
+		return
+	}
+	p.cancelled = false
+	p.say(cancelOutcome(ev.Result))
+}
+
 func (p *responseScreen) moveTab(by int) {
 	tabs := p.tabs()
 	i := 0
 	for j, t := range tabs {
-		if t == p.tab {
+		if t == p.current() {
 			i = j
 		}
 	}
@@ -380,11 +399,6 @@ func (p *responseScreen) view(width, height int) string {
 	case e == nil:
 		return st.title.Render("Response") + "\n\nNothing has been sent yet. Send a request from the Request screen (3)."
 	}
-	// The run's request may have been let go since the tab was chosen.
-	if !slices.Contains(p.tabs(), p.tab) {
-		p.tab = tabJSON
-	}
-
 	lines := []string{p.header(e), st.dim.Render(clip("$ "+output.SanitizeCell(e.display.String()), width))}
 	if p.dialog != nil {
 		return strings.Join(append(lines, "", p.dialog.view(st, width)), "\n")
@@ -401,12 +415,6 @@ func (p *responseScreen) view(width, height int) string {
 	}
 
 	lines = append(lines, p.tabBar())
-	// Resolved on the first frame after the run ended, which is the first moment
-	// the notice could be read anyway.
-	if p.cancelled {
-		p.cancelled = false
-		p.say(cancelOutcome(e.result))
-	}
 	for _, note := range p.caveats(e) {
 		lines = append(lines, wrap(st.warnText.Render(note), width))
 	}
@@ -464,7 +472,7 @@ func (p *responseScreen) header(e *runEntry) string {
 func (p *responseScreen) tabBar() string {
 	var parts []string
 	for _, t := range p.tabs() {
-		if t == p.tab {
+		if t == p.current() {
 			parts = append(parts, p.st.activeTab.Render("["+t.String()+"]"))
 		} else {
 			parts = append(parts, p.st.tab.Render(" "+t.String()+" "))
@@ -506,7 +514,8 @@ func (p *responseScreen) fill(e *runEntry, width, height int) {
 	p.vp.SetWidth(width)
 	p.vp.SetHeight(height)
 
-	k := viewKey{id: e.id, tab: p.tab, state: e.state, dropped: e.dropped, width: width}
+	tab := p.current()
+	k := viewKey{id: e.id, tab: tab, state: e.state, dropped: e.dropped, width: width}
 	if k == p.shown {
 		return
 	}
@@ -514,13 +523,13 @@ func (p *responseScreen) fill(e *runEntry, width, height int) {
 
 	// A table is as wide as its widest row, and wrapping it would break its
 	// columns; everything else wraps.
-	p.vp.SoftWrap = p.tab != tabTable
+	p.vp.SoftWrap = tab != tabTable
 	p.vp.SetContent(p.contents(e))
 }
 
 func (p *responseScreen) contents(e *runEntry) string {
 	r := e.result
-	switch p.tab {
+	switch p.current() {
 	case tabStderr:
 		if len(r.Stderr) == 0 {
 			return p.st.dim.Render("The command said nothing on stderr.")

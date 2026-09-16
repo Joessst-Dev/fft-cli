@@ -3,6 +3,7 @@ package tui
 import (
 	"strings"
 
+	tea "charm.land/bubbletea/v2"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -24,6 +25,14 @@ var _ = Describe("the Operations screen", func() {
 		h = newHarness(Options{})
 		h.loaded(twoProjects, validToken)
 		h.press("2")
+	})
+
+	It("sizes its list to the terminal before anything is drawn", func() {
+		h.send(tea.WindowSizeMsg{Width: 100, Height: 30})
+
+		Expect(h.m.operations.list.Width()).To(Equal(100))
+		Expect(h.m.operations.list.Height()).To(Equal(h.m.bodyHeight(h.m.help.View(h.m.bindings())) - 2))
+		Expect(h.m.operations.list.Height()).To(BeNumerically(">", 0))
 	})
 
 	It("lists every operation, naming each group on its first row", func() {

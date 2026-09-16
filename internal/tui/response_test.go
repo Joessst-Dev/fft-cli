@@ -95,6 +95,14 @@ var _ = Describe("the Response screen", func() {
 			Expect(h.view()).NotTo(ContainSubstring("Cancelling"))
 		})
 
+		It("knows what the cancel did before anything is drawn", func() {
+			h.press("c")
+			h.finishID(id, Result{ExitCode: exitcode.Interrupted})
+
+			Expect(h.m.response.notice).To(HavePrefix("Cancelled."))
+			Expect(h.m.response.cancelled).To(BeFalse())
+		})
+
 		It("says when the run finished before the cancel reached it", func() {
 			h.press("c")
 			h.finishID(id, Result{ExitCode: exitcode.OK, Status: 200, Stdout: []byte(`{}`)})
@@ -145,6 +153,16 @@ var _ = Describe("the Response screen", func() {
 			h.press("right")
 			Expect(h.view()).To(ContainSubstring("[Table]"))
 			Expect(h.view()).To(ContainSubstring(`TABLE OF [{"id":"f-1"`))
+		})
+
+		It("falls back to the JSON once the table has gone with the request, without forgetting the choice by drawing", func() {
+			h.press("right")
+			delete(h.m.s.requests, id)
+
+			Expect(h.view()).To(ContainSubstring("[JSON]"))
+			Expect(h.m.response.tab).To(Equal(tabTable), "drawing the screen changed what it shows next")
+			h.press("right")
+			Expect(h.view()).To(ContainSubstring("[Stderr]"))
 		})
 
 		It("offers no table for a command without one", func() {

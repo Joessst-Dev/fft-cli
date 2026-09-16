@@ -247,15 +247,19 @@ func (o *operationsScreen) equivalent() shellCommand {
 	return o.s.displayFor(op.Command.Path, o.s.project)
 }
 
-func (o *operationsScreen) view(width, height int) string {
+// resize tells the list the size of the body it is drawn in, below its title. The
+// list pages by its own height, so it must know it before a key moves it.
+func (o *operationsScreen) resize(width, height int) {
+	if width > 0 && height > 0 && (o.list.Width() != width || o.list.Height() != max(height-2, 1)) {
+		o.list.SetSize(width, max(height-2, 1))
+	}
+}
+
+func (o *operationsScreen) view(width, _ int) string {
 	if o.describing != nil {
 		return o.describe(*o.describing, width)
 	}
 
-	// The list pages by its own height, so it learns the size it is drawn at.
-	if width > 0 && height > 0 && (o.list.Width() != width || o.list.Height() != height-2) {
-		o.list.SetSize(width, max(height-2, 1))
-	}
 	title := o.st.title.Render("Operations")
 	if o.s.readOnly() {
 		title += "  " + o.st.dim.Render("read-only: a write marked "+lockBadge+" would be refused")
