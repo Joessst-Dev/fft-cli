@@ -254,10 +254,9 @@ func (f *addForm) validate() []string {
 	return problems
 }
 
-// action is the `project add` the form describes. The secrets travel on stdin —
-// the API key on the first line, the password after it — so that neither the
-// argument list nor its display can hold them.
-func (f *addForm) action() action {
+// args is the `project add` command line the form describes. It holds no secret:
+// the API key and the password travel on stdin, see [addForm.action].
+func (f *addForm) args() []string {
 	args := []string{"project", "add", f.value(rowName),
 		"--base-url", f.value(rowBaseURL),
 	}
@@ -284,8 +283,15 @@ func (f *addForm) action() action {
 	if f.fields[rowForce].on {
 		args = append(args, "--force")
 	}
-	args = append(args, "--api-key-stdin", "--password-stdin")
+	return append(args, "--api-key-stdin", "--password-stdin")
+}
 
+// action is the `project add` the form describes, with its secrets. They travel on
+// stdin — the API key on the first line, the password after it — so that neither
+// the argument list nor its display can hold them. It is built once, on submit;
+// what the screen shows is built from [addForm.args] alone.
+func (f *addForm) action() action {
+	args := f.args()
 	// The password is sent exactly as typed; the key is trimmed, as the flag is.
 	stdin := f.value(rowAPIKey) + "\n" + f.fields[rowPassword].input.Value()
 	return action{
@@ -340,6 +346,8 @@ func (f *addForm) view(width int) string {
 	if f.failure != nil {
 		lines = append(lines, f.failure.view(st, width))
 	}
-	lines = append(lines, st.dim.Render("The API key and password are passed on stdin, never on the command line."))
+	lines = append(lines,
+		st.dim.Render(clip("runs: "+commandLine(f.args()), width)),
+		st.dim.Render("The API key and password are passed on stdin, never on the command line."))
 	return strings.Join(lines, "\n")
 }

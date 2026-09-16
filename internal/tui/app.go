@@ -136,10 +136,42 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
+// keyOwner is the part of the UI the next key goes to.
+type keyOwner int
+
+const (
+	// ownerScreen is the screen, under the global keys.
+	ownerScreen keyOwner = iota
+	// ownerPanel is the command panel, under the global keys.
+	ownerPanel
+	// ownerFocused is a dialog or a form on the screen: its own keys, and ctrl+c.
+	ownerFocused
+	// ownerQuit is the question whether to quit.
+	ownerQuit
+)
+
+// owner decides who has the keyboard. The key handling, the body, the help line
+// and the status bar all ask it, so that whatever takes the next key is what is
+// drawn: a question the user cannot see must never be one a keystroke answers.
+func (m *app) owner() keyOwner {
+	switch {
+	case m.confirmQuit:
+		return ownerQuit
+	case m.screens[m.current].focused():
+		return ownerFocused
+	case m.showPanel:
+		return ownerPanel
+	default:
+		return ownerScreen
+	}
+}
+
 func (m *app) key(msg tea.KeyPressMsg) tea.Cmd {
 	m.flash = ""
+	scr := m.screens[m.current]
 
-	if m.confirmQuit {
+	switch m.owner() {
+	case ownerQuit:
 		switch {
 		case key.Matches(msg, yesKey), key.Matches(msg, m.keys.forceQ):
 			return tea.Quit
@@ -147,13 +179,10 @@ func (m *app) key(msg tea.KeyPressMsg) tea.Cmd {
 			m.confirmQuit = false
 		}
 		return nil
-	}
-
-	scr := m.screens[m.current]
-	if key.Matches(msg, m.keys.forceQ) {
-		return m.quit()
-	}
-	if scr.focused() {
+	case ownerFocused:
+		if key.Matches(msg, m.keys.forceQ) {
+			return m.quit()
+		}
 		return scr.update(msg)
 	}
 
@@ -204,11 +233,17 @@ func (m *app) quit() tea.Cmd {
 	return nil
 }
 
+// equivalent is the command the part of the UI with the keyboard stands for. A
+// focused dialog or form shows its own, and the quit question stands for none.
 func (m *app) equivalent() string {
-	if m.showPanel {
+	switch m.owner() {
+	case ownerPanel:
 		return m.panel.equivalent()
+	case ownerScreen:
+		return m.screens[m.current].equivalent()
+	default:
+		return ""
 	}
-	return m.screens[m.current].equivalent()
 }
 
 // copyEquivalent puts the focused action's fft command on the clipboard, through
@@ -223,15 +258,21 @@ func (m *app) copyEquivalent() tea.Cmd {
 	return tea.SetClipboard(eq)
 }
 
+// bindings is what the help line offers. While a dialog, a form or the quit
+// question has the keyboard, the global keys do nothing, so only its own keys are
+// shown: a help line that offered y to copy under a dialog whose y means yes would
+// be advertising the wrong one.
 func (m *app) bindings() helpKeys {
-	local := m.screens[m.current].bindings()
-	if m.showPanel {
-		local = m.panel.bindings()
+	switch m.owner() {
+	case ownerQuit:
+		return helpKeys{local: []key.Binding{yesKey, noKey}}
+	case ownerFocused:
+		return helpKeys{local: m.screens[m.current].bindings()}
+	case ownerPanel:
+		return helpKeys{local: m.panel.bindings(), global: m.keys.bindings()}
+	default:
+		return helpKeys{local: m.screens[m.current].bindings(), global: m.keys.bindings()}
 	}
-	if m.confirmQuit {
-		local = []key.Binding{yesKey, noKey}
-	}
-	return helpKeys{local: local, global: m.keys.bindings()}
 }
 
 func (m *app) View() tea.View {
@@ -239,29 +280,63 @@ func (m *app) View() tea.View {
 	status := m.statusBar()
 	helpLine := m.help.View(m.bindings())
 
-	// Tabs, a blank line, the body, the status bar and the help.
-	bodyHeight := m.height - 3 - lipgloss.Height(helpLine)
+	// Tabs, a blank line, the body, the status bar and the help. On a terminal too
+	// small for all of it the body gets nothing, and the frame is cut to the height
+	// below, so that nothing is ever drawn past the last row.
+	chrome := 3 + lipgloss.Height(helpLine)
+	bodyHeight := max(m.height-chrome, 0)
 
+	owner := m.owner()
 	var body string
-	switch {
-	case m.confirmQuit:
+	switch owner {
+	case ownerQuit:
 		body = m.quitDialog()
 	default:
 		body = m.screens[m.current].view(m.width, bodyHeight)
 	}
 
-	if m.showPanel {
-		panelHeight := max(bodyHeight/2, 5)
-		panel := m.panel.view(m.st, m.spin.View(), m.width, panelHeight)
-		body = fit(body, bodyHeight-lipgloss.Height(panel)) + "\n" + panel
+	// The panel is drawn only while it has the keyboard: under a focused dialog it
+	// would take half the body, and could cut off the very question being asked.
+	if owner == ownerPanel {
+		body = m.withPanel(body, bodyHeight)
 	}
 
-	content := strings.Join([]string{tabs, "", fit(body, bodyHeight), status, helpLine}, "\n")
+	var content string
+	switch {
+	case m.height > 0 && owner >= ownerFocused && lipgloss.Height(body) > bodyHeight:
+		// A question that does not fit beside the chrome gets the whole terminal:
+		// the tabs and the help can go, the question the next key answers cannot.
+		content = fitExactly(body, m.height)
+	case m.height > 0:
+		parts := []string{tabs, ""}
+		if bodyHeight > 0 {
+			parts = append(parts, fitExactly(body, bodyHeight))
+		}
+		content = fitExactly(strings.Join(append(parts, status, helpLine), "\n"), m.height)
+	default:
+		content = strings.Join([]string{tabs, "", body, status, helpLine}, "\n")
+	}
+
 	v := tea.NewView(content)
 	// The alternate screen gives the shell's scrollback back untouched on exit.
 	v.AltScreen = true
 	v.WindowTitle = "fft"
 	return v
+}
+
+// withPanel puts the command panel under body, both within bodyHeight rows. The
+// panel keeps its rows first: it is what has the keyboard.
+func (m *app) withPanel(body string, bodyHeight int) string {
+	if m.height <= 0 {
+		return body + "\n" + m.panel.view(m.st, m.spin.View(), m.width, 5)
+	}
+	panelHeight := min(max(bodyHeight/2, 5), bodyHeight)
+	panel := fitExactly(m.panel.view(m.st, m.spin.View(), m.width, panelHeight), panelHeight)
+	above := bodyHeight - panelHeight
+	if above <= 0 {
+		return panel
+	}
+	return fitExactly(body, above) + "\n" + panel
 }
 
 func (m *app) tabBar() string {
@@ -332,9 +407,14 @@ func fit(s string, height int) string {
 	if height <= 0 {
 		return s
 	}
+	return fitExactly(s, height)
+}
+
+// fitExactly is fit for a height that is known, however small.
+func fitExactly(s string, height int) string {
 	lines := strings.Split(s, "\n")
 	if len(lines) > height {
-		lines = lines[:height]
+		lines = lines[:max(height, 0)]
 	}
 	for len(lines) < height {
 		lines = append(lines, "")

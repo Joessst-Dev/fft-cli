@@ -385,7 +385,11 @@ func (p *projectsScreen) submitForm() tea.Cmd {
 			form.failure = &failure{what: "adding " + name, result: r}
 			return nil
 		}
-		if p.form == form {
+		// Only the form that was submitted may be answered with a question. One the
+		// user has since closed, or replaced with another, has left the screen, and a
+		// question asked in its place would take the keys of whatever came next.
+		stillOpen := p.form == form
+		if stillOpen {
 			p.form = nil
 		}
 
@@ -401,6 +405,10 @@ func (p *projectsScreen) submitForm() tea.Cmd {
 			return tea.Batch(p.reload(), p.warmUp())
 		}
 
+		if !stillOpen {
+			p.succeed("Added " + name + ". Select it and press enter to switch to it.")
+			return p.reload()
+		}
 		p.succeed("Added " + name + ".")
 		p.dialog = &confirmDialog{
 			question: fmt.Sprintf("Switch to %s now?", name),
@@ -431,7 +439,7 @@ func (p *projectsScreen) equivalent() string {
 	case p.dialog != nil:
 		return p.dialog.equivalent()
 	case p.form != nil:
-		return p.form.action().display
+		return commandLine(p.form.args())
 	}
 	if row, ok := p.selected(); ok && !p.s.headless {
 		return p.useAction(row.Name).display
@@ -441,6 +449,11 @@ func (p *projectsScreen) equivalent() string {
 
 func (p *projectsScreen) view(width, _ int) string {
 	st := p.st
+	if p.dialog != nil {
+		// A dialog has the keyboard, over the list and over the form alike, so it is
+		// drawn in their place: first, where no height can cut it off.
+		return strings.Join([]string{st.title.Render("Projects"), "", p.dialog.view(st, width)}, "\n")
+	}
 	if p.form != nil {
 		return p.form.view(width)
 	}
@@ -469,9 +482,6 @@ func (p *projectsScreen) view(width, _ int) string {
 	}
 	if p.failure != nil {
 		lines = append(lines, p.failure.view(st, width))
-	}
-	if p.dialog != nil {
-		lines = append(lines, "", p.dialog.view(st, width))
 	}
 	return strings.Join(lines, "\n")
 }

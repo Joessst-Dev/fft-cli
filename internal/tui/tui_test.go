@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	tea "charm.land/bubbletea/v2"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -227,7 +228,7 @@ var _ = Describe("the UI", func() {
 		It("allows writes again only after a yes, which becomes the command's --yes", func() {
 			h.press("down", "r")
 			Expect(h.view()).To(ContainSubstring("Allow writes to prod again?"))
-			Expect(h.view()).To(ContainSubstring("$ fft project read-only prod --off --yes"))
+			Expect(h.view()).To(ContainSubstring("runs: fft project read-only prod --off --yes"))
 			Expect(h.r.commandLines()).To(HaveLen(2))
 
 			h.press("y")
@@ -426,6 +427,34 @@ var _ = Describe("the UI", func() {
 			h.lookup("project", "use", "qa")
 		})
 
+		When("the form is no longer open when the add finishes", func() {
+			BeforeEach(func() {
+				fill()
+				h.press("ctrl+s", "esc")
+			})
+
+			It("says the project was added, and asks nothing the next key could answer", func() {
+				h.press("i")
+				h.finishID(3, ok(`{"name":"qa","active":false}`))
+
+				Expect(h.view()).NotTo(ContainSubstring("Switch to qa now?"))
+				Expect(clipboard(h.press("y"))).To(Equal("fft project list"), "y copies the panel's selected run")
+				Expect(h.r.commandLines()).NotTo(ContainElement("project use qa"))
+
+				h.press("esc")
+				Expect(h.view()).To(ContainSubstring("Added qa. Select it and press enter to switch to it."))
+			})
+
+			It("leaves a second form's keys to that form", func() {
+				h.press("a")
+				h.finishID(3, ok(`{"name":"qa","active":false}`))
+
+				h.typeText("yard")
+				Expect(h.view()).To(MatchRegexp(`Name\s+yard`))
+				Expect(h.r.commandLines()).NotTo(ContainElement("project use qa"))
+			})
+		})
+
 		It("follows fft when the new project became the active one", func() {
 			fill()
 			h.press("ctrl+s")
@@ -525,6 +554,76 @@ var _ = Describe("the UI", func() {
 			Expect(h.view()).NotTo(ContainSubstring("Commands —"))
 		})
 	})
+
+	Describe("the part of the UI that has the keyboard", func() {
+		BeforeEach(func() {
+			h.loaded(twoProjects, validToken)
+		})
+
+		It("is drawn in place of the command panel, when a question opens under it", func() {
+			h.press("a")
+			h.typeText("qa")
+			h.press("tab")
+			h.typeText("https://qa.example.com")
+			h.press("tab")
+			h.typeText("AIzaKey")
+			h.press("tab", "tab")
+			h.typeText("bot@example.com")
+			h.press("shift+tab", "space", "tab", "tab", "tab", "tab", "tab")
+			h.typeText("pw")
+			h.press("ctrl+s")
+			h.m.showPanel = true
+			h.finishID(3, ok(`{"name":"qa","active":false}`))
+
+			view := h.view()
+			Expect(view).To(ContainSubstring("Switch to qa now?"))
+			Expect(view).NotTo(ContainSubstring("Commands —"))
+			Expect(view).NotTo(ContainSubstring("copy command"))
+			Expect(view).NotTo(ContainSubstring("running commands"))
+
+			h.press("n")
+			Expect(h.view()).To(ContainSubstring("Commands —"), "the panel is back once the question is answered")
+		})
+
+		DescribeTable("offers only its own keys while it is a dialog, a form or the quit question",
+			func(open func(h *harness), own string) {
+				open(h)
+
+				view := h.view()
+				Expect(view).To(ContainSubstring(own))
+				Expect(view).NotTo(ContainSubstring("copy command"))
+				Expect(view).NotTo(ContainSubstring("switch screen"))
+				Expect(view).NotTo(ContainSubstring("$ fft"), "the status bar offers a command to copy")
+			},
+			Entry("a yes/no dialog", func(h *harness) { h.press("r") }, "y yes"),
+			Entry("a type-the-name dialog", func(h *harness) { h.press("d") }, "enter confirm"),
+			Entry("the add form", func(h *harness) { h.press("a") }, "ctrl+s add project"),
+			Entry("the quit question", func(h *harness) { h.press("enter", "q") }, "n/esc no"),
+		)
+
+		It("shows the command a form would run on the form itself", func() {
+			h.press("a")
+			h.typeText("qa")
+			Expect(h.view()).To(ContainSubstring("runs: fft project add qa --base-url '' --username ''"))
+		})
+	})
+
+	DescribeTable("never draws past the terminal's last row",
+		func(width, height int, open func(h *harness), visible string) {
+			h.loaded(twoProjects, validToken)
+			open(h)
+			h.send(tea.WindowSizeMsg{Width: width, Height: height})
+
+			content := h.m.View().Content
+			Expect(strings.Count(content, "\n") + 1).To(BeNumerically("<=", height))
+			Expect(h.view()).To(ContainSubstring(visible))
+		},
+		Entry("the list, one row", 80, 1, func(*harness) {}, "1 Projects"),
+		Entry("the list, three rows", 80, 3, func(*harness) {}, "1 Projects"),
+		Entry("the list with the panel open", 80, 7, func(h *harness) { h.press("i") }, "Commands"),
+		Entry("a dialog on a short terminal", 40, 9, func(h *harness) { h.press("r") }, "Make staging"),
+		Entry("the panel on a narrow one", 12, 20, func(h *harness) { h.press("i") }, "Comm"),
+	)
 
 	Describe("copying the equivalent command", func() {
 		It("puts the focused action's command on the clipboard and says so", func() {
