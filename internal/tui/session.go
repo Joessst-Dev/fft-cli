@@ -103,9 +103,10 @@ type session struct {
 	environ     func() []string
 	tempDir     string
 
-	// tempFiles are the files an editor still has open. Each is removed when its
-	// editor exits, and whatever is left when the UI ends is removed then.
-	tempFiles map[string]bool
+	// tempDirs are the private directories an editor is still working in. Each is
+	// removed, with everything the editor left in it, when its editor exits, and
+	// whatever is left when the UI ends is removed then.
+	tempDirs map[string]bool
 }
 
 // sentRequest is a request the Request screen sent: the operation, and the
@@ -144,7 +145,7 @@ func newSession(opts Options, st styles) *session {
 		getenv:        getenv,
 		environ:       environ,
 		tempDir:       opts.tempDir,
-		tempFiles:     make(map[string]bool),
+		tempDirs:      make(map[string]bool),
 		requests:      make(map[RunID]*sentRequest),
 		project:       opts.Project,
 		readOnlyFloor: opts.ReadOnly,
@@ -241,12 +242,12 @@ func (s *session) launch(a action, done func(Result) tea.Cmd) (RunID, tea.Cmd) {
 	return id, nil
 }
 
-// cleanup removes the temporary files an editor was still working on.
+// cleanup removes the directories an editor was still working in.
 func (s *session) cleanup() {
-	for path := range s.tempFiles {
+	for dir := range s.tempDirs {
 		// Best effort, as the UI goes: there is nobody left to tell.
-		_ = os.Remove(path)
-		delete(s.tempFiles, path)
+		_ = os.RemoveAll(dir)
+		delete(s.tempDirs, dir)
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -116,31 +117,36 @@ func splitCommand(s string, backslashes bool) ([]string, error) {
 	return words, nil
 }
 
-// writeBodyFile writes body to a new private file in dir ("" for the system's
-// temporary directory), and returns its path.
-func writeBodyFile(dir string, body []byte) (string, error) {
-	// CreateTemp makes the file 0600 and refuses a name that exists, so nothing
-	// else can have it open, or have put a link where it goes.
-	f, err := os.CreateTemp(dir, "fft-body-*.json")
+// bodyFileName is the name the body has in its directory. The directory is the
+// session's alone, so the name need not be unpredictable; the extension is what
+// tells an editor to treat it as JSON.
+const bodyFileName = "body.json"
+
+// writeBodyFile writes body to a file in a new private directory under parent (""
+// for the system's temporary directory), and returns the file's path.
+//
+// A directory rather than a file: an editor writes a swap file, a backup or an
+// undo file beside what it edits, holding the same body, and those go when the
+// directory does.
+func writeBodyFile(parent string, body []byte) (string, error) {
+	// MkdirTemp makes the directory 0700 under a name nobody else has taken, so
+	// nothing else can list it, or have put a link where the file goes.
+	dir, err := os.MkdirTemp(parent, "fft-body-*")
 	if err != nil {
-		return "", fmt.Errorf("create a file for the editor: %w", err)
+		return "", fmt.Errorf("create a directory for the editor: %w", err)
 	}
-	path := f.Name()
-	_, err = f.Write(body)
-	if closeErr := f.Close(); err == nil {
-		err = closeErr
-	}
-	if err != nil {
-		// Best effort: the write failed, and the file is of no use to anyone.
-		_ = os.Remove(path)
+	path := filepath.Join(dir, bodyFileName)
+	if err := os.WriteFile(path, body, 0o600); err != nil {
+		// Best effort: the write failed, and the directory is of no use to anyone.
+		_ = os.RemoveAll(dir)
 		return "", fmt.Errorf("write the body for the editor: %w", err)
 	}
 	return path, nil
 }
 
 // openEditor writes body to a private file and opens the user's editor on it. The
-// file is always removed: when the editor exits, whether it could start or not,
-// and by [session.cleanup] if the UI ends first.
+// file's directory is always removed: when the editor exits, whether it could
+// start or not, and by [session.cleanup] if the UI ends first.
 func (s *session) openEditor(body []byte, gen uint64) (tea.Cmd, error) {
 	argv, err := editorCommand(s.getenv)
 	if err != nil {
@@ -150,7 +156,7 @@ func (s *session) openEditor(body []byte, gen uint64) (tea.Cmd, error) {
 	if err != nil {
 		return nil, err
 	}
-	s.tempFiles[path] = true
+	s.tempDirs[filepath.Dir(path)] = true
 
 	c := exec.Command(argv[0], append(argv[1:], path)...)
 	// The editor is the user's program, not fft's, and a plugin or a shell escape in
@@ -161,13 +167,15 @@ func (s *session) openEditor(body []byte, gen uint64) (tea.Cmd, error) {
 	}), nil
 }
 
-// finishEditing reads back what the editor left in msg's file, and removes it.
+// finishEditing reads back what the editor left in msg's file, and removes the
+// file's directory with everything in it.
 func (s *session) finishEditing(msg editorDoneMsg) ([]byte, error) {
 	defer func() {
-		// Nothing more can be done about a file that will not go: the UI ends by
+		// Nothing more can be done about a directory that will not go: the UI ends by
 		// trying once more.
-		if err := os.Remove(msg.path); err == nil || errors.Is(err, os.ErrNotExist) {
-			delete(s.tempFiles, msg.path)
+		dir := filepath.Dir(msg.path)
+		if err := os.RemoveAll(dir); err == nil {
+			delete(s.tempDirs, dir)
 		}
 	}()
 	if msg.err != nil {

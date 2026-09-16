@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
@@ -575,12 +576,20 @@ var _ = Describe("the Request screen", func() {
 			cmd := h.editor.cmds[0]
 			Expect(cmd.Args[:2]).To(Equal([]string{"fake-editor", "--wait"}))
 			path := h.editor.path()
-			Expect(filepath.Dir(path)).To(Equal(h.tmp))
-
-			info, err := os.Stat(path)
-			Expect(err).NotTo(HaveOccurred())
-			Expect(info.Mode().Perm()).To(Equal(os.FileMode(0o600)))
+			dir := filepath.Dir(path)
+			Expect(filepath.Dir(dir)).To(Equal(h.tmp))
+			Expect(filepath.Base(path)).To(Equal("body.json"))
 			Expect(os.ReadFile(path)).To(BeEquivalentTo(opAddPickJob.SampleBody))
+
+			if runtime.GOOS != "windows" {
+				info, err := os.Stat(path)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(info.Mode().Perm()).To(Equal(os.FileMode(0o600)))
+
+				info, err = os.Stat(dir)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(info.Mode().Perm()).To(Equal(os.FileMode(0o700)), "the directory is the session's alone")
+			}
 		})
 
 		It("gives the editor none of fft's credentials", func() {
@@ -613,6 +622,17 @@ var _ = Describe("the Request screen", func() {
 			Expect(string(inv.Stdin)).To(Equal(edited))
 			Expect(strings.Join(inv.Args, " ")).NotTo(ContainSubstring("stdin-only"))
 			Expect(h.view()).NotTo(ContainSubstring("stdin-only"))
+		})
+
+		It("removes what the editor left beside the body, with the body", func() {
+			h.press("e")
+			dir := filepath.Dir(h.editor.path())
+			Expect(os.WriteFile(filepath.Join(dir, ".body.json.swp"), []byte(`{"secret":1}`), 0o600)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(dir, "body.json~"), []byte(`{"secret":1}`), 0o600)).To(Succeed())
+			h.editorExits([]byte(`{"a":1}`), nil)
+
+			Expect(h.files()).To(BeEmpty())
+			Expect(dir).NotTo(BeADirectory())
 		})
 
 		It("reopens the body as it was left", func() {
@@ -676,9 +696,11 @@ var _ = Describe("the Request screen", func() {
 			Expect(h.view()).To(ContainSubstring("$EDITOR: a quote or a backslash is not closed"))
 		})
 
-		It("removes the file of an editor still open when the UI ends", func() {
+		It("removes the directory of an editor still open when the UI ends", func() {
 			h.press("e")
 			Expect(h.files()).To(HaveLen(1))
+			swap := filepath.Join(filepath.Dir(h.editor.path()), ".body.json.swp")
+			Expect(os.WriteFile(swap, []byte(`{}`), 0o600)).To(Succeed())
 
 			h.m.s.cleanup()
 			Expect(h.files()).To(BeEmpty())
