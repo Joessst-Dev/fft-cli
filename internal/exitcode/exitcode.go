@@ -57,3 +57,29 @@ func FromError(err error) int {
 	}
 	return General
 }
+
+// meanings are the short descriptions `fft help exit-codes` and the agent skill's
+// troubleshooting table give each code.
+var meanings = map[int]string{
+	OK:          "success",
+	General:     "unclassified failure",
+	Usage:       "bad flags or arguments",
+	Config:      "no active project, or the config is unusable",
+	Auth:        "authentication failed",
+	Forbidden:   "authenticated, but not permitted",
+	NotFound:    "not found",
+	Conflict:    "version conflict",
+	Partial:     "partial bulk write",
+	Unavailable: "upstream unreachable or erroring",
+	ReadOnly:    "read-only: fft refused a write, nothing was sent",
+	Interrupted: "interrupted",
+}
+
+// Meaning describes code in a few words, for a person reading a result rather than
+// a script branching on it. A code fft never exits with is described as unknown.
+func Meaning(code int) string {
+	if m, ok := meanings[code]; ok {
+		return m
+	}
+	return "unknown exit code"
+}
