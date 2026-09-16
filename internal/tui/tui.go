@@ -25,6 +25,10 @@ type Options struct {
 	// fft's own resolution. It is only shown; the Runner already acts on it.
 	Project string
 
+	// Headless is set when fft runs from the environment (FFT_BASE_URL): the config
+	// file is not the session's to change, from the first keystroke on.
+	Headless bool
+
 	// ReadOnly is set when every write in the session is refused, whatever the
 	// project's configuration says: fft tui --read-only, or FFT_READ_ONLY.
 	ReadOnly bool

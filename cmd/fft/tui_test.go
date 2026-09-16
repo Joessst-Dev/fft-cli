@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/Joessst-Dev/fft-cli/internal/config"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/tui"
 )
@@ -102,6 +103,19 @@ var _ = Describe("fft tui", func() {
 			Entry("FFT_NO_COLOR", func() { c.setenv("FFT_NO_COLOR", "true") }, nil, tui.Options{}),
 			Entry("NO_COLOR", func() { c.setenv("NO_COLOR", "1") }, nil, tui.Options{}),
 		)
+
+		It("tells the UI it runs from the environment before the UI has listed anything", func() {
+			Expect(c.run("tui")).To(Equal(exitcode.OK), c.errOut())
+			Expect(started[0].Headless).To(BeTrue())
+		})
+
+		It("tells the UI a session on the config file may change it", func() {
+			c.setenv(config.EnvBaseURL, "")
+			c.configuredTenant(func(http.ResponseWriter, *http.Request) {})
+
+			Expect(c.run("tui")).To(Equal(exitcode.OK), c.errOut())
+			Expect(started[0].Headless).To(BeFalse())
+		})
 
 		It("cancels what is still running when the UI returns, and reports how it ended", func() {
 			blocking := c.fakeTenant(func(_ http.ResponseWriter, r *http.Request, _ []byte) {

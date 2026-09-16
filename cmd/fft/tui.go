@@ -62,6 +62,7 @@ func newTUICmd(deps *Deps) *cobra.Command {
 				In:       cmd.InOrStdin(),
 				Out:      cmd.ErrOrStderr(),
 				Project:  deps.Project,
+				Headless: deps.Ephemeral != nil,
 				ReadOnly: session.readOnly || deps.ReadOnlyEnv,
 				Color:    uiColor(cmd),
 			})

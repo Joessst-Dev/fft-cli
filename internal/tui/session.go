@@ -64,9 +64,14 @@ type session struct {
 	// read-only for this session, whatever its configuration says.
 	readOnlyFloor bool
 
-	// headless is set once `project list` has reported the environment's project:
-	// the config file is not fft's to change in this process.
+	// headless is set when the config file is not fft's to change in this process:
+	// the caller said so at the start, or `project list` has since reported the
+	// environment's project.
 	headless bool
+
+	// startedHeadless is what the caller said, which a list without the
+	// environment's project does not overrule.
+	startedHeadless bool
 
 	// projectReadOnly is whether the current project is configured read-only.
 	projectReadOnly bool
@@ -88,8 +93,12 @@ func newSession(opts Options) *session {
 		now:           now,
 		project:       opts.Project,
 		readOnlyFloor: opts.ReadOnly,
-		runs:          newRunList(),
-		done:          make(map[RunID]func(Result) tea.Cmd),
+		// Known before the list is: a key pressed while it loads is refused as
+		// surely as one pressed after.
+		headless:        opts.Headless,
+		startedHeadless: opts.Headless,
+		runs:            newRunList(),
+		done:            make(map[RunID]func(Result) tea.Cmd),
 	}
 }
 

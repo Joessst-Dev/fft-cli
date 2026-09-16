@@ -388,6 +388,13 @@ var _ = Describe("the UI", func() {
 			h.press("a")
 		})
 
+		It("accepts http:// only as far as project add does, and says so", func() {
+			h.press("tab")
+			h.typeText("ftp://qa.example.com")
+			h.press("ctrl+s")
+			Expect(h.view()).To(ContainSubstring("the base URL must start with https:// (http:// only for localhost)"))
+		})
+
 		It("refuses to send what project add would refuse, and says what is missing", func() {
 			h.press("ctrl+s")
 
@@ -534,6 +541,26 @@ var _ = Describe("the UI", func() {
 
 			Expect(h.view()).NotTo(ContainSubstring("Add a project"))
 			Expect(h.r.commandLines()).To(HaveLen(2))
+		})
+	})
+
+	When("fft is running from the environment and the list has not loaded yet", func() {
+		BeforeEach(func() {
+			h = newHarness(Options{Headless: true})
+		})
+
+		It("refuses the add form already, sending nothing", func() {
+			h.press("a")
+
+			Expect(h.view()).NotTo(ContainSubstring("Add a project"))
+			Expect(h.view()).To(ContainSubstring("Nothing was sent: fft is running from the environment"))
+			Expect(h.r.commandLines()).To(HaveLen(2))
+		})
+
+		It("stays headless when the list does not show the environment's project", func() {
+			h.loaded(twoProjects, validToken)
+			h.press("a")
+			Expect(h.view()).NotTo(ContainSubstring("Add a project"))
 		})
 	})
 

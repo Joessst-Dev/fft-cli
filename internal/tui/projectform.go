@@ -252,7 +252,9 @@ func (f *addForm) validate() []string {
 
 	require(rowBaseURL, "the base URL")
 	if u := f.value(rowBaseURL); u != "" && !strings.HasPrefix(u, "https://") && !strings.HasPrefix(u, "http://") {
-		problems = append(problems, "the base URL must start with https://")
+		// http:// is let through for a local emulator; project add refuses it for
+		// anything but a loopback host, and says so.
+		problems = append(problems, "the base URL must start with https:// (http:// only for localhost)")
 	}
 
 	require(rowAPIKey, "the API key")

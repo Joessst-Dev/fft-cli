@@ -202,7 +202,7 @@ func (p *projectsScreen) setRows(rows []projectRow) {
 	first := !p.loaded
 	p.rows, p.loaded = rows, true
 
-	p.s.resolved, p.s.headless = "", false
+	p.s.resolved, p.s.headless = "", p.s.startedHeadless
 	for _, r := range rows {
 		if r.Active {
 			p.s.resolved = r.Name
