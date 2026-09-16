@@ -573,6 +573,68 @@ var _ = Describe("the TUI's command runner", func() {
 			Expect(t.recorded()).To(ConsistOf(HaveField("Path", HavePrefix("/other/"))))
 		})
 
+		It("sends an invocation pinned to a project there, whichever project is selected", func() {
+			t := c.configuredTenant(func(w http.ResponseWriter, _ *http.Request) {
+				answerJSON(w, emptyFacilities)
+			})
+			r.SetProject("other")
+
+			id := start(r, tui.Invocation{Args: []string{"facility", "list"}, Project: "prod"})
+			res := awaitDone(r, id)[id]
+
+			Expect(res.ExitCode).To(Equal(exitcode.OK), "stderr: %s", res.Stderr)
+			Expect(t.recorded()).To(ConsistOf(HaveField("Path", HavePrefix("/prod/"))))
+			Expect(res.Project).To(Equal("prod"))
+		})
+
+		It("reports the project a run acted on, even when fft's own resolution chose it", func() {
+			c.configuredTenant(func(w http.ResponseWriter, _ *http.Request) {
+				answerJSON(w, emptyFacilities)
+			})
+
+			id := start(r, tui.Invocation{Args: []string{"facility", "list"}})
+			Expect(awaitDone(r, id)[id].Project).To(Equal("prod"))
+		})
+
+		It("reports no project for a run that never chose one", func() {
+			c.configuredTenant(func(w http.ResponseWriter, _ *http.Request) {
+				answerJSON(w, emptyFacilities)
+			})
+
+			id := start(r, tui.Invocation{Args: []string{"facility", "list", "--no-such-flag"}})
+			res := awaitDone(r, id)[id]
+
+			Expect(res.ExitCode).To(Equal(exitcode.Usage))
+			Expect(res.Project).To(BeEmpty())
+		})
+
+		It("keeps only the first part of an answer too large to hold, and says so", func() {
+			c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+				answerJSON(w, `{"id":"pj-1","note":"`+strings.Repeat("x", 4096)+`"}`)
+			})
+			r.stdoutLimit = 1024
+
+			id := start(r, tui.Invocation{Args: []string{"picking", "get-pick-job", "--pick-job-id", "pj-1"}})
+			res := awaitDone(r, id)[id]
+
+			Expect(res.ExitCode).To(Equal(exitcode.OK), "the command must finish however much the UI keeps")
+			Expect(res.Stdout).To(HaveLen(1024))
+			Expect(res.StdoutTruncated).To(BeTrue())
+			Expect(res.StderrTruncated).To(BeFalse())
+		})
+
+		It("keeps the whole of an answer that fits", func() {
+			c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+				answerJSON(w, `{"id":"pj-1"}`)
+			})
+
+			id := start(r, tui.Invocation{Args: []string{"picking", "get-pick-job", "--pick-job-id", "pj-1"}})
+			res := awaitDone(r, id)[id]
+
+			Expect(json.Valid(res.Stdout)).To(BeTrue())
+			Expect(res.StdoutTruncated).To(BeFalse())
+		})
+
 		// A --project that is really the value of the flag before it used to hide the
 		// selection from a runner that looked for the flag by name, and the run then
 		// went to the active project instead of the selected one.

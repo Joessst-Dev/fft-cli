@@ -30,6 +30,11 @@ type Invocation struct {
 	// command line or kept in a process listing.
 	Stdin []byte
 
+	// Project, when set, is the project the invocation acts on, whichever one the
+	// UI has selected since. It is how a request is sent again to the project it
+	// was first sent to. It travels beside Args, like the selection it overrides.
+	Project string
+
 	// Exclusive runs the invocation alone, with no other run in flight, and after
 	// every exclusive invocation started before it. The runner already runs alone
 	// every command that reads a shared file and writes it back, since two of those
@@ -68,6 +73,16 @@ type Result struct {
 
 	// Stderr is everything else the command said: errors, warnings, notices.
 	Stderr []byte
+
+	// StdoutTruncated and StderrTruncated say the command wrote more than the
+	// runner keeps, and the stream holds only the first part of what it wrote. A
+	// truncated document is not the API's answer, and must not pass for one.
+	StdoutTruncated bool
+	StderrTruncated bool
+
+	// Project is the project the command acted on, "" when it never got as far as
+	// choosing one.
+	Project string
 
 	// Duration is how long the command executed, excluding the time it queued.
 	Duration time.Duration

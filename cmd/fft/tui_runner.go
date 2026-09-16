@@ -20,6 +20,15 @@ import (
 // key cannot open a flood of connections to their tenant.
 const runnerSlots = 4
 
+// The most of a run's output the runner keeps. A response is held in memory for
+// as long as the UI may show it, and `--all` over a large tenant can print tens of
+// megabytes that nobody will scroll through on a terminal; the rest is counted and
+// dropped, and the result says so.
+const (
+	runnerStdoutLimit = 8 << 20
+	runnerStderrLimit = 256 << 10
+)
+
 // runnerEventBuffer absorbs a burst of state changes while the UI is busy
 // drawing. A full buffer blocks the runs, not the UI, which is the right way round.
 const runnerEventBuffer = 64
@@ -97,6 +106,9 @@ type cliRunner struct {
 
 	// tokens is the session's token sources, shared by every run.
 	tokens sessionTokens
+
+	// stdoutLimit and stderrLimit are how much of each run's output is kept.
+	stdoutLimit, stderrLimit int
 }
 
 var _ tui.Runner = (*cliRunner)(nil)
@@ -135,6 +147,9 @@ func newCLIRunner(ctx context.Context, deps *Deps, session uiRun) *cliRunner {
 		slots:   make(chan struct{}, runnerSlots),
 		cancels: make(map[tui.RunID]context.CancelFunc),
 		catalog: newRootCmd(deps.forRun(nil, session)),
+
+		stdoutLimit: runnerStdoutLimit,
+		stderrLimit: runnerStderrLimit,
 	}
 }
 
@@ -158,6 +173,9 @@ func (r *cliRunner) Start(inv tui.Invocation) (tui.RunID, error) {
 
 	j.ui = r.session
 	j.ui.project = r.project
+	if inv.Project != "" {
+		j.ui.project = inv.Project
+	}
 
 	j.exclusive = inv.Exclusive || r.rewritesSharedFile(inv.Args)
 	inv.Exclusive = j.exclusive
@@ -296,19 +314,45 @@ func (r *cliRunner) execute(ctx context.Context, j job) tui.Result {
 		return tui.Result{ExitCode: exitcode.Interrupted}
 	}
 
-	var stdout, stderr bytes.Buffer
+	stdout := cappedBuffer{limit: r.stdoutLimit}
+	stderr := cappedBuffer{limit: r.stderrLimit}
 	started := time.Now()
 	// The command line is run exactly as given; the run's Deps carries what the UI
 	// decides.
 	code := executeRoot(ctx, deps, newRootCmd(deps), j.inv.Args, in, &stdout, &stderr)
 
-	return tui.Result{
-		ExitCode: code,
-		Status:   int(status.Load()),
-		Stdout:   stdout.Bytes(),
-		Stderr:   stderr.Bytes(),
-		Duration: time.Since(started),
+	res := tui.Result{
+		ExitCode:        code,
+		Status:          int(status.Load()),
+		Stdout:          stdout.buf.Bytes(),
+		Stderr:          stderr.buf.Bytes(),
+		StdoutTruncated: stdout.dropped,
+		StderrTruncated: stderr.dropped,
+		Duration:        time.Since(started),
 	}
+	if p := deps.run.project.Load(); p != nil {
+		res.Project = *p
+	}
+	return res
+}
+
+// cappedBuffer keeps the first limit bytes written to it, and drops the rest.
+type cappedBuffer struct {
+	buf     bytes.Buffer
+	limit   int
+	dropped bool
+}
+
+// Write never fails, and always reports everything as written: a command whose
+// output the UI has stopped keeping must still finish, and report how it ended.
+func (b *cappedBuffer) Write(p []byte) (int, error) {
+	room := max(b.limit-b.buf.Len(), 0)
+	kept := p[:min(room, len(p))]
+	b.buf.Write(kept)
+	if len(kept) < len(p) {
+		b.dropped = true
+	}
+	return len(p), nil
 }
 
 func (r *cliRunner) finish(id tui.RunID, inv tui.Invocation, res tui.Result) {
