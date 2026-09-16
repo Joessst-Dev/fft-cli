@@ -392,7 +392,7 @@ func (r *requestScreen) receive(msg tea.Msg) tea.Cmd {
 		r.problems = []string{"the body is not valid JSON: press e to fix it"}
 	default:
 		r.body = body
-		r.say(fmt.Sprintf("Body: %d bytes of JSON.", len(body)))
+		r.say("The body is ready to send.")
 	}
 	return nil
 }

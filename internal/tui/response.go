@@ -85,6 +85,10 @@ type responseScreen struct {
 	dialog  dialog
 	notice  string
 	failure *failure
+
+	// cancelled is set once c was pressed on the run on display. What the cancel
+	// did is only known when the run ends.
+	cancelled bool
 }
 
 // viewKey is what decides the viewport's contents.
@@ -108,6 +112,7 @@ func (p *responseScreen) show(id RunID) {
 	p.id = id
 	p.tab = tabJSON
 	p.dialog, p.notice, p.failure = nil, "", nil
+	p.cancelled = false
 	p.shown = viewKey{}
 	p.vp.GotoTop()
 }
@@ -166,7 +171,8 @@ func (p *responseScreen) update(msg tea.Msg) tea.Cmd {
 	case key.Matches(keyMsg, p.keys.cancel):
 		if e.state != RunDone {
 			p.s.runner.Cancel(e.id)
-			p.say("Cancelling… a write that already reached the tenant may still have landed.")
+			p.cancelled = true
+			p.say("Cancelling…")
 		}
 	case key.Matches(keyMsg, p.keys.rerun):
 		return p.rerun(e)
@@ -392,6 +398,12 @@ func (p *responseScreen) view(width, height int) string {
 	}
 
 	lines = append(lines, p.tabBar())
+	// Resolved on the first frame after the run ended, which is the first moment
+	// the notice could be read anyway.
+	if p.cancelled {
+		p.cancelled = false
+		p.say(cancelOutcome(e.result))
+	}
 	for _, note := range p.caveats(e) {
 		lines = append(lines, wrap(st.warnText.Render(note), width))
 	}
@@ -404,6 +416,16 @@ func (p *responseScreen) view(width, height int) string {
 
 	p.fill(e, width, max(height-len(lines)-1, 1))
 	return strings.Join(append(lines, "", p.vp.View()), "\n")
+}
+
+// cancelOutcome says what a cancel turned out to do: a command that finished its
+// work before the cancel reached it reports how it ended, and a write among those
+// has landed.
+func cancelOutcome(r Result) string {
+	if r.ExitCode == exitcode.Interrupted {
+		return "Cancelled. A write that had already reached the tenant may still have landed."
+	}
+	return "It finished before the cancel reached it: this is how it ended."
 }
 
 func (p *responseScreen) header(e *runEntry) string {

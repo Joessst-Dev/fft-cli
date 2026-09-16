@@ -85,6 +85,22 @@ var _ = Describe("the Response screen", func() {
 			Expect(h.view()).To(ContainSubstring("exit 130 (interrupted)"))
 			Expect(h.view()).To(ContainSubstring("no HTTP response"))
 		})
+
+		It("says the cancel stopped it, once it has ended so", func() {
+			h.press("c")
+			h.finishID(id, Result{ExitCode: exitcode.Interrupted})
+
+			Expect(h.view()).To(ContainSubstring("Cancelled. A write that had already reached the tenant may still have landed."))
+			Expect(h.view()).NotTo(ContainSubstring("Cancelling"))
+		})
+
+		It("says when the run finished before the cancel reached it", func() {
+			h.press("c")
+			h.finishID(id, Result{ExitCode: exitcode.OK, Status: 200, Stdout: []byte(`{}`)})
+
+			Expect(h.view()).To(ContainSubstring("exit 0 (success) · HTTP 200"))
+			Expect(h.view()).To(ContainSubstring("It finished before the cancel reached it"))
+		})
 	})
 
 	Describe("a finished response", func() {

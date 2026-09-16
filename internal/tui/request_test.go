@@ -311,7 +311,8 @@ var _ = Describe("the Request screen", func() {
 			h.editorExits([]byte(edited), nil)
 
 			Expect(h.files()).To(BeEmpty())
-			Expect(h.view()).To(ContainSubstring("Body: 44 bytes"))
+			Expect(h.view()).To(ContainSubstring("Body: 44 bytes, sent on stdin"))
+			Expect(h.view()).To(ContainSubstring("The body is ready to send."))
 
 			h.press("s", "y")
 			inv := h.last()
