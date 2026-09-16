@@ -39,7 +39,16 @@ the synthetic address fulfillmenttools issues, {username}@ocff-{projectId}-{env}
 The fulfillmenttools API key (a Firebase Web API key) is treated as sensitive: it
 goes to the keychain alongside the password and tokens, each under its own entry,
 and is never written to the config file. It grants nothing on its own and is sent
-only to Google's identity endpoints — never to fulfillmenttools.`
+only to Google's identity endpoints — never to fulfillmenttools.
+
+To keep the API key off the command line as well, pass --api-key-stdin. Together
+with --password-stdin, stdin then holds the API key on its first line and the
+password after it:
+
+  printf '%s\n%s' "$API_KEY" "$PASSWORD" | fft project add prd \
+    --base-url https://acme.api.fulfillmenttools.com \
+    --username warehouse-bot --project-id acme --env prd \
+    --api-key-stdin --password-stdin`
 
 // addFlags are the non-interactive inputs to `project add`.
 type addFlags struct {
@@ -51,6 +60,7 @@ type addFlags struct {
 	projectID     string
 	environment   string
 	passwordStdin bool
+	apiKeyStdin   bool
 	force         bool
 	readOnly      bool
 }
@@ -82,6 +92,8 @@ func newProjectAddCmd(deps *Deps) *cobra.Command {
 	f.StringVar(&flags.projectID, "project-id", "", "fulfillmenttools project id")
 	f.StringVar(&flags.environment, "env", "", "Environment, e.g. pre or prd")
 	f.BoolVar(&flags.passwordStdin, "password-stdin", false, "Read the password from stdin")
+	f.BoolVar(&flags.apiKeyStdin, "api-key-stdin", false,
+		"Read the API key from stdin (its first line, when --password-stdin is given too)")
 	f.BoolVar(&flags.force, "force", false, "Overwrite an existing project of the same name")
 
 	// This local --read-only shadows the root's persistent one on this command, which
@@ -92,6 +104,7 @@ func newProjectAddCmd(deps *Deps) *cobra.Command {
 	f.BoolVar(&flags.readOnly, "read-only", false, "Refuse every request that would change this project")
 
 	cmd.MarkFlagsMutuallyExclusive("email", "username")
+	cmd.MarkFlagsMutuallyExclusive("api-key", "api-key-stdin")
 
 	return cmd
 }
@@ -106,10 +119,10 @@ func runProjectAdd(cmd *cobra.Command, deps *Deps, flags *addFlags, name string)
 		return err
 	}
 
-	// Nothing may be prompted for once stdin has been handed to --password-stdin:
-	// the password is the whole of stdin, so there is no line left to read an
-	// answer from.
-	interactive := deps.Prompt.Interactive() && !flags.passwordStdin
+	// Nothing may be prompted for once stdin has been handed to --password-stdin or
+	// --api-key-stdin: the secrets are the whole of stdin, so there is no line left
+	// to read an answer from.
+	interactive := deps.Prompt.Interactive() && !flags.passwordStdin && !flags.apiKeyStdin
 
 	project, password, err := gatherProject(deps, flags, name, interactive)
 	if err != nil {
@@ -177,10 +190,20 @@ func runProjectAdd(cmd *cobra.Command, deps *Deps, flags *addFlags, name string)
 // gatherProject assembles the project from flags, falling back to prompts on a
 // terminal and to a precise "you are missing these flags" error without one.
 func gatherProject(deps *Deps, flags *addFlags, name string, interactive bool) (config.Project, string, error) {
+	piped, err := readStdinSecrets(deps, flags)
+	if err != nil {
+		return config.Project{}, "", err
+	}
+
+	apiKey := flags.apiKey
+	if flags.apiKeyStdin {
+		apiKey = piped.apiKey
+	}
+
 	p := config.Project{
 		Name:           strings.TrimSpace(name),
 		BaseURL:        strings.TrimSpace(flags.baseURL),
-		FirebaseAPIKey: strings.TrimSpace(flags.apiKey),
+		FirebaseAPIKey: strings.TrimSpace(apiKey),
 		Email:          strings.TrimSpace(flags.email),
 		Username:       strings.TrimSpace(flags.username),
 		Tenant:         strings.TrimSpace(flags.tenant),
@@ -217,7 +240,7 @@ func gatherProject(deps *Deps, flags *addFlags, name string, interactive bool) (
 	}
 	p.BaseURL = normalized
 
-	password, err := readPassword(deps, flags, interactive)
+	password, err := readPassword(deps, flags, piped.password, interactive)
 	if err != nil {
 		return config.Project{}, "", err
 	}
@@ -318,16 +341,58 @@ func requireFields(p config.Project, interactive bool) error {
 		"stdin is not a terminal, so fft cannot prompt: pass %s", strings.Join(missing, ", "))}
 }
 
-func readPassword(deps *Deps, flags *addFlags, interactive bool) (string, error) {
-	if flags.passwordStdin {
-		password, err := prompt.ReadAll(deps.In)
-		if err != nil {
-			return "", err
+// stdinSecrets is what `project add` read from stdin, for the flags that asked it
+// to.
+type stdinSecrets struct {
+	apiKey   string
+	password string
+}
+
+// readStdinSecrets reads stdin once, for --password-stdin, --api-key-stdin or both.
+//
+// Both at once share the stream line by line, the API key first. A Firebase Web API
+// key never contains a line break, so its line ends it unambiguously; the password
+// is everything after it, trimmed exactly as when it is piped in alone. This is what
+// lets a caller — fft tui among them — keep both secrets out of the argument list,
+// which is shown, logged and visible in the process table.
+func readStdinSecrets(deps *Deps, flags *addFlags) (stdinSecrets, error) {
+	if !flags.passwordStdin && !flags.apiKeyStdin {
+		return stdinSecrets{}, nil
+	}
+
+	data, err := prompt.ReadAll(deps.In)
+	if err != nil {
+		return stdinSecrets{}, err
+	}
+
+	var piped stdinSecrets
+	switch {
+	case flags.apiKeyStdin && flags.passwordStdin:
+		key, password, ok := strings.Cut(data, "\n")
+		if !ok {
+			return stdinSecrets{}, exitcode.UsageError{Err: errors.New(
+				"--api-key-stdin with --password-stdin needs the API key on the first line of stdin and the password after it")}
 		}
-		if password == "" {
+		piped = stdinSecrets{apiKey: key, password: password}
+	case flags.apiKeyStdin:
+		piped.apiKey = data
+	default:
+		piped.password = data
+	}
+
+	piped.apiKey = strings.TrimSpace(piped.apiKey)
+	if flags.apiKeyStdin && piped.apiKey == "" {
+		return stdinSecrets{}, exitcode.UsageError{Err: errors.New("--api-key-stdin was given but stdin held no API key")}
+	}
+	return piped, nil
+}
+
+func readPassword(deps *Deps, flags *addFlags, piped string, interactive bool) (string, error) {
+	if flags.passwordStdin {
+		if piped == "" {
 			return "", exitcode.UsageError{Err: errors.New("--password-stdin was given but stdin was empty")}
 		}
-		return password, nil
+		return piped, nil
 	}
 
 	if !interactive {

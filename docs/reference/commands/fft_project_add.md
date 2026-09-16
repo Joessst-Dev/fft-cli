@@ -35,6 +35,15 @@ goes to the keychain alongside the password and tokens, each under its own entry
 and is never written to the config file. It grants nothing on its own and is sent
 only to Google's identity endpoints — never to fulfillmenttools.
 
+To keep the API key off the command line as well, pass --api-key-stdin. Together
+with --password-stdin, stdin then holds the API key on its first line and the
+password after it:
+
+  printf '%s\n%s' "$API_KEY" "$PASSWORD" | fft project add prd \
+    --base-url https://acme.api.fulfillmenttools.com \
+    --username warehouse-bot --project-id acme --env prd \
+    --api-key-stdin --password-stdin
+
 ## Usage
 
 ```
@@ -45,6 +54,7 @@ fft project add [name] [flags]
 
 ```
       --api-key string      fulfillmenttools API key
+      --api-key-stdin       Read the API key from stdin (its first line, when --password-stdin is given too)
       --base-url string     API root, e.g. https://acme.api.fulfillmenttools.com
       --email string        Email address to sign in with (use instead of --username)
       --env string          Environment, e.g. pre or prd

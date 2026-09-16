@@ -233,6 +233,58 @@ var _ = Describe("fft project add", func() {
 		})
 	})
 
+	// A caller that must keep the API key out of the argument list — fft tui shows
+	// every command line it runs — pipes it in with the password.
+	When("the API key is piped in with --api-key-stdin", func() {
+		add := func(extra ...string) int {
+			return c.run(append([]string{"project", "add", "staging",
+				"--base-url", "https://acme.api.fulfillmenttools.com",
+				"--email", "someone@acme.com"}, extra...)...)
+		}
+
+		It("reads the key from the first line and the password from the rest", func() {
+			c.stdin.WriteString("AIzaSyPiped\r\npass word\nwith a second line\n")
+
+			Expect(add("--api-key-stdin", "--password-stdin")).To(Equal(exitcode.OK))
+
+			Expect(c.secrets.Snapshot()).To(Equal(map[string]string{
+				"fft:staging:apiKey":   "AIzaSyPiped",
+				"fft:staging:password": "pass word\nwith a second line",
+			}))
+			Expect(c.out()).NotTo(ContainSubstring("AIzaSyPiped"))
+		})
+
+		It("keeps the piped key out of the config file", func() {
+			c.stdin.WriteString("AIzaSyPiped\ns3cret")
+			Expect(add("--api-key-stdin", "--password-stdin")).To(Equal(exitcode.OK))
+
+			data, err := os.ReadFile(c.configPath)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(string(data)).NotTo(ContainSubstring("AIzaSyPiped"))
+		})
+
+		DescribeTable("exits 2 and stores nothing when stdin does not hold what the flags promise",
+			func(stdin, message string, flags ...string) {
+				c.stdin.WriteString(stdin)
+
+				Expect(add(flags...)).To(Equal(exitcode.Usage))
+				Expect(c.errOut()).To(ContainSubstring(message))
+				Expect(c.secrets.Snapshot()).To(BeEmpty())
+				Expect(c.configPath).NotTo(BeAnExistingFile())
+			},
+			Entry("one line for two secrets", "AIzaSyPiped", "on the first line of stdin",
+				"--api-key-stdin", "--password-stdin"),
+			Entry("an empty key line", "\ns3cret", "held no API key",
+				"--api-key-stdin", "--password-stdin"),
+			Entry("a key and an empty password line", "AIzaSyPiped\n\n", "stdin was empty",
+				"--api-key-stdin", "--password-stdin"),
+			Entry("the key alone, with nothing left to read a password from", "AIzaSyPiped",
+				"--password-stdin", "--api-key-stdin"),
+			Entry("the key both piped and given", "AIzaSyPiped\ns3cret", "api-key",
+				"--api-key", "AIzaSyFlag", "--api-key-stdin", "--password-stdin"),
+		)
+	})
+
 	When("the base URL is plain http to a real host", func() {
 		It("exits 2, because fft would send the bearer token in the clear", func() {
 			c.stdin.WriteString("s3cret")

@@ -41,6 +41,19 @@ echo "$PASSWORD" | fft project add prod \
   --password-stdin
 ```
 
+The API key is sensitive too — it goes to the keychain, never to the config file. To keep
+it off the command line as well, pipe it in with `--api-key-stdin`. Together with
+`--password-stdin`, stdin holds the key on its first line and the password after it:
+
+```sh
+printf '%s\n%s' "$FIREBASE_WEB_API_KEY" "$PASSWORD" | fft project add prod \
+  --base-url   https://ocff-acme-pre.api.fulfillmenttools.com \
+  --project-id acme \
+  --env        pre \
+  --username   jane.doe \
+  --api-key-stdin --password-stdin
+```
+
 Pass `--email jane.doe@ocff-acme-pre.com` instead of `--username`/`--project-id`/`--env`
 if you already know the full address. `--force` overwrites an existing project of the
 same name.
