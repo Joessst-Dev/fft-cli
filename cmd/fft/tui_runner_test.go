@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -48,6 +49,51 @@ func awaitDone(r tui.Runner, ids ...tui.RunID) map[tui.RunID]tui.Result {
 		}
 	}
 	return done
+}
+
+// awaitState reads r's events until run id enters state.
+func awaitState(r tui.Runner, id tui.RunID, state tui.RunState) {
+	GinkgoHelper()
+	for {
+		var ev tui.RunEvent
+		Eventually(r.Events()).WithTimeout(runTimeout).Should(Receive(&ev))
+		if ev.ID == id && ev.State == state {
+			return
+		}
+	}
+}
+
+// configuredTenant is [cli.fakeTenant] reached through the config file rather than
+// the environment: two projects, "prod" (the active one) and "other", both pointing
+// at it. The runner's config-file handling can only be seen with a config file.
+func (c *cli) configuredTenant(handle func(w http.ResponseWriter, r *http.Request)) *tenant {
+	t := &tenant{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.record(call{Method: r.Method, Path: r.URL.Path, Query: r.URL.Query()})
+		handle(w, r)
+	}))
+	DeferCleanup(srv.Close)
+
+	cfg := config.New()
+	cfg.ActiveProject = "prod"
+	for _, name := range []string{"prod", "other"} {
+		cfg.Upsert(config.Project{
+			Name:           name,
+			BaseURL:        srv.URL + "/" + name,
+			FirebaseAPIKey: "AIzaSyExample",
+			Email:          "bot@ocff-acme-" + name + ".com",
+		})
+	}
+	Expect(c.deps.Config.Save(cfg)).To(Succeed())
+	return t
+}
+
+// activeProject is the project the config file on disk names as active.
+func (c *cli) activeProject() string {
+	GinkgoHelper()
+	cfg, err := c.deps.Config.Load()
+	Expect(err).NotTo(HaveOccurred())
+	return cfg.ActiveProject
 }
 
 // start starts one invocation and fails the spec if the runner refuses it.
@@ -124,6 +170,35 @@ var _ = Describe("the TUI's command runner", func() {
 		r.Cancel(id)
 
 		Expect(awaitDone(r, id)[id].ExitCode).To(Equal(exitcode.Interrupted))
+	})
+
+	It("does not run a cancelled command that was waiting for the config file", func() {
+		arrived := make(chan struct{}, 1)
+		release := make(chan struct{})
+		c.configuredTenant(func(w http.ResponseWriter, _ *http.Request) {
+			arrived <- struct{}{}
+			<-release
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"id":"pj-1"}`))
+		})
+		releaseAll := sync.OnceFunc(func() { close(release) })
+		DeferCleanup(releaseAll)
+		r := c.newRunner()
+
+		// A read holds the config file open for reading, so the switch below has to
+		// wait for it.
+		blocking := start(r, tui.Invocation{Args: []string{"picking", "get-pick-job", "--pick-job-id", "pj-1"}})
+		Eventually(arrived).WithTimeout(runTimeout).Should(Receive())
+
+		switching := start(r, tui.Invocation{Args: []string{"project", "use", "other"}})
+		awaitState(r, switching, tui.RunRunning)
+		r.Cancel(switching)
+		releaseAll()
+
+		res := awaitDone(r, blocking, switching)
+		Expect(res[blocking].ExitCode).To(Equal(exitcode.OK), "stderr: %s", res[blocking].Stderr)
+		Expect(res[switching].ExitCode).To(Equal(exitcode.Interrupted), "stderr: %s", res[switching].Stderr)
+		Expect(c.activeProject()).To(Equal("prod"), "a cancelled switch went ahead")
 	})
 
 	It("refuses a component's command, which would take over the terminal", func() {

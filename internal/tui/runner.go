@@ -37,7 +37,8 @@ type RunState int
 const (
 	// RunQueued is an accepted invocation waiting for a free slot.
 	RunQueued RunState = iota
-	// RunRunning is an invocation that is executing.
+	// RunRunning is an invocation that holds a slot: it is executing, or waiting
+	// for a command that needs the config file to itself to finish.
 	RunRunning
 	// RunDone is an invocation that has finished, however it finished.
 	RunDone
@@ -49,7 +50,9 @@ type Result struct {
 	ExitCode int
 
 	// Status is the HTTP status of the last response the tenant sent, and 0 when
-	// no response arrived — a refused write, a usage error, a cancelled run.
+	// no response arrived — a refused write, a usage error, a cancelled run. A
+	// command that sends requests side by side reports the one that finished last,
+	// which is not necessarily the one it sent last.
 	Status int
 
 	// Stdout is the command's data: the API's own document under -o json.
@@ -83,9 +86,11 @@ type Runner interface {
 	// Start accepts inv and returns at once. Its progress arrives on Events.
 	Start(inv Invocation) (RunID, error)
 
-	// Cancel stops a queued or running invocation, which then finishes with exit
-	// code 130 as an interrupted command would. Cancelling a finished or unknown
-	// run does nothing.
+	// Cancel stops an invocation. One that has not started executing ends with exit
+	// code 130 and has sent nothing. One that is executing ends as the command does
+	// when interrupted: 130 if the interruption stopped it, and its own result if
+	// it finished its work first — a write that landed is reported as landed.
+	// Cancelling a finished or unknown run does nothing.
 	Cancel(id RunID)
 
 	// Events delivers every state change of every run. The runner closes it once

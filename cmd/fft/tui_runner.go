@@ -193,6 +193,13 @@ func (r *cliRunner) execute(ctx context.Context, inv tui.Invocation) tui.Result 
 		defer r.config.RUnlock()
 	}
 
+	// Waiting for the lock can outlast a cancel. A command whose turn came after it
+	// was cancelled has not started, and must not: `project use` does not look at
+	// its context, and would switch the project the user just said not to.
+	if ctx.Err() != nil {
+		return tui.Result{ExitCode: exitcode.Interrupted}
+	}
+
 	started := time.Now()
 	code := executeRoot(ctx, root, r.argv(inv.Args), in, &stdout, &stderr)
 
