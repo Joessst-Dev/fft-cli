@@ -583,6 +583,19 @@ var _ = Describe("the Request screen", func() {
 			Expect(os.ReadFile(path)).To(BeEquivalentTo(opAddPickJob.SampleBody))
 		})
 
+		It("gives the editor none of fft's credentials", func() {
+			h.env["FFT_PASSWORD"] = "hunter2"
+			h.env["fft_api_key"] = "AIzaSyExample"
+			h.env["PATH"] = "/usr/bin"
+			h.press("e")
+
+			env := h.editor.cmds[0].Env
+			Expect(env).NotTo(BeNil(), "a nil Env inherits everything")
+			Expect(env).To(ContainElements("PATH=/usr/bin", "EDITOR=fake-editor --wait"))
+			Expect(env).NotTo(ContainElement(ContainSubstring("hunter2")))
+			Expect(env).NotTo(ContainElement(ContainSubstring("AIzaSyExample")))
+		})
+
 		It("travels on stdin, never on the command line, and the file is removed", func() {
 			const edited = `{"pickLineItems":[{"article":"stdin-only"}]}`
 			h.press("e")

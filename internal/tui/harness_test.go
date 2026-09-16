@@ -98,6 +98,13 @@ func newHarness(opts Options) *harness {
 	}
 	opts.execProcess = h.editor.exec
 	opts.getenv = func(name string) string { return h.env[name] }
+	opts.environ = func() []string {
+		environ := make([]string, 0, len(h.env))
+		for name, value := range h.env {
+			environ = append(environ, name+"="+value)
+		}
+		return environ
+	}
 	opts.tempDir = h.tmp
 	h.m = newApp(opts)
 	h.send(tea.WindowSizeMsg{Width: 140, Height: 40})

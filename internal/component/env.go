@@ -107,19 +107,14 @@ func Environ(base []string, c Component, cmd Command, opts EnvOptions) ([]string
 	inherited := make(map[string]string, len(base))
 
 	for _, entry := range base {
-		name, value, ok := strings.Cut(entry, "=")
-		if !ok {
-			continue
+		if name, value, ok := strings.Cut(entry, "="); ok {
+			inherited[name] = value
 		}
-		inherited[name] = value
-		// Case-insensitive: Windows environment lookups ignore case, so a child asking
-		// for FFT_PASSWORD would read a `fft_password` a case-sensitive strip had left
-		// behind. The strip is the credential boundary; a boundary the case of a
-		// variable name can walk through is not one.
-		if strings.HasPrefix(strings.ToUpper(name), "FFT_") {
-			continue
+	}
+	for _, entry := range WithoutFFT(base) {
+		if name, value, ok := strings.Cut(entry, "="); ok {
+			env[name] = value
 		}
-		env[name] = value
 	}
 
 	// The one part of the FFT_ namespace a manifest may ask for, and only if it did.
@@ -160,6 +155,25 @@ func Environ(base []string, c Component, cmd Command, opts EnvOptions) ([]string
 		return nil, err
 	}
 	return flatten(env), nil
+}
+
+// WithoutFFT is environ, in os.Environ form, without a single FFT_ variable: the
+// environment for a process fft starts that has no business with its credentials.
+// It never returns nil, which exec.Cmd would read as "inherit everything".
+func WithoutFFT(environ []string) []string {
+	out := make([]string, 0, len(environ))
+	for _, entry := range environ {
+		name, _, _ := strings.Cut(entry, "=")
+		// Case-insensitive: Windows environment lookups ignore case, so a child asking
+		// for FFT_PASSWORD would read a `fft_password` a case-sensitive strip had left
+		// behind. The strip is the credential boundary; a boundary the case of a
+		// variable name can walk through is not one.
+		if strings.HasPrefix(strings.ToUpper(name), "FFT_") {
+			continue
+		}
+		out = append(out, entry)
+	}
+	return out
 }
 
 // addSession puts back the tenant credentials the declared session allows.

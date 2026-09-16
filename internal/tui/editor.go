@@ -9,6 +9,8 @@ import (
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/Joessst-Dev/fft-cli/internal/component"
 )
 
 // editorDoneMsg says the editor opened on path has exited, with err when it
@@ -151,6 +153,9 @@ func (s *session) openEditor(body []byte, gen uint64) (tea.Cmd, error) {
 	s.tempFiles[path] = true
 
 	c := exec.Command(argv[0], append(argv[1:], path)...)
+	// The editor is the user's program, not fft's, and a plugin or a shell escape in
+	// it has no business with the credentials a headless session exported.
+	c.Env = component.WithoutFFT(s.environ())
 	return s.execProcess(c, func(err error) tea.Msg {
 		return editorDoneMsg{path: path, gen: gen, err: err}
 	}), nil

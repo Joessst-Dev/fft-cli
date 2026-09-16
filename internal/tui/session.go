@@ -100,6 +100,7 @@ type session struct {
 	// environment is read, and where its temporary files go.
 	execProcess func(*exec.Cmd, tea.ExecCallback) tea.Cmd
 	getenv      func(string) string
+	environ     func() []string
 	tempDir     string
 
 	// tempFiles are the files an editor still has open. Each is removed when its
@@ -131,12 +132,17 @@ func newSession(opts Options, st styles) *session {
 	if getenv == nil {
 		getenv = os.Getenv
 	}
+	environ := opts.environ
+	if environ == nil {
+		environ = os.Environ
+	}
 	return &session{
 		runner:        opts.Runner,
 		now:           now,
 		st:            st,
 		execProcess:   execProcess,
 		getenv:        getenv,
+		environ:       environ,
 		tempDir:       opts.tempDir,
 		tempFiles:     make(map[string]bool),
 		requests:      make(map[RunID]*sentRequest),
