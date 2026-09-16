@@ -172,6 +172,15 @@ func (r *cliRunner) run(ctx context.Context, id tui.RunID, inv tui.Invocation) {
 	r.finish(id, inv, r.execute(ctx, inv))
 }
 
+// execute runs one invocation on a Deps of its own.
+//
+// Each run builds its own token source, so runs side by side against a project
+// whose cached token has expired each refresh it. The refreshed token lands in
+// the shared credential store, so the stampede is one burst, not a pattern; a
+// token source shared per project would need invalidating on every project add,
+// remove and re-authentication, which is more machinery than one burst is worth.
+// A caller avoids the burst by running one authenticated command on its own
+// before it sends several side by side.
 func (r *cliRunner) execute(ctx context.Context, inv tui.Invocation) tui.Result {
 	in := bytes.NewReader(inv.Stdin)
 

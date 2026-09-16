@@ -272,6 +272,145 @@ var _ = Describe("the TUI's command runner", func() {
 		Expect(peak.Load()).To(BeEquivalentTo(runnerSlots))
 	})
 
+	Describe("a command that must run alone", func() {
+		var (
+			r          *cliRunner
+			arrived    chan struct{}
+			releaseAll func()
+			blocking   tui.RunID
+		)
+
+		BeforeEach(func() {
+			arrived = make(chan struct{}, 1)
+			release := make(chan struct{})
+			c.configuredTenant(func(w http.ResponseWriter, _ *http.Request) {
+				arrived <- struct{}{}
+				<-release
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"id":"pj-1"}`))
+			})
+			releaseAll = sync.OnceFunc(func() { close(release) })
+			DeferCleanup(releaseAll)
+
+			r = c.newRunner()
+			blocking = start(r, tui.Invocation{Args: []string{"picking", "get-pick-job", "--pick-job-id", "pj-1"}})
+			Eventually(arrived).WithTimeout(runTimeout).Should(Receive())
+		})
+
+		DescribeTable("waits for every run in flight to finish",
+			func(inv tui.Invocation) {
+				alone := start(r, inv)
+				awaitState(r, alone, tui.RunRunning)
+
+				// A free slot is not enough: the run in flight still holds the config file.
+				Consistently(r.Events()).WithTimeout(200 * time.Millisecond).ShouldNot(Receive())
+
+				releaseAll()
+				for id, res := range awaitDone(r, blocking, alone) {
+					Expect(res.ExitCode).To(Equal(exitcode.OK), "run %d: %s", id, res.Stderr)
+				}
+			},
+			Entry("when the caller asks for it", tui.Invocation{Args: []string{"version"}, Exclusive: true}),
+			Entry("when the command rewrites the config file", tui.Invocation{Args: []string{"project", "use", "other"}}),
+		)
+
+		It("holds back the runs that start after it", func() {
+			releaseAll()
+			Expect(awaitDone(r, blocking)[blocking].ExitCode).To(Equal(exitcode.OK))
+
+			// Now the exclusive run is the one in flight, held by the tenant in turn.
+			second := make(chan struct{})
+			c.configuredTenant(func(w http.ResponseWriter, _ *http.Request) {
+				arrived <- struct{}{}
+				<-second
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"id":"pj-1"}`))
+			})
+			releaseSecond := sync.OnceFunc(func() { close(second) })
+			DeferCleanup(releaseSecond)
+
+			alone := start(r, tui.Invocation{
+				Args:      []string{"picking", "get-pick-job", "--pick-job-id", "pj-1"},
+				Exclusive: true,
+			})
+			Eventually(arrived).WithTimeout(runTimeout).Should(Receive())
+
+			after := start(r, tui.Invocation{Args: []string{"version"}})
+			awaitState(r, after, tui.RunRunning)
+			Consistently(r.Events()).WithTimeout(200 * time.Millisecond).ShouldNot(Receive())
+
+			releaseSecond()
+			for id, res := range awaitDone(r, alone, after) {
+				Expect(res.ExitCode).To(Equal(exitcode.OK), "run %d: %s", id, res.Stderr)
+			}
+		})
+	})
+
+	It("ends a run cancelled while it waited for a slot, without sending it", func() {
+		arrived := make(chan struct{}, runnerSlots)
+		release := make(chan struct{})
+		t := c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+			arrived <- struct{}{}
+			<-release
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"id":"pj-1"}`))
+		})
+		releaseAll := sync.OnceFunc(func() { close(release) })
+		DeferCleanup(releaseAll)
+		r := c.newRunner()
+
+		held := make([]tui.RunID, 0, runnerSlots)
+		for range runnerSlots {
+			held = append(held, start(r, tui.Invocation{Args: []string{"picking", "get-pick-job", "--pick-job-id", "pj-1"}}))
+		}
+		for range runnerSlots {
+			Eventually(arrived).WithTimeout(runTimeout).Should(Receive())
+		}
+
+		queued := start(r, tui.Invocation{Args: []string{"picking", "add-pick-job", "--data", `{"pickLineItems":[]}`}})
+		awaitState(r, queued, tui.RunQueued)
+		r.Cancel(queued)
+
+		// It ends while every slot is still taken: it never needed one to stop.
+		Expect(awaitDone(r, queued)[queued].ExitCode).To(Equal(exitcode.Interrupted))
+
+		releaseAll()
+		awaitDone(r, held...)
+		Expect(t.recorded()).To(HaveLen(runnerSlots), "the cancelled run was sent")
+	})
+
+	It("shuts down while its runs are blocked on an events buffer nobody reads", func() {
+		r := newCLIRunner(context.Background(), c.deps, uiRun{})
+
+		// Three events a run, and more runs than the buffer has room for.
+		for range runnerEventBuffer {
+			start(r, tui.Invocation{Args: []string{"version"}})
+		}
+		Eventually(func() int { return len(r.events) }).WithTimeout(runTimeout).Should(Equal(runnerEventBuffer))
+
+		closed := make(chan struct{})
+		go func() {
+			defer close(closed)
+			r.Close()
+		}()
+		Eventually(closed).WithTimeout(runTimeout).Should(BeClosed())
+
+		// Whatever was buffered is still delivered, and then the stream ends.
+		Eventually(r.Events()).WithTimeout(runTimeout).Should(BeClosed())
+	})
+
+	It("refuses a write in a session started read-only", func() {
+		t := c.readOnlyProject(false)
+		r := newCLIRunner(context.Background(), c.deps, uiRun{readOnly: true})
+		DeferCleanup(r.Close)
+
+		id := start(r, tui.Invocation{Args: []string{"picking", "add-pick-job", "--data", `{"pickLineItems":[]}`}})
+		res := awaitDone(r, id)[id]
+
+		Expect(res.ExitCode).To(Equal(exitcode.ReadOnly), "stderr: %s", res.Stderr)
+		Expect(t.recorded()).To(BeEmpty())
+	})
+
 	It("refuses to start anything once it has been shut down", func() {
 		r := c.newRunner()
 		r.Close()

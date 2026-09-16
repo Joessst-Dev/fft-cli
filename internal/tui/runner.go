@@ -16,8 +16,13 @@ type RunID uint64
 // Invocation is one fft command line to execute.
 type Invocation struct {
 	// Args is the command line without the program name: {"facility", "list"}.
-	// The runner adds the flags the UI depends on (machine-readable output, the
-	// selected project), so Args carries only what the user chose.
+	// It is run exactly as given; what the UI decides for every run — the output
+	// format, the selected project — travels beside it, so Args carries only what
+	// the user chose.
+	//
+	// Args is not secret. It is shown as the equivalent fft command and kept, with
+	// known credential-shaped values redacted, in the request history; redaction is
+	// a net, not a place to put a secret. Anything sensitive belongs on Stdin.
 	Args []string
 
 	// Stdin is what the command reads from standard input. A request body and a
