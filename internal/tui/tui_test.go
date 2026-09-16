@@ -45,6 +45,16 @@ var _ = Describe("the UI", func() {
 			Expect(view).NotTo(ContainSubstring("RO"))
 		})
 
+		It("signs in first for the environment's project too, whose token only the session keeps", func() {
+			h.loaded(`[{"name":"env","active":true,"ephemeral":true}]`,
+				`{"project":"env","store":"env","signIn":"password","token":"none"}`)
+
+			Expect(h.r.exclusive(h.lookup("auth", "whoami"))).To(BeTrue())
+			// The store's "none" is about the store, not about the token the session holds.
+			Expect(h.view()).To(ContainSubstring("token not stored (environment)"))
+			Expect(h.view()).NotTo(ContainSubstring("not signed in"))
+		})
+
 		It("signs in first, alone, when the next run would have to", func() {
 			h.loaded(twoProjects, `{"project":"staging","store":"keyring","signIn":"password","token":"expired"}`)
 
@@ -62,8 +72,6 @@ var _ = Describe("the UI", func() {
 				Expect(h.r.commandLines()).To(Equal([]string{"project list", "auth status"}))
 			},
 			Entry("a valid token", validToken),
-			Entry("the environment's store, which keeps no token",
-				`{"project":"env","store":"env","signIn":"password","token":"none"}`),
 			Entry("a fixed id token", `{"project":"env","store":"env","signIn":"idToken","token":"unknown"}`),
 		)
 

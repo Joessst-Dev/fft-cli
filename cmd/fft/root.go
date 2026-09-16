@@ -192,6 +192,11 @@ type Deps struct {
 	// client receives. The TUI's runner uses it to report what a run got back.
 	observeStatus func(status int)
 
+	// tokens, when set, is the token sources a `fft tui` session shares between its
+	// runs; see [sessionTokens]. The runner sets it on each run. A command typed in
+	// a shell is its own session, and builds its source itself.
+	tokens *sessionTokens
+
 	// HistoryPath is the request history file. "" means the real one in the state
 	// directory; a spec points it somewhere it can read, or somewhere unwritable.
 	HistoryPath string
@@ -300,8 +305,8 @@ func (d *Deps) forRun(in io.Reader, ui uiRun) *Deps {
 		// Printer, Prompt, Debug, Project, Ephemeral, Timeout, AssumeYes,
 		// ReadOnlyFlag, ReadOnlyEnv, noKeyringFromConfig, explicitNoKeyring, cfg,
 		// componentWarnings and the update-check plumbing. StartTUI stays nil — a
-		// run cannot open a second UI, it has no terminal — and observeStatus is the
-		// caller's to set.
+		// run cannot open a second UI, it has no terminal — and observeStatus and
+		// tokens are the caller's to set.
 	}
 }
 

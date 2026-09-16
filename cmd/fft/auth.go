@@ -155,7 +155,18 @@ func (d *Deps) tokenSource() (config.Project, auth.TokenSource, error) {
 		return config.Project{}, nil, err
 	}
 
-	src, err := d.NewTokenSource(p, d.Secrets, d.Clock, d.Debug)
+	build := func() (auth.TokenSource, error) {
+		return d.NewTokenSource(p, d.Secrets, d.Clock, d.Debug)
+	}
+	// A run with --debug builds a source of its own: the shared one would trace to
+	// the stderr of whichever run built it, and this run's trace would not show the
+	// sign-in it is being asked to show.
+	var src auth.TokenSource
+	if d.tokens != nil && d.Debug == nil {
+		src, err = d.tokens.source(p, build)
+	} else {
+		src, err = build()
+	}
 	if err != nil {
 		return config.Project{}, nil, err
 	}

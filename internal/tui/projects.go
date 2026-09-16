@@ -279,20 +279,22 @@ func (p *projectsScreen) refreshStatus(startup bool) tea.Cmd {
 	})
 }
 
-// needsSignIn reports whether the next authenticated run would mint a token that
-// the store would keep. An env project's store keeps nothing, so signing in ahead
-// of time would buy nothing there.
+// needsSignIn reports whether the next authenticated run would mint a token. The
+// session keeps what it mints for every run after it, the environment's projects
+// included, whose store keeps nothing: a fixed id token is the only credential
+// there is nothing to mint for.
 func needsSignIn(st *authStatus) bool {
-	return st.SignIn == "password" && st.Store != "env" && st.Token != "valid"
+	return st.SignIn == "password" && st.Token != "valid"
 }
 
 // warmUp signs in to the current project with one run that has the runner to
 // itself.
 //
-// Every run builds its own token source, so several runs started side by side on
-// a project with no fresh token would each sign in. One run first, alone, leaves a
-// fresh token in the store for all of them — and puts a keychain prompt, if the
-// system raises one, at a moment the user can connect to what they just did.
+// The runs share the session's token, but the first of several started side by
+// side would still sign in while the others wait on it — and a keychain prompt, if
+// the system raises one, would appear under whatever the user happened to start.
+// One run first, alone, puts both at a moment the user can connect to what they
+// just did.
 func (p *projectsScreen) warmUp() tea.Cmd {
 	p.warmed = true
 	a := p.s.scoped("auth", "whoami")

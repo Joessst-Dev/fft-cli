@@ -219,8 +219,13 @@ func (a *authStatus) tokenSummary(now time.Time) string {
 	}
 	switch a.Token {
 	case "none":
-		if a.SignIn == "none" {
+		switch {
+		case a.SignIn == "none":
 			return "no credentials"
+		case a.Store == "env":
+			// The environment's store keeps no token, so the state it reports says
+			// nothing about the one this session holds in memory.
+			return "token not stored (environment)"
 		}
 		return "not signed in"
 	case "unknown":

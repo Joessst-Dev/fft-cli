@@ -94,6 +94,9 @@ type cliRunner struct {
 	// lastExclusive is closed once the most recently started exclusive run has
 	// finished, nil when there has been none.
 	lastExclusive chan struct{}
+
+	// tokens is the session's token sources, shared by every run.
+	tokens sessionTokens
 }
 
 var _ tui.Runner = (*cliRunner)(nil)
@@ -201,6 +204,7 @@ func (r *cliRunner) SetProject(name string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.project = name
+	r.tokens.forget()
 }
 
 // Close cancels every run, waits for them to finish, and closes Events. It is
@@ -262,18 +266,12 @@ func (r *cliRunner) run(ctx context.Context, id tui.RunID, j job) {
 	r.finish(id, j.inv, r.execute(ctx, j))
 }
 
-// execute runs one job on a Deps of its own.
-//
-// Each run builds its own token source, so runs side by side against a project
-// whose cached token has expired each refresh it. The refreshed token lands in
-// the shared credential store, so the stampede is one burst, not a pattern; a
-// token source shared per project would need invalidating on every project add,
-// remove and re-authentication, which is more machinery than one burst is worth.
-// A caller avoids the burst by running one authenticated command on its own
-// before it sends several side by side.
+// execute runs one job on a Deps of its own, signing its requests through the
+// session's token sources.
 func (r *cliRunner) execute(ctx context.Context, j job) tui.Result {
 	in := bytes.NewReader(j.stdin)
 	deps := r.deps.forRun(in, j.ui)
+	deps.tokens = &r.tokens
 
 	var status atomic.Int64
 	deps.observeStatus = func(code int) { status.Store(int64(code)) }
@@ -281,6 +279,11 @@ func (r *cliRunner) execute(ctx context.Context, j job) tui.Result {
 	if j.exclusive {
 		r.config.Lock()
 		defer r.config.Unlock()
+		// A command that runs alone may have rewritten the config file — replaced a
+		// project's account, removed it — and a token kept from before would sign the
+		// next run in as whoever the project used to be. Forgotten before the lock is
+		// released, so that no run can pick the old one up in between.
+		defer r.tokens.forget()
 	} else {
 		r.config.RLock()
 		defer r.config.RUnlock()
