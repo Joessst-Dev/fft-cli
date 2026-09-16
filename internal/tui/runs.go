@@ -20,7 +20,7 @@ const keptRuns = 100
 // runEntry is one invocation as the panel shows it.
 type runEntry struct {
 	id      RunID
-	display string
+	display shellCommand
 	state   RunState
 	queued  time.Time
 	started time.Time
@@ -38,7 +38,7 @@ func newRunList() *runList {
 	return &runList{byID: make(map[RunID]*runEntry)}
 }
 
-func (l *runList) add(id RunID, display string, at time.Time) {
+func (l *runList) add(id RunID, display shellCommand, at time.Time) {
 	e := &runEntry{id: id, display: display, state: RunQueued, queued: at}
 	l.entries = append(l.entries, e)
 	l.byID[id] = e
@@ -159,11 +159,11 @@ func (p *runsPanel) bindings() []key.Binding {
 	return []key.Binding{p.keys.up, p.keys.cancel, p.keys.close}
 }
 
-func (p *runsPanel) equivalent() string {
+func (p *runsPanel) equivalent() shellCommand {
 	if e := p.selected(); e != nil {
 		return e.display
 	}
-	return ""
+	return shellCommand{}
 }
 
 func (p *runsPanel) view(st styles, spin string, width, height int) string {
@@ -207,7 +207,7 @@ func (p *runsPanel) row(st styles, e *runEntry, spin string, selected bool, widt
 	if selected {
 		marker = "> "
 	}
-	line := fmt.Sprintf("%s#%-3d %s  %s", marker, e.id, output.SanitizeCell(e.display), state)
+	line := fmt.Sprintf("%s#%-3d %s  %s", marker, e.id, output.SanitizeCell(e.display.String()), state)
 	if selected {
 		line = st.selected.Render(line)
 	}

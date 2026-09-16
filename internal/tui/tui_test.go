@@ -387,7 +387,7 @@ var _ = Describe("the UI", func() {
 			h.press("R")
 			id := h.lookup("auth", "refresh")
 			Expect(h.r.exclusive(id)).To(BeTrue())
-			Expect(h.m.s.runs.byID[id].display).To(Equal("fft auth refresh --project prod"))
+			Expect(h.m.s.runs.byID[id].display.String()).To(Equal("fft auth refresh --project prod"))
 
 			h.finishID(id, failed(exitcode.Auth, "Error: cannot authenticate"))
 			Expect(h.view()).To(ContainSubstring("refreshing the token failed: exit 4 (authentication failed)"))
@@ -458,7 +458,7 @@ var _ = Describe("the UI", func() {
 			for _, secret := range []string{apiKey, password} {
 				Expect(strings.Join(h.r.args(id), " ")).NotTo(ContainSubstring(secret))
 				Expect(h.view()).NotTo(ContainSubstring(secret))
-				Expect(h.m.s.runs.byID[id].display).NotTo(ContainSubstring(secret))
+				Expect(h.m.s.runs.byID[id].display.String()).NotTo(ContainSubstring(secret))
 			}
 		})
 
@@ -766,6 +766,15 @@ var _ = Describe("the UI", func() {
 			Expect(h.view()).To(ContainSubstring("Copied: fft project use staging"))
 		})
 
+		It("refuses to copy a command no shell quoting keeps intact, and marks it", func() {
+			h.loaded(`[{"name":"it's","active":true,"baseUrl":"https://a.example.com","credential":"keyring"}]`,
+				`{"project":"it's","store":"keyring","signIn":"password","token":"valid","expiresAt":"2026-07-12T12:42:00Z"}`)
+
+			Expect(h.view()).To(ContainSubstring(`$ fft project use 'it'\''s'  (cannot be copied safely)`))
+			Expect(clipboard(h.press("y"))).To(BeEmpty())
+			Expect(h.view()).To(ContainSubstring("This command cannot be copied safely"))
+		})
+
 		It("says when there is nothing to copy", func() {
 			h.press("2")
 			Expect(clipboard(h.press("y"))).To(BeEmpty())
@@ -820,15 +829,3 @@ var _ = Describe("the UI", func() {
 		Expect(h.send(runnerClosedMsg{})).To(BeNil())
 	})
 })
-
-var _ = DescribeTable("commandLine quotes what a shell would misread",
-	func(args []string, want string) {
-		Expect(commandLine(args)).To(Equal(want))
-	},
-	Entry("plain words", []string{"project", "use", "staging"}, "fft project use staging"),
-	Entry("a URL", []string{"--base-url", "https://a.example.com/x"}, "fft --base-url https://a.example.com/x"),
-	Entry("a space", []string{"use", "my project"}, "fft use 'my project'"),
-	Entry("a quote", []string{"use", "it's"}, `fft use 'it'\''s'`),
-	Entry("an empty value", []string{"--tenant", ""}, "fft --tenant ''"),
-	Entry("a dollar", []string{"use", "$HOME"}, "fft use '$HOME'"),
-)

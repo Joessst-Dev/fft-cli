@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -35,7 +36,7 @@ type action struct {
 
 	// display is the fft command a user would type for the same effect. It is
 	// never where a secret goes; neither is inv.Args.
-	display string
+	display shellCommand
 }
 
 // session is the state every screen shares: the runner, the project the UI acts
@@ -128,11 +129,11 @@ func (s *session) selectProject(name string) {
 // scoped is the display of a command that acts on the current project: the
 // --project a shell would need, since the UI's choice is not in its argv.
 func (s *session) scoped(args ...string) action {
-	display := commandLine(args)
+	shown := args
 	if s.project != "" && !s.headless {
-		display += " --project " + shellQuote(s.project)
+		shown = append(slices.Clone(args), "--project", s.project)
 	}
-	return action{inv: Invocation{Args: args}, display: display}
+	return action{inv: Invocation{Args: args}, display: commandLine(shown)}
 }
 
 // start runs a, and calls done with its result once it has finished.

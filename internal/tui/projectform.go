@@ -374,7 +374,7 @@ func (f *addForm) view(width int) string {
 		lines = append(lines, f.failure.view(st, width))
 	}
 	lines = append(lines,
-		st.dim.Render(clip("runs: "+commandLine(f.args()), width)),
+		st.dim.Render(clip("runs: "+commandLine(f.args()).String(), width)),
 		st.dim.Render("The API key and password are passed on stdin, never on the command line."))
 	return strings.Join(lines, "\n")
 }

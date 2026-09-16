@@ -473,7 +473,7 @@ func (p *projectsScreen) bindings() []key.Binding {
 	return []key.Binding{k.up, k.use, k.readOnly, k.remove, k.refresh, k.add, k.reload}
 }
 
-func (p *projectsScreen) equivalent() string {
+func (p *projectsScreen) equivalent() shellCommand {
 	switch {
 	case p.dialog != nil:
 		return p.dialog.equivalent()

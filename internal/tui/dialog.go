@@ -16,8 +16,8 @@ type dialog interface {
 	view(st styles, width int) string
 	bindings() []key.Binding
 
-	// equivalent is the command a yes would run, "" when a yes runs nothing yet.
-	equivalent() string
+	// equivalent is the command a yes would run, empty when a yes runs nothing yet.
+	equivalent() shellCommand
 }
 
 var (
@@ -32,7 +32,7 @@ var (
 type confirmDialog struct {
 	question string
 	detail   string
-	command  string
+	command  shellCommand
 	onYes    func() tea.Cmd
 }
 
@@ -54,8 +54,8 @@ func (d *confirmDialog) view(st styles, width int) string {
 	if d.detail != "" {
 		lines = append(lines, d.detail)
 	}
-	if d.command != "" {
-		lines = append(lines, "", st.dim.Render("runs: "+d.command))
+	if !d.command.empty() {
+		lines = append(lines, "", st.dim.Render("runs: "+d.command.String()))
 	}
 	lines = append(lines, "", "y yes · n no")
 	return st.dialog.Width(dialogWidth(width)).Render(strings.Join(lines, "\n"))
@@ -63,7 +63,7 @@ func (d *confirmDialog) view(st styles, width int) string {
 
 func (d *confirmDialog) bindings() []key.Binding { return []key.Binding{yesKey, noKey} }
 
-func (d *confirmDialog) equivalent() string { return d.command }
+func (d *confirmDialog) equivalent() shellCommand { return d.command }
 
 // typeNameDialog asks for a name to be typed back before something that cannot be
 // undone, or that takes a protection away. A y is too easy to give by accident —
@@ -72,13 +72,13 @@ type typeNameDialog struct {
 	question string
 	detail   string
 	name     string
-	command  string
+	command  shellCommand
 	input    textinput.Model
 	mismatch bool
 	onMatch  func() tea.Cmd
 }
 
-func newTypeNameDialog(st styles, question, detail, name, command string, onMatch func() tea.Cmd) *typeNameDialog {
+func newTypeNameDialog(st styles, question, detail, name string, command shellCommand, onMatch func() tea.Cmd) *typeNameDialog {
 	in := textinput.New()
 	in.Prompt = "> "
 	in.SetStyles(st.input)
@@ -122,13 +122,13 @@ func (d *typeNameDialog) view(st styles, width int) string {
 	if d.mismatch {
 		lines = append(lines, st.errorText.Render("That is not the name; nothing was sent."))
 	}
-	lines = append(lines, "", st.dim.Render("runs: "+d.command), "", "enter confirm · esc cancel")
+	lines = append(lines, "", st.dim.Render("runs: "+d.command.String()), "", "enter confirm · esc cancel")
 	return st.dialog.Width(dialogWidth(width)).Render(strings.Join(lines, "\n"))
 }
 
 func (d *typeNameDialog) bindings() []key.Binding { return []key.Binding{submitKey, cancelKey} }
 
-func (d *typeNameDialog) equivalent() string { return d.command }
+func (d *typeNameDialog) equivalent() shellCommand { return d.command }
 
 // dialogWidth keeps a dialog readable: as wide as the text wants on a small
 // terminal, and not stretched across a large one.

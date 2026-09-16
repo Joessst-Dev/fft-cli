@@ -25,7 +25,7 @@ type screen interface {
 	bindings() []key.Binding
 
 	// equivalent is the fft command for what the screen's focused action would do.
-	equivalent() string
+	equivalent() shellCommand
 
 	// focused reports whether a dialog or a text field has the keyboard, in which
 	// case the global keys, but for ctrl+c, are the screen's to interpret.
@@ -38,10 +38,10 @@ type comingSoon struct {
 	what string
 }
 
-func (c comingSoon) update(tea.Msg) tea.Cmd  { return nil }
-func (c comingSoon) bindings() []key.Binding { return nil }
-func (c comingSoon) equivalent() string      { return "" }
-func (c comingSoon) focused() bool           { return false }
+func (c comingSoon) update(tea.Msg) tea.Cmd   { return nil }
+func (c comingSoon) bindings() []key.Binding  { return nil }
+func (c comingSoon) equivalent() shellCommand { return shellCommand{} }
+func (c comingSoon) focused() bool            { return false }
 
 func (c comingSoon) view(int, int) string {
 	return c.name + "\n\nComing soon: " + c.what + "."
@@ -242,14 +242,14 @@ func (m *app) quit() tea.Cmd {
 
 // equivalent is the command the part of the UI with the keyboard stands for. A
 // focused dialog or form shows its own, and the quit question stands for none.
-func (m *app) equivalent() string {
+func (m *app) equivalent() shellCommand {
 	switch m.owner() {
 	case ownerPanel:
 		return m.panel.equivalent()
 	case ownerScreen:
 		return m.screens[m.current].equivalent()
 	default:
-		return ""
+		return shellCommand{}
 	}
 }
 
@@ -257,12 +257,17 @@ func (m *app) equivalent() string {
 // the terminal (OSC 52), so that it works over SSH too.
 func (m *app) copyEquivalent() tea.Cmd {
 	eq := m.equivalent()
-	if eq == "" {
+	switch {
+	case eq.empty():
 		m.flash = "Nothing to copy here."
 		return nil
+	case eq.unportable:
+		m.flash = "This command cannot be copied safely: a value holds a quote, a backslash or a " +
+			"control character that shells do not all read the same way."
+		return nil
 	}
-	m.flash = "Copied: " + eq
-	return tea.SetClipboard(eq)
+	m.flash = "Copied: " + eq.line
+	return tea.SetClipboard(eq.line)
 }
 
 // bindings is what the help line offers. While a dialog, a form or the quit
@@ -379,8 +384,8 @@ func (m *app) statusBar() string {
 
 	right := m.flash
 	if right == "" {
-		if eq := m.equivalent(); eq != "" {
-			right = "$ " + eq
+		if eq := m.equivalent(); !eq.empty() {
+			right = "$ " + eq.String()
 		}
 	}
 	line := left
