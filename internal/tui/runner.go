@@ -25,9 +25,10 @@ type Invocation struct {
 	// command line or kept in a process listing.
 	Stdin []byte
 
-	// Exclusive runs the invocation alone, with no other run in flight. A command
-	// that rewrites the config file needs it: a concurrent run would read the file
-	// half-way through its rewrite.
+	// Exclusive runs the invocation alone, with no other run in flight. The runner
+	// already runs alone every command that reads a shared file and writes it
+	// back, since two of those side by side lose one of their updates; this is for
+	// a sequence the UI knows must not interleave with anything else.
 	Exclusive bool
 }
 

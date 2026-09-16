@@ -59,10 +59,11 @@ func newProjectAddCmd(deps *Deps) *cobra.Command {
 	var flags addFlags
 
 	cmd := &cobra.Command{
-		Use:   "add [name]",
-		Short: "Configure a project",
-		Long:  projectAddLong,
-		Args:  usageArgs(cobra.MaximumNArgs(1)),
+		Use:         "add [name]",
+		Annotations: map[string]string{annotationExclusive: exclusiveConfig},
+		Short:       "Configure a project",
+		Long:        projectAddLong,
+		Args:        usageArgs(cobra.MaximumNArgs(1)),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var name string
 			if len(args) == 1 {

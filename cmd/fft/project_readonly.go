@@ -37,6 +37,7 @@ func newProjectReadOnlyCmd(deps *Deps) *cobra.Command {
 		// accident this command exists to prevent — `fft project read-only --off` with
 		// prod merely *active* would disarm the wrong tenant.
 		Use:               "read-only <name>",
+		Annotations:       map[string]string{annotationExclusive: exclusiveConfig},
 		Short:             "Refuse every request that would change a project",
 		Long:              projectReadOnlyLong,
 		Aliases:           []string{"readonly", "ro"},

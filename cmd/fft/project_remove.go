@@ -33,6 +33,7 @@ pick another.`
 func newProjectRemoveCmd(deps *Deps) *cobra.Command {
 	return &cobra.Command{
 		Use:               "remove <name>",
+		Annotations:       map[string]string{annotationExclusive: exclusiveConfig},
 		Short:             "Remove a project and its stored credentials",
 		Long:              projectRemoveLong,
 		Aliases:           []string{"rm", "delete"},

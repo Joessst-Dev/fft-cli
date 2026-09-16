@@ -27,17 +27,28 @@ const runnerEventBuffer = 64
 // errRunnerClosed is what Start answers once the runner has been shut down.
 var errRunnerClosed = errors.New("the command runner has been shut down")
 
-// configWriters are the commands that rewrite the config file. Each runs alone,
-// whatever the caller said: a run reading the file while another replaces it would
-// see a file that is neither.
-var configWriters = map[string]bool{
-	"fft project add":       true,
-	"fft project use":       true,
-	"fft project remove":    true,
-	"fft project read-only": true,
-	"fft template save":     true,
-	"fft template remove":   true,
-}
+// annotationExclusive marks a command the TUI's runner must run alone, whatever the
+// caller asked for. Its value names the files the command rewrites.
+//
+// Such a command reads a file, decides, and writes the file back. Every write is
+// atomic, so a concurrent run never sees a torn file; the danger is a lost update.
+// Two of them side by side each save what they read, and the second save silently
+// undoes the first one's change — a project switched and then switched back by a
+// `project read-only` that loaded the file before the switch. The guard spec in
+// exclusive_test.go finds every command that saves the config file and fails
+// until it carries this.
+const annotationExclusive = "exclusive"
+
+const (
+	// exclusiveConfig is the config file.
+	exclusiveConfig = "config"
+
+	// exclusiveTemplates is the template directory. Saving checks that the name is
+	// free before it writes, and removing checks that the file is there: two saves
+	// of one name side by side would both find it free, and the second would
+	// overwrite the first without the --force it would otherwise have required.
+	exclusiveTemplates = "templates"
+)
 
 // cliRunner is the TUI's [tui.Runner]: it executes each invocation through
 // [executeRoot], on a Deps of its own, in the background.
@@ -185,7 +196,7 @@ func (r *cliRunner) execute(ctx context.Context, inv tui.Invocation) tui.Result 
 		}
 	}
 
-	if inv.Exclusive || (findErr == nil && configWriters[target.CommandPath()]) {
+	if inv.Exclusive || (findErr == nil && target.Annotations[annotationExclusive] != "") {
 		r.config.Lock()
 		defer r.config.Unlock()
 	} else {
