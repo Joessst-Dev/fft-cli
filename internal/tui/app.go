@@ -93,8 +93,8 @@ type app struct {
 }
 
 func newApp(opts Options) *app {
-	s := newSession(opts)
 	st := newStyles(opts.Color)
+	s := newSession(opts, st)
 
 	h := help.New()
 	h.Styles = st.help
@@ -181,8 +181,11 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.PasteMsg:
 		// A paste is typing, so it goes where typing goes: to a focused field. With
 		// nothing focused, pasted text would be read as a burst of commands.
-		if m.owner() == ownerFocused {
+		switch m.owner() {
+		case ownerFocused:
 			cmds = append(cmds, m.screens[m.current].update(msg))
+		case ownerQuestion:
+			cmds = append(cmds, m.s.answerWith(msg))
 		}
 	default:
 		for _, scr := range m.screens {
@@ -195,6 +198,11 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.s.runs.inFlight() > 0 && !m.spinning {
 		m.spinning = true
 		cmds = append(cmds, m.spin.Tick)
+	}
+	// A question is armed from the moment it is what the user sees, which may be
+	// long after it arrived.
+	if m.owner() == ownerQuestion {
+		m.s.asking().dialog.arm()
 	}
 	return m, tea.Batch(cmds...)
 }
@@ -209,6 +217,8 @@ const (
 	ownerPanel
 	// ownerFocused is a dialog or a form on the screen: its own keys, and ctrl+c.
 	ownerFocused
+	// ownerQuestion is a question a running command asks: its own keys, and ctrl+c.
+	ownerQuestion
 	// ownerQuit is the question whether to quit.
 	ownerQuit
 )
@@ -216,6 +226,11 @@ const (
 // owner decides who has the keyboard. The key handling, the body, the help line
 // and the status bar all ask it, so that whatever takes the next key is what is
 // drawn: a question the user cannot see must never be one a keystroke answers.
+//
+// A command's question comes when the command gets to it, not when the user asks
+// for it, so it waits behind whatever the user is in the middle of: a field being
+// typed into, a dialog, the open command panel, where the run shows as waiting.
+// Whatever screen is underneath, it is asked as soon as none of those is open.
 func (m *app) owner() keyOwner {
 	switch {
 	case m.confirmQuit:
@@ -224,6 +239,8 @@ func (m *app) owner() keyOwner {
 		return ownerFocused
 	case m.showPanel:
 		return ownerPanel
+	case m.s.asking() != nil:
+		return ownerQuestion
 	default:
 		return ownerScreen
 	}
@@ -247,6 +264,11 @@ func (m *app) key(msg tea.KeyPressMsg) tea.Cmd {
 			return m.quit()
 		}
 		return scr.update(msg)
+	case ownerQuestion:
+		if key.Matches(msg, m.keys.forceQ) {
+			return m.quit()
+		}
+		return m.s.answerWith(msg)
 	}
 
 	switch {
@@ -339,6 +361,8 @@ func (m *app) bindings() helpKeys {
 		return helpKeys{local: []key.Binding{yesKey, noKey}}
 	case ownerFocused:
 		return helpKeys{local: m.screens[m.current].bindings()}
+	case ownerQuestion:
+		return helpKeys{local: m.s.asking().dialog.bindings()}
 	case ownerPanel:
 		return helpKeys{local: m.panel.bindings(), global: m.keys.bindings()}
 	default:
@@ -362,6 +386,8 @@ func (m *app) View() tea.View {
 	switch owner {
 	case ownerQuit:
 		body = m.quitDialog()
+	case ownerQuestion:
+		body = m.s.asking().dialog.view(m.st, m.width)
 	default:
 		body = m.screens[m.current].view(m.width, bodyHeight)
 	}
@@ -439,6 +465,9 @@ func (m *app) statusBar() string {
 	parts = append(parts, output.SanitizeCell(m.s.status.tokenSummary(m.s.now())))
 	if n := m.s.runs.inFlight(); n > 0 {
 		parts = append(parts, fmt.Sprintf("%s %d running", m.spin.View(), n))
+	}
+	if n := len(m.s.questions); n > 0 {
+		parts = append(parts, m.st.warnText.Render(fmt.Sprintf("%d waiting for your answer", n)))
 	}
 	left := " " + strings.Join(parts, " · ")
 

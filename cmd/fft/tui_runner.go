@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
+	"github.com/Joessst-Dev/fft-cli/internal/prompt"
 	"github.com/Joessst-Dev/fft-cli/internal/tui"
 )
 
@@ -49,10 +50,23 @@ var errRunnerClosed = errors.New("the command runner has been shut down")
 const annotationExclusive = "exclusive"
 
 // annotationConfirms marks a command that asks before it acts unless --yes is
-// given. The TUI asks in its place, and gives --yes to the run the user confirmed
-// only when the command carries this; confirms_test.go finds every command that
-// asks and fails until it does.
+// given; confirms_test.go finds every command that asks and fails until it
+// carries this.
+//
+// The TUI never passes --yes to such a command. The command asks its own question
+// — the one that names the facility it looked up, or the number of listings it is
+// about to purge — and the runner hands that question to the UI to answer. A --yes
+// would skip it, and leave the user confirming a summary of the operation instead.
+//
+// The value is [confirmsYes] when a y answers. A command that cannot be undone
+// names instead the word the UI makes the user type back: its own verb, which its
+// question states and no stray keystroke produces. The id the command resolved
+// would be no better — a UUID is pasted, not typed — and the UI only has it as
+// part of the question's prose.
 const annotationConfirms = "confirms"
+
+// confirmsYes is the [annotationConfirms] value of a question a y answers.
+const confirmsYes = "true"
 
 const (
 	// exclusiveConfig is the config file.
@@ -84,7 +98,8 @@ type cliRunner struct {
 	// config is held for reading by every run and for writing by an exclusive one.
 	config sync.RWMutex
 
-	nextID atomic.Uint64
+	nextID       atomic.Uint64
+	nextQuestion atomic.Uint64
 
 	// mu guards everything below, and makes Start's wg.Add and Close's wg.Wait
 	// mutually exclusive — an Add racing a Wait is the one misuse WaitGroup cannot
@@ -93,6 +108,9 @@ type cliRunner struct {
 	closed  bool
 	cancels map[tui.RunID]context.CancelFunc
 	wg      sync.WaitGroup
+
+	// questions are the questions runs are waiting on, one per run at most.
+	questions map[tui.RunID]*pendingQuestion
 
 	// project is the project the UI has selected. A run takes it when it is
 	// started, not when it executes: the user confirmed it against the project
@@ -134,6 +152,10 @@ type job struct {
 	// ui is the session as it was at Start, the selected project included.
 	ui uiRun
 
+	// confirm is the word the user types to answer the command's question yes, ""
+	// when a y answers it. See [annotationConfirms].
+	confirm string
+
 	// exclusive runs the job alone. after, when set, is closed once the
 	// exclusive job started before it has finished, and done is closed when this
 	// one has.
@@ -157,6 +179,8 @@ func newCLIRunner(ctx context.Context, deps *Deps, session uiRun) *cliRunner {
 		slots:   make(chan struct{}, runnerSlots),
 		cancels: make(map[tui.RunID]context.CancelFunc),
 		catalog: tree,
+
+		questions: make(map[tui.RunID]*pendingQuestion),
 		// Before the runner is returned, and so before Start can walk the same tree
 		// from another goroutine.
 		ops: newCLICatalog(tree),
@@ -190,7 +214,9 @@ func (r *cliRunner) Start(inv tui.Invocation) (tui.RunID, error) {
 		j.ui.project = inv.Project
 	}
 
-	j.exclusive = inv.Exclusive || r.rewritesSharedFile(inv.Args)
+	exclusive, confirm := r.classify(inv.Args)
+	j.confirm = confirm
+	j.exclusive = inv.Exclusive || exclusive
 	inv.Exclusive = j.exclusive
 	j.inv = inv
 	if j.exclusive {
@@ -210,11 +236,18 @@ func (r *cliRunner) Start(inv tui.Invocation) (tui.RunID, error) {
 	return id, nil
 }
 
-// rewritesSharedFile reports whether args resolve to a command marked
-// [annotationExclusive]. It must be called with mu held.
-func (r *cliRunner) rewritesSharedFile(args []string) bool {
+// classify resolves args in the catalog tree, and reports whether the command
+// must run alone ([annotationExclusive]) and what a user types to confirm its
+// question ([annotationConfirms]). It must be called with mu held.
+func (r *cliRunner) classify(args []string) (exclusive bool, confirm string) {
 	target, _, err := r.catalog.Find(args)
-	return err == nil && target.Annotations[annotationExclusive] != ""
+	if err != nil {
+		return false, ""
+	}
+	if word := target.Annotations[annotationConfirms]; word != confirmsYes {
+		confirm = word
+	}
+	return target.Annotations[annotationExclusive] != "", confirm
 }
 
 // Cancel implements [tui.Runner].
@@ -224,6 +257,60 @@ func (r *cliRunner) Cancel(id tui.RunID) {
 	r.mu.Unlock()
 	if cancel != nil {
 		cancel()
+	}
+}
+
+// Answer implements [tui.Runner].
+func (r *cliRunner) Answer(id tui.RunID, q uint64, yes bool) {
+	r.mu.Lock()
+	p := r.questions[id]
+	if p == nil || p.id != q {
+		r.mu.Unlock()
+		return
+	}
+	// Taken out under mu, so that exactly one answer is ever sent: the channel's
+	// one slot is always free for it.
+	delete(r.questions, id)
+	r.mu.Unlock()
+	p.answer <- yes
+}
+
+// pendingQuestion is a question a run is waiting on.
+type pendingQuestion struct {
+	id     uint64
+	answer chan bool
+}
+
+// confirmer is run id's [prompt.Confirmer]: it hands the command's question to the
+// UI, and waits for the answer or for the run to be cancelled. A cancel is never a
+// yes, even when an answer arrives with it.
+func (r *cliRunner) confirmer(ctx context.Context, id tui.RunID, j job) prompt.Confirmer {
+	return func(text string) (bool, error) {
+		p := &pendingQuestion{id: r.nextQuestion.Add(1), answer: make(chan bool, 1)}
+		r.mu.Lock()
+		r.questions[id] = p
+		r.mu.Unlock()
+		defer func() {
+			r.mu.Lock()
+			if r.questions[id] == p {
+				delete(r.questions, id)
+			}
+			r.mu.Unlock()
+		}()
+
+		r.emit(tui.RunEvent{
+			ID: id, State: tui.RunRunning, Invocation: j.inv, At: time.Now(),
+			Question: &tui.Question{ID: p.id, Text: text, Confirm: j.confirm},
+		})
+		select {
+		case yes := <-p.answer:
+			if err := ctx.Err(); err != nil {
+				return false, err
+			}
+			return yes, nil
+		case <-ctx.Done():
+			return false, ctx.Err()
+		}
 	}
 }
 
@@ -297,12 +384,12 @@ func (r *cliRunner) run(ctx context.Context, id tui.RunID, j job) {
 	}
 
 	r.emit(tui.RunEvent{ID: id, State: tui.RunRunning, Invocation: j.inv, At: time.Now()})
-	r.finish(id, j.inv, r.execute(ctx, j))
+	r.finish(id, j.inv, r.execute(ctx, id, j))
 }
 
 // execute runs one job on a Deps of its own, signing its requests through the
 // session's token sources.
-func (r *cliRunner) execute(ctx context.Context, j job) tui.Result {
+func (r *cliRunner) execute(ctx context.Context, id tui.RunID, j job) tui.Result {
 	in := bytes.NewReader(j.stdin)
 	deps := r.deps.forRun(in, j.ui)
 	deps.tokens = &r.tokens
@@ -332,6 +419,9 @@ func (r *cliRunner) execute(ctx context.Context, j job) tui.Result {
 
 	stdout := cappedBuffer{limit: r.stdoutLimit}
 	stderr := cappedBuffer{limit: r.stderrLimit}
+	// The run has no terminal, so its questions are asked in the UI. Everything
+	// else a Prompter reads still needs one, and is refused.
+	deps.Prompt = prompt.New(in, &stderr, prompt.WithConfirmer(r.confirmer(ctx, id, j)))
 	started := time.Now()
 	// The command line is run exactly as given; the run's Deps carries what the UI
 	// decides.

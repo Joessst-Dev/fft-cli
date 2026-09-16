@@ -35,7 +35,7 @@ func newProjectRemoveCmd(deps *Deps) *cobra.Command {
 		Use: "remove <name>",
 		Annotations: map[string]string{
 			annotationExclusive: exclusiveConfig,
-			annotationConfirms:  "true",
+			annotationConfirms:  confirmsYes,
 		},
 		Short:             "Remove a project and its stored credentials",
 		Long:              projectRemoveLong,
@@ -144,7 +144,7 @@ func confirmRemoval(deps *Deps, name string) (bool, error) {
 		return true, nil
 	}
 
-	if !deps.Prompt.Interactive() {
+	if !deps.Prompt.CanConfirm() {
 		return false, exitcode.UsageError{Err: errors.New(
 			"stdin is not a terminal, so fft cannot ask for confirmation: pass --yes to remove the project")}
 	}

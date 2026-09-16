@@ -30,7 +30,7 @@ func newRoutingCategoryDeleteCmd(deps *Deps) *cobra.Command {
 
 		Annotations: map[string]string{
 			annotationOperationID: "deleteRoutingStrategyNodeConfigCategory",
-			annotationConfirms:    "true",
+			annotationConfirms:    "delete",
 		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {

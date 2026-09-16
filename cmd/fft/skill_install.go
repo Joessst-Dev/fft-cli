@@ -52,7 +52,7 @@ func newSkillInstallCmd(deps *Deps) *cobra.Command {
 		Long:  skillInstallLong,
 		Args:  usageArgs(cobra.NoArgs),
 
-		Annotations: map[string]string{annotationConfirms: "true"},
+		Annotations: map[string]string{annotationConfirms: confirmsYes},
 
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			// --dir "" is a flag given and a directory not named. Falling through to the
@@ -170,7 +170,7 @@ func confirmSkillOverwrite(deps *Deps, dir string, pending []skill.Change, force
 		deps.Printer.Warnf("%s: %s", c.Status, c.File)
 	}
 
-	if !deps.Prompt.Interactive() {
+	if !deps.Prompt.CanConfirm() {
 		return false, exitcode.UsageError{Err: fmt.Errorf(
 			"%s in %s %s not what fft ships, and stdin is not a terminal, so fft cannot ask: pass --force to replace them",
 			count(len(pending), "file"), dir, plural(len(pending), "is", "are"))}

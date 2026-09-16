@@ -102,6 +102,29 @@ type RunEvent struct {
 
 	// Result is set when State is [RunDone], and zero otherwise.
 	Result Result
+
+	// Question, on a [RunRunning] event, is a question the command asks before it
+	// goes on. The run waits until [Runner.Answer] answers it, or until it is
+	// cancelled, which answers no.
+	Question *Question
+}
+
+// Question is what a running command asks the user, in its own words: the
+// confirmation `fft facility delete` asks in a shell, naming the facility it has
+// looked up.
+type Question struct {
+	// ID tells this question from every other one the runner has asked. An answer
+	// names it, so that it can only ever answer the question it was given for.
+	ID uint64
+
+	// Text is the command's question. It may quote what the API returned, and is
+	// sanitized before it is drawn.
+	Text string
+
+	// Confirm, when set, is the word the user must type back to say yes. A command
+	// that cannot be undone asks for one: a single key is too easy to press by
+	// accident. "" means a y answers.
+	Confirm string
 }
 
 // Runner executes invocations in the background and reports on them.
@@ -124,6 +147,10 @@ type Runner interface {
 	// Events delivers every state change of every run. The runner closes it once
 	// it has been shut down and its last run has finished.
 	Events() <-chan RunEvent
+
+	// Answer answers question q of run id. An answer to a question the run is no
+	// longer asking — it was cancelled, or it has ended — does nothing.
+	Answer(id RunID, q uint64, yes bool)
 
 	// SetProject selects the project the invocations started after it act on. ""
 	// leaves the choice to fft's own resolution: the active project, or the

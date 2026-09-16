@@ -488,9 +488,12 @@ func flagArg(name, value string) []string {
 	return []string{name, value}
 }
 
-// args is the command line the form describes. confirmed adds the --yes that
-// answers the question the command would ask, for a write the user has confirmed.
-func (r *requestScreen) args(confirmed bool) []string {
+// args is the command line the form describes.
+//
+// It never carries --yes. A command that asks before it acts asks in the UI, in
+// its own words, once it has looked up what it is about to act on; a --yes would
+// have the user confirm the form's summary of the operation instead.
+func (r *requestScreen) args() []string {
 	cmd := r.op.Command
 	args := slices.Clone(cmd.Path)
 
@@ -510,9 +513,6 @@ func (r *requestScreen) args(confirmed bool) []string {
 	}
 	if r.body != nil {
 		args = append(args, "--file", "-")
-	}
-	if confirmed && cmd.Confirms {
-		args = append(args, "--yes")
 	}
 	if dashed {
 		// After every flag: an argument that starts with a dash is only an argument
@@ -539,45 +539,52 @@ func (r *requestScreen) send() tea.Cmd {
 		return nil
 	}
 	project := r.s.target()
-	if !r.op.Mutates {
+	if !asksFirst(*r.op) {
 		return r.start(project)
 	}
 
-	named := r.s.currentProject()
-	if named == "" {
-		named = "the active project"
-	}
-	detail := fmt.Sprintf("%s %s changes data on the tenant.", r.op.Method, r.op.Path)
-	if r.s.readOnly() {
-		detail += " This project or session is read-only, so fft will refuse it and send nothing."
-	}
-	r.dialog = &confirmDialog{
-		question: fmt.Sprintf("Send %s to %s?", firstNonEmpty(r.op.Summary, r.op.ID), named),
-		detail:   detail,
-		command:  r.display(project, true),
+	r.dialog = armed(&confirmDialog{
+		question: fmt.Sprintf("Send %s to %s?", firstNonEmpty(r.op.Summary, r.op.ID), r.s.named()),
+		detail:   writeDetail(*r.op, r.s.readOnly()),
+		command:  r.display(project),
 		onYes:    func() tea.Cmd { return r.start(project) },
-	}
+	}, r.s.now, true)
 	return nil
 }
 
-func (r *requestScreen) display(project string, confirmed bool) shellCommand {
-	return r.s.displayFor(r.args(confirmed), project)
+// asksFirst reports whether the UI asks before sending op. A write is asked about,
+// except by a command that asks its own question: that one names what it is about
+// to change, and asking twice teaches the user to say yes without reading.
+func asksFirst(op Operation) bool {
+	return op.Mutates && !op.Command.Confirms
+}
+
+// writeDetail is what the question about sending op says under it.
+func writeDetail(op Operation, readOnly bool) string {
+	detail := fmt.Sprintf("%s %s changes data on the tenant.", op.Method, op.Path)
+	if readOnly {
+		detail += " This project or session is read-only, so fft will refuse it and send nothing."
+	}
+	return detail
+}
+
+func (r *requestScreen) display(project string) shellCommand {
+	return r.s.displayFor(r.args(), project)
 }
 
 // start sends the request to project, "" to leave the choice to fft's own
 // resolution.
 func (r *requestScreen) start(project string) tea.Cmd {
-	confirmed := r.op.Mutates
 	sent := &sentRequest{
 		op: *r.op,
 		inv: Invocation{
-			Args:    r.args(confirmed),
+			Args:    r.args(),
 			Stdin:   bytes.Clone(r.body),
 			Project: project,
 		},
 		project: project,
 	}
-	a := action{inv: sent.inv, display: r.display(project, confirmed)}
+	a := action{inv: sent.inv, display: r.display(project)}
 	r.notice, r.failure = "", nil
 	return r.s.sendRequest(r.nav, a, sent)
 }
@@ -621,7 +628,7 @@ func (r *requestScreen) equivalent() shellCommand {
 	case r.op == nil:
 		return shellCommand{}
 	}
-	return r.display(r.s.target(), false)
+	return r.display(r.s.target())
 }
 
 func (r *requestScreen) view(width, _ int) string {
@@ -641,6 +648,9 @@ func (r *requestScreen) view(width, _ int) string {
 	lines := header
 	if op.Mutates {
 		access := "This request changes data: sending it asks first."
+		if op.Command.Confirms {
+			access = "This request changes data: the command asks first, once it has looked up what it changes."
+		}
 		if r.s.readOnly() {
 			access = lockBadge + " This project or session is read-only: fft will refuse this write."
 		}

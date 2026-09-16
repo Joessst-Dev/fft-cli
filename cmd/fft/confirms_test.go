@@ -5,6 +5,7 @@ import (
 	"go/parser"
 	"go/token"
 	"maps"
+	"net/http"
 	"os"
 	"path/filepath"
 	"slices"
@@ -21,10 +22,8 @@ import (
 //
 // The spec below finds the functions by reading the source, so a new confirmation
 // fails the build until it is written down here, and the command written down must
-// carry annotationConfirms. The TUI adds --yes to a write the user has confirmed
-// only when the command carries it: without it, a command that asks would find no
-// terminal to ask on and refuse, and with it on every command, the equivalent
-// command the UI shows would carry a flag that does nothing.
+// carry annotationConfirms. The TUI decides from it how the question the command
+// asks is answered: with a y, or with a word typed back for what cannot be undone.
 var confirmers = map[string]string{
 	"newComponentInstallCmd":      "fft component install",
 	"newComponentRemoveCmd":       "fft component remove",
@@ -153,6 +152,31 @@ var _ = Describe("commands that ask before they act", func() {
 			Expect(cmd.CommandPath()).To(Equal(path))
 			Expect(cmd.Annotations).To(HaveKey(annotationConfirms), "%s asks before it acts", path)
 		}
+	})
+
+	It("asks for a typed word before anything that cannot be undone", func() {
+		var walk func(*cobra.Command)
+		walk = func(cmd *cobra.Command) {
+			defer func() {
+				for _, child := range cmd.Commands() {
+					walk(child)
+				}
+			}()
+			word, ok := cmd.Annotations[annotationConfirms]
+			if !ok {
+				return
+			}
+			Expect(word).To(Or(Equal(confirmsYes), MatchRegexp(`^[a-z]+$`)),
+				"%s: annotationConfirms is confirmsYes, or the one word the user types", cmd.CommandPath())
+
+			op, hasOp := operationOf(cmd)
+			irreversible := (hasOp && op.Method == http.MethodDelete) || cmd.CommandPath() == "fft listing purge"
+			if irreversible {
+				Expect(word).NotTo(Equal(confirmsYes),
+					"%s cannot be undone: name the word the user must type in annotationConfirms", cmd.CommandPath())
+			}
+		}
+		walk(root)
 	})
 
 	It("marks no other command", func() {

@@ -34,7 +34,7 @@ func newListingDeleteCmd(deps *Deps) *cobra.Command {
 
 		Annotations: map[string]string{
 			annotationOperationID: "deleteFacilityListing",
-			annotationConfirms:    "true",
+			annotationConfirms:    "delete",
 		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {

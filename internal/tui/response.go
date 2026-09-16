@@ -221,19 +221,19 @@ func (p *responseScreen) rerun(e *runEntry) tea.Cmd {
 	a := action{inv: again.inv, display: p.s.displayFor(again.inv.Args, again.project)}
 
 	send := func() tea.Cmd { return p.s.sendRequest(p.nav, a, again) }
-	if !req.op.Mutates {
+	if !asksFirst(req.op) {
 		return send()
 	}
 	project := again.project
 	if project == "" {
 		project = "the active project"
 	}
-	p.dialog = &confirmDialog{
+	p.dialog = armed(&confirmDialog{
 		question: fmt.Sprintf("Send %s to %s again?", firstNonEmpty(req.op.Summary, req.op.ID), project),
-		detail:   fmt.Sprintf("%s %s changes data on the tenant.", req.op.Method, req.op.Path),
+		detail:   writeDetail(req.op, false),
 		command:  a.display,
 		onYes:    send,
-	}
+	}, p.s.now, true)
 	return nil
 }
 
@@ -390,6 +390,9 @@ func (p *responseScreen) view(width, height int) string {
 		return strings.Join(append(lines, "", p.dialog.view(st, width)), "\n")
 	}
 	if e.state != RunDone {
+		if e.asking {
+			lines = append(lines, "", st.warnText.Render("It is waiting for your answer to its question."))
+		}
 		lines = append(lines, "", "Press c to cancel it.")
 		if p.notice != "" {
 			lines = append(lines, wrap(st.okText.Render(output.SanitizeCell(p.notice)), width))

@@ -57,7 +57,7 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 		Use: "save <name>",
 		Annotations: map[string]string{
 			annotationExclusive: exclusiveTemplates,
-			annotationConfirms:  "true",
+			annotationConfirms:  confirmsYes,
 		},
 		Short: "Save a request body as a template",
 		Long:  templateSaveLong,

@@ -34,6 +34,9 @@ type runEntry struct {
 	ended   time.Time
 	result  Result
 
+	// asking is set while the run waits for the user to answer its question.
+	asking bool
+
 	// dropped is set once the run's output has been let go to stay within
 	// keptOutputBytes.
 	dropped bool
@@ -66,8 +69,14 @@ func (l *runList) update(ev RunEvent) {
 	case RunQueued:
 		e.queued = ev.At
 	case RunRunning:
+		if ev.Question != nil {
+			// Asked while it runs: it started when it said so first.
+			e.asking = true
+			return
+		}
 		e.started = ev.At
 	case RunDone:
+		e.asking = false
 		e.ended = ev.At
 		e.result = ev.Result
 		l.shed(keptOutputBytes)
@@ -235,12 +244,14 @@ func (p *runsPanel) view(st styles, spin string, width, height int) string {
 func (p *runsPanel) row(st styles, e *runEntry, spin string, selected bool, width int) string {
 	now := p.s.now()
 	var state string
-	switch e.state {
-	case RunQueued:
+	switch {
+	case e.state == RunQueued:
 		state = st.dim.Render("queued " + elapsed(now.Sub(e.queued)))
-	case RunRunning:
+	case e.state == RunRunning && e.asking:
+		state = st.warnText.Render("waiting for your answer")
+	case e.state == RunRunning:
 		state = spin + " running " + elapsed(now.Sub(e.started))
-	case RunDone:
+	case e.state == RunDone:
 		took := elapsed(e.result.Duration)
 		if e.result.ExitCode == exitcode.OK {
 			state = st.okText.Render("ok") + " " + took

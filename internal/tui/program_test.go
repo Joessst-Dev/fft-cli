@@ -83,8 +83,9 @@ func boolJSON(b bool) string {
 	return "false"
 }
 
-func (r *scriptedRunner) Cancel(RunID)            {}
-func (r *scriptedRunner) Events() <-chan RunEvent { return r.events }
+func (r *scriptedRunner) Cancel(RunID)               {}
+func (r *scriptedRunner) Answer(RunID, uint64, bool) {}
+func (r *scriptedRunner) Events() <-chan RunEvent    { return r.events }
 
 func (r *scriptedRunner) SetProject(name string) {
 	r.mu.Lock()

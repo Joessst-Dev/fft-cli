@@ -37,7 +37,15 @@ type Prompter struct {
 	// the refusal — and the question a destructive command asks would go untested.
 	// nil means "ask the file descriptor", which is what production does.
 	interactive *bool
+
+	// confirmer, when set, is where Confirm's questions go instead of in.
+	confirmer Confirmer
 }
+
+// Confirmer answers a yes/no question somewhere other than on the terminal. fft's
+// interactive UI is one: a command it runs has no terminal of its own, and the
+// question is asked in a dialog. An error is never a yes.
+type Confirmer func(question string) (bool, error)
 
 // Option configures a Prompter.
 type Option func(*Prompter)
@@ -49,6 +57,13 @@ type Option func(*Prompter)
 // destructive command asks.
 func WithInteractive(v bool) Option {
 	return func(p *Prompter) { p.interactive = &v }
+}
+
+// WithConfirmer sends every [Prompter.Confirm] to c. The other prompts still read
+// in, and still need a terminal there: a Confirmer answers yes or no, and nothing
+// else.
+func WithConfirmer(c Confirmer) Option {
+	return func(p *Prompter) { p.confirmer = c }
 }
 
 // New returns a Prompter reading from in and writing prompts to out. out should
@@ -67,6 +82,12 @@ func (p *Prompter) Interactive() bool {
 		return *p.interactive
 	}
 	return IsTerminal(p.in)
+}
+
+// CanConfirm reports whether [Prompter.Confirm] reaches someone who can answer: a
+// terminal on in, or a [Confirmer].
+func (p *Prompter) CanConfirm() bool {
+	return p.confirmer != nil || p.Interactive()
 }
 
 // IsTerminal reports whether v is an interactive terminal. It accepts anything
@@ -154,6 +175,21 @@ func (p *Prompter) Password(label string) (string, error) {
 // Confirm asks a yes/no question. Anything other than "y" or "yes" is a no —
 // destructive commands should never proceed on an ambiguous answer.
 func (p *Prompter) Confirm(label string) (bool, error) {
+	if p.confirmer != nil {
+		yes, err := p.confirmer(label)
+		if err != nil {
+			return false, err
+		}
+		// Written after the fact, so that what the command said on stderr still
+		// records what it asked and what it was told.
+		answer := "n"
+		if yes {
+			answer = "y"
+		}
+		fmt.Fprintf(p.out, "%s [y/N]: %s\n", label, answer)
+		return yes, nil
+	}
+
 	fmt.Fprintf(p.out, "%s [y/N]: ", label)
 
 	line, err := p.readLine()

@@ -85,6 +85,13 @@ type session struct {
 	runs *runList
 	done map[RunID]func(Result) tea.Cmd
 
+	// questions are what running commands are waiting to be told, oldest first.
+	// The first is the one asked; the others wait their turn.
+	questions []*question
+
+	// st draws the questions' dialogs.
+	st styles
+
 	// requests are the runs the Request screen sent, as they were sent, so that
 	// the Response screen can send one again. They are forgotten with the run.
 	requests map[RunID]*sentRequest
@@ -111,7 +118,7 @@ type sentRequest struct {
 	project string
 }
 
-func newSession(opts Options) *session {
+func newSession(opts Options, st styles) *session {
 	now := opts.Now
 	if now == nil {
 		now = time.Now
@@ -127,6 +134,7 @@ func newSession(opts Options) *session {
 	return &session{
 		runner:        opts.Runner,
 		now:           now,
+		st:            st,
 		execProcess:   execProcess,
 		getenv:        getenv,
 		tempDir:       opts.tempDir,
@@ -161,6 +169,14 @@ func (s *session) target() string {
 		return ""
 	}
 	return s.currentProject()
+}
+
+// named is how a question names the project a request goes to.
+func (s *session) named() string {
+	if p := s.currentProject(); p != "" {
+		return p
+	}
+	return "the active project"
 }
 
 // readOnly reports whether writes to the current project are refused.
@@ -232,15 +248,92 @@ func (s *session) cleanup() {
 // wants to happen next.
 func (s *session) handle(ev RunEvent) tea.Cmd {
 	s.runs.update(ev)
+	if ev.Question != nil {
+		s.ask(ev)
+	}
 	if ev.State != RunDone {
 		return nil
 	}
+	// A run that has ended is asking nothing any more: it was cancelled, or timed
+	// out, while its question waited.
+	s.questions = slices.DeleteFunc(s.questions, func(q *question) bool { return q.run == ev.ID })
 	done, ok := s.done[ev.ID]
 	if !ok {
 		return nil
 	}
 	delete(s.done, ev.ID)
 	return done(ev.Result)
+}
+
+// question is a question a running command asked, and the dialog that asks it.
+type question struct {
+	run    RunID
+	id     uint64
+	dialog *armedDialog
+
+	// yes is what the dialog was answered with, once it has been.
+	yes bool
+}
+
+// ask queues the question ev carries.
+func (s *session) ask(ev RunEvent) {
+	e, known := s.runs.byID[ev.ID]
+	if !known {
+		// Not a run this UI started, so there is nobody to show it to who knows
+		// what it is about; and silence would leave the run waiting for ever.
+		s.runner.Answer(ev.ID, ev.Question.ID, false)
+		return
+	}
+	q := &question{run: ev.ID, id: ev.Question.ID}
+	yes := func() tea.Cmd {
+		q.yes = true
+		return nil
+	}
+
+	detail := fmt.Sprintf("Command #%d is waiting for your answer", ev.ID)
+	if ev.Invocation.Project != "" {
+		detail += ", on project " + ev.Invocation.Project
+	}
+	detail += "."
+
+	var d dialog
+	if word := ev.Question.Confirm; word != "" {
+		typed := newTypeNameDialog(s.st, ev.Question.Text, detail+" It cannot be undone.", word, e.display, yes)
+		typed.what = "word"
+		d = typed
+	} else {
+		d = &confirmDialog{question: ev.Question.Text, detail: detail, command: e.display, onYes: yes}
+	}
+	// Armed only once it is in front of the user, which may be well after it came.
+	q.dialog = armed(d, s.now, false)
+	s.questions = append(s.questions, q)
+}
+
+// asking is the question the UI asks now, nil when no command is waiting.
+func (s *session) asking() *question {
+	if len(s.questions) == 0 {
+		return nil
+	}
+	return s.questions[0]
+}
+
+// answerWith hands msg to the question being asked, and sends the answer once it
+// has one.
+func (s *session) answerWith(msg tea.Msg) tea.Cmd {
+	q := s.asking()
+	if q == nil {
+		return nil
+	}
+	finished, cmd := q.dialog.update(msg)
+	if !finished {
+		return cmd
+	}
+	s.questions = s.questions[1:]
+	if e, ok := s.runs.byID[q.run]; ok {
+		e.asking = false
+	}
+	s.runner.Answer(q.run, q.id, q.yes)
+	return cmd
 }
 
 // failure is a run that did not succeed, as a screen shows it.

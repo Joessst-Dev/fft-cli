@@ -20,9 +20,17 @@ import (
 type fakeRunner struct {
 	started   []Invocation
 	cancelled []RunID
+	answers   []answer
 	projects  []string
 	events    chan RunEvent
 	startErr  error
+}
+
+// answer is one call to [Runner.Answer].
+type answer struct {
+	run      RunID
+	question uint64
+	yes      bool
 }
 
 func newFakeRunner() *fakeRunner {
@@ -40,8 +48,11 @@ func (r *fakeRunner) Start(inv Invocation) (RunID, error) {
 	return RunID(len(r.started)), nil
 }
 
-func (r *fakeRunner) Cancel(id RunID)                { r.cancelled = append(r.cancelled, id) }
-func (r *fakeRunner) Events() <-chan RunEvent        { return r.events }
+func (r *fakeRunner) Cancel(id RunID)         { r.cancelled = append(r.cancelled, id) }
+func (r *fakeRunner) Events() <-chan RunEvent { return r.events }
+func (r *fakeRunner) Answer(id RunID, q uint64, yes bool) {
+	r.answers = append(r.answers, answer{run: id, question: q, yes: yes})
+}
 func (r *fakeRunner) SetProject(name string)         { r.projects = append(r.projects, name) }
 func (r *fakeRunner) args(id RunID) []string         { return r.started[id-1].Args }
 func (r *fakeRunner) stdin(id RunID) string          { return string(r.started[id-1].Stdin) }
@@ -66,6 +77,9 @@ type harness struct {
 	editor *fakeEditor
 	env    map[string]string
 	tmp    string
+
+	// questions counts the questions the harness has had runs ask.
+	questions uint64
 }
 
 func newHarness(opts Options) *harness {
@@ -159,6 +173,24 @@ func (h *harness) finish(res Result, args ...string) tea.Cmd {
 func (h *harness) finishID(id RunID, res Result) tea.Cmd {
 	h.done[id] = true
 	return h.send(runEventMsg{ID: id, State: RunDone, Invocation: h.r.invocation(id), At: h.now, Result: res})
+}
+
+// wait lets the clock run past the moment a dialog starts taking keys.
+func (h *harness) wait() {
+	h.now = h.now.Add(armDelay)
+}
+
+// ask has run id ask text, as the runner reports a command's question, and returns
+// the question's id.
+func (h *harness) ask(id RunID, text, confirm string) uint64 {
+	h.questions++
+	inv := Invocation{}
+	if int(id) <= len(h.r.started) {
+		inv = h.r.invocation(id)
+	}
+	h.send(runEventMsg{ID: id, State: RunRunning, Invocation: inv, At: h.now,
+		Question: &Question{ID: h.questions, Text: text, Confirm: confirm}})
+	return h.questions
 }
 
 func ok(stdout string) Result { return Result{ExitCode: 0, Stdout: []byte(stdout)} }
@@ -345,6 +377,14 @@ var (
 		Tag: "Picking (Operations)", Mutates: true, SampleBody: `{"pickLineItems":[]}`,
 		Description: "Creates a pick job for the given line items.",
 		Command:     Command{Path: []string{"picking", "add-pick-job"}, Body: true, BodyRequired: true},
+	}
+	opUnlockOrder = Operation{
+		ID: "orderAction", Summary: "Unlock an order", Method: "POST", Path: "/api/orders/{orderId}/actions",
+		Tag: "Orders (Operations)", Mutates: true,
+		Command: Command{
+			Path: []string{"order", "unlock"}, Curated: true,
+			Args: []Arg{{Name: "id", Required: true}},
+		},
 	}
 	opGetPickJob = Operation{
 		ID: "getPickJob", Summary: "Get a pick job", Method: "GET", Path: "/api/pickjobs/{pickJobId}",

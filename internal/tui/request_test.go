@@ -229,8 +229,8 @@ var _ = Describe("the Request screen", func() {
 
 	Describe("sending a write", func() {
 		BeforeEach(func() {
-			h.request(opDeleteFacility)
-			h.fill(0, "BER-01")
+			h.request(opUnlockOrder)
+			h.fill(0, "ORD-1")
 		})
 
 		It("asks first, showing the command a yes runs, and sends nothing yet", func() {
@@ -239,17 +239,18 @@ var _ = Describe("the Request screen", func() {
 
 			Expect(h.r.started).To(HaveLen(n))
 			view := h.view()
-			Expect(view).To(ContainSubstring("Send Delete a facility to staging?"))
-			Expect(view).To(ContainSubstring("DELETE /api/facilities/{facilityId} changes data on the tenant."))
-			Expect(view).To(ContainSubstring("runs: fft facility delete BER-01 --yes --project staging"))
+			Expect(view).To(ContainSubstring("Send Unlock an order to staging?"))
+			Expect(view).To(ContainSubstring("POST /api/orders/{orderId}/actions changes data on the tenant."))
+			Expect(view).To(ContainSubstring("runs: fft order unlock ORD-1 --project staging"))
 			Expect(h.m.owner()).To(Equal(ownerFocused))
 		})
 
 		It("sends it to the project the question named, whatever is selected by the time it goes", func() {
 			h.press("s")
-			Expect(h.view()).To(ContainSubstring("Send Delete a facility to staging?"))
+			Expect(h.view()).To(ContainSubstring("Send Unlock an order to staging?"))
 			// A switch the user asked for before, finishing while the question is open.
 			h.m.s.selectProject("prod")
+			h.wait()
 			h.press("y")
 
 			Expect(h.last().Project).To(Equal("staging"))
@@ -258,7 +259,9 @@ var _ = Describe("the Request screen", func() {
 
 		It("sends nothing on no", func() {
 			n := len(h.r.started)
-			h.press("s", "n")
+			h.press("s")
+			h.wait()
+			h.press("n")
 
 			Expect(h.r.started).To(HaveLen(n))
 			Expect(h.m.current).To(Equal(tabRequest))
@@ -267,47 +270,246 @@ var _ = Describe("the Request screen", func() {
 		It("sends nothing on a pasted yes", func() {
 			n := len(h.r.started)
 			h.press("s")
+			h.wait()
 			h.send(tea.PasteMsg{Content: "y"})
 
 			Expect(h.r.started).To(HaveLen(n))
 		})
 
-		It("sends it with --yes once confirmed, since the command would ask the same", func() {
-			h.press("s", "y")
+		It("sends it once confirmed, with no --yes", func() {
+			h.press("s")
+			h.wait()
+			h.press("y")
 
-			Expect(h.last().Args).To(Equal([]string{"facility", "delete", "BER-01", "--yes"}))
+			Expect(h.last().Args).To(Equal([]string{"order", "unlock", "ORD-1"}))
 			Expect(h.m.current).To(Equal(tabResponse))
 		})
 
-		It("adds no --yes to a command that does not ask", func() {
-			h.request(opAddPickJob)
-			h.m.request.body = []byte(`{"pickLineItems":[]}`)
-			h.press("s")
-			Expect(h.view()).To(ContainSubstring("runs: fft picking add-pick-job --file - --project staging"))
-			h.press("y")
+		It("takes no key until the question has been in front of the user for a moment", func() {
+			n := len(h.r.started)
+			h.press("s", "y")
+			Expect(h.r.started).To(HaveLen(n), "a y pressed straight after s answered a question nobody had read")
+			Expect(h.m.owner()).To(Equal(ownerFocused))
 
-			Expect(h.last().Args).To(Equal([]string{"picking", "add-pick-job", "--file", "-"}))
+			h.wait()
+			h.press("y")
+			Expect(h.r.started).To(HaveLen(n + 1))
+		})
+
+		It("does not take a y typed straight after ctrl+s sent the field being edited", func() {
+			n := len(h.r.started)
+			h.press("x", "enter")
+			h.typeText("ORD-2")
+			h.press("ctrl+s")
+			h.typeText("y")
+
+			Expect(h.r.started).To(HaveLen(n))
+			Expect(h.view()).To(ContainSubstring("Send Unlock an order to staging?"))
 		})
 
 		It("says a read-only project will refuse it, and still leaves the refusal to fft", func() {
 			h = newHarness(Options{ReadOnly: true})
 			h.loaded(twoProjects, validToken)
-			h.request(opDeleteFacility)
-			h.fill(0, "BER-01")
+			h.request(opUnlockOrder)
+			h.fill(0, "ORD-1")
 			Expect(h.view()).To(ContainSubstring("This project or session is read-only"))
 
 			h.press("s")
 			Expect(h.view()).To(ContainSubstring("fft will refuse it and send"))
+			h.wait()
 			h.press("y")
-			Expect(h.last().Args).To(Equal([]string{"facility", "delete", "BER-01", "--yes"}))
+			Expect(h.last().Args).To(Equal([]string{"order", "unlock", "ORD-1"}))
 		})
 
 		It("puts an argument that starts with a dash after every flag", func() {
-			h.press("x")
+			h.request(opAddPickJob)
+			h.m.request.body = []byte(`{}`)
+			h.request(opUnlockOrder)
 			h.fill(0, "-odd")
-			h.press("s", "y")
+			h.press("s")
+			h.wait()
+			h.press("y")
 
-			Expect(h.last().Args).To(Equal([]string{"facility", "delete", "--yes", "--", "-odd"}))
+			Expect(h.last().Args).To(Equal([]string{"order", "unlock", "--", "-odd"}))
+		})
+	})
+
+	Describe("a write whose command asks its own question", func() {
+		var run RunID
+
+		BeforeEach(func() {
+			h.request(opDeleteFacility)
+			h.fill(0, "BER-01")
+			h.press("s")
+			run = RunID(len(h.r.started))
+		})
+
+		It("is sent at once, without --yes, for the command to ask", func() {
+			Expect(h.last().Args).To(Equal([]string{"facility", "delete", "BER-01"}))
+			Expect(h.last().Project).To(Equal("staging"))
+			Expect(h.m.current).To(Equal(tabResponse))
+			Expect(h.m.owner()).To(Equal(ownerScreen))
+		})
+
+		It("says on the form that the command asks", func() {
+			h.request(opDeleteFacility)
+			Expect(h.view()).To(ContainSubstring("the command asks first, once it has looked up what it changes"))
+		})
+
+		It("shows the command's question, whatever screen is in front", func() {
+			h.press("2")
+			h.ask(run, "Delete facility Berlin Mitte (BER-01)? This cannot be undone.", "delete")
+
+			Expect(h.m.owner()).To(Equal(ownerQuestion))
+			view := h.view()
+			Expect(view).To(ContainSubstring("Delete facility Berlin Mitte (BER-01)? This cannot be undone."))
+			Expect(view).To(ContainSubstring("Command #%d is waiting for your answer, on project staging.", run))
+			Expect(view).To(ContainSubstring("Type delete to confirm."))
+			Expect(view).To(ContainSubstring("runs: fft facility delete BER-01 --project staging"))
+			Expect(view).To(ContainSubstring("enter confirm · esc cancel"))
+			Expect(view).NotTo(ContainSubstring("$ fft"), "a question offers no command to copy")
+		})
+
+		It("answers yes only once the word is typed back", func() {
+			q := h.ask(run, "Delete facility BER-01? This cannot be undone.", "delete")
+			h.wait()
+			h.typeText("y")
+			h.press("enter")
+			Expect(h.r.answers).To(BeEmpty())
+			Expect(h.view()).To(ContainSubstring("That is not the word; nothing was sent."))
+
+			h.press("x")
+			h.m.s.asking().dialog.dialog.(*typeNameDialog).input.SetValue("")
+			h.typeText("delete")
+			h.press("enter")
+			Expect(h.r.answers).To(Equal([]answer{{run: run, question: q, yes: true}}))
+			Expect(h.m.owner()).To(Equal(ownerScreen))
+			Expect(h.m.s.runs.byID[run].asking).To(BeFalse())
+		})
+
+		It("answers no on esc", func() {
+			q := h.ask(run, "Delete facility BER-01?", "delete")
+			h.wait()
+			h.press("esc")
+
+			Expect(h.r.answers).To(Equal([]answer{{run: run, question: q, yes: false}}))
+		})
+
+		It("takes no key before it has been in front of the user for a moment", func() {
+			h.ask(run, "Delete facility BER-01?", "delete")
+			h.typeText("delete")
+			h.press("enter")
+
+			Expect(h.r.answers).To(BeEmpty())
+			Expect(h.m.s.asking().dialog.dialog.(*typeNameDialog).input.Value()).To(BeEmpty())
+		})
+
+		It("takes a y for a question that does not ask for a word, and not a pasted one", func() {
+			q := h.ask(run, "Replace the template?", "")
+			h.wait()
+			h.send(tea.PasteMsg{Content: "y"})
+			Expect(h.r.answers).To(BeEmpty())
+
+			h.press("y")
+			Expect(h.r.answers).To(Equal([]answer{{run: run, question: q, yes: true}}))
+		})
+
+		It("waits behind a field being typed into, says so, and is armed only once it shows", func() {
+			h.request(opGetPickJob)
+			h.press("enter")
+			h.ask(run, "Delete facility BER-01?", "")
+
+			Expect(h.m.owner()).To(Equal(ownerFocused))
+			Expect(h.view()).To(ContainSubstring("1 waiting for your answer"))
+			h.typeText("pj-y")
+			Expect(h.r.answers).To(BeEmpty())
+			Expect(h.m.request.fields[0].value()).To(Equal("pj-y"))
+
+			h.wait()
+			h.press("enter")
+			Expect(h.m.owner()).To(Equal(ownerQuestion))
+			h.press("y")
+			Expect(h.r.answers).To(BeEmpty(), "a y pressed as the question appeared answered it")
+		})
+
+		It("waits behind the command panel, which shows the run waiting", func() {
+			h.press("i")
+			h.ask(run, "Delete facility BER-01?", "delete")
+
+			Expect(h.m.owner()).To(Equal(ownerPanel))
+			Expect(h.view()).To(MatchRegexp(`#%d\s+fft facility delete BER-01 --project staging\s+waiting for your answer`, run))
+			Expect(h.view()).To(ContainSubstring("It is waiting for your answer to its question."))
+
+			h.press("esc")
+			Expect(h.m.owner()).To(Equal(ownerQuestion))
+		})
+
+		It("lets the panel cancel a run that is waiting", func() {
+			h.press("i")
+			h.ask(run, "Delete facility BER-01?", "delete")
+			h.press("c")
+
+			Expect(h.r.cancelled).To(Equal([]RunID{run}))
+			h.finishID(run, Result{ExitCode: exitcode.Interrupted})
+			h.press("esc")
+			Expect(h.m.owner()).To(Equal(ownerScreen))
+			Expect(h.r.answers).To(BeEmpty(), "the runner answers a cancelled question itself")
+		})
+
+		It("asks one question at a time, in the order they came, and answers each for its own run", func() {
+			h.request(opDeleteFacility)
+			h.fill(0, "HAM-02")
+			h.press("s")
+			second := RunID(len(h.r.started))
+
+			q1 := h.ask(run, "Delete facility BER-01?", "")
+			q2 := h.ask(second, "Delete facility HAM-02?", "")
+			Expect(h.view()).To(ContainSubstring("Delete facility BER-01?"))
+			Expect(h.view()).To(ContainSubstring("2 waiting for your answer"))
+
+			h.wait()
+			h.press("n")
+			Expect(h.view()).To(ContainSubstring("Delete facility HAM-02?"))
+			h.press("y")
+			Expect(h.r.answers).To(HaveLen(1), "a y pressed as the second question appeared answered it")
+			h.wait()
+			h.press("y")
+
+			Expect(h.r.answers).To(Equal([]answer{
+				{run: run, question: q1, yes: false},
+				{run: second, question: q2, yes: true},
+			}))
+		})
+
+		It("drops the question of a run that has ended", func() {
+			h.ask(run, "Delete facility BER-01?", "delete")
+			h.finishID(run, Result{ExitCode: exitcode.Interrupted})
+
+			Expect(h.m.owner()).To(Equal(ownerScreen))
+			Expect(h.m.s.questions).To(BeEmpty())
+			Expect(h.r.answers).To(BeEmpty())
+		})
+
+		It("answers no for a run it did not start", func() {
+			q := h.ask(99, "Delete everything?", "")
+
+			Expect(h.m.owner()).To(Equal(ownerScreen))
+			Expect(h.r.answers).To(Equal([]answer{{run: 99, question: q, yes: false}}))
+		})
+
+		It("draws nothing of the question a terminal would act on", func() {
+			h.ask(run, "Delete \x1b]0;owned\x07facility \x1b[2Jnow?", "delete")
+
+			content := h.m.View().Content
+			Expect(content).NotTo(ContainSubstring("\x1b]0;"))
+			Expect(content).NotTo(ContainSubstring("\x1b[2J"))
+			Expect(h.view()).To(ContainSubstring("facility"))
+		})
+
+		It("quits on ctrl+c, as every dialog does", func() {
+			h.ask(run, "Delete facility BER-01?", "delete")
+			h.press("ctrl+c")
+			Expect(h.m.confirmQuit).To(BeTrue())
 		})
 	})
 
@@ -347,7 +549,9 @@ var _ = Describe("the Request screen", func() {
 			Expect(h.view()).To(ContainSubstring("Body: 44 bytes, sent on stdin"))
 			Expect(h.view()).To(ContainSubstring("The body is ready to send."))
 
-			h.press("s", "y")
+			h.press("s")
+			h.wait()
+			h.press("y")
 			inv := h.last()
 			Expect(inv.Args).To(Equal([]string{"picking", "add-pick-job", "--file", "-"}))
 			Expect(string(inv.Stdin)).To(Equal(edited))

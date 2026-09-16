@@ -22,6 +22,7 @@ func (h *harness) sent(op Operation, fill ...string) RunID {
 	}
 	h.press("s")
 	if h.m.request.dialog != nil {
+		h.wait()
 		h.press("y")
 	}
 	Expect(h.m.current).To(Equal(tabResponse))
@@ -188,7 +189,9 @@ var _ = Describe("the Response screen", func() {
 			It("asks first when it is a write, and sends the same body", func() {
 				h.request(opAddPickJob)
 				h.m.request.body = []byte(`{"pickLineItems":[1]}`)
-				h.press("s", "y")
+				h.press("s")
+				h.wait()
+				h.press("y")
 				write := RunID(len(h.r.started))
 				h.finishID(write, Result{ExitCode: exitcode.OK, Project: "staging"})
 
@@ -198,9 +201,22 @@ var _ = Describe("the Response screen", func() {
 				Expect(h.view()).To(ContainSubstring("Send Create a pick job to staging again?"))
 
 				h.press("y")
+				Expect(h.r.started).To(HaveLen(n), "a y pressed straight after r answered the question")
+				h.wait()
+				h.press("y")
 				Expect(h.r.started).To(HaveLen(n + 1))
 				Expect(string(h.last().Stdin)).To(Equal(`{"pickLineItems":[1]}`))
 				Expect(h.last().Args).To(Equal([]string{"picking", "add-pick-job", "--file", "-"}))
+			})
+
+			It("sends a command that asks its own question without asking first, and with no --yes", func() {
+				del := h.sent(opDeleteFacility, "BER-01")
+				h.finishID(del, Result{ExitCode: exitcode.OK, Project: "staging"})
+
+				h.press("r")
+				Expect(h.m.owner()).To(Equal(ownerScreen))
+				Expect(h.last().Args).To(Equal([]string{"facility", "delete", "BER-01"}))
+				Expect(h.last().Project).To(Equal("staging"))
 			})
 
 			It("is not offered for a run the Request screen did not send", func() {

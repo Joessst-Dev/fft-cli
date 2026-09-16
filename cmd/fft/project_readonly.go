@@ -39,7 +39,7 @@ func newProjectReadOnlyCmd(deps *Deps) *cobra.Command {
 		Use: "read-only <name>",
 		Annotations: map[string]string{
 			annotationExclusive: exclusiveConfig,
-			annotationConfirms:  "true",
+			annotationConfirms:  confirmsYes,
 		},
 		Short:             "Refuse every request that would change a project",
 		Long:              projectReadOnlyLong,
@@ -135,7 +135,7 @@ func confirmWritable(deps *Deps, name string) (bool, error) {
 		return true, nil
 	}
 
-	if !deps.Prompt.Interactive() {
+	if !deps.Prompt.CanConfirm() {
 		return false, exitcode.UsageError{Err: errors.New(
 			"stdin is not a terminal, so fft cannot ask for confirmation: pass --yes to allow writes again")}
 	}

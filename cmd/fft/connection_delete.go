@@ -33,7 +33,7 @@ func newConnectionDeleteCmd(deps *Deps) *cobra.Command {
 
 		Annotations: map[string]string{
 			annotationOperationID: "deleteFacilityConnection",
-			annotationConfirms:    "true",
+			annotationConfirms:    "delete",
 		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {

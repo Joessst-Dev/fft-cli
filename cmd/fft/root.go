@@ -302,11 +302,12 @@ func (d *Deps) forRun(in io.Reader, ui uiRun) *Deps {
 
 		// Rebuilt by complete, by newRootCmd or by execute, from this run's flags and
 		// streams — run among them:
-		// Printer, Prompt, Debug, Project, Ephemeral, Timeout, AssumeYes,
-		// ReadOnlyFlag, ReadOnlyEnv, noKeyringFromConfig, explicitNoKeyring, cfg,
+		// Printer, Debug, Project, Ephemeral, Timeout, AssumeYes, ReadOnlyFlag,
+		// ReadOnlyEnv, noKeyringFromConfig, explicitNoKeyring, cfg,
 		// componentWarnings and the update-check plumbing. StartTUI stays nil — a
-		// run cannot open a second UI, it has no terminal — and observeStatus and
-		// tokens are the caller's to set.
+		// run cannot open a second UI, it has no terminal — and observeStatus,
+		// tokens and Prompt are the caller's to set: the runner's Prompt asks the
+		// run's questions in the UI.
 	}
 }
 

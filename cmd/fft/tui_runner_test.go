@@ -742,7 +742,6 @@ var runDepsClassification = map[string]string{
 	"Terminal": "per run",
 
 	"Printer":             "rebuilt",
-	"Prompt":              "rebuilt",
 	"Debug":               "rebuilt",
 	"Project":             "rebuilt",
 	"Ephemeral":           "rebuilt",
@@ -760,6 +759,7 @@ var runDepsClassification = map[string]string{
 	"StartTUI":            "zero",
 	"observeStatus":       "caller",
 	"tokens":              "caller",
+	"Prompt":              "caller",
 	"HistoryPath":         "shared",
 	"historyMaxBytes":     "shared",
 	"run":                 "rebuilt",

@@ -152,7 +152,7 @@ func newHistoryClearCmd(deps *Deps) *cobra.Command {
 		Args:  usageArgs(cobra.NoArgs),
 		Annotations: map[string]string{
 			annotationExclusive: exclusiveHistory,
-			annotationConfirms:  "true",
+			annotationConfirms:  confirmsYes,
 		},
 		RunE: func(_ *cobra.Command, _ []string) error {
 			ok, err := confirmHistoryClear(deps)
@@ -180,7 +180,7 @@ func confirmHistoryClear(deps *Deps) (bool, error) {
 	if deps.AssumeYes {
 		return true, nil
 	}
-	if !deps.Prompt.Interactive() {
+	if !deps.Prompt.CanConfirm() {
 		return false, exitcode.UsageError{Err: errors.New(
 			"stdin is not a terminal, so fft cannot ask for confirmation: pass --yes to clear the history")}
 	}

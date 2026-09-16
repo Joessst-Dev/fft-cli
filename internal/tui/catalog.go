@@ -72,7 +72,9 @@ type Command struct {
 	// that may differ from the operation's SampleBody.
 	Example bool
 
-	// Confirms says the command asks before it acts unless --yes is given.
+	// Confirms says the command asks before it acts, in its own words and after
+	// looking up what it is about to change. The UI sends such a command without
+	// asking first, and puts the command's question to the user instead.
 	Confirms bool
 
 	// Table says [Catalog.Table] can render what the command prints.

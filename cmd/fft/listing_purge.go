@@ -44,7 +44,7 @@ func newListingPurgeCmd(deps *Deps) *cobra.Command {
 
 		Annotations: map[string]string{
 			annotationOperationID: "deleteListingsOfFacility",
-			annotationConfirms:    "true",
+			annotationConfirms:    "purge",
 		},
 
 		RunE: func(cmd *cobra.Command, _ []string) error {

@@ -40,7 +40,7 @@ func newOrderCancelCmd(deps *Deps) *cobra.Command {
 
 		Annotations: map[string]string{
 			annotationOperationID: "orderAction",
-			annotationConfirms:    "true",
+			annotationConfirms:    "cancel",
 		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {

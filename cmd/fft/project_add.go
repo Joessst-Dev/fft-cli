@@ -72,7 +72,7 @@ func newProjectAddCmd(deps *Deps) *cobra.Command {
 		Use: "add [name]",
 		Annotations: map[string]string{
 			annotationExclusive: exclusiveConfig,
-			annotationConfirms:  "true",
+			annotationConfirms:  confirmsYes,
 		},
 		Short: "Configure a project",
 		Long:  projectAddLong,

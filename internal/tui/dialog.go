@@ -2,6 +2,7 @@ package tui
 
 import (
 	"strings"
+	"time"
 
 	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/textinput"
@@ -28,6 +29,46 @@ var (
 	submitKey = key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "confirm"))
 	cancelKey = key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", "cancel"))
 )
+
+// armDelay is how long a dialog ignores keys once it is in front of the user. A
+// key meant for what was there a moment before — the next letter of a value, a y
+// typed just after ctrl+s sent the form — arrives inside it, and must not answer a
+// question nobody has read yet.
+const armDelay = 500 * time.Millisecond
+
+// armedDialog is a dialog that takes no keys until it has been in front of the
+// user for armDelay.
+type armedDialog struct {
+	dialog
+	now func() time.Time
+
+	// shown is when the dialog first had the keyboard, zero until then.
+	shown time.Time
+}
+
+// armed wraps d. A dialog opened by the key the user just pressed is in front of
+// them at once, and shown is set; one that waits its turn is shown later, by arm.
+func armed(d dialog, now func() time.Time, shown bool) *armedDialog {
+	a := &armedDialog{dialog: d, now: now}
+	if shown {
+		a.arm()
+	}
+	return a
+}
+
+// arm notes that the dialog now has the keyboard. Only the first call counts.
+func (a *armedDialog) arm() {
+	if a.shown.IsZero() {
+		a.shown = a.now()
+	}
+}
+
+func (a *armedDialog) update(msg tea.Msg) (bool, tea.Cmd) {
+	if a.shown.IsZero() || a.now().Sub(a.shown) < armDelay {
+		return false, nil
+	}
+	return a.dialog.update(msg)
+}
 
 // confirmDialog asks a yes/no question. No is the default: enter declines, and
 // only y goes ahead.
@@ -74,6 +115,10 @@ type typeNameDialog struct {
 	question string
 	detail   string
 	name     string
+
+	// what is what name is, as the dialog calls it: "name", unless set.
+	what string
+
 	command  shellCommand
 	input    textinput.Model
 	mismatch bool
@@ -123,7 +168,11 @@ func (d *typeNameDialog) view(st styles, width int) string {
 	}
 	lines = append(lines, "Type "+output.SanitizeCell(d.name)+" to confirm.", d.input.View())
 	if d.mismatch {
-		lines = append(lines, st.errorText.Render("That is not the name; nothing was sent."))
+		what := d.what
+		if what == "" {
+			what = "name"
+		}
+		lines = append(lines, st.errorText.Render("That is not the "+what+"; nothing was sent."))
 	}
 	lines = append(lines, "", st.dim.Render("runs: "+output.SanitizeCell(d.command.String())), "", "enter confirm · esc cancel")
 	return st.dialog.Width(dialogWidth(width)).Render(strings.Join(lines, "\n"))

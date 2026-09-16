@@ -25,7 +25,7 @@ func newTemplateRemoveCmd(deps *Deps) *cobra.Command {
 		Use: "remove <name>",
 		Annotations: map[string]string{
 			annotationExclusive: exclusiveTemplates,
-			annotationConfirms:  "true",
+			annotationConfirms:  confirmsYes,
 		},
 		Aliases:           []string{"rm", "delete"},
 		Short:             "Delete a saved template",

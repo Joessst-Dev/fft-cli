@@ -30,7 +30,7 @@ func newFacilityDeleteCmd(deps *Deps) *cobra.Command {
 
 		Annotations: map[string]string{
 			annotationOperationID: "deleteFacility",
-			annotationConfirms:    "true",
+			annotationConfirms:    "delete",
 		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -80,7 +80,7 @@ func confirmDestructive(deps *Deps, question string) (bool, error) {
 		return true, nil
 	}
 
-	if !deps.Prompt.Interactive() {
+	if !deps.Prompt.CanConfirm() {
 		return false, exitcode.UsageError{Err: fmt.Errorf(
 			"%w: pass --yes to confirm this without being asked", prompt.ErrNotInteractive)}
 	}
