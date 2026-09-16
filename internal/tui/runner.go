@@ -30,10 +30,12 @@ type Invocation struct {
 	// command line or kept in a process listing.
 	Stdin []byte
 
-	// Exclusive runs the invocation alone, with no other run in flight. The runner
-	// already runs alone every command that reads a shared file and writes it
-	// back, since two of those side by side lose one of their updates; this is for
-	// a sequence the UI knows must not interleave with anything else.
+	// Exclusive runs the invocation alone, with no other run in flight, and after
+	// every exclusive invocation started before it. The runner already runs alone
+	// every command that reads a shared file and writes it back, since two of those
+	// side by side lose one of their updates, and reports those as exclusive in its
+	// events; this is for a sequence the UI knows must not interleave with anything
+	// else.
 	Exclusive bool
 }
 
@@ -73,8 +75,11 @@ type Result struct {
 
 // RunEvent reports a change in an invocation's state.
 type RunEvent struct {
-	ID         RunID
-	State      RunState
+	ID    RunID
+	State RunState
+
+	// Invocation is the invocation as the runner accepted it. Its Stdin is always
+	// nil: what a run reads may be a secret, and an event is not where it goes.
 	Invocation Invocation
 
 	// At is when the invocation entered State.
@@ -89,7 +94,9 @@ type RunEvent struct {
 // Its lifecycle belongs to whoever built it, so there is no Close here: the UI
 // only starts, cancels and watches.
 type Runner interface {
-	// Start accepts inv and returns at once. Its progress arrives on Events.
+	// Start accepts inv and returns at once. Its progress arrives on Events. The
+	// project it acts on is the one selected when Start is called, however long
+	// the run then waits for its turn.
 	Start(inv Invocation) (RunID, error)
 
 	// Cancel stops an invocation. One that has not started executing ends with exit
@@ -103,7 +110,8 @@ type Runner interface {
 	// it has been shut down and its last run has finished.
 	Events() <-chan RunEvent
 
-	// SetProject selects the project later invocations act on. "" leaves the
-	// choice to fft's own resolution: the active project, or the environment.
+	// SetProject selects the project the invocations started after it act on. ""
+	// leaves the choice to fft's own resolution: the active project, or the
+	// environment.
 	SetProject(name string)
 }

@@ -4,9 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"slices"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -136,6 +139,33 @@ var _ = Describe("the TUI's command runner", func() {
 		var doc map[string]any
 		Expect(json.Unmarshal(res.Stdout, &doc)).To(Succeed(), "stdout was not JSON: %s", res.Stdout)
 		Expect(doc).To(HaveKeyWithValue("id", "pj-1"))
+	})
+
+	It("never puts what a run reads on stdin into an event", func() {
+		const body = `{"pickLineItems":[],"note":"stdin-must-not-appear"}`
+		c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"id":"pj-1"}`))
+		})
+		r := c.newRunner()
+
+		id := start(r, tui.Invocation{Args: []string{"picking", "add-pick-job", "--file", "-"}, Stdin: []byte(body)})
+
+		var events []tui.RunEvent
+		for {
+			var ev tui.RunEvent
+			Eventually(r.Events()).WithTimeout(runTimeout).Should(Receive(&ev))
+			events = append(events, ev)
+			if ev.ID == id && ev.State == tui.RunDone {
+				break
+			}
+		}
+		Expect(events).To(HaveLen(3))
+		Expect(events[2].Result.ExitCode).To(Equal(exitcode.OK), "stderr: %s", events[2].Result.Stderr)
+		for _, ev := range events {
+			Expect(ev.Invocation.Stdin).To(BeNil(), "state %d", ev.State)
+			Expect(fmt.Sprintf("%+v", ev)).NotTo(ContainSubstring("stdin-must-not-appear"))
+		}
 	})
 
 	It("refuses a write against a read-only project without sending anything", func() {
@@ -343,6 +373,90 @@ var _ = Describe("the TUI's command runner", func() {
 			for id, res := range awaitDone(r, alone, after) {
 				Expect(res.ExitCode).To(Equal(exitcode.OK), "run %d: %s", id, res.Stderr)
 			}
+		})
+	})
+
+	When("every slot is taken", func() {
+		var (
+			r          *cliRunner
+			t          *tenant
+			held       []tui.RunID
+			releaseAll func()
+		)
+
+		BeforeEach(func() {
+			arrived := make(chan struct{}, runnerSlots)
+			release := make(chan struct{})
+			t = c.configuredTenant(func(w http.ResponseWriter, req *http.Request) {
+				if strings.HasSuffix(req.URL.Path, "/HOLD") {
+					arrived <- struct{}{}
+					<-release
+				}
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"id":"pj-1"}`))
+			})
+			releaseAll = sync.OnceFunc(func() { close(release) })
+			DeferCleanup(releaseAll)
+
+			r = c.newRunner()
+			r.SetProject("prod")
+			held = nil
+			for range runnerSlots {
+				held = append(held, start(r, tui.Invocation{Args: []string{"picking", "get-pick-job", "--pick-job-id", "HOLD"}}))
+			}
+			for range runnerSlots {
+				Eventually(arrived).WithTimeout(runTimeout).Should(Receive())
+			}
+		})
+
+		It("sends a queued run to the project selected when it was started, not when its turn came", func() {
+			queued := start(r, tui.Invocation{Args: []string{"picking", "get-pick-job", "--pick-job-id", "QUEUED"}})
+			r.SetProject("other")
+			releaseAll()
+
+			res := awaitDone(r, append(held, queued)...)
+			Expect(res[queued].ExitCode).To(Equal(exitcode.OK), "stderr: %s", res[queued].Stderr)
+			Expect(t.recorded()).To(ContainElement(HaveField("Path", "/prod/api/pickjobs/QUEUED")))
+			Expect(t.recorded()).NotTo(ContainElement(HaveField("Path", "/other/api/pickjobs/QUEUED")))
+		})
+
+		It("runs the commands that must run alone in the order they were started", func() {
+			var switches []tui.RunID
+			for _, name := range []string{"other", "prod", "other", "prod", "other", "prod", "other"} {
+				switches = append(switches, start(r, tui.Invocation{Args: []string{"project", "use", name}}))
+			}
+			releaseAll()
+
+			var ran []tui.RunID
+			finished := map[tui.RunID]bool{}
+			for len(finished) < len(held)+len(switches) {
+				var ev tui.RunEvent
+				Eventually(r.Events()).WithTimeout(runTimeout).Should(Receive(&ev))
+				switch {
+				case ev.State == tui.RunRunning && slices.Contains(switches, ev.ID):
+					Expect(ev.Invocation.Exclusive).To(BeTrue(), "project use rewrites the config file")
+					ran = append(ran, ev.ID)
+				case ev.State == tui.RunDone:
+					Expect(ev.Result.ExitCode).To(Equal(exitcode.OK), "run %d: %s", ev.ID, ev.Result.Stderr)
+					finished[ev.ID] = true
+				}
+			}
+			Expect(ran).To(Equal(switches))
+			Expect(c.activeProject()).To(Equal("other"), "the last switch did not win")
+		})
+
+		It("keeps the line moving past an exclusive run cancelled while it waited", func() {
+			first := start(r, tui.Invocation{Args: []string{"project", "use", "prod"}})
+			second := start(r, tui.Invocation{Args: []string{"version"}, Exclusive: true})
+			third := start(r, tui.Invocation{Args: []string{"project", "use", "other"}})
+			r.Cancel(first)
+			releaseAll()
+
+			res := awaitDone(r, append(held, first, second, third)...)
+			Expect(res[first].ExitCode).To(Equal(exitcode.Interrupted))
+			Expect(res[second].ExitCode).To(Equal(exitcode.OK), "stderr: %s", res[second].Stderr)
+			Expect(res[third].ExitCode).To(Equal(exitcode.OK), "stderr: %s", res[third].Stderr)
+			Expect(c.activeProject()).To(Equal("other"))
 		})
 	})
 

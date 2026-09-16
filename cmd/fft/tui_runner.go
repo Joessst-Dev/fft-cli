@@ -9,6 +9,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/spf13/cobra"
+
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/tui"
 )
@@ -67,19 +69,54 @@ type cliRunner struct {
 	// config is held for reading by every run and for writing by an exclusive one.
 	config sync.RWMutex
 
-	project atomic.Pointer[string]
-	nextID  atomic.Uint64
+	nextID atomic.Uint64
 
-	// mu guards closed and cancels, and makes Start's wg.Add and Close's wg.Wait
+	// mu guards everything below, and makes Start's wg.Add and Close's wg.Wait
 	// mutually exclusive — an Add racing a Wait is the one misuse WaitGroup cannot
 	// survive.
 	mu      sync.Mutex
 	closed  bool
 	cancels map[tui.RunID]context.CancelFunc
 	wg      sync.WaitGroup
+
+	// project is the project the UI has selected. A run takes it when it is
+	// started, not when it executes: the user confirmed it against the project
+	// on screen then, and a switch while it queues must not redirect it.
+	project string
+
+	// catalog is a command tree that is never executed. Start resolves a command
+	// line in it to learn whether the command must run alone, which has to be
+	// known before the run is queued so that its place in line can be kept.
+	// cobra builds flag sets lazily as it looks commands up, so it is only used
+	// under mu.
+	catalog *cobra.Command
+
+	// lastExclusive is closed once the most recently started exclusive run has
+	// finished, nil when there has been none.
+	lastExclusive chan struct{}
 }
 
 var _ tui.Runner = (*cliRunner)(nil)
+
+// job is one accepted invocation, with what was decided about it when it was
+// started.
+type job struct {
+	inv tui.Invocation
+
+	// stdin is inv.Stdin, taken out of inv so that no event carries it. The
+	// runner owns this copy and clears it once the run is over.
+	stdin []byte
+
+	// ui is the session as it was at Start, the selected project included.
+	ui uiRun
+
+	// exclusive runs the job alone. after, when set, is closed once the
+	// exclusive job started before it has finished, and done is closed when this
+	// one has.
+	exclusive bool
+	after     <-chan struct{}
+	done      chan struct{}
+}
 
 // newCLIRunner returns a runner whose runs are all cancelled when ctx is. deps is
 // the template each run's own Deps is cut from, and session the flags `fft tui` was
@@ -94,15 +131,21 @@ func newCLIRunner(ctx context.Context, deps *Deps, session uiRun) *cliRunner {
 		events:  make(chan tui.RunEvent, runnerEventBuffer),
 		slots:   make(chan struct{}, runnerSlots),
 		cancels: make(map[tui.RunID]context.CancelFunc),
+		catalog: newRootCmd(deps.forRun(nil, session)),
 	}
 }
 
 // Start implements [tui.Runner].
+//
+// Everything a run depends on that can change while it waits is decided here:
+// the project it acts on, and its place among the runs that must run alone. The
+// session's read-only floor and timeout are fixed for the runner's life.
 func (r *cliRunner) Start(inv tui.Invocation) (tui.RunID, error) {
 	// The caller's slices are copied: the run outlives this call, and a UI that
 	// reuses its buffers must not be able to rewrite a command already queued.
+	j := job{stdin: bytes.Clone(inv.Stdin)}
 	inv.Args = slices.Clone(inv.Args)
-	inv.Stdin = bytes.Clone(inv.Stdin)
+	inv.Stdin = nil
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -110,13 +153,34 @@ func (r *cliRunner) Start(inv tui.Invocation) (tui.RunID, error) {
 		return 0, errRunnerClosed
 	}
 
+	j.ui = r.session
+	j.ui.project = r.project
+
+	j.exclusive = inv.Exclusive || r.rewritesSharedFile(inv.Args)
+	inv.Exclusive = j.exclusive
+	j.inv = inv
+	if j.exclusive {
+		// In the order they were started: two switches in a row must end on the
+		// second, and a sign-in queued after a switch must follow it.
+		j.after = r.lastExclusive
+		j.done = make(chan struct{})
+		r.lastExclusive = j.done
+	}
+
 	id := tui.RunID(r.nextID.Add(1))
 	ctx, cancel := context.WithCancel(r.ctx)
 	r.cancels[id] = cancel
 
 	r.wg.Add(1)
-	go r.run(ctx, id, inv)
+	go r.run(ctx, id, j)
 	return id, nil
+}
+
+// rewritesSharedFile reports whether args resolve to a command marked
+// [annotationExclusive]. It must be called with mu held.
+func (r *cliRunner) rewritesSharedFile(args []string) bool {
+	target, _, err := r.catalog.Find(args)
+	return err == nil && target.Annotations[annotationExclusive] != ""
 }
 
 // Cancel implements [tui.Runner].
@@ -132,8 +196,12 @@ func (r *cliRunner) Cancel(id tui.RunID) {
 // Events implements [tui.Runner].
 func (r *cliRunner) Events() <-chan tui.RunEvent { return r.events }
 
-// SetProject implements [tui.Runner].
-func (r *cliRunner) SetProject(name string) { r.project.Store(&name) }
+// SetProject implements [tui.Runner]. It applies to the runs started after it.
+func (r *cliRunner) SetProject(name string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.project = name
+}
 
 // Close cancels every run, waits for them to finish, and closes Events. It is
 // safe to call more than once.
@@ -152,33 +220,49 @@ func (r *cliRunner) Close() {
 	close(r.events)
 }
 
-func (r *cliRunner) run(ctx context.Context, id tui.RunID, inv tui.Invocation) {
+func (r *cliRunner) run(ctx context.Context, id tui.RunID, j job) {
 	defer r.wg.Done()
 	defer r.forget(id)
+	if j.done != nil {
+		// Deferred after the slot and the config file are released, and after the
+		// last event: the next exclusive run starts only once this one has ended.
+		defer close(j.done)
+	}
+	// A secret on stdin is not kept in memory any longer than the run needs it.
+	defer clear(j.stdin)
 
-	r.emit(tui.RunEvent{ID: id, State: tui.RunQueued, Invocation: inv, At: time.Now()})
+	r.emit(tui.RunEvent{ID: id, State: tui.RunQueued, Invocation: j.inv, At: time.Now()})
+
+	if j.after != nil {
+		select {
+		case <-j.after:
+		case <-ctx.Done():
+			r.finish(id, j.inv, tui.Result{ExitCode: exitcode.Interrupted})
+			return
+		}
+	}
 
 	select {
 	case r.slots <- struct{}{}:
 	case <-ctx.Done():
 		// Never started, so nothing was sent: it ends exactly as a command
 		// interrupted before its first request would.
-		r.finish(id, inv, tui.Result{ExitCode: exitcode.Interrupted})
+		r.finish(id, j.inv, tui.Result{ExitCode: exitcode.Interrupted})
 		return
 	}
 	defer func() { <-r.slots }()
 
 	// A cancel and a free slot can arrive together, and select chose the slot.
 	if ctx.Err() != nil {
-		r.finish(id, inv, tui.Result{ExitCode: exitcode.Interrupted})
+		r.finish(id, j.inv, tui.Result{ExitCode: exitcode.Interrupted})
 		return
 	}
 
-	r.emit(tui.RunEvent{ID: id, State: tui.RunRunning, Invocation: inv, At: time.Now()})
-	r.finish(id, inv, r.execute(ctx, inv))
+	r.emit(tui.RunEvent{ID: id, State: tui.RunRunning, Invocation: j.inv, At: time.Now()})
+	r.finish(id, j.inv, r.execute(ctx, j))
 }
 
-// execute runs one invocation on a Deps of its own.
+// execute runs one job on a Deps of its own.
 //
 // Each run builds its own token source, so runs side by side against a project
 // whose cached token has expired each refresh it. The refreshed token lands in
@@ -187,24 +271,14 @@ func (r *cliRunner) run(ctx context.Context, id tui.RunID, inv tui.Invocation) {
 // remove and re-authentication, which is more machinery than one burst is worth.
 // A caller avoids the burst by running one authenticated command on its own
 // before it sends several side by side.
-func (r *cliRunner) execute(ctx context.Context, inv tui.Invocation) tui.Result {
-	in := bytes.NewReader(inv.Stdin)
-
-	ui := r.session
-	if p := r.project.Load(); p != nil {
-		ui.project = *p
-	}
-	deps := r.deps.forRun(in, ui)
+func (r *cliRunner) execute(ctx context.Context, j job) tui.Result {
+	in := bytes.NewReader(j.stdin)
+	deps := r.deps.forRun(in, j.ui)
 
 	var status atomic.Int64
 	deps.observeStatus = func(code int) { status.Store(int64(code)) }
 
-	root := newRootCmd(deps)
-
-	// The command line is run exactly as given — the run's Deps carries what the UI
-	// decides — so what Find resolves here is what executes below.
-	target, _, findErr := root.Find(inv.Args)
-	if inv.Exclusive || (findErr == nil && target.Annotations[annotationExclusive] != "") {
+	if j.exclusive {
 		r.config.Lock()
 		defer r.config.Unlock()
 	} else {
@@ -221,7 +295,9 @@ func (r *cliRunner) execute(ctx context.Context, inv tui.Invocation) tui.Result 
 
 	var stdout, stderr bytes.Buffer
 	started := time.Now()
-	code := executeRoot(ctx, deps, root, inv.Args, in, &stdout, &stderr)
+	// The command line is run exactly as given; the run's Deps carries what the UI
+	// decides.
+	code := executeRoot(ctx, deps, newRootCmd(deps), j.inv.Args, in, &stdout, &stderr)
 
 	return tui.Result{
 		ExitCode: code,
