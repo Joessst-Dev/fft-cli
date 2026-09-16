@@ -2,47 +2,593 @@ package tui
 
 import (
 	"context"
+	"strings"
+	"time"
 
-	tea "charm.land/bubbletea/v2"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 )
 
-var _ = Describe("the placeholder UI", func() {
-	var m model
+var _ = Describe("the UI", func() {
+	var h *harness
 
 	BeforeEach(func() {
-		m = newModel(Options{})
-	})
-
-	quits := func(msg tea.Msg) bool {
-		_, cmd := m.Update(msg)
-		if cmd == nil {
-			return false
-		}
-		_, isQuit := cmd().(tea.QuitMsg)
-		return isQuit
-	}
-
-	DescribeTable("quits on the quit keys",
-		func(msg tea.KeyPressMsg) { Expect(quits(msg)).To(BeTrue()) },
-		Entry("q", tea.KeyPressMsg{Code: 'q', Text: "q"}),
-		Entry("ctrl+c", tea.KeyPressMsg{Code: 'c', Mod: tea.ModCtrl}),
-	)
-
-	It("ignores any other key", func() {
-		Expect(quits(tea.KeyPressMsg{Code: 'x', Text: "x"})).To(BeFalse())
-	})
-
-	It("draws a frame that says how to leave, on the alternate screen", func() {
-		v := m.View()
-
-		Expect(v.Content).To(ContainSubstring("fft"))
-		Expect(v.Content).To(ContainSubstring("quit"))
-		Expect(v.AltScreen).To(BeTrue())
+		h = newHarness(Options{})
 	})
 
 	It("refuses to start without a runner to execute commands with", func() {
 		Expect(Run(context.Background(), Options{})).To(MatchError(ContainSubstring("no runner")))
 	})
+
+	It("draws on the alternate screen", func() {
+		Expect(h.m.View().AltScreen).To(BeTrue())
+	})
+
+	Describe("starting up", func() {
+		It("lists the projects and reads the credential state, side by side", func() {
+			Expect(h.r.commandLines()).To(Equal([]string{"project list", "auth status"}))
+			Expect(h.r.exclusive(1)).To(BeFalse())
+			Expect(h.r.exclusive(2)).To(BeFalse())
+			Expect(h.view()).To(ContainSubstring("Loading projects"))
+		})
+
+		It("shows the projects, marking the one it acts on, and the token's remaining life", func() {
+			h.loaded(twoProjects, validToken)
+
+			view := h.view()
+			Expect(view).To(MatchRegexp(`> \* staging\s+https://staging.example.com`))
+			Expect(view).To(MatchRegexp(`  prod\s+https://prod.example.com\s+\S+\s+keyring\s+read-only`))
+			Expect(view).To(ContainSubstring("fft · staging · token 42m left"))
+			Expect(view).NotTo(ContainSubstring("RO"))
+		})
+
+		It("signs in first, alone, when the next run would have to", func() {
+			h.loaded(twoProjects, `{"project":"staging","store":"keyring","signIn":"password","token":"expired"}`)
+
+			id := h.lookup("auth", "whoami")
+			Expect(h.r.exclusive(id)).To(BeTrue())
+
+			h.finishID(id, ok(`{}`))
+			Expect(h.r.commandLines()).To(HaveLen(4))
+			Expect(h.r.commandLines()[3]).To(Equal("auth status"))
+		})
+
+		DescribeTable("does not sign in ahead of time when it would buy nothing",
+			func(status string) {
+				h.loaded(twoProjects, status)
+				Expect(h.r.commandLines()).To(Equal([]string{"project list", "auth status"}))
+			},
+			Entry("a valid token", validToken),
+			Entry("the environment's store, which keeps no token",
+				`{"project":"env","store":"env","signIn":"password","token":"none"}`),
+			Entry("a fixed id token", `{"project":"env","store":"env","signIn":"idToken","token":"unknown"}`),
+		)
+
+		It("shows no project and no error when none is configured", func() {
+			h.finish(ok(`[]`), "project", "list")
+			h.finish(failed(exitcode.Config, "Error: no active project"), "auth", "status")
+
+			view := h.view()
+			Expect(view).To(ContainSubstring("No projects are configured. Press a to add one."))
+			Expect(view).To(ContainSubstring("fft · no project"))
+			Expect(view).NotTo(ContainSubstring("failed"))
+		})
+	})
+
+	Describe("the read-only badge", func() {
+		It("shows when the current project is configured read-only", func() {
+			h = newHarness(Options{Project: "prod"})
+			h.loaded(twoProjects, validToken)
+
+			Expect(h.view()).To(ContainSubstring("fft · prod · RO"))
+		})
+
+		It("shows for every project when the session itself is read-only", func() {
+			h = newHarness(Options{ReadOnly: true})
+			h.loaded(twoProjects, validToken)
+
+			Expect(h.view()).To(ContainSubstring("fft · staging · RO"))
+			Expect(h.view()).To(MatchRegexp(`staging\s+.*read-only`))
+		})
+	})
+
+	Describe("switching screens", func() {
+		It("goes to a screen by its number, and says what is still to come", func() {
+			h.press("2")
+			Expect(h.view()).To(ContainSubstring("[2 Operations]"))
+			Expect(h.view()).To(ContainSubstring("Coming soon"))
+
+			h.press("7")
+			Expect(h.view()).To(ContainSubstring("[7 Roles]"))
+		})
+
+		It("cycles with tab and shift+tab, and ctrl+p goes back to Projects", func() {
+			h.press("tab")
+			Expect(h.view()).To(ContainSubstring("[2 Operations]"))
+			h.press("shift+tab", "shift+tab")
+			Expect(h.view()).To(ContainSubstring("[7 Roles]"))
+			h.press("ctrl+p")
+			Expect(h.view()).To(ContainSubstring("[1 Projects]"))
+		})
+
+		It("toggles the full help with ?", func() {
+			Expect(h.view()).NotTo(ContainSubstring("previous"))
+			h.press("?")
+			Expect(h.view()).To(ContainSubstring("switch project"))
+			Expect(h.view()).To(ContainSubstring("running commands"))
+		})
+	})
+
+	Describe("using a project", func() {
+		BeforeEach(func() {
+			h.loaded(twoProjects, validToken)
+			h.press("down")
+		})
+
+		It("shows the command enter would run", func() {
+			Expect(h.view()).To(ContainSubstring("$ fft project use prod"))
+		})
+
+		It("switches with project use, alone, and only then selects it for later runs", func() {
+			h.press("enter")
+
+			id := h.lookup("project", "use", "prod")
+			Expect(h.r.exclusive(id)).To(BeTrue())
+			Expect(h.r.projects).To(BeEmpty(), "selected before the switch had happened")
+
+			h.finishID(id, ok(""))
+			Expect(h.r.projects).To(Equal([]string{"prod"}))
+			Expect(h.view()).To(ContainSubstring("Now using prod."))
+			Expect(h.view()).To(ContainSubstring("fft · prod"))
+
+			whoami := h.lookup("auth", "whoami")
+			Expect(h.r.exclusive(whoami)).To(BeTrue())
+			h.lookup("project", "list")
+
+			h.finishID(whoami, ok(`{}`))
+			h.lookup("auth", "status")
+		})
+
+		It("takes u as well as enter", func() {
+			h.press("u")
+			h.lookup("project", "use", "prod")
+		})
+
+		It("ignores a credential state read before the switch and answered after it", func() {
+			h.press("ctrl+r")
+			stale := h.lookup("auth", "status")
+			h.press("enter")
+			h.finish(ok(""), "project", "use", "prod")
+			h.finishID(stale, ok(validToken))
+
+			Expect(h.view()).To(ContainSubstring("fft · prod · RO · token ?"))
+		})
+
+		It("shows why a switch failed, with the exit code's meaning, and selects nothing", func() {
+			h.press("enter")
+			h.finish(failed(exitcode.Config, "Error: project \"prod\" is not configured\nRun 'fft project list'."),
+				"project", "use", "prod")
+
+			view := h.view()
+			Expect(view).To(ContainSubstring("switching to prod failed: exit 3 (no active project, or the config is unusable)"))
+			Expect(view).To(ContainSubstring(`Error: project "prod" is not configured`))
+			Expect(view).To(ContainSubstring("Run 'fft project list'."))
+			Expect(h.r.projects).To(BeEmpty())
+		})
+
+		It("keeps what a failed command said from steering the terminal", func() {
+			h.press("enter")
+			h.finish(failed(exitcode.General, "Error: \x1b[2Jboom\x07"), "project", "use", "prod")
+
+			Expect(h.m.View().Content).NotTo(ContainSubstring("\x1b[2J"))
+			Expect(h.m.View().Content).NotTo(ContainSubstring("\x07"))
+			Expect(h.view()).To(ContainSubstring("Error: [2Jboom"))
+		})
+
+		It("reports a runner that would not take the command", func() {
+			h.r.startErr = errShutDown
+			h.press("enter")
+
+			Expect(h.view()).To(ContainSubstring("switching to prod failed: exit 1"))
+			Expect(h.view()).To(ContainSubstring("shut down"))
+		})
+	})
+
+	Describe("toggling read-only", func() {
+		BeforeEach(func() {
+			h.loaded(twoProjects, validToken)
+		})
+
+		It("asks first, naming the project, and sends nothing on no", func() {
+			h.press("r")
+			Expect(h.view()).To(ContainSubstring("Make staging read-only?"))
+			Expect(h.view()).To(ContainSubstring("runs: fft project read-only staging"))
+
+			for _, no := range []string{"n", "esc", "enter"} {
+				h.press(no)
+				Expect(h.view()).NotTo(ContainSubstring("Make staging read-only?"))
+				h.press("r")
+			}
+			Expect(h.r.commandLines()).To(HaveLen(2))
+		})
+
+		It("makes a project read-only on yes, without a --yes it does not need", func() {
+			h.press("r", "y")
+
+			id := h.lookup("project", "read-only", "staging")
+			Expect(h.r.exclusive(id)).To(BeTrue())
+			h.finishID(id, ok(""))
+			Expect(h.view()).To(ContainSubstring("staging is read-only."))
+			h.lookup("project", "list")
+		})
+
+		It("allows writes again only after a yes, which becomes the command's --yes", func() {
+			h.press("down", "r")
+			Expect(h.view()).To(ContainSubstring("Allow writes to prod again?"))
+			Expect(h.view()).To(ContainSubstring("$ fft project read-only prod --off --yes"))
+			Expect(h.r.commandLines()).To(HaveLen(2))
+
+			h.press("y")
+			id := h.lookup("project", "read-only", "prod", "--off", "--yes")
+			h.finishID(id, ok(""))
+			Expect(h.view()).To(ContainSubstring("prod accepts writes again."))
+		})
+	})
+
+	Describe("removing a project", func() {
+		BeforeEach(func() {
+			h.loaded(twoProjects, validToken)
+			h.press("down", "d")
+		})
+
+		It("asks for the name to be typed, and sends nothing until it is", func() {
+			Expect(h.view()).To(ContainSubstring("Remove prod and its stored credentials?"))
+			Expect(h.view()).To(ContainSubstring("Type prod to confirm."))
+
+			h.typeText("staging")
+			h.press("enter")
+			Expect(h.view()).To(ContainSubstring("That is not the name; nothing was removed."))
+			Expect(h.r.commandLines()).To(HaveLen(2))
+		})
+
+		It("sends nothing when cancelled", func() {
+			h.typeText("prod")
+			h.press("esc")
+
+			Expect(h.view()).NotTo(ContainSubstring("Type prod to confirm."))
+			Expect(h.r.commandLines()).To(HaveLen(2))
+		})
+
+		It("takes the keyboard, so a q in the name is typed rather than quitting", func() {
+			h.typeText("q")
+			Expect(h.view()).To(ContainSubstring("> q"))
+		})
+
+		It("removes the project with --yes once the name matches", func() {
+			h.typeText("prod")
+			h.press("enter")
+
+			id := h.lookup("project", "remove", "prod", "--yes")
+			Expect(h.r.exclusive(id)).To(BeTrue())
+			h.finishID(id, ok(""))
+			Expect(h.view()).To(ContainSubstring("Removed prod."))
+			Expect(h.r.projects).To(BeEmpty(), "prod was not the UI's project")
+		})
+
+		It("gives the choice back to fft when the UI's own project goes", func() {
+			h = newHarness(Options{Project: "prod"})
+			h.loaded(twoProjects, validToken)
+			h.press("d")
+			h.typeText("prod")
+			h.press("enter")
+			h.finish(ok(""), "project", "remove", "prod", "--yes")
+
+			Expect(h.r.projects).To(Equal([]string{""}))
+			h.lookup("auth", "status")
+		})
+	})
+
+	Describe("refreshing the token", func() {
+		It("runs auth refresh alone, shows the project a shell would need, and rereads the state", func() {
+			h = newHarness(Options{Project: "prod"})
+			h.loaded(twoProjects, validToken)
+
+			h.press("R")
+			id := h.lookup("auth", "refresh")
+			Expect(h.r.exclusive(id)).To(BeTrue())
+			Expect(h.m.s.runs.byID[id].display).To(Equal("fft auth refresh --project prod"))
+
+			h.finishID(id, failed(exitcode.Auth, "Error: cannot authenticate"))
+			Expect(h.view()).To(ContainSubstring("refreshing the token failed: exit 4 (authentication failed)"))
+			h.lookup("auth", "status")
+		})
+	})
+
+	Describe("the add form", func() {
+		const (
+			apiKey   = "AIzaSyTypedKey"
+			password = "hunter2 with spaces"
+		)
+
+		fill := func() {
+			h.typeText("qa")
+			h.press("tab")
+			h.typeText("https://qa.example.com")
+			h.press("tab")
+			h.typeText(apiKey)
+			h.press("tab", "tab")
+			h.typeText("bot")
+			h.press("tab")
+			h.typeText("acme")
+			h.press("tab")
+			h.typeText("pre")
+			h.press("tab", "tab")
+			h.typeText(password)
+		}
+
+		BeforeEach(func() {
+			h.loaded(twoProjects, validToken)
+			h.press("a")
+		})
+
+		It("refuses to send what project add would refuse, and says what is missing", func() {
+			h.press("ctrl+s")
+
+			view := h.view()
+			Expect(view).To(ContainSubstring("the name is required"))
+			Expect(view).To(ContainSubstring("the API key is required"))
+			Expect(view).To(ContainSubstring("the password is required"))
+			Expect(h.r.commandLines()).To(HaveLen(2))
+		})
+
+		It("sends the secrets on stdin and nowhere else", func() {
+			fill()
+			h.press("ctrl+s")
+
+			id := RunID(3)
+			Expect(h.r.args(id)).To(Equal([]string{
+				"project", "add", "qa",
+				"--base-url", "https://qa.example.com",
+				"--username", "bot",
+				"--project-id", "acme",
+				"--env", "pre",
+				"--api-key-stdin", "--password-stdin",
+			}))
+			Expect(h.r.stdin(id)).To(Equal(apiKey + "\n" + password))
+			Expect(h.r.exclusive(id)).To(BeTrue())
+
+			for _, secret := range []string{apiKey, password} {
+				Expect(strings.Join(h.r.args(id), " ")).NotTo(ContainSubstring(secret))
+				Expect(h.view()).NotTo(ContainSubstring(secret))
+				Expect(h.m.s.runs.byID[id].display).NotTo(ContainSubstring(secret))
+			}
+		})
+
+		It("masks the secrets as they are typed, and keeps q a letter", func() {
+			fill()
+			view := h.view()
+			Expect(view).NotTo(ContainSubstring(apiKey))
+			Expect(view).NotTo(ContainSubstring("hunter2"))
+			Expect(view).To(ContainSubstring("•••"))
+			Expect(view).To(MatchRegexp(`Name\s+qa`))
+		})
+
+		It("signs in with an email when switched to one, and passes the optional flags", func() {
+			h.typeText("qa")
+			h.press("tab")
+			h.typeText("https://qa.example.com")
+			h.press("tab")
+			h.typeText(apiKey)
+			h.press("tab", "space", "tab")
+			h.typeText("someone@example.com")
+			h.press("tab", "tab", "tab")
+			h.typeText("Acme")
+			h.press("tab")
+			h.typeText(password)
+			h.press("tab", "space", "tab", "space", "enter")
+
+			Expect(h.r.args(3)).To(Equal([]string{
+				"project", "add", "qa",
+				"--base-url", "https://qa.example.com",
+				"--email", "someone@example.com",
+				"--tenant", "Acme",
+				"--read-only", "--force",
+				"--api-key-stdin", "--password-stdin",
+			}))
+		})
+
+		It("keeps the form open with the command's complaint when the add fails", func() {
+			fill()
+			h.press("ctrl+s")
+			h.finishID(3, failed(exitcode.Auth, "Error: verify the credentials for \"qa\": INVALID_PASSWORD"))
+
+			view := h.view()
+			Expect(view).To(ContainSubstring("Add a project"))
+			Expect(view).To(ContainSubstring("adding qa failed: exit 4 (authentication failed)"))
+			Expect(view).To(ContainSubstring("INVALID_PASSWORD"))
+		})
+
+		It("offers to switch to the new project, and switches on yes", func() {
+			fill()
+			h.press("ctrl+s")
+			h.finishID(3, ok(`{"name":"qa","active":false}`))
+
+			Expect(h.view()).To(ContainSubstring("Switch to qa now?"))
+			h.lookup("project", "list")
+			h.press("y")
+			h.lookup("project", "use", "qa")
+		})
+
+		It("follows fft when the new project became the active one", func() {
+			fill()
+			h.press("ctrl+s")
+			h.finishID(3, ok(`{"name":"qa","active":true}`))
+
+			Expect(h.r.projects).To(Equal([]string{"qa"}))
+			h.lookup("auth", "whoami")
+		})
+
+		It("is closed by esc without sending anything", func() {
+			fill()
+			h.press("esc")
+
+			Expect(h.view()).NotTo(ContainSubstring("Add a project"))
+			Expect(h.r.commandLines()).To(HaveLen(2))
+		})
+	})
+
+	When("fft is running from the environment", func() {
+		BeforeEach(func() {
+			h.loaded(`[{"name":"env","active":true,"baseUrl":"http://localhost:8080","credential":"env","ephemeral":true}]`,
+				`{"project":"env","store":"env","signIn":"idToken","token":"unknown"}`)
+		})
+
+		It("says the projects are read-only here", func() {
+			Expect(h.view()).To(ContainSubstring("Running from the environment"))
+			Expect(h.view()).To(ContainSubstring("fft · env (environment) · fixed token expiry unknown"))
+		})
+
+		DescribeTable("refuses every change to the config file, sending nothing",
+			func(key string) {
+				h.press(key)
+
+				Expect(h.view()).To(ContainSubstring("Nothing was sent: fft is running from the environment"))
+				Expect(h.view()).NotTo(ContainSubstring("Add a project"))
+				Expect(h.r.commandLines()).To(HaveLen(2))
+			},
+			Entry("use", "enter"),
+			Entry("read-only", "r"),
+			Entry("remove", "d"),
+			Entry("add", "a"),
+		)
+
+		It("still refreshes the token, which is not a config change", func() {
+			h.press("R")
+			h.lookup("auth", "refresh")
+		})
+	})
+
+	Describe("the command panel", func() {
+		BeforeEach(func() {
+			h.loaded(twoProjects, validToken)
+			h.press("down", "enter")
+		})
+
+		It("lists the runs, newest first, with their state", func() {
+			id := h.lookup("project", "use", "prod")
+			h.send(runEventMsg{ID: id, State: RunRunning, At: h.now})
+			h.now = h.now.Add(1500 * time.Millisecond)
+			h.press("i")
+
+			view := h.view()
+			Expect(view).To(ContainSubstring("Commands — 1 running"))
+			Expect(view).To(MatchRegexp(`> #3 +fft project use prod +\S* ?running 1.5s`))
+			Expect(view).To(MatchRegexp(`#1 +fft project list +ok`))
+			Expect(view).To(ContainSubstring("1 running"))
+		})
+
+		It("cancels the selected run with c", func() {
+			h.press("i", "c")
+			Expect(h.r.cancelled).To(Equal([]RunID{3}))
+		})
+
+		It("does not cancel a run that has finished", func() {
+			h.press("i", "down", "c")
+			Expect(h.r.cancelled).To(BeEmpty())
+		})
+
+		It("shows a finished run's exit code and what it means", func() {
+			h.finish(failed(exitcode.Auth, ""), "project", "use", "prod")
+			h.press("i")
+
+			Expect(h.view()).To(MatchRegexp(`#3 +fft project use prod +exit 4 authentication failed`))
+		})
+
+		It("copies the selected run's command", func() {
+			Expect(clipboard(h.press("i", "y"))).To(Equal("fft project use prod"))
+		})
+
+		It("closes with esc or i", func() {
+			h.press("i", "esc")
+			Expect(h.view()).NotTo(ContainSubstring("Commands —"))
+			h.press("i", "i")
+			Expect(h.view()).NotTo(ContainSubstring("Commands —"))
+		})
+	})
+
+	Describe("copying the equivalent command", func() {
+		It("puts the focused action's command on the clipboard and says so", func() {
+			h.loaded(twoProjects, validToken)
+
+			Expect(clipboard(h.press("y"))).To(Equal("fft project use staging"))
+			Expect(h.view()).To(ContainSubstring("Copied: fft project use staging"))
+		})
+
+		It("says when there is nothing to copy", func() {
+			h.press("2")
+			Expect(clipboard(h.press("y"))).To(BeEmpty())
+			Expect(h.view()).To(ContainSubstring("Nothing to copy here."))
+		})
+	})
+
+	Describe("quitting", func() {
+		It("quits at once when nothing is running", func() {
+			h.loaded(twoProjects, validToken)
+			Expect(quits(h.press("q"))).To(BeTrue())
+		})
+
+		When("commands are still running", func() {
+			It("asks first, and stays on no", func() {
+				Expect(quits(h.press("q"))).To(BeFalse())
+				Expect(h.view()).To(ContainSubstring("2 commands are still running. Quit and cancel them?"))
+
+				Expect(quits(h.press("n"))).To(BeFalse())
+				Expect(h.view()).NotTo(ContainSubstring("still running"))
+			})
+
+			It("quits on yes", func() {
+				h.press("q")
+				Expect(quits(h.press("y"))).To(BeTrue())
+			})
+
+			It("quits on a second ctrl+c", func() {
+				Expect(quits(h.press("ctrl+c"))).To(BeFalse())
+				Expect(quits(h.press("ctrl+c"))).To(BeTrue())
+			})
+		})
+
+		It("leaves a q typed into a form in the form, and still quits on ctrl+c", func() {
+			h.loaded(twoProjects, validToken)
+			h.press("a")
+
+			Expect(quits(h.press("q"))).To(BeFalse())
+			Expect(h.view()).To(MatchRegexp(`Name\s+q`))
+			Expect(quits(h.press("ctrl+c"))).To(BeTrue())
+		})
+	})
+
+	It("waits for the next event after each one", func() {
+		cmd := h.send(runEventMsg{ID: 1, State: RunRunning, At: h.now})
+		Expect(cmd).NotTo(BeNil())
+		Expect(h.m.s.runs.byID[1].state).To(Equal(RunRunning))
+	})
+
+	It("stops waiting once the runner has shut down", func() {
+		h.loaded(twoProjects, validToken)
+		Expect(h.send(runnerClosedMsg{})).To(BeNil())
+	})
 })
+
+var _ = DescribeTable("commandLine quotes what a shell would misread",
+	func(args []string, want string) {
+		Expect(commandLine(args)).To(Equal(want))
+	},
+	Entry("plain words", []string{"project", "use", "staging"}, "fft project use staging"),
+	Entry("a URL", []string{"--base-url", "https://a.example.com/x"}, "fft --base-url https://a.example.com/x"),
+	Entry("a space", []string{"use", "my project"}, "fft use 'my project'"),
+	Entry("a quote", []string{"use", "it's"}, `fft use 'it'\''s'`),
+	Entry("an empty value", []string{"--tenant", ""}, "fft --tenant ''"),
+	Entry("a dollar", []string{"use", "$HOME"}, "fft use '$HOME'"),
+)

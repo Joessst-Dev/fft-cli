@@ -4,10 +4,9 @@ import (
 	"context"
 	"errors"
 	"io"
+	"time"
 
-	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
-	"charm.land/lipgloss/v2"
 )
 
 // Options is what [Run] needs from its caller.
@@ -21,57 +20,35 @@ type Options struct {
 	// Out is where the UI is drawn. fft passes stderr, so that stdout stays what
 	// it is everywhere else: data, and here nothing at all.
 	Out io.Writer
+
+	// Project is the project the session starts on, "" to leave the choice to
+	// fft's own resolution. It is only shown; the Runner already acts on it.
+	Project string
+
+	// ReadOnly is set when every write in the session is refused, whatever the
+	// project's configuration says: fft tui --read-only, or FFT_READ_ONLY.
+	ReadOnly bool
+
+	// Color draws the UI in colour. Without it nothing depends on colour to be
+	// understood.
+	Color bool
+
+	// Now is the clock the UI measures elapsed time and token lifetimes with. nil
+	// means time.Now.
+	Now func() time.Time
 }
 
-// Run shows the UI until the user quits or ctx is cancelled.
+// Run shows the UI until the user quits or ctx is cancelled. Runs still in flight
+// when it returns are the Runner owner's to cancel.
 func Run(ctx context.Context, opts Options) error {
 	if opts.Runner == nil {
 		return errors.New("tui: no runner to execute commands with")
 	}
-	p := tea.NewProgram(newModel(opts),
+	p := tea.NewProgram(newApp(opts),
 		tea.WithContext(ctx),
 		tea.WithInput(opts.In),
 		tea.WithOutput(opts.Out),
 	)
 	_, err := p.Run()
 	return err
-}
-
-type keyMap struct {
-	quit key.Binding
-}
-
-func defaultKeys() keyMap {
-	return keyMap{
-		quit: key.NewBinding(key.WithKeys("q", "ctrl+c"), key.WithHelp("q", "quit")),
-	}
-}
-
-type model struct {
-	keys  keyMap
-	frame lipgloss.Style
-}
-
-func newModel(Options) model {
-	return model{
-		keys:  defaultKeys(),
-		frame: lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Padding(0, 1),
-	}
-}
-
-func (m model) Init() tea.Cmd { return nil }
-
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if k, ok := msg.(tea.KeyPressMsg); ok && key.Matches(k, m.keys.quit) {
-		return m, tea.Quit
-	}
-	return m, nil
-}
-
-func (m model) View() tea.View {
-	help := m.keys.quit.Help()
-	v := tea.NewView(m.frame.Render("fft — interactive mode\n\n" + help.Key + "  " + help.Desc))
-	// The alternate screen gives the shell's scrollback back untouched on exit.
-	v.AltScreen = true
-	return v
 }
