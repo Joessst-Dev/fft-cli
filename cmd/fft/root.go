@@ -618,7 +618,11 @@ func (d *Deps) openSecrets(noKeyring bool) (secrets.Store, error) {
 	if d.Ephemeral != nil {
 		return secrets.NewEnv(os.LookupEnv), nil
 	}
-	return secrets.Open(noKeyring)
+	// Through the printer, not the process's stderr: whoever built this run chose
+	// where its notices go, and the file store has no way to know.
+	return secrets.Open(noKeyring, secrets.WithWarn(func(msg string) {
+		d.Printer.Notef("%s", msg)
+	}))
 }
 
 // noteInheritedFileStore says, once per run, that credentials are being kept in
