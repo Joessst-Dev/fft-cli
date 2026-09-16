@@ -432,8 +432,8 @@ func (r *cliRunner) execute(ctx context.Context, id tui.RunID, j job) tui.Result
 	res := tui.Result{
 		ExitCode:        code,
 		Status:          int(status.Load()),
-		Stdout:          stdout.buf.Bytes(),
-		Stderr:          stderr.buf.Bytes(),
+		Stdout:          stdout.buf,
+		Stderr:          stderr.buf,
 		StdoutTruncated: stdout.dropped,
 		StderrTruncated: stderr.dropped,
 		Duration:        time.Since(started),
@@ -445,8 +445,12 @@ func (r *cliRunner) execute(ctx context.Context, id tui.RunID, j job) tui.Result
 }
 
 // cappedBuffer keeps the first limit bytes written to it, and drops the rest.
+//
+// It bounds what it allocates as well as what it keeps. A bytes.Buffer grows by
+// doubling, so one holding a few bytes under the limit may have reserved nearly
+// twice it; this one never reserves more than limit bytes.
 type cappedBuffer struct {
-	buf     bytes.Buffer
+	buf     []byte
 	limit   int
 	dropped bool
 }
@@ -454,12 +458,17 @@ type cappedBuffer struct {
 // Write never fails, and always reports everything as written: a command whose
 // output the UI has stopped keeping must still finish, and report how it ended.
 func (b *cappedBuffer) Write(p []byte) (int, error) {
-	room := max(b.limit-b.buf.Len(), 0)
+	room := max(b.limit-len(b.buf), 0)
 	kept := p[:min(room, len(p))]
-	b.buf.Write(kept)
 	if len(kept) < len(p) {
 		b.dropped = true
 	}
+	if need := len(b.buf) + len(kept); need > cap(b.buf) {
+		grown := make([]byte, len(b.buf), min(max(2*cap(b.buf), need), b.limit))
+		copy(grown, b.buf)
+		b.buf = grown
+	}
+	b.buf = append(b.buf, kept...)
 	return len(p), nil
 }
 

@@ -765,6 +765,37 @@ var runDepsClassification = map[string]string{
 	"ui":                  "per run",
 }
 
+var _ = Describe("the buffer a TUI run's output is kept in", func() {
+	It("keeps the first bytes up to its limit, and says it dropped the rest", func() {
+		b := cappedBuffer{limit: 10}
+		for _, chunk := range []string{"abc", "defghij", "klm"} {
+			n, err := b.Write([]byte(chunk))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(n).To(Equal(len(chunk)))
+		}
+		Expect(string(b.buf)).To(Equal("abcdefghij"))
+		Expect(b.dropped).To(BeTrue())
+	})
+
+	It("never reserves more than its limit, however it is written to", func() {
+		const limit = 1000
+		b := cappedBuffer{limit: limit}
+		for range 300 {
+			_, _ = b.Write([]byte("0123456"))
+			Expect(cap(b.buf)).To(BeNumerically("<=", limit))
+		}
+		Expect(b.buf).To(HaveLen(limit))
+	})
+
+	It("keeps nothing, and reserves nothing, with no room at all", func() {
+		b := cappedBuffer{}
+		_, _ = b.Write([]byte("x"))
+		Expect(b.buf).To(BeEmpty())
+		Expect(cap(b.buf)).To(BeZero())
+		Expect(b.dropped).To(BeTrue())
+	})
+})
+
 var _ = Describe("a Deps for one TUI run", func() {
 	It("has every field classified", func() {
 		deps := reflect.TypeFor[Deps]()
