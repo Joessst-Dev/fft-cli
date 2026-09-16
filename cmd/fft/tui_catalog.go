@@ -55,11 +55,14 @@ func newCLICatalog(root *cobra.Command) *cliCatalog {
 
 		var cmd tui.Command
 		switch found := commands[op.ID]; {
-		case found != nil:
-			cmd = describeCommand(found, op, global)
+		case len(found) == 1:
+			cmd = describeCommand(found[0], op, global)
 		case escape != nil:
-			// An installed component claimed the operation, and it has no command of
-			// fft's own: `fft api` still reaches it.
+			// No single command of fft's own sends it. An installed component claimed
+			// it, or several curated commands each send one use of it — `order cancel`
+			// and `order unlock` are both orderAction — and naming any one of them would
+			// make the form send that use whatever body the user wrote. `fft api`
+			// reaches it, and sends the body as it is.
 			cmd = describeCommand(escape, op, global)
 			cmd.Path = append(cmd.Path, op.ID)
 			cmd.Args = nil
@@ -109,17 +112,14 @@ func (c *cliCatalog) Table(cmd tui.Command, stdout []byte) (string, error) {
 	return renderTable(cmd.Path, stdout)
 }
 
-// operationCommands maps each operationId to the command that declares it: the
-// first one [commandPath] would find, so that the UI and the help agree on which
-// command an operation is.
-func operationCommands(root *cobra.Command) map[string]*cobra.Command {
-	found := make(map[string]*cobra.Command)
+// operationCommands maps each operationId to the commands that declare it, in the
+// order [commandPath] finds them.
+func operationCommands(root *cobra.Command) map[string][]*cobra.Command {
+	found := make(map[string][]*cobra.Command)
 	var walk func(*cobra.Command)
 	walk = func(cmd *cobra.Command) {
 		if id := cmd.Annotations[annotationOperationID]; id != "" {
-			if _, seen := found[id]; !seen {
-				found[id] = cmd
-			}
+			found[id] = append(found[id], cmd)
 		}
 		for _, child := range cmd.Commands() {
 			walk(child)

@@ -76,9 +76,14 @@ var _ = Describe("the TUI's catalog of operations", func() {
 		Expect(slices.IsSorted(tags)).To(BeTrue(), "%v", tags)
 	})
 
-	It("resolves every operation to the command the help names for it", func() {
+	It("resolves every operation to the one command that sends it, or else to fft api", func() {
+		claims := operationCommands(root)
 		for _, op := range api.Operations() {
 			got := ops[op.ID]
+			if len(claims[op.ID]) > 1 {
+				Expect(got.Command.Path).To(Equal([]string{"api", op.ID}), op.ID)
+				continue
+			}
 			Expect(got.Command.Path).NotTo(BeEmpty(), op.ID)
 			Expect("fft "+strings.Join(got.Command.Path, " ")).To(Equal(commandPath(root, op)), op.ID)
 
@@ -87,6 +92,44 @@ var _ = Describe("the TUI's catalog of operations", func() {
 			Expect(rest).To(BeEmpty(), op.ID)
 			Expect(resolved.Annotations).To(HaveKeyWithValue(annotationOperationID, op.ID))
 		}
+	})
+
+	When("more than one command sends the operation", func() {
+		It("sends it through fft api, body and all, rather than through one of them", func() {
+			claims := operationCommands(root)
+			Expect(claims["orderAction"]).To(HaveLen(2), "the spec needs an operation two curated commands send")
+			Expect(claims["facilityAction"]).To(HaveLen(2))
+
+			for _, id := range []string{"orderAction", "facilityAction"} {
+				op, ok := api.LookupOperation(id)
+				Expect(ok).To(BeTrue())
+
+				cmd := ops[id].Command
+				Expect(cmd.Path).To(Equal([]string{"api", id}))
+				Expect(cmd.Curated).To(BeFalse())
+				Expect(cmd.Confirms).To(BeFalse())
+				Expect(cmd.Args).To(BeEmpty())
+				Expect(cmd.Body).To(Equal(op.HasBody))
+				Expect(cmd.BodyRequired).To(Equal(op.BodyRequired))
+				Expect(flagNames(cmd)).To(ConsistOf("header", "param", "query"))
+			}
+		})
+	})
+
+	When("an installed component claims the operation", func() {
+		It("sends it through fft api", func() {
+			c := newCLI()
+			m := fakeManifest("pickjob")
+			m.Commands[0].Claims = []string{"getPickJob"}
+			c.installFake(m)
+
+			got := catalogOps(newCLICatalog(newRootCmd(c.deps)))["getPickJob"].Command
+			Expect(got.Path).To(Equal([]string{"api", "getPickJob"}))
+			Expect(got.Curated).To(BeFalse())
+			Expect(got.Example).To(BeFalse())
+			Expect(got.Body).To(BeFalse())
+			Expect(flagNames(got)).To(ConsistOf("header", "param", "query"))
+		})
 	})
 
 	It("tells a write from a read exactly as the read-only gate does", func() {
@@ -108,17 +151,18 @@ var _ = Describe("the TUI's catalog of operations", func() {
 
 	When("a curated command covers an operation", func() {
 		It("names the curated command, whose generated twin does not exist", func() {
-			list, _, err := root.Find([]string{"facility", "list"})
+			get, _, err := root.Find([]string{"facility", "get"})
 			Expect(err).NotTo(HaveOccurred())
-			opID := list.Annotations[annotationOperationID]
+			opID := get.Annotations[annotationOperationID]
 			Expect(opID).NotTo(BeEmpty())
 
 			got := ops[opID].Command
-			Expect(got.Path).To(Equal([]string{"facility", "list"}))
+			Expect(got.Path).To(Equal([]string{"facility", "get"}))
 			Expect(got.Curated).To(BeTrue())
+			Expect(got.Table).To(BeTrue())
 
 			twin := commandName(api.Operation{ID: opID})
-			Expect(list.Parent().Commands()).NotTo(ContainElement(HaveField("Use", twin)),
+			Expect(get.Parent().Commands()).NotTo(ContainElement(HaveField("Use", twin)),
 				"the generated twin was registered")
 		})
 
@@ -213,7 +257,7 @@ var _ = Describe("the TUI's catalog of operations", func() {
 		It("types its flags", func() {
 			for _, op := range api.Operations() {
 				cmd := ops[op.ID].Command
-				if cmd.Curated {
+				if cmd.Curated || cmd.Path[0] == "api" {
 					continue
 				}
 				// The names registerParamFlags gives, disambiguated the same way.
