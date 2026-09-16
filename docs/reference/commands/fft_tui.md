@@ -14,9 +14,16 @@ tree as in a shell: the read-only gate, the exit codes and the validation all
 apply unchanged.
 
 The first screen manages projects: switch, protect, remove and add them, and
-refresh the current token. Press ? for every key, i for the commands that are
-running, and y to copy the fft command the focused action stands for. Secrets you
-type are passed to that command on stdin, never on its command line.
+refresh the current token. The Operations screen lists every operation of the
+API by tag; press / to search it, D to describe one and enter to fill in its
+request. The Request screen builds the command from its flags, opens the body in
+$EDITOR (then $VISUAL) and asks before it sends a write. The Response screen shows
+the exit code, the HTTP status, the JSON, a table where the command prints one,
+and stderr; r sends the request again and s saves the body to a file.
+
+Press ? for every key, i for the commands that are running, and y to copy the fft
+command the focused action stands for. Secrets you type and request bodies are
+passed to that command on stdin, never on its command line.
 
 The UI is drawn on stderr and needs a terminal on both stdin and stderr. It
 writes nothing to stdout.
