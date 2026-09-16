@@ -85,6 +85,38 @@ var _ = Describe("the Request screen", func() {
 			Expect(h.view()).To(ContainSubstring("$ fft facility list --status ONLINE --status OFFLINE --size 50 --all"))
 		})
 
+		It("cycles an on/off field through on, an explicit off, and unset", func() {
+			h.m.request.cursor = 2
+			Expect(h.view()).To(MatchRegexp(`--all\s+\[ \] unset`))
+
+			h.press("space")
+			Expect(h.view()).To(MatchRegexp(`--all\s+\[x\] on`))
+			Expect(h.view()).To(ContainSubstring("$ fft facility list --all --project staging"))
+
+			h.press("space")
+			Expect(h.view()).To(MatchRegexp(`--all\s+\[-\] off`))
+			Expect(h.view()).To(ContainSubstring("$ fft facility list --all=false --project staging"))
+			h.press("s")
+			Expect(h.last().Args).To(Equal([]string{"facility", "list", "--all=false"}))
+
+			h.press("3")
+			h.press("space")
+			Expect(h.view()).To(ContainSubstring("$ fft facility list --project staging"))
+		})
+
+		It("leaves a default on to the command until the field is set", func() {
+			op := opListFacilities
+			op.Command.Flags = []Flag{{Name: "wait", Kind: FlagBool, Default: "true"}}
+			h.request(op)
+			Expect(h.view()).To(MatchRegexp(`--wait\s+\[ \] unset, default true`))
+			Expect(h.view()).To(ContainSubstring("$ fft facility list --project staging"))
+
+			h.press("space", "space")
+			Expect(h.view()).To(ContainSubstring("$ fft facility list --wait=false --project staging"))
+			h.press("x")
+			Expect(h.view()).To(ContainSubstring("$ fft facility list --project staging"))
+		})
+
 		It("takes every key as text while a field is being edited", func() {
 			h.m.request.cursor = 1
 			h.press("enter")

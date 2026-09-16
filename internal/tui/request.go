@@ -22,8 +22,24 @@ type requestField struct {
 	arg   *Arg
 	flag  *Flag
 	input textinput.Model
-	on    bool
+
+	// switched is what an on/off field says. Unset sends nothing, and leaves the
+	// command's default; off sends --name=false, which a generated command passes
+	// on to the API as an explicit false.
+	switched switchState
 }
+
+// switchState is the value of an on/off field.
+type switchState int
+
+const (
+	switchUnset switchState = iota
+	switchOn
+	switchOff
+)
+
+// next is the state space moves to: unset, on, off, and round again.
+func (s switchState) next() switchState { return (s + 1) % 3 }
 
 func (f *requestField) label() string {
 	if f.arg != nil {
@@ -65,7 +81,7 @@ func newRequestKeys() requestKeys {
 		up:     key.NewBinding(key.WithKeys("up", "k"), key.WithHelp("↑/↓", "select")),
 		down:   key.NewBinding(key.WithKeys("down", "j")),
 		edit:   key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "edit")),
-		toggle: key.NewBinding(key.WithKeys("space"), key.WithHelp("space", "on/off")),
+		toggle: key.NewBinding(key.WithKeys("space"), key.WithHelp("space", "on/off/unset")),
 		editor: key.NewBinding(key.WithKeys("e"), key.WithHelp("e", "edit body")),
 		send:   key.NewBinding(key.WithKeys("s", "ctrl+s"), key.WithHelp("s", "send")),
 		clear:  key.NewBinding(key.WithKeys("x"), key.WithHelp("x", "clear")),
@@ -146,11 +162,7 @@ func (r *requestScreen) newField(arg *Arg, flag *Flag) *requestField {
 	} else {
 		in.Placeholder = arg.Name
 	}
-	f := &requestField{arg: arg, flag: flag, input: in}
-	if flag != nil && flag.Kind == FlagBool {
-		f.on = flag.Default == "true"
-	}
-	return f
+	return &requestField{arg: arg, flag: flag, input: in}
 }
 
 // placeholderFor is the hint an empty field shows: what the command does without
@@ -160,6 +172,8 @@ func placeholderFor(f Flag) string {
 	switch {
 	case len(f.Enum) > 0:
 		hint = strings.Join(f.Enum, " | ")
+	case f.Kind == FlagBool:
+		hint = "unset"
 	case f.Kind == FlagList:
 		hint = "comma-separated"
 	case f.Kind == FlagPairs:
@@ -209,14 +223,14 @@ func (r *requestScreen) update(msg tea.Msg) tea.Cmd {
 		r.selected()
 	case key.Matches(keyMsg, r.keys.toggle):
 		if f := r.selected(); f != nil && f.toggle() {
-			f.on = !f.on
+			f.switched = f.switched.next()
 		}
 	case key.Matches(keyMsg, r.keys.edit):
 		f := r.selected()
 		switch {
 		case f == nil:
 		case f.toggle():
-			f.on = !f.on
+			f.switched = f.switched.next()
 		default:
 			r.editing, r.before = true, f.input.Value()
 			return f.input.Focus()
@@ -224,9 +238,7 @@ func (r *requestScreen) update(msg tea.Msg) tea.Cmd {
 	case key.Matches(keyMsg, r.keys.clear):
 		if f := r.selected(); f != nil {
 			f.input.SetValue("")
-			if f.toggle() {
-				f.on = f.flag.Default == "true"
-			}
+			f.switched = switchUnset
 		}
 	case key.Matches(keyMsg, r.keys.editor):
 		return r.editBody()
@@ -457,14 +469,13 @@ func (r *requestScreen) fieldArgs(f *requestField) []string {
 	name := "--" + f.flag.Name
 	switch {
 	case f.toggle():
-		isDefault := f.on == (f.flag.Default == "true")
-		switch {
-		case isDefault:
-			return nil
-		case f.on:
+		switch f.switched {
+		case switchOn:
 			return []string{name}
-		default:
+		case switchOff:
 			return []string{name + "=false"}
+		default:
+			return nil
 		}
 	case f.value() == "":
 		return nil
@@ -743,9 +754,13 @@ func (r *requestScreen) row(f *requestField, selected bool, labelWidth, width in
 	var val string
 	switch {
 	case f.toggle():
-		val = "[ ]"
-		if f.on {
-			val = "[x]"
+		switch f.switched {
+		case switchOn:
+			val = "[x] on"
+		case switchOff:
+			val = "[-] off"
+		default:
+			val = "[ ] " + st.dim.Render(f.input.Placeholder)
 		}
 	case selected && r.editing:
 		val = f.input.View()
