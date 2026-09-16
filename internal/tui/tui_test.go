@@ -147,6 +147,9 @@ var _ = Describe("the UI", func() {
 		It("goes to a screen by its number, and says what is still to come", func() {
 			h.press("2")
 			Expect(h.view()).To(ContainSubstring("[2 Operations]"))
+
+			h.press("5")
+			Expect(h.view()).To(ContainSubstring("[5 Templates]"))
 			Expect(h.view()).To(ContainSubstring("Coming soon"))
 
 			h.press("7")
@@ -824,7 +827,8 @@ var _ = Describe("the UI", func() {
 		})
 
 		It("says when there is nothing to copy", func() {
-			h.press("2")
+			// The Request screen, before an operation has been chosen.
+			h.press("3")
 			Expect(clipboard(h.press("y"))).To(BeEmpty())
 			Expect(h.view()).To(ContainSubstring("Nothing to copy here."))
 		})

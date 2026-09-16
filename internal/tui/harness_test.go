@@ -2,6 +2,8 @@ package tui
 
 import (
 	"errors"
+	"os"
+	"os/exec"
 	"reflect"
 	"slices"
 	"strings"
@@ -57,20 +59,32 @@ func (r *fakeRunner) commandLines() []string {
 
 // harness drives the root model the way Bubble Tea would, one message at a time.
 type harness struct {
-	r    *fakeRunner
-	m    *app
-	now  time.Time
-	done map[RunID]bool
+	r      *fakeRunner
+	m      *app
+	now    time.Time
+	done   map[RunID]bool
+	editor *fakeEditor
+	env    map[string]string
+	tmp    string
 }
 
 func newHarness(opts Options) *harness {
 	h := &harness{
-		r:    newFakeRunner(),
-		now:  time.Date(2026, 7, 12, 12, 0, 0, 0, time.UTC),
-		done: map[RunID]bool{},
+		r:      newFakeRunner(),
+		now:    time.Date(2026, 7, 12, 12, 0, 0, 0, time.UTC),
+		done:   map[RunID]bool{},
+		editor: &fakeEditor{},
+		env:    map[string]string{"EDITOR": "fake-editor --wait"},
+		tmp:    GinkgoT().TempDir(),
 	}
 	opts.Runner = h.r
 	opts.Now = func() time.Time { return h.now }
+	if opts.Catalog == nil {
+		opts.Catalog = fakeCatalog{}
+	}
+	opts.execProcess = h.editor.exec
+	opts.getenv = func(name string) string { return h.env[name] }
+	opts.tempDir = h.tmp
 	h.m = newApp(opts)
 	h.send(tea.WindowSizeMsg{Width: 140, Height: 40})
 	// Init's own command waits on the runner; only its side effects matter here.
@@ -112,6 +126,8 @@ func keyPress(k string) tea.KeyPressMsg {
 		"ctrl+p":    {Code: 'p', Mod: tea.ModCtrl},
 		"ctrl+r":    {Code: 'r', Mod: tea.ModCtrl},
 		"ctrl+s":    {Code: 's', Mod: tea.ModCtrl},
+		"left":      {Code: tea.KeyLeft},
+		"right":     {Code: tea.KeyRight},
 	}
 	if msg, ok := special[k]; ok {
 		return msg
@@ -215,4 +231,145 @@ func (h *harness) loaded(projects, status string) {
 	GinkgoHelper()
 	h.finish(ok(projects), "project", "list")
 	h.finish(ok(status), "auth", "status")
+}
+
+// pump hands the model every message cmd produces, and what those produce in turn,
+// the way Bubble Tea would: how the list's search results come back.
+func (h *harness) pump(cmd tea.Cmd) {
+	for range 4 {
+		msgs := msgsOf(cmd)
+		if len(msgs) == 0 {
+			return
+		}
+		var next []tea.Cmd
+		for _, msg := range msgs {
+			next = append(next, h.send(msg))
+		}
+		cmd = tea.Batch(next...)
+	}
+}
+
+// search types query into the operations list's search, and applies it.
+func (h *harness) search(query string) {
+	GinkgoHelper()
+	h.pump(h.press("/"))
+	for _, r := range query {
+		h.pump(h.send(tea.KeyPressMsg{Code: r, Text: string(r)}))
+	}
+}
+
+// files is every file in the harness's temporary directory.
+func (h *harness) files() []string {
+	GinkgoHelper()
+	entries, err := os.ReadDir(h.tmp)
+	Expect(err).NotTo(HaveOccurred())
+	names := make([]string, 0, len(entries))
+	for _, e := range entries {
+		names = append(names, e.Name())
+	}
+	return names
+}
+
+// fakeEditor stands in for tea.ExecProcess: it records the editor the UI would
+// hand the terminal to, and runs nothing until a spec says how the editor exits.
+type fakeEditor struct {
+	cmds      []*exec.Cmd
+	callbacks []tea.ExecCallback
+}
+
+// editorOpened is what the fake's command produces; the real one hands the
+// terminal over instead.
+type editorOpened struct{}
+
+func (e *fakeEditor) exec(c *exec.Cmd, fn tea.ExecCallback) tea.Cmd {
+	e.cmds = append(e.cmds, c)
+	e.callbacks = append(e.callbacks, fn)
+	return func() tea.Msg { return editorOpened{} }
+}
+
+// path is the file the last editor was opened on.
+func (e *fakeEditor) path() string {
+	GinkgoHelper()
+	Expect(e.cmds).NotTo(BeEmpty(), "no editor was opened")
+	args := e.cmds[len(e.cmds)-1].Args
+	return args[len(args)-1]
+}
+
+// exit has the last editor save content, unless it is nil, and exit with err.
+func (h *harness) editorExits(content []byte, err error) tea.Cmd {
+	GinkgoHelper()
+	path := h.editor.path()
+	if content != nil {
+		Expect(os.WriteFile(path, content, 0o600)).To(Succeed())
+	}
+	fn := h.editor.callbacks[len(h.editor.callbacks)-1]
+	return h.send(fn(err))
+}
+
+// The operations the fake catalog lists.
+var (
+	opListFacilities = Operation{
+		ID: "searchFacility", Summary: "Search facilities", Method: "POST", Path: "/api/facilities/search",
+		Tag: "Facilities (Core)", Permissions: []string{"FACILITY_READ"},
+		Command: Command{
+			Path: []string{"facility", "list"}, Curated: true, Table: true,
+			Flags: []Flag{
+				{Name: "status", Kind: FlagList, Usage: "Only facilities in this status", Enum: []string{"ONLINE", "OFFLINE"}},
+				{Name: "size", Kind: FlagInt, Usage: "Page size", Default: "20"},
+				{Name: "all", Kind: FlagBool, Usage: "Every page"},
+			},
+		},
+	}
+	opDeleteFacility = Operation{
+		ID: "deleteFacility", Summary: "Delete a facility", Method: "DELETE", Path: "/api/facilities/{facilityId}",
+		Tag: "Facilities (Core)", Mutates: true, Permissions: []string{"FACILITY_WRITE"},
+		Command: Command{
+			Path: []string{"facility", "delete"}, Curated: true, Confirms: true,
+			Args: []Arg{{Name: "id", Required: true}},
+		},
+	}
+	opReplaceFacility = Operation{
+		ID: "replaceFacility", Summary: "Replace a facility", Method: "PUT", Path: "/api/facilities/{facilityId}",
+		Tag: "Facilities (Core)", Mutates: true, SampleBody: `{"name":"sample"}`,
+		Command: Command{
+			Path: []string{"facility", "update"}, Curated: true, Body: true, BodyRequired: true, Example: true,
+			Args: []Arg{{Name: "id", Required: true}},
+			Flags: []Flag{
+				{Name: "kind", Kind: FlagString, WithExample: true},
+				{Name: "if-version", Kind: FlagInt},
+			},
+		},
+	}
+	opAddPickJob = Operation{
+		ID: "addPickJob", Summary: "Create a pick job", Method: "POST", Path: "/api/pickjobs",
+		Tag: "Picking (Operations)", Mutates: true, SampleBody: `{"pickLineItems":[]}`,
+		Description: "Creates a pick job for the given line items.",
+		Command:     Command{Path: []string{"picking", "add-pick-job"}, Body: true, BodyRequired: true},
+	}
+	opGetPickJob = Operation{
+		ID: "getPickJob", Summary: "Get a pick job", Method: "GET", Path: "/api/pickjobs/{pickJobId}",
+		Tag: "Picking (Operations)",
+		Command: Command{
+			Path:  []string{"picking", "get-pick-job"},
+			Flags: []Flag{{Name: "pick-job-id", Kind: FlagString, Required: true, Usage: "The pick job"}},
+		},
+	}
+)
+
+// fakeCatalog lists a handful of operations, and draws a table by quoting what it
+// was given.
+type fakeCatalog struct{}
+
+func (fakeCatalog) Groups() []OperationGroup {
+	return []OperationGroup{
+		{Tag: "Facilities (Core)", Operations: []Operation{opDeleteFacility, opReplaceFacility, opListFacilities}},
+		{Tag: "Picking (Operations)", Operations: []Operation{opAddPickJob, opGetPickJob}},
+	}
+}
+
+func (fakeCatalog) Table(cmd Command, stdout []byte) (string, error) {
+	if !cmd.Table {
+		return "", errors.New("no table")
+	}
+	return "TABLE OF " + string(stdout), nil
 }

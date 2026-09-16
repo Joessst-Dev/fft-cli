@@ -146,6 +146,14 @@ linters:
         linters:
           - gosec
         text: G204
+      # G204 flags exec.Command with a non-constant program. The program is the
+      # user's own $EDITOR (or $VISUAL), run as the user, which is what the setting
+      # is for. It is split into words without a shell, so nothing in it is expanded
+      # or chained, and the only other argument is the private file fft created.
+      - path: ^internal/tui/editor\.go$
+        linters:
+          - gosec
+        text: G204
       # The component installer's entire job is to write files it downloaded and run
       # a binary it installed, so G304 (open a variable path), G122 (write inside a
       # WalkDir callback) and G204 (exec a variable path) fire on the feature rather

@@ -68,6 +68,10 @@ func (r *scriptedRunner) answer(args []string) Result {
 		return ok(`{"project":"` + project + `","store":"keyring","signIn":"password","token":"valid","expiresAt":"2026-07-12T13:00:00Z"}`)
 	case "project use":
 		r.active = args[2]
+	case "picking get-pick-job":
+		res := ok(`{"id":"pj-1","status":"OPEN"}`)
+		res.Status = 200
+		return res
 	}
 	return ok(`{}`)
 }
@@ -158,7 +162,7 @@ var _ = Describe("the UI as a running program", func() {
 
 	run := func() {
 		now := time.Date(2026, 7, 12, 12, 0, 0, 0, time.UTC)
-		p = tea.NewProgram(probed{newApp(Options{Runner: r, Now: func() time.Time { return now }})},
+		p = tea.NewProgram(probed{newApp(Options{Runner: r, Catalog: fakeCatalog{}, Now: func() time.Time { return now }})},
 			tea.WithContext(context.Background()),
 			tea.WithInput(nil),
 			tea.WithOutput(out),
@@ -231,6 +235,34 @@ var _ = Describe("the UI as a running program", func() {
 		Expect(final).To(ContainSubstring("Now using prod."))
 		Expect(final).To(ContainSubstring("fft · prod · RO · token 1h00m left"))
 		Expect(final).To(MatchRegexp(`\* prod`))
+	})
+
+	It("finds an operation, sends it, and shows what came back", func() {
+		run()
+		loaded()
+
+		p.Send(keyPress("2"))
+		p.Send(keyPress("/"))
+		for _, r := range "getPick" {
+			p.Send(tea.KeyPressMsg{Code: r, Text: string(r)})
+		}
+		// The search answers in the background; enter applies it once it has.
+		Eventually(view).Should(ContainSubstring("1 operation"))
+		p.Send(keyPress("enter"))
+		p.Send(keyPress("enter"))
+		Eventually(view).Should(ContainSubstring("--pick-job-id (required)"))
+
+		p.Send(keyPress("enter"))
+		for _, r := range "pj-1" {
+			p.Send(tea.KeyPressMsg{Code: r, Text: string(r)})
+		}
+		p.Send(keyPress("enter"))
+		p.Send(keyPress("s"))
+
+		Eventually(r.commandLines).Should(ContainElement("picking get-pick-job --pick-job-id pj-1"))
+		Eventually(view).Should(ContainSubstring(`"status": "OPEN"`))
+		Expect(view()).To(ContainSubstring("exit 0 (success) · HTTP 200"))
+		Expect(view()).To(ContainSubstring("[4 Response]"))
 	})
 
 	It("asks before quitting while a command runs, and quits on yes", func() {

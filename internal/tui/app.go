@@ -17,6 +17,14 @@ import (
 // position, counting from one.
 var screenNames = []string{"Projects", "Operations", "Request", "Response", "Templates", "History", "Roles"}
 
+// The screens' positions in screenNames.
+const (
+	tabProjects = iota
+	tabOperations
+	tabRequest
+	tabResponse
+)
+
 // screen is one tab of the UI.
 type screen interface {
 	// update handles a key, or text pasted while the screen is focused.
@@ -30,6 +38,13 @@ type screen interface {
 	// focused reports whether a dialog or a text field has the keyboard, in which
 	// case the global keys, but for ctrl+c, are the screen's to interpret.
 	focused() bool
+}
+
+// receiver is a screen that takes messages other than keys: the results of work it
+// started in the background. Every receiver is offered every such message, and
+// ignores what is not its own.
+type receiver interface {
+	receive(msg tea.Msg) tea.Cmd
 }
 
 // comingSoon stands in for a screen a later release fills in.
@@ -61,9 +76,12 @@ type app struct {
 
 	width, height int
 
-	current  int
-	screens  []screen
-	projects *projectsScreen
+	current    int
+	screens    []screen
+	projects   *projectsScreen
+	operations *operationsScreen
+	request    *requestScreen
+	response   *responseScreen
 
 	panel     *runsPanel
 	showPanel bool
@@ -81,26 +99,58 @@ func newApp(opts Options) *app {
 	h := help.New()
 	h.Styles = st.help
 
-	projects := newProjectsScreen(s, st)
-	return &app{
+	m := &app{
 		s:      s,
 		st:     st,
 		keys:   newGlobalKeys(),
 		help:   h,
 		events: opts.Runner.Events(),
 		spin:   spinner.New(spinner.WithSpinner(spinner.MiniDot)),
-		screens: []screen{
-			projects,
-			comingSoon{"Operations", "every operation, grouped by tag, with fuzzy search"},
-			comingSoon{"Request", "a form for any operation, built from its flags"},
-			comingSoon{"Response", "the last response as JSON, as a table, and its stderr"},
-			comingSoon{"Templates", "saved request bodies, rendered and sent"},
-			comingSoon{"History", "recent and most used requests"},
-			comingSoon{"Roles", "your roles and what they permit"},
-		},
-		projects: projects,
-		panel:    newRunsPanel(s),
+		panel:  newRunsPanel(s),
 	}
+	m.projects = newProjectsScreen(s, st)
+	m.operations = newOperationsScreen(s, st, m, opts.Catalog)
+	m.request = newRequestScreen(s, st, m)
+	m.response = newResponseScreen(s, st, opts.Catalog, m)
+	m.screens = []screen{
+		m.projects,
+		m.operations,
+		m.request,
+		m.response,
+		comingSoon{"Templates", "saved request bodies, rendered and sent"},
+		comingSoon{"History", "recent and most used requests"},
+		comingSoon{"Roles", "your roles and what they permit"},
+	}
+	return m
+}
+
+var _ navigator = (*app)(nil)
+
+func (m *app) openOperations() tea.Cmd {
+	m.current = tabOperations
+	return nil
+}
+
+func (m *app) openRequest(op Operation) tea.Cmd {
+	m.request.open(op)
+	m.current = tabRequest
+	return nil
+}
+
+func (m *app) openRequestScreen() tea.Cmd {
+	m.current = tabRequest
+	return nil
+}
+
+func (m *app) openResponse(id RunID) {
+	m.response.show(id)
+	m.current = tabResponse
+	// What was asked for is drawn, and what is drawn has the keyboard.
+	m.showPanel = false
+}
+
+func (m *app) showing(scr screen) bool {
+	return m.screens[m.current] == scr && !m.showPanel && !m.confirmQuit
 }
 
 func (m *app) Init() tea.Cmd {
@@ -133,6 +183,12 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// nothing focused, pasted text would be read as a burst of commands.
 		if m.owner() == ownerFocused {
 			cmds = append(cmds, m.screens[m.current].update(msg))
+		}
+	default:
+		for _, scr := range m.screens {
+			if r, ok := scr.(receiver); ok {
+				cmds = append(cmds, r.receive(msg))
+			}
 		}
 	}
 
@@ -208,7 +264,7 @@ func (m *app) key(msg tea.KeyPressMsg) tea.Cmd {
 		m.current = (m.current + len(m.screens) - 1) % len(m.screens)
 	case key.Matches(msg, m.keys.projects):
 		// Projects is where a project is switched; a picker of its own can come later.
-		m.current = 0
+		m.current = tabProjects
 		m.showPanel = false
 	default:
 		for i, b := range m.keys.screens {
@@ -220,8 +276,11 @@ func (m *app) key(msg tea.KeyPressMsg) tea.Cmd {
 		// An open panel has the keyboard, so that its c cancels a run rather than
 		// meaning whatever c means on the screen underneath.
 		if m.showPanel {
-			if m.panel.update(msg) {
+			switch m.panel.update(msg) {
+			case panelClose:
 				m.showPanel = false
+			case panelOpen:
+				m.openResponse(m.panel.selected().id)
 			}
 			return nil
 		}

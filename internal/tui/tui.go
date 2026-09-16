@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"os/exec"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
@@ -43,6 +44,13 @@ type Options struct {
 	// Now is the clock the UI measures elapsed time and token lifetimes with. nil
 	// means time.Now.
 	Now func() time.Time
+
+	// The editor seams, for the specs: how the editor takes over the terminal
+	// (tea.ExecProcess), where $EDITOR is read from (os.Getenv), and where the file
+	// it edits is written ("" for the system's temporary directory).
+	execProcess func(*exec.Cmd, tea.ExecCallback) tea.Cmd
+	getenv      func(string) string
+	tempDir     string
 }
 
 // Run shows the UI until the user quits or ctx is cancelled. Runs still in flight
@@ -54,7 +62,11 @@ func Run(ctx context.Context, opts Options) error {
 	if opts.Catalog == nil {
 		return errors.New("tui: no catalog of operations to offer")
 	}
-	p := tea.NewProgram(newApp(opts),
+	m := newApp(opts)
+	// A body the user was still editing when the UI ended is theirs, and it is not
+	// left behind in a temporary directory.
+	defer m.s.cleanup()
+	p := tea.NewProgram(m,
 		tea.WithContext(ctx),
 		tea.WithInput(opts.In),
 		tea.WithOutput(opts.Out),

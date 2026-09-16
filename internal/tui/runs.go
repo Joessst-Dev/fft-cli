@@ -17,6 +17,13 @@ import (
 // over a session's recent work, and a bound on what a long session holds.
 const keptRuns = 100
 
+// keptOutputBytes is how much output the session holds across its finished runs.
+// The runner already bounds each run; this bounds the hundred of them, newest
+// first, so that a session spent paging through large lists does not grow
+// without limit. An older run's output beyond it is dropped, and its response
+// says so.
+const keptOutputBytes = 64 << 20
+
 // runEntry is one invocation as the panel shows it.
 type runEntry struct {
 	id      RunID
@@ -26,6 +33,10 @@ type runEntry struct {
 	started time.Time
 	ended   time.Time
 	result  Result
+
+	// dropped is set once the run's output has been let go to stay within
+	// keptOutputBytes.
+	dropped bool
 }
 
 // runList is every run of the session, oldest first.
@@ -59,6 +70,26 @@ func (l *runList) update(ev RunEvent) {
 	case RunDone:
 		e.ended = ev.At
 		e.result = ev.Result
+		l.shed(keptOutputBytes)
+	}
+}
+
+// shed drops the output of the oldest finished runs until what is left fits in
+// budget.
+func (l *runList) shed(budget int) {
+	kept := 0
+	for i := len(l.entries) - 1; i >= 0; i-- {
+		e := l.entries[i]
+		size := len(e.result.Stdout) + len(e.result.Stderr)
+		if size == 0 {
+			continue
+		}
+		if kept+size <= budget {
+			kept += size
+			continue
+		}
+		e.result.Stdout, e.result.Stderr = nil, nil
+		e.dropped = true
 	}
 }
 
@@ -101,6 +132,7 @@ type runsPanel struct {
 type runsKeys struct {
 	up     key.Binding
 	down   key.Binding
+	open   key.Binding
 	cancel key.Binding
 	close  key.Binding
 }
@@ -111,6 +143,7 @@ func newRunsPanel(s *session) *runsPanel {
 		keys: runsKeys{
 			up:     key.NewBinding(key.WithKeys("up", "k"), key.WithHelp("↑/↓", "select")),
 			down:   key.NewBinding(key.WithKeys("down", "j")),
+			open:   key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "open response")),
 			cancel: key.NewBinding(key.WithKeys("c"), key.WithHelp("c", "cancel run")),
 			close:  key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", "close")),
 		},
@@ -137,26 +170,40 @@ func (p *runsPanel) selected() *runEntry {
 	return runs[p.cursor]
 }
 
-// update handles a key, and reports whether the panel wants to close.
-func (p *runsPanel) update(msg tea.KeyPressMsg) (closePanel bool) {
+// panelAction is what a key on the panel asks of the UI around it.
+type panelAction int
+
+const (
+	panelStay panelAction = iota
+	panelClose
+	// panelOpen asks for the selected run's response.
+	panelOpen
+)
+
+// update handles a key, and says what the UI should do next.
+func (p *runsPanel) update(msg tea.KeyPressMsg) panelAction {
 	switch {
 	case key.Matches(msg, p.keys.up):
 		p.cursor--
 	case key.Matches(msg, p.keys.down):
 		p.cursor++
+	case key.Matches(msg, p.keys.open):
+		if e := p.selected(); e != nil {
+			return panelOpen
+		}
 	case key.Matches(msg, p.keys.cancel):
 		if e := p.selected(); e != nil && e.state != RunDone {
 			p.s.runner.Cancel(e.id)
 		}
 	case key.Matches(msg, p.keys.close):
-		return true
+		return panelClose
 	}
 	p.selected()
-	return false
+	return panelStay
 }
 
 func (p *runsPanel) bindings() []key.Binding {
-	return []key.Binding{p.keys.up, p.keys.cancel, p.keys.close}
+	return []key.Binding{p.keys.up, p.keys.open, p.keys.cancel, p.keys.close}
 }
 
 func (p *runsPanel) equivalent() shellCommand {

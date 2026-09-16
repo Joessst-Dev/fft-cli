@@ -2,6 +2,8 @@ package tui
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 	"slices"
 	"strings"
 	"time"
@@ -82,6 +84,31 @@ type session struct {
 
 	runs *runList
 	done map[RunID]func(Result) tea.Cmd
+
+	// requests are the runs the Request screen sent, as they were sent, so that
+	// the Response screen can send one again. They are forgotten with the run.
+	requests map[RunID]*sentRequest
+
+	// The editor seams: how a process takes over the terminal, where its
+	// environment is read, and where its temporary files go.
+	execProcess func(*exec.Cmd, tea.ExecCallback) tea.Cmd
+	getenv      func(string) string
+	tempDir     string
+
+	// tempFiles are the files an editor still has open. Each is removed when its
+	// editor exits, and whatever is left when the UI ends is removed then.
+	tempFiles map[string]bool
+}
+
+// sentRequest is a request the Request screen sent: the operation, and the
+// invocation with its body.
+type sentRequest struct {
+	op  Operation
+	inv Invocation
+
+	// project is the project selected when it was sent, "" when fft's own
+	// resolution chose. The run's result says which one that was.
+	project string
 }
 
 func newSession(opts Options) *session {
@@ -89,9 +116,22 @@ func newSession(opts Options) *session {
 	if now == nil {
 		now = time.Now
 	}
+	execProcess := opts.execProcess
+	if execProcess == nil {
+		execProcess = tea.ExecProcess
+	}
+	getenv := opts.getenv
+	if getenv == nil {
+		getenv = os.Getenv
+	}
 	return &session{
 		runner:        opts.Runner,
 		now:           now,
+		execProcess:   execProcess,
+		getenv:        getenv,
+		tempDir:       opts.tempDir,
+		tempFiles:     make(map[string]bool),
+		requests:      make(map[RunID]*sentRequest),
 		project:       opts.Project,
 		readOnlyFloor: opts.ReadOnly,
 		// Known before the list is: a key pressed while it loads is refused as
@@ -129,24 +169,52 @@ func (s *session) selectProject(name string) {
 // scoped is the display of a command that acts on the current project: the
 // --project a shell would need, since the UI's choice is not in its argv.
 func (s *session) scoped(args ...string) action {
-	shown := args
-	if s.project != "" && !s.headless {
-		shown = append(slices.Clone(args), "--project", s.project)
+	return action{inv: Invocation{Args: args}, display: s.displayFor(args, s.project)}
+}
+
+// displayFor is args as a shell would need them to act on project: with the
+// --project the UI decides beside the command line. The environment's project is
+// the one a shell with the same environment reaches without it.
+func (s *session) displayFor(args []string, project string) shellCommand {
+	if project == "" || s.headless {
+		return commandLine(args)
 	}
-	return action{inv: Invocation{Args: args}, display: commandLine(shown)}
+	return commandLine(append(slices.Clone(args), "--project", project))
 }
 
 // start runs a, and calls done with its result once it has finished.
 func (s *session) start(a action, done func(Result) tea.Cmd) tea.Cmd {
+	_, cmd := s.launch(a, done)
+	return cmd
+}
+
+// launch is start, and says which run it started: 0 when the runner refused it,
+// in which case done has already been called.
+func (s *session) launch(a action, done func(Result) tea.Cmd) (RunID, tea.Cmd) {
 	id, err := s.runner.Start(a.inv)
 	if err != nil {
 		// Nothing ran. The caller hears about it the way it hears about any other
 		// failure, so that no screen needs a second error path.
-		return done(Result{ExitCode: exitcode.General, Stderr: []byte(err.Error())})
+		return 0, done(Result{ExitCode: exitcode.General, Stderr: []byte(err.Error())})
 	}
 	s.runs.add(id, a.display, s.now())
 	s.done[id] = done
-	return nil
+	// A request is kept only as long as its run is.
+	for kept := range s.requests {
+		if _, ok := s.runs.byID[kept]; !ok {
+			delete(s.requests, kept)
+		}
+	}
+	return id, nil
+}
+
+// cleanup removes the temporary files an editor was still working on.
+func (s *session) cleanup() {
+	for path := range s.tempFiles {
+		// Best effort, as the UI goes: there is nobody left to tell.
+		_ = os.Remove(path)
+		delete(s.tempFiles, path)
+	}
 }
 
 // handle applies a runner event, and returns whatever the finished run's caller
