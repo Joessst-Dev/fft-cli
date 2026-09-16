@@ -118,6 +118,12 @@ linters:
         linters:
           - gosec
         text: G304
+      # G304 flags opening a variable path. The path is the history file's own name
+      # with ".lock" appended — fft's state directory or the test seam, never input.
+      - path: ^internal/history/lock_(unix|windows)\.go$
+        linters:
+          - gosec
+        text: G304
       # G404 flags math/rand for the retry backoff jitter. Jitter spreads load; it
       # is not a secret and does not want a CSPRNG.
       - path: ^internal/client/do\.go$
