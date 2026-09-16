@@ -323,8 +323,10 @@ func (r *cliRunner) Events() <-chan tui.RunEvent { return r.events }
 // SetProject implements [tui.Runner]. It applies to the runs started after it.
 func (r *cliRunner) SetProject(name string) {
 	r.mu.Lock()
-	defer r.mu.Unlock()
 	r.project = name
+	r.mu.Unlock()
+	// Outside mu, which every Start takes: holding one lock while taking another is
+	// an order every other path would have to keep.
 	r.tokens.forget()
 }
 

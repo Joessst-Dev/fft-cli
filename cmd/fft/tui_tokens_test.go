@@ -212,6 +212,81 @@ var _ = Describe("the TUI session's tokens", func() {
 			Expect(counts.builds.Load()).To(BeEquivalentTo(2))
 		})
 
+		When("building a token source waits on the user", func() {
+			var (
+				building chan struct{}
+				release  func()
+			)
+
+			BeforeEach(func() {
+				building = make(chan struct{}, 8)
+				unblock := make(chan struct{})
+				release = sync.OnceFunc(func() { close(unblock) })
+				c.deps.NewTokenSource = func(config.Project, secrets.Store, func() time.Time, io.Writer) (auth.TokenSource, error) {
+					counts.builds.Add(1)
+					building <- struct{}{}
+					// A keychain dialog nobody has answered yet.
+					<-unblock
+					return &mintingSource{mints: &counts.mints}, nil
+				}
+				r = c.newRunner()
+				// After the runner's own cleanup is registered, so that it runs first: the
+				// runner cannot shut down while a build waits.
+				DeferCleanup(release)
+				r.SetProject("prod")
+			})
+
+			It("still lets the UI switch project and start other runs", func() {
+				first := start(r, tui.Invocation{Args: []string{"facility", "list"}})
+				Eventually(building).WithTimeout(runTimeout).Should(Receive())
+
+				switched := make(chan tui.RunID)
+				go func() {
+					defer GinkgoRecover()
+					r.SetProject("other")
+					id, err := r.Start(tui.Invocation{Args: []string{"version"}})
+					Expect(err).NotTo(HaveOccurred())
+					switched <- id
+				}()
+				var second tui.RunID
+				Eventually(switched).WithTimeout(runTimeout).Should(Receive(&second))
+				Expect(awaitDone(r, second)[second].ExitCode).To(Equal(exitcode.OK))
+
+				release()
+				Expect(awaitDone(r, first)[first].ExitCode).To(Equal(exitcode.OK))
+			})
+
+			It("builds once for the runs that ask meanwhile", func() {
+				first := start(r, tui.Invocation{Args: []string{"facility", "list"}})
+				Eventually(building).WithTimeout(runTimeout).Should(Receive())
+				second := start(r, tui.Invocation{Args: []string{"facility", "list"}})
+				awaitState(r, second, tui.RunRunning)
+
+				release()
+				for id, res := range awaitDone(r, first, second) {
+					Expect(res.ExitCode).To(Equal(exitcode.OK), "run %d: %s", id, res.Stderr)
+				}
+				Expect(counts.builds.Load()).To(BeEquivalentTo(1))
+			})
+
+			It("does not keep a source whose build began before a switch", func() {
+				first := start(r, tui.Invocation{Args: []string{"facility", "list"}})
+				Eventually(building).WithTimeout(runTimeout).Should(Receive())
+
+				switched := make(chan struct{})
+				go func() {
+					defer close(switched)
+					r.SetProject("prod")
+				}()
+				Eventually(switched).WithTimeout(runTimeout).Should(BeClosed())
+
+				release()
+				Expect(awaitDone(r, first)[first].ExitCode).To(Equal(exitcode.OK))
+				runOK(r, "facility", "list")
+				Expect(counts.builds.Load()).To(BeEquivalentTo(2), "a source built before the switch was kept after it")
+			})
+		})
+
 		It("does not hand a project changed outside the session the token of the account it was", func() {
 			runOK(r, "facility", "list")
 

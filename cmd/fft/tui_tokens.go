@@ -26,6 +26,24 @@ import (
 type sessionTokens struct {
 	mu      sync.Mutex
 	sources map[tokenKey]auth.TokenSource
+
+	// building holds the source being built for a key, for the runs that ask for
+	// it meanwhile to wait on.
+	building map[tokenKey]*tokenBuild
+
+	// generation counts the forgets. A source whose build began before the latest
+	// one is handed to the runs that waited for it, and not kept.
+	generation uint64
+}
+
+// tokenBuild is one token source being built.
+type tokenBuild struct {
+	done       chan struct{}
+	generation uint64
+
+	// src and err are set before done is closed.
+	src auth.TokenSource
+	err error
 }
 
 // tokenKey identifies a project by everything its token source is built from, so
@@ -48,33 +66,53 @@ func tokenKeyOf(p config.Project) tokenKey {
 // source returns the session's token source for p, building it with build the
 // first time p asks.
 //
-// The lock is held while build runs. Building reads the credential store, which on
-// macOS may raise a keychain dialog; runs that queue behind it get the one source
-// it produced rather than a dialog each.
+// Building reads the credential store, which on macOS may raise a keychain dialog,
+// so the runs that ask for p meanwhile wait for the one build rather than raising
+// a dialog each. They wait without the lock: a build that waits on the user must
+// not hold up a project switch, or a run for another project.
 func (t *sessionTokens) source(p config.Project, build func() (auth.TokenSource, error)) (auth.TokenSource, error) {
 	key := tokenKeyOf(p)
 
 	t.mu.Lock()
-	defer t.mu.Unlock()
 	if src, ok := t.sources[key]; ok {
+		t.mu.Unlock()
 		return src, nil
 	}
+	if b, ok := t.building[key]; ok {
+		t.mu.Unlock()
+		<-b.done
+		return b.src, b.err
+	}
+	b := &tokenBuild{done: make(chan struct{}), generation: t.generation}
+	if t.building == nil {
+		t.building = make(map[tokenKey]*tokenBuild)
+	}
+	t.building[key] = b
+	t.mu.Unlock()
 
-	src, err := build()
-	if err != nil {
-		return nil, err
+	b.src, b.err = build()
+
+	t.mu.Lock()
+	if t.building[key] == b {
+		delete(t.building, key)
 	}
-	if t.sources == nil {
-		t.sources = make(map[tokenKey]auth.TokenSource)
+	if b.err == nil && b.generation == t.generation {
+		if t.sources == nil {
+			t.sources = make(map[tokenKey]auth.TokenSource)
+		}
+		t.sources[key] = b.src
 	}
-	t.sources[key] = src
-	return src, nil
+	t.mu.Unlock()
+	close(b.done)
+	return b.src, b.err
 }
 
-// forget drops every token source. A run already holding one keeps using it; the
-// runs after this build their own again.
+// forget drops every token source. A run already holding one, or waiting for one
+// being built, keeps it; the runs after this build their own again.
 func (t *sessionTokens) forget() {
 	t.mu.Lock()
 	defer t.mu.Unlock()
+	t.generation++
 	clear(t.sources)
+	clear(t.building)
 }
