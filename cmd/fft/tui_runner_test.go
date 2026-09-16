@@ -24,7 +24,7 @@ const runTimeout = 10 * time.Second
 
 // newRunner is a runner over the spec's Deps, shut down when the spec ends.
 func (c *cli) newRunner() *cliRunner {
-	r := newCLIRunner(context.Background(), c.deps)
+	r := newCLIRunner(context.Background(), c.deps, uiRun{})
 	DeferCleanup(r.Close)
 	return r
 }
@@ -269,6 +269,7 @@ var runDepsClassification = map[string]string{
 	"updateDone":          "rebuilt",
 	"StartTUI":            "zero",
 	"observeStatus":       "caller",
+	"ui":                  "per run",
 }
 
 var _ = Describe("a Deps for one TUI run", func() {
@@ -289,12 +290,13 @@ var _ = Describe("a Deps for one TUI run", func() {
 		parent.AssumeYes = true
 
 		in := bytes.NewReader(nil)
-		child := parent.forRun(in)
+		child := parent.forRun(in, uiRun{readOnly: true})
 
 		Expect(child.Config).To(BeIdenticalTo(parent.Config))
 		Expect(child.Secrets).To(BeIdenticalTo(parent.Secrets))
 		Expect(child.In).To(BeIdenticalTo(in))
 		Expect(child.Terminal).To(HaveValue(BeFalse()))
+		Expect(child.ui).To(HaveValue(Equal(uiRun{readOnly: true})))
 
 		Expect(child.Project).To(BeEmpty())
 		Expect(child.cfg).To(BeNil())

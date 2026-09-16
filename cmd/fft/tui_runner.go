@@ -42,11 +42,12 @@ var configWriters = map[string]bool{
 // cliRunner is the TUI's [tui.Runner]: it executes each invocation through
 // [executeRoot], on a Deps of its own, in the background.
 type cliRunner struct {
-	deps   *Deps
-	ctx    context.Context
-	stop   context.CancelFunc
-	events chan tui.RunEvent
-	slots  chan struct{}
+	deps    *Deps
+	session uiRun
+	ctx     context.Context
+	stop    context.CancelFunc
+	events  chan tui.RunEvent
+	slots   chan struct{}
 
 	// config is held for reading by every run and for writing by an exclusive one.
 	config sync.RWMutex
@@ -66,11 +67,13 @@ type cliRunner struct {
 var _ tui.Runner = (*cliRunner)(nil)
 
 // newCLIRunner returns a runner whose runs are all cancelled when ctx is. deps is
-// the template each run's own Deps is cut from; see [Deps.forRun].
-func newCLIRunner(ctx context.Context, deps *Deps) *cliRunner {
+// the template each run's own Deps is cut from, and session the flags `fft tui` was
+// started with; see [Deps.forRun].
+func newCLIRunner(ctx context.Context, deps *Deps, session uiRun) *cliRunner {
 	ctx, stop := context.WithCancel(ctx)
 	return &cliRunner{
 		deps:    deps,
+		session: session,
 		ctx:     ctx,
 		stop:    stop,
 		events:  make(chan tui.RunEvent, runnerEventBuffer),
@@ -162,7 +165,7 @@ func (r *cliRunner) run(ctx context.Context, id tui.RunID, inv tui.Invocation) {
 
 func (r *cliRunner) execute(ctx context.Context, inv tui.Invocation) tui.Result {
 	in := bytes.NewReader(inv.Stdin)
-	deps := r.deps.forRun(in)
+	deps := r.deps.forRun(in, r.session)
 
 	var status atomic.Int64
 	deps.observeStatus = func(code int) { status.Store(int64(code)) }

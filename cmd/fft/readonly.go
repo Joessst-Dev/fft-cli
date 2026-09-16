@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -170,6 +171,8 @@ func (e *componentReadOnlyError) Hint() string {
 		return fmt.Sprintf("Unset %s to allow writes.", config.EnvReadOnly)
 	case sourceFlag:
 		return "Drop --read-only to allow writes."
+	case sourceSession:
+		return "Restart fft tui without --read-only to allow writes."
 	default:
 		return fmt.Sprintf("Run 'fft project read-only %s --off' to allow writes.", e.project)
 	}
@@ -222,6 +225,9 @@ func (d *Deps) guardOperation(cmd *cobra.Command, op api.Operation) error {
 		case sourceEnv:
 			return exitcode.UsageError{Err: fmt.Errorf(
 				"--read-only=false cannot loosen %s, which is set", config.EnvReadOnly)}
+		case sourceSession:
+			return exitcode.UsageError{Err: errors.New(
+				"--read-only=false cannot loosen this fft tui session, which was started with --read-only")}
 		}
 	}
 
@@ -247,6 +253,10 @@ func (d *Deps) readOnlySource(p config.Project) (readOnlySource, bool) {
 	case p.ReadOnly, d.ReadOnlyEnv:
 		// An ephemeral project is read-only only because the environment said so.
 		return sourceEnv, true
+	case d.ui != nil && d.ui.readOnly:
+		// Ahead of the run's own flag: its remedy is the one that works, since a
+		// run inside the session cannot drop a --read-only it never typed.
+		return sourceSession, true
 	case d.ReadOnlyFlag != nil && *d.ReadOnlyFlag:
 		return sourceFlag, true
 	default:
@@ -270,6 +280,8 @@ const (
 	sourceProject readOnlySource = iota + 1
 	sourceEnv
 	sourceFlag
+	// sourceSession is `fft tui --read-only`, which covers every run in the UI.
+	sourceSession
 )
 
 // readOnlyError is a write refused before it was sent.
@@ -297,6 +309,8 @@ func (e *readOnlyError) Hint() string {
 		return fmt.Sprintf("Unset %s to allow writes.", config.EnvReadOnly)
 	case sourceFlag:
 		return "Drop --read-only to allow writes."
+	case sourceSession:
+		return "Restart fft tui without --read-only to allow writes."
 	default:
 		return fmt.Sprintf("Run 'fft project read-only %s --off' to allow writes.", e.project)
 	}

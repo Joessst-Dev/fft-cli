@@ -192,6 +192,11 @@ type Deps struct {
 	// client receives. The TUI's runner uses it to report what a run got back.
 	observeStatus func(status int)
 
+	// ui is set on a run that `fft tui` started, and nil on a command line typed in
+	// a shell. Unlike the fields complete rebuilds, it is never reset: it is how a
+	// flag given to the session reaches a run that parses only its own flags.
+	ui *uiRun
+
 	// cfg caches the parsed config file, so that a command reading it twice does
 	// not read the disk twice and a mutation followed by a save sees its own
 	// writes.
@@ -217,8 +222,23 @@ type Deps struct {
 	updateDone chan struct{}
 }
 
+// uiRun is what makes a run inside `fft tui` differ from the same command line in
+// a shell: the flags the session was started with.
+//
+// They cannot simply be copied onto the run's Deps, because [Deps.complete]
+// rewrites those fields from the run's own command line — which never saw them.
+type uiRun struct {
+	// readOnly is `fft tui --read-only`: a floor under every run in the session,
+	// which a run's own --read-only=false may not lower, exactly like FFT_READ_ONLY.
+	readOnly bool
+
+	// timeout is `fft tui --timeout`, the bound for every run that does not give
+	// its own; nil when the session was started without one.
+	timeout *time.Duration
+}
+
 // forRun returns the Deps one concurrent run of the command tree should use,
-// reading its standard input from in.
+// reading its standard input from in, inside the session ui describes.
 //
 // Every field is accounted for, in one of three groups. What is shared is safe to
 // share: stores that serialise their own access, pure functions, and seams a spec
@@ -226,7 +246,7 @@ type Deps struct {
 // in a shell. Everything else is left zero, because [Deps.complete] and
 // [newRootCmd] rebuild it from the run's own flags and streams — and sharing it
 // would be a data race between runs, or one run's --project leaking into another.
-func (d *Deps) forRun(in io.Reader) *Deps {
+func (d *Deps) forRun(in io.Reader, ui uiRun) *Deps {
 	return &Deps{
 		// Shared.
 		Config:         d.Config,
@@ -247,6 +267,7 @@ func (d *Deps) forRun(in io.Reader) *Deps {
 		// and no update notice may be drawn over the screen.
 		In:       in,
 		Terminal: ptr(false),
+		ui:       &ui,
 
 		// Rebuilt by complete, or by newRootCmd, from this run's flags and streams:
 		// Printer, Prompt, Debug, Project, Ephemeral, Timeout, AssumeYes,
@@ -550,6 +571,9 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 
 	d.Project = v.GetString("project")
 	d.Timeout = v.GetDuration("timeout")
+	if d.ui != nil && d.ui.timeout != nil && !rootFlagChanged(cmd, "timeout") {
+		d.Timeout = *d.ui.timeout
+	}
 	d.AssumeYes = v.GetBool("yes")
 
 	// Assigned on every run, absence included: the spec harness reuses one Deps
@@ -562,8 +586,8 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 	// for "block writes in this session". And read off the flag rather than viper,
 	// so that FFT_READ_ONLY cannot be talked down to a default — see [Deps.ReadOnlyEnv].
 	d.ReadOnlyFlag = nil
-	if f := cmd.Root().PersistentFlags().Lookup("read-only"); f != nil && f.Changed {
-		d.ReadOnlyFlag = ptr(f.Value.String() == "true")
+	if rootFlagChanged(cmd, "read-only") {
+		d.ReadOnlyFlag = ptr(cmd.Root().PersistentFlags().Lookup("read-only").Value.String() == "true")
 	}
 	d.ReadOnlyEnv = config.ReadOnlyFromEnv(os.LookupEnv)
 
@@ -600,6 +624,14 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 		}
 	}
 	return nil
+}
+
+// rootFlagChanged reports whether the global flag name was given on this command
+// line. It asks the root's persistent set, for the reason complete reads
+// --read-only there: a subcommand may declare a local flag of the same name.
+func rootFlagChanged(cmd *cobra.Command, name string) bool {
+	f := cmd.Root().PersistentFlags().Lookup(name)
+	return f != nil && f.Changed
 }
 
 // bindFlags builds the flag → env → config → default precedence chain.
