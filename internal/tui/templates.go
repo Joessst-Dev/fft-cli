@@ -14,6 +14,7 @@ import (
 
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/output"
+	"github.com/Joessst-Dev/fft-cli/internal/template"
 )
 
 // templateRow is one entry of `fft template list -o json`.
@@ -92,6 +93,10 @@ type openTemplate struct {
 	// doc is what `template show` said, nil while it is being read.
 	doc    *templateDoc
 	params []*paramField
+
+	// refused are the parameters the form leaves out, because no --set can reach
+	// them by their name.
+	refused []string
 
 	// form is set while the parameters have the cursor, editing while one of them
 	// has the keyboard; before is what it held when editing started.
@@ -489,10 +494,19 @@ func (t *templatesScreen) openRow(row templateRow, next func(*openTemplate) tea.
 func (t *templatesScreen) setDoc(o *openTemplate, doc *templateDoc) {
 	o.doc = doc
 	names := make([]string, 0, len(doc.Params))
+	o.refused = nil
 	for name := range doc.Params {
+		// fft refuses to read a file declaring such a name. Should one arrive all
+		// the same, the form does not offer it: the --set it would build sets
+		// something else.
+		if template.ValidateParamName(name) != nil {
+			o.refused = append(o.refused, name)
+			continue
+		}
 		names = append(names, name)
 	}
 	slices.Sort(names)
+	slices.Sort(o.refused)
 
 	kept := t.values[o.row.key()]
 	o.params = make([]*paramField, 0, len(names))
@@ -893,6 +907,11 @@ func (t *templatesScreen) detail(o *openTemplate, width, height int) string {
 	}
 	for i, f := range o.params {
 		head = append(head, t.paramRow(o, f, o.form && i == o.cursor, nameWidth, width))
+	}
+	if len(o.refused) > 0 {
+		head = append(head, wrap(st.warnText.Render(clean(fmt.Sprintf(
+			"Not offered: %s. No --set can reach a parameter by that name; set its path instead.",
+			strings.Join(o.refused, ", ")))), width))
 	}
 	if f := o.selected(); o.form && f != nil && f.spec.Description != "" {
 		head = append(head, st.dim.Render(clip("  "+clean(f.spec.Description), width)))

@@ -286,6 +286,17 @@ var _ = Describe("the Templates screen", func() {
 			Expect(h.m.templates.open.params[0].value()).To(BeEmpty())
 		})
 
+		It("never offer a parameter whose name --set would misroute", func() {
+			h.openTemplate(`{"schemaVersion":1,"operationId":"addPickJob",` +
+				`"params":{"a=b":{"path":"orderRef"},"email":{"path":"consumer.email"}},"body":{"a":1}}`)
+			names := []string{}
+			for _, f := range h.m.templates.open.params {
+				names = append(names, f.name)
+			}
+			Expect(names).To(Equal([]string{"email"}))
+			Expect(h.view()).To(ContainSubstring("Not offered: a=b."))
+		})
+
 		It("say so when the template declares none", func() {
 			h.openTemplate(docFor("addPickJob"))
 			h.press("p")
