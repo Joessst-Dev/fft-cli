@@ -8,6 +8,8 @@ require (
 	charm.land/lipgloss/v2 v2.0.6
 	cloud.google.com/go/pubsub/v2 v2.7.0
 	github.com/Azure/azure-sdk-for-go/sdk/messaging/azservicebus v1.10.0
+	// ultraviolet has no tagged release; this is the commit lipgloss v2.0.6 itself
+	// requires, so minimal version selection would choose it anyway.
 	github.com/charmbracelet/ultraviolet v0.0.0-20260811164956-006e29f97886
 	github.com/charmbracelet/x/ansi v0.11.8
 	github.com/fatih/color v1.19.0
