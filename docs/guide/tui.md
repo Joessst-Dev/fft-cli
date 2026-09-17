@@ -154,7 +154,7 @@ empty field shows what the command does without it.
 | Key | |
 |---|---|
 | `↑`/`↓` | select a field |
-| `enter` | edit the field, or switch an on/off flag |
+| `enter` | edit the field, or cycle an on/off flag like `space` |
 | `space` | cycle an on/off flag through on, off and unset |
 | `x` | clear the field |
 | `e` | edit the body in your editor |

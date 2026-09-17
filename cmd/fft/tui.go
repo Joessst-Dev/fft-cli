@@ -138,8 +138,7 @@ func announceSecretsWarnings(store secrets.Store) {
 //     to the user through the UI. Only the Projects screen's remove and allow-writes
 //     add --yes, because their typed-name dialogs are that question.
 //   - --debug is not carried over. A trace of every request would bury each run's
-//     own stderr, which the UI shows with its response; the UI can ask for one on
-//     the request being investigated.
+//     own stderr, which the UI shows with its response.
 //   - -o and --no-color mean nothing to a run, which always speaks JSON to the UI.
 func sessionFlags(cmd *cobra.Command, deps *Deps) uiRun {
 	session := uiRun{readOnly: deps.ReadOnlyFlag != nil && *deps.ReadOnlyFlag}

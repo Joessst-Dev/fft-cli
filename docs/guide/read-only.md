@@ -41,7 +41,8 @@ or under `FFT_READ_ONLY`, every write on the Operations screen shows a 🔒 and 
 shows `RO`. Sending one anyway is refused with exit `10`, and nothing is sent. The session's
 `--read-only` holds for every request in the session: a request cannot loosen it, and
 allowing writes to a project from the Projects screen does not either. To allow writes
-again, restart `fft tui` without the flag.
+again, restart `fft tui` without the flag, and with `FFT_READ_ONLY` unset if that is what
+made the session read-only.
 
 ## Reads keep working, and that includes the searches
 

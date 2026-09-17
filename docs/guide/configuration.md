@@ -139,8 +139,8 @@ Recording is switched off:
   ```
 
 - by `FFT_HISTORY=off`, everywhere — the environment wins over the config file. `on`,
-  `true`, `yes`, `1` and `t` switch recording on; any other value switches it off, so a
-  typo does not quietly start recording;
+  `true`, `yes`, `1` and `t` switch recording on; any other non-empty value switches it
+  off, so a typo does not quietly start recording. An empty value counts as unset;
 - in headless mode (`FFT_BASE_URL` and friends), unless `FFT_HISTORY=on` asks for it: a CI
   job's history is a file on a runner nobody reads.
 
