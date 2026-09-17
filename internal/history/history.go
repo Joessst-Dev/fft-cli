@@ -125,7 +125,8 @@ func (l Log) maxBytes() int64 {
 }
 
 // Append adds e to the end of the file, creating it (0600, in a 0700 directory)
-// if needed.
+// if needed, and taking group and other access away from a file or directory that
+// has it.
 //
 // The entry is one write to a file opened for appending, which is what lets any
 // number of fft processes record at once without a lock: the operating system
@@ -138,13 +139,22 @@ func (l Log) Append(e Entry) error {
 	}
 	line = append(line, '\n')
 
-	if err := os.MkdirAll(filepath.Dir(l.Path), atomicfile.DirMode); err != nil {
+	dir := filepath.Dir(l.Path)
+	if err := os.MkdirAll(dir, atomicfile.DirMode); err != nil {
 		return fmt.Errorf("create the history directory: %w", err)
+	}
+	// Before the entry is written, not after: an entry that cannot be kept private
+	// is not written at all.
+	if err := tightenDir(dir); err != nil {
+		return fmt.Errorf("make %s private: %w", dir, err)
 	}
 
 	f, info, err := l.open(os.O_APPEND | os.O_CREATE | os.O_WRONLY)
 	if err != nil {
 		return err
+	}
+	if err := tightenFile(f, info); err != nil {
+		return errors.Join(fmt.Errorf("make %s private: %w", l.Path, err), f.Close())
 	}
 	n, writeErr := f.Write(line)
 	if err := errors.Join(writeErr, f.Close()); err != nil {

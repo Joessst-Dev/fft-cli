@@ -4,6 +4,7 @@ package history
 
 import (
 	"errors"
+	"io/fs"
 	"os"
 	"time"
 
@@ -42,6 +43,12 @@ func replace(path string, data []byte) error {
 		return atomicfile.Write(path, data)
 	}, windows.ERROR_SHARING_VIOLATION, windows.ERROR_ACCESS_DENIED)
 }
+
+// tightenDir and tightenFile do nothing on Windows, where access is an ACL the
+// user profile already confines and a mode is only a read-only bit.
+func tightenDir(string) error { return nil }
+
+func tightenFile(*os.File, fs.FileInfo) error { return nil }
 
 func retryShared(op func() error, transient ...error) error {
 	deadline := time.Now().Add(shareWait)

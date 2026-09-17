@@ -119,3 +119,42 @@ var _ = Describe("a compaction lock path that is a symlink", func() {
 		Expect(target).NotTo(BeAnExistingFile())
 	})
 })
+
+var _ = Describe("a history that others can read", func() {
+	var (
+		dir string
+		log history.Log
+	)
+
+	BeforeEach(func() {
+		dir = filepath.Join(GinkgoT().TempDir(), "fft")
+		log = history.Log{Path: filepath.Join(dir, "history.jsonl")}
+	})
+
+	mode := func(path string) os.FileMode {
+		GinkgoHelper()
+		info, err := os.Stat(path)
+		Expect(err).NotTo(HaveOccurred())
+		return info.Mode().Perm()
+	}
+
+	It("is made private by the next append", func() {
+		Expect(os.MkdirAll(dir, 0o700)).To(Succeed())
+		Expect(os.WriteFile(log.Path, nil, 0o600)).To(Succeed())
+		Expect(os.Chmod(log.Path, 0o644)).To(Succeed())
+
+		Expect(log.Append(entry("prod", "getFacility", 1))).To(Succeed())
+
+		Expect(mode(log.Path)).To(Equal(os.FileMode(0o600)))
+	})
+
+	It("has its directory made private too", func() {
+		Expect(os.MkdirAll(dir, 0o700)).To(Succeed())
+		Expect(os.Chmod(dir, 0o755)).To(Succeed())
+
+		Expect(log.Append(entry("prod", "getFacility", 1))).To(Succeed())
+
+		Expect(mode(dir)).To(Equal(os.FileMode(0o700)))
+		Expect(mode(log.Path)).To(Equal(os.FileMode(0o600)))
+	})
+})

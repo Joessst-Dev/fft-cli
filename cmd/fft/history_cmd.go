@@ -31,10 +31,11 @@ and other arguments, the names of --file bodies, and filter values such as a
 status or a date. Anything personal passed that way is in the record too.
 
 The record is ~/.local/state/fft/history.jsonl (or under $XDG_STATE_HOME), mode
-0600. It never leaves the machine.
+0600 in a 0700 directory: fft takes group and other access away from either
+before it records. It never leaves the machine.
 
-Recording is off in headless mode (FFT_BASE_URL and friends) unless FFT_HISTORY=on
-is set. FFT_HISTORY=off, or settings.noHistory: true in the config file, switches
+Recording is off in headless mode (FFT_BASE_URL and friends, with no --project
+naming a configured project) unless FFT_HISTORY=on is set. FFT_HISTORY=off, or settings.noHistory: true in the config file, switches
 it off everywhere.`
 
 const historyListLong = `List the most recent requests, newest first.
