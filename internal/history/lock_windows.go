@@ -16,6 +16,12 @@ import (
 // tryLock takes an exclusive lock on path, trying until wait has passed. It
 // reports false, and no error, when another process kept the lock throughout.
 func tryLock(path string, wait time.Duration) (unlock func(), locked bool, err error) {
+	// Windows has no O_NOFOLLOW. Looking first narrows, but cannot close, the
+	// window in which a link planted at the path would have fft lock a file
+	// elsewhere.
+	if info, err := os.Lstat(path); err == nil && !info.Mode().IsRegular() {
+		return nil, false, fmt.Errorf("%s: %w", path, errNotRegular)
+	}
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, atomicfile.FileMode)
 	if err != nil {
 		return nil, false, err

@@ -16,7 +16,12 @@ import (
 // tryLock takes an exclusive advisory lock on path, trying until wait has passed.
 // It reports false, and no error, when another process kept the lock throughout.
 func tryLock(path string, wait time.Duration) (unlock func(), locked bool, err error) {
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, atomicfile.FileMode)
+	// O_NOFOLLOW, so that a symlink planted at the lock's path cannot have fft
+	// create, or lock, a file elsewhere. os.OpenFile adds O_CLOEXEC itself.
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR|unix.O_NOFOLLOW, atomicfile.FileMode)
+	if errors.Is(err, unix.ELOOP) {
+		return nil, false, fmt.Errorf("%s: %w", path, errNotRegular)
+	}
 	if err != nil {
 		return nil, false, err
 	}

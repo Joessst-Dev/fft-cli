@@ -105,3 +105,17 @@ var _ = Describe("a history path that is a symlink", func() {
 		Expect(err).To(MatchError(ContainSubstring("not a regular file")))
 	})
 })
+
+var _ = Describe("a compaction lock path that is a symlink", func() {
+	It("is refused, rather than creating the file it points at", func() {
+		dir := GinkgoT().TempDir()
+		log := history.Log{Path: filepath.Join(dir, "history.jsonl"), MaxBytes: 64}
+		target := filepath.Join(dir, "elsewhere.lock")
+		Expect(os.Symlink(target, log.Path+".lock")).To(Succeed())
+
+		err := log.Append(entry("prod", "getFacility", 1))
+
+		Expect(err).To(MatchError(ContainSubstring("not a regular file")))
+		Expect(target).NotTo(BeAnExistingFile())
+	})
+})
