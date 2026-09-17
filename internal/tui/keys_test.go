@@ -338,6 +338,17 @@ var _ = Describe("the key legend", func() {
 		})
 	})
 
+	It("does not scroll while the terminal's height is unknown, since all of it is drawn", func() {
+		h.request(opReplaceFacility)
+		h.send(tea.WindowSizeMsg{Width: 120})
+		h.press("?")
+		for range 100 {
+			h.press("down")
+		}
+		Expect(h.m.legendScroll).To(BeZero())
+		Expect(h.view()).To(ContainSubstring("select a field"))
+	})
+
 	DescribeTable("never draws past the terminal's last row",
 		func(width, height int) {
 			h.request(opReplaceFacility)

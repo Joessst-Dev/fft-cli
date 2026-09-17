@@ -187,6 +187,12 @@ func (m *app) legendView(height int) string {
 // scrollLegend moves the legend by rows, within what there is to show.
 func (m *app) scrollLegend(rows int) {
 	room := m.legendHeight() - 1
+	if room <= 0 {
+		// A height nobody knows draws all of the legend, and a single row draws only
+		// its title: either way there is nothing to scroll.
+		m.legendScroll = 0
+		return
+	}
 	total := len(legendLines(m.st, m.width, m.legendSections()))
 	m.legendScroll = min(max(m.legendScroll+rows, 0), max(total-room, 0))
 }
