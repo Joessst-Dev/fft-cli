@@ -163,6 +163,11 @@ type job struct {
 	exclusive bool
 	after     <-chan struct{}
 	done      chan struct{}
+
+	// rewritesConfig is set for a command that saves the config file, whose tokens
+	// are forgotten once it finishes. An exclusive run is not necessarily one: the
+	// UI also runs a sign-in alone, and the token it mints is the point of it.
+	rewritesConfig bool
 }
 
 // newCLIRunner returns a runner whose runs are all cancelled when ctx is. deps is
@@ -216,9 +221,10 @@ func (r *cliRunner) Start(inv tui.Invocation) (tui.RunID, error) {
 	}
 	j.ui.background = inv.Background
 
-	exclusive, confirm := r.classify(inv.Args)
+	rewrites, confirm := r.classify(inv.Args)
 	j.confirm = confirm
-	j.exclusive = inv.Exclusive || exclusive
+	j.rewritesConfig = rewrites == exclusiveConfig
+	j.exclusive = inv.Exclusive || rewrites != ""
 	inv.Exclusive = j.exclusive
 	j.inv = inv
 	if j.exclusive {
@@ -238,18 +244,19 @@ func (r *cliRunner) Start(inv tui.Invocation) (tui.RunID, error) {
 	return id, nil
 }
 
-// classify resolves args in the catalog tree, and reports whether the command
-// must run alone ([annotationExclusive]) and what a user types to confirm its
-// question ([annotationConfirms]). It must be called with mu held.
-func (r *cliRunner) classify(args []string) (exclusive bool, confirm string) {
+// classify resolves args in the catalog tree, and reports the files the command
+// rewrites, "" when it must not run alone ([annotationExclusive]), and what a user
+// types to confirm its question ([annotationConfirms]). It must be called with mu
+// held.
+func (r *cliRunner) classify(args []string) (rewrites, confirm string) {
 	target, _, err := r.catalog.Find(args)
 	if err != nil {
-		return false, ""
+		return "", ""
 	}
 	if word := target.Annotations[annotationConfirms]; word != confirmsYes {
 		confirm = word
 	}
-	return target.Annotations[annotationExclusive] != "", confirm
+	return target.Annotations[annotationExclusive], confirm
 }
 
 // Cancel implements [tui.Runner].
@@ -404,11 +411,13 @@ func (r *cliRunner) execute(ctx context.Context, id tui.RunID, j job) tui.Result
 	if j.exclusive {
 		r.config.Lock()
 		defer r.config.Unlock()
-		// A command that runs alone may have rewritten the config file — replaced a
-		// project's account, removed it — and a token kept from before would sign the
-		// next run in as whoever the project used to be. Forgotten before the lock is
-		// released, so that no run can pick the old one up in between.
-		defer r.tokens.forget()
+		if j.rewritesConfig {
+			// The command may have replaced a project's account, or removed it, and a
+			// token kept from before would sign the next run in as whoever the project
+			// used to be. Forgotten before the lock is released, so that no run can
+			// pick the old one up in between.
+			defer r.tokens.forget()
+		}
 	} else {
 		r.config.RLock()
 		defer r.config.RUnlock()

@@ -212,6 +212,26 @@ var _ = Describe("the TUI session's tokens", func() {
 			Expect(counts.builds.Load()).To(BeEquivalentTo(2))
 		})
 
+		It("keeps the token of a run the UI asked to run alone", func() {
+			id := start(r, tui.Invocation{Args: []string{"facility", "list"}, Exclusive: true})
+			Expect(awaitDone(r, id)[id].ExitCode).To(Equal(exitcode.OK))
+			runOK(r, "facility", "list")
+
+			Expect(counts.builds.Load()).To(BeEquivalentTo(1))
+			Expect(counts.mints.Load()).To(BeEquivalentTo(1))
+		})
+
+		It("signs the runs after a refresh with the refreshed token", func() {
+			runOK(r, "facility", "list")
+			// Alone, as the Projects screen starts it.
+			id := start(r, tui.Invocation{Args: []string{"auth", "refresh"}, Exclusive: true})
+			Expect(awaitDone(r, id)[id].ExitCode).To(Equal(exitcode.OK))
+			runOK(r, "facility", "list")
+
+			Expect(counts.builds.Load()).To(BeEquivalentTo(1))
+			Expect(seen.all()).To(Equal([]string{"Bearer token-1", "Bearer token-2"}))
+		})
+
 		When("building a token source waits on the user", func() {
 			var (
 				building chan struct{}
