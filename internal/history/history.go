@@ -57,8 +57,9 @@ type Entry struct {
 	// Command is the command's path, "fft facility list".
 	Command string `json:"command"`
 
-	// Args are the command's positional arguments followed by the flags it was
-	// given, each as --name=value, after [Redact].
+	// Args are the command's positional arguments and the flags it was given, as
+	// [Args] records them. Read them with [SplitArgs]: an argument that starts
+	// with a dash follows the flags and a "--".
 	Args []string `json:"args,omitempty"`
 
 	// Status is the HTTP status of the last response, 0 when none arrived.

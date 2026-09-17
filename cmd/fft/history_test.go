@@ -97,6 +97,15 @@ var _ = Describe("request history", func() {
 			)))
 		})
 
+		It("records an argument that starts with a dash after the flags, where a shell needs it", func() {
+			Expect(c.run("facility", "get", "-o", "json", "--", "--BER-01")).To(Equal(exitcode.OK), c.errOut())
+
+			Expect(recorded(log)).To(ConsistOf(HaveField("Args", []string{"--output=json", "--", "--BER-01"})))
+
+			Expect(c.run("history", "list")).To(Equal(exitcode.OK), c.errOut())
+			Expect(c.out()).To(ContainSubstring("fft facility get --output=json -- --BER-01"))
+		})
+
 		It("records an operation reached through fft api by the operation it names", func() {
 			Expect(c.run("api", "getFacility", "--param", "facilityId=f-1")).To(Equal(exitcode.OK), c.errOut())
 

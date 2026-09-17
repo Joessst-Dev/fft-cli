@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"slices"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -172,7 +171,7 @@ func (d *Deps) historyEntry(cmd *cobra.Command, code int, elapsed time.Duration)
 		Project:     d.historyProject(),
 		OperationID: id,
 		Command:     cmd.CommandPath(),
-		Args:        history.Redact(slices.Concat(positional, changedFlags(cmd))),
+		Args:        history.Args(positional, changedFlags(cmd)),
 		Exit:        code,
 		DurationMS:  elapsed.Milliseconds(),
 	}

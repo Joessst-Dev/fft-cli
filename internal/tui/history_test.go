@@ -251,6 +251,14 @@ var _ = Describe("the History screen", func() {
 			Expect(h.r.commandLines()).NotTo(ContainElement(HavePrefix("facility")))
 		})
 
+		It("fills in an argument that starts with a dash, sent after the flags", func() {
+			reopen(entry(1, "staging", "deleteFacility", "fft facility delete", "--", "--BER-01"))
+
+			Expect(field("<id>").value()).To(Equal("--BER-01"))
+			Expect(h.m.request.args()).To(Equal([]string{"facility", "delete", "--", "--BER-01"}))
+			Expect(h.view()).NotTo(ContainSubstring("Not part of this form"))
+		})
+
 		It("fills in an on/off flag given as off", func() {
 			reopen(entry(1, "staging", "searchFacility", "fft facility list", "--all=false"))
 			Expect(field("--all").switched).To(Equal(switchOff))

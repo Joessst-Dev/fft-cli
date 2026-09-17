@@ -556,12 +556,12 @@ func recall(op Operation, e history.Entry) recalled {
 	if len(path) > 0 && path[0] == "fft" {
 		path = path[1:]
 	}
-	args := e.Args
+	positional, flagArgs := history.SplitArgs(e.Args)
 	// `fft api <operationId>` names its operation as its first argument, which is
 	// part of the command the form stands for.
-	if slices.Equal(path, []string{"api"}) && len(args) > 0 && !strings.HasPrefix(args[0], "--") {
-		path = append(path, args[0])
-		args = args[1:]
+	if slices.Equal(path, []string{"api"}) && len(positional) > 0 {
+		path = append(path, positional[0])
+		positional = positional[1:]
 	}
 	if !slices.Equal(path, op.Command.Path) {
 		return rc
@@ -573,9 +573,7 @@ func recall(op Operation, e history.Entry) recalled {
 		flags[f.Name] = f
 	}
 
-	i := 0
-	for ; i < len(args) && !strings.HasPrefix(args[i], "--"); i++ {
-		value := args[i]
+	for _, value := range positional {
 		if value == history.Redacted {
 			value = ""
 			if len(rc.args) < len(op.Command.Args) {
@@ -586,7 +584,7 @@ func recall(op Operation, e history.Entry) recalled {
 	}
 
 	lists := make(map[string][]string)
-	for _, arg := range args[i:] {
+	for _, arg := range flagArgs {
 		name, value, hasValue := strings.Cut(strings.TrimPrefix(arg, "--"), "=")
 		f, known := flags[name]
 		switch {
