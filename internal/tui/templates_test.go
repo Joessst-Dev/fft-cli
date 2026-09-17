@@ -545,7 +545,7 @@ var _ = Describe("the Templates screen", func() {
 			h.press("t")
 			h.m.request.dialog.(*inputDialog).input.SetValue("other")
 			h.press("enter")
-			saveID := h.lookup("template", "save", "--operation", "addPickJob", "--file", "-", "other")
+			saveID := h.lookup("template", "save", "other", "--operation", "addPickJob", "--file", "-")
 
 			h.showTemplates(oneTemplate)
 			h.openTemplate(rushDoc)
@@ -604,6 +604,21 @@ var _ = Describe("the Templates screen", func() {
 			Expect(h.view()).NotTo(ContainSubstring("Rendering rush…"))
 		})
 	})
+
+	DescribeTable("puts a template name that starts with a dash after every flag",
+		func(key string, want ...string) {
+			h.showTemplates(`[{"name":"-y","scope":"project","operationId":"addPickJob"}]`)
+			if key != "enter" {
+				h.press("enter")
+				h.finish(ok(docFor("addPickJob")), "template", "show", "--", "-y")
+			}
+			h.press(key)
+			h.lookup(want...)
+		},
+		Entry("show", "enter", "template", "show", "--", "-y"),
+		Entry("render", "R", "template", "render", "--", "-y"),
+		Entry("remove", "x", "template", "remove", "--local", "--", "-y"),
+	)
 
 	Describe("removing a template", func() {
 		It("runs template remove, whose own question is the confirmation, and reads the list again", func() {
@@ -712,7 +727,7 @@ var _ = Describe("saving a request as a template", func() {
 		It("runs template save for the operation, with the body on stdin, for the project on screen", func() {
 			saveAs("rush")
 
-			id := h.lookup("template", "save", "--operation", "addPickJob", "--file", "-", "rush")
+			id := h.lookup("template", "save", "rush", "--operation", "addPickJob", "--file", "-")
 			Expect(h.r.stdin(id)).To(Equal(`{"pickLineItems":[]}`))
 			Expect(h.r.invocation(id).Project).To(Equal("staging"))
 			Expect(h.view()).To(ContainSubstring("Saving the template rush…"))
@@ -727,12 +742,12 @@ var _ = Describe("saving a request as a template", func() {
 			h.press("3")
 
 			saveAs("rush")
-			h.finish(ok(`{}`), "template", "save", "--operation", "addPickJob", "--file", "-", "rush")
+			h.finish(ok(`{}`), "template", "save", "rush", "--operation", "addPickJob", "--file", "-")
 			h.press("5")
 			h.lookup("template", "list")
 		})
 
-		It("puts a name that starts with a dash after the flags", func() {
+		It("puts a name that starts with a dash after the flags, where fft refuses it as a name", func() {
 			saveAs("-rush")
 			h.lookup("template", "save", "--operation", "addPickJob", "--file", "-", "--", "-rush")
 		})
@@ -740,7 +755,7 @@ var _ = Describe("saving a request as a template", func() {
 		It("says why it was not saved", func() {
 			saveAs("rush")
 			h.finish(failed(exitcode.Usage, `Error: there is already a user template named "rush": pass --force to replace it`),
-				"template", "save", "--operation", "addPickJob", "--file", "-", "rush")
+				"template", "save", "rush", "--operation", "addPickJob", "--file", "-")
 
 			Expect(h.view()).To(ContainSubstring("saving the template rush failed: exit 2"))
 			Expect(h.view()).To(ContainSubstring("there is already a user template"))

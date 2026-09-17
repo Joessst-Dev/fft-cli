@@ -462,7 +462,7 @@ func (t *templatesScreen) openRow(row templateRow, next func(*openTemplate) tea.
 	o := &openTemplate{row: row}
 	t.open = o
 	t.say("")
-	args := []string{"template", "show", row.Name}
+	args := templateArgs("show", row.Name)
 	return t.s.start(action{inv: Invocation{Args: args}, display: commandLine(args)}, func(r Result) tea.Cmd {
 		if gen != t.openGen {
 			return nil
@@ -544,11 +544,23 @@ func (o *openTemplate) missing() []string {
 
 // renderArgs is the `fft template render` command line for o's values.
 func (o *openTemplate) renderArgs() []string {
-	args := []string{"template", "render", o.row.Name}
+	var sets []string
 	for _, f := range o.params {
-		args = append(args, f.setArgs()...)
+		sets = append(sets, f.setArgs()...)
 	}
-	return args
+	return templateArgs("render", o.row.Name, sets...)
+}
+
+// templateArgs is `fft template <verb> <name> <flags>`. fft refuses a template
+// name that starts with a dash, but the name comes out of a directory listing,
+// so one that slipped past that rule goes last, after "--", where it is only a
+// name and never a flag.
+func templateArgs(verb, name string, flags ...string) []string {
+	args := []string{"template", verb}
+	if strings.HasPrefix(name, "-") {
+		return append(append(append(args, flags...), "--"), name)
+	}
+	return append(append(args, name), flags...)
 }
 
 // ready says whether o can be rendered, and opens its parameters when it cannot.
@@ -679,10 +691,11 @@ func (t *templatesScreen) handOver(op Operation, body []byte, project string, as
 // remove runs `template remove`, which asks its own question before it deletes
 // anything.
 func (t *templatesScreen) remove(row templateRow) tea.Cmd {
-	args := []string{"template", "remove", row.Name}
+	var flags []string
 	if row.Scope == projectScope {
-		args = append(args, "--local")
+		flags = append(flags, "--local")
 	}
+	args := templateArgs("remove", row.Name, flags...)
 	t.say("Removing " + row.Name + "…")
 	var id RunID
 	id, cmd := t.s.launch(action{inv: Invocation{Args: args}, display: commandLine(args)}, func(r Result) tea.Cmd {
@@ -746,7 +759,7 @@ func (t *templatesScreen) equivalent() shellCommand {
 	o := t.open
 	if o == nil {
 		if row, ok := t.selected(); ok {
-			return commandLine([]string{"template", "show", row.Name})
+			return commandLine(templateArgs("show", row.Name))
 		}
 		return commandLine([]string{"template", "list"})
 	}

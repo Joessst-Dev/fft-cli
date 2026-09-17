@@ -694,12 +694,7 @@ func (r *requestScreen) askTemplateName() {
 // saveTemplate runs `template save` with the body on stdin. The command refuses a
 // name that is taken, and the form says so.
 func (r *requestScreen) saveTemplate(name string, op Operation, body []byte, project string) tea.Cmd {
-	args := []string{"template", "save", "--operation", op.ID, "--file", "-"}
-	if strings.HasPrefix(name, "-") {
-		// A name is only a name once the flags have ended.
-		args = append(args, "--")
-	}
-	args = append(args, name)
+	args := templateArgs("save", name, "--operation", op.ID, "--file", "-")
 	a := action{inv: Invocation{Args: args, Stdin: body, Project: project}, display: r.s.displayFor(args, project)}
 	gen := r.gen
 	r.say("Saving the template " + name + "…")
