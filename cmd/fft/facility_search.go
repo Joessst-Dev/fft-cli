@@ -73,7 +73,7 @@ func newFacilitySearchCmd(deps *Deps) *cobra.Command {
 	f := cmd.Flags()
 	f.StringVar(&file, "file", "", "JSON file holding the search payload ('-' for stdin)")
 	f.BoolVar(&example, "example", false, "Print a sample request body and exit")
-	page.register(f, "facilities", client.DefaultSize)
+	page.registerWithFile(f, "facilities", client.DefaultSize)
 
 	cmd.MarkFlagsMutuallyExclusive("file", "example")
 
