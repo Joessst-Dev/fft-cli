@@ -111,7 +111,8 @@ In CI, skip projects entirely — see [CI and headless use](./ci.md).
 
 `fft` records every command that sent an API operation — typed in a shell or sent from
 `fft tui` — so that `fft history list` can show what ran and `fft history top` which
-operations you reach for most:
+operations you reach for most. The requests `fft tui` makes on its own, such as reading
+your roles, are not recorded:
 
 ```sh
 fft history list --limit 10     # the latest requests, every project

@@ -11,7 +11,8 @@ Show and clear the requests fft has sent.
 
 fft keeps a local record of every command that addressed an API operation, typed
 in a shell or sent from fft tui: when it ran, against which project, which
-operation, the flags it was given, the HTTP status and the exit code. Request and
+operation, the flags it was given, the HTTP status and the exit code. The requests
+fft tui makes on its own, such as reading your roles, are not recorded. Request and
 response bodies are never recorded, and so are no inline --data bodies, header
 values, template values or credential-shaped flags: those are kept as &lt;redacted>.
 
