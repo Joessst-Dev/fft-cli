@@ -176,7 +176,9 @@ func (l Log) compact() error {
 	var size int64
 	for keep > 0 {
 		next := int64(len(lines[keep-1])) + 1
-		if size+next > budget {
+		// The newest entry is kept whatever its size: dropping it would leave the
+		// file empty, and the run just recorded with nothing to show for it.
+		if size+next > budget && keep < len(lines) {
 			break
 		}
 		size += next

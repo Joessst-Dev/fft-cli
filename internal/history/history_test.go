@@ -139,6 +139,19 @@ var _ = Describe("a history log", func() {
 			}
 		})
 
+		It("keeps the newest entry even when it alone is over the budget", func() {
+			for i := range 3 {
+				Expect(log.Append(entry("prod", fmt.Sprintf("op%03d", i), i))).To(Succeed())
+			}
+			big := entry("prod", "opBig", 3)
+			big.Command = "fft api " + strings.Repeat("x", int(log.MaxBytes)*9/10)
+			Expect(log.Append(big)).To(Succeed())
+
+			entries, err := log.Read()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(entries).To(HaveExactElements(HaveField("OperationID", "opBig")))
+		})
+
 		It("drops a corrupt line while it is at it", func() {
 			Expect(os.MkdirAll(filepath.Dir(log.Path), 0o700)).To(Succeed())
 			Expect(os.WriteFile(log.Path, []byte("garbage\n"), 0o600)).To(Succeed())
