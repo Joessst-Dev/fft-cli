@@ -643,6 +643,44 @@ var _ = Describe("the Templates screen", func() {
 		})
 	})
 
+	Describe("a name that resolves to another template than the list showed", func() {
+		// The list was read while only the user template existed; show resolves the
+		// name once a project template of the same name has appeared.
+		const movedDoc = `{"schemaVersion":1,"operationId":"addPickJob","body":{"a":1},
+		  "resolved":{"name":"rush","scope":"project","path":"/work/.fft/templates/rush.json"}}`
+		const shadowWarning = "Warning: rush resolved to the project template /work/.fft/templates/rush.json, " +
+			"which shadows a user template of the same name.\n"
+
+		BeforeEach(func() {
+			h.showTemplates(oneTemplate)
+			h.press("enter")
+			h.finish(Result{Stdout: []byte(movedDoc), Stderr: []byte(shadowWarning)}, "template", "show", "rush")
+		})
+
+		It("is headed with the scope and the file show read, and says what show warned", func() {
+			view := h.view()
+			Expect(view).To(ContainSubstring("rush  project scope"))
+			Expect(view).To(ContainSubstring("/work/.fft/templates/rush.json"))
+			Expect(view).NotTo(ContainSubstring("/home/u/.local/share/fft/templates/rush.json"))
+			Expect(view).To(ContainSubstring("The list showed the user template rush; the name now reads the project one"))
+			Expect(view).To(ContainSubstring("which shadows a user template of the same name."))
+		})
+
+		It("names the template show read in the question before its body is sent", func() {
+			h.press("S")
+			h.finish(ok(`{"a":1}`), pinned(movedDoc, "template", "render", "rush")...)
+
+			Expect(h.view()).To(ContainSubstring("The body, 7 bytes, from the project template rush"))
+			Expect(h.view()).To(ContainSubstring("(/work/.fft/templates/rush.json):"))
+			Expect(h.view()).NotTo(ContainSubstring("from the user template"))
+		})
+
+		It("removes the template show read", func() {
+			h.press("x")
+			Expect(h.last().Args).To(Equal([]string{"template", "remove", "rush", "--local"}))
+		})
+	})
+
 	Describe("the body a question about sending a template shows", func() {
 		projectList := strings.NewReplacer(`"scope":"user"`, `"scope":"project"`,
 			`/home/u/.local/share/fft/templates/rush.json`, `/work/.fft/templates/rush.json`).Replace(oneTemplate)

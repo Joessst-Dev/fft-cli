@@ -49,6 +49,10 @@ type templateDoc struct {
 	// Body is kept as the bytes fft printed, so that a 64-bit id is shown as the
 	// digits it is.
 	Body json.RawMessage `json:"body"`
+
+	// Resolved is the template show read, which is not necessarily the one the
+	// list showed under that name.
+	Resolved templateRow `json:"resolved"`
 }
 
 // templateParam is one parameter a template declares.
@@ -100,12 +104,17 @@ func (f *paramField) setArgs() []string {
 
 // openTemplate is the template whose detail is on display.
 type openTemplate struct {
+	// row is the list's entry the template was opened from. Its name is what every
+	// command names; which file that reaches is what show says, in doc.
 	row templateRow
 
 	// doc is what `template show` said, nil while it is being read, and digest
-	// identifies it for `template render --if-digest`.
+	// identifies it for `template render --if-digest`. notes are what show warned
+	// about on stderr: a project template hiding a user one, a template saved
+	// under another project.
 	doc    *templateDoc
 	digest string
+	notes  []string
 	params []*paramField
 
 	// form is set while the parameters have the cursor, editing while one of them
@@ -140,6 +149,20 @@ func (o *openTemplate) setRendered(body []byte) {
 	default:
 		o.lines = nil
 	}
+}
+
+// source is the template on display: the one show read, once it has, and the
+// list's entry until then.
+func (o *openTemplate) source() templateRow {
+	if o.doc == nil || o.doc.Resolved.Scope == "" {
+		return o.row
+	}
+	return o.doc.Resolved
+}
+
+// moved says the name resolved to another template than the list showed.
+func (o *openTemplate) moved() bool {
+	return o.source().key() != o.row.key()
 }
 
 func (o *openTemplate) selected() *paramField {
@@ -393,7 +416,7 @@ func (t *templatesScreen) detailKey(o *openTemplate, msg tea.KeyPressMsg) tea.Cm
 	case key.Matches(msg, t.keys.send):
 		return t.renderAndSend(o)
 	case key.Matches(msg, t.keys.remove):
-		return t.remove(o.row)
+		return t.remove(o.source())
 	}
 	return nil
 }
@@ -476,7 +499,7 @@ func (t *templatesScreen) keep(o *openTemplate) {
 			kept[f.name] = v
 		}
 	}
-	t.values[o.row.key()] = kept
+	t.values[o.source().key()] = kept
 }
 
 // close goes back to the list. What was being said about the template goes with
@@ -514,6 +537,7 @@ func (t *templatesScreen) openRow(row templateRow, next func(*openTemplate) tea.
 			return nil
 		}
 		o.digest = digest
+		o.notes = stderrTail(r.Stderr, 4)
 		t.setDoc(o, &doc)
 		// Only onto the screen that asked, while nothing else has the keyboard: a
 		// form or a dialog that opened over another screen would take its keys.
@@ -545,7 +569,7 @@ func (t *templatesScreen) setDoc(o *openTemplate, doc *templateDoc) {
 	}
 	slices.Sort(names)
 
-	kept := t.values[o.row.key()]
+	kept := t.values[o.source().key()]
 	var body any
 	dec := json.NewDecoder(bytes.NewReader(doc.Body))
 	dec.UseNumber()
@@ -742,7 +766,7 @@ func (t *templatesScreen) renderAndSend(o *openTemplate) tea.Cmd {
 			return nil
 		}
 		command := t.pipeline(o, op, project)
-		from := templateSource(o.row)
+		from := templateSource(o.source())
 		send := func() tea.Cmd { return t.handOver(op, body, from, project, asked, command, false) }
 		if len(warnings) == 0 {
 			return send()
@@ -814,7 +838,7 @@ func (t *templatesScreen) remove(row templateRow) tea.Cmd {
 			t.fail("removing "+row.Name, r)
 			return t.reload()
 		}
-		if t.open != nil && t.open.row.key() == row.key() {
+		if t.open != nil && (t.open.row.key() == row.key() || t.open.source().key() == row.key()) {
 			t.close()
 		}
 		t.say("Removed " + row.Name + ".")
@@ -967,14 +991,23 @@ func (t *templatesScreen) table(width int) []string {
 func (t *templatesScreen) detail(o *openTemplate, width, height int) string {
 	st := t.st
 	clean := output.SanitizeCell
+	src := o.source()
 	head := []string{
-		clip(st.title.Render(clean(o.row.Name))+"  "+st.dim.Render(clean(o.row.Scope)+" scope"), width),
-		st.dim.Render(clip(clean(o.row.Path), width)),
+		clip(st.title.Render(clean(src.Name))+"  "+st.dim.Render(clean(src.Scope)+" scope"), width),
+		st.dim.Render(clip(clean(src.Path), width)),
 	}
 	doc := o.doc
 	if doc == nil {
 		head = append(head, "", st.dim.Render("Reading the template…"))
 		return strings.Join(append(head, t.footer(width)...), "\n")
+	}
+	if o.moved() {
+		head = append(head, wrap(st.warnText.Render(clean(fmt.Sprintf(
+			"The list showed the %s template %s; the name now reads the %s one above.",
+			o.row.Scope, o.row.Name, src.Scope))), width))
+	}
+	for _, note := range o.notes {
+		head = append(head, wrap(st.warnText.Render(note), width))
 	}
 
 	if doc.Description != "" {
