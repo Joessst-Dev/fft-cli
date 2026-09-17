@@ -262,6 +262,17 @@ var _ = Describe("the Templates screen", func() {
 			Expect(h.m.templates.open.params[0].value()).To(Equal("a@b.de"))
 		})
 
+		It("are not handed to a template of the same name in the other scope", func() {
+			h.openTemplate(rushDoc)
+			h.press("p")
+			h.fillParam(0, "a@b.de")
+			h.press("esc", "esc", "ctrl+r")
+			h.finish(ok(strings.Replace(oneTemplate, `"scope":"user"`, `"scope":"project"`, 1)), "template", "list")
+
+			h.openTemplate(rushDoc)
+			Expect(h.m.templates.open.params[0].value()).To(BeEmpty())
+		})
+
 		It("puts back what a value held when esc leaves it, and clears it with x", func() {
 			h.openTemplate(rushDoc)
 			h.press("p")
@@ -617,6 +628,16 @@ var _ = Describe("the Templates screen", func() {
 			h.showTemplates(strings.Replace(oneTemplate, `"scope":"user"`, `"scope":"project"`, 1))
 			h.press("x")
 			h.lookup("template", "remove", "rush", "--local")
+		})
+
+		It("leaves a template of the same name in the other scope open", func() {
+			h.showTemplates(`[{"name":"rush","scope":"project"},{"name":"b","scope":"user"}]`)
+			h.openTemplate(rushDoc)
+			h.m.templates.remove(templateRow{Name: "rush", Scope: "user"})
+			h.finish(ok(`{"template":"rush"}`), "template", "remove", "rush")
+
+			Expect(h.m.templates.open).NotTo(BeNil())
+			Expect(h.m.templates.open.row.Scope).To(Equal("project"))
 		})
 
 		It("says why nothing was removed", func() {

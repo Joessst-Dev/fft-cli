@@ -27,6 +27,12 @@ type templateRow struct {
 	Path        string   `json:"path"`
 }
 
+// templateKey is what tells two templates apart: a name is only unique within
+// its scope.
+type templateKey struct{ scope, name string }
+
+func (r templateRow) key() templateKey { return templateKey{scope: r.Scope, name: r.Name} }
+
 // projectScope is the scope `fft template list` reports for ./.fft/templates, the
 // one `--local` reaches.
 const projectScope = "project"
@@ -186,9 +192,10 @@ type templatesScreen struct {
 
 	open *openTemplate
 
-	// values are what the user gave each template's parameters, by template name,
-	// kept for as long as the session runs.
-	values map[string]map[string]string
+	// values are what the user gave each template's parameters, kept for as long
+	// as the session runs. A project and a user template may share a name, and a
+	// value typed for one is not the other's.
+	values map[templateKey]map[string]string
 
 	dialog  dialog
 	notice  string
@@ -199,7 +206,7 @@ func newTemplatesScreen(s *session, st styles, nav navigator, cat Catalog) *temp
 	t := &templatesScreen{
 		s: s, st: st, nav: nav, keys: newTemplateKeys(),
 		ops:    make(map[string]Operation),
-		values: make(map[string]map[string]string),
+		values: make(map[templateKey]map[string]string),
 	}
 	if cat != nil {
 		for _, g := range cat.Groups() {
@@ -436,7 +443,7 @@ func (t *templatesScreen) keep(o *openTemplate) {
 			kept[f.name] = v
 		}
 	}
-	t.values[o.row.Name] = kept
+	t.values[o.row.key()] = kept
 }
 
 // close goes back to the list. What was being said about the template goes with
@@ -487,7 +494,7 @@ func (t *templatesScreen) setDoc(o *openTemplate, doc *templateDoc) {
 	}
 	slices.Sort(names)
 
-	kept := t.values[o.row.Name]
+	kept := t.values[o.row.key()]
 	o.params = make([]*paramField, 0, len(names))
 	for _, name := range names {
 		spec := doc.Params[name]
@@ -682,11 +689,11 @@ func (t *templatesScreen) remove(row templateRow) tea.Cmd {
 			t.fail("removing "+row.Name, r)
 			return t.reload()
 		}
-		if t.open != nil && t.open.row.Name == row.Name {
+		if t.open != nil && t.open.row.key() == row.key() {
 			t.close()
 		}
 		t.say("Removed " + row.Name + ".")
-		delete(t.values, row.Name)
+		delete(t.values, row.key())
 		return t.reload()
 	})
 }
