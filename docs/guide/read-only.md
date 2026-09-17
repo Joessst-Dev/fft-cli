@@ -33,6 +33,16 @@ where it is how you take the mark off a project you are reconfiguring — and th
 project **without** saying `--read-only=false` leaves the mark on; rotating a password
 does not silently disarm prod.
 
+## In the interactive UI
+
+[`fft tui`](./tui.md) goes through the same gate, because every request it sends is an
+fft command. On a read-only project, or in a session started with `fft tui --read-only`
+or under `FFT_READ_ONLY`, every write on the Operations screen shows a 🔒 and the status bar
+shows `RO`. Sending one anyway is refused with exit `10`, and nothing is sent. The session's
+`--read-only` holds for every request in the session: a request cannot loosen it, and
+allowing writes to a project from the Projects screen does not either. To allow writes
+again, restart `fft tui` without the flag.
+
 ## Reads keep working, and that includes the searches
 
 The fulfillmenttools API runs its cursor searches over `POST` — `POST

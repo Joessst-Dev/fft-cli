@@ -110,7 +110,7 @@ In CI, skip projects entirely — see [CI and headless use](./ci.md).
 ## Request history
 
 `fft` records every command that sent an API operation — typed in a shell or sent from
-`fft tui` — so that `fft history list` can show what ran and `fft history top` which
+[`fft tui`](./tui.md) — so that `fft history list` can show what ran and `fft history top` which
 operations you reach for most. The requests `fft tui` makes on its own, such as reading
 your roles, are not recorded:
 
@@ -138,7 +138,9 @@ Recording is switched off:
     noHistory: true
   ```
 
-- by `FFT_HISTORY=off`, everywhere — the environment wins over the config file;
+- by `FFT_HISTORY=off`, everywhere — the environment wins over the config file. `on`,
+  `true`, `yes`, `1` and `t` switch recording on; any other value switches it off, so a
+  typo does not quietly start recording;
 - in headless mode (`FFT_BASE_URL` and friends), unless `FFT_HISTORY=on` asks for it: a CI
   job's history is a file on a runner nobody reads.
 
