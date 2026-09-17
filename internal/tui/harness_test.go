@@ -350,6 +350,10 @@ var (
 	opListFacilities = Operation{
 		ID: "searchFacility", Summary: "Search facilities", Method: "POST", Path: "/api/facilities/search",
 		Tag: "Facilities (Core)", Permissions: []string{"FACILITY_READ"},
+		// The real searchFacility is sent by two hand-written commands, and by fft api,
+		// and opens fft facility search by default. The fake's default is deliberately
+		// the other one: most specs need a read whose form has flags of every kind and
+		// no body, and the search's required body would put an editor in each of them.
 		Command: Command{
 			Path: []string{"facility", "list"}, Curated: true, Table: true,
 			Flags: []Flag{
@@ -358,7 +362,6 @@ var (
 				{Name: "all", Kind: FlagBool, Usage: "Every page"},
 			},
 		},
-		// The real searchFacility is sent by two hand-written commands, and by fft api.
 		Also: []Command{
 			{
 				Path: []string{"facility", "search"}, Curated: true, Table: true, Body: true, BodyRequired: true,

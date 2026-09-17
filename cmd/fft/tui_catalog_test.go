@@ -218,8 +218,9 @@ var _ = Describe("the TUI's catalog of operations", func() {
 			"searchStock":            {"fft stock list", "fft stock search"},
 		}
 
-		// formFor is the form of op the UI reopens a request sent through the command
-		// at path in, the way recall looks for it.
+		// formFor is the form of op whose command is at path. It restates the match
+		// the UI's own lookup makes, which is unexported: a form found here is one the
+		// catalog offers, and the tui package's specs show that recall picks it.
 		formFor := func(id string, path []string) (tui.Command, bool) {
 			op := ops[id]
 			for _, cmd := range append([]tui.Command{op.Command}, op.Also...) {
