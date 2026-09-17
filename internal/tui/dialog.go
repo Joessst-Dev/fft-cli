@@ -136,6 +136,9 @@ type typeNameDialog struct {
 	// what is what name is, as the dialog calls it: "name", unless set.
 	what string
 
+	// notes are lines the question is about, each drawn on its own.
+	notes []string
+
 	command  shellCommand
 	input    textinput.Model
 	mismatch bool
@@ -183,6 +186,9 @@ func (d *typeNameDialog) update(msg tea.Msg) (bool, tea.Cmd) {
 func (d *typeNameDialog) view(st styles, width, height int) string {
 	// A project name comes from the config file, which may have been edited by hand.
 	top := []string{st.title.Render(output.SanitizeCell(d.question))}
+	for _, note := range d.notes {
+		top = append(top, st.warnText.Render(output.SanitizeCell(note)))
+	}
 	if d.detail != "" {
 		top = append(top, output.SanitizeCell(d.detail))
 	}

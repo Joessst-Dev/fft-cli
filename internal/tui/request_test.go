@@ -756,7 +756,8 @@ var _ = Describe("the Request screen", func() {
 
 			h.press("e")
 			Expect(os.ReadFile(h.editor.path())).To(BeEquivalentTo(`{"name":"x"}`))
-			Expect(h.r.commandLines()).To(HaveLen(3), "the example was asked for more than once")
+			Expect(strings.Count(strings.Join(h.r.commandLines(), "\n"), "--example")).To(Equal(1),
+				"the example was asked for more than once")
 		})
 
 		It("ignores the answer once another form has been opened", func() {

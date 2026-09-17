@@ -626,6 +626,7 @@ func (r *requestScreen) send() tea.Cmd {
 
 	r.dialog = armed(&confirmDialog{
 		question: fmt.Sprintf("Send %s to %s?", firstNonEmpty(r.op.Summary, r.op.ID), r.s.named()),
+		notes:    r.s.lackingNotes(*r.op, project),
 		detail:   writeDetail(*r.op, r.s.readOnly()),
 		command:  r.display(project),
 		onYes:    func() tea.Cmd { return r.start(project) },
@@ -874,6 +875,9 @@ func (r *requestScreen) view(width, height int) string {
 			access = lockBadge + " This project or session is read-only: fft will refuse this write."
 		}
 		lines = append(lines, st.warnText.Render(access))
+	}
+	if note := lackingNote(r.s.lacking(op)); note != "" {
+		lines = append(lines, wrap(st.warnText.Render(note), width))
 	}
 	lines = append(lines, "")
 

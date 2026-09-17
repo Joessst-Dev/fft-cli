@@ -249,6 +249,7 @@ func (p *responseScreen) rerun(e *runEntry) tea.Cmd {
 	}
 	p.dialog = armed(&confirmDialog{
 		question: fmt.Sprintf("Send %s to %s again?", firstNonEmpty(req.op.Summary, req.op.ID), project),
+		notes:    p.s.lackingNotes(req.op, again.project),
 		detail:   writeDetail(req.op, false),
 		command:  a.display,
 		onYes:    send,

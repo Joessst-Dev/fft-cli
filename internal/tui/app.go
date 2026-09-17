@@ -24,6 +24,8 @@ const (
 	tabRequest
 	tabResponse
 	tabTemplates
+	tabHistory
+	tabRoles
 )
 
 // screen is one tab of the UI.
@@ -84,6 +86,7 @@ type app struct {
 	request    *requestScreen
 	response   *responseScreen
 	templates  *templatesScreen
+	roles      *rolesScreen
 
 	panel     *runsPanel
 	showPanel bool
@@ -115,6 +118,8 @@ func newApp(opts Options) *app {
 	m.request = newRequestScreen(s, st, m)
 	m.response = newResponseScreen(s, st, opts.Catalog, m)
 	m.templates = newTemplatesScreen(s, st, m, opts.Catalog)
+	m.roles = newRolesScreen(s, st, opts.Catalog)
+	m.operations.hint = m.hint
 	m.screens = []screen{
 		m.projects,
 		m.operations,
@@ -122,9 +127,15 @@ func newApp(opts Options) *app {
 		m.response,
 		m.templates,
 		comingSoon{"History", "recent and most used requests"},
-		comingSoon{"Roles", "your roles and what they permit"},
+		m.roles,
 	}
 	return m
+}
+
+// hint is what the Operations list shows beside op: what the user appears to lack
+// for it.
+func (m *app) hint(op Operation) opHint {
+	return opHint{lacking: m.s.lacking(op)}
 }
 
 var _ navigator = (*app)(nil)
@@ -222,10 +233,22 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.s.asking().dialog.arm()
 	}
 	m.operations.resize(m.width, m.bodyHeight(m.help.View(m.bindings())))
-	if m.screens[m.current] == m.templates {
-		cmds = append(cmds, m.templates.shown())
-	}
+	cmds = append(cmds, m.readShown())
 	return m, tea.Batch(cmds...)
+}
+
+// readShown reads what the screen on display shows and is not current: the
+// templates, the user's roles. Each is read when somebody looks, not when the UI
+// starts, and read again once it may have changed — after a project switch for the
+// roles.
+func (m *app) readShown() tea.Cmd {
+	switch m.screens[m.current] {
+	case m.templates:
+		return m.templates.shown()
+	case m.operations, m.request, m.roles:
+		return m.roles.want()
+	}
+	return nil
 }
 
 // bodyHeight is how many rows the screen gets under the tabs and above the status

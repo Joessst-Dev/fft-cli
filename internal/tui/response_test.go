@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -257,12 +258,14 @@ var _ = Describe("the Response screen", func() {
 			})
 
 			It("proposes a name, and writes the body privately", func() {
+				// Named after the run, whose number counts every command the UI started.
+				name := fmt.Sprintf("response-%d.json", h.m.response.id)
 				h.press("s")
-				Expect(h.view()).To(ContainSubstring("> response-3.json"))
+				Expect(h.view()).To(ContainSubstring("> " + name))
 				h.press("enter")
 
-				Expect(h.wrote("response-3.json")).To(Equal(`[{"id":"f-1","name":"Berlin\u001b[2J"}]`))
-				info, err := os.Stat(filepath.Join(h.tmp, "response-3.json"))
+				Expect(h.wrote(name)).To(Equal(`[{"id":"f-1","name":"Berlin\u001b[2J"}]`))
+				info, err := os.Stat(filepath.Join(h.tmp, name))
 				Expect(err).NotTo(HaveOccurred())
 				Expect(info.Mode().Perm()).To(Equal(os.FileMode(0o600)))
 				Expect(h.view()).To(ContainSubstring("Saved 39 bytes to "))

@@ -82,6 +82,10 @@ type session struct {
 	// status is the current project's credential state, nil until known.
 	status *authStatus
 
+	// grants is what the user's roles permit, nil until whoami has said. It
+	// applies only while its project is the current one.
+	grants *grants
+
 	runs *runList
 	done map[RunID]func(Result) tea.Cmd
 
@@ -206,7 +210,30 @@ func (s *session) selectProject(name string) {
 	s.project = name
 	s.switches++
 	s.status = nil
+	s.grants = nil
 	s.runner.SetProject(name)
+}
+
+// lacking is the permissions op wants that the user appears to hold none of on the
+// current project, nil when they hold one or when nobody can tell. See [grants].
+func (s *session) lacking(op Operation) []string {
+	if s.grants == nil || s.grants.project != s.currentProject() {
+		return nil
+	}
+	return s.grants.lacking(op)
+}
+
+// lackingNotes is what a question about sending op to project adds when the user
+// appears to lack its permission there: nothing, or the one note. project is ""
+// for the current one; the roles of any other are not known.
+func (s *session) lackingNotes(op Operation, project string) []string {
+	if project != "" && project != s.currentProject() {
+		return nil
+	}
+	if note := lackingNote(s.lacking(op)); note != "" {
+		return []string{note}
+	}
+	return nil
 }
 
 // scoped is the display of a command that acts on the current project: the
@@ -326,14 +353,27 @@ func (s *session) ask(ev RunEvent) {
 		preview = newBodyPreview(sent.inv.Stdin, sent.from)
 	}
 
+	var notes []string
+	if sent := s.requests[ev.ID]; sent != nil {
+		notes = s.lackingNotes(sent.op, sent.project)
+	}
+
 	var d dialog
 	if word := ev.Question.Confirm; word != "" {
 		typed := newTypeNameDialog(s.st, ev.Question.Text, detail+" It cannot be undone.", word, e.display, yes)
 		typed.what = "word"
 		typed.preview = preview
+		typed.notes = notes
 		d = typed
 	} else {
-		d = &confirmDialog{question: ev.Question.Text, detail: detail, command: e.display, onYes: yes, preview: preview}
+		d = &confirmDialog{
+			question: ev.Question.Text,
+			notes:    notes,
+			detail:   detail,
+			command:  e.display,
+			onYes:    yes,
+			preview:  preview,
+		}
 	}
 	// Armed only once it is in front of the user, which may be well after it came.
 	q.dialog = armed(d, s.now, false)

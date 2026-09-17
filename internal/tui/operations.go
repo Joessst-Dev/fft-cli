@@ -24,9 +24,9 @@ const (
 
 // opHint is what the list knows about an operation beyond the API's description of
 // it: how often this project has sent it, and which permissions the user appears
-// to lack for it. Both come from the request history and the user's roles, which a
-// later release reads; until then every hint is the zero value, and the list
-// draws neither.
+// to lack for it. The permissions come from the user's roles, and the uses from
+// the request history, which a later release reads; while either is unknown its
+// part of the hint is the zero value, and the list draws nothing for it.
 type opHint struct {
 	uses    int
 	lacking []string
