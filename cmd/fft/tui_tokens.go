@@ -1,8 +1,6 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/binary"
 	"sync"
 
 	"github.com/Joessst-Dev/fft-cli/internal/auth"
@@ -48,19 +46,14 @@ type tokenBuild struct {
 
 // tokenKey identifies a project by everything its token source is built from, so
 // that a project edited outside the session — by `fft project add --force` in
-// another shell — does not get the token of the account it was before.
-type tokenKey [sha256.Size]byte
+// another shell — does not get the token of the account it was before. The fields
+// themselves are the key, so two projects share a source only when they are equal.
+type tokenKey struct {
+	name, baseURL, email, firebaseAPIKey string
+}
 
 func tokenKeyOf(p config.Project) tokenKey {
-	h := sha256.New()
-	for _, part := range []string{p.Name, p.BaseURL, p.Email, p.FirebaseAPIKey} {
-		// Length-prefixed, so that no two different projects hash the same fields.
-		h.Write(binary.LittleEndian.AppendUint64(nil, uint64(len(part))))
-		h.Write([]byte(part))
-	}
-	var k tokenKey
-	h.Sum(k[:0])
-	return k
+	return tokenKey{name: p.Name, baseURL: p.BaseURL, email: p.Email, firebaseAPIKey: p.FirebaseAPIKey}
 }
 
 // source returns the session's token source for p, building it with build the
