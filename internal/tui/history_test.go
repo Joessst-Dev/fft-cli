@@ -375,6 +375,13 @@ var _ = Describe("the History screen", func() {
 			Expect(h.view()).NotTo(ContainSubstring("whose flags this form does not have"))
 		})
 
+		It("opens the fft api form for an operation id fft api was given with spaces around it", func() {
+			reopen(entry(1, "staging", "searchFacility", "fft api", " searchFacility\t", "--param=x=1"))
+
+			Expect(h.m.request.args()).To(Equal([]string{"api", "searchFacility", "--param", "x=1"}))
+			Expect(h.view()).NotTo(ContainSubstring("whose flags this form does not have"))
+		})
+
 		It("opens an empty form for a request sent through a command this fft does not have", func() {
 			reopen(entry(1, "staging", "searchFacility", "fft facility find", "--size=5"))
 

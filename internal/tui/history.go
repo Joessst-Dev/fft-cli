@@ -571,9 +571,10 @@ func recall(op Operation, e history.Entry) (Operation, recalled) {
 	}
 	positional, flagArgs := history.SplitArgs(e.Args)
 	// `fft api <operationId>` names its operation as its first argument, which is
-	// part of the command the form stands for.
+	// part of the command the form stands for. fft api trims that id before looking
+	// it up, so a record keeps it as it was typed, spaces and all.
 	if slices.Equal(path, []string{"api"}) && len(positional) > 0 {
-		path = append(path, positional[0])
+		path = append(path, strings.TrimSpace(positional[0]))
 		positional = positional[1:]
 	}
 	op, rc.kept = op.sentThrough(path)
