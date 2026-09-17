@@ -688,6 +688,74 @@ var _ = Describe("fft template", func() {
 			Expect(copied).To(MatchJSON(c.out()))
 		})
 
+		// show -o json names the file it read, an absolute path under the user's home.
+		// A project template is meant to be committed, so that path must never end up
+		// in one, whatever the shown template looks like.
+		Describe("piped back into a project template", func() {
+			// shown is what show -o json prints for a template file holding doc.
+			shown := func(name, doc string) string {
+				GinkgoHelper()
+				Expect(os.WriteFile(userPath(name), []byte(doc), 0o600)).To(Succeed())
+				Expect(c.run("template", "show", name, "-o", "json")).To(Equal(exitcode.OK), c.errOut())
+				Expect(c.out()).To(ContainSubstring(`"resolved"`))
+				return c.out()
+			}
+
+			saveLocal := func(doc string) int {
+				c.stdin.Reset()
+				c.stdin.WriteString(doc)
+				return c.run("template", "save", "copy", "--local", "--file", "-")
+			}
+
+			projectTemplates := func() []string {
+				GinkgoHelper()
+				files, err := filepath.Glob(filepath.Join(".fft", "templates", "*"))
+				Expect(err).NotTo(HaveOccurred())
+				return files
+			}
+
+			It("keeps the template, not the envelope show wraps it in", func() {
+				Expect(saveLocal(shown("rush", readFile(userPath("rush"))))).To(Equal(exitcode.OK), c.errOut())
+
+				saved := readFile(filepath.Join(".fft", "templates", "copy.json"))
+				Expect(saved).NotTo(ContainSubstring(`"resolved"`))
+				Expect(saved).NotTo(ContainSubstring(dataDir))
+			})
+
+			It("refuses one whose body is not a JSON object, rather than save the envelope as the body", func() {
+				doc := shown("batch", `{"schemaVersion":1,"body":[{"facilityRef":"BER-01"}]}`)
+
+				Expect(saveLocal(doc)).To(Equal(exitcode.Usage))
+				Expect(c.errOut()).To(ContainSubstring("fft template show"))
+				Expect(c.errOut()).To(ContainSubstring("not a JSON object"))
+				Expect(projectTemplates()).To(BeEmpty())
+			})
+
+			// show refuses to print such a template, so this envelope is written by hand.
+			It("refuses one whose body is null", func() {
+				doc := `{"schemaVersion":1,"body":null,` +
+					`"resolved":{"name":"empty","scope":"user","path":"/home/someone/.local/share/fft/templates/empty.json"}}`
+
+				Expect(saveLocal(doc)).To(Equal(exitcode.Usage))
+				Expect(projectTemplates()).To(BeEmpty())
+			})
+
+			It("refuses one of a schema version this fft does not know, rather than save the envelope", func() {
+				doc := strings.Replace(shown("rush", readFile(userPath("rush"))),
+					`"schemaVersion": 1`, `"schemaVersion": 99`, 1)
+				Expect(doc).To(ContainSubstring(`"schemaVersion": 99`))
+
+				Expect(saveLocal(doc)).To(Equal(exitcode.Usage))
+				Expect(c.errOut()).To(ContainSubstring("schema version 99"))
+				Expect(projectTemplates()).To(BeEmpty())
+			})
+
+			It("still saves a body that only has a schemaVersion of its own", func() {
+				Expect(saveLocal(`{"schemaVersion":"2026-01","payload":{"a":1}}`)).To(Equal(exitcode.OK), c.errOut())
+				Expect(readFile(filepath.Join(".fft", "templates", "copy.json"))).To(ContainSubstring(`"payload"`))
+			})
+		})
+
 		It("lets an explicit --param/--require replace the params carried in from show, rather than merge", func() {
 			Expect(c.run("template", "show", "rush", "-o", "json")).To(Equal(exitcode.OK))
 			shown := c.out()

@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -110,7 +111,10 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			body, envelope := unwrapShownTemplate(body)
+			body, envelope, err := unwrapShownTemplate(body)
+			if err != nil {
+				return err
+			}
 			if description == "" {
 				description = envelope.Description
 			}
@@ -362,21 +366,35 @@ func declaredParams(body entityDoc, params, required []string) (map[string]templ
 // flag, because a template file carries nothing that says "I was printed by
 // show": schemaVersion plus a body is what any template file looks like, on
 // disk or piped from show alike, and a real fulfillmenttools request body has
-// no plausible reason to declare a top-level "schemaVersion" of its own.
+// no plausible reason to declare both top-level keys of its own.
+//
+// It is an envelope whatever the two keys hold. One this fft cannot unwrap — a
+// schema version it does not know, a body that is not an object — is refused
+// rather than saved whole: the whole of show's document includes "resolved",
+// the absolute path of the file it read, which has no business in a template
+// meant to be committed.
 //
 // The caller decides what to do with the returned envelope: an explicit flag
 // (--description, --param, --require) still wins over what was carried in.
-func unwrapShownTemplate(body entityDoc) (entityDoc, template.Template) {
-	sv, ok := body["schemaVersion"].(json.Number)
-	if !ok {
-		return body, template.Template{}
+func unwrapShownTemplate(body entityDoc) (entityDoc, template.Template, error) {
+	sv, hasVersion := body["schemaVersion"]
+	rawInner, hasBody := body["body"]
+	if !hasVersion || !hasBody {
+		return body, template.Template{}, nil
 	}
-	if n, err := sv.Int64(); err != nil || n <= 0 || n > template.Version {
-		return body, template.Template{}
+
+	version, isNumber := sv.(json.Number)
+	n, err := version.Int64()
+	if !isNumber || err != nil || n <= 0 || n > template.Version {
+		return nil, template.Template{}, exitcode.UsageError{Err: fmt.Errorf(
+			"the input is a template of schema version %v, as 'fft template show' prints it, "+
+				"and this fft reads versions 1 to %d: a newer fft may save it", sv, template.Version)}
 	}
-	inner, ok := body["body"].(map[string]any)
+	inner, ok := rawInner.(map[string]any)
 	if !ok {
-		return body, template.Template{}
+		return nil, template.Template{}, exitcode.UsageError{Err: errors.New(
+			"the input is a template as 'fft template show' prints it, and its body is not a JSON object: " +
+				"fft template save only saves an object body")}
 	}
 
 	// Re-decoded with UseNumber, the same way template.Decode reads a template
@@ -389,7 +407,7 @@ func unwrapShownTemplate(body entityDoc) (entityDoc, template.Template) {
 		dec.UseNumber()
 		_ = dec.Decode(&envelope) // best effort: inner is authoritative for the body regardless
 	}
-	return inner, envelope
+	return inner, envelope, nil
 }
 
 // credentialLikePaths lists the dotted paths in body whose key looks like it
