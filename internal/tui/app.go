@@ -23,6 +23,7 @@ const (
 	tabOperations
 	tabRequest
 	tabResponse
+	tabTemplates
 )
 
 // screen is one tab of the UI.
@@ -82,6 +83,7 @@ type app struct {
 	operations *operationsScreen
 	request    *requestScreen
 	response   *responseScreen
+	templates  *templatesScreen
 
 	panel     *runsPanel
 	showPanel bool
@@ -112,12 +114,13 @@ func newApp(opts Options) *app {
 	m.operations = newOperationsScreen(s, st, m, opts.Catalog)
 	m.request = newRequestScreen(s, st, m)
 	m.response = newResponseScreen(s, st, opts.Catalog, m)
+	m.templates = newTemplatesScreen(s, st, m, opts.Catalog)
 	m.screens = []screen{
 		m.projects,
 		m.operations,
 		m.request,
 		m.response,
-		comingSoon{"Templates", "saved request bodies, rendered and sent"},
+		m.templates,
 		comingSoon{"History", "recent and most used requests"},
 		comingSoon{"Roles", "your roles and what they permit"},
 	}
@@ -140,6 +143,15 @@ func (m *app) openRequest(op Operation) tea.Cmd {
 func (m *app) openRequestScreen() tea.Cmd {
 	m.current = tabRequest
 	return nil
+}
+
+func (m *app) sendBody(op Operation, body []byte) tea.Cmd {
+	m.current = tabRequest
+	return m.request.sendBody(op, body)
+}
+
+func (m *app) templatesChanged() {
+	m.templates.changed()
 }
 
 func (m *app) openResponse(id RunID) {
@@ -206,6 +218,9 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.s.asking().dialog.arm()
 	}
 	m.operations.resize(m.width, m.bodyHeight(m.help.View(m.bindings())))
+	if m.screens[m.current] == m.templates {
+		cmds = append(cmds, m.templates.shown())
+	}
 	return m, tea.Batch(cmds...)
 }
 

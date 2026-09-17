@@ -66,6 +66,7 @@ type requestKeys struct {
 	toggle key.Binding
 	editor key.Binding
 	send   key.Binding
+	save   key.Binding
 	clear  key.Binding
 	back   key.Binding
 
@@ -84,6 +85,7 @@ func newRequestKeys() requestKeys {
 		toggle: key.NewBinding(key.WithKeys("space"), key.WithHelp("space", "on/off/unset")),
 		editor: key.NewBinding(key.WithKeys("e"), key.WithHelp("e", "edit body")),
 		send:   key.NewBinding(key.WithKeys("s", "ctrl+s"), key.WithHelp("s", "send")),
+		save:   key.NewBinding(key.WithKeys("t"), key.WithHelp("t", "save as template")),
 		clear:  key.NewBinding(key.WithKeys("x"), key.WithHelp("x", "clear")),
 		back:   key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", "operations")),
 
@@ -244,6 +246,8 @@ func (r *requestScreen) update(msg tea.Msg) tea.Cmd {
 		return r.editBody()
 	case key.Matches(keyMsg, r.keys.send):
 		return r.send()
+	case key.Matches(keyMsg, r.keys.save):
+		r.askTemplateName()
 	case key.Matches(keyMsg, r.keys.back):
 		return r.nav.openOperations()
 	}
@@ -644,6 +648,78 @@ func (r *requestScreen) start(project string) tea.Cmd {
 	return r.s.sendRequest(r.nav, a, sent)
 }
 
+// sendBody opens a form for op holding body, and sends it unless the command needs
+// more than the body, in which case the form waits for the rest.
+func (r *requestScreen) sendBody(op Operation, body []byte) tea.Cmd {
+	r.open(op)
+	r.body = bytes.Clone(body)
+	if problems := r.validate(); len(problems) > 0 {
+		r.say("The body is in the form. Fill in what the command still needs, then press s to send it.")
+		r.problems = problems
+		return nil
+	}
+	return r.send()
+}
+
+// askTemplateName asks what to call the template the form's body is saved as.
+func (r *requestScreen) askTemplateName() {
+	switch {
+	case !r.op.Command.Body:
+		r.say(fmt.Sprintf("fft %s takes no request body, so there is nothing to save as a template.",
+			strings.Join(r.op.Command.Path, " ")))
+		return
+	case r.busy:
+		r.say("The editor has the body: finish there first.")
+		return
+	case r.body == nil:
+		r.say("There is no body to save yet: press e to write one.")
+		return
+	case !json.Valid(r.body):
+		r.problems = []string{"the body is not valid JSON: press e to fix it"}
+		return
+	}
+
+	// Taken now: what is saved is the body the user was looking at when they asked,
+	// and the project the form sends to is the one the template is recorded under.
+	body := bytes.Clone(r.body)
+	op := *r.op
+	project := r.s.target()
+	r.dialog = newInputDialog(r.st, "Save this request's body as a template named:",
+		"Only the body is kept, in your own templates, not the repository's. "+
+			"The form's arguments and flags are not part of a template.",
+		op.ID,
+		func(name string) tea.Cmd { return r.saveTemplate(strings.TrimSpace(name), op, body, project) })
+}
+
+// saveTemplate runs `template save` with the body on stdin. The command refuses a
+// name that is taken, and the form says so.
+func (r *requestScreen) saveTemplate(name string, op Operation, body []byte, project string) tea.Cmd {
+	args := []string{"template", "save", "--operation", op.ID, "--file", "-"}
+	if strings.HasPrefix(name, "-") {
+		// A name is only a name once the flags have ended.
+		args = append(args, "--")
+	}
+	args = append(args, name)
+	a := action{inv: Invocation{Args: args, Stdin: body, Project: project}, display: r.s.displayFor(args, project)}
+	gen := r.gen
+	r.say("Saving the template " + name + "…")
+	return r.s.start(a, func(res Result) tea.Cmd {
+		if res.ExitCode == exitcode.OK {
+			r.nav.templatesChanged()
+		}
+		if gen != r.gen {
+			return nil
+		}
+		if res.ExitCode != exitcode.OK {
+			r.notice = ""
+			r.failure = &failure{what: "saving the template " + name, result: res}
+			return nil
+		}
+		r.say("Saved the body as the template " + name + ". The Templates screen (5) renders and sends it.")
+		return nil
+	})
+}
+
 // sendRequest starts a request and shows its response, whatever becomes of it.
 func (s *session) sendRequest(nav navigator, a action, sent *sentRequest) tea.Cmd {
 	id, cmd := s.launch(a, func(Result) tea.Cmd { return nil })
@@ -671,7 +747,7 @@ func (r *requestScreen) bindings() []key.Binding {
 	}
 	keys = append(keys, k.clear)
 	if r.op.Command.Body {
-		keys = append(keys, k.editor)
+		keys = append(keys, k.editor, k.save)
 	}
 	return append(keys, k.send, k.back)
 }

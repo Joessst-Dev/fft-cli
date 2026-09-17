@@ -49,6 +49,13 @@ type navigator interface {
 	// openResponse shows the Response screen with run id.
 	openResponse(id RunID)
 
+	// sendBody shows the Request screen with a form for op holding body, and sends
+	// it as the form would once nothing more is needed.
+	sendBody(op Operation, body []byte) tea.Cmd
+
+	// templatesChanged says a template was saved or removed.
+	templatesChanged()
+
 	// showing reports whether scr is the screen on display.
 	showing(scr screen) bool
 }

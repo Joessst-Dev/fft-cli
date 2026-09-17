@@ -74,9 +74,14 @@ func (a *armedDialog) update(msg tea.Msg) (bool, tea.Cmd) {
 // only y goes ahead.
 type confirmDialog struct {
 	question string
-	detail   string
-	command  shellCommand
-	onYes    func() tea.Cmd
+
+	// notes are lines the question is about, each drawn on its own: the warnings a
+	// command printed, say.
+	notes []string
+
+	detail  string
+	command shellCommand
+	onYes   func() tea.Cmd
 }
 
 func (d *confirmDialog) update(msg tea.Msg) (bool, tea.Cmd) {
@@ -94,6 +99,9 @@ func (d *confirmDialog) update(msg tea.Msg) (bool, tea.Cmd) {
 
 func (d *confirmDialog) view(st styles, width int) string {
 	lines := []string{st.title.Render(output.SanitizeCell(d.question))}
+	for _, note := range d.notes {
+		lines = append(lines, st.warnText.Render(output.SanitizeCell(note)))
+	}
 	if d.detail != "" {
 		lines = append(lines, output.SanitizeCell(d.detail))
 	}

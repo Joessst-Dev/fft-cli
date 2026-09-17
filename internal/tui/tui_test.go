@@ -150,6 +150,9 @@ var _ = Describe("the UI", func() {
 
 			h.press("5")
 			Expect(h.view()).To(ContainSubstring("[5 Templates]"))
+
+			h.press("6")
+			Expect(h.view()).To(ContainSubstring("[6 History]"))
 			Expect(h.view()).To(ContainSubstring("Coming soon"))
 
 			h.press("7")
