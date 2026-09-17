@@ -147,6 +147,79 @@ var _ = Describe("the Roles screen", func() {
 		Expect(h.m.hint(opDeleteFacility).lacking).To(BeEmpty())
 	})
 
+	Describe("after a failed read", func() {
+		BeforeEach(func() {
+			h.press("7")
+			h.finish(failed(exitcode.Auth, "Error: sign-in failed: INVALID_PASSWORD"), "auth", "whoami")
+			Expect(whoamiRuns()).To(Equal(1))
+		})
+
+		It("reads them again, in the background, once the credentials check out", func() {
+			h.press("1", "ctrl+r")
+			h.finish(ok(twoProjects), "project", "list")
+			h.finish(ok(validToken), "auth", "status")
+			h.press("7")
+
+			Expect(whoamiRuns()).To(Equal(2))
+			id := h.lookup("auth", "whoami")
+			Expect(h.r.invocation(id).Background).To(BeTrue())
+			h.whoamiFor("staging", readOnlyRoles)
+			Expect(h.m.hint(opDeleteFacility).lacking).NotTo(BeEmpty())
+		})
+
+		It("reads them again once the token was refreshed", func() {
+			h.press("1", "R")
+			h.finish(ok(""), "auth", "refresh")
+			h.finish(ok(validToken), "auth", "status")
+			h.press("7")
+
+			Expect(whoamiRuns()).To(Equal(2))
+		})
+
+		It("does not read them again while the credentials still fail", func() {
+			h.press("1", "ctrl+r")
+			h.finish(ok(twoProjects), "project", "list")
+			h.finish(failed(exitcode.Auth, "Error: no credentials"), "auth", "status")
+			h.press("7")
+
+			Expect(whoamiRuns()).To(Equal(1))
+			Expect(h.view()).To(ContainSubstring("Press r to try again."))
+		})
+
+		It("does not read them again for another project's credentials", func() {
+			h.press("1", "ctrl+r")
+			h.finish(ok(twoProjects), "project", "list")
+			h.finish(ok(`{"project":"prod","store":"keyring","signIn":"password","token":"valid"}`), "auth", "status")
+			h.press("7")
+
+			Expect(whoamiRuns()).To(Equal(1))
+		})
+
+		It("reads them only once, however often the credentials check out meanwhile", func() {
+			h.press("1", "ctrl+r")
+			h.finish(ok(twoProjects), "project", "list")
+			h.finish(ok(validToken), "auth", "status")
+			h.press("7")
+			h.press("1", "ctrl+r")
+			h.finish(ok(twoProjects), "project", "list")
+			h.finish(ok(validToken), "auth", "status")
+			h.press("7")
+
+			Expect(whoamiRuns()).To(Equal(2), "the second read is still on its way")
+		})
+	})
+
+	It("does not read them again after a read that succeeded, when the credentials check out", func() {
+		h.press("7")
+		h.whoamiFor("staging", readOnlyRoles)
+		h.press("1", "ctrl+r")
+		h.finish(ok(twoProjects), "project", "list")
+		h.finish(ok(validToken), "auth", "status")
+		h.press("7")
+
+		Expect(whoamiRuns()).To(Equal(1))
+	})
+
 	It("says there is no project rather than failing", func() {
 		h.press("7")
 		h.finish(failed(exitcode.Config, "Error: no active project"), "auth", "whoami")

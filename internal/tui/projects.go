@@ -272,6 +272,7 @@ func (p *projectsScreen) refreshStatus(startup bool) tea.Cmd {
 			return nil
 		}
 		p.s.status = &st
+		p.s.signIns++
 		if startup && !p.warmed && needsSignIn(&st) {
 			return p.warmUp()
 		}

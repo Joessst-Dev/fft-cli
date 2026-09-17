@@ -86,6 +86,11 @@ type session struct {
 	// applies only while its project is the current one.
 	grants *grants
 
+	// signIns counts the times the current project's credential state was read
+	// successfully — at startup, after a sign-in or a token refresh, on a reload. A
+	// read that failed for want of credentials may succeed after one.
+	signIns uint64
+
 	runs *runList
 	done map[RunID]func(Result) tea.Cmd
 

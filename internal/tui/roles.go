@@ -65,6 +65,10 @@ type rolesScreen struct {
 	gen       uint64
 	loading   bool
 
+	// signIns is the session's count of credential checks when the roles were
+	// last asked for. A read that failed is tried again once it has moved.
+	signIns uint64
+
 	// shown is the scope what is on display was read for, and project the project
 	// whoami answered for; me and missing are nil until a read has succeeded.
 	shown   scope
@@ -93,10 +97,17 @@ func (r *rolesScreen) focused() bool { return false }
 // already. It is called while a screen that uses them is on display, so the
 // request is only made once somebody looks.
 func (r *rolesScreen) want() tea.Cmd {
-	if r.requested && r.asked == r.s.scope() {
+	if r.requested && r.asked == r.s.scope() && !r.retry() {
 		return nil
 	}
 	return r.load(true)
+}
+
+// retry reports whether the last read, which failed, may succeed now: the
+// credentials it lacked have checked out since. Nobody has to press r for the
+// greying to come back after a sign-in that works.
+func (r *rolesScreen) retry() bool {
+	return !r.loading && r.failure != nil && r.shown == r.s.scope() && r.signIns != r.s.signIns
 }
 
 // load reads the roles. background is a read nobody asked for, which the request
@@ -106,6 +117,7 @@ func (r *rolesScreen) want() tea.Cmd {
 func (r *rolesScreen) load(background bool) tea.Cmd {
 	asked := r.s.scope()
 	r.asked, r.requested, r.loading = asked, true, true
+	r.signIns = r.s.signIns
 	r.gen++
 	gen := r.gen
 
