@@ -279,6 +279,21 @@ var _ = Describe("request history", func() {
 			Expect(c.run("facility", "list")).To(Equal(exitcode.OK), c.errOut())
 			Expect(recorded(log)).To(ConsistOf(HaveField("OperationID", "searchFacility")))
 		})
+
+		It("lists the environment's own requests, and not a configured project's", func() {
+			c.setenv(config.EnvHistory, "on")
+			Expect(log.Append(history.Entry{V: history.Version, Project: "prod", OperationID: "getFacility"})).To(Succeed())
+			Expect(c.run("facility", "list")).To(Equal(exitcode.OK), c.errOut())
+			c.stdout.Reset()
+
+			Expect(c.run("history", "list", "-o", "json")).To(Equal(exitcode.OK), c.errOut())
+			var got []history.Entry
+			Expect(json.Unmarshal(c.stdout.Bytes(), &got)).To(Succeed(), c.out())
+			Expect(got).To(ConsistOf(And(
+				HaveField("Project", config.EphemeralName),
+				HaveField("OperationID", "searchFacility"),
+			)))
+		})
 	})
 
 	// Recording is a side effect nobody asked this command for. Whether it happens,
@@ -360,8 +375,19 @@ var _ = Describe("fft history", func() {
 			)
 		})
 
-		It("prints every project's requests as recorded, newest first", func() {
+		It("prints the current project's requests as recorded, newest first", func() {
 			Expect(c.run("history", "list", "-o", "json")).To(Equal(exitcode.OK), c.errOut())
+
+			var got []history.Entry
+			Expect(json.Unmarshal(c.stdout.Bytes(), &got)).To(Succeed(), c.out())
+			Expect(got).To(Equal([]history.Entry{
+				at("prod", "searchFacility", 3),
+				at("prod", "getFacility", 1),
+			}))
+		})
+
+		It("prints every project's requests with --all-projects", func() {
+			Expect(c.run("history", "list", "--all-projects", "-o", "json")).To(Equal(exitcode.OK), c.errOut())
 
 			var got []history.Entry
 			Expect(json.Unmarshal(c.stdout.Bytes(), &got)).To(Succeed(), c.out())
@@ -376,7 +402,7 @@ var _ = Describe("fft history", func() {
 			Expect(c.run("history", "list")).To(Equal(exitcode.OK), c.errOut())
 
 			lines := strings.Split(strings.TrimSpace(c.out()), "\n")
-			Expect(lines).To(HaveLen(4))
+			Expect(lines).To(HaveLen(3))
 			Expect(lines[0]).To(MatchRegexp(`^WHEN\s+PROJECT\s+OPERATION\s+STATUS\s+EXIT\s+TOOK\s+COMMAND$`))
 			Expect(lines[1]).To(MatchRegexp(`prod\s+searchFacility\s+200\s+0\s+42ms\s+fft api searchFacility$`))
 		})
@@ -395,6 +421,17 @@ var _ = Describe("fft history", func() {
 			var got []history.Entry
 			Expect(json.Unmarshal(c.stdout.Bytes(), &got)).To(Succeed())
 			Expect(got).To(ConsistOf(HaveField("OperationID", "addPickJob")))
+		})
+
+		It("asks for a project when there is no current one", func() {
+			cfg, err := c.deps.Config.Load()
+			Expect(err).NotTo(HaveOccurred())
+			cfg.ActiveProject = ""
+			Expect(c.deps.Config.Save(cfg)).To(Succeed())
+
+			Expect(c.run("history", "list")).To(Equal(exitcode.Config))
+			Expect(c.errOut()).To(ContainSubstring("--all-projects"))
+			Expect(c.out()).To(BeEmpty())
 		})
 
 		It("refuses a negative --limit", func() {

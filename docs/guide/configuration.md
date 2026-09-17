@@ -115,7 +115,8 @@ operations you reach for most. The requests `fft tui` makes on its own, such as 
 your roles, are not recorded:
 
 ```sh
-fft history list --limit 10     # the latest requests, every project
+fft history list --limit 10     # the latest requests in the current project
+fft history list --all-projects # ... and in every project
 fft history top                 # the most used operations in the current project
 fft history top --all-projects -o json
 fft history clear               # asks first; --yes in a script

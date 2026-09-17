@@ -33,8 +33,8 @@ it off everywhere.`
 
 const historyListLong = `List the most recent requests, newest first.
 
-Every project's requests are listed, unless --project (or FFT_PROJECT) names one.
-Under -o json the entries are printed as recorded.`
+The list covers the current project — --project, or the active one — unless
+--all-projects is given. Under -o json the entries are printed as recorded.`
 
 const historyTopLong = `List the operations used most, most used first.
 
@@ -65,7 +65,10 @@ func newHistoryCmd(deps *Deps) *cobra.Command {
 }
 
 func newHistoryListCmd(deps *Deps) *cobra.Command {
-	var limit int
+	var (
+		limit       int
+		allProjects bool
+	)
 
 	cmd := &cobra.Command{
 		Use:     "list",
@@ -78,12 +81,17 @@ func newHistoryListCmd(deps *Deps) *cobra.Command {
 				return exitcode.UsageError{Err: errors.New("--limit cannot be negative")}
 			}
 
+			project, err := historyProject(deps, allProjects)
+			if err != nil {
+				return err
+			}
+
 			entries, err := readHistory(deps)
 			if err != nil {
 				return err
 			}
-			if deps.Project != "" {
-				entries = slices.DeleteFunc(entries, func(e history.Entry) bool { return e.Project != deps.Project })
+			if project != "" {
+				entries = slices.DeleteFunc(entries, func(e history.Entry) bool { return e.Project != project })
 			}
 			slices.Reverse(entries)
 			if limit > 0 && len(entries) > limit {
@@ -97,7 +105,9 @@ func newHistoryListCmd(deps *Deps) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().IntVar(&limit, "limit", 20, "Show at most this many requests (0 for all)")
+	f := cmd.Flags()
+	f.IntVar(&limit, "limit", 20, "Show at most this many requests (0 for all)")
+	f.BoolVar(&allProjects, "all-projects", false, "List every project's requests")
 	return cmd
 }
 
@@ -117,13 +127,9 @@ func newHistoryTopCmd(deps *Deps) *cobra.Command {
 				return exitcode.UsageError{Err: errors.New("--limit cannot be negative")}
 			}
 
-			project := ""
-			if !allProjects {
-				name, err := deps.currentProjectName()
-				if err != nil {
-					return err
-				}
-				project = name
+			project, err := historyProject(deps, allProjects)
+			if err != nil {
+				return err
 			}
 
 			entries, err := readHistory(deps)
@@ -202,6 +208,15 @@ func readHistory(deps *Deps) ([]history.Entry, error) {
 	return log.Read()
 }
 
+// historyProject is the project a history command covers: the current one, or
+// every project ("") when all is set.
+func historyProject(deps *Deps, all bool) (string, error) {
+	if all {
+		return "", nil
+	}
+	return deps.currentProjectName()
+}
+
 // currentProjectName is the name of the project a command would act on, found
 // without reading the keychain: only the name is needed.
 func (d *Deps) currentProjectName() (string, error) {
@@ -216,7 +231,7 @@ func (d *Deps) currentProjectName() (string, error) {
 	if err != nil {
 		if errors.Is(err, config.ErrNoActiveProject) {
 			return "", config.NewError(config.ErrNoActiveProject,
-				"Name one with --project, or pass --all-projects to count every project.")
+				"Name one with --project, or pass --all-projects to cover every project.")
 		}
 		return "", err
 	}

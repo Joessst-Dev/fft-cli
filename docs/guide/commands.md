@@ -259,6 +259,7 @@ fft history top -o json
 fft history top --all-projects --limit 0 -o json
 fft history list --limit 10 -o json
 fft history list --project staging -o json
+fft history list --all-projects -o json
 # only when the user asks; it asks first
 fft history clear
 ```
@@ -285,10 +286,12 @@ fft history clear
   user normally does before suggesting a command. `--all-projects` counts every project,
   each separately; `--limit` (default 10, `0` for all) caps the list. It needs a current
   project unless `--all-projects` is given: exit 3 otherwise.
-- `fft history list -o json` prints the recent requests, newest first, from every project
-  unless `--project` names one; `--limit` defaults to 20, `0` for all. Each entry has `v`
-  (the record's format version), `ts`, `source` (`cli` or `tui`), `project`, `operationId`,
-  `command`, `args`, `status` (left out when no response arrived), `exit` and `durationMs`.
+- `fft history list -o json` prints the recent requests in the current project, newest
+  first; `--all-projects` lists every project's; `--limit` defaults to 20, `0` for all. Like
+  `top`, it needs a current project unless `--all-projects` is given: exit 3 otherwise.
+  Each entry has `v` (the record's format version), `ts`, `source` (`cli` or `tui`),
+  `project`, `operationId`, `command`, `args`, `status` (left out when no response
+  arrived), `exit` and `durationMs`.
 - Neither holds a request body, and inline `--data`, header values, `--set` values and
   credential-shaped flags appear as `<redacted>`. History is off in headless mode unless
   `FFT_HISTORY=on`, so in CI both usually print `[]`; when nothing is being recorded, stderr

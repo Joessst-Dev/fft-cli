@@ -9,8 +9,8 @@ List the most recent requests
 
 List the most recent requests, newest first.
 
-Every project's requests are listed, unless --project (or FFT_PROJECT) names one.
-Under -o json the entries are printed as recorded.
+The list covers the current project — --project, or the active one — unless
+--all-projects is given. Under -o json the entries are printed as recorded.
 
 ## Usage
 
@@ -21,7 +21,8 @@ fft history list [flags]
 ## Flags
 
 ```
-      --limit int   Show at most this many requests (0 for all) (default 20)
+      --all-projects   List every project's requests
+      --limit int      Show at most this many requests (0 for all) (default 20)
 ```
 
 ## See also
