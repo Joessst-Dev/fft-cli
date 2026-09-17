@@ -389,6 +389,21 @@ func (p *responseScreen) bindings() []key.Binding {
 	return append(keys, k.save, k.back)
 }
 
+func (p *responseScreen) legend() []legendSection {
+	k := p.keys
+	return []legendSection{{entries: []legendEntry{
+		{of: k.nextTab, desc: "switch between JSON, Table and Stderr"},
+		{of: k.scroll, keys: "↑/↓, j/k", desc: "scroll"},
+		{keys: "h/l", desc: "scroll sideways"},
+		{keys: "pgup/pgdn, b/f", desc: "scroll a page"},
+		{keys: "u/d", desc: "scroll half a page"},
+		{of: k.rerun, desc: "send the same request again"},
+		{of: k.save, desc: "save the response body to a file"},
+		{of: k.cancel, desc: "cancel the request while it runs"},
+		{of: k.back, desc: "back to Request"},
+	}}}
+}
+
 func (p *responseScreen) equivalent() shellCommand {
 	switch e := p.entry(); {
 	case p.dialog != nil:

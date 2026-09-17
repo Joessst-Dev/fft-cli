@@ -186,6 +186,13 @@ func (r *rolesScreen) bindings() []key.Binding {
 	return []key.Binding{r.keys.up, r.keys.refresh}
 }
 
+func (r *rolesScreen) legend() []legendSection {
+	return []legendSection{{entries: []legendEntry{
+		{of: r.keys.up, desc: "scroll"},
+		{of: r.keys.refresh, desc: "read your roles again (fft auth whoami)"},
+	}}}
+}
+
 func (r *rolesScreen) equivalent() shellCommand {
 	return r.s.scoped("auth", "whoami").display
 }

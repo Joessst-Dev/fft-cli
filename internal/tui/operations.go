@@ -257,6 +257,29 @@ func (o *operationsScreen) bindings() []key.Binding {
 	}
 }
 
+func (o *operationsScreen) legend() []legendSection {
+	k := o.keys
+	return []legendSection{
+		{entries: []legendEntry{
+			{of: k.up, desc: "select an operation"},
+			{keys: "←/→, pgup/pgdn", desc: "previous or next page"},
+			{keys: "g/G, home/end", desc: "first or last operation"},
+			{of: k.open, desc: "open its request form"},
+			{of: k.describe, desc: "describe it: path, access, permissions, body, flags"},
+			{of: k.filter, desc: "search by operation id, summary or command"},
+			{of: k.clear, desc: "clear the search you kept"},
+		}},
+		{title: "While searching", compact: true, entries: []legendEntry{
+			{of: k.accept, keys: "enter/↑/↓", desc: "keep the search"},
+			{of: k.cancel, desc: "drop it"},
+		}},
+		{title: "In the description", compact: true, entries: []legendEntry{
+			{of: k.open, desc: "open the request form"},
+			{of: k.back, desc: "back to the list"},
+		}},
+	}
+}
+
 func (o *operationsScreen) equivalent() shellCommand {
 	op, ok := o.selected()
 	if o.describing != nil {

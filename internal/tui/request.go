@@ -875,6 +875,36 @@ func (r *requestScreen) bindings() []key.Binding {
 	return append(keys, k.send, k.back)
 }
 
+func (r *requestScreen) legend() []legendSection {
+	k := r.keys
+	main := legendSection{entries: []legendEntry{
+		{of: k.up, desc: "select a field"},
+		{of: k.edit, desc: "edit the field, or cycle an on/off flag"},
+		{of: k.toggle, keys: "space", desc: "cycle an on/off flag (on, off, unset)"},
+		{of: k.clear, desc: "clear the field"},
+		{of: k.editor, desc: "edit the body in $VISUAL or $EDITOR"},
+		{of: k.save, desc: "save the body as a template"},
+		{of: k.send, keys: "s, ctrl+s", desc: "send the request"},
+		{of: k.back, desc: "back to Operations"},
+	}}
+	switch {
+	case r.op == nil:
+		main.note = "Choose an operation on Operations (2) first: until then these keys do nothing."
+	case !r.op.Command.Body:
+		main.note = "This operation takes no body, so e and t do nothing here."
+	}
+	return []legendSection{main, {
+		title:   "While typing in a field",
+		compact: true,
+		entries: []legendEntry{
+			{of: k.done, desc: "done"},
+			{of: k.next, keys: "tab/shift+tab", desc: "next/previous field"},
+			{of: k.revert, desc: "undo"},
+			{of: k.sendEdit, desc: "send"},
+		},
+	}}
+}
+
 func (r *requestScreen) equivalent() shellCommand {
 	switch {
 	case r.dialog != nil:

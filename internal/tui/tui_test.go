@@ -168,11 +168,11 @@ var _ = Describe("the UI", func() {
 			Expect(h.view()).To(ContainSubstring("[1 Projects]"))
 		})
 
-		It("toggles the full help with ?", func() {
-			Expect(h.view()).NotTo(ContainSubstring("previous"))
+		It("opens the key legend with ?, over the screen", func() {
 			h.press("?")
-			Expect(h.view()).To(ContainSubstring("switch project"))
+			Expect(h.view()).To(ContainSubstring("Keys · Projects"))
 			Expect(h.view()).To(ContainSubstring("running commands"))
+			Expect(h.view()).NotTo(ContainSubstring("No projects"))
 		})
 	})
 
@@ -758,8 +758,8 @@ var _ = Describe("the UI", func() {
 			view := h.view()
 			Expect(view).To(ContainSubstring("Switch to qa now?"))
 			Expect(view).NotTo(ContainSubstring("Commands —"))
-			Expect(view).NotTo(ContainSubstring("copy command"))
-			Expect(view).NotTo(ContainSubstring("running commands"))
+			Expect(view).NotTo(ContainSubstring("y copy"))
+			Expect(view).NotTo(ContainSubstring("i running"))
 
 			h.press("n")
 			Expect(h.view()).To(ContainSubstring("Commands —"), "the panel is back once the question is answered")
@@ -771,8 +771,9 @@ var _ = Describe("the UI", func() {
 
 				view := h.view()
 				Expect(view).To(ContainSubstring(own))
-				Expect(view).NotTo(ContainSubstring("copy command"))
-				Expect(view).NotTo(ContainSubstring("switch screen"))
+				Expect(view).NotTo(ContainSubstring("y copy"))
+				Expect(view).NotTo(ContainSubstring("1-7/tab screens"))
+				Expect(view).NotTo(ContainSubstring("all keys"), "? does not open the legend here")
 				Expect(view).NotTo(ContainSubstring("$ fft"), "the status bar offers a command to copy")
 			},
 			Entry("a yes/no dialog", func(h *harness) { h.press("r") }, "y yes"),

@@ -31,7 +31,7 @@ var _ = Describe("the Operations screen", func() {
 		h.send(tea.WindowSizeMsg{Width: 100, Height: 30})
 
 		Expect(h.m.operations.list.Width()).To(Equal(100))
-		Expect(h.m.operations.list.Height()).To(Equal(h.m.bodyHeight(h.m.help.View(h.m.bindings())) - 2))
+		Expect(h.m.operations.list.Height()).To(Equal(h.m.bodyHeight(h.m.hintLine()) - 2))
 		Expect(h.m.operations.list.Height()).To(BeNumerically(">", 0))
 	})
 
@@ -117,7 +117,7 @@ var _ = Describe("the Operations screen", func() {
 			h.search("pick")
 
 			Expect(h.view()).To(ContainSubstring("enter done"))
-			Expect(h.view()).NotTo(ContainSubstring("switch screen"))
+			Expect(h.view()).NotTo(ContainSubstring("1-7/tab screens"))
 			Expect(h.view()).NotTo(ContainSubstring("$ fft"))
 		})
 

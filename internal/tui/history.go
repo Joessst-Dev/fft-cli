@@ -380,6 +380,17 @@ func (h *historyScreen) bindings() []key.Binding {
 	return []key.Binding{k.up, k.open, k.toggle, k.clear, k.reload}
 }
 
+func (h *historyScreen) legend() []legendSection {
+	k := h.keys
+	return []legendSection{{entries: []legendEntry{
+		{of: k.up, desc: "select a request"},
+		{of: k.open, desc: "fill in the Request form the way it was sent"},
+		{of: k.toggle, desc: "switch between recent and most used"},
+		{of: k.clear, desc: "clear the history (fft history clear)"},
+		{of: k.reload, desc: "read it again"},
+	}}}
+}
+
 func (h *historyScreen) equivalent() shellCommand {
 	if h.dialog != nil {
 		return h.dialog.equivalent()

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"charm.land/bubbles/v2/help"
 	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
@@ -35,6 +34,10 @@ type screen interface {
 	view(width, height int) string
 	bindings() []key.Binding
 
+	// legend is every key the screen takes, in each of its modes, with what it
+	// does: the hint line shows the keys that work right now, the legend all of them.
+	legend() []legendSection
+
 	// equivalent is the fft command for what the screen's focused action would do.
 	equivalent() shellCommand
 
@@ -51,13 +54,13 @@ type receiver interface {
 }
 
 // app is the root model: the tab bar, the screen underneath it, the in-flight
-// panel, the status bar and the help line.
+// panel, the status bar and the hint line.
 type app struct {
-	s      *session
-	st     styles
-	keys   globalKeys
-	help   help.Model
-	events <-chan RunEvent
+	s          *session
+	st         styles
+	keys       globalKeys
+	legendKeys legendKeys
+	events     <-chan RunEvent
 
 	spin     spinner.Model
 	spinning bool
@@ -79,6 +82,11 @@ type app struct {
 
 	confirmQuit bool
 
+	// legendOpen is set while the key legend is drawn in place of the screen, and
+	// legendScroll is how far down it is scrolled.
+	legendOpen   bool
+	legendScroll int
+
 	// flash is a one-keystroke message in the status bar, such as what y copied.
 	flash string
 }
@@ -87,17 +95,14 @@ func newApp(opts Options) *app {
 	st := newStyles(opts.Color)
 	s := newSession(opts, st)
 
-	h := help.New()
-	h.Styles = st.help
-
 	m := &app{
-		s:      s,
-		st:     st,
-		keys:   newGlobalKeys(),
-		help:   h,
-		events: opts.Runner.Events(),
-		spin:   spinner.New(spinner.WithSpinner(spinner.MiniDot)),
-		panel:  newRunsPanel(s),
+		s:          s,
+		st:         st,
+		keys:       newGlobalKeys(),
+		legendKeys: newLegendKeys(),
+		events:     opts.Runner.Events(),
+		spin:       spinner.New(spinner.WithSpinner(spinner.MiniDot)),
+		panel:      newRunsPanel(s),
 	}
 	m.projects = newProjectsScreen(s, st)
 	m.operations = newOperationsScreen(s, st, m, opts.Catalog)
@@ -170,7 +175,7 @@ func (m *app) openResponse(id RunID) {
 }
 
 func (m *app) showing(scr screen) bool {
-	return m.screens[m.current] == scr && !m.showPanel && !m.confirmQuit
+	return m.screens[m.current] == scr && !m.showPanel && !m.confirmQuit && !m.legendOpen
 }
 
 func (m *app) Init() tea.Cmd {
@@ -182,7 +187,6 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width, m.height = msg.Width, msg.Height
-		m.help.SetWidth(msg.Width)
 	case runEventMsg:
 		if msg.State == RunDone && msg.Result.Recorded {
 			// Recorded before the runner says it is done.
@@ -229,7 +233,7 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.owner() == ownerQuestion {
 		m.s.asking().dialog.arm()
 	}
-	m.operations.resize(m.width, m.bodyHeight(m.help.View(m.bindings())))
+	m.operations.resize(m.width, m.bodyHeight(m.hintLine()))
 	cmds = append(cmds, m.readShown())
 	m.history.sync()
 	return m, tea.Batch(cmds...)
@@ -256,9 +260,15 @@ func (m *app) readShown() tea.Cmd {
 }
 
 // bodyHeight is how many rows the screen gets under the tabs and above the status
-// bar and helpLine: none on a terminal too small for more than those.
-func (m *app) bodyHeight(helpLine string) int {
-	return max(m.height-3-lipgloss.Height(helpLine), 0)
+// bar and hint, which may take several rows: none on a terminal too small for
+// more than those.
+func (m *app) bodyHeight(hint string) int {
+	return max(m.height-3-lipgloss.Height(hint), 0)
+}
+
+// hintLine is the keys that work right now, on as many rows as they need.
+func (m *app) hintLine() string {
+	return hintView(m.st, m.width, m.bindings())
 }
 
 // keyOwner is the part of the UI the next key goes to.
@@ -273,11 +283,13 @@ const (
 	ownerFocused
 	// ownerQuestion is a question a running command asks: its own keys, and ctrl+c.
 	ownerQuestion
+	// ownerLegend is the key legend: its own keys, and quit.
+	ownerLegend
 	// ownerQuit is the question whether to quit.
 	ownerQuit
 )
 
-// owner decides who has the keyboard. The key handling, the body, the help line
+// owner decides who has the keyboard. The key handling, the body, the hint line
 // and the status bar all ask it, so that whatever takes the next key is what is
 // drawn: a question the user cannot see must never be one a keystroke answers.
 //
@@ -289,6 +301,8 @@ func (m *app) owner() keyOwner {
 	switch {
 	case m.confirmQuit:
 		return ownerQuit
+	case m.legendOpen:
+		return ownerLegend
 	case m.screens[m.current].focused():
 		return ownerFocused
 	case m.showPanel:
@@ -323,13 +337,15 @@ func (m *app) key(msg tea.KeyPressMsg) tea.Cmd {
 			return m.quit()
 		}
 		return m.s.answerWith(msg)
+	case ownerLegend:
+		return m.legendKey(msg)
 	}
 
 	switch {
 	case key.Matches(msg, m.keys.quit):
 		return m.quit()
 	case key.Matches(msg, m.keys.help):
-		m.help.ShowAll = !m.help.ShowAll
+		m.legendOpen, m.legendScroll = true, 0
 	case key.Matches(msg, m.keys.runs):
 		m.showPanel = !m.showPanel
 	case key.Matches(msg, m.keys.copy):
@@ -365,6 +381,28 @@ func (m *app) key(msg tea.KeyPressMsg) tea.Cmd {
 	return nil
 }
 
+// legendKey handles a key while the legend is open. It swallows every key it does
+// not know: the legend covers the screen, and a key must not act on what the user
+// cannot see.
+func (m *app) legendKey(msg tea.KeyPressMsg) tea.Cmd {
+	k := m.legendKeys
+	switch {
+	case key.Matches(msg, k.close):
+		m.legendOpen = false
+	case key.Matches(msg, m.keys.quit):
+		return m.quit()
+	case key.Matches(msg, k.up):
+		m.scrollLegend(-1)
+	case key.Matches(msg, k.down):
+		m.scrollLegend(1)
+	case key.Matches(msg, k.pageUp):
+		m.scrollLegend(-max(m.legendHeight()-2, 1))
+	case key.Matches(msg, k.pageDn):
+		m.scrollLegend(max(m.legendHeight()-2, 1))
+	}
+	return nil
+}
+
 // quit leaves at once when nothing is running, and asks first when something is:
 // leaving cancels it, and a write that is cancelled may or may not have landed.
 func (m *app) quit() tea.Cmd {
@@ -376,7 +414,8 @@ func (m *app) quit() tea.Cmd {
 }
 
 // equivalent is the command the part of the UI with the keyboard stands for. A
-// focused dialog or form shows its own, and the quit question stands for none.
+// focused dialog or form shows its own, and the quit question and the legend stand
+// for none: while they are open, y copies nothing.
 func (m *app) equivalent() shellCommand {
 	switch m.owner() {
 	case ownerPanel:
@@ -405,10 +444,11 @@ func (m *app) copyEquivalent() tea.Cmd {
 	return tea.SetClipboard(eq.line)
 }
 
-// bindings is what the help line offers. While a dialog, a form or the quit
+// bindings is what the hint line offers. While a dialog, a form or the quit
 // question has the keyboard, the global keys do nothing, so only its own keys are
-// shown: a help line that offered y to copy under a dialog whose y means yes would
-// be advertising the wrong one.
+// shown: a hint that offered y to copy under a dialog whose y means yes would be
+// advertising the wrong one. For the same reason ? is offered only where it opens
+// the legend, and inside the legend as what closes it.
 func (m *app) bindings() helpKeys {
 	switch m.owner() {
 	case ownerQuit:
@@ -417,6 +457,8 @@ func (m *app) bindings() helpKeys {
 		return helpKeys{local: m.screens[m.current].bindings()}
 	case ownerQuestion:
 		return helpKeys{local: m.s.asking().dialog.bindings()}
+	case ownerLegend:
+		return helpKeys{local: []key.Binding{m.legendKeys.up}, global: []key.Binding{m.keys.quit, m.legendKeys.close}}
 	case ownerPanel:
 		return helpKeys{local: m.panel.bindings(), global: m.keys.bindings()}
 	default:
@@ -427,12 +469,12 @@ func (m *app) bindings() helpKeys {
 func (m *app) View() tea.View {
 	tabs := m.tabBar()
 	status := m.statusBar()
-	helpLine := m.help.View(m.bindings())
+	hint := m.hintLine()
 
-	// Tabs, a blank line, the body, the status bar and the help. On a terminal too
+	// Tabs, a blank line, the body, the status bar and the hint. On a terminal too
 	// small for all of it the body gets nothing, and the frame is cut to the height
 	// below, so that nothing is ever drawn past the last row.
-	bodyHeight := m.bodyHeight(helpLine)
+	bodyHeight := m.bodyHeight(hint)
 
 	owner := m.owner()
 	var body string
@@ -441,6 +483,8 @@ func (m *app) View() tea.View {
 		body = m.quitDialog()
 	case ownerQuestion:
 		body = m.s.asking().dialog.view(m.st, m.width, bodyHeight)
+	case ownerLegend:
+		body = m.legendView(m.legendHeight())
 	default:
 		body = m.screens[m.current].view(m.width, bodyHeight)
 	}
@@ -453,6 +497,10 @@ func (m *app) View() tea.View {
 
 	var content string
 	switch {
+	case m.height > 0 && owner == ownerLegend && m.legendHeight() > bodyHeight:
+		// Too short for the legend beside the chrome: it takes the terminal, and its
+		// title says how to close it.
+		content = fit(body, m.height)
 	case m.height > 0 && owner >= ownerFocused && lipgloss.Height(body) > bodyHeight:
 		// A question that does not fit beside the chrome gets the whole terminal:
 		// the tabs and the help can go, the question the next key answers cannot.
@@ -462,9 +510,9 @@ func (m *app) View() tea.View {
 		if bodyHeight > 0 {
 			parts = append(parts, fit(body, bodyHeight))
 		}
-		content = fit(strings.Join(append(parts, status, helpLine), "\n"), m.height)
+		content = fit(strings.Join(append(parts, status, hint), "\n"), m.height)
 	default:
-		content = strings.Join([]string{tabs, "", body, status, helpLine}, "\n")
+		content = strings.Join([]string{tabs, "", body, status, hint}, "\n")
 	}
 
 	v := tea.NewView(content)

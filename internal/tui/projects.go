@@ -491,6 +491,34 @@ func (p *projectsScreen) bindings() []key.Binding {
 	return []key.Binding{k.up, k.use, k.readOnly, k.remove, k.refresh, k.add, k.reload}
 }
 
+func (p *projectsScreen) legend() []legendSection {
+	k := p.keys
+	main := legendSection{entries: []legendEntry{
+		{of: k.up, desc: "select a project"},
+		{of: k.use, keys: "enter, u", desc: "use it (fft project use)"},
+		{of: k.readOnly, desc: "make it read-only, or allow writes again"},
+		{of: k.remove, desc: "remove it and its stored credentials"},
+		{of: k.refresh, desc: "sign in again now (fft auth refresh)"},
+		{of: k.add, desc: "add a project"},
+		{of: k.reload, desc: "read the list and the credentials again"},
+	}}
+	if p.s.headless {
+		main.note = "Running from the environment: enter, u, r, d and a change nothing here."
+	}
+	f := newFormKeys()
+	return []legendSection{main, {
+		title:   "In the add form",
+		compact: true,
+		entries: []legendEntry{
+			{of: f.next, keys: "tab/↓/enter", desc: "next field"},
+			{of: f.prev, keys: "shift+tab/↑", desc: "previous field"},
+			{of: f.toggle, desc: "switch a toggle"},
+			{of: f.submit, desc: "add the project (so does enter on the last field)"},
+			{of: f.cancel, desc: "cancel"},
+		},
+	}}
+}
+
 func (p *projectsScreen) equivalent() shellCommand {
 	switch {
 	case p.dialog != nil:

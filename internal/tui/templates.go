@@ -882,6 +882,42 @@ func (t *templatesScreen) bindings() []key.Binding {
 	}
 }
 
+func (t *templatesScreen) legend() []legendSection {
+	k := t.keys
+	return []legendSection{
+		{entries: []legendEntry{
+			{of: k.up, desc: "select a template"},
+			{of: k.open, desc: "open it: parameters, body, file"},
+			{of: k.params, desc: "fill in its parameters"},
+			{of: k.render, desc: "render it (fft template render)"},
+			{of: k.send, desc: "render it and send the body"},
+			{of: k.remove, desc: "remove it (fft template remove)"},
+			{of: k.reload, desc: "read the list again"},
+		}},
+		{title: "In an open template", compact: true, entries: []legendEntry{
+			{of: k.scroll, desc: "scroll"},
+			{of: k.params, desc: "parameters"},
+			{of: k.render, desc: "render"},
+			{of: k.send, desc: "render and send"},
+			{of: k.remove, desc: "remove"},
+			{of: k.back, desc: "back to the list"},
+		}},
+		{title: "In the parameter form", compact: true, entries: []legendEntry{
+			{of: k.up, desc: "select"},
+			{of: k.edit, desc: "edit a value"},
+			{of: k.clear, desc: "clear it"},
+			{of: k.render, desc: "render"},
+			{of: k.send, desc: "render and send"},
+			{of: k.leave, desc: "close the form"},
+		}},
+		{title: "While typing a value", compact: true, entries: []legendEntry{
+			{of: k.done, desc: "done"},
+			{of: k.next, keys: "tab/shift+tab", desc: "next/previous"},
+			{of: k.revert, desc: "undo"},
+		}},
+	}
+}
+
 func (t *templatesScreen) equivalent() shellCommand {
 	if t.dialog != nil {
 		return t.dialog.equivalent()

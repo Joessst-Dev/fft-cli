@@ -56,6 +56,16 @@ type formKeys struct {
 	cancel key.Binding
 }
 
+func newFormKeys() formKeys {
+	return formKeys{
+		next:   key.NewBinding(key.WithKeys("tab", "down", "enter"), key.WithHelp("tab/enter", "next field")),
+		prev:   key.NewBinding(key.WithKeys("shift+tab", "up"), key.WithHelp("shift+tab", "previous field")),
+		toggle: key.NewBinding(key.WithKeys("space"), key.WithHelp("space", "toggle")),
+		submit: key.NewBinding(key.WithKeys("ctrl+s"), key.WithHelp("ctrl+s", "add project")),
+		cancel: key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", "cancel")),
+	}
+}
+
 // formEvent is what a key did to the form as a whole.
 type formEvent int
 
@@ -85,16 +95,7 @@ type addForm struct {
 }
 
 func newAddForm(st styles) *addForm {
-	f := &addForm{
-		st: st,
-		keys: formKeys{
-			next:   key.NewBinding(key.WithKeys("tab", "down", "enter"), key.WithHelp("tab/enter", "next field")),
-			prev:   key.NewBinding(key.WithKeys("shift+tab", "up"), key.WithHelp("shift+tab", "previous field")),
-			toggle: key.NewBinding(key.WithKeys("space"), key.WithHelp("space", "toggle")),
-			submit: key.NewBinding(key.WithKeys("ctrl+s"), key.WithHelp("ctrl+s", "add project")),
-			cancel: key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", "cancel")),
-		},
-	}
+	f := &addForm{st: st, keys: newFormKeys()}
 
 	f.fields = make([]*formField, rowCount)
 	text := func(label, placeholder string, kind fieldKind) *formField {

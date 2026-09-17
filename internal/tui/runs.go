@@ -215,6 +215,20 @@ func (p *runsPanel) bindings() []key.Binding {
 	return []key.Binding{p.keys.up, p.keys.open, p.keys.cancel, p.keys.close}
 }
 
+func (p *runsPanel) legend() legendSection {
+	k := p.keys
+	return legendSection{
+		title:   "In the running commands panel (i)",
+		compact: true,
+		entries: []legendEntry{
+			{of: k.up, desc: "select"},
+			{of: k.open, desc: "open its response"},
+			{of: k.cancel, desc: "cancel it"},
+			{of: k.close, keys: "esc/i", desc: "close"},
+		},
+	}
+}
+
 func (p *runsPanel) equivalent() shellCommand {
 	if e := p.selected(); e != nil {
 		return e.display

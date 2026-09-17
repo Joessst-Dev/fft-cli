@@ -35,6 +35,22 @@ var (
 	cancelKey = key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", "cancel"))
 )
 
+// questionLegend is what the keys of a question do. A question has the keyboard
+// while it is open, so the legend, which cannot be opened then, explains them
+// ahead of time.
+func questionLegend() legendSection {
+	return legendSection{
+		title:   "In a question",
+		compact: true,
+		entries: []legendEntry{
+			{of: yesKey, desc: "yes"},
+			{of: noKey, keys: "n/esc/enter", desc: "no"},
+			{of: submitKey, desc: "confirm a typed name or value"},
+			{of: cancelKey, desc: "cancel"},
+		},
+	}
+}
+
 // armDelay is how long a dialog ignores keys once it is in front of the user. A
 // key meant for what was there a moment before — the next letter of a value, a y
 // typed just after ctrl+s sent the form — arrives inside it, and must not answer a
