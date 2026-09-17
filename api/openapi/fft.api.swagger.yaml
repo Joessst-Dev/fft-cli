@@ -12464,6 +12464,18 @@ paths:
             maxLength: 2
             minLength: 2
             type: string
+        - description: Order in which the result should be returned
+          in: query
+          name: orderBy
+          required: false
+          schema:
+            enum:
+              - CREATED_ASC
+              - CREATED_DESC
+              - LAST_MODIFIED_ASC
+              - LAST_MODIFIED_DESC
+            example: LAST_MODIFIED_ASC
+            type: string
       responses:
         '200':
           content:
@@ -32271,6 +32283,17 @@ components:
       description: BulkUpsertSummary
     BulkyGoodsDetails:
       properties:
+        ldmToWeightFactor:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The grams equivalent to 1 loading meter, converting between weight
+            and loading meters.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
         maxGirth:
           description: The maximum girth in millimeters of the packagingUnit.
           type: number
@@ -32285,17 +32308,35 @@ components:
           type: number
         packagingPricingDetails:
           $ref: '#/components/schemas/PackagingPricingDetails'
+        pricingBasis:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitPricingBasis'
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The basis used to determine which quantity of the packagingUnit is
+            chargeable.
+          x-badges:
+            - color: red
+              label: ALPHA
         type:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitType'
           description: The type of the packagingUnit.
-          enum:
-            - PALLET
-            - TWO_MAN_HANDLING
-            - PARCEL
-            - BULKY_GOODS
-          type: string
         volumeBufferInPercent:
           description: The volume buffer in percent for the packagingUnit.
           type: number
+        volumetricWeightFactor:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The volumetric weight factor for the packagingUnit.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
       required:
         - type
         - maxLength
@@ -45893,12 +45934,24 @@ components:
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
+        generalShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionGeneralShipmentRestriction
+          maxItems: 50
+          type: array
         id:
           type: string
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
           maxItems: 500
+          type: array
+        packageTypeSpecificShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionPackageTypeSpecificShipmentRestriction
+          maxItems: 50
           type: array
         packagingUnitsByContexts:
           items:
@@ -45944,6 +45997,8 @@ components:
               MANAGED_FACILITY: >-
                 #/components/schemas/InterFacilityConnectionManagedFacilityTarget
               SUPPLIER: '#/components/schemas/InterFacilityConnectionSupplierTarget'
+        transportDetails:
+          $ref: '#/components/schemas/TransportDetails'
       required:
         - id
         - sourceFacilityRef
@@ -46083,10 +46138,22 @@ components:
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
+        generalShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionGeneralShipmentRestriction
+          maxItems: 50
+          type: array
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
           maxItems: 500
+          type: array
+        packageTypeSpecificShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionPackageTypeSpecificShipmentRestriction
+          maxItems: 50
           type: array
         packagingUnitsByContexts:
           items:
@@ -46110,6 +46177,8 @@ components:
                   #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
           maxItems: 500
           type: array
+        transportDetails:
+          $ref: '#/components/schemas/TransportDetails'
         type:
           $ref: '#/components/schemas/ConnectionType'
       required:
@@ -46153,10 +46222,22 @@ components:
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
+        generalShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionGeneralShipmentRestriction
+          maxItems: 50
+          type: array
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
           maxItems: 500
+          type: array
+        packageTypeSpecificShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionPackageTypeSpecificShipmentRestriction
+          maxItems: 50
           type: array
         packagingUnitsByContexts:
           items:
@@ -46180,6 +46261,8 @@ components:
                   #/components/schemas/InterFacilityConnectionTransferRelativeSurcharge
           maxItems: 500
           type: array
+        transportDetails:
+          $ref: '#/components/schemas/TransportDetails'
         type:
           $ref: '#/components/schemas/ConnectionType'
         version:
@@ -46192,6 +46275,29 @@ components:
         name: InterFacilityConnectionForUpdate
       title: InterFacilityConnectionForUpdate
       description: InterFacilityConnectionForUpdate
+    InterFacilityConnectionGeneralShipmentRestriction:
+      properties:
+        restrictionType:
+          $ref: >-
+            #/components/schemas/InterFacilityConnectionGeneralShipmentRestrictionType
+        value:
+          type: number
+      required:
+        - restrictionType
+        - value
+      type: object
+      title: InterFacilityConnectionGeneralShipmentRestriction
+      description: InterFacilityConnectionGeneralShipmentRestriction
+    InterFacilityConnectionGeneralShipmentRestrictionType:
+      enum:
+        - MAX_WEIGHT_PER_SHIPMENT
+        - MAX_LOADING_METERS_PER_SHIPMENT
+        - MAX_PACKAGING_UNITS_PER_SHIPMENT
+        - MIN_PACKAGING_UNITS_PER_SHIPMENT
+        - MAX_WEIGHT_PER_LOADING_METER
+      type: string
+      title: InterFacilityConnectionGeneralShipmentRestrictionType
+      description: InterFacilityConnectionGeneralShipmentRestrictionType
     InterFacilityConnectionManagedFacilityTarget:
       allOf:
         - $ref: '#/components/schemas/InterFacilityConnectionBaseTarget'
@@ -46211,6 +46317,32 @@ components:
       type: object
       title: InterFacilityConnectionManagedFacilityTarget
       description: InterFacilityConnectionManagedFacilityTarget
+    InterFacilityConnectionPackageTypeSpecificShipmentRestriction:
+      properties:
+        packagingUnitRefs:
+          items:
+            type: string
+          type: array
+        packagingUnitType:
+          $ref: '#/components/schemas/PackagingUnitType'
+        restrictionType:
+          $ref: >-
+            #/components/schemas/InterFacilityConnectionPackageTypeSpecificShipmentRestrictionType
+        value:
+          type: number
+      required:
+        - restrictionType
+        - value
+        - packagingUnitType
+      type: object
+      title: InterFacilityConnectionPackageTypeSpecificShipmentRestriction
+      description: InterFacilityConnectionPackageTypeSpecificShipmentRestriction
+    InterFacilityConnectionPackageTypeSpecificShipmentRestrictionType:
+      enum:
+        - MAX_PACKAGING_UNITS_PER_TYPE
+      type: string
+      title: InterFacilityConnectionPackageTypeSpecificShipmentRestrictionType
+      description: InterFacilityConnectionPackageTypeSpecificShipmentRestrictionType
     InterFacilityConnections:
       additionalProperties: false
       properties:
@@ -46330,10 +46462,22 @@ components:
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
+        generalShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionGeneralShipmentRestriction
+          maxItems: 50
+          type: array
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
           maxItems: 500
+          type: array
+        packageTypeSpecificShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionPackageTypeSpecificShipmentRestriction
+          maxItems: 50
           type: array
         packagingUnitsByContexts:
           items:
@@ -46359,6 +46503,8 @@ components:
           type: array
         target:
           $ref: '#/components/schemas/InterFacilityConnectionCustomerTarget'
+        transportDetails:
+          $ref: '#/components/schemas/TransportDetails'
         type:
           $ref: '#/components/schemas/ConnectionType'
       required:
@@ -46403,10 +46549,22 @@ components:
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
+        generalShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionGeneralShipmentRestriction
+          maxItems: 50
+          type: array
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
           maxItems: 500
+          type: array
+        packageTypeSpecificShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionPackageTypeSpecificShipmentRestriction
+          maxItems: 50
           type: array
         packagingUnitsByContexts:
           items:
@@ -46432,6 +46590,8 @@ components:
           type: array
         target:
           $ref: '#/components/schemas/InterFacilityConnectionCustomerTarget'
+        transportDetails:
+          $ref: '#/components/schemas/TransportDetails'
         type:
           $ref: '#/components/schemas/ConnectionType'
         version:
@@ -46479,10 +46639,22 @@ components:
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
+        generalShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionGeneralShipmentRestriction
+          maxItems: 50
+          type: array
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
           maxItems: 500
+          type: array
+        packageTypeSpecificShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionPackageTypeSpecificShipmentRestriction
+          maxItems: 50
           type: array
         packagingUnitsByContexts:
           items:
@@ -46508,6 +46680,8 @@ components:
           type: array
         target:
           $ref: '#/components/schemas/InterFacilityConnectionManagedFacilityTarget'
+        transportDetails:
+          $ref: '#/components/schemas/TransportDetails'
         type:
           $ref: '#/components/schemas/ConnectionType'
       required:
@@ -46552,10 +46726,22 @@ components:
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
+        generalShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionGeneralShipmentRestriction
+          maxItems: 50
+          type: array
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
           maxItems: 500
+          type: array
+        packageTypeSpecificShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionPackageTypeSpecificShipmentRestriction
+          maxItems: 50
           type: array
         packagingUnitsByContexts:
           items:
@@ -46581,6 +46767,8 @@ components:
           type: array
         target:
           $ref: '#/components/schemas/InterFacilityConnectionManagedFacilityTarget'
+        transportDetails:
+          $ref: '#/components/schemas/TransportDetails'
         type:
           $ref: '#/components/schemas/ConnectionType'
         version:
@@ -46628,10 +46816,22 @@ components:
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
+        generalShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionGeneralShipmentRestriction
+          maxItems: 50
+          type: array
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
           maxItems: 500
+          type: array
+        packageTypeSpecificShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionPackageTypeSpecificShipmentRestriction
+          maxItems: 50
           type: array
         packagingUnitsByContexts:
           items:
@@ -46657,6 +46857,8 @@ components:
           type: array
         target:
           $ref: '#/components/schemas/InterFacilityConnectionSupplierTarget'
+        transportDetails:
+          $ref: '#/components/schemas/TransportDetails'
         type:
           $ref: '#/components/schemas/ConnectionType'
       required:
@@ -46701,10 +46903,22 @@ components:
           type: array
         fallbackTransitTime:
           $ref: '#/components/schemas/CarrierTransitTime'
+        generalShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionGeneralShipmentRestriction
+          maxItems: 50
+          type: array
         nonDeliveryDays:
           items:
             $ref: '#/components/schemas/NonDeliveryDaysPerCountryAndProvince'
           maxItems: 500
+          type: array
+        packageTypeSpecificShipmentRestrictions:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionPackageTypeSpecificShipmentRestriction
+          maxItems: 50
           type: array
         packagingUnitsByContexts:
           items:
@@ -46730,6 +46944,8 @@ components:
           type: array
         target:
           $ref: '#/components/schemas/InterFacilityConnectionSupplierTarget'
+        transportDetails:
+          $ref: '#/components/schemas/TransportDetails'
         type:
           $ref: '#/components/schemas/ConnectionType'
         version:
@@ -51835,6 +52051,71 @@ components:
         name: Location
       title: Location
       description: Location
+    LongGoodsDetails:
+      properties:
+        ldmToWeightFactor:
+          description: >-
+            The grams equivalent to 1 loading meter, converting between weight
+            and loading meters.
+          type: number
+        loadCarrierHeight:
+          description: >-
+            The height in millimeters of the empty load carrier (e.g. pallet or
+            skid) itself.
+          type: number
+        loadCarrierWeight:
+          description: >-
+            The tare weight in grams of the empty load carrier (e.g. pallet or
+            skid) itself.
+          type: number
+        maxGirth:
+          description: The maximum girth in millimeters of the packagingUnit.
+          type: number
+        maxItemQuantity:
+          description: The maximum number of items that can fit in the packagingUnit.
+          type: number
+        maxLength:
+          description: The maximum length in millimeters of the packagingUnit.
+          type: number
+        maxWeight:
+          description: The maximum weight in grams that the packagingUnit can hold.
+          type: number
+        packagingPricingDetails:
+          $ref: '#/components/schemas/PackagingPricingDetails'
+        pricingBasis:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitPricingBasis'
+          description: >-
+            The basis used to determine which quantity of the packagingUnit is
+            chargeable.
+        type:
+          description: The type of the packagingUnit.
+          enum:
+            - PALLET
+            - TWO_MAN_HANDLING
+            - PARCEL
+            - BULKY_GOODS
+            - LONG_GOODS
+          type: string
+        volumeBufferInPercent:
+          description: The volume buffer in percent for the packagingUnit.
+          type: number
+        volumetricWeightFactor:
+          description: The volumetric weight factor for the packagingUnit.
+          type: number
+      required:
+        - type
+        - packagingPricingDetails
+      title: LongGoodsDetails
+      type: object
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />LongGoodsDetails
+      x-badges:
+        - color: red
+          label: ALPHA
     LookupAttributeDefinitions:
       properties: {}
       title: LookupAttributeDefinitions
@@ -59934,6 +60215,7 @@ components:
             - $ref: '#/components/schemas/ParcelDetails'
             - $ref: '#/components/schemas/BulkyGoodsDetails'
             - $ref: '#/components/schemas/TwoManHandlingDetails'
+            - $ref: '#/components/schemas/LongGoodsDetails'
         tenantPackagingUnitId:
           description: The tenant specific identifier for the packagingUnit.
           example: MY_PACKAGINGUNIT_ID
@@ -59960,6 +60242,7 @@ components:
             - $ref: '#/components/schemas/ParcelDetails'
             - $ref: '#/components/schemas/BulkyGoodsDetails'
             - $ref: '#/components/schemas/TwoManHandlingDetails'
+            - $ref: '#/components/schemas/LongGoodsDetails'
         tenantPackagingUnitId:
           description: The tenant specific identifier for the packagingUnit.
           example: MY_PACKAGINGUNIT_ID
@@ -60088,6 +60371,51 @@ components:
       type: object
       title: PackagingUnitDimensions
       description: PackagingUnitDimensions
+    PackagingUnitPricingBasis:
+      properties:
+        pricingQuantities:
+          description: >-
+            The quantities compared, each converted to pricingUnit; the highest
+            one determines the chargeable amount.
+          items:
+            $ref: '#/components/schemas/PackagingUnitPricingQuantity'
+          maxItems: 3
+          type: array
+        pricingUnit:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitPricingUnit'
+          description: The unit the pricing quantities are converted to and priced in.
+      required:
+        - pricingUnit
+        - pricingQuantities
+      title: PackagingUnitPricingBasis
+      type: object
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />PackagingUnitPricingBasis
+      x-badges:
+        - color: red
+          label: ALPHA
+    PackagingUnitPricingQuantity:
+      description: >-
+        The quantities compared, each converted to pricingUnit; the highest one
+        determines the chargeable amount.
+      enum:
+        - ACTUAL_WEIGHT
+        - VOLUMETRIC_WEIGHT
+        - LOADING_METER_EQUIVALENT
+      title: PackagingUnitPricingQuantity
+      type: string
+    PackagingUnitPricingUnit:
+      description: The unit the pricing quantities are converted to and priced in.
+      enum:
+        - GRAM
+        - CUBIC_METER
+        - LOADING_METER
+      title: PackagingUnitPricingUnit
+      type: string
     PackagingUnitsByContext:
       additionalProperties: false
       properties:
@@ -60162,6 +60490,16 @@ components:
         - TARGET_POSTALCODE
         - TARGET_COUNTRY
       title: PackagingUnitSurchargeContextTypes
+      type: string
+    PackagingUnitType:
+      description: The type of the packagingUnit.
+      enum:
+        - PALLET
+        - TWO_MAN_HANDLING
+        - PARCEL
+        - BULKY_GOODS
+        - LONG_GOODS
+      title: PackagingUnitType
       type: string
     PackingConfigurations:
       allOf:
@@ -61985,22 +62323,74 @@ components:
       properties:
         dimensions:
           $ref: '#/components/schemas/PackagingUnitDetailDimensions'
+        ldmToWeightFactor:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The grams equivalent to 1 loading meter, converting between weight
+            and loading meters.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
+        loadCarrierHeight:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The height in millimeters of the empty load carrier (e.g. pallet
+            or skid) itself.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
+        loadCarrierWeight:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The tare weight in grams of the empty load carrier (e.g. pallet or
+            skid) itself.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
         maxItemQuantity:
           description: The maximum number of items that can fit in the packagingUnit.
           type: number
+        maxVolumetricWeight:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The maximum volumetric weight the packagingUnit can hold, as a
+            feasibility cap.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
         maxWeight:
           description: The maximum weight in grams that the packagingUnit can hold.
           type: number
         packagingPricingDetails:
           $ref: '#/components/schemas/PackagingPricingDetails'
+        pricingBasis:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitPricingBasis'
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The basis used to determine which quantity of the packagingUnit is
+            chargeable.
+          x-badges:
+            - color: red
+              label: ALPHA
         type:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitType'
           description: The type of the packagingUnit.
-          enum:
-            - PALLET
-            - TWO_MAN_HANDLING
-            - PARCEL
-            - BULKY_GOODS
-          type: string
         volumeBufferInPercent:
           description: The volume buffer in percent for the packagingUnit.
           type: number
@@ -62184,25 +62574,65 @@ components:
       properties:
         dimensions:
           $ref: '#/components/schemas/PackagingUnitDetailDimensions'
+        ldmToWeightFactor:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The grams equivalent to 1 loading meter, converting between weight
+            and loading meters.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
         maxItemQuantity:
           description: The maximum number of items that can fit in the packagingUnit.
           type: number
+        maxVolumetricWeight:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The maximum volumetric weight the packagingUnit can hold, as a
+            feasibility cap.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
         maxWeight:
           description: The maximum weight in grams that the packagingUnit can hold.
           type: number
         packagingPricingDetails:
           $ref: '#/components/schemas/PackagingPricingDetails'
+        pricingBasis:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitPricingBasis'
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The basis used to determine which quantity of the packagingUnit is
+            chargeable.
+          x-badges:
+            - color: red
+              label: ALPHA
         type:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitType'
           description: The type of the packagingUnit.
-          enum:
-            - PALLET
-            - TWO_MAN_HANDLING
-            - PARCEL
-            - BULKY_GOODS
-          type: string
         volumeBufferInPercent:
           description: The volume buffer in percent for the packagingUnit.
           type: number
+        volumetricWeightFactor:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The volumetric weight factor for the packagingUnit.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
       required:
         - type
         - dimensions
@@ -89635,10 +90065,28 @@ components:
       type: object
       title: TransitTimeConfigurationForUpsert
       description: TransitTimeConfigurationForUpsert
+    TransportDetails:
+      properties:
+        vehicleWidthInMeters:
+          type: number
+      type: object
+      title: TransportDetails
+      description: TransportDetails
     TwoManHandlingDetails:
       properties:
         dimensions:
           $ref: '#/components/schemas/PackagingUnitDetailDimensions'
+        ldmToWeightFactor:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The grams equivalent to 1 loading meter, converting between weight
+            and loading meters.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
         maxItemQuantity:
           description: The maximum number of items that can fit in the packagingUnit.
           type: number
@@ -89650,17 +90098,46 @@ components:
           type: number
         packagingPricingDetails:
           $ref: '#/components/schemas/PackagingPricingDetails'
+        pricingBasis:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitPricingBasis'
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The basis used to determine which quantity of the packagingUnit is
+            chargeable.
+          x-badges:
+            - color: red
+              label: ALPHA
         type:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitType'
           description: The type of the packagingUnit.
-          enum:
-            - PALLET
-            - TWO_MAN_HANDLING
-            - PARCEL
-            - BULKY_GOODS
-          type: string
         volumeBufferInPercent:
           description: The volume buffer in percent for the packagingUnit.
           type: number
+        volumetricWeightFactor:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The volumetric weight factor for the packagingUnit.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
+        weightToVolumeFactor:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The factor converting the weight of the packagingUnit to an
+            equivalent volume.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
       required:
         - type
         - dimensions
