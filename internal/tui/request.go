@@ -131,6 +131,9 @@ type requestScreen struct {
 	notice   string
 	problems []string
 	failure  *failure
+
+	// notes are what a command the form ran said on stderr beside succeeding.
+	notes []string
 }
 
 func newRequestScreen(s *session, st styles, nav navigator) *requestScreen {
@@ -144,7 +147,7 @@ func (r *requestScreen) open(op Operation) {
 	r.fields = nil
 	r.cursor, r.editing = 0, false
 	r.body, r.example, r.busy = nil, nil, false
-	r.dialog, r.notice, r.problems, r.failure = nil, "", nil, nil
+	r.dialog, r.notice, r.problems, r.failure, r.notes = nil, "", nil, nil, nil
 
 	for i := range op.Command.Args {
 		r.fields = append(r.fields, r.newField(&op.Command.Args[i], nil))
@@ -416,7 +419,7 @@ func (r *requestScreen) receive(msg tea.Msg) tea.Cmd {
 }
 
 func (r *requestScreen) say(notice string) {
-	r.notice, r.failure = notice, nil
+	r.notice, r.failure, r.notes = notice, nil, nil
 }
 
 func (r *requestScreen) fail(what string, err error) {
@@ -710,9 +713,30 @@ func (r *requestScreen) saveTemplate(name string, op Operation, body []byte, pro
 			r.failure = &failure{what: "saving the template " + name, result: res}
 			return nil
 		}
-		r.say("Saved the body as the template " + name + ". The Templates screen (5) renders and sends it.")
+		r.say(savedNotice(name, res.Stdout))
+		// What save said besides: a version it dropped from the body, a project
+		// template that hides this one.
+		r.notes = stderrTail(res.Stderr, 4)
 		return nil
 	})
+}
+
+// savedNotice is what the form says once `template save` has saved name, which
+// printed stdout. It promises the Templates screen only for a template that screen
+// will render.
+func savedNotice(name string, stdout []byte) string {
+	var saved struct {
+		ShadowedBy *string `json:"shadowedBy"`
+	}
+	switch err := json.Unmarshal(stdout, &saved); {
+	case err != nil:
+		return "Saved the body as the template " + name + "."
+	case saved.ShadowedBy != nil:
+		return "Saved the body as the template " + name + ", but a project template of the same name hides it: " +
+			"the Templates screen renders that one instead."
+	default:
+		return "Saved the body as the template " + name + ". The Templates screen (5) renders and sends it."
+	}
 }
 
 // sendRequest starts a request and shows its response, whatever becomes of it.
@@ -801,6 +825,9 @@ func (r *requestScreen) view(width, _ int) string {
 	lines = append(lines, "", r.bodyLine())
 	if r.notice != "" {
 		lines = append(lines, "", wrap(st.okText.Render(output.SanitizeCell(r.notice)), width))
+	}
+	for _, note := range r.notes {
+		lines = append(lines, wrap(st.warnText.Render(note), width))
 	}
 	for _, p := range r.problems {
 		lines = append(lines, st.errorText.Render("• "+output.SanitizeCell(p)))

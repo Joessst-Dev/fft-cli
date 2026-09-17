@@ -843,6 +843,31 @@ var _ = Describe("saving a request as a template", func() {
 			Expect(h.view()).To(ContainSubstring("Saved the body as the template rush."))
 		})
 
+		It("shows what save said beside succeeding", func() {
+			saveAs("rush")
+			h.finish(Result{
+				Stdout: []byte(`{"template":"rush","path":"/home/u/.local/share/fft/templates/rush.json"}`),
+				Stderr: []byte("Dropped the top-level \"version\": replaying a saved version is a guaranteed 409.\n" +
+					"Saved rush. Render it with 'fft template render rush'.\n"),
+			}, "template", "save", "rush", "--operation", "addPickJob", "--file", "-")
+
+			Expect(h.view()).To(ContainSubstring("Saved the body as the template rush. The Templates screen (5) renders"))
+			Expect(h.view()).To(ContainSubstring(`Dropped the top-level "version"`))
+		})
+
+		It("does not promise the Templates screen renders a template a project one hides", func() {
+			saveAs("rush")
+			h.finish(Result{
+				Stdout: []byte(`{"template":"rush","path":"/home/u/.local/share/fft/templates/rush.json",` +
+					`"shadowedBy":"/work/.fft/templates/rush.json"}`),
+				Stderr: []byte("Warning: Saved rush, but the project template /work/.fft/templates/rush.json has the same name.\n"),
+			}, "template", "save", "rush", "--operation", "addPickJob", "--file", "-")
+
+			Expect(h.view()).To(ContainSubstring("but a project template of the same name hides it"))
+			Expect(h.view()).NotTo(ContainSubstring("renders and sends it"))
+			Expect(h.view()).To(ContainSubstring("/work/.fft/templates/rush.json has the same name"))
+		})
+
 		It("has the Templates screen read its list again", func() {
 			h.press("5")
 			h.finish(ok(`[]`), "template", "list")
