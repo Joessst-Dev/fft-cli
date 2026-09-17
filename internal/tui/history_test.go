@@ -159,6 +159,36 @@ var _ = Describe("the History screen", func() {
 		Expect(h.view()).To(ContainSubstring("No requests have been recorded for this project yet."))
 	})
 
+	Describe("with no current project", func() {
+		const noneActive = `[{"name":"staging","active":false},{"name":"prod","active":false}]`
+
+		BeforeEach(func() {
+			h = newHarness(Options{Catalog: historyCatalog{}, History: src})
+			h.loaded(noneActive, `{}`)
+		})
+
+		It("lists every project's requests, and says so", func() {
+			show()
+			Expect(h.view()).To(ContainSubstring("History · recent requests  on every project"))
+			Expect(h.view()).To(ContainSubstring("deleteFacility"))
+			Expect(h.view()).To(ContainSubstring("--status=ONLINE"))
+		})
+
+		It("says the operations used most are counted per project, rather than that none were sent", func() {
+			show()
+			h.press("t")
+			Expect(h.view()).NotTo(ContainSubstring("for this project"))
+			Expect(h.view()).To(ContainSubstring("counted per project, and no project is selected"))
+		})
+
+		It("says none were recorded at all when there are none", func() {
+			src.entries = nil
+			show()
+			Expect(h.view()).To(ContainSubstring("No requests have been recorded yet."))
+			Expect(h.view()).NotTo(ContainSubstring("for this project"))
+		})
+	})
+
 	Describe("when history is off", func() {
 		BeforeEach(func() {
 			src.off = "FFT_HISTORY is off"

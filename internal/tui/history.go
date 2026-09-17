@@ -398,8 +398,12 @@ func (h *historyScreen) view(width, height int) string {
 		title = "History · most used operations"
 	}
 	lines := []string{st.title.Render(title)}
-	if p := h.s.currentProject(); p != "" {
-		lines[0] += st.dim.Render("  on " + output.SanitizeCell(p))
+	project := h.s.currentProject()
+	switch {
+	case project != "":
+		lines[0] += st.dim.Render("  on " + output.SanitizeCell(project))
+	case !h.mostUsed:
+		lines[0] += st.dim.Render("  on every project")
 	}
 	if h.dialog != nil {
 		return strings.Join(append(lines, "", h.dialog.view(st, width, height-2)), "\n")
@@ -422,6 +426,13 @@ func (h *historyScreen) view(width, height int) string {
 	case h.rowCount() == 0 && h.off != "":
 		lines = append(lines, wrap("Nothing to show, and nothing is added while history is off: "+
 			"this is not a sign that nothing was sent.", width))
+	case h.mostUsed && project == "":
+		// Counted per project, so there is nothing to count without one; the recent
+		// list still has every project's requests.
+		lines = append(lines, wrap("The operations used most are counted per project, and no project is selected. "+
+			"Choose one on the Projects screen (1), or press t for every project's recent requests.", width))
+	case h.rowCount() == 0 && project == "":
+		lines = append(lines, "No requests have been recorded yet.")
 	case h.rowCount() == 0:
 		lines = append(lines, "No requests have been recorded for this project yet.")
 	default:
