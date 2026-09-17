@@ -46,7 +46,10 @@ func newFacilitySearchCmd(deps *Deps) *cobra.Command {
 		Long:  facilitySearchLong,
 		Args:  usageArgs(cobra.NoArgs),
 
-		Annotations: map[string]string{annotationOperationID: "searchFacility"},
+		Annotations: map[string]string{
+			annotationOperationID:      "searchFacility",
+			annotationSharedReadSender: "true",
+		},
 
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			// --example needs no project, no credentials and no network, so it is

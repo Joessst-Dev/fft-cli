@@ -170,32 +170,34 @@ var _ = Describe("the TUI's command runner", func() {
 		Expect(table).To(ContainSubstring("BER-01"))
 	})
 
-	It("sends a read two commands share through the curated one, with the table the shell prints", func() {
+	It("sends a read two commands share through the curated one, as written, with the table the shell prints", func() {
 		t := c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
-			writeJSON(w, http.StatusOK, searchPage(
-				[]string{fixture("facility_managed.json"), fixture("facility_supplier.json")}, false, "", nil))
+			writeJSON(w, http.StatusOK, stockPage(fixture("stock.json"), fixture("stock_empty.json")))
 		})
 		r := c.newRunner()
-		const body = `{"query":{"address":{"city":{"eq":"Berlin"}}}}`
+		const body = `{"query":{"and":[{"tenantArticleId":{"eq":"4711"}},{"value":{"notEq":16777217}}]},"size":10}`
 
-		search := catalogOps(r.Catalog())["searchFacility"].Command
-		Expect(search.Path).To(Equal([]string{"facility", "search"}))
+		search := catalogOps(r.Catalog())["searchStock"].Command
+		Expect(search.Path).To(Equal([]string{"stock", "search"}))
 		Expect(search.Table).To(BeTrue())
 
 		id := start(r, tui.Invocation{Args: append(slices.Clone(search.Path), "--file", "-"), Stdin: []byte(body)})
 		res := awaitDone(r, id)[id]
 		Expect(res.ExitCode).To(Equal(exitcode.OK), "stderr: %s", res.Stderr)
-		Expect(t.only().json()).To(HaveKeyWithValue("query",
-			HaveKeyWithValue("address", HaveKeyWithValue("city", HaveKeyWithValue("eq", "Berlin")))))
+
+		sent := t.only()
+		Expect(sent.Method).To(Equal(http.MethodPost))
+		Expect(sent.Path).To(Equal("/api/stocks/search"))
+		Expect(string(sent.Body)).To(Equal(body))
 
 		table, err := r.Catalog().Table(search, res.Stdout)
 		Expect(err).NotTo(HaveOccurred())
 
 		file := filepath.Join(GinkgoT().TempDir(), "query.json")
 		Expect(os.WriteFile(file, []byte(body), 0o600)).To(Succeed())
-		Expect(c.run("facility", "search", "--file", file)).To(Equal(exitcode.OK), c.errOut())
+		Expect(c.run("stock", "search", "--file", file)).To(Equal(exitcode.OK), c.errOut())
 		Expect(table).To(Equal(c.out()))
-		Expect(table).To(ContainSubstring("BER-01"))
+		Expect(table).To(ContainSubstring("shelf-a-12"))
 	})
 
 	It("never puts what a run reads on stdin into an event", func() {

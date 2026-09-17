@@ -160,7 +160,29 @@ var _ = Describe("the TUI's catalog of operations", func() {
 			}
 		})
 
-		It("sends a read through the claimant that takes the body as written, with its table", func() {
+		It("marks only commands that send a read with a body as able to stand for it", func() {
+			var marked []string
+			var walk func(*cobra.Command)
+			walk = func(cmd *cobra.Command) {
+				if cmd.Annotations[annotationSharedReadSender] != "" {
+					path := cmd.CommandPath()
+					marked = append(marked, path)
+
+					op, ok := api.LookupOperation(cmd.Annotations[annotationOperationID])
+					Expect(ok).To(BeTrue(), "%s is marked but claims no operation", path)
+					Expect(op.Mutates()).To(BeFalse(), "%s is marked but %s writes", path, op.ID)
+					Expect(op.HasBody).To(BeTrue(), "%s is marked but %s takes no body", path, op.ID)
+					Expect(cmd.Annotations).NotTo(HaveKey(annotationGenerated), path)
+				}
+				for _, child := range cmd.Commands() {
+					walk(child)
+				}
+			}
+			walk(root)
+			Expect(marked).To(ConsistOf("fft facility search", "fft listing search", "fft stock search"))
+		})
+
+		It("sends a read through the claimant marked to stand for it, with its table", func() {
 			claims := operationCommands(root)
 			Expect(claims["searchFacility"]).To(HaveLen(2), "the spec needs a read two curated commands send")
 
@@ -471,4 +493,41 @@ var _ = Describe("the TUI's table of a curated command", func() {
 		_, err := renderTable([]string{"picking", "get-pick-job"}, []byte(`{}`))
 		Expect(err).To(MatchError(ContainSubstring("no table")))
 	})
+})
+
+var _ = Describe("operationSender", func() {
+	// claimant is a command claiming an operation, as the tree walk finds one.
+	claimant := func(name string, annotations ...string) *cobra.Command {
+		cmd := &cobra.Command{Use: name, Annotations: map[string]string{annotationOperationID: "op"}}
+		for _, a := range annotations {
+			cmd.Annotations[a] = "true"
+		}
+		return cmd
+	}
+	var (
+		marked    = claimant("marked", annotationSharedReadSender)
+		other     = claimant("other", annotationSharedReadSender)
+		plain     = claimant("plain")
+		generated = claimant("generated", annotationGenerated)
+	)
+	// A search is the read-POST the spec lists; any other POST is a write.
+	read := api.Operation{ID: "searchFacility", Method: http.MethodPost, HasBody: true}
+	write := api.Operation{ID: "orderAction", Method: http.MethodPost, HasBody: true}
+	readNoBody := api.Operation{ID: "getFacility", Method: http.MethodGet}
+
+	DescribeTable("picks the command the request form runs",
+		func(op api.Operation, claimants []*cobra.Command, want *cobra.Command) {
+			Expect(op.Mutates()).To(Equal(op.ID == write.ID), "the operations must be what they claim")
+			Expect(operationSender(op, claimants)).To(BeIdenticalTo(want))
+		},
+		Entry("the only claimant, whatever it is", readNoBody, []*cobra.Command{plain}, plain),
+		Entry("the only claimant of a write", write, []*cobra.Command{plain}, plain),
+		Entry("no one, when nothing claims it", read, nil, nil),
+		Entry("no one for a shared write, even with every claimant marked", write, []*cobra.Command{marked, other}, nil),
+		Entry("no one for a shared read that takes no body", readNoBody, []*cobra.Command{marked, plain}, nil),
+		Entry("no one for a shared read with two marked claimants", read, []*cobra.Command{marked, other}, nil),
+		Entry("no one for a shared read with no marked claimant", read, []*cobra.Command{plain, generated}, nil),
+		Entry("the marked curated command over a generated one", read, []*cobra.Command{generated, marked}, marked),
+		Entry("the marked command over an unmarked curated one", read, []*cobra.Command{plain, marked}, marked),
+	)
 })

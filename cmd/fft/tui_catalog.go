@@ -127,30 +127,35 @@ func operationCommands(root *cobra.Command) map[string][]*cobra.Command {
 	return found
 }
 
+// annotationSharedReadSender marks a curated command that may stand for its
+// operation in the request form when other commands claim the operation too. Only a
+// command that sends the body the user wrote may carry it — checked against the
+// schema, sent as written, with nothing of its own but the paging its flags set —
+// because the form offers the operation's body, not one command's use of it.
+const annotationSharedReadSender = "sharedReadSender"
+
 // operationSender is the command the request form for op runs, out of the commands
 // that claim op, or nil when none of them can stand for the operation and it must
 // go through `fft api`.
 //
 // A write several commands share is never given to one of them: `order cancel` and
 // `order unlock` are both orderAction, and naming either would make the form send
-// that one use, whatever body the user wrote. A shared read cannot do that harm,
-// but its claimants still differ in what they can send — `facility list` builds
-// the search body from its flags, and `listing list` insists on a facility the
-// tenant-wide search does not — so the one chosen is the one that sends the body
-// as the user wrote it, as `fft api` would, and adds the curated table and the
-// paging. Anything less clear-cut, including two such commands, stays with `fft
-// api`: the catalog spec's census makes a new shared operation a decision.
+// that one use, whatever body the user wrote. A shared read with a body goes to the
+// one claimant marked [annotationSharedReadSender], which adds the curated table
+// and the paging to what `fft api` would send. Anything else, including two marked
+// claimants, stays with `fft api`: the catalog spec's census makes a new shared
+// operation a decision.
 func operationSender(op api.Operation, claimants []*cobra.Command) *cobra.Command {
 	switch {
 	case len(claimants) == 1:
 		return claimants[0]
-	case len(claimants) == 0, op.Mutates(), !op.HasBody:
+	case op.Mutates(), !op.HasBody:
 		return nil
 	}
 
 	var sender *cobra.Command
 	for _, c := range claimants {
-		if c.Annotations[annotationGenerated] != "" || c.LocalFlags().Lookup("file") == nil {
+		if c.Annotations[annotationSharedReadSender] == "" {
 			continue
 		}
 		if sender != nil {
