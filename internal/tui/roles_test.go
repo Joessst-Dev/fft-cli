@@ -350,6 +350,8 @@ var _ = Describe("permission greying", func() {
 
 	It("draws a lacking operation dimmed, and the others plain", func() {
 		h = newHarness(Options{Catalog: roleCatalog{}, Color: true})
+		// Past the wait for the terminal's background, which takes no keys.
+		h.now = h.now.Add(backgroundWait)
 		h.loaded(twoProjects, validToken)
 		knowRoles(readOnlyRoles)
 		// Off the lacking rows, so that the selection's own style is not what is seen.

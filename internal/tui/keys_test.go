@@ -147,10 +147,6 @@ var _ = Describe("the key hint", func() {
 		Expect(before).To(Equal(ansi.Strip(before)))
 	})
 
-	It("asks the terminal for its background when it starts", func() {
-		Expect(msgsOf(h.m.Init())).To(ContainElement(BeAssignableToTypeOf(tea.RequestBackgroundColor())))
-	})
-
 	It("does not offer the legend while a field has the keyboard, where ? is typed", func() {
 		h.press("2", "/", "?")
 

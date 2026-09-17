@@ -9,6 +9,7 @@ import (
 	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	uv "github.com/charmbracelet/ultraviolet"
 
 	"github.com/Joessst-Dev/fft-cli/internal/output"
 )
@@ -90,6 +91,10 @@ type app struct {
 
 	// flash is a one-keystroke message in the status bar, such as what y copied.
 	flash string
+
+	// background is the question about the terminal's background, whose answer
+	// arrives among the keys.
+	background backgroundQuery
 }
 
 func newApp(opts Options) *app {
@@ -180,7 +185,15 @@ func (m *app) showing(scr screen) bool {
 }
 
 func (m *app) Init() tea.Cmd {
-	return tea.Batch(waitForEvent(m.events), m.projects.init(), tea.RequestBackgroundColor)
+	cmds := []tea.Cmd{waitForEvent(m.events), m.projects.init()}
+	// Only the colours depend on the answer, and a terminal that answers after fft
+	// has exited prints the reply at the shell's prompt: without colour, nothing
+	// is asked.
+	if m.st.color {
+		m.background.ask(m.s.now())
+		cmds = append(cmds, tea.RequestBackgroundColor)
+	}
+	return tea.Batch(cmds...)
 }
 
 func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -196,7 +209,11 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.response.observe(RunEvent(msg))
 		cmds = append(cmds, m.s.handle(RunEvent(msg)), waitForEvent(m.events))
 	case tea.BackgroundColorMsg:
+		m.background.answered()
 		m.st.hint = newHintStyles(m.st.color, msg.IsDark())
+	case uv.UnknownEvent:
+		// Bubble Tea hands on what the terminal reader could not decode as is.
+		m.background.unknown(msg, m.s.now())
 	case runnerClosedMsg:
 		// The runner is shut down only as the UI goes; there is nothing left to wait for.
 	case spinner.TickMsg:
@@ -209,7 +226,9 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.spin, cmd = m.spin.Update(msg)
 		cmds = append(cmds, cmd)
 	case tea.KeyPressMsg:
-		cmds = append(cmds, m.key(msg))
+		if key.Matches(msg, m.keys.forceQ) || !m.background.swallow(msg, m.s.now()) {
+			cmds = append(cmds, m.key(msg))
+		}
 	case tea.PasteMsg:
 		// A paste is typing, so it goes where typing goes: to a focused field. With
 		// nothing focused, pasted text would be read as a burst of commands.
