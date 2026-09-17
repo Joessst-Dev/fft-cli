@@ -467,12 +467,22 @@ func (b *cappedBuffer) Write(p []byte) (int, error) {
 		b.dropped = true
 	}
 	if need := len(b.buf) + len(kept); need > cap(b.buf) {
-		grown := make([]byte, len(b.buf), min(max(2*cap(b.buf), need), b.limit))
+		grown := make([]byte, len(b.buf), b.grownCap(need))
 		copy(grown, b.buf)
 		b.buf = grown
 	}
 	b.buf = append(b.buf, kept...)
 	return len(p), nil
+}
+
+// grownCap is the capacity to grow to for need bytes: double the current one, but
+// never past limit. need never exceeds limit, since Write keeps no more than fits.
+// The doubling is only taken below limit/2, so it cannot overflow.
+func (b *cappedBuffer) grownCap(need int) int {
+	if cap(b.buf) > b.limit/2 {
+		return b.limit
+	}
+	return min(max(2*cap(b.buf), need), b.limit)
 }
 
 func (r *cliRunner) finish(id tui.RunID, inv tui.Invocation, res tui.Result) {
