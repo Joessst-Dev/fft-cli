@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"reflect"
 	"slices"
 	"strings"
@@ -164,6 +166,34 @@ var _ = Describe("the TUI's command runner", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(c.run("facility", "get", "BER-01")).To(Equal(exitcode.OK), c.errOut())
+		Expect(table).To(Equal(c.out()))
+		Expect(table).To(ContainSubstring("BER-01"))
+	})
+
+	It("sends a read two commands share through the curated one, with the table the shell prints", func() {
+		t := c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+			writeJSON(w, http.StatusOK, searchPage(
+				[]string{fixture("facility_managed.json"), fixture("facility_supplier.json")}, false, "", nil))
+		})
+		r := c.newRunner()
+		const body = `{"query":{"address":{"city":{"eq":"Berlin"}}}}`
+
+		search := catalogOps(r.Catalog())["searchFacility"].Command
+		Expect(search.Path).To(Equal([]string{"facility", "search"}))
+		Expect(search.Table).To(BeTrue())
+
+		id := start(r, tui.Invocation{Args: append(slices.Clone(search.Path), "--file", "-"), Stdin: []byte(body)})
+		res := awaitDone(r, id)[id]
+		Expect(res.ExitCode).To(Equal(exitcode.OK), "stderr: %s", res.Stderr)
+		Expect(t.only().json()).To(HaveKeyWithValue("query",
+			HaveKeyWithValue("address", HaveKeyWithValue("city", HaveKeyWithValue("eq", "Berlin")))))
+
+		table, err := r.Catalog().Table(search, res.Stdout)
+		Expect(err).NotTo(HaveOccurred())
+
+		file := filepath.Join(GinkgoT().TempDir(), "query.json")
+		Expect(os.WriteFile(file, []byte(body), 0o600)).To(Succeed())
+		Expect(c.run("facility", "search", "--file", file)).To(Equal(exitcode.OK), c.errOut())
 		Expect(table).To(Equal(c.out()))
 		Expect(table).To(ContainSubstring("BER-01"))
 	})

@@ -54,15 +54,13 @@ func newCLICatalog(root *cobra.Command) *cliCatalog {
 		}
 
 		var cmd tui.Command
-		switch found := commands[op.ID]; {
-		case len(found) == 1:
-			cmd = describeCommand(found[0], op, global)
+		switch sender := operationSender(op, commands[op.ID]); {
+		case sender != nil:
+			cmd = describeCommand(sender, op, global)
 		case escape != nil:
-			// No single command of fft's own sends it. An installed component claimed
-			// it, or several curated commands each send one use of it — `order cancel`
-			// and `order unlock` are both orderAction — and naming any one of them would
-			// make the form send that use whatever body the user wrote. `fft api`
-			// reaches it, and sends the body as it is.
+			// No single command of fft's own stands for it: an installed component
+			// claimed it, or several curated commands each send one use of it. `fft
+			// api` reaches it, and sends the body as it is.
 			cmd = describeCommand(escape, op, global)
 			cmd.Path = append(cmd.Path, op.ID)
 			cmd.Args = nil
@@ -127,6 +125,40 @@ func operationCommands(root *cobra.Command) map[string][]*cobra.Command {
 	}
 	walk(root)
 	return found
+}
+
+// operationSender is the command the request form for op runs, out of the commands
+// that claim op, or nil when none of them can stand for the operation and it must
+// go through `fft api`.
+//
+// A write several commands share is never given to one of them: `order cancel` and
+// `order unlock` are both orderAction, and naming either would make the form send
+// that one use, whatever body the user wrote. A shared read cannot do that harm,
+// but its claimants still differ in what they can send — `facility list` builds
+// the search body from its flags, and `listing list` insists on a facility the
+// tenant-wide search does not — so the one chosen is the one that sends the body
+// as the user wrote it, as `fft api` would, and adds the curated table and the
+// paging. Anything less clear-cut, including two such commands, stays with `fft
+// api`: the catalog spec's census makes a new shared operation a decision.
+func operationSender(op api.Operation, claimants []*cobra.Command) *cobra.Command {
+	switch {
+	case len(claimants) == 1:
+		return claimants[0]
+	case len(claimants) == 0, op.Mutates(), !op.HasBody:
+		return nil
+	}
+
+	var sender *cobra.Command
+	for _, c := range claimants {
+		if c.Annotations[annotationGenerated] != "" || c.LocalFlags().Lookup("file") == nil {
+			continue
+		}
+		if sender != nil {
+			return nil
+		}
+		sender = c
+	}
+	return sender
 }
 
 // describeCommand is what the request form needs to know about cmd, which sends op.

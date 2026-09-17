@@ -81,7 +81,6 @@ var _ = Describe("the TUI's catalog of operations", func() {
 		for _, op := range api.Operations() {
 			got := ops[op.ID]
 			if len(claims[op.ID]) > 1 {
-				Expect(got.Command.Path).To(Equal([]string{"api", op.ID}), op.ID)
 				continue
 			}
 			Expect(got.Command.Path).NotTo(BeEmpty(), op.ID)
@@ -95,7 +94,49 @@ var _ = Describe("the TUI's catalog of operations", func() {
 	})
 
 	When("more than one command sends the operation", func() {
-		It("sends it through fft api, body and all, rather than through one of them", func() {
+		// sharedSenders is every operation several commands claim, and the command
+		// the form sends it through. An operation that joins the list fails the
+		// census until someone has decided which of its claimants, if any, may stand
+		// for it.
+		sharedSenders := map[string][]string{
+			"actionsRoutingStrategy": {"api", "actionsRoutingStrategy"},
+			"facilityAction":         {"api", "facilityAction"},
+			"orderAction":            {"api", "orderAction"},
+			"searchFacility":         {"facility", "search"},
+			"searchListing":          {"listing", "search"},
+			"searchStock":            {"stock", "search"},
+		}
+
+		It("sends each through the command the census names", func() {
+			shared := make(map[string][]string)
+			for id, claimants := range operationCommands(root) {
+				if len(claimants) > 1 {
+					shared[id] = ops[id].Command.Path
+				}
+			}
+			Expect(shared).To(Equal(sharedSenders))
+		})
+
+		It("sends none that writes through one of its claimants", func() {
+			for id, claimants := range operationCommands(root) {
+				op, ok := api.LookupOperation(id)
+				Expect(ok).To(BeTrue(), id)
+				if len(claimants) < 2 {
+					continue
+				}
+				if op.Mutates() {
+					Expect(ops[id].Command.Path).To(Equal([]string{"api", id}), "%s writes", id)
+					continue
+				}
+				if path := ops[id].Command.Path; path[0] != "api" {
+					sender, _, err := root.Find(path)
+					Expect(err).NotTo(HaveOccurred(), id)
+					Expect(claimants).To(ContainElement(sender), id)
+				}
+			}
+		})
+
+		It("sends a write through fft api, body and all, rather than through one of them", func() {
 			claims := operationCommands(root)
 			Expect(claims["orderAction"]).To(HaveLen(2), "the spec needs an operation two curated commands send")
 			Expect(claims["facilityAction"]).To(HaveLen(2))
@@ -103,6 +144,7 @@ var _ = Describe("the TUI's catalog of operations", func() {
 			for _, id := range []string{"orderAction", "facilityAction"} {
 				op, ok := api.LookupOperation(id)
 				Expect(ok).To(BeTrue())
+				Expect(op.Mutates()).To(BeTrue())
 
 				cmd := ops[id].Command
 				Expect(cmd.Path).To(Equal([]string{"api", id}))
@@ -116,6 +158,25 @@ var _ = Describe("the TUI's catalog of operations", func() {
 					Expect(f.Kind).To(Equal(tui.FlagPairs), "--%s takes name=value pairs, which may hold commas", f.Name)
 				}
 			}
+		})
+
+		It("sends a read through the claimant that takes the body as written, with its table", func() {
+			claims := operationCommands(root)
+			Expect(claims["searchFacility"]).To(HaveLen(2), "the spec needs a read two curated commands send")
+
+			op, ok := api.LookupOperation("searchFacility")
+			Expect(ok).To(BeTrue())
+			Expect(op.Mutates()).To(BeFalse())
+
+			cmd := ops["searchFacility"].Command
+			Expect(cmd.Path).To(Equal([]string{"facility", "search"}))
+			Expect(cmd.Curated).To(BeTrue())
+			Expect(cmd.Table).To(BeTrue())
+			Expect(cmd.Example).To(BeTrue())
+			Expect(cmd.Args).To(BeEmpty())
+			Expect(cmd.Body).To(BeTrue())
+			Expect(cmd.BodyRequired).To(BeTrue())
+			Expect(flagNames(cmd)).To(ConsistOf("all", "max-items", "size", "total"))
 		})
 	})
 
