@@ -298,6 +298,41 @@ var _ = Describe("the History screen", func() {
 			Expect(h.view()).To(ContainSubstring("was sent as 'fft api', whose flags this form does not have"))
 		})
 
+		// Rows, newest first: searchFacility --size=50, getPickJob, searchFacility
+		// --status=ONLINE. The cursor goes to the last of them, which shares its
+		// operation with the first.
+		DescribeTable("opens the request the cursor was on, after the history was read again",
+			func(arrived []history.Entry) {
+				show()
+				h.press("down", "down")
+				src.add(arrived...)
+				h.pump(h.press("ctrl+r"))
+				Expect(src.readCount()).To(Equal(2))
+
+				h.press("enter")
+				Expect(h.m.request.op.ID).To(Equal("searchFacility"))
+				Expect(field("--status").value()).To(Equal("ONLINE"))
+				Expect(field("--size").value()).To(BeEmpty(), "the newer request of the same operation was opened")
+			},
+			Entry("with nothing new", nil),
+			Entry("with a newer request of the same operation",
+				[]history.Entry{entry(5, "staging", "searchFacility", "fft facility list", "--size=5")}),
+			Entry("with a newer request of another operation",
+				[]history.Entry{entry(5, "staging", "getPickJob", "fft picking get-pick-job", "--pick-job-id=pj-3")}),
+		)
+
+		It("stays on the operation used most it was on, after the history was read again", func() {
+			show()
+			h.press("t", "down")
+			src.add(entry(5, "staging", "addPickJob", "fft picking add-pick-job"),
+				entry(6, "staging", "addPickJob", "fft picking add-pick-job"),
+				entry(7, "staging", "addPickJob", "fft picking add-pick-job"))
+			h.pump(h.press("ctrl+r"))
+
+			h.press("enter")
+			Expect(h.m.request.op.ID).To(Equal("getPickJob"))
+		})
+
 		It("opens the last request of an operation used most", func() {
 			show()
 			h.press("t", "enter")

@@ -167,7 +167,11 @@ func (h *historyScreen) sync() {
 	if h.derived == want {
 		return
 	}
-	previous := h.selectedOperation()
+	previousOp := h.selectedOperation()
+	previousEntry, hadEntry := entryIdentity{}, false
+	if !h.mostUsed && h.cursor >= 0 && h.cursor < len(h.recent) {
+		previousEntry, hadEntry = identify(h.recent[h.cursor]), true
+	}
 	h.derived = want
 
 	h.recent = h.recent[:0]
@@ -187,16 +191,50 @@ func (h *historyScreen) sync() {
 		}
 	}
 
-	// The cursor stays on the operation it was on, where there still is one: the
-	// newest request moves every row down.
+	// The cursor stays on the row it was on, where there still is one: the newest
+	// request moves every row down. A row of recent requests is that request, not
+	// its operation — most operations are sent many times, and enter must reopen
+	// the one the user picked.
 	h.cursor = 0
-	if previous != "" {
-		for i := range h.rowCount() {
-			if h.operationAt(i) == previous {
+	switch {
+	case hadEntry:
+		for i, e := range h.recent {
+			if identify(e) == previousEntry {
 				h.cursor = i
 				break
 			}
 		}
+	case previousOp != "":
+		for i := range h.rowCount() {
+			if h.operationAt(i) == previousOp {
+				h.cursor = i
+				break
+			}
+		}
+	}
+}
+
+// entryIdentity tells one recorded request from another. An entry has no id of
+// its own, and two requests that agree on all of this are the same request as far
+// as reopening one goes.
+type entryIdentity struct {
+	ts          int64
+	project     string
+	operationID string
+	command     string
+	args        string
+	exit        int
+}
+
+func identify(e history.Entry) entryIdentity {
+	return entryIdentity{
+		ts:          e.TS.UnixNano(),
+		project:     e.Project,
+		operationID: e.OperationID,
+		command:     e.Command,
+		// A NUL cannot be part of an argument, so no two argument lists join alike.
+		args: strings.Join(e.Args, "\x00"),
+		exit: e.Exit,
 	}
 }
 
