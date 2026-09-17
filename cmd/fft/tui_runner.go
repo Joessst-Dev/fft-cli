@@ -245,9 +245,9 @@ func (r *cliRunner) Start(inv tui.Invocation) (tui.RunID, error) {
 }
 
 // classify resolves args in the catalog tree, and reports the files the command
-// rewrites, "" when it must not run alone ([annotationExclusive]), and what a user
-// types to confirm its question ([annotationConfirms]). It must be called with mu
-// held.
+// rewrites, "" when nothing requires it to run alone ([annotationExclusive]), and
+// what a user types to confirm its question ([annotationConfirms]). It must be
+// called with mu held.
 func (r *cliRunner) classify(args []string) (rewrites, confirm string) {
 	target, _, err := r.catalog.Find(args)
 	if err != nil {

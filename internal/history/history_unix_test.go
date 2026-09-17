@@ -120,6 +120,24 @@ var _ = Describe("a compaction lock path that is a symlink", func() {
 	})
 })
 
+var _ = Describe("a history directory that is a symlink", func() {
+	It("is refused by an append, rather than chmodding whatever it points at", func() {
+		base := GinkgoT().TempDir()
+		target := filepath.Join(base, "elsewhere")
+		Expect(os.MkdirAll(target, 0o755)).To(Succeed())
+		dir := filepath.Join(base, "fft")
+		Expect(os.Symlink(target, dir)).To(Succeed())
+
+		log := history.Log{Path: filepath.Join(dir, "history.jsonl")}
+		err := log.Append(entry("prod", "getFacility", 1))
+
+		Expect(err).To(MatchError(ContainSubstring("not a regular file")))
+		info, statErr := os.Stat(target)
+		Expect(statErr).NotTo(HaveOccurred())
+		Expect(info.Mode().Perm()).To(Equal(os.FileMode(0o755)), "the symlink target's permissions must be untouched")
+	})
+})
+
 var _ = Describe("a history that others can read", func() {
 	var (
 		dir string

@@ -3,6 +3,7 @@
 package history
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 
@@ -36,10 +37,17 @@ const private fs.FileMode = 0o077
 // tightenDir takes group and other access away from the history directory. It
 // was only created 0700 if fft created it; one another tool made first keeps
 // whatever that tool chose.
+//
+// Lstat, not Stat: a symlink planted at the directory path must be refused,
+// the same as openFlags refuses one at the file path, rather than followed
+// into a chmod of whatever directory it points at.
 func tightenDir(dir string) error {
-	info, err := os.Stat(dir)
+	info, err := os.Lstat(dir)
 	if err != nil {
 		return err
+	}
+	if !info.IsDir() {
+		return fmt.Errorf("%s: %w", dir, errNotRegular)
 	}
 	if perm := info.Mode().Perm(); perm&private != 0 {
 		return os.Chmod(dir, perm&^private)
