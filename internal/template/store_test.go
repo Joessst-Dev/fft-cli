@@ -213,6 +213,21 @@ var _ = Describe("the template store", func() {
 			Expect(listing.Problems[0].Path).To(Equal(bad))
 		})
 
+		It("reports a file whose parameter no --set could reach, and lists the rest", func() {
+			_, err := store.Write("good", template.ScopeUser, sample(""))
+			Expect(err).NotTo(HaveOccurred())
+
+			bad := filepath.Join(dataDir, "fft", "templates", "misrouted.json")
+			Expect(os.WriteFile(bad, []byte(
+				`{"schemaVersion":1,"body":{"status":"OPEN"},"params":{"a=b":{"path":"order.id"}}}`), 0o600)).To(Succeed())
+
+			listing, err := store.List()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(listing.Found).To(ConsistOf(HaveField("Name", "good")))
+			Expect(listing.Problems).To(ConsistOf(HaveField("Path", bad)))
+			Expect(listing.Problems[0].Err).To(MatchError(ContainSubstring(`parameter "a=b" cannot contain "="`)))
+		})
+
 		It("ignores files that are not templates", func() {
 			_, err := store.Write("good", template.ScopeUser, sample(""))
 			Expect(err).NotTo(HaveOccurred())

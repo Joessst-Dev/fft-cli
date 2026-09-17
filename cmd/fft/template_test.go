@@ -216,6 +216,13 @@ var _ = Describe("fft template", func() {
 			Expect(c.errOut()).To(ContainSubstring("path and not a name"))
 		})
 
+		It("refuses a parameter name --set would cut short, carried in from a shown template", func() {
+			c.stdin.WriteString(`{"schemaVersion":1,"body":{"status":"OPEN"},"params":{"a=b":{"path":"order.id"}}}`)
+			Expect(c.run("template", "save", "copy", "--file", "-")).To(Equal(exitcode.Usage))
+			Expect(c.errOut()).To(ContainSubstring(`parameter "a=b" cannot contain "="`))
+			Expect(userPath("copy")).NotTo(BeAnExistingFile())
+		})
+
 		It("refuses a parameter name the body uses at the top level for somewhere else", func() {
 			Expect(save("rush", "--file", "-", "--param", "order=order.items.0.quantity")).
 				To(Equal(exitcode.Usage))

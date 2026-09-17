@@ -54,6 +54,11 @@ fft template save rush-order --file body.json --require email=order.consumer.ema
 `--set`, and rendering without a required parameter fails with exit 2 naming **all** of the
 missing ones at once.
 
+A parameter name is what `--set name=value` addresses, so it cannot hold a `.`, a `\` or an
+`=`, start with a dash, or start or end with white space. A template file that declares
+such a name — a hand-edited or committed one — is refused when it is read, and
+`fft template list` names it on stderr.
+
 ## Changing values
 
 `--set` takes either a declared parameter or a path into the body, and the two are the same

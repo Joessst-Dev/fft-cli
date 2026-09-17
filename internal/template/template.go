@@ -110,15 +110,8 @@ func Decode(data []byte) (*Template, error) {
 func (t *Template) validateParams() error {
 	body, _ := t.Body.(map[string]any)
 	for name, p := range t.Params {
-		if name == "" {
-			return fmt.Errorf("a parameter needs a name")
-		}
-		for _, r := range name {
-			if r == '.' || r == '\\' {
-				return fmt.Errorf(
-					"parameter %q cannot contain %q, because that is what makes it a path and not a name",
-					name, string(r))
-			}
+		if err := ValidateParamName(name); err != nil {
+			return err
 		}
 		if _, clash := body[name]; clash && name != p.Path {
 			return fmt.Errorf(
@@ -137,6 +130,41 @@ func (t *Template) validateParams() error {
 				"parameter %q is required and also carries a default, so nothing would ever ask for it: "+
 					"drop one of the two",
 				name)
+		}
+	}
+	return nil
+}
+
+// ValidateParamName refuses a parameter name that --set could not address as
+// itself.
+//
+// --set splits its argument at the first '=' and trims the name, so a name
+// holding an '=' or starting or ending in white space is never the key a --set
+// arrives with: `--set a=b=x` would set a parameter "a" to "b=x", or a top-level
+// field "a" that the template author never meant. A dot or a backslash makes a
+// name a path. A leading dash reads as a flag wherever the name is typed on its
+// own. Each of these is a name that works in the file and misroutes the value
+// the moment somebody uses it.
+func ValidateParamName(name string) error {
+	if name == "" {
+		return fmt.Errorf("a parameter needs a name")
+	}
+	if strings.TrimSpace(name) != name {
+		return fmt.Errorf("parameter %q cannot start or end with white space, which --set trims away", name)
+	}
+	if strings.HasPrefix(name, "-") {
+		return fmt.Errorf("parameter %q cannot start with a dash, which reads as a flag", name)
+	}
+	for _, r := range name {
+		switch r {
+		case '.', '\\':
+			return fmt.Errorf(
+				"parameter %q cannot contain %q, because that is what makes it a path and not a name",
+				name, string(r))
+		case '=':
+			return fmt.Errorf(
+				"parameter %q cannot contain %q, because --set name=value ends the name at the first one",
+				name, string(r))
 		}
 	}
 	return nil

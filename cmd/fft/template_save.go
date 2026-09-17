@@ -403,8 +403,8 @@ func credentialLikePaths(body entityDoc) []string {
 
 // validateParamName keeps the one namespace --set reads unambiguous.
 //
-// A name with a dot in it would be indistinguishable from a path, so it is
-// refused outright. A name that is also a top-level key of the body is refused
+// A name --set could not address as itself — a dot makes it a path, an '='
+// ends it early — is refused outright, by the same rule a loaded file meets. A name that is also a top-level key of the body is refused
 // only when it points somewhere *else* — `--require name=name` is the obvious
 // thing to type for a top-level field, and it is not ambiguous at all, because
 // both readings of `--set name=x` land in the same place. What is ambiguous is a
@@ -415,15 +415,8 @@ func credentialLikePaths(body entityDoc) []string {
 // Both checks run at save time, so that --set never needs a precedence rule for
 // a user to remember at the point of use.
 func validateParamName(name, path string, body entityDoc) error {
-	if name == "" {
-		return exitcode.UsageError{Err: fmt.Errorf("a parameter needs a name")}
-	}
-	for _, r := range name {
-		if r == '.' || r == '\\' {
-			return exitcode.UsageError{Err: fmt.Errorf(
-				"a parameter name cannot contain %q, because that is what makes it a path and not a name",
-				string(r))}
-		}
+	if err := template.ValidateParamName(name); err != nil {
+		return exitcode.UsageError{Err: err}
 	}
 	if _, clash := body[name]; clash && name != path {
 		return exitcode.UsageError{Err: fmt.Errorf(
