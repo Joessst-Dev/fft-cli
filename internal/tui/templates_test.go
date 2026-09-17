@@ -10,6 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
+	"github.com/Joessst-Dev/fft-cli/internal/template"
 )
 
 // The operations only the template specs need: a read that takes a body, and a
@@ -60,6 +61,16 @@ const (
 // templateDoc is rushDoc for another operation, or for none when id is "".
 func docFor(id string) string {
 	return `{"schemaVersion":1,"operationId":"` + id + `","body":{"a":1}}`
+}
+
+// pinned is args with the --if-digest a render of doc carries.
+func pinned(doc string, args ...string) []string {
+	GinkgoHelper()
+	t, err := template.Decode([]byte(doc))
+	Expect(err).NotTo(HaveOccurred())
+	digest, err := template.Digest(t)
+	Expect(err).NotTo(HaveOccurred())
+	return append(args, "--if-digest", digest)
 }
 
 // showTemplates goes to the Templates screen and answers its list.
@@ -238,18 +249,19 @@ var _ = Describe("the Templates screen", func() {
 			h.fillParam(1, "12345")
 			h.press("R")
 
-			Expect(h.last().Args).To(Equal([]string{
+			Expect(h.last().Args).To(Equal(pinned(rushDoc,
 				"template", "render", "rush", "--set-string", "email=a@b.de", "--set-string", "id=12345",
-			}))
+			)))
 		})
 
 		DescribeTable("sends a value as a string when the saved body holds one where it goes",
 			func(spec, body, flag string) {
-				h.openTemplate(`{"schemaVersion":1,"operationId":"addPickJob","params":{"id":` + spec + `},"body":` + body + `}`)
+				doc := `{"schemaVersion":1,"operationId":"addPickJob","params":{"id":` + spec + `},"body":` + body + `}`
+				h.openTemplate(doc)
 				h.press("p")
 				h.fillParam(0, "12345")
 				h.press("R")
-				Expect(h.last().Args).To(Equal([]string{"template", "render", "rush", flag, "id=12345"}))
+				Expect(h.last().Args).To(Equal(pinned(doc, "template", "render", "rush", flag, "id=12345")))
 			},
 			Entry("a required parameter with no default", `{"path":"orderRef","required":true}`,
 				`{"orderRef":"00042"}`, "--set-string"),
@@ -304,15 +316,16 @@ var _ = Describe("the Templates screen", func() {
 			Expect(h.m.templates.open.params[0].value()).To(BeEmpty())
 		})
 
-		It("never offer a parameter whose name --set would misroute", func() {
-			h.openTemplate(`{"schemaVersion":1,"operationId":"addPickJob",` +
-				`"params":{"a=b":{"path":"orderRef"},"email":{"path":"consumer.email"}},"body":{"a":1}}`)
-			names := []string{}
-			for _, f := range h.m.templates.open.params {
-				names = append(names, f.name)
-			}
-			Expect(names).To(Equal([]string{"email"}))
-			Expect(h.view()).To(ContainSubstring("Not offered: a=b."))
+		It("are never offered for a template that declares one --set would misroute", func() {
+			h.press("p")
+			h.finish(ok(`{"schemaVersion":1,"operationId":"addPickJob",`+
+				`"params":{"a=b":{"path":"orderRef"},"email":{"path":"consumer.email"}},"body":{"a":1}}`),
+				"template", "show", "rush")
+
+			Expect(h.m.templates.open.doc).To(BeNil())
+			Expect(h.m.templates.open.form).To(BeFalse())
+			Expect(h.view()).To(ContainSubstring("reading rush failed"))
+			Expect(h.view()).To(ContainSubstring(`parameter "a=b" cannot contain "="`))
 		})
 
 		It("say so when the template declares none", func() {
@@ -343,7 +356,7 @@ var _ = Describe("the Templates screen", func() {
 			h.fillParam(0, "a@b.de")
 			h.press("R")
 
-			id := h.lookup("template", "render", "rush", "--set-string", "email=a@b.de")
+			id := h.lookup(pinned(rushDoc, "template", "render", "rush", "--set-string", "email=a@b.de")...)
 			Expect(h.r.invocation(id).Project).To(Equal("staging"))
 			Expect(h.r.stdin(id)).To(BeEmpty())
 
@@ -359,7 +372,7 @@ var _ = Describe("the Templates screen", func() {
 			h.fillParam(0, "a@b.de")
 			h.press("R")
 			h.finish(Result{Stdout: []byte(rendered), Stderr: []byte("Warning: addPickJob is deprecated.\n")},
-				"template", "render", "rush", "--set-string", "email=a@b.de")
+				pinned(rushDoc, "template", "render", "rush", "--set-string", "email=a@b.de")...)
 
 			Expect(h.view()).To(ContainSubstring("Warning: addPickJob is deprecated."))
 		})
@@ -368,7 +381,7 @@ var _ = Describe("the Templates screen", func() {
 			h.press("p")
 			h.fillParam(0, "a@b.de")
 			h.press("R")
-			h.finish(failed(exitcode.Usage, "Error: consumer.email is a string"), "template", "render", "rush", "--set-string", "email=a@b.de")
+			h.finish(failed(exitcode.Usage, "Error: consumer.email is a string"), pinned(rushDoc, "template", "render", "rush", "--set-string", "email=a@b.de")...)
 
 			Expect(h.view()).To(ContainSubstring("rendering rush failed: exit 2"))
 			Expect(h.view()).To(ContainSubstring("Saved body"))
@@ -432,7 +445,7 @@ var _ = Describe("the Templates screen", func() {
 			h.press("p")
 			h.fillParam(0, "a@b.de")
 			h.press("S")
-			h.finish(res, "template", "render", "rush", "--set-string", "email=a@b.de")
+			h.finish(res, pinned(rushDoc, "template", "render", "rush", "--set-string", "email=a@b.de")...)
 		}
 
 		BeforeEach(func() {
@@ -508,7 +521,7 @@ var _ = Describe("the Templates screen", func() {
 			h.press("esc")
 			h.openTemplate(docFor("searchPickJobs"))
 			h.press("S")
-			h.finish(ok(`{"a":1}`), "template", "render", "rush")
+			h.finish(ok(`{"a":1}`), pinned(docFor("searchPickJobs"), "template", "render", "rush")...)
 
 			Expect(h.last().Args).To(Equal([]string{"picking", "search", "--file", "-"}))
 			Expect(string(h.last().Stdin)).To(Equal(`{"a":1}`))
@@ -519,7 +532,7 @@ var _ = Describe("the Templates screen", func() {
 			h.press("esc")
 			h.openTemplate(docFor("purgeListings"))
 			h.press("S")
-			h.finish(ok(`{"a":1}`), "template", "render", "rush")
+			h.finish(ok(`{"a":1}`), pinned(docFor("purgeListings"), "template", "render", "rush")...)
 
 			id := h.lookup("listing", "purge", "--file", "-")
 			Expect(h.m.request.dialog).To(BeNil())
@@ -532,7 +545,7 @@ var _ = Describe("the Templates screen", func() {
 			h.press("esc")
 			h.openTemplate(docFor("replaceFacility"))
 			h.press("S")
-			h.finish(ok(`{"a":1}`), "template", "render", "rush")
+			h.finish(ok(`{"a":1}`), pinned(docFor("replaceFacility"), "template", "render", "rush")...)
 
 			Expect(h.m.current).To(Equal(tabRequest))
 			Expect(h.view()).To(ContainSubstring("Fill in what the command still needs"))
@@ -563,12 +576,32 @@ var _ = Describe("the Templates screen", func() {
 			Entry("an operation that takes no body", docFor("deleteFacility"), "fft facility delete takes no request body"),
 		)
 
+		It("renders only the template it showed, and sends nothing once the file has changed", func() {
+			h.press("esc")
+			h.openTemplate(docFor("searchPickJobs"))
+			h.press("S")
+			h.finish(failed(exitcode.Conflict, `Error: the template "rush" has changed`),
+				pinned(docFor("searchPickJobs"), "template", "render", "rush")...)
+
+			Expect(h.m.current).To(Equal(tabTemplates))
+			Expect(h.r.commandLines()).NotTo(ContainElement(HavePrefix("picking")))
+			Expect(h.view()).To(ContainSubstring("rush changed on disk after it was opened, so nothing was rendered or sent."))
+
+			changed := docFor("purgeListings")
+			h.finish(ok(changed), "template", "show", "rush")
+			Expect(h.view()).To(ContainSubstring("operation  purgeListings"))
+			Expect(h.view()).To(ContainSubstring("It has been read again"))
+
+			h.press("S")
+			h.lookup(pinned(changed, "template", "render", "rush")...)
+		})
+
 		It("sends nothing when the project changed while the template rendered", func() {
 			h.press("p")
 			h.fillParam(0, "a@b.de")
 			h.press("S")
 			h.m.projects.selectProject("prod")
-			h.finish(ok(rendered), "template", "render", "rush", "--set-string", "email=a@b.de")
+			h.finish(ok(rendered), pinned(rushDoc, "template", "render", "rush", "--set-string", "email=a@b.de")...)
 
 			Expect(h.m.current).To(Equal(tabTemplates))
 			Expect(h.view()).To(ContainSubstring("The project changed while the template rendered, so nothing was sent."))
@@ -590,7 +623,7 @@ var _ = Describe("the Templates screen", func() {
 			h.press("p")
 			h.fillParam(0, "a@b.de")
 			h.press("S", "esc", "2")
-			h.finish(ok(rendered), "template", "render", "rush", "--set-string", "email=a@b.de")
+			h.finish(ok(rendered), pinned(rushDoc, "template", "render", "rush", "--set-string", "email=a@b.de")...)
 
 			Expect(h.m.current).To(Equal(tabOperations))
 			Expect(h.r.commandLines()).NotTo(ContainElement(HavePrefix("picking")))
@@ -623,7 +656,7 @@ var _ = Describe("the Templates screen", func() {
 			h.press("p")
 			h.fillParam(0, "a@b.de")
 			h.press("S")
-			renderID := h.lookup("template", "render", "rush", "--set-string", "email=a@b.de")
+			renderID := h.lookup(pinned(rushDoc, "template", "render", "rush", "--set-string", "email=a@b.de")...)
 
 			h.finishID(saveID, ok(`{"template":"other","path":"/home/u/.local/share/fft/templates/other.json"}`))
 			h.lookup("template", "list")
@@ -653,7 +686,7 @@ var _ = Describe("the Templates screen", func() {
 			h.press("p")
 			h.fillParam(0, "a@b.de")
 			h.press("R")
-			renderID := h.lookup("template", "render", "rush", "--set-string", "email=a@b.de")
+			renderID := h.lookup(pinned(rushDoc, "template", "render", "rush", "--set-string", "email=a@b.de")...)
 			h.press("esc", "x")
 			h.finish(failed(exitcode.Usage, "Error: cancelled"), "template", "remove", "rush")
 			h.lookup("template", "list")
@@ -669,7 +702,7 @@ var _ = Describe("the Templates screen", func() {
 			h.press("p")
 			h.fillParam(0, "a@b.de")
 			h.press("R", "esc", "esc")
-			h.finish(ok(rendered), "template", "render", "rush", "--set-string", "email=a@b.de")
+			h.finish(ok(rendered), pinned(rushDoc, "template", "render", "rush", "--set-string", "email=a@b.de")...)
 
 			Expect(h.m.templates.open).To(BeNil())
 			Expect(h.view()).NotTo(ContainSubstring("Rendering rush…"))
@@ -677,18 +710,21 @@ var _ = Describe("the Templates screen", func() {
 	})
 
 	DescribeTable("puts a template name that starts with a dash after every flag",
-		func(key string, want ...string) {
+		func(key string, flags ...string) {
 			h.showTemplates(`[{"name":"-y","scope":"project","operationId":"addPickJob"}]`)
 			if key != "enter" {
 				h.press("enter")
 				h.finish(ok(docFor("addPickJob")), "template", "show", "--", "-y")
 			}
 			h.press(key)
-			h.lookup(want...)
+			if key == "R" {
+				flags = pinned(docFor("addPickJob"), flags...)
+			}
+			h.lookup(append(flags, "--", "-y")...)
 		},
-		Entry("show", "enter", "template", "show", "--", "-y"),
-		Entry("render", "R", "template", "render", "--", "-y"),
-		Entry("remove", "x", "template", "remove", "--local", "--", "-y"),
+		Entry("show", "enter", "template", "show"),
+		Entry("render", "R", "template", "render"),
+		Entry("remove", "x", "template", "remove", "--local"),
 	)
 
 	Describe("removing a template", func() {

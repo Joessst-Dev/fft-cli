@@ -102,13 +102,11 @@ func (f *paramField) setArgs() []string {
 type openTemplate struct {
 	row templateRow
 
-	// doc is what `template show` said, nil while it is being read.
+	// doc is what `template show` said, nil while it is being read, and digest
+	// identifies it for `template render --if-digest`.
 	doc    *templateDoc
+	digest string
 	params []*paramField
-
-	// refused are the parameters the form leaves out, because no --set can reach
-	// them by their name.
-	refused []string
 
 	// form is set while the parameters have the cursor, editing while one of them
 	// has the keyboard; before is what it held when editing started.
@@ -507,10 +505,15 @@ func (t *templatesScreen) openRow(row templateRow, next func(*openTemplate) tea.
 			return nil
 		}
 		var doc templateDoc
-		if err := json.Unmarshal(r.Stdout, &doc); err != nil {
+		digest, err := showDigest(r.Stdout)
+		if err == nil {
+			err = json.Unmarshal(r.Stdout, &doc)
+		}
+		if err != nil {
 			t.fail("reading "+row.Name, Result{ExitCode: exitcode.General, Stderr: []byte(err.Error())})
 			return nil
 		}
+		o.digest = digest
 		t.setDoc(o, &doc)
 		// Only onto the screen that asked, while nothing else has the keyboard: a
 		// form or a dialog that opened over another screen would take its keys.
@@ -521,23 +524,26 @@ func (t *templatesScreen) openRow(row templateRow, next func(*openTemplate) tea.
 	})
 }
 
+// showDigest is the digest of the template `template show -o json` printed. It
+// reads the document the way fft reads a template file, so a document fft would
+// refuse — a parameter no --set can reach, say — is refused here too, and never
+// becomes a form.
+func showDigest(stdout []byte) (string, error) {
+	shown, err := template.Decode(stdout)
+	if err != nil {
+		return "", err
+	}
+	return template.Digest(shown)
+}
+
 func (t *templatesScreen) setDoc(o *openTemplate, doc *templateDoc) {
 	o.doc = doc
 	o.setRendered(nil)
 	names := make([]string, 0, len(doc.Params))
-	o.refused = nil
 	for name := range doc.Params {
-		// fft refuses to read a file declaring such a name. Should one arrive all
-		// the same, the form does not offer it: the --set it would build sets
-		// something else.
-		if template.ValidateParamName(name) != nil {
-			o.refused = append(o.refused, name)
-			continue
-		}
 		names = append(names, name)
 	}
 	slices.Sort(names)
-	slices.Sort(o.refused)
 
 	kept := t.values[o.row.key()]
 	var body any
@@ -593,13 +599,17 @@ func (o *openTemplate) missing() []string {
 	return names
 }
 
-// renderArgs is the `fft template render` command line for o's values.
-func (o *openTemplate) renderArgs() []string {
-	var sets []string
+// renderArgs is the `fft template render` command line for o's values. digest,
+// unless "", pins the render to the template as show described it.
+func (o *openTemplate) renderArgs(digest string) []string {
+	var flags []string
 	for _, f := range o.params {
-		sets = append(sets, f.setArgs()...)
+		flags = append(flags, f.setArgs()...)
 	}
-	return templateArgs("render", o.row.Name, sets...)
+	if digest != "" {
+		flags = append(flags, "--if-digest", digest)
+	}
+	return templateArgs("render", o.row.Name, flags...)
 }
 
 // templateArgs is `fft template <verb> <name> <flags>`. fft refuses a template
@@ -633,13 +643,19 @@ func (t *templatesScreen) ready(o *openTemplate) bool {
 // render runs `template render` for o, for project, and hands done what it printed
 // and what it warned about.
 func (t *templatesScreen) render(o *openTemplate, project string, done func(body []byte, warnings []string) tea.Cmd) tea.Cmd {
-	args := o.renderArgs()
+	// Pinned to what show said: render reads the file again, and what it renders
+	// must be the template the user has been looking at — the operation S sends
+	// it with was read from that, not from whatever the file says by now.
+	args := o.renderArgs(o.digest)
 	a := action{inv: Invocation{Args: args, Project: project}, display: t.s.displayFor(args, project)}
 	gen := t.openGen
 	t.say("Rendering " + o.row.Name + "…")
 	return t.s.start(a, func(r Result) tea.Cmd {
 		if gen != t.openGen || t.open != o {
 			return nil
+		}
+		if r.ExitCode == exitcode.Conflict {
+			return t.reopen(o)
 		}
 		if r.ExitCode != exitcode.OK {
 			o.setRendered(nil)
@@ -653,6 +669,17 @@ func (t *templatesScreen) render(o *openTemplate, project string, done func(body
 		t.say("")
 		return done(o.rendered, o.warnings)
 	})
+}
+
+// reopen reads o again, because the file changed after it was shown: nothing
+// was rendered from it, and nothing is sent until the user has seen what it
+// says now.
+func (t *templatesScreen) reopen(o *openTemplate) tea.Cmd {
+	t.keep(o)
+	cmd := t.openRow(o.row, nil)
+	t.say(o.row.Name + " changed on disk after it was opened, so nothing was rendered or sent. " +
+		"It has been read again: check it, then press R or S.")
+	return cmd
 }
 
 func (t *templatesScreen) renderOnly(o *openTemplate) tea.Cmd {
@@ -773,7 +800,7 @@ func (t *templatesScreen) remove(row templateRow) tea.Cmd {
 // pipeline is the shell pipe that does what S does: the render, into the
 // operation's command.
 func (t *templatesScreen) pipeline(o *openTemplate, op Operation, project string) shellCommand {
-	render := t.s.displayFor(o.renderArgs(), project)
+	render := t.s.displayFor(o.renderArgs(""), project)
 	send := t.s.displayFor(append(slices.Clone(op.Command.Path), "--file", "-"), project)
 	return shellCommand{
 		line:       render.line + " | " + send.line,
@@ -820,7 +847,7 @@ func (t *templatesScreen) equivalent() shellCommand {
 			return t.pipeline(o, op, t.s.target())
 		}
 	}
-	return t.s.displayFor(o.renderArgs(), t.s.target())
+	return t.s.displayFor(o.renderArgs(""), t.s.target())
 }
 
 func (t *templatesScreen) view(width, height int) string {
@@ -945,11 +972,6 @@ func (t *templatesScreen) detail(o *openTemplate, width, height int) string {
 	}
 	for i, f := range o.params {
 		head = append(head, t.paramRow(o, f, o.form && i == o.cursor, nameWidth, width))
-	}
-	if len(o.refused) > 0 {
-		head = append(head, wrap(st.warnText.Render(clean(fmt.Sprintf(
-			"Not offered: %s. No --set can reach a parameter by that name; set its path instead.",
-			strings.Join(o.refused, ", ")))), width))
 	}
 	if f := o.selected(); o.form && f != nil && f.spec.Description != "" {
 		head = append(head, st.dim.Render(clip("  "+clean(f.spec.Description), width)))

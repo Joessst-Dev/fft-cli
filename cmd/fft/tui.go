@@ -33,8 +33,9 @@ sends the request again and s saves the body to a file.
 The Templates screen lists the saved templates. p fills in a template's
 parameters, R renders it, and S renders it and hands the body to the operation's
 command: anything the render warns about, such as a template saved under another
-project, is shown first, and a write is still asked about before it goes. x
-removes a template.
+project, is shown first, and a write is still asked about before it goes. What is
+rendered is the template on screen: if its file changed after it was opened, nothing
+is sent and the template is read again. x removes a template.
 
 Press ? for every key, i for the commands that are running, and y to copy the fft
 command the focused action stands for. Secrets you type and request bodies are

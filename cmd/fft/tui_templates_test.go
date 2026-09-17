@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 	"path/filepath"
 	"slices"
 
@@ -9,6 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
+	"github.com/Joessst-Dev/fft-cli/internal/template"
 	"github.com/Joessst-Dev/fft-cli/internal/tui"
 )
 
@@ -116,6 +118,28 @@ var _ = Describe("templates in the TUI", func() {
 
 		call := t.only()
 		Expect(string(call.Body)).To(Equal(`{"order":{"consumer":{"email":"a@b.de"},"id":9007199254740993}}`))
+	})
+
+	It("renders only the template show printed, once it has been decoded again as the UI does", func() {
+		r := c.newRunner()
+		saveRush(r, "")
+
+		id := start(r, tui.Invocation{Args: []string{"template", "show", "rush"}})
+		shown := awaitDone(r, id)[id]
+		Expect(shown.ExitCode).To(Equal(exitcode.OK), "stderr: %s", shown.Stderr)
+		doc, err := template.Decode(shown.Stdout)
+		Expect(err).NotTo(HaveOccurred())
+		digest, err := template.Digest(doc)
+		Expect(err).NotTo(HaveOccurred())
+
+		render(r, "", "--if-digest", digest)
+
+		Expect(os.WriteFile(userPath("rush"),
+			[]byte(`{"schemaVersion":1,"operationId":"deleteFacility","body":{"a":1}}`), 0o600)).To(Succeed())
+		id = start(r, tui.Invocation{Args: []string{"template", "render", "rush", "--if-digest", digest}})
+		changed := awaitDone(r, id)[id]
+		Expect(changed.ExitCode).To(Equal(exitcode.Conflict))
+		Expect(changed.Stdout).To(BeEmpty())
 	})
 
 	It("warns when the template is rendered for a project other than the one it was saved under", func() {
