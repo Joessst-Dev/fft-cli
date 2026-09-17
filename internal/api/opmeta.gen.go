@@ -959,7 +959,7 @@ var operations = []Operation{
 		Permissions:  []string{"PACKAGING_UNITS_WRITE"},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"details\": {\n    \"dimensions\": {\n      \"maxHeight\": 1,\n      \"maxLength\": 1,\n      \"maxWidth\": 1\n    },\n    \"maxWeight\": 1,\n    \"packagingPricingDetails\": {\n      \"pricing\": [\n        {\n          \"prices\": []\n        }\n      ]\n    },\n    \"type\": \"PALLET\",\n    \"volumetricWeightFactor\": 1\n  },\n  \"nameLocalized\": {},\n  \"tenantPackagingUnitId\": \"MY_PACKAGINGUNIT_ID\"\n}\n",
+		SampleBody:   "{\n  \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"details\": {\n    \"dimensions\": {\n      \"maxHeight\": 1,\n      \"maxLength\": 1,\n      \"maxWidth\": 1\n    },\n    \"maxWeight\": 1,\n    \"packagingPricingDetails\": {\n      \"pricing\": [\n        {\n          \"prices\": []\n        }\n      ]\n    },\n    \"type\": {},\n    \"volumetricWeightFactor\": 1\n  },\n  \"nameLocalized\": {},\n  \"tenantPackagingUnitId\": \"MY_PACKAGINGUNIT_ID\"\n}\n",
 	},
 	{
 		ID:             "createParcelInformation",
@@ -3095,6 +3095,7 @@ var operations = []Operation{
 			{Name: "itemReturnLineItemStatus", In: InQuery, Type: TypeArray, Item: TypeString, Explode: true, Enum: []string{"OPEN", "IN_PROGRESS", "WAITING_FOR_INPUT", "REJECTED", "ACCEPTED", "CANCELED"}, Description: "ItemReturnLineItemStatus of an included ItemReturn line item to filter the results"},
 			{Name: "itemReturnScannableCodes", In: InQuery, Type: TypeArray, Item: TypeString, Explode: true, Description: "scannableCodes of the item return to filter the results"},
 			{Name: "itemReturnStatus", In: InQuery, Type: TypeArray, Item: TypeString, Explode: true, Enum: []string{"ANNOUNCED", "OPEN", "IN_PROGRESS", "PAUSED", "FINISHED", "WAITING_FOR_INPUT", "CANCELED", "OBSOLETE"}, Description: "ItemReturnStatus of an included ItemReturn to filter the results"},
+			{Name: "orderBy", In: InQuery, Type: TypeString, Enum: []string{"CREATED_ASC", "CREATED_DESC", "LAST_MODIFIED_ASC", "LAST_MODIFIED_DESC"}, Description: "Order in which the result should be returned"},
 			{Name: "returnFacilityId", In: InQuery, Type: TypeString, Description: "return facility to filter to"},
 			{Name: "searchTerm", In: InQuery, Type: TypeString, Description: "Term by which to search through the fields"},
 			{Name: "size", In: InQuery, Type: TypeInteger, Description: "number of entities to show"},
@@ -5921,7 +5922,7 @@ var operations = []Operation{
 		},
 		HasBody:      true,
 		BodyRequired: true,
-		SampleBody:   "{\n  \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"details\": {\n    \"dimensions\": {\n      \"maxHeight\": 1,\n      \"maxLength\": 1,\n      \"maxWidth\": 1\n    },\n    \"maxWeight\": 1,\n    \"packagingPricingDetails\": {\n      \"pricing\": [\n        {\n          \"prices\": []\n        }\n      ]\n    },\n    \"type\": \"PALLET\",\n    \"volumetricWeightFactor\": 1\n  },\n  \"nameLocalized\": {},\n  \"tenantPackagingUnitId\": \"MY_PACKAGINGUNIT_ID\",\n  \"version\": 1\n}\n",
+		SampleBody:   "{\n  \"carrierRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"details\": {\n    \"dimensions\": {\n      \"maxHeight\": 1,\n      \"maxLength\": 1,\n      \"maxWidth\": 1\n    },\n    \"maxWeight\": 1,\n    \"packagingPricingDetails\": {\n      \"pricing\": [\n        {\n          \"prices\": []\n        }\n      ]\n    },\n    \"type\": {},\n    \"volumetricWeightFactor\": 1\n  },\n  \"nameLocalized\": {},\n  \"tenantPackagingUnitId\": \"MY_PACKAGINGUNIT_ID\",\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "putPackingContainerRequirement",
