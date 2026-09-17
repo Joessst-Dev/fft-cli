@@ -18,6 +18,10 @@ type Options struct {
 	// Catalog is every operation the UI can send.
 	Catalog Catalog
 
+	// History is the request history the History screen shows and the Operations
+	// list counts uses from. nil shows none.
+	History History
+
 	// In is where keystrokes come from; it must be a terminal.
 	In io.Reader
 

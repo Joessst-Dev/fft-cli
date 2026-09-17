@@ -50,21 +50,6 @@ type receiver interface {
 	receive(msg tea.Msg) tea.Cmd
 }
 
-// comingSoon stands in for a screen a later release fills in.
-type comingSoon struct {
-	name string
-	what string
-}
-
-func (c comingSoon) update(tea.Msg) tea.Cmd   { return nil }
-func (c comingSoon) bindings() []key.Binding  { return nil }
-func (c comingSoon) equivalent() shellCommand { return shellCommand{} }
-func (c comingSoon) focused() bool            { return false }
-
-func (c comingSoon) view(int, int) string {
-	return c.name + "\n\nComing soon: " + c.what + "."
-}
-
 // app is the root model: the tab bar, the screen underneath it, the in-flight
 // panel, the status bar and the help line.
 type app struct {
@@ -86,6 +71,7 @@ type app struct {
 	request    *requestScreen
 	response   *responseScreen
 	templates  *templatesScreen
+	history    *historyScreen
 	roles      *rolesScreen
 
 	panel     *runsPanel
@@ -118,6 +104,7 @@ func newApp(opts Options) *app {
 	m.request = newRequestScreen(s, st, m)
 	m.response = newResponseScreen(s, st, opts.Catalog, m)
 	m.templates = newTemplatesScreen(s, st, m, opts.Catalog)
+	m.history = newHistoryScreen(s, st, m, opts.Catalog, opts.History)
 	m.roles = newRolesScreen(s, st, opts.Catalog)
 	m.operations.hint = m.hint
 	m.screens = []screen{
@@ -126,16 +113,16 @@ func newApp(opts Options) *app {
 		m.request,
 		m.response,
 		m.templates,
-		comingSoon{"History", "recent and most used requests"},
+		m.history,
 		m.roles,
 	}
 	return m
 }
 
-// hint is what the Operations list shows beside op: what the user appears to lack
-// for it.
+// hint is what the Operations list shows beside op: how often it was sent to the
+// current project, and what the user appears to lack for it.
 func (m *app) hint(op Operation) opHint {
-	return opHint{lacking: m.s.lacking(op)}
+	return opHint{uses: m.history.usesOf(op.ID), lacking: m.s.lacking(op)}
 }
 
 var _ navigator = (*app)(nil)
@@ -165,6 +152,12 @@ func (m *app) unsentForm(body []byte) (form, lost string) {
 	return m.request.unsent(body)
 }
 
+func (m *app) openRecalled(op Operation, rc recalled) tea.Cmd {
+	m.request.openRecalled(op, rc)
+	m.current = tabRequest
+	return nil
+}
+
 func (m *app) templatesChanged() {
 	m.templates.changed()
 }
@@ -191,6 +184,10 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width, m.height = msg.Width, msg.Height
 		m.help.SetWidth(msg.Width)
 	case runEventMsg:
+		if msg.State == RunDone {
+			// Recorded, if it is recorded at all, before the runner says it is done.
+			m.history.runFinished()
+		}
 		m.response.observe(RunEvent(msg))
 		cmds = append(cmds, m.s.handle(RunEvent(msg)), waitForEvent(m.events))
 	case runnerClosedMsg:
@@ -234,18 +231,25 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	m.operations.resize(m.width, m.bodyHeight(m.help.View(m.bindings())))
 	cmds = append(cmds, m.readShown())
+	m.history.sync()
 	return m, tea.Batch(cmds...)
 }
 
 // readShown reads what the screen on display shows and is not current: the
-// templates, the user's roles. Each is read when somebody looks, not when the UI
-// starts, and read again once it may have changed — after a project switch for the
-// roles.
+// templates, the history, the user's roles. Each is read when somebody looks, not
+// when the UI starts, and read again once it may have changed — after a run for
+// the history, after a project switch for the roles.
 func (m *app) readShown() tea.Cmd {
 	switch m.screens[m.current] {
 	case m.templates:
 		return m.templates.shown()
-	case m.operations, m.request, m.roles:
+	case m.operations:
+		return tea.Batch(m.roles.want(), m.history.want())
+	case m.request:
+		return m.roles.want()
+	case m.history:
+		return m.history.want()
+	case m.roles:
 		return m.roles.want()
 	}
 	return nil

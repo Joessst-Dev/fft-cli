@@ -143,6 +143,11 @@ type requestScreen struct {
 	// last saved as a template: work in either is not lost with the form.
 	sent  *sentForm
 	saved []byte
+
+	// recalled is the command line the form was filled in with from the history,
+	// nil for a form the user filled in. Those values are not the user's work
+	// until they change one.
+	recalled []string
 }
 
 // sentForm is what the form held when it was sent.
@@ -162,7 +167,7 @@ func (r *requestScreen) open(op Operation) {
 	r.fields = nil
 	r.cursor, r.editing = 0, false
 	r.body, r.example, r.busy, r.from = nil, nil, false, ""
-	r.sent, r.saved = nil, nil
+	r.sent, r.saved, r.recalled = nil, nil, nil
 	r.dialog, r.notice, r.problems, r.failure, r.notes = nil, "", nil, nil, nil
 
 	for i := range op.Command.Args {
@@ -695,6 +700,9 @@ func (r *requestScreen) unsent(body []byte) (form, lost string) {
 	if r.sent != nil && slices.Equal(r.sent.args, r.args()) && bytes.Equal(r.sent.body, r.body) {
 		return form, ""
 	}
+	if r.recalled != nil && r.body == nil && slices.Equal(r.recalled, r.args()) {
+		return form, ""
+	}
 
 	var parts []string
 	filled := 0
@@ -731,6 +739,32 @@ func (r *requestScreen) sendBody(op Operation, body []byte, from string) tea.Cmd
 		return nil
 	}
 	return r.send()
+}
+
+// openRecalled replaces the form with one for op, filled in with what rc recalls.
+// A value history did not keep is left empty rather than filled with its marker.
+func (r *requestScreen) openRecalled(op Operation, rc recalled) {
+	r.open(op)
+	r.say(rc.notice())
+	r.notes = rc.warnings()
+	if !rc.kept {
+		return
+	}
+	positional := 0
+	for _, f := range r.fields {
+		switch {
+		case f.arg != nil:
+			if positional < len(rc.args) {
+				f.input.SetValue(rc.args[positional])
+			}
+			positional++
+		case f.toggle():
+			f.switched = rc.switches[f.flag.Name]
+		default:
+			f.input.SetValue(rc.values[f.flag.Name])
+		}
+	}
+	r.recalled = r.args()
 }
 
 // askTemplateName asks what to call the template the form's body is saved as.

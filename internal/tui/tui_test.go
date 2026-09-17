@@ -144,7 +144,7 @@ var _ = Describe("the UI", func() {
 	})
 
 	Describe("switching screens", func() {
-		It("goes to a screen by its number, and says what is still to come", func() {
+		It("goes to a screen by its number", func() {
 			h.press("2")
 			Expect(h.view()).To(ContainSubstring("[2 Operations]"))
 
@@ -153,7 +153,6 @@ var _ = Describe("the UI", func() {
 
 			h.press("6")
 			Expect(h.view()).To(ContainSubstring("[6 History]"))
-			Expect(h.view()).To(ContainSubstring("Coming soon"))
 
 			h.press("7")
 			Expect(h.view()).To(ContainSubstring("[7 Roles]"))

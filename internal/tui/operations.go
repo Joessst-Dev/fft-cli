@@ -24,9 +24,9 @@ const (
 
 // opHint is what the list knows about an operation beyond the API's description of
 // it: how often this project has sent it, and which permissions the user appears
-// to lack for it. The permissions come from the user's roles, and the uses from
-// the request history, which a later release reads; while either is unknown its
-// part of the hint is the zero value, and the list draws nothing for it.
+// to lack for it. Both come from the request history and the user's roles; while
+// either is unknown its part of the hint is the zero value, and the list draws
+// nothing for it.
 type opHint struct {
 	uses    int
 	lacking []string
@@ -57,6 +57,10 @@ type navigator interface {
 	// unsentForm names the Request screen's form and says what it holds that
 	// replacing it with a form for body would lose; lost is "" when nothing.
 	unsentForm(body []byte) (form, lost string)
+
+	// openRecalled shows the Request screen with a form for op, filled in with what
+	// a recorded request gave it. Nothing is sent.
+	openRecalled(op Operation, rc recalled) tea.Cmd
 
 	// templatesChanged says a template was saved or removed.
 	templatesChanged()
