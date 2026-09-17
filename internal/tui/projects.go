@@ -313,8 +313,21 @@ func (p *projectsScreen) warmUp() tea.Cmd {
 	})
 }
 
+// projectArgs is `fft project <verb> <name> <flags>`. A project name comes out
+// of the config file, not user typing, so one starting with a dash (fft refuses
+// to create such a project, but an older fft or a hand-edited config may have
+// one) goes last, after "--", where it is only a name and never a flag — the
+// same guard templateArgs uses for template names.
+func projectArgs(verb, name string, flags ...string) []string {
+	args := []string{"project", verb}
+	if strings.HasPrefix(name, "-") {
+		return append(append(append(args, flags...), "--"), name)
+	}
+	return append(append(args, name), flags...)
+}
+
 func (p *projectsScreen) useAction(name string) action {
-	args := []string{"project", "use", name}
+	args := projectArgs("use", name)
 	return action{inv: Invocation{Args: args, Exclusive: true}, display: commandLine(args)}
 }
 
@@ -338,7 +351,7 @@ func (p *projectsScreen) readOnlyDialog(row projectRow) dialog {
 	if row.ReadOnly {
 		return p.allowWritesDialog(row)
 	}
-	args := []string{"project", "read-only", row.Name}
+	args := projectArgs("read-only", row.Name)
 	a := action{inv: Invocation{Args: args, Exclusive: true}, display: commandLine(args)}
 	return &confirmDialog{
 		question: fmt.Sprintf("Make %s read-only?", row.Name),
@@ -355,7 +368,7 @@ func (p *projectsScreen) readOnlyDialog(row projectRow) dialog {
 func (p *projectsScreen) allowWritesDialog(row projectRow) dialog {
 	// The command asks before re-arming writes, and a run has no terminal to ask
 	// on. This dialog is that question, so its answer is the --yes.
-	args := []string{"project", "read-only", row.Name, "--off", "--yes"}
+	args := projectArgs("read-only", row.Name, "--off", "--yes")
 	a := action{inv: Invocation{Args: args, Exclusive: true}, display: commandLine(args)}
 	question := fmt.Sprintf("Allow writes to %s again?", row.Name)
 	detail := "fft will send creates, updates and deletes to it again."
@@ -384,7 +397,7 @@ func (p *projectsScreen) startReadOnly(a action, name, done string) tea.Cmd {
 }
 
 func (p *projectsScreen) removeDialog(row projectRow) dialog {
-	args := []string{"project", "remove", row.Name, "--yes"}
+	args := projectArgs("remove", row.Name, "--yes")
 	a := action{inv: Invocation{Args: args, Exclusive: true}, display: commandLine(args)}
 	question := fmt.Sprintf("Remove %s and its stored credentials?", row.Name)
 	return newTypeNameDialog(p.st, question, "", row.Name, a.display, func() tea.Cmd {

@@ -16,7 +16,7 @@ var inlineBodyFlags = map[string]bool{"data": true}
 // pairFlags carry name=value (or, for a header, "Name: value") pairs whose name is
 // worth keeping and whose value may not be: a header is where a token travels, and
 // a path parameter or a template value can be anything.
-var pairFlags = map[string]bool{"header": true, "set": true, "param": true, "require": true}
+var pairFlags = map[string]bool{"header": true, "set": true, "set-string": true, "param": true, "require": true}
 
 // personalNamePatterns are name substrings of flags and query parameters that
 // carry a person's data: a consumer's contact details and name, an employee's

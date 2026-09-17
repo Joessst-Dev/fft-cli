@@ -308,14 +308,14 @@ func (p *responseScreen) checkSave(path string, body []byte) tea.Cmd {
 		p.save(target, body)
 		return nil
 	}
-	p.dialog = &confirmDialog{
+	p.dialog = armed(&confirmDialog{
 		question: "Replace " + target + "?",
 		detail:   "The file exists. Its contents will be lost.",
 		onYes: func() tea.Cmd {
 			p.save(target, body)
 			return nil
 		},
-	}
+	}, p.s.now, true)
 	return nil
 }
 

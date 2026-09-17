@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -123,6 +124,13 @@ func (d *Deps) recordHistory(cmd *cobra.Command, code int, elapsed time.Duration
 	log, err := d.historyLog()
 	if err == nil {
 		err = log.Append(entry)
+	}
+	var compactErr *history.CompactError
+	if errors.As(err, &compactErr) {
+		// The entry itself was written; only the trailing compaction failed, so
+		// this is not a reason to tell the user their request went unrecorded.
+		d.debugHistory("compaction failed: %v", compactErr.Err)
+		err = nil
 	}
 	if err != nil {
 		d.debugHistory("not recorded: %v", err)

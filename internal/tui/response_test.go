@@ -280,10 +280,12 @@ var _ = Describe("the Response screen", func() {
 
 				h.saveAs("out.json")
 				Expect(h.view()).To(ContainSubstring("out.json?"))
+				h.wait()
 				h.press("n")
 				Expect(h.wrote("out.json")).To(Equal("keep"))
 
 				h.saveAs("out.json")
+				h.wait()
 				h.press("y")
 				Expect(h.wrote("out.json")).To(HavePrefix(`[{"id":"f-1"`))
 			})

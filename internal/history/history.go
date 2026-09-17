@@ -105,6 +105,18 @@ const readLimitFactor = 4
 // have fft write to a file it does not own.
 var errNotRegular = errors.New("not a regular file; move it aside for fft to keep a history there")
 
+// CompactError is what [Log.Append] returns when the entry itself was written but
+// the trailing compaction it triggered failed. Unwrap it to inspect the cause; a
+// caller that only cares whether the entry was recorded should treat it as
+// success and report the wrapped error on its own debug channel instead.
+type CompactError struct {
+	Err error
+}
+
+func (e *CompactError) Error() string { return "compact history: " + e.Err.Error() }
+
+func (e *CompactError) Unwrap() error { return e.Err }
+
 func (l Log) maxBytes() int64 {
 	if l.MaxBytes > 0 {
 		return l.MaxBytes
@@ -142,7 +154,11 @@ func (l Log) Append(e Entry) error {
 	// The size before the write plus the write is enough to decide on: compaction
 	// looks at the file again under its lock before it rewrites anything.
 	if info.Size()+int64(n) > l.maxBytes() {
-		return l.compact()
+		if err := l.compact(); err != nil {
+			// The entry above is already durable; only the trailing compaction
+			// failed, and that must not read to a caller as "not recorded".
+			return &CompactError{Err: err}
+		}
 	}
 	return nil
 }
