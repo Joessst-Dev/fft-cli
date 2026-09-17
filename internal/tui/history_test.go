@@ -318,6 +318,15 @@ var _ = Describe("the History screen", func() {
 				"and the apiKey pair of --query, so they are not filled in."))
 		})
 
+		It("withholds a person's data the way history recorded it", func() {
+			recorded := history.Args([]string{"getPickJobs"}, []string{"--query=email=jane@example.com", "--query=status=OPEN"})
+			reopen(entry(1, "staging", "getPickJobs", "fft api", recorded...))
+
+			Expect(field("--query").value()).To(Equal("status=OPEN"))
+			Expect(h.view()).NotTo(ContainSubstring("jane@example.com"))
+			Expect(h.view()).To(ContainSubstring("History keeps no value for the email pair of --query"))
+		})
+
 		It("keeps the values of a list history kept, and says one was not", func() {
 			reopen(entry(1, "staging", "searchFacility", "fft facility list",
 				"--status=ONLINE", "--status=<redacted>"))

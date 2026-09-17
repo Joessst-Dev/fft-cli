@@ -328,7 +328,14 @@ the HTTP status, the exit code and the duration.
 - **Redacted** as `<redacted>`: inline `--data` bodies (`--data -` and `--data @file` are
   kept, since they only say where the body came from), header values, template values
   (`--set`), the values of `--param` and `--require` pairs, any flag or pair whose name
-  looks like a credential, and any value that is a JSON document.
+  looks like a credential, any value that is a JSON document, and any flag or pair whose
+  name looks like a person's data: email, phone, mobile, address, street, postal code,
+  first and last name, consumer name, username, assigned user and search term — so
+  `--query email=jane@example.com` is kept as `--query email=<redacted>`.
+- **Kept as typed**, because reopening a request needs them: ids and other positional
+  arguments, the names of `--file` and `--data @file` bodies, and every other flag and
+  filter value, such as a status or a date. Whatever personal data is passed that way —
+  an order id that is a consumer's email, say — is in the record too.
 - **Not recorded**: requests the UI makes on its own, such as reading your roles or signing
   in at startup. They would otherwise count as uses of those operations. Pressing `r` on
   the Roles screen is your own request, so it is recorded.

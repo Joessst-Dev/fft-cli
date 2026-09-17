@@ -124,11 +124,14 @@ fft history clear               # asks first; --yes in a script
 
 An entry holds the time, the project name, the operation, the command with its flags, the
 HTTP status, the exit code and the duration. It never holds a request or response body,
-and inline `--data` bodies, header values, template values and credential-shaped flags
-are stored as `<redacted>`. The file is `$XDG_STATE_HOME/fft/history.jsonl` (by default
+and inline `--data` bodies, header values, template values, credential-shaped flags and
+flags or query parameters named like a person's data (`--email`, `--query email=…`,
+`--search-term`, …) are stored as `<redacted>`; the full list is in
+[What history records](./tui.md#what-history-records). The file is `$XDG_STATE_HOME/fft/history.jsonl` (by default
 `~/.local/state/fft/history.jsonl`), mode `0600`; it is trimmed to its newest half once it
-passes 1 MiB, and it never leaves the machine. It does name your projects and the ids you
-passed on the command line, which is worth knowing before you share a home directory.
+passes 1 MiB, and it never leaves the machine. It does name your projects, and keeps the
+ids, file names and other values you passed on the command line as typed, since reopening
+a request needs them; that is worth knowing before you share a home directory.
 
 Recording is switched off:
 

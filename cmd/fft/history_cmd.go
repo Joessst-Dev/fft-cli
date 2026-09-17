@@ -22,7 +22,13 @@ in a shell or sent from fft tui: when it ran, against which project, which
 operation, the flags it was given, the HTTP status and the exit code. The requests
 fft tui makes on its own, such as reading your roles, are not recorded. Request and
 response bodies are never recorded, and so are no inline --data bodies, header
-values, template values or credential-shaped flags: those are kept as <redacted>.
+values, template values, credential-shaped flags, or flags and query parameters
+that name a person's data (email, phone, address, street, postal code, first and
+last name, username, search term): those are kept as <redacted>.
+
+Everything else is kept as typed, because reopening a request needs it: the ids
+and other arguments, the names of --file bodies, and filter values such as a
+status or a date. Anything personal passed that way is in the record too.
 
 The record is ~/.local/state/fft/history.jsonl (or under $XDG_STATE_HOME), mode
 0600. It never leaves the machine.

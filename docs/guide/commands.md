@@ -292,8 +292,10 @@ fft history clear
   Each entry has `v` (the record's format version), `ts`, `source` (`cli` or `tui`),
   `project`, `operationId`, `command`, `args`, `status` (left out when no response
   arrived), `exit` and `durationMs`.
-- Neither holds a request body, and inline `--data`, header values, `--set` values and
-  credential-shaped flags appear as `<redacted>`. History is off in headless mode unless
+- Neither holds a request body, and inline `--data`, header values, `--set` values,
+  credential-shaped flags and flags or query parameters named like a person's data
+  (`--email`, `--query email=…`, `--search-term`) appear as `<redacted>`; ids and other
+  values are kept as typed. History is off in headless mode unless
   `FFT_HISTORY=on`, so in CI both usually print `[]`; when nothing is being recorded, stderr
   says why.
 - `fft history clear` deletes the whole history. It asks first, and without a terminal it

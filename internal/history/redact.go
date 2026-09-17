@@ -18,6 +18,28 @@ var inlineBodyFlags = map[string]bool{"data": true}
 // a path parameter or a template value can be anything.
 var pairFlags = map[string]bool{"header": true, "set": true, "param": true, "require": true}
 
+// personalNamePatterns are name substrings of flags and query parameters that
+// carry a person's data: a consumer's contact details and name, an employee's
+// login, and the free-text searches such values are typed into. The list is
+// narrow on purpose. Ids and paths are kept, because reopening a request needs
+// them, and a name like facilityName is the tenant's, not a person's.
+var personalNamePatterns = []string{
+	"email", "phone", "mobile", "address", "street", "postal",
+	"firstname", "lastname", "consumername", "username", "assigneduser", "searchterm",
+}
+
+// looksPersonal reports whether name is shaped like one that holds a person's
+// data. Case and the separators '-' and '_' are ignored, as for credentials.
+func looksPersonal(name string) bool {
+	normalized := strings.ToLower(strings.NewReplacer("-", "", "_", "").Replace(name))
+	for _, pattern := range personalNamePatterns {
+		if strings.Contains(normalized, pattern) {
+			return true
+		}
+	}
+	return false
+}
+
 // Redact returns args with the values history must not keep replaced by
 // [Redacted]. args are positional arguments and flags, each flag written as
 // --name=value or, for a flag given without a value, a bare --name.
@@ -25,8 +47,8 @@ var pairFlags = map[string]bool{"header": true, "set": true, "param": true, "req
 //   - --data keeps "-" and "@path", which say where the body came from; an inline
 //     body is dropped.
 //   - --header, --set, --param and --require keep the name of each pair.
-//   - A flag whose name looks like a credential is dropped, and so is the value of
-//     any pair whose name does.
+//   - A flag whose name looks like a credential or a person's data is dropped, and
+//     so is the value of any pair whose name does.
 //   - Any value that starts with '{' or '[' is a JSON document, and is dropped
 //     wherever it appears.
 //
@@ -55,7 +77,7 @@ func redactArg(arg string) string {
 	redact := func(v string) string { return "--" + name + "=" + v }
 
 	switch {
-	case secrets.LooksLikeCredential(name), looksLikeJSON(value):
+	case withheldName(name), looksLikeJSON(value):
 		return redact(Redacted)
 	case inlineBodyFlags[name]:
 		if value == "-" || strings.HasPrefix(value, "@") {
@@ -69,10 +91,15 @@ func redactArg(arg string) string {
 		return redact(Redacted)
 	}
 
-	if key, ok := pairName(value); ok && secrets.LooksLikeCredential(strings.TrimRight(key, "=: ")) {
+	if key, ok := pairName(value); ok && withheldName(strings.TrimRight(key, "=: ")) {
 		return redact(key + Redacted)
 	}
 	return arg
+}
+
+// withheldName reports whether a flag or pair of this name keeps no value.
+func withheldName(name string) bool {
+	return secrets.LooksLikeCredential(name) || looksPersonal(name)
 }
 
 // pairName returns the name part of a name=value or "Name: value" pair, with its

@@ -28,6 +28,13 @@ var _ = Describe("redacting a command line", func() {
 		Entry("a credential-named flag", "--firebase-api-key=AIzaSy", "--firebase-api-key=<redacted>"),
 		Entry("a credential-named query parameter", "--query=access_token=abc", "--query=access_token=<redacted>"),
 		Entry("an ordinary query parameter", "--query=status=OPEN", "--query=status=OPEN"),
+		Entry("a personal flag", "--email=jane@example.com", "--email=<redacted>"),
+		Entry("a personal flag, spelt in kebab case", "--consumer-name=Jane Doe", "--consumer-name=<redacted>"),
+		Entry("a free-text search", "--search-term=Jane", "--search-term=<redacted>"),
+		Entry("a personal query parameter", "--query=email=jane@example.com", "--query=email=<redacted>"),
+		Entry("a personal query parameter in camel case", "--query=recipientPostalCode=40764", "--query=recipientPostalCode=<redacted>"),
+		Entry("an id, which reopening needs", "--consumer-id=c-1", "--consumer-id=c-1"),
+		Entry("a name that is not a person's", "--facility-name=Berlin", "--facility-name=Berlin"),
 		Entry("a JSON value in any flag", `--filter=[{"a":1}]`, "--filter=<redacted>"),
 		Entry("a JSON positional argument", `{"a":1}`, "<redacted>"),
 	)

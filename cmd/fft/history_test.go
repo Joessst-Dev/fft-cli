@@ -587,7 +587,7 @@ var _ = Describe("the history's redaction of every flag in the tree", func() {
 		"output": "names an output format",
 	}
 
-	It("drops the value of every flag that could carry a body or a credential", func() {
+	It("drops the value of every flag that could carry a body, a credential or a person's data", func() {
 		root := newRootCmd(newCLI().deps)
 
 		var walk func(cmd *cobra.Command)
@@ -597,11 +597,12 @@ var _ = Describe("the history's redaction of every flag in the tree", func() {
 					return
 				}
 				credential := looksCredential(f.Name)
+				personal := looksPersonal(f.Name)
 				body := strings.Contains(strings.ToLower(f.Usage), "json")
 				if _, excused := notABody[f.Name]; excused {
 					body = false
 				}
-				if !credential && !body {
+				if !credential && !personal && !body {
 					return
 				}
 
@@ -617,6 +618,19 @@ var _ = Describe("the history's redaction of every flag in the tree", func() {
 		walk(root)
 	})
 })
+
+// looksPersonal is the spec's own, deliberately broader, idea of a flag that
+// carries a person's data.
+func looksPersonal(name string) bool {
+	name = strings.ToLower(name)
+	for _, word := range []string{"mail", "phone", "mobile", "address", "street", "postal", "zip",
+		"first-name", "last-name", "consumer-name", "user-name", "username", "assigned-user", "search-term"} {
+		if strings.Contains(name, word) {
+			return true
+		}
+	}
+	return false
+}
 
 // looksCredential is the spec's own, deliberately broader, idea of a
 // credential-shaped flag name, so that the guard does not merely restate the rule
