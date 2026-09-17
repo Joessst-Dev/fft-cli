@@ -81,6 +81,11 @@ func newOpItem(op Operation) opItem {
 	// What a user remembers an operation by: its id, what it does, or the command
 	// they would type.
 	filter := op.ID + " " + op.Summary + " fft " + strings.Join(op.Command.Path, " ")
+	for _, cmd := range op.Also {
+		if cmd.Curated {
+			filter += " fft " + strings.Join(cmd.Path, " ")
+		}
+	}
 	return opItem{op: op, filter: filter}
 }
 
@@ -312,6 +317,12 @@ func (o *operationsScreen) describe(op Operation, width int) string {
 		"operation  " + clean(op.ID),
 		"tag        " + clean(op.Tag),
 		"command    " + o.s.displayFor(op.Command.Path, "").String() + commandKind(op.Command),
+	}
+	// fft api, which sends every operation, is not worth a line on each.
+	for _, cmd := range op.Also {
+		if cmd.Curated {
+			lines = append(lines, "also       "+o.s.displayFor(cmd.Path, "").String()+commandKind(cmd))
+		}
 	}
 
 	switch {

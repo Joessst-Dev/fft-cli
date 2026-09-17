@@ -99,6 +99,12 @@ var _ = Describe("the Operations screen", func() {
 			Expect(h.row("searchFacility")).To(HavePrefix("> "))
 		})
 
+		It("finds an operation by another hand-written command that sends it, but not by fft api", func() {
+			filter := newOpItem(opListFacilities).FilterValue()
+			Expect(filter).To(ContainSubstring("fft facility search"))
+			Expect(filter).NotTo(ContainSubstring("fft api"))
+		})
+
 		It("takes every key as text while the search is open", func() {
 			h.search("q2y")
 
@@ -160,6 +166,14 @@ var _ = Describe("the Operations screen", func() {
 			Expect(view).To(ContainSubstring("Replace a facility"))
 			Expect(view).To(ContainSubstring("--kind text"))
 			Expect(view).To(ContainSubstring("--if-version integer"))
+		})
+
+		It("names the other hand-written commands that send it, and not fft api", func() {
+			h.press("esc", "up", "D")
+			view := h.view()
+			Expect(view).To(ContainSubstring("command    fft facility list (hand-written)"))
+			Expect(view).To(ContainSubstring("also       fft facility search (hand-written)"))
+			Expect(view).NotTo(ContainSubstring("fft api searchFacility"))
 		})
 
 		It("goes back to the list with esc", func() {

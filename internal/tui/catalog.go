@@ -1,5 +1,7 @@
 package tui
 
+import "slices"
+
 // Catalog describes every operation the UI can send, and the fft command that
 // sends each one. It is read-only, and safe to read from any goroutine.
 type Catalog interface {
@@ -42,8 +44,29 @@ type Operation struct {
 	// operation takes none.
 	SampleBody string
 
-	// Command is the command that sends it.
+	// Command is the command the form for it runs.
 	Command Command
+
+	// Also are the other commands that send it: the other hand-written commands
+	// that each send one use of it, and `fft api` unless Command is already that.
+	// A request recorded through one of them reopens in its form, not Command's,
+	// because only that form has the flags it was sent with.
+	Also []Command
+}
+
+// sentThrough is op with the form of the command at path, which the request was
+// sent through, or false when no command of op's is at path.
+func (op Operation) sentThrough(path []string) (Operation, bool) {
+	if slices.Equal(path, op.Command.Path) {
+		return op, true
+	}
+	for _, cmd := range op.Also {
+		if slices.Equal(path, cmd.Path) {
+			op.Command = cmd
+			return op, true
+		}
+	}
+	return op, false
 }
 
 // Command is an fft command, as the request form needs to know it.

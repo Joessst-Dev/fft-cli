@@ -1,6 +1,7 @@
 package main
 
 import (
+	"maps"
 	"net/http"
 	"slices"
 	"strings"
@@ -8,6 +9,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	"github.com/Joessst-Dev/fft-cli/internal/api"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
@@ -199,6 +201,99 @@ var _ = Describe("the TUI's catalog of operations", func() {
 			Expect(cmd.Body).To(BeTrue())
 			Expect(cmd.BodyRequired).To(BeTrue())
 			Expect(flagNames(cmd)).To(ConsistOf("all", "max-items", "size", "total"))
+		})
+	})
+
+	When("a recorded request is reopened", func() {
+		// sharedClaimants is every command that claims an operation another command
+		// claims too, as history records it. A request recorded through any of them
+		// must reopen in that command's own form: the form the operation opens by
+		// default has other flags, and would drop the user's values.
+		sharedClaimants := map[string][]string{
+			"actionsRoutingStrategy": {"fft routing strategy activate", "fft routing strategy actions"},
+			"facilityAction":         {"fft facility coordinates set", "fft facility coordinates remove"},
+			"orderAction":            {"fft order cancel", "fft order unlock"},
+			"searchFacility":         {"fft facility list", "fft facility search"},
+			"searchListing":          {"fft listing list", "fft listing search"},
+			"searchStock":            {"fft stock list", "fft stock search"},
+		}
+
+		// formFor is the form of op the UI reopens a request sent through the command
+		// at path in, the way recall looks for it.
+		formFor := func(id string, path []string) (tui.Command, bool) {
+			op := ops[id]
+			for _, cmd := range append([]tui.Command{op.Command}, op.Also...) {
+				if slices.Equal(cmd.Path, path) {
+					return cmd, true
+				}
+			}
+			return tui.Command{}, false
+		}
+
+		It("knows every command that shares its operation with another", func() {
+			shared := make(map[string][]string)
+			for id, claimants := range operationCommands(root) {
+				if len(claimants) < 2 {
+					continue
+				}
+				for _, c := range claimants {
+					shared[id] = append(shared[id], c.CommandPath())
+				}
+			}
+			Expect(shared).To(HaveLen(len(sharedClaimants)))
+			for id, paths := range sharedClaimants {
+				Expect(shared).To(HaveKeyWithValue(id, ConsistOf(paths)), id)
+			}
+		})
+
+		var entries []TableEntry
+		for _, id := range slices.Sorted(maps.Keys(sharedClaimants)) {
+			for _, command := range sharedClaimants[id] {
+				entries = append(entries, Entry(command, id, command))
+			}
+		}
+		DescribeTable("finds the form of the command it was sent through, among those sharing its operation",
+			func(id, command string) {
+				op, ok := api.LookupOperation(id)
+				Expect(ok).To(BeTrue())
+				path := strings.Fields(command)[1:]
+				sender, rest, err := root.Find(path)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(rest).To(BeEmpty())
+				Expect(sender.Annotations).To(HaveKeyWithValue(annotationOperationID, id))
+
+				form, found := formFor(id, path)
+				Expect(found).To(BeTrue(), "a request sent as %q would reopen in the form of %v", command, ops[id].Command.Path)
+
+				global := make(map[string]bool)
+				root.PersistentFlags().VisitAll(func(f *pflag.Flag) { global[f.Name] = true })
+				Expect(form).To(Equal(describeCommand(sender, op, global)))
+			},
+			entries,
+		)
+
+		It("finds the fft api form for every operation, for a request sent through fft api", func() {
+			for _, op := range api.Operations() {
+				// Not split at spaces: an operation id may hold one, and history keeps
+				// the id as the one argument it was given as.
+				form, found := formFor(op.ID, []string{"api", op.ID})
+				Expect(found).To(BeTrue(), op.ID)
+				Expect(form.Curated).To(BeFalse(), op.ID)
+				Expect(form.Args).To(BeEmpty(), op.ID)
+				Expect(form.Body).To(Equal(op.HasBody), op.ID)
+				Expect(form.BodyRequired).To(Equal(op.BodyRequired), op.ID)
+				Expect(flagNames(form)).To(ConsistOf("header", "param", "query"), op.ID)
+			}
+		})
+
+		It("offers each command once", func() {
+			for id, op := range ops {
+				paths := []string{strings.Join(op.Command.Path, " ")}
+				for _, cmd := range op.Also {
+					paths = append(paths, strings.Join(cmd.Path, " "))
+				}
+				Expect(paths).To(HaveLen(len(slices.Compact(slices.Sorted(slices.Values(paths))))), id)
+			}
 		})
 	})
 

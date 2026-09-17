@@ -333,7 +333,7 @@ func (h *historyScreen) reopen(e history.Entry) tea.Cmd {
 			": the API may have changed since the request was sent.")
 		return nil
 	}
-	rc := recall(op, e)
+	op, rc := recall(op, e)
 	form, lost := h.nav.unsentForm(nil)
 	if lost == "" {
 		return h.nav.openRecalled(op, rc)
@@ -536,8 +536,8 @@ type recalled struct {
 	values   map[string]string
 	switches map[string]switchState
 
-	// kept is false when the request was sent through another command than the
-	// form's, whose flags the form does not have: nothing is filled in.
+	// kept is false when the request was sent through a command the operation no
+	// longer has, whose flags no form has: nothing is filled in.
 	kept bool
 	via  string
 
@@ -554,8 +554,10 @@ type recalled struct {
 	sent time.Time
 }
 
-// recall reads what e gave each field of op's form.
-func recall(op Operation, e history.Entry) recalled {
+// recall reads what e gave each field of the form of the command e was sent
+// through, and returns op with that form. When op has no command at e's path, op
+// is returned as it is, and nothing is filled in.
+func recall(op Operation, e history.Entry) (Operation, recalled) {
 	rc := recalled{
 		values:   make(map[string]string),
 		switches: make(map[string]switchState),
@@ -574,10 +576,10 @@ func recall(op Operation, e history.Entry) recalled {
 		path = append(path, positional[0])
 		positional = positional[1:]
 	}
-	if !slices.Equal(path, op.Command.Path) {
-		return rc
+	op, rc.kept = op.sentThrough(path)
+	if !rc.kept {
+		return op, rc
 	}
-	rc.kept = true
 
 	flags := make(map[string]Flag, len(op.Command.Flags))
 	for _, f := range op.Command.Flags {
@@ -626,7 +628,7 @@ func recall(op Operation, e history.Entry) recalled {
 	for name, values := range lists {
 		rc.values[name] = strings.Join(values, ",")
 	}
-	return rc
+	return op, rc
 }
 
 // withheldValue names a value of list flag that history did not keep: by the name

@@ -141,7 +141,8 @@ In the description, `enter` opens the request form and `esc` goes back to the li
 An operation that a curated command sends opens that command's form, so you get its typed
 flags and table. A write that several commands share, such as the order actions, opens the
 form for `fft api <operationId>` instead, because each of those commands sends only one use
-of the operation. So does an operation a component claims.
+of the operation. So does an operation a component claims. The description names the
+other curated commands that send an operation, and a search finds it by them too.
 
 Operations your roles do not seem to allow are shown dimmed. See [Roles](#roles-7).
 
@@ -251,9 +252,13 @@ project's requests.
 | `c` | clear the history (`fft history clear`, which asks its own question) |
 | `ctrl+r` | read it again |
 
-`enter` sends nothing. It fills the form in and waits. History keeps no bodies and no
-redacted values, so those fields are left empty and the form lists what it could not fill
-in. It asks before replacing a form that holds work you have not sent.
+`enter` sends nothing. It fills the form in and waits. The form is the one for the command
+the request was sent through, even where the operation opens another: a request sent as
+`fft facility list` reopens that command's form, not the one for `fft facility search`, and
+one sent through `fft api` reopens the `fft api` form. Only a command this fft no longer has
+gives an empty form. History keeps no bodies and no redacted values, so those fields are
+left empty and the form lists what it could not fill in. It asks before replacing a form
+that holds work you have not sent.
 
 The most used operations are counted per project, which is also where the stars on the
 Operations screen come from. When requests are not being recorded, the screen says why.

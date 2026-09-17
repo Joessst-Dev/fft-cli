@@ -41,10 +41,7 @@ func newCLICatalog(root *cobra.Command) *cliCatalog {
 	global := make(map[string]bool)
 	root.PersistentFlags().VisitAll(func(f *pflag.Flag) { global[f.Name] = true })
 
-	escape, _, err := root.Find([]string{"api"})
-	if err != nil || escape == root {
-		escape = nil
-	}
+	viaEscape := escapeCommand(root, global)
 
 	byTag := make(map[string][]tui.Operation)
 	for _, op := range api.Operations() {
@@ -53,21 +50,29 @@ func newCLICatalog(root *cobra.Command) *cliCatalog {
 			tag = untaggedGroup
 		}
 
+		claimants := commands[op.ID]
+		sender := operationSender(op, claimants)
 		var cmd tui.Command
-		switch sender := operationSender(op, commands[op.ID]); {
+		switch {
 		case sender != nil:
 			cmd = describeCommand(sender, op, global)
-		case escape != nil:
+		case viaEscape != nil:
 			// No single command of fft's own stands for it: an installed component
 			// claimed it, or several curated commands each send one use of it. `fft
 			// api` reaches it, and sends the body as it is.
-			cmd = describeCommand(escape, op, global)
-			cmd.Path = append(cmd.Path, op.ID)
-			cmd.Args = nil
-			cmd.Curated, cmd.Example = false, false
-			cmd.Body, cmd.BodyRequired = op.HasBody, op.BodyRequired
+			cmd = viaEscape(op)
 		default:
 			continue
+		}
+
+		var also []tui.Command
+		for _, c := range claimants {
+			if c != sender {
+				also = append(also, describeCommand(c, op, global))
+			}
+		}
+		if sender != nil && viaEscape != nil {
+			also = append(also, viaEscape(op))
 		}
 
 		byTag[tag] = append(byTag[tag], tui.Operation{
@@ -82,6 +87,7 @@ func newCLICatalog(root *cobra.Command) *cliCatalog {
 			Deprecated:  op.Deprecated,
 			SampleBody:  op.SampleBody,
 			Command:     cmd,
+			Also:        also,
 		})
 	}
 
@@ -108,6 +114,26 @@ func (c *cliCatalog) Groups() []tui.OperationGroup { return c.groups }
 // Table implements [tui.Catalog].
 func (c *cliCatalog) Table(cmd tui.Command, stdout []byte) (string, error) {
 	return renderTable(cmd.Path, stdout)
+}
+
+// escapeCommand returns what the request form needs to know about `fft api <id>`
+// for an operation, or nil when root has no `fft api`. Its flags do not depend on
+// the operation, so they are read once rather than once for each of the API's.
+func escapeCommand(root *cobra.Command, global map[string]bool) func(api.Operation) tui.Command {
+	escape, _, err := root.Find([]string{"api"})
+	if err != nil || escape == root {
+		return nil
+	}
+	base := describeCommand(escape, api.Operation{}, global)
+	return func(op api.Operation) tui.Command {
+		cmd := base
+		cmd.Path = append(slices.Clone(base.Path), op.ID)
+		cmd.Args = nil
+		cmd.Flags = slices.Clone(base.Flags)
+		cmd.Curated, cmd.Example = false, false
+		cmd.Body, cmd.BodyRequired = op.HasBody, op.BodyRequired
+		return cmd
+	}
 }
 
 // operationCommands maps each operationId to the commands that declare it, in the

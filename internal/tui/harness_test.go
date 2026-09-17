@@ -358,6 +358,24 @@ var (
 				{Name: "all", Kind: FlagBool, Usage: "Every page"},
 			},
 		},
+		// The real searchFacility is sent by two hand-written commands, and by fft api.
+		Also: []Command{
+			{
+				Path: []string{"facility", "search"}, Curated: true, Table: true, Body: true, BodyRequired: true,
+				Flags: []Flag{
+					{Name: "max-items", Kind: FlagInt, Usage: "Stop after this many"},
+					{Name: "all", Kind: FlagBool, Usage: "Every page"},
+				},
+			},
+			{
+				Path: []string{"api", "searchFacility"}, Body: true,
+				Flags: []Flag{
+					{Name: "header", Kind: FlagPairs},
+					{Name: "param", Kind: FlagPairs},
+					{Name: "query", Kind: FlagPairs},
+				},
+			},
+		},
 	}
 	opDeleteFacility = Operation{
 		ID: "deleteFacility", Summary: "Delete a facility", Method: "DELETE", Path: "/api/facilities/{facilityId}",

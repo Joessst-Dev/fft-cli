@@ -345,11 +345,43 @@ var _ = Describe("the History screen", func() {
 			Expect(h.view()).To(ContainSubstring("Not part of this form, so not carried over: --debug."))
 		})
 
-		It("opens an empty form for a request sent through another command", func() {
+		It("opens the form of the other hand-written command the request was sent through", func() {
+			reopen(entry(1, "staging", "searchFacility", "fft facility search", "--file=-", "--max-items=40", "--all"))
+
+			Expect(h.m.request.op.ID).To(Equal("searchFacility"))
+			Expect(h.m.request.op.Command.Path).To(Equal([]string{"facility", "search"}))
+			Expect(field("--max-items").value()).To(Equal("40"))
+			Expect(field("--all").switched).To(Equal(switchOn))
+			Expect(h.view()).To(ContainSubstring("Filled in from the request of"))
+			Expect(h.view()).NotTo(ContainSubstring("whose flags this form does not have"))
+			Expect(h.view()).NotTo(ContainSubstring("Not part of this form"))
+			Expect(h.view()).To(ContainSubstring("History keeps no request bodies"))
+		})
+
+		It("sends the reopened twin through its own command", func() {
+			reopen(entry(1, "staging", "searchFacility", "fft facility search", "--max-items=40"))
+			h.press("e")
+			h.editorExits([]byte(`{"query":{}}`), nil)
+
+			h.press("s")
+			Expect(h.last().Args).To(Equal([]string{"facility", "search", "--max-items", "40", "--file", "-"}))
+		})
+
+		It("opens the fft api form for a request sent through fft api", func() {
 			reopen(entry(1, "staging", "searchFacility", "fft api", "searchFacility", "--param=x=1"))
+
+			Expect(h.m.request.op.ID).To(Equal("searchFacility"))
+			Expect(h.m.request.args()).To(Equal([]string{"api", "searchFacility", "--param", "x=1"}))
+			Expect(h.view()).NotTo(ContainSubstring("whose flags this form does not have"))
+		})
+
+		It("opens an empty form for a request sent through a command this fft does not have", func() {
+			reopen(entry(1, "staging", "searchFacility", "fft facility find", "--size=5"))
+
 			Expect(h.m.request.op.ID).To(Equal("searchFacility"))
 			Expect(h.m.request.args()).To(Equal([]string{"facility", "list"}))
-			Expect(h.view()).To(ContainSubstring("was sent as 'fft api', whose flags this form does not have"))
+			Expect(field("--size").value()).To(BeEmpty())
+			Expect(h.view()).To(ContainSubstring("was sent as 'fft facility find', whose flags this form does not have"))
 		})
 
 		// Rows, newest first: searchFacility --size=50, getPickJob, searchFacility
