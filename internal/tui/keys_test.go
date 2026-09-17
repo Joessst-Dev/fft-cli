@@ -4,6 +4,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"image/color"
 	"path/filepath"
 	"slices"
 	"strconv"
@@ -73,6 +74,7 @@ var _ = Describe("the key hint", func() {
 		h.send(tea.WindowSizeMsg{Width: 120, Height: 30})
 
 		Expect(h.hintRows()).To(Equal([]string{
+			strings.Repeat("─", 120),
 			"↑/↓ select • enter use • r read-only on/off • d remove • R refresh token • a add • ctrl+r reload",
 			"1-7/tab screens • ctrl+p project • i running • y copy • q quit • ? all keys",
 		}))
@@ -86,6 +88,44 @@ var _ = Describe("the key hint", func() {
 			Expect(h.m.bodyHeight(h.m.hintLine())).To(Equal(30 - 3 - rows))
 			Expect(strings.Count(h.m.View().Content, "\n") + 1).To(Equal(30))
 		}
+	})
+
+	It("sets itself apart with a rule, which a short terminal gives to the body instead", func() {
+		h.send(tea.WindowSizeMsg{Width: 60, Height: 30})
+		rule := strings.Repeat("─", 60)
+		Expect(h.hintRows()[0]).To(Equal(rule))
+		Expect(h.view()).To(ContainSubstring(" fft · staging · token 42m left"))
+
+		h.send(tea.WindowSizeMsg{Width: 60, Height: 12})
+		rows := h.hintRows()
+		Expect(h.view()).NotTo(ContainSubstring(rule))
+		Expect(h.m.bodyHeight(h.m.hintLine())).To(Equal(12 - 3 - len(rows)))
+		Expect(rows[0]).To(HavePrefix("↑/↓ select"))
+		Expect(rows[len(rows)-1]).To(HaveSuffix("? all keys"))
+	})
+
+	It("draws its keys for the terminal's background once the terminal says what it is", func() {
+		coloured := newHarness(Options{Color: true})
+		coloured.loaded(twoProjects, validToken)
+		dark := coloured.m.hintLine()
+
+		coloured.send(tea.BackgroundColorMsg{Color: color.White})
+		light := coloured.m.hintLine()
+		Expect(light).NotTo(Equal(dark))
+		Expect(ansi.Strip(light)).To(Equal(ansi.Strip(dark)))
+
+		coloured.send(tea.BackgroundColorMsg{Color: color.Black})
+		Expect(coloured.m.hintLine()).To(Equal(dark))
+
+		// Without colour there is nothing to pick.
+		before := h.m.hintLine()
+		h.send(tea.BackgroundColorMsg{Color: color.White})
+		Expect(h.m.hintLine()).To(Equal(before))
+		Expect(before).To(Equal(ansi.Strip(before)))
+	})
+
+	It("asks the terminal for its background when it starts", func() {
+		Expect(msgsOf(h.m.Init())).To(ContainElement(BeAssignableToTypeOf(tea.RequestBackgroundColor())))
 	})
 
 	It("does not offer the legend while a field has the keyboard, where ? is typed", func() {
@@ -203,7 +243,7 @@ var _ = Describe("the key legend", func() {
 	It("offers only its own keys, and no command to copy", func() {
 		h.press("?")
 
-		Expect(h.hintRows()).To(Equal([]string{"↑/↓ scroll", "q quit • ?/esc close"}))
+		Expect(h.hintRows()).To(Equal([]string{strings.Repeat("─", 120), "↑/↓ scroll", "q quit • ?/esc close"}))
 		Expect(h.view()).NotTo(ContainSubstring("$ fft"))
 	})
 

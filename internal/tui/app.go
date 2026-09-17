@@ -179,7 +179,7 @@ func (m *app) showing(scr screen) bool {
 }
 
 func (m *app) Init() tea.Cmd {
-	return tea.Batch(waitForEvent(m.events), m.projects.init())
+	return tea.Batch(waitForEvent(m.events), m.projects.init(), tea.RequestBackgroundColor)
 }
 
 func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -194,6 +194,8 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.response.observe(RunEvent(msg))
 		cmds = append(cmds, m.s.handle(RunEvent(msg)), waitForEvent(m.events))
+	case tea.BackgroundColorMsg:
+		m.st.hint = newHintStyles(m.st.color, msg.IsDark())
 	case runnerClosedMsg:
 		// The runner is shut down only as the UI goes; there is nothing left to wait for.
 	case spinner.TickMsg:
@@ -266,9 +268,18 @@ func (m *app) bodyHeight(hint string) int {
 	return max(m.height-3-lipgloss.Height(hint), 0)
 }
 
-// hintLine is the keys that work right now, on as many rows as they need.
+// ruleMinBody is the fewest body rows the rule above the hint is drawn beside. The
+// rule is only a divider, and a short terminal needs the row more.
+const ruleMinBody = 8
+
+// hintLine is the keys that work right now, on as many rows as they need, under a
+// rule that sets them apart from the status bar.
 func (m *app) hintLine() string {
-	return hintView(m.st, m.width, m.bindings())
+	hint := hintView(m.st, m.width, m.bindings())
+	if m.width <= 0 || m.height-3-lipgloss.Height(hint)-1 < ruleMinBody {
+		return hint
+	}
+	return m.st.hint.rule.Render(strings.Repeat("─", m.width)) + "\n" + hint
 }
 
 // keyOwner is the part of the UI the next key goes to.

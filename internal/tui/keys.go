@@ -105,20 +105,26 @@ const hintSeparator = " • "
 
 // hintView draws h on as many lines as its keys need at width columns: the local
 // keys from a line of their own, the global ones from the next. Nothing is cut
-// short with an ellipsis, so the last global key — the legend's — is always shown.
-// A width of 0 is one nobody knows, and gives each part a single line.
+// short with an ellipsis, so the last global key — the legend's — is always shown,
+// and it is drawn in the key's colour throughout, to be found first. A width of 0
+// is one nobody knows, and gives each part a single line.
 func hintView(st styles, width int, h helpKeys) string {
+	hs := st.hint
 	var lines []string
-	for _, part := range [][]key.Binding{h.local, h.global} {
-		items := make([]string, 0, len(part))
-		for _, b := range part {
-			if help := b.Help(); b.Enabled() && help.Key != "" {
-				items = append(items,
-					st.help.ShortKey.Inline(true).Render(help.Key)+" "+
-						st.help.ShortDesc.Inline(true).Render(help.Desc))
+	for part, bindings := range [][]key.Binding{h.local, h.global} {
+		items := make([]string, 0, len(bindings))
+		for i, b := range bindings {
+			help := b.Help()
+			if !b.Enabled() || help.Key == "" {
+				continue
 			}
+			desc := hs.desc
+			if part == 1 && i == len(bindings)-1 {
+				desc = hs.key.Bold(false)
+			}
+			items = append(items, hs.key.Render(help.Key)+" "+desc.Render(help.Desc))
 		}
-		lines = append(lines, pack(items, st.help.ShortSeparator.Inline(true).Render(hintSeparator), width)...)
+		lines = append(lines, pack(items, hs.sep.Render(hintSeparator), width)...)
 	}
 	return strings.Join(lines, "\n")
 }
