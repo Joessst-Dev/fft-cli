@@ -57,6 +57,11 @@ func (d *Deps) historyLog() (history.Log, error) {
 // runner nobody reads, filling up with the job's project names. Then the config
 // file's settings.noHistory.
 //
+// Headless mode is the run acting on the environment's project, not FFT_* merely
+// being exported: a developer whose shell has them and who names a configured
+// project with --project is working as anyone else does, and is recorded — as the
+// update notice, too, still reaches them.
+//
 // It may run for a command that failed before [Deps.complete] did, so it opens
 // what it needs itself rather than relying on what complete would have set.
 func (d *Deps) historyOff() string {
@@ -67,10 +72,7 @@ func (d *Deps) historyOff() string {
 		return config.EnvHistory + " is off"
 	}
 
-	if d.Ephemeral != nil {
-		return "fft is running from the environment (set " + config.EnvHistory + "=on to record)"
-	}
-	if _, headless, err := config.FromEnv(os.LookupEnv); headless || err != nil {
+	if d.actsOnEnvironment() {
 		return "fft is running from the environment (set " + config.EnvHistory + "=on to record)"
 	}
 
@@ -91,6 +93,23 @@ func (d *Deps) historyOff() string {
 		return "settings.noHistory is set in the config file"
 	}
 	return ""
+}
+
+// actsOnEnvironment reports whether the run acts on the project FFT_* describes.
+// A set that does not parse counts as one: the run was meant to be headless, and
+// fails before it acts on anything.
+func (d *Deps) actsOnEnvironment() bool {
+	if d.Ephemeral == nil {
+		if _, headless, err := config.FromEnv(os.LookupEnv); !headless && err == nil {
+			return false
+		}
+	}
+	if d.run != nil {
+		if p := d.run.project.Load(); p != nil {
+			return *p == config.EphemeralName
+		}
+	}
+	return d.Project == "" || d.Project == config.EphemeralName
 }
 
 // recordHistory appends the run of cmd to the request history, if it addressed an

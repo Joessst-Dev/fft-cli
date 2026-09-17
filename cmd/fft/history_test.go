@@ -273,6 +273,23 @@ var _ = Describe("request history", func() {
 			Expect(recorded(log)).To(BeEmpty())
 		})
 
+		It("records a run that names a configured project, which is not headless", func() {
+			c.configuredTenant(func(w http.ResponseWriter, _ *http.Request) {
+				answerJSON(w, `{"facilities":[],"total":0}`)
+			})
+
+			Expect(c.run("facility", "list", "--project", "prod")).To(Equal(exitcode.OK), c.errOut())
+			Expect(recorded(log)).To(ConsistOf(And(
+				HaveField("Project", "prod"),
+				HaveField("OperationID", "searchFacility"),
+			)))
+		})
+
+		It("records nothing for a run that names the environment's project", func() {
+			Expect(c.run("facility", "list", "--project", config.EphemeralName)).To(Equal(exitcode.OK), c.errOut())
+			Expect(recorded(log)).To(BeEmpty())
+		})
+
 		It("records when FFT_HISTORY=on asks it to", func() {
 			c.setenv(config.EnvHistory, "on")
 
