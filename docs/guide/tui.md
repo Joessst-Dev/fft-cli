@@ -50,20 +50,31 @@ cannot be added, switched, changed or removed until the `FFT_*` variables are un
 
 The tab bar lists seven screens. The status bar under them shows the project (marked
 `RO` when writes are refused), the state of its token, how many commands are running and
-how many are waiting for an answer, and the `$ fft …` command for the focused action. The
-help line shows the keys for whatever has the keyboard.
+how many are waiting for an answer, and the `$ fft …` command for the focused action.
+
+Below the status bar, the key hint shows the keys that work right now. It takes as many
+lines as it needs: first the keys of the screen, then the global keys, ending with `? all
+keys`.
 
 | Key | |
 |---|---|
 | `1`–`7`, `tab`, `shift+tab` | switch screen |
 | `ctrl+p` | go to the Projects screen |
-| `?` | show every key, or fewer |
+| `?` | open the key legend |
 | `i` | open or close the panel of running commands |
 | `y` | copy the focused action's `fft` command |
 | `q`, `ctrl+c` | quit |
 
+`?` opens the key legend in place of the screen. It lists every key of that screen, the
+keys for each of its modes (typing in a field, searching, a form), the running commands
+panel, questions, and the global keys. It also lists keys that do nothing right now, such
+as `e` for an operation without a body, and says why they do nothing. `↑`/`↓` and
+`pgup`/`pgdn` scroll it, and `?` or `esc` closes it. While it is open, no other key reaches
+the screen underneath. `q` and `ctrl+c` still quit.
+
 While a text field or a question has the keyboard, only `ctrl+c` still works: a `q` typed
-into a field is a `q`. Quitting while commands are still running asks first (`y` quits,
+into a field is a `q`, and so is a `?`. The hint then shows only that field's or
+question's keys. Quitting while commands are still running asks first (`y` quits,
 `n` stays), because a cancelled write may already have reached the tenant.
 
 `y` copies through the terminal (OSC 52), so it also works over SSH. It refuses a command
@@ -106,7 +117,7 @@ token, signs in.
 | Key | |
 |---|---|
 | `↑`/`↓` | select |
-| `enter` | use this project (`fft project use`) |
+| `enter`, `u` | use this project (`fft project use`) |
 | `r` | make it read-only, or allow writes again (`fft project read-only`) |
 | `d` | remove it and its stored credentials (`fft project remove`) |
 | `R` | sign in again now (`fft auth refresh`) |
@@ -116,8 +127,9 @@ token, signs in.
 Making a project read-only asks `y`/`n`. Allowing writes again, and removing a project,
 want its name typed back.
 
-`a` opens a form for `fft project add`. `tab`/`enter` and `shift+tab` move between
-fields, `space` switches a toggle, `ctrl+s` adds the project and `esc` cancels. The API key
+`a` opens a form for `fft project add`. `tab`/`↓`/`enter` and `shift+tab`/`↑` move
+between fields, `space` switches a toggle, `ctrl+s` adds the project (so does `enter` on
+the last field) and `esc` cancels. The API key
 and the password go to the command on stdin (`--api-key-stdin --password-stdin`), never on
 its command line, so the command the UI shows holds neither.
 
@@ -131,6 +143,8 @@ current project has sent it three times (see [History](#history-6)).
 | Key | |
 |---|---|
 | `↑`/`↓` | select |
+| `←`/`→`, `pgup`/`pgdn` | previous or next page |
+| `g`/`G`, `home`/`end` | first or last operation |
 | `/` | search by operation id, summary or command; `enter` keeps the search, `esc` drops it |
 | `esc` | clear the search you kept |
 | `enter` | open the operation's request form |
@@ -162,8 +176,8 @@ empty field shows what the command does without it.
 | `s`, `ctrl+s` | send |
 | `esc` | back to Operations |
 
-While you type in a field, `enter` finishes, `tab`/`shift+tab` move to the next or previous
-field, `esc` undoes the change and `ctrl+s` sends. A list flag takes comma-separated values.
+While you type in a field, `enter` finishes, `tab`/`shift+tab` (or `↓`/`↑`) move to the
+next or previous field, `esc` undoes the change and `ctrl+s` sends. A list flag takes comma-separated values.
 
 `e` opens the body in `$VISUAL`, else `$EDITOR`, else `vi` (`notepad` on Windows). The
 first time, it starts from the command's own `--example`, or else the sample body from the
@@ -192,7 +206,8 @@ that ran.
 | Key | |
 |---|---|
 | `←`/`→` | switch between JSON, Table and Stderr |
-| `↑`/`↓`, `h`/`l` | scroll |
+| `↑`/`↓` (`j`/`k`), `h`/`l` | scroll |
+| `pgup`/`pgdn` (`b`/`f`), `u`/`d` | scroll a page, or half a page |
 | `r` | send the same request again |
 | `s` | save the response body to a file |
 | `c` | cancel, while it runs |
