@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 	. "github.com/onsi/ginkgo/v2"
@@ -352,39 +353,47 @@ var _ = Describe("the key legend", func() {
 	})
 
 	Describe("as the screens declare it", func() {
-		// legendOf is where the legend lists a keys type's bindings: the screen on
-		// the tab its keys belong to, or any tab for the keys that work everywhere.
-		legendOf := map[string]int{
-			"globalKeys":    tabProjects,
-			"legendKeys":    tabProjects,
-			"runsKeys":      tabProjects,
-			"projectKeys":   tabProjects,
-			"formKeys":      tabProjects,
-			"operationKeys": tabOperations,
-			"requestKeys":   tabRequest,
-			"responseKeys":  tabResponse,
-			"templateKeys":  tabTemplates,
-			"historyKeys":   tabHistory,
-			"roleKeys":      tabRoles,
+		// legendOf is the legend section that lists an owner's bindings: the screen
+		// its keys belong to, or the shared section for keys that work on every
+		// screen. An owner is a keys struct type, or a package-level binding's name.
+		legendOf := map[string]func(m *app) []legendSection{
+			"globalKeys":    func(m *app) []legendSection { return []legendSection{m.keys.legend()} },
+			"legendKeys":    func(m *app) []legendSection { return []legendSection{m.legendKeys.legend()} },
+			"runsKeys":      func(m *app) []legendSection { return []legendSection{m.panel.legend()} },
+			"yesKey":        func(*app) []legendSection { return []legendSection{questionLegend()} },
+			"noKey":         func(*app) []legendSection { return []legendSection{questionLegend()} },
+			"submitKey":     func(*app) []legendSection { return []legendSection{questionLegend()} },
+			"cancelKey":     func(*app) []legendSection { return []legendSection{questionLegend()} },
+			"projectKeys":   func(m *app) []legendSection { return m.projects.legend() },
+			"formKeys":      func(m *app) []legendSection { return m.projects.legend() },
+			"operationKeys": func(m *app) []legendSection { return m.operations.legend() },
+			"requestKeys":   func(m *app) []legendSection { return m.request.legend() },
+			"responseKeys":  func(m *app) []legendSection { return m.response.legend() },
+			"templateKeys":  func(m *app) []legendSection { return m.templates.legend() },
+			"historyKeys":   func(m *app) []legendSection { return m.history.legend() },
+			"roleKeys":      func(m *app) []legendSection { return m.roles.legend() },
 		}
 
-		It("lists every key a screen gives help text for", func() {
+		It("lists every key a screen gives help text for, in that screen's own legend", func() {
 			declared := helpBindings()
 			Expect(declared).NotTo(BeEmpty())
-			for typ, bindings := range declared {
-				tab, known := legendOf[typ]
-				Expect(known).To(BeTrue(), "%s declares keys with help, but no legend is known to list them: add it to legendOf", typ)
+			for owner, bindings := range declared {
+				sections, known := legendOf[owner]
+				Expect(known).To(BeTrue(), "%s declares keys with help, but no legend is known to list them: add it to legendOf", owner)
 
-				h.m.current = tab
-				var listed [][]string
-				for _, sec := range h.m.legendSections() {
+				var listed []declaredBinding
+				for _, sec := range sections(h.m) {
 					for _, e := range sec.entries {
-						listed = append(listed, e.of.Keys())
+						listed = append(listed, declaredBinding{keys: e.of.Keys(), help: e.of.Help()})
 					}
 				}
 				for _, b := range bindings {
-					Expect(slices.ContainsFunc(listed, func(keys []string) bool { return slices.Equal(keys, b.keys) })).
-						To(BeTrue(), "the %s legend does not list %s.%s (%s)", screenNames[tab], typ, b.field, strings.Join(b.keys, ", "))
+					// Keys and help together tell the fields of one owner apart, so that
+					// esc to go back is not taken as listed because esc to undo is.
+					Expect(slices.ContainsFunc(bindings, func(o declaredBinding) bool { return o.field != b.field && o.same(b) })).
+						To(BeFalse(), "%s.%s has the keys and help of another field, so the legend cannot tell them apart", owner, b.field)
+					Expect(slices.ContainsFunc(listed, b.same)).
+						To(BeTrue(), "the legend does not list %s.%s (%s)", owner, b.field, strings.Join(b.keys, ", "))
 				}
 			}
 		})
@@ -410,12 +419,20 @@ var _ = Describe("the key legend", func() {
 type declaredBinding struct {
 	field string
 	keys  []string
+	help  key.Help
 }
 
-// helpBindings reads the package's source for every keys struct literal, and
-// returns, by struct type, the fields built with key.WithHelp and their keys. The
-// source is read rather than the values because the fields are unexported, and a
-// binding added to a struct is exactly what a hand-kept list would miss.
+func (b declaredBinding) same(o declaredBinding) bool {
+	return slices.Equal(b.keys, o.keys) && b.help == o.help
+}
+
+// helpBindings reads the package's source for the bindings built with
+// key.WithHelp, and returns them by owner: the fields of a keys struct literal by
+// the struct's type, and a package-level binding (yesKey and the other question
+// keys in dialog.go) by its own name. The source is read rather than the values
+// because the fields are unexported, and a binding added to a struct is exactly
+// what a hand-kept list would miss. A binding built anywhere else, such as inside
+// a function body, is not scanned.
 func helpBindings() map[string][]declaredBinding {
 	GinkgoHelper()
 	files, err := filepath.Glob("*.go")
@@ -429,6 +446,21 @@ func helpBindings() map[string][]declaredBinding {
 		}
 		file, err := parser.ParseFile(fset, name, nil, 0)
 		Expect(err).NotTo(HaveOccurred())
+		for _, decl := range file.Decls {
+			gen, ok := decl.(*ast.GenDecl)
+			if !ok || gen.Tok != token.VAR {
+				continue
+			}
+			for _, spec := range gen.Specs {
+				vs := spec.(*ast.ValueSpec)
+				for i, value := range vs.Values {
+					if b, withHelp := readBinding(value); withHelp {
+						b.field = vs.Names[i].Name
+						found[b.field] = append(found[b.field], b)
+					}
+				}
+			}
+		}
 		ast.Inspect(file, func(n ast.Node) bool {
 			lit, ok := n.(*ast.CompositeLit)
 			if !ok {
@@ -443,9 +475,9 @@ func helpBindings() map[string][]declaredBinding {
 				if !ok {
 					continue
 				}
-				if keys, withHelp := bindingKeys(kv.Value); withHelp {
-					field := kv.Key.(*ast.Ident).Name
-					found[typ.Name] = append(found[typ.Name], declaredBinding{field: field, keys: keys})
+				if b, withHelp := readBinding(kv.Value); withHelp {
+					b.field = kv.Key.(*ast.Ident).Name
+					found[typ.Name] = append(found[typ.Name], b)
 				}
 			}
 			return true
@@ -454,12 +486,12 @@ func helpBindings() map[string][]declaredBinding {
 	return found
 }
 
-// bindingKeys reads a key.NewBinding call: the keys it is built with, and whether
-// it has help text.
-func bindingKeys(expr ast.Expr) (keys []string, withHelp bool) {
+// readBinding reads a key.NewBinding call: the keys and help it is built with,
+// and whether it has help at all.
+func readBinding(expr ast.Expr) (b declaredBinding, withHelp bool) {
 	call, ok := expr.(*ast.CallExpr)
 	if !ok || !isCallTo(call, "NewBinding") {
-		return nil, false
+		return b, false
 	}
 	for _, arg := range call.Args {
 		opt, ok := arg.(*ast.CallExpr)
@@ -469,17 +501,24 @@ func bindingKeys(expr ast.Expr) (keys []string, withHelp bool) {
 		switch {
 		case isCallTo(opt, "WithHelp"):
 			withHelp = true
+			Expect(opt.Args).To(HaveLen(2))
+			b.help = key.Help{Key: stringLit(opt.Args[0]), Desc: stringLit(opt.Args[1])}
 		case isCallTo(opt, "WithKeys"):
 			for _, k := range opt.Args {
-				lit, ok := k.(*ast.BasicLit)
-				Expect(ok).To(BeTrue(), "a key built from something other than a literal")
-				s, err := strconv.Unquote(lit.Value)
-				Expect(err).NotTo(HaveOccurred())
-				keys = append(keys, s)
+				b.keys = append(b.keys, stringLit(k))
 			}
 		}
 	}
-	return keys, withHelp
+	return b, withHelp
+}
+
+func stringLit(expr ast.Expr) string {
+	GinkgoHelper()
+	lit, ok := expr.(*ast.BasicLit)
+	Expect(ok).To(BeTrue(), "a key or its help built from something other than a literal")
+	s, err := strconv.Unquote(lit.Value)
+	Expect(err).NotTo(HaveOccurred())
+	return s
 }
 
 func isCallTo(call *ast.CallExpr, name string) bool {
