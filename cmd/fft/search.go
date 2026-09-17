@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -327,31 +326,6 @@ func renderList(deps *Deps, view listView, items []json.RawMessage) error {
 	}
 
 	return deps.Printer.RenderRaw(rows, raw)
-}
-
-// searchPayload decodes a `search --file` body, and refuses one the API would not
-// understand.
-//
-// DisallowUnknownFields is the point. A query is a deep tree of optional filters,
-// and the API's answer to `{"statuz": …}` is not an error but a 200 listing
-// everything — a filter that silently does not filter. Checking the body against
-// the generated schema turns that into "unknown field statuz", before a byte goes
-// over the wire.
-func searchPayload[Q, S any](deps *Deps, path, entity string) (client.SearchPayload[Q, S], error) {
-	var payload client.SearchPayload[Q, S]
-
-	raw, err := readBody(deps, path)
-	if err != nil {
-		return payload, err
-	}
-
-	dec := json.NewDecoder(bytes.NewReader(raw))
-	dec.DisallowUnknownFields()
-
-	if err := dec.Decode(&payload); err != nil {
-		return payload, exitcode.UsageError{Err: fmt.Errorf("%s is not a valid %s search: %w", path, entity, err)}
-	}
-	return payload, nil
 }
 
 // parseSort turns --sort field:asc into the API's sort object.
