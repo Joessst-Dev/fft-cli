@@ -10,6 +10,7 @@ import (
 	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
@@ -121,8 +122,26 @@ type openTemplate struct {
 	rendered []byte
 	warnings []string
 
+	// lines is the body on display — rendered, else saved — as drawn. It is
+	// worked out when the body changes rather than on every frame: a body can run
+	// to megabytes.
+	lines []string
+
 	// scroll is how many lines of the body are scrolled past.
 	scroll int
+}
+
+// setRendered makes body the rendered body, nil for none, and the one on display.
+func (o *openTemplate) setRendered(body []byte) {
+	o.rendered = body
+	switch {
+	case body != nil:
+		o.lines = bodyLines(body)
+	case o.doc != nil:
+		o.lines = bodyLines(o.doc.Body)
+	default:
+		o.lines = nil
+	}
 }
 
 func (o *openTemplate) selected() *paramField {
@@ -504,6 +523,7 @@ func (t *templatesScreen) openRow(row templateRow, next func(*openTemplate) tea.
 
 func (t *templatesScreen) setDoc(o *openTemplate, doc *templateDoc) {
 	o.doc = doc
+	o.setRendered(nil)
 	names := make([]string, 0, len(doc.Params))
 	o.refused = nil
 	for name := range doc.Params {
@@ -622,11 +642,12 @@ func (t *templatesScreen) render(o *openTemplate, project string, done func(body
 			return nil
 		}
 		if r.ExitCode != exitcode.OK {
-			o.rendered, o.warnings = nil, nil
+			o.setRendered(nil)
+			o.warnings = nil
 			t.fail("rendering "+o.row.Name, r)
 			return nil
 		}
-		o.rendered = bytes.Clone(r.Stdout)
+		o.setRendered(bytes.Clone(r.Stdout))
 		o.warnings = stderrTail(r.Stderr, 8)
 		o.scroll = 0
 		t.say("")
@@ -835,7 +856,7 @@ func (t *templatesScreen) footer(width int) []string {
 		lines = append(lines, "", wrap(t.st.okText.Render(output.SanitizeCell(t.notice)), width))
 	}
 	if t.failure != nil {
-		lines = append(lines, "", t.failure.view(t.st, width))
+		lines = append(lines, "", wrap(t.failure.view(t.st, width), width))
 	}
 	return lines
 }
@@ -893,7 +914,7 @@ func (t *templatesScreen) detail(o *openTemplate, width, height int) string {
 	st := t.st
 	clean := output.SanitizeCell
 	head := []string{
-		st.title.Render(clean(o.row.Name)) + "  " + st.dim.Render(clean(o.row.Scope)+" scope"),
+		clip(st.title.Render(clean(o.row.Name))+"  "+st.dim.Render(clean(o.row.Scope)+" scope"), width),
 		st.dim.Render(clip(clean(o.row.Path), width)),
 	}
 	doc := o.doc
@@ -905,13 +926,13 @@ func (t *templatesScreen) detail(o *openTemplate, width, height int) string {
 	if doc.Description != "" {
 		head = append(head, wrap(clean(doc.Description), width))
 	}
-	head = append(head, "", t.operationLine(doc))
+	head = append(head, "", clip(t.operationLine(doc), width))
 	if doc.Project != "" {
 		saved := "saved under " + clean(doc.Project)
 		if cur := t.s.currentProject(); cur != "" && cur != doc.Project {
 			saved = st.warnText.Render(saved + ", not " + clean(cur) + ": ids in the body may not resolve here")
 		}
-		head = append(head, saved)
+		head = append(head, wrap(saved, width))
 	}
 
 	head = append(head, "", st.title.Render("Parameters"))
@@ -940,33 +961,31 @@ func (t *templatesScreen) detail(o *openTemplate, width, height int) string {
 	head = append(head, t.footer(width)...)
 
 	title := "Saved body"
-	body := []byte(doc.Body)
 	if o.rendered != nil {
-		title, body = "Rendered body", o.rendered
+		title = "Rendered body"
 	}
 	head = append(head, "", st.title.Render(title))
 
-	lines := bodyLines(body)
-	room := max(height-len(head), 1)
+	// Counted as drawn: a wrapped description or notice is several rows.
+	top := strings.Join(head, "\n")
+	room := max(height-lipgloss.Height(top), 1)
+	lines := o.lines
 	first := min(o.scroll, max(len(lines)-room, 0))
-	shown := lines[first:min(first+room, len(lines))]
-	for i, line := range shown {
-		shown[i] = clip(line, width)
+	shown := make([]string, 0, room)
+	for _, line := range lines[first:min(first+room, len(lines))] {
+		shown = append(shown, clip(line, width))
 	}
-	return strings.Join(append(head, shown...), "\n")
+	return strings.Join(append([]string{top}, shown...), "\n")
 }
 
 // maxScroll is the furthest o's body scrolls: far enough to show its last line.
 func (t *templatesScreen) maxScroll(o *openTemplate) int {
-	body := []byte{}
-	if o.doc != nil {
-		body = o.doc.Body
-	}
-	if o.rendered != nil {
-		body = o.rendered
-	}
-	return max(len(bodyLines(body))-1, 0)
+	return max(len(o.lines)-1, 0)
 }
+
+// maxBodyLines is as much of a body as the screen keeps to scroll through. A body
+// longer than that is for a shell, where it can be paged and searched.
+const maxBodyLines = 10_000
 
 // bodyLines is a JSON body indented, one line per element, stripped of anything a
 // terminal would act on: it is the file's, and a project file comes with a clone.
@@ -976,7 +995,13 @@ func bodyLines(body []byte) []string {
 	if err := json.Indent(&indented, body, "  ", "  "); err == nil {
 		text = "  " + indented.String()
 	}
-	return strings.Split(strings.TrimRight(output.Sanitize(text), "\n"), "\n")
+	lines := strings.SplitN(strings.TrimRight(output.Sanitize(text), "\n"), "\n", maxBodyLines+1)
+	if len(lines) > maxBodyLines {
+		more := strings.Count(lines[maxBodyLines], "\n") + 1
+		lines = append(lines[:maxBodyLines],
+			fmt.Sprintf("  … %d more lines not shown: render it in a shell to read them all", more))
+	}
+	return lines
 }
 
 // operationLine says which operation the template is for, and the command that

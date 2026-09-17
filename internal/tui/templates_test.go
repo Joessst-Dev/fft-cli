@@ -1,9 +1,11 @@
 package tui
 
 import (
+	"slices"
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
+	"github.com/charmbracelet/x/ansi"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -370,6 +372,48 @@ var _ = Describe("the Templates screen", func() {
 
 			Expect(h.view()).To(ContainSubstring("rendering rush failed: exit 2"))
 			Expect(h.view()).To(ContainSubstring("Saved body"))
+		})
+
+		It("fits the screen when the description wraps onto several rows", func() {
+			h.press("esc")
+			long := strings.Repeat("A rush pick job for the flagship store. ", 6)
+			doc := strings.Replace(rushDoc, `"description": "Rush pick job"`, `"description": "`+long+`"`, 1)
+			doc = strings.Replace(doc, `"big": 9007199254740993`, `"lines": [`+strings.Repeat(`1,`, 40)+`1]`, 1)
+			h.openTemplate(doc)
+
+			const width, height = 40, 24
+			view := ansi.Strip(h.m.templates.view(width, height))
+			rows := strings.Split(view, "\n")
+			Expect(len(rows)).To(BeNumerically("<=", height), view)
+			for _, row := range rows {
+				Expect(ansi.StringWidth(row)).To(BeNumerically("<=", width), row)
+			}
+			Expect(view).To(ContainSubstring("Saved body"))
+		})
+
+		It("keeps the body it draws, and draws it the same however narrow the screen", func() {
+			lines := h.m.templates.open.lines
+			Expect(lines).NotTo(BeEmpty())
+			kept := slices.Clone(lines)
+
+			h.m.templates.view(12, 40)
+			h.press("down")
+			Expect(h.m.templates.open.lines).To(HaveLen(len(lines)))
+			Expect(&h.m.templates.open.lines[0]).To(BeIdenticalTo(&lines[0]), "worked out once, not on every key")
+			Expect(h.m.templates.open.lines).To(Equal(kept), "clipping a row for the screen changes nothing kept")
+		})
+
+		It("keeps at most 10,000 lines of a body, and says how many more there are", func() {
+			h.press("esc")
+			items := strings.TrimSuffix(strings.Repeat(`1,`, 20_000), ",")
+			h.openTemplate(`{"schemaVersion":1,"operationId":"addPickJob","body":{"items":[` + items + `]}}`)
+
+			lines := h.m.templates.open.lines
+			Expect(lines).To(HaveLen(maxBodyLines + 1))
+			Expect(lines[maxBodyLines]).To(ContainSubstring("10004 more lines not shown"))
+
+			h.m.templates.open.scroll = h.m.templates.maxScroll(h.m.templates.open)
+			Expect(h.view()).To(ContainSubstring("more lines not shown"))
 		})
 
 		It("scrolls the body", func() {
