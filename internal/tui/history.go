@@ -530,7 +530,8 @@ type recalled struct {
 	kept bool
 	via  string
 
-	// withheld are the fields history keeps no value for, which stay empty.
+	// withheld are the fields, and the values of list fields, that history keeps
+	// no value for, which are not filled in.
 	withheld []string
 
 	// dropped are the flags the form has no field for.
@@ -593,6 +594,10 @@ func recall(op Operation, e history.Entry) recalled {
 			rc.body = true
 		case !known:
 			rc.dropped = appendOnce(rc.dropped, "--"+name)
+		case strings.Contains(value, history.Redacted) && (f.Kind == FlagList || f.Kind == FlagPairs):
+			// One value of several: the others are kept, and this one is named, so
+			// that the user knows what to add rather than guess what went missing.
+			rc.withheld = appendOnce(rc.withheld, withheldValue(name, value))
 		case strings.Contains(value, history.Redacted):
 			// A redaction marker is not a value, and never goes into a field as one.
 			rc.withheld = appendOnce(rc.withheld, "--"+name)
@@ -615,11 +620,30 @@ func recall(op Operation, e history.Entry) recalled {
 	return rc
 }
 
+// withheldValue names a value of list flag that history did not keep: by the name
+// of its pair, where the record still has it, or else as one of the flag's values.
+func withheldValue(flag, value string) string {
+	if prefix, ok := strings.CutSuffix(value, history.Redacted); ok {
+		if pair := strings.TrimRight(prefix, "=: "); pair != "" {
+			return "the " + pair + " pair of --" + flag
+		}
+	}
+	return "a value of --" + flag
+}
+
 func appendOnce(list []string, s string) []string {
 	if slices.Contains(list, s) {
 		return list
 	}
 	return append(list, s)
+}
+
+// inProse joins items the way a sentence lists them: "a, b and c".
+func inProse(items []string) string {
+	if len(items) < 2 {
+		return strings.Join(items, "")
+	}
+	return strings.Join(items[:len(items)-1], ", ") + " and " + items[len(items)-1]
 }
 
 // notice is what the form says about where its values came from.
@@ -636,7 +660,13 @@ func (rc recalled) notice() string {
 func (rc recalled) warnings() []string {
 	var out []string
 	if len(rc.withheld) > 0 {
-		out = append(out, "History keeps no value for "+strings.Join(rc.withheld, ", ")+", so it is left empty.")
+		// A pair's name comes out of the history file, not out of the catalog.
+		verb := "it is"
+		if len(rc.withheld) > 1 {
+			verb = "they are"
+		}
+		out = append(out, output.SanitizeCell("History keeps no value for "+inProse(rc.withheld)+
+			", so "+verb+" not filled in."))
 	}
 	if rc.body {
 		out = append(out, "History keeps no request bodies: press e to write it again.")

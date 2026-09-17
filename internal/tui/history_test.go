@@ -268,20 +268,36 @@ var _ = Describe("the History screen", func() {
 			Expect(h.view()).To(ContainSubstring("Replace the Request form for Delete a facility?"))
 		})
 
-		It("leaves a value history did not keep empty, and says which", func() {
+		It("keeps the pairs history kept, and names the ones it did not", func() {
 			reopen(entry(1, "staging", "getPickJobs", "fft api",
-				"getPickJobs", "--header=Authorization: <redacted>", "--query=status=OPEN", "--query=size=5"))
+				"getPickJobs", "--header=Authorization: <redacted>",
+				"--query=status=OPEN", "--query=apiKey=<redacted>", "--query=size=5"))
 
 			Expect(field("--header").value()).To(BeEmpty())
 			Expect(field("--query").value()).To(Equal("status=OPEN,size=5"))
 			Expect(h.view()).NotTo(ContainSubstring("<redacted>"))
-			Expect(h.view()).To(ContainSubstring("History keeps no value for --header, so it is left empty."))
+			Expect(h.view()).To(ContainSubstring("History keeps no value for the Authorization pair of --header " +
+				"and the apiKey pair of --query, so they are not filled in."))
+		})
+
+		It("keeps the values of a list history kept, and says one was not", func() {
+			reopen(entry(1, "staging", "searchFacility", "fft facility list",
+				"--status=ONLINE", "--status=<redacted>"))
+
+			Expect(field("--status").value()).To(Equal("ONLINE"))
+			Expect(h.view()).To(ContainSubstring("History keeps no value for a value of --status, so it is not filled in."))
 		})
 
 		It("leaves a redacted argument empty", func() {
 			reopen(entry(1, "staging", "deleteFacility", "fft facility delete", history.Redacted))
 			Expect(field("<id>").value()).To(BeEmpty())
-			Expect(h.view()).To(ContainSubstring("History keeps no value for <id>"))
+			Expect(h.view()).To(ContainSubstring("History keeps no value for <id>, so it is not filled in."))
+		})
+
+		It("names a redacted pair only by what the file says, made safe to draw", func() {
+			reopen(entry(1, "staging", "getPickJobs", "fft api", "getPickJobs", "--query=a\u001b[2Jb=<redacted>"))
+			Expect(h.view()).To(ContainSubstring("History keeps no value for the a"))
+			Expect(h.m.View().Content).NotTo(ContainSubstring("\u001b[2J"), "the view is drawn raw")
 		})
 
 		It("says the body was not kept, and what the form has no field for", func() {
