@@ -16,6 +16,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -86,9 +87,21 @@ type Log struct {
 	Path string
 
 	// MaxBytes is the size above which Append compacts the file to about half of
-	// it, keeping the newest entries. Zero means [DefaultMaxBytes].
+	// it, keeping the newest entries. Zero means [DefaultMaxBytes]. A read keeps
+	// at most the last [readLimitFactor] times MaxBytes of the file.
 	MaxBytes int64
 }
+
+// readLimitFactor bounds a read relative to MaxBytes. Append keeps the file under
+// MaxBytes, give or take a compaction skipped while another process held the
+// lock, so only a file something else wrote comes near it; and the newest entries
+// of such a file are the ones worth reading.
+const readLimitFactor = 4
+
+// errNotRegular is what every function here says about a history path that holds
+// something other than a file: a FIFO, which would hold up every command until
+// something read it, or a device, which may never end.
+var errNotRegular = errors.New("not a regular file; move it aside for fft to keep a history there")
 
 func (l Log) maxBytes() int64 {
 	if l.MaxBytes > 0 {
@@ -115,17 +128,18 @@ func (l Log) Append(e Entry) error {
 		return fmt.Errorf("create the history directory: %w", err)
 	}
 
-	f, err := os.OpenFile(l.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, atomicfile.FileMode)
+	f, info, err := l.open(os.O_APPEND | os.O_CREATE | os.O_WRONLY)
 	if err != nil {
-		return fmt.Errorf("open %s: %w", l.Path, err)
+		return err
 	}
-	_, writeErr := f.Write(line)
-	info, statErr := f.Stat()
-	if err := errors.Join(writeErr, statErr, f.Close()); err != nil {
+	n, writeErr := f.Write(line)
+	if err := errors.Join(writeErr, f.Close()); err != nil {
 		return fmt.Errorf("append to %s: %w", l.Path, err)
 	}
 
-	if info.Size() > l.maxBytes() {
+	// The size before the write plus the write is enough to decide on: compaction
+	// looks at the file again under its lock before it rewrites anything.
+	if info.Size()+int64(n) > l.maxBytes() {
 		return l.compact()
 	}
 	return nil
@@ -146,9 +160,9 @@ func (l Log) compact() error {
 	}
 	defer unlock()
 
-	data, err := os.ReadFile(l.Path)
+	data, err := l.read()
 	if err != nil {
-		return fmt.Errorf("read %s: %w", l.Path, err)
+		return err
 	}
 	// Another process may have compacted while this one waited for the lock.
 	if int64(len(data)) <= l.maxBytes() {
@@ -184,13 +198,16 @@ func (l Log) compact() error {
 // Read returns every entry in the file, oldest first. A file that does not exist
 // is an empty history. A line that is not an entry — a write cut short by a full
 // disk, a hand edit — is skipped, so one bad line never costs the rest.
+//
+// A file larger than the read limit (see [Log.MaxBytes]) is read from the end: its
+// newest entries are returned, and the older ones are left unread.
 func (l Log) Read() ([]Entry, error) {
-	data, err := os.ReadFile(l.Path)
+	data, err := l.read()
 	if errors.Is(err, fs.ErrNotExist) {
 		return nil, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("read %s: %w", l.Path, err)
+		return nil, err
 	}
 
 	var entries []Entry
@@ -213,6 +230,68 @@ func (l Log) Clear() (int, error) {
 		return 0, fmt.Errorf("remove %s: %w", l.Path, err)
 	}
 	return len(entries), nil
+}
+
+// open opens the history file with flag, and refuses anything but a regular file
+// before a byte is read or written.
+//
+// The path is looked at first, so that a FIFO is named for what it is rather than
+// by the error an open of it without a reader gives; the opened file is looked at
+// again, in case the path changed in between.
+func (l Log) open(flag int) (*os.File, fs.FileInfo, error) {
+	if info, err := os.Stat(l.Path); err == nil && !info.Mode().IsRegular() {
+		return nil, nil, fmt.Errorf("%s: %w", l.Path, errNotRegular)
+	}
+	f, err := os.OpenFile(l.Path, flag|openNonblock, atomicfile.FileMode)
+	if err != nil {
+		return nil, nil, err
+	}
+	info, err := f.Stat()
+	if err == nil && !info.Mode().IsRegular() {
+		err = fmt.Errorf("%s: %w", l.Path, errNotRegular)
+	}
+	if err != nil {
+		return nil, nil, errors.Join(err, f.Close())
+	}
+	return f, info, nil
+}
+
+// read returns the file's contents, or, for a file over the read limit, its last
+// whole lines within the limit.
+func (l Log) read() ([]byte, error) {
+	f, info, err := l.open(os.O_RDONLY)
+	if err != nil {
+		return nil, err
+	}
+	data, err := readTail(f, info.Size(), readLimitFactor*l.maxBytes())
+	if err := errors.Join(err, f.Close()); err != nil {
+		return nil, fmt.Errorf("read %s: %w", l.Path, err)
+	}
+	return data, nil
+}
+
+// readTail reads at most limit bytes of f, which was size bytes long when it was
+// opened. A longer file is read from the start of the first line that begins
+// within the last limit bytes; a file that grew since is still cut at limit, and
+// the line that cuts short is skipped like any other that is not an entry.
+func readTail(f *os.File, size, limit int64) ([]byte, error) {
+	if size <= limit {
+		return io.ReadAll(io.LimitReader(f, limit))
+	}
+	// One byte early, so that a cut that falls right after a newline keeps the line
+	// that starts there.
+	if _, err := f.Seek(size-limit-1, io.SeekStart); err != nil {
+		return nil, err
+	}
+	data, err := io.ReadAll(io.LimitReader(f, limit+1))
+	if err != nil {
+		return nil, err
+	}
+	i := bytes.IndexByte(data, '\n')
+	if i < 0 {
+		return nil, nil
+	}
+	return data[i+1:], nil
 }
 
 func decode(line []byte) (Entry, bool) {

@@ -172,6 +172,51 @@ var _ = Describe("a history log", func() {
 		})
 	})
 
+	When("something other than fft made it far larger than its limit", func() {
+		const entries = 2000
+
+		BeforeEach(func() {
+			log.MaxBytes = 4096
+			var data bytes.Buffer
+			for i := range entries {
+				line, err := json.Marshal(entry("prod", fmt.Sprintf("op%04d", i), i%60))
+				Expect(err).NotTo(HaveOccurred())
+				data.Write(line)
+				data.WriteByte('\n')
+			}
+			Expect(int64(data.Len())).To(BeNumerically(">", 20*log.MaxBytes))
+			Expect(os.MkdirAll(filepath.Dir(log.Path), 0o700)).To(Succeed())
+			Expect(os.WriteFile(log.Path, data.Bytes(), 0o600)).To(Succeed())
+		})
+
+		It("reads only its newest entries, as many as a few times the limit holds", func() {
+			read, err := log.Read()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(read).NotTo(BeEmpty())
+			Expect(read[len(read)-1].OperationID).To(Equal(fmt.Sprintf("op%04d", entries-1)))
+			Expect(len(read)).To(BeNumerically("<", entries/5), "the whole file was read")
+
+			var size int64
+			for _, e := range read {
+				line, err := json.Marshal(e)
+				Expect(err).NotTo(HaveOccurred())
+				size += int64(len(line)) + 1
+			}
+			Expect(size).To(BeNumerically("<=", 4*log.MaxBytes))
+		})
+
+		It("still compacts it on the next append", func() {
+			Expect(log.Append(entry("prod", "opLast", 1))).To(Succeed())
+
+			info, err := os.Stat(log.Path)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(info.Size()).To(BeNumerically("<=", log.MaxBytes))
+			read, err := log.Read()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(read[len(read)-1].OperationID).To(Equal("opLast"))
+		})
+	})
+
 	Describe("clearing it", func() {
 		It("removes every entry and says how many there were", func() {
 			Expect(log.Append(entry("prod", "getFacility", 1))).To(Succeed())
