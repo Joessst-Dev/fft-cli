@@ -154,6 +154,13 @@ linters:
         linters:
           - gosec
         text: G204
+      # G304 flags opening a variable path. The path is the body file fft itself
+      # created in its own private temporary directory for the editor, read back
+      # once the editor exits.
+      - path: ^internal/tui/editor\.go$
+        linters:
+          - gosec
+        text: G304
       # The component installer's entire job is to write files it downloaded and run
       # a binary it installed, so G304 (open a variable path), G122 (write inside a
       # WalkDir callback) and G204 (exec a variable path) fire on the feature rather
