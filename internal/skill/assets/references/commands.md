@@ -193,6 +193,7 @@ composes with any command that takes `--file`:
 
 ```sh
 fft template save rush-order --file body.json --require email=order.consumer.email
+fft template save rush-order --operation addOrder --file body.json
 fft template list
 fft template show rush-order
 fft template render rush-order --set email=a@b.de | fft order create --file -
@@ -204,6 +205,8 @@ fft template remove rush-order
 - `--set` takes a declared parameter or a path (`--set order.items.0.quantity=3`). An id
   made only of digits needs `--set-string`, or it goes out as a number.
 - Saving strips a top-level `version`, because replaying a stale one is a guaranteed 409.
+- `--operation <operationId>` records which operation the body is for; an unknown id, or
+  one that takes no body, is exit 2.
 - `--local` writes `./.fft/templates`, which the repository commits. Read one before you
   commit it: a body captured from real work carries real ids and consumer emails.
 - Full rules in [templates.md](templates.md).

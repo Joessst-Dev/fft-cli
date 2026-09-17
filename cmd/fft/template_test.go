@@ -137,6 +137,59 @@ var _ = Describe("fft template", func() {
 			Expect(c.out()).To(ContainSubstring(`"operationId": "addFacility"`))
 		})
 
+		Describe("--operation", func() {
+			It("records the operation a body from a file is for", func() {
+				Expect(save("rush", "--operation", "addOrder", "--file", "-")).To(Equal(exitcode.OK), c.errOut())
+
+				Expect(c.run("template", "show", "rush", "-o", "json")).To(Equal(exitcode.OK))
+				Expect(c.out()).To(ContainSubstring(`"operationId": "addOrder"`))
+				Expect(c.out()).To(ContainSubstring(`"tenantOrderId": "A-1"`))
+			})
+
+			It("wins over the operation a body piped from show carried", func() {
+				Expect(c.run("template", "save", "fac", "--from", "addFacility")).To(Equal(exitcode.OK))
+				Expect(c.run("template", "show", "fac", "-o", "json")).To(Equal(exitcode.OK))
+				shown := c.out()
+
+				c.stdin.WriteString(shown)
+				Expect(c.run("template", "save", "copy", "--operation", "addOrder", "--file", "-")).
+					To(Equal(exitcode.OK), c.errOut())
+
+				Expect(c.run("template", "show", "copy", "-o", "json")).To(Equal(exitcode.OK))
+				Expect(c.out()).To(ContainSubstring(`"operationId": "addOrder"`))
+			})
+
+			It("refuses an operation this fft does not know, naming the likely one and writing nothing", func() {
+				Expect(save("rush", "--operation", "addOrdr", "--file", "-")).To(Equal(exitcode.Usage))
+				Expect(c.errOut()).To(ContainSubstring(`there is no operation "addOrdr"`))
+				Expect(c.errOut()).To(ContainSubstring("addOrder"))
+				Expect(userPath("rush")).NotTo(BeAnExistingFile())
+				Expect(c.stdin.String()).To(Equal(body), "a refused save must not consume stdin")
+			})
+
+			It("refuses an operation that takes no body, writing nothing", func() {
+				Expect(save("rush", "--operation", "getFacility", "--file", "-")).To(Equal(exitcode.Usage))
+				Expect(c.errOut()).To(ContainSubstring("getFacility takes no request body"))
+				Expect(userPath("rush")).NotTo(BeAnExistingFile())
+			})
+
+			It("cannot be given with --from, which names the operation already", func() {
+				Expect(c.run("template", "save", "fac", "--from", "addFacility", "--operation", "addOrder")).
+					To(Equal(exitcode.Usage))
+				Expect(c.errOut()).To(ContainSubstring("[from operation]"))
+				Expect(userPath("fac")).NotTo(BeAnExistingFile())
+			})
+
+			It("still asks before a credential-shaped field goes to the project scope", func() {
+				c.stdin.Reset()
+				c.stdin.WriteString(`{"clientSecret":"shh","facility":"BER-01"}`)
+				Expect(c.run("template", "save", "creds", "--local", "--operation", "addOrder", "--file", "-")).
+					To(Equal(exitcode.Usage))
+				Expect(c.errOut()).To(ContainSubstring("--yes"))
+				Expect(filepath.Join(".fft", "templates", "creds.json")).NotTo(BeAnExistingFile())
+			})
+		})
+
 		It("refuses a body it was never given", func() {
 			Expect(c.run("template", "save", "rush")).To(Equal(exitcode.Usage))
 			Expect(c.errOut()).To(ContainSubstring("--file, --data or --from"))

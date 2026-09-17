@@ -19,10 +19,14 @@ not a new way to reach the tenant.
 fft template save rush-order --file body.json --description "Rush order for the flagship"
 fft order get ORDER-1 -o json | fft template save from-order --file -
 fft template save facility --from addFacility
+fft template save rush-order --operation addOrder --file body.json
 ```
 
 - `--from <operationId>` seeds the body from the spec's own example and records which
   operation it is for, which is the fastest way to start one from nothing.
+- `--operation <operationId>` records the operation a `--file` or `--data` body is for. The
+  id must be one `fft api list` shows, and one that takes a body; anything else is exit 2
+  and nothing is written. It cannot be combined with `--from`, which names one already.
 - A top-level `version` is **dropped on the way in**, and fft says so. A version is only
   true of the entity at the moment it was read; replaying a saved one is a guaranteed 409.
   Put one back at render time with `--set version=N` if you really mean to.

@@ -23,6 +23,11 @@ The body comes from --file, --data or --from:
     fft order get ORDER-1 -o json | fft template save rush --file -
     fft template save rush --from createOrder        seeds from the spec's example
 
+--operation records the operation a --file or --data body is for, the way --from does
+for the example it seeds. The id must be one this fft knows and one that takes a body:
+
+    fft template save rush --operation addOrder --file body.json
+
 --param declares a parameter: a short name for a path inside the body, so that
 '--set email=…' works instead of '--set order.consumer.email=…'. Give it a default
 with a second '=', and mark it required with --require:
@@ -50,6 +55,7 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 		description string
 		params      []string
 		required    []string
+		operation   string
 		force       bool
 	)
 
@@ -65,6 +71,14 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 		RunE: func(_ *cobra.Command, args []string) error {
 			name := args[0]
 			if err := template.ValidateName(name); err != nil {
+				return err
+			}
+
+			// Checked before anything is read or written: a template recorded against
+			// an operation that does not exist, or that sends no body, is one no
+			// render can ever deliver anywhere.
+			declaredOp, err := templateOperation(operation)
+			if err != nil {
 				return err
 			}
 
@@ -99,6 +113,9 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 			body, envelope := unwrapShownTemplate(body)
 			if description == "" {
 				description = envelope.Description
+			}
+			if declaredOp != "" {
+				operationID = declaredOp
 			}
 			if operationID == "" {
 				operationID = envelope.OperationID
@@ -175,6 +192,7 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 	f.StringVar(&file, "file", "", "JSON file holding the request body ('-' for stdin)")
 	f.StringVar(&data, "data", "", "Request body: inline JSON, @file, or '-' for stdin")
 	f.StringVar(&from, "from", "", "Seed the body from this operation's example")
+	f.StringVar(&operation, "operation", "", "Record the operation (an operationId) the body is sent with")
 	f.StringVar(&description, "description", "", "What this template is for")
 	f.StringArrayVar(&params, "param", nil,
 		"Declare a parameter: --param name=path[=default] (repeatable)")
@@ -185,6 +203,8 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 	cmd.MarkFlagsMutuallyExclusive("file", "data")
 	cmd.MarkFlagsMutuallyExclusive("file", "from")
 	cmd.MarkFlagsMutuallyExclusive("data", "from")
+	// --from already names the operation, and two names for it could disagree.
+	cmd.MarkFlagsMutuallyExclusive("operation", "from")
 
 	return cmd
 }
@@ -224,6 +244,23 @@ func templateSource(deps *Deps, file, data, from string) ([]byte, string, error)
 			"a template needs a body: pass --file, --data or --from")}
 	}
 	return raw, "", nil
+}
+
+// templateOperation resolves --operation to the operationId it names, "" when the
+// flag was not given.
+func templateOperation(id string) (string, error) {
+	if id == "" {
+		return "", nil
+	}
+	op, err := findOperation(id)
+	if err != nil {
+		return "", err
+	}
+	if !op.HasBody {
+		return "", exitcode.UsageError{Err: fmt.Errorf(
+			"%s takes no request body, so a template has nothing to send it", op.ID)}
+	}
+	return op.ID, nil
 }
 
 // declaredParams builds the params block from --param and --require.
