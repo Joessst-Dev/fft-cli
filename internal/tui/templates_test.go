@@ -527,6 +527,73 @@ var _ = Describe("the Templates screen", func() {
 		})
 	})
 
+	Describe("an answer that arrives while the list is read again", func() {
+		It("still hands over a render that a save on the Request screen finished during", func() {
+			h.request(opAddPickJob)
+			h.m.request.body = []byte(`{"a":1}`)
+			h.press("t")
+			h.m.request.dialog.(*inputDialog).input.SetValue("other")
+			h.press("enter")
+			saveID := h.lookup("template", "save", "--operation", "addPickJob", "--file", "-", "other")
+
+			h.showTemplates(oneTemplate)
+			h.openTemplate(rushDoc)
+			h.press("p")
+			h.fillParam(0, "a@b.de")
+			h.press("S")
+			renderID := h.lookup("template", "render", "rush", "--set", "email=a@b.de")
+
+			h.finishID(saveID, ok(`{"template":"other","path":"/home/u/.local/share/fft/templates/other.json"}`))
+			h.lookup("template", "list")
+			h.finishID(renderID, ok(rendered))
+
+			Expect(h.m.current).To(Equal(tabRequest))
+			Expect(h.view()).To(ContainSubstring("Send Create a pick job to staging?"))
+		})
+
+		It("still shows a template whose show a removal finished during", func() {
+			h.showTemplates(`[{"name":"rush","scope":"user"},{"name":"b","scope":"user"}]`)
+			h.press("x")
+			removeID := h.lookup("template", "remove", "rush")
+			h.press("down", "enter")
+			showID := h.lookup("template", "show", "b")
+
+			h.finishID(removeID, ok(`{"template":"rush"}`))
+			h.finishID(showID, ok(docFor("addPickJob")))
+
+			Expect(h.view()).NotTo(ContainSubstring("Reading the template…"))
+			Expect(h.view()).To(ContainSubstring("Saved body"))
+		})
+
+		It("still shows a render that a declined removal finished during", func() {
+			h.showTemplates(oneTemplate)
+			h.openTemplate(rushDoc)
+			h.press("p")
+			h.fillParam(0, "a@b.de")
+			h.press("R")
+			renderID := h.lookup("template", "render", "rush", "--set", "email=a@b.de")
+			h.press("esc", "x")
+			h.finish(failed(exitcode.Usage, "Error: cancelled"), "template", "remove", "rush")
+			h.lookup("template", "list")
+			h.finishID(renderID, ok(rendered))
+
+			Expect(h.view()).To(ContainSubstring("Rendered body"))
+			Expect(h.view()).NotTo(ContainSubstring("Rendering rush…"))
+		})
+
+		It("says nothing more about a render once esc has left its template", func() {
+			h.showTemplates(oneTemplate)
+			h.openTemplate(rushDoc)
+			h.press("p")
+			h.fillParam(0, "a@b.de")
+			h.press("R", "esc", "esc")
+			h.finish(ok(rendered), "template", "render", "rush", "--set", "email=a@b.de")
+
+			Expect(h.m.templates.open).To(BeNil())
+			Expect(h.view()).NotTo(ContainSubstring("Rendering rush…"))
+		})
+	})
+
 	Describe("removing a template", func() {
 		It("runs template remove, whose own question is the confirmation, and reads the list again", func() {
 			h.showTemplates(oneTemplate)

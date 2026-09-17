@@ -177,9 +177,12 @@ type templatesScreen struct {
 	// list is read when the screen is first shown, not when the UI starts.
 	requested bool
 
-	// gen counts the lists read and the templates opened. An answer that arrives
-	// for an earlier one is about something no longer on screen.
-	gen uint64
+	// listGen counts the lists read, and openGen the templates opened and closed.
+	// An answer that arrives for an earlier one is about something no longer on
+	// screen. They are counted apart because the list is read again whenever a
+	// template is saved or removed, and that says nothing about the template open.
+	listGen uint64
+	openGen uint64
 
 	open *openTemplate
 
@@ -246,11 +249,11 @@ func (t *templatesScreen) fail(what string, r Result) {
 
 func (t *templatesScreen) reload() tea.Cmd {
 	t.requested = true
-	t.gen++
-	gen := t.gen
+	t.listGen++
+	gen := t.listGen
 	args := []string{"template", "list"}
 	return t.s.start(action{inv: Invocation{Args: args}, display: commandLine(args)}, func(r Result) tea.Cmd {
-		if gen != t.gen {
+		if gen != t.listGen {
 			return nil
 		}
 		if r.ExitCode != exitcode.OK {
@@ -436,22 +439,25 @@ func (t *templatesScreen) keep(o *openTemplate) {
 	t.values[o.row.Name] = kept
 }
 
+// close goes back to the list. What was being said about the template goes with
+// it: a "Rendering…" left behind would never be answered.
 func (t *templatesScreen) close() {
-	t.gen++
+	t.openGen++
 	t.open = nil
+	t.say("")
 }
 
 // openRow shows row's detail, reading it with `template show`, and then does next
 // with it, if the detail is still on display by the time it has been read.
 func (t *templatesScreen) openRow(row templateRow, next func(*openTemplate) tea.Cmd) tea.Cmd {
-	t.gen++
-	gen := t.gen
+	t.openGen++
+	gen := t.openGen
 	o := &openTemplate{row: row}
 	t.open = o
 	t.say("")
 	args := []string{"template", "show", row.Name}
 	return t.s.start(action{inv: Invocation{Args: args}, display: commandLine(args)}, func(r Result) tea.Cmd {
-		if gen != t.gen {
+		if gen != t.openGen {
 			return nil
 		}
 		if r.ExitCode != exitcode.OK {
@@ -559,10 +565,10 @@ func (t *templatesScreen) ready(o *openTemplate) bool {
 func (t *templatesScreen) render(o *openTemplate, project string, done func(body []byte, warnings []string) tea.Cmd) tea.Cmd {
 	args := o.renderArgs()
 	a := action{inv: Invocation{Args: args, Project: project}, display: t.s.displayFor(args, project)}
-	gen := t.gen
+	gen := t.openGen
 	t.say("Rendering " + o.row.Name + "…")
 	return t.s.start(a, func(r Result) tea.Cmd {
-		if gen != t.gen || t.open != o {
+		if gen != t.openGen || t.open != o {
 			return nil
 		}
 		if r.ExitCode != exitcode.OK {
@@ -676,10 +682,10 @@ func (t *templatesScreen) remove(row templateRow) tea.Cmd {
 			t.fail("removing "+row.Name, r)
 			return t.reload()
 		}
-		t.say("Removed " + row.Name + ".")
 		if t.open != nil && t.open.row.Name == row.Name {
 			t.close()
 		}
+		t.say("Removed " + row.Name + ".")
 		delete(t.values, row.Name)
 		return t.reload()
 	})
