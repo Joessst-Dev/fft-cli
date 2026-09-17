@@ -213,10 +213,18 @@ func (s *session) readOnly() bool {
 // about the previous one no longer applies.
 func (s *session) selectProject(name string) {
 	s.project = name
+	s.forgetCurrent()
+	s.runner.SetProject(name)
+}
+
+// forgetCurrent drops what is known about the current project, and has every read
+// about it that is still on its way ignored. A selection needs it, and so does a
+// project that stays selected while its name comes to stand for another account,
+// or for nothing.
+func (s *session) forgetCurrent() {
 	s.switches++
 	s.status = nil
 	s.grants = nil
-	s.runner.SetProject(name)
 }
 
 // lacking is the permissions op wants that the user appears to hold none of on the

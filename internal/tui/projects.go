@@ -394,9 +394,14 @@ func (p *projectsScreen) removeDialog(row projectRow) dialog {
 				return p.reload()
 			}
 			p.succeed("Removed " + row.Name + ".")
-			if p.s.project == row.Name {
+			switch row.Name {
+			case p.s.project:
 				// The UI's choice is gone with it; fft's own resolution decides again.
 				p.selectProject("")
+			case p.s.currentProject():
+				// fft's own choice is gone; until the list says what it chooses now,
+				// nothing known about the removed project may pass for the current one.
+				p.s.forgetCurrent()
 			}
 			return tea.Batch(p.reload(), p.refreshStatus(false))
 		})
@@ -446,6 +451,14 @@ func (p *projectsScreen) submitForm() tea.Cmd {
 			// fft made it the active project, and the UI follows fft's choice.
 			p.succeed("Added " + name + "; it is now the active project.")
 			p.selectProject(name)
+			return tea.Batch(p.reload(), p.warmUp())
+		}
+
+		if name == p.s.currentProject() {
+			// A --force add under the name in use: the UI stays on it, but it may now
+			// sign in as someone else, whose roles and token are not the old ones.
+			p.s.forgetCurrent()
+			p.succeed("Replaced " + name + ".")
 			return tea.Batch(p.reload(), p.warmUp())
 		}
 

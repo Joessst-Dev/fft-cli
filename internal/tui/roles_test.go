@@ -209,6 +209,81 @@ var _ = Describe("the Roles screen", func() {
 		})
 	})
 
+	Describe("once the current project's name is given to another account", func() {
+		// readRoles has the roles read for the project on screen, and goes back to
+		// the Projects screen.
+		readRoles := func() {
+			GinkgoHelper()
+			h.press("7")
+			h.whoamiFor("staging", readOnlyRoles)
+			Expect(h.m.hint(opDeleteFacility).lacking).NotTo(BeEmpty())
+			h.press("1")
+		}
+
+		// add submits the add form for name, signing in with an email, replacing a
+		// project of that name, and returns the run it started.
+		add := func(name string) RunID {
+			GinkgoHelper()
+			h.press("a")
+			h.typeText(name)
+			h.press("tab")
+			h.typeText("https://" + name + ".example.com")
+			h.press("tab")
+			h.typeText("AIzaSyOtherKey")
+			h.press("tab", "space", "tab")
+			h.typeText("someone-else@example.com")
+			h.press("tab", "tab", "tab", "tab")
+			h.typeText("hunter2")
+			h.press("tab", "tab", "space", "ctrl+s")
+			id := RunID(len(h.r.started))
+			Expect(h.r.args(id)).To(ContainElements("add", name, "--force"))
+			return id
+		}
+
+		When("the UI has chosen staging itself", func() {
+			BeforeEach(func() {
+				h = newHarness(Options{Catalog: roleCatalog{}, Project: "staging"})
+				h.loaded(twoProjects, validToken)
+				readRoles()
+			})
+
+			It("forgets the roles of the account a new staging replaced, and reads the new one's", func() {
+				h.finishID(add("staging"), ok(`{"name":"staging","active":true}`))
+
+				Expect(h.m.hint(opDeleteFacility).lacking).To(BeEmpty(), "those were the old account's roles")
+				Expect(h.view()).NotTo(ContainSubstring("Switch to staging now?"), "it is the project in use")
+				Expect(h.view()).To(ContainSubstring("Replaced staging."))
+				warmUp := h.lookup("auth", "whoami")
+				Expect(h.r.exclusive(warmUp)).To(BeTrue(), "signed in again first, alone, as after a switch")
+				h.finishID(warmUp, ok(`{}`))
+				h.lookup("auth", "status")
+
+				h.press("7")
+				id := h.lookup("auth", "whoami")
+				Expect(h.r.exclusive(id)).To(BeFalse(), "the roles read, not a sign-in")
+				Expect(h.r.invocation(id).Project).To(Equal("staging"))
+			})
+
+			It("keeps them when another project is added", func() {
+				h.finishID(add("qa"), ok(`{"name":"qa","active":false}`))
+
+				Expect(h.m.hint(opDeleteFacility).lacking).NotTo(BeEmpty())
+				Expect(h.view()).To(ContainSubstring("Switch to qa now?"))
+			})
+		})
+
+		It("forgets the roles of a removed staging at once, before the list says what is current now", func() {
+			readRoles()
+			h.press("d")
+			h.typeText("staging")
+			h.press("enter")
+			h.finish(ok(""), "project", "remove", "staging", "--yes")
+
+			Expect(h.m.hint(opDeleteFacility).lacking).To(BeEmpty())
+		})
+
+	})
+
 	It("does not read them again after a read that succeeded, when the credentials check out", func() {
 		h.press("7")
 		h.whoamiFor("staging", readOnlyRoles)
