@@ -256,11 +256,25 @@ var _ = Describe("the key legend", func() {
 		Expect(h.m.showPanel).To(BeFalse())
 		Expect(h.m.request.editing).To(BeFalse())
 
-		h.send(tea.PasteMsg{Content: "s"})
-		Expect(h.r.started).To(HaveLen(started))
-
 		h.press("esc")
 		Expect(h.view()).NotTo(ContainSubstring("Nothing to copy"))
+	})
+
+	It("types nothing pasted into a question waiting behind it", func() {
+		h.press("enter", "?")
+		id := h.lookup("project", "use", "staging")
+		h.ask(id, "Purge the listing?", "purge")
+
+		// Long enough that the question would take it, were it in front.
+		h.wait()
+		h.send(tea.PasteMsg{Content: "purge"})
+		h.press("esc")
+		h.wait()
+		Expect(h.view()).To(ContainSubstring("Purge the listing?"))
+		Expect(h.view()).NotTo(ContainSubstring("> purge"))
+
+		h.press("enter")
+		Expect(h.r.answers).To(BeEmpty(), "the pasted verb answered the question")
 	})
 
 	It("offers only its own keys, and no command to copy", func() {
