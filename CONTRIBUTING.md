@@ -37,6 +37,28 @@ Note that the drift spec only walks skill→command tree. A *new* command can go
 undocumented and stay green, so when you add a curated noun, update `SKILL.md` (including
 the frontmatter `description`) and `references/commands.md` yourself.
 
+## A new `Deps` field needs a decision
+
+`fft tui` runs many commands at once in one process. Each run gets its own `Deps`
+from `Deps.forRun` (`cmd/fft/root.go`), and `forRun` lists the fields it copies by name
+rather than copying the struct. So a field you add to `Deps` does not reach a run inside
+the UI until you decide what happens to it:
+
+- **shared** — safe for concurrent runs to share: a store that serialises its own access,
+  a pure function, a seam a spec sets;
+- **per run** — set by `forRun` itself, such as the run's stdin;
+- **rebuilt** — left zero, because `Deps.complete`, `newRootCmd` or `execute` rebuilds it
+  from the run's own flags and streams. Sharing such a field would be a data race, or one
+  run's `--project` leaking into another's. A few fields, like `StartTUI`, are left zero
+  because a run must never have them;
+- **caller** — set by the runner on each run, like `Prompt`, which asks the run's questions
+  in the UI.
+
+Put the field in `forRun` if it is shared or per run, and record the decision in
+`runDepsClassification` in `cmd/fft/tui_runner_test.go`. The spec *"a Deps for one TUI run
+has every field classified"* fails for any `Deps` field missing from that map, and names
+the field.
+
 ## The documentation site
 
 `docs/` is a VitePress site published to GitHub Pages. Its guide pages come from two
