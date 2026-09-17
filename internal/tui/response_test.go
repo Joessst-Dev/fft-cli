@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -267,7 +268,10 @@ var _ = Describe("the Response screen", func() {
 				Expect(h.wrote(name)).To(Equal(`[{"id":"f-1","name":"Berlin\u001b[2J"}]`))
 				info, err := os.Stat(filepath.Join(h.tmp, name))
 				Expect(err).NotTo(HaveOccurred())
-				Expect(info.Mode().Perm()).To(Equal(os.FileMode(0o600)))
+				// Windows carries no Unix mode bits and reports 0666 for any writable file.
+				if runtime.GOOS != "windows" {
+					Expect(info.Mode().Perm()).To(Equal(os.FileMode(0o600)))
+				}
 				Expect(h.view()).To(ContainSubstring("Saved 39 bytes to "))
 			})
 
