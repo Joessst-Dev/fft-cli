@@ -623,6 +623,47 @@ var _ = Describe("fft template", func() {
 			Expect(c.errOut()).To(ContainSubstring("shadows a user template"))
 		})
 
+		Describe("under -o json", func() {
+			resolved := func() map[string]any {
+				GinkgoHelper()
+				Expect(c.run("template", "show", "rush", "-o", "json")).To(Equal(exitcode.OK))
+				var doc struct {
+					Resolved map[string]any `json:"resolved"`
+				}
+				Expect(json.Unmarshal([]byte(c.out()), &doc)).To(Succeed())
+				return doc.Resolved
+			}
+
+			It("names the template it read: its name, its scope and its file", func() {
+				Expect(resolved()).To(Equal(map[string]any{
+					"name":  "rush",
+					"scope": "user",
+					"path":  userPath("rush"),
+				}))
+			})
+
+			It("names the project template once one of the same name hides the user one", func() {
+				Expect(resolved()).To(HaveKeyWithValue("scope", "user"))
+				Expect(save("rush", "--local", "--file", "-")).To(Equal(exitcode.OK))
+
+				now := resolved()
+				Expect(now).To(HaveKeyWithValue("scope", "project"))
+				Expect(now["path"]).To(HaveSuffix(filepath.Join(".fft", "templates", "rush.json")))
+				Expect(c.errOut()).To(ContainSubstring("shadows a user template"))
+			})
+
+			It("keeps the digest a render pins to: the extra key is not part of the template", func() {
+				Expect(c.run("template", "show", "rush", "-o", "json")).To(Equal(exitcode.OK))
+				shown, err := template.Decode([]byte(c.out()))
+				Expect(err).NotTo(HaveOccurred())
+				digest, err := template.Digest(shown)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(c.run("template", "render", "rush", "--if-digest", digest,
+					"--set", "email=a@b.de")).To(Equal(exitcode.OK))
+			})
+		})
+
 		It("round-trips through save under -o json, description and required params included", func() {
 			Expect(c.run("template", "show", "rush", "-o", "json")).To(Equal(exitcode.OK))
 			shown := c.out()

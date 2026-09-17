@@ -21,7 +21,10 @@ as saved. 'fft template render' prints only the body, with the parameters applie
 this is the one to read before you type a --set.
 
 -o json and -o yaml print the file's own contents, so 'fft template show x -o json'
-round-trips through 'fft template save x --file -'.`
+round-trips through 'fft template save x --file -', plus a "resolved" object naming
+the template that was read: its name, its scope (project or user) and its file. A
+project template hides a user template of the same name, so the scope is the one
+the name resolved to, not necessarily the one you saved.`
 
 func newTemplateShowCmd(deps *Deps) *cobra.Command {
 	return &cobra.Command{
@@ -50,7 +53,11 @@ func newTemplateShowCmd(deps *Deps) *cobra.Command {
 				// Go struct where -o yaml would quote it and -o json would re-marshal
 				// it. RenderRaw re-indents rather than re-encoding, the same way a read
 				// command avoids re-encoding the API's own document.
-				raw, err := template.Encode(saved.Template)
+				raw, err := json.Marshal(shownTemplate{Template: saved.Template, Resolved: resolvedTemplate{
+					Name:  saved.Name,
+					Scope: saved.Scope,
+					Path:  saved.Path,
+				}})
 				if err != nil {
 					return err
 				}
@@ -61,6 +68,28 @@ func newTemplateShowCmd(deps *Deps) *cobra.Command {
 			return nil
 		},
 	}
+}
+
+// shownTemplate is what `fft template show -o json` prints: the template file's
+// fields, and which file they were read from.
+//
+// The file's fields stay at the top level, so that the document is still one
+// `template save --file -` and `template.Decode` read as a template — both ignore
+// the extra key, and the digest, taken over the decoded template, does not move.
+type shownTemplate struct {
+	*template.Template
+
+	// Resolved says which template the name resolved to. It cannot be read from
+	// the list printed a moment earlier: a project template of the same name may
+	// have appeared since, and it hides the user one.
+	Resolved resolvedTemplate `json:"resolved"`
+}
+
+// resolvedTemplate names the template `show` read.
+type resolvedTemplate struct {
+	Name  string         `json:"name"`
+	Scope template.Scope `json:"scope"`
+	Path  string         `json:"path"`
 }
 
 // writeTemplate renders the labelled block `fft template show` prints, in the

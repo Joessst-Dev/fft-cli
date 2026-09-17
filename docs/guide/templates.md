@@ -99,8 +99,13 @@ template, not whatever a `git pull` has made of the file since:
 fft template render rush-order --if-digest 3f5a… --set email=a@b.de | fft order create --file -
 ```
 
-The digest is the SHA-256 of the template's own encoding, the document `show -o json`
+The digest is the SHA-256 of the template's own encoding, the fields `show -o json`
 prints, so it does not move when the file is merely re-indented.
+
+`show -o json` also prints a `resolved` object — `name`, `scope` (`project` or `user`) and
+`path` — naming the file it read. A project template hides a user template of the same
+name, so read the scope from there rather than from an earlier `template list`. The key is
+not part of the template: piping the document into `template save --file -` ignores it.
 
 ## Tenants do not share ids
 
