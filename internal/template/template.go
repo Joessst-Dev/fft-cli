@@ -98,10 +98,24 @@ func Decode(data []byte) (*Template, error) {
 		return nil, fmt.Errorf("the template has no %q", "body")
 	}
 	if err := t.validateParams(); err != nil {
-		return nil, fmt.Errorf("read the template: %w", err)
+		return nil, fmt.Errorf("read the template: %w", &ParamError{Err: err})
 	}
 	return &t, nil
 }
+
+// ParamError is a template file whose declared parameters [Decode] refuses. The
+// body is fine; editing the "params" object in the file is the fix, and a caller
+// that knows where the file is says so.
+//
+// A file an earlier fft saved can be one: its parameter names were checked for
+// less than they are now.
+type ParamError struct {
+	Err error
+}
+
+func (e *ParamError) Error() string { return e.Err.Error() }
+
+func (e *ParamError) Unwrap() error { return e.Err }
 
 // validateParams keeps the one namespace resolve reads unambiguous.
 //

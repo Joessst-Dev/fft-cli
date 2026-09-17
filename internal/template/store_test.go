@@ -226,6 +226,8 @@ var _ = Describe("the template store", func() {
 			Expect(listing.Found).To(ConsistOf(HaveField("Name", "good")))
 			Expect(listing.Problems).To(ConsistOf(HaveField("Path", bad)))
 			Expect(listing.Problems[0].Err).To(MatchError(ContainSubstring(`parameter "a=b" cannot contain "="`)))
+			Expect(listing.Problems[0].Err).To(MatchError(ContainSubstring(`edit its "params"`)))
+			Expect(listing.Problems[0].Err).To(MatchError(ContainSubstring("'fft template remove misrouted'")))
 		})
 
 		It("reports a template file whose name no command could address, and passes over a dot file", func() {

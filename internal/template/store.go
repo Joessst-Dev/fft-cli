@@ -423,6 +423,14 @@ func read(path, name string, scope Scope) (Saved, error) {
 	}
 
 	t, err := Decode(data)
+	if paramErr := (*ParamError)(nil); errors.As(err, &paramErr) {
+		remove := "fft template remove " + name
+		if scope == ScopeProject {
+			remove += " --local"
+		}
+		return Saved{}, fmt.Errorf("%s: %w (edit its \"params\" to fix it, or delete it with '%s')",
+			path, err, remove)
+	}
 	if err != nil {
 		return Saved{}, fmt.Errorf("%s: %w", path, err)
 	}
