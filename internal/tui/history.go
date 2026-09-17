@@ -133,7 +133,14 @@ func (h *historyScreen) want() tea.Cmd {
 	}
 	h.stale, h.reading = false, true
 	src := h.src
-	return func() tea.Msg {
+	return func() (msg tea.Msg) {
+		// A read that panics must still answer: the screen waits for an answer before
+		// it reads again, and the panic would otherwise end the whole UI.
+		defer func() {
+			if r := recover(); r != nil {
+				msg = historyReadMsg{err: fmt.Errorf("reading the history panicked: %v", r)}
+			}
+		}()
 		entries, off, err := src.Read()
 		return historyReadMsg{entries: entries, off: off, err: err}
 	}

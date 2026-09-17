@@ -20,12 +20,19 @@ type fakeHistory struct {
 	off     string
 	err     error
 	reads   int
+
+	// panics has the next read panic with this value, once.
+	panics any
 }
 
 func (f *fakeHistory) Read() ([]history.Entry, string, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.reads++
+	if p := f.panics; p != nil {
+		f.panics = nil
+		panic(p)
+	}
 	return append([]history.Entry(nil), f.entries...), f.off, f.err
 }
 
@@ -170,6 +177,26 @@ var _ = Describe("the History screen", func() {
 		show()
 		Expect(h.view()).To(ContainSubstring("reading the history failed"))
 		Expect(h.view()).To(ContainSubstring("permission denied"))
+		Expect(h.view()).NotTo(ContainSubstring("Reading the history…"))
+
+		src.mu.Lock()
+		src.err = nil
+		src.mu.Unlock()
+		h.pump(h.press("ctrl+r"))
+		Expect(src.readCount()).To(Equal(2), "a failed read is tried again")
+		Expect(h.view()).NotTo(ContainSubstring("reading the history failed"))
+		Expect(h.view()).To(ContainSubstring("--size=50"))
+	})
+
+	It("says a read that panicked failed, and reads again", func() {
+		src.panics = "index out of range"
+		show()
+		Expect(h.view()).To(ContainSubstring("reading the history failed"))
+		Expect(h.view()).To(ContainSubstring("index out of range"))
+
+		h.pump(h.press("ctrl+r"))
+		Expect(src.readCount()).To(Equal(2))
+		Expect(h.view()).To(ContainSubstring("--size=50"))
 	})
 
 	It("says there is none without a history to read", func() {
