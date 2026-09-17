@@ -115,8 +115,7 @@ var _ = Describe("templates in the TUI", func() {
 		Expect(sent.ExitCode).To(Equal(exitcode.OK), "stderr: %s", sent.Stderr)
 
 		call := t.only()
-		Expect(string(call.Body)).To(ContainSubstring("a@b.de"))
-		Expect(string(call.Body)).To(ContainSubstring("9007199254740993"))
+		Expect(string(call.Body)).To(Equal(`{"order":{"consumer":{"email":"a@b.de"},"id":9007199254740993}}`))
 	})
 
 	It("warns when the template is rendered for a project other than the one it was saved under", func() {
