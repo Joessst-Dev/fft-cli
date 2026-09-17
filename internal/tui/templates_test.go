@@ -642,6 +642,73 @@ var _ = Describe("the Templates screen", func() {
 		})
 	})
 
+	Describe("a Request form holding work that was never sent", func() {
+		// sendSearch renders the search template, and hands its body over.
+		sendSearch := func() {
+			GinkgoHelper()
+			h.showTemplates(oneTemplate)
+			h.openTemplate(docFor("searchPickJobs"))
+			h.press("S")
+			h.finish(ok(`{"a":1}`), pinned(docFor("searchPickJobs"), "template", "render", "rush")...)
+		}
+
+		BeforeEach(func() {
+			h.request(opReplaceFacility)
+			h.fill(0, "BER-01")
+			h.m.request.body = []byte(`{"mine":true}`)
+		})
+
+		It("is not replaced before the user says so, and says what would be lost", func() {
+			sendSearch()
+
+			Expect(h.m.current).To(Equal(tabTemplates))
+			Expect(h.view()).To(ContainSubstring("Replace the Request form for Replace a facility?"))
+			Expect(h.view()).To(ContainSubstring("It holds 1 filled-in field and a 13-byte body"))
+			Expect(h.r.commandLines()).NotTo(ContainElement(HavePrefix("picking")))
+
+			h.press("y")
+			Expect(h.m.request.op.ID).To(Equal("replaceFacility"), "a y at once is not an answer")
+
+			h.wait()
+			h.press("n")
+			Expect(h.m.current).To(Equal(tabTemplates))
+			Expect(h.m.request.op.ID).To(Equal("replaceFacility"))
+			Expect(h.m.request.fields[0].value()).To(Equal("BER-01"))
+			Expect(h.m.request.body).To(Equal([]byte(`{"mine":true}`)))
+			Expect(h.r.commandLines()).NotTo(ContainElement(HavePrefix("picking")))
+		})
+
+		It("is replaced, and the template's body sent, once the user says yes", func() {
+			sendSearch()
+			h.wait()
+			h.press("y")
+
+			Expect(h.last().Args).To(Equal([]string{"picking", "search", "--file", "-"}))
+			Expect(string(h.last().Stdin)).To(Equal(`{"a":1}`))
+			Expect(h.m.current).To(Equal(tabResponse))
+		})
+
+		It("is replaced without a question once it has been sent as it is", func() {
+			h.press("s")
+			h.wait()
+			h.press("y")
+			h.lookup("facility", "update", "BER-01", "--file", "-")
+
+			sendSearch()
+			Expect(h.m.templates.dialog).To(BeNil())
+			Expect(h.last().Args).To(Equal([]string{"picking", "search", "--file", "-"}))
+		})
+
+		It("is replaced without a question when it holds nothing the user typed", func() {
+			h.request(opAddPickJob)
+			h.m.request.body = []byte(sampleOf(opAddPickJob))
+
+			sendSearch()
+			Expect(h.m.templates.dialog).To(BeNil())
+			Expect(h.m.current).To(Equal(tabResponse))
+		})
+	})
+
 	Describe("an answer that arrives while the list is read again", func() {
 		It("still hands over a render that a save on the Request screen finished during", func() {
 			h.request(opAddPickJob)

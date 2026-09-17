@@ -134,6 +134,17 @@ type requestScreen struct {
 
 	// notes are what a command the form ran said on stderr beside succeeding.
 	notes []string
+
+	// sent is the command line and body the form last sent, and saved the body it
+	// last saved as a template: work in either is not lost with the form.
+	sent  *sentForm
+	saved []byte
+}
+
+// sentForm is what the form held when it was sent.
+type sentForm struct {
+	args []string
+	body []byte
 }
 
 func newRequestScreen(s *session, st styles, nav navigator) *requestScreen {
@@ -147,6 +158,7 @@ func (r *requestScreen) open(op Operation) {
 	r.fields = nil
 	r.cursor, r.editing = 0, false
 	r.body, r.example, r.busy = nil, nil, false
+	r.sent, r.saved = nil, nil
 	r.dialog, r.notice, r.problems, r.failure, r.notes = nil, "", nil, nil, nil
 
 	for i := range op.Command.Args {
@@ -647,8 +659,44 @@ func (r *requestScreen) start(project string) tea.Cmd {
 		project: project,
 	}
 	a := action{inv: sent.inv, display: r.display(project)}
+	r.sent = &sentForm{args: sent.inv.Args, body: sent.inv.Stdin}
 	r.notice, r.failure = "", nil
 	return r.s.sendRequest(r.nav, a, sent)
+}
+
+// unsent names the form and says what it holds that a form for body would lose:
+// the arguments and flags filled in, and a body the user wrote. Nothing is lost
+// if the form is as it was sent, and a body is not lost if it is body itself, was
+// saved as a template, or is the example the form offered.
+func (r *requestScreen) unsent(body []byte) (form, lost string) {
+	if r.op == nil {
+		return "", ""
+	}
+	form = firstNonEmpty(r.op.Summary, r.op.ID)
+	if r.sent != nil && slices.Equal(r.sent.args, r.args()) && bytes.Equal(r.sent.body, r.body) {
+		return form, ""
+	}
+
+	var parts []string
+	filled := 0
+	for _, f := range r.fields {
+		if f.value() != "" || f.switched != switchUnset {
+			filled++
+		}
+	}
+	switch filled {
+	case 0:
+	case 1:
+		parts = append(parts, "1 filled-in field")
+	default:
+		parts = append(parts, fmt.Sprintf("%d filled-in fields", filled))
+	}
+	kept := r.body == nil || bytes.Equal(r.body, body) || bytes.Equal(r.body, r.saved) ||
+		bytes.Equal(r.body, r.example) || string(r.body) == sampleOf(*r.op)
+	if !kept {
+		parts = append(parts, fmt.Sprintf("a %d-byte body", len(r.body)))
+	}
+	return form, strings.Join(parts, " and ")
 }
 
 // sendBody opens a form for op holding body, and sends it unless the command needs
@@ -713,6 +761,7 @@ func (r *requestScreen) saveTemplate(name string, op Operation, body []byte, pro
 			r.failure = &failure{what: "saving the template " + name, result: res}
 			return nil
 		}
+		r.saved = body
 		r.say(savedNotice(name, res.Stdout))
 		// What save said besides: a version it dropped from the body, a project
 		// template that hides this one.

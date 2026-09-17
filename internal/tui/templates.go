@@ -741,7 +741,8 @@ func (t *templatesScreen) renderAndSend(o *openTemplate) tea.Cmd {
 			t.say("Rendered " + o.row.Name + ", and nothing was sent: you had moved on. Press S again to send it.")
 			return nil
 		}
-		send := func() tea.Cmd { return t.handOver(op, body, project, asked) }
+		command := t.pipeline(o, op, project)
+		send := func() tea.Cmd { return t.handOver(op, body, project, asked, command, false) }
 		if len(warnings) == 0 {
 			return send()
 		}
@@ -749,7 +750,7 @@ func (t *templatesScreen) renderAndSend(o *openTemplate) tea.Cmd {
 			question: fmt.Sprintf("Rendering %s warned. Send it anyway?", o.row.Name),
 			notes:    warnings,
 			detail:   "Nothing has been sent yet. A write is asked about again before it goes.",
-			command:  t.pipeline(o, op, project),
+			command:  command,
 			onYes:    send,
 		}, t.s.now, true)
 		return nil
@@ -757,11 +758,24 @@ func (t *templatesScreen) renderAndSend(o *openTemplate) tea.Cmd {
 }
 
 // handOver gives the rendered body to the Request screen, which sends it the way it
-// sends a body the user wrote.
-func (t *templatesScreen) handOver(op Operation, body []byte, project string, asked uint64) tea.Cmd {
+// sends a body the user wrote. The form it replaces may hold work of the user's
+// that was never sent; unless replace says they have agreed to lose it, they are
+// asked first.
+func (t *templatesScreen) handOver(op Operation, body []byte, project string, asked uint64,
+	command shellCommand, replace bool) tea.Cmd {
 	if t.s.switches != asked || t.s.target() != project {
 		t.say("The project changed before the template was sent, so nothing was sent. Press S to render it for " +
 			t.s.named() + ".")
+		return nil
+	}
+	if form, lost := t.nav.unsentForm(body); lost != "" && !replace {
+		t.dialog = armed(&confirmDialog{
+			question: fmt.Sprintf("Replace the Request form for %s?", form),
+			notes:    []string{"It holds " + lost + " that you have not sent. Replacing the form loses them."},
+			detail:   "Nothing has been sent yet. Answer n to keep the form, and send or clear it first.",
+			command:  command,
+			onYes:    func() tea.Cmd { return t.handOver(op, body, project, asked, command, true) },
+		}, t.s.now, true)
 		return nil
 	}
 	return t.nav.sendBody(op, body)

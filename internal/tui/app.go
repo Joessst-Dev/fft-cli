@@ -150,6 +150,10 @@ func (m *app) sendBody(op Operation, body []byte) tea.Cmd {
 	return m.request.sendBody(op, body)
 }
 
+func (m *app) unsentForm(body []byte) (form, lost string) {
+	return m.request.unsent(body)
+}
+
 func (m *app) templatesChanged() {
 	m.templates.changed()
 }

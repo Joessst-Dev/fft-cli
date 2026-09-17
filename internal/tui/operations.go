@@ -53,6 +53,10 @@ type navigator interface {
 	// it as the form would once nothing more is needed.
 	sendBody(op Operation, body []byte) tea.Cmd
 
+	// unsentForm names the Request screen's form and says what it holds that
+	// replacing it with a form for body would lose; lost is "" when nothing.
+	unsentForm(body []byte) (form, lost string)
+
 	// templatesChanged says a template was saved or removed.
 	templatesChanged()
 
