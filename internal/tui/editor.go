@@ -3,6 +3,7 @@ package tui
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -181,9 +182,29 @@ func (s *session) finishEditing(msg editorDoneMsg) ([]byte, error) {
 	if msg.err != nil {
 		return nil, fmt.Errorf("the editor did not finish: %w", msg.err)
 	}
-	body, err := os.ReadFile(msg.path)
+	body, err := readEditedBody(msg.path)
 	if err != nil {
 		return nil, fmt.Errorf("read what the editor saved: %w", err)
+	}
+	return body, nil
+}
+
+// maxEditedBody is the largest body read back from the editor. The file is the
+// user's to fill, and a paste gone wrong must not have the UI hold whatever it
+// holds; a body for one request is nowhere near it.
+const maxEditedBody = 8 << 20
+
+func readEditedBody(path string) ([]byte, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	body, err := io.ReadAll(io.LimitReader(f, maxEditedBody+1))
+	if err := errors.Join(err, f.Close()); err != nil {
+		return nil, err
+	}
+	if len(body) > maxEditedBody {
+		return nil, fmt.Errorf("the body is too large to load back: the editor left more than %d MiB", maxEditedBody>>20)
 	}
 	return body, nil
 }

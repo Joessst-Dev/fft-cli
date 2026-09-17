@@ -665,6 +665,18 @@ var _ = Describe("the Request screen", func() {
 			Expect(h.view()).To(ContainSubstring("exit status 1"))
 		})
 
+		It("keeps the body, and says why, when the editor left one too large to load", func() {
+			h.press("e")
+			h.editorExits([]byte(`{"a":1}`), nil)
+			h.press("e")
+			h.editorExits([]byte(strings.Repeat(" ", maxEditedBody+1)), nil)
+
+			Expect(h.files()).To(BeEmpty())
+			Expect(string(h.m.request.body)).To(Equal(`{"a":1}`))
+			Expect(h.view()).To(ContainSubstring("editing the body failed"))
+			Expect(h.view()).To(ContainSubstring("too large to load back"))
+		})
+
 		It("keeps a body that is not JSON for fixing, and refuses to send it", func() {
 			h.press("e")
 			h.editorExits([]byte(`{"a":`), nil)
