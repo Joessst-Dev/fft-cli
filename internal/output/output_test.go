@@ -243,6 +243,26 @@ var _ = Describe("Printer", func() {
 			Entry("without colour", false),
 		)
 
+		It("keeps only its own colours in a value, and never lets one bleed past its cell", func() {
+			p, out, _ := printer(output.Table, true)
+			style := p.Style()
+
+			Expect(p.Render(output.Rows{
+				Headers: []string{"NAME", "CITY"},
+				Rows: [][]string{
+					{"\x1b[8mhidden", "Berlin"},
+					{"\x1b[31mred", style.Green("ONLINE")},
+				},
+			}, nil)).To(Succeed())
+
+			lines := strings.Split(strings.TrimRight(out.String(), "\n"), "\n")
+			Expect(lines).To(HaveLen(3))
+			Expect(out.String()).NotTo(ContainSubstring("\x1b[8m"), "a value concealed itself")
+			Expect(lines[1]).To(HavePrefix("hidden   "))
+			Expect(lines[2]).To(HavePrefix("\x1b[31mred\x1b[0m"), "the value's colour runs on into the next cell")
+			Expect(lines[2]).To(HaveSuffix(style.Green("ONLINE")))
+		})
+
 		It("leaves no trailing whitespace on a line", func() {
 			p, out, _ := printer(output.Table, false)
 

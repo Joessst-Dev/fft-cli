@@ -92,24 +92,48 @@ func (p *Printer) table(t Rows) error {
 // newline in one forges a row on a stdout that is supposed to be only data.
 //
 // With colour on, the SGR sequences a row builder painted with [Style] must
-// survive, so those are kept and everything between them is sanitized. A value
-// that carries an SGR sequence of its own keeps it too: it can change a colour,
-// but not move the cursor, write the clipboard or add a row. With colour off no
-// cell has a reason to hold one, and none survives.
+// survive, so those are kept and everything between them is sanitized. Only the
+// sequences a Style emits are kept: a value cannot conceal itself, blink or paint
+// a background. It can still say one of fft's own colours, and so a cell that
+// leaves a colour on ends in a reset, lest it bleed into the cells after it. With
+// colour off no cell has a reason to hold one, and none survives.
 func (p *Printer) safeCell(cell string) string {
 	if !p.color {
 		return SanitizeCell(cell)
 	}
 	var b strings.Builder
 	last := 0
+	open := false
 	for _, loc := range sgr.FindAllStringIndex(cell, -1) {
 		b.WriteString(SanitizeCell(cell[last:loc[0]]))
-		b.WriteString(cell[loc[0]:loc[1]])
+		if seq := cell[loc[0]:loc[1]]; styleSGR[seq] {
+			b.WriteString(seq)
+			open = seq != sgrReset
+		}
 		last = loc[1]
 	}
 	b.WriteString(SanitizeCell(cell[last:]))
+	if open {
+		b.WriteString(sgrReset)
+	}
 	return b.String()
 }
+
+// sgrReset turns every attribute off.
+const sgrReset = "\x1b[0m"
+
+// styleSGR is every SGR sequence a [Style] emits, taken from Style itself so that
+// a colour added there is kept here too.
+var styleSGR = func() map[string]bool {
+	style := Style{enabled: true}
+	seqs := map[string]bool{sgrReset: true}
+	for _, paint := range []func(string) string{style.Bold, style.Faint, style.Green, style.Yellow, style.Red} {
+		for _, seq := range sgr.FindAllString(paint("x"), -1) {
+			seqs[seq] = true
+		}
+	}
+	return seqs
+}()
 
 // columnWidths measures each column across every line. A ragged row — one with
 // fewer cells than the header — widens only the columns it actually has, rather
