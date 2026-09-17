@@ -82,6 +82,20 @@ else in fft — see [Ids are not numbers](recipes.md) — arriving from the othe
 fft template render rush-order --set-string order.tenantOrderId=12345
 ```
 
+## Rendering what you reviewed
+
+`fft template show` prints a `DIGEST` for the template as it read it. `render --if-digest`
+renders only while the template still has that digest, and otherwise exits 7 with nothing
+on stdout — so a script, or a person, that read a template before sending it sends that
+template, not whatever a `git pull` has made of the file since:
+
+```sh
+fft template render rush-order --if-digest 3f5a… --set email=a@b.de | fft order create --file -
+```
+
+The digest is the SHA-256 of the template's own encoding, the document `show -o json`
+prints, so it does not move when the file is merely re-indented.
+
 ## Tenants do not share ids
 
 A template records the project it was saved under. Rendering it while another project is

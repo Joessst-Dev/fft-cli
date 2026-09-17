@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -13,6 +14,7 @@ import (
 
 	"github.com/Joessst-Dev/fft-cli/internal/config"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
+	"github.com/Joessst-Dev/fft-cli/internal/template"
 )
 
 var _ = Describe("fft template", func() {
@@ -438,6 +440,43 @@ var _ = Describe("fft template", func() {
 			Expect(c.errOut()).To(ContainSubstring(`saved under project "staging"`))
 			Expect(c.errOut()).To(ContainSubstring(`active project is "prod"`))
 			Expect(c.out()).To(ContainSubstring("a@b.de"))
+		})
+
+		Describe("--if-digest", func() {
+			// digest is what show prints under DIGEST for rush.
+			digest := func() string {
+				GinkgoHelper()
+				Expect(c.run("template", "show", "rush")).To(Equal(exitcode.OK))
+				m := regexp.MustCompile(`DIGEST\n  ([0-9a-f]{64})\n`).FindStringSubmatch(c.out())
+				Expect(m).To(HaveLen(2), c.out())
+				return m[1]
+			}
+
+			It("renders the template show described", func() {
+				d := digest()
+				Expect(c.run("template", "render", "rush", "--if-digest", d, "--set", "email=a@b.de")).
+					To(Equal(exitcode.OK), c.errOut())
+				Expect(c.out()).To(ContainSubstring("a@b.de"))
+			})
+
+			It("is the digest of show -o json's document, decoded again", func() {
+				Expect(c.run("template", "show", "rush", "-o", "json")).To(Equal(exitcode.OK))
+				t, err := template.Decode([]byte(c.out()))
+				Expect(err).NotTo(HaveOccurred())
+				Expect(template.Digest(t)).To(Equal(digest()))
+			})
+
+			It("refuses, with exit 7 and nothing on stdout, a template that changed since", func() {
+				d := digest()
+				Expect(save("rush", "--file", "-", "--force",
+					"--require", "email=order.consumer.email", "--description", "changed")).To(Equal(exitcode.OK))
+
+				Expect(c.run("template", "render", "rush", "--if-digest", d, "--set", "email=a@b.de")).
+					To(Equal(exitcode.Conflict))
+				Expect(c.out()).To(BeEmpty())
+				Expect(c.errOut()).To(ContainSubstring(`the template "rush" has changed`))
+				Expect(c.errOut()).To(ContainSubstring("fft template show rush"))
+			})
 		})
 
 		It("refuses to guess which template when there is nobody to ask", func() {

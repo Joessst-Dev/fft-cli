@@ -30,6 +30,10 @@ Rendering makes no request. It needs no project, no credentials and no network,
 and it always prints JSON — even under -o yaml — because the body is going into a
 command that reads JSON.
 
+--if-digest renders only the template whose digest 'fft template show' printed, and
+exits 7 when the file has changed since: a script that reviewed a template sends that
+template, not whatever the file says by the time it renders.
+
 Called with no name on a terminal, it asks which template to render.
 
 ## Usage
@@ -41,6 +45,7 @@ fft template render [name] [flags]
 ## Flags
 
 ```
+      --if-digest string         Render only if the template's digest, as 'fft template show' prints it, is still this one
       --set stringArray          Set a parameter or a path: --set email=a@b.de (repeatable)
       --set-string stringArray   Set a value as a string, whatever it looks like: --set-string id=12345 (repeatable)
 ```

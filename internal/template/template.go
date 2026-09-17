@@ -13,6 +13,8 @@ package template
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"slices"
@@ -179,6 +181,44 @@ func Encode(t *Template) ([]byte, error) {
 		return nil, fmt.Errorf("write the template: %w", err)
 	}
 	return append(data, '\n'), nil
+}
+
+// Digest identifies what a template says: the SHA-256, in hex, of what [Encode]
+// writes for it.
+//
+// It is taken over the encoding rather than the file's bytes so that anything
+// holding the decoded template — `fft template show -o json` decoded again, say —
+// arrives at the same digest as the command that read the file: Encode sorts the
+// keys and keeps every number's digits, so a template and its re-decoded copy
+// encode alike.
+func Digest(t *Template) (string, error) {
+	data, err := Encode(t)
+	if err != nil {
+		return "", err
+	}
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:]), nil
+}
+
+// ChangedError is a template that is no longer the one a caller read: its
+// digest is not the one the caller expected. It exits 7, as a stale version
+// does, and for the same reason: what the caller decided on has moved under it.
+type ChangedError struct {
+	Name     string
+	Expected string
+	Actual   string
+}
+
+func (e *ChangedError) Error() string {
+	return fmt.Sprintf("the template %q has changed: its digest is %s, not %s", e.Name, e.Actual, e.Expected)
+}
+
+// ExitCode implements the interface exitcode.FromError looks for.
+func (e *ChangedError) ExitCode() int { return exitcode.Conflict }
+
+// Hint says how to see what it says now.
+func (e *ChangedError) Hint() string {
+	return fmt.Sprintf("Read it again with 'fft template show %s' before you render it.", e.Name)
 }
 
 // Render applies the declared defaults and then the given overrides, and returns

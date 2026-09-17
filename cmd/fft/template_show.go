@@ -115,6 +115,10 @@ func writeTemplate(out io.Writer, saved template.Saved, style output.Style) {
 		}
 	}
 
+	if digest, err := template.Digest(saved.Template); err == nil {
+		fmt.Fprintf(out, "\n%s\n  %s\n", label("DIGEST"), digest)
+	}
+
 	if body, err := json.MarshalIndent(saved.Body, "", "  "); err == nil {
 		fmt.Fprintf(out, "\n%s\n%s\n", label("BODY"), indent(string(body), "  "))
 	}

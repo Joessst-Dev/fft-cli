@@ -2,6 +2,7 @@ package template_test
 
 import (
 	"strconv"
+	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -82,4 +83,37 @@ var _ = Describe("decoding a template", func() {
 			  "params":{"email":{"path":"order.consumer.email","required":true}}}`))
 		Expect(err).NotTo(HaveOccurred())
 	})
+})
+
+var _ = Describe("a template's digest", func() {
+	const file = `{"schemaVersion":1,"operationId":"addOrder","params":{"qty":{"path":"order.qty","default":1}},
+	  "body":{"order":{"id":9007199254740993,"qty":2}}}`
+
+	digestOf := func(data string) string {
+		GinkgoHelper()
+		t, err := template.Decode([]byte(data))
+		Expect(err).NotTo(HaveOccurred())
+		d, err := template.Digest(t)
+		Expect(err).NotTo(HaveOccurred())
+		return d
+	}
+
+	It("is the same for a template and its encoding decoded again", func() {
+		t, err := template.Decode([]byte(file))
+		Expect(err).NotTo(HaveOccurred())
+		encoded, err := template.Encode(t)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(digestOf(string(encoded))).To(Equal(digestOf(file)))
+		Expect(digestOf(file)).To(MatchRegexp(`^[0-9a-f]{64}$`))
+	})
+
+	DescribeTable("changes with anything the template says",
+		func(changed string) {
+			Expect(digestOf(changed)).NotTo(Equal(digestOf(file)))
+		},
+		Entry("the operation", strings.Replace(file, "addOrder", "addPickJob", 1)),
+		Entry("a digit of a 64-bit id", strings.Replace(file, "993", "994", 1)),
+		Entry("a default", strings.Replace(file, `"default":1`, `"default":"1"`, 1)),
+	)
 })

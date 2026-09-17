@@ -207,6 +207,8 @@ fft template remove rush-order
 - Saving strips a top-level `version`, because replaying a stale one is a guaranteed 409.
 - `--operation <operationId>` records which operation the body is for; an unknown id, or
   one that takes no body, is exit 2.
+- `render --if-digest <digest>` renders only the template whose DIGEST `show` printed, and
+  exits 7 if the file changed since — for a script that reviews a template before it sends it.
 - `--local` writes `./.fft/templates`, which the repository commits. Read one before you
   commit it: a body captured from real work carries real ids and consumer emails.
 - Full rules in [templates.md](templates.md).
