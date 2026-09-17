@@ -376,15 +376,22 @@ func requiredMark(required bool) string {
 // describeFlagLine is a flag as the describe view and the form's hint show it.
 func describeFlagLine(f Flag) string {
 	var b strings.Builder
-	b.WriteString("--" + f.Name + " " + kindName(f.Kind) + requiredMark(f.Required))
+	b.WriteString("--")
+	b.WriteString(f.Name)
+	b.WriteByte(' ')
+	b.WriteString(kindName(f.Kind))
+	b.WriteString(requiredMark(f.Required))
 	if f.Usage != "" {
-		b.WriteString("  " + f.Usage)
+		b.WriteString("  ")
+		b.WriteString(f.Usage)
 	}
 	if len(f.Enum) > 0 {
-		b.WriteString("  one of: " + strings.Join(f.Enum, ", "))
+		b.WriteString("  one of: ")
+		b.WriteString(strings.Join(f.Enum, ", "))
 	}
 	if f.Default != "" {
-		b.WriteString("  default: " + f.Default)
+		b.WriteString("  default: ")
+		b.WriteString(f.Default)
 	}
 	return output.SanitizeCell(b.String())
 }
