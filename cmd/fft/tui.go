@@ -133,9 +133,10 @@ func announceSecretsWarnings(store secrets.Store) {
 //   - --project selects the project the runner starts on; see [cliRunner.SetProject].
 //   - --no-keyring is carried over by construction: the runs share this command's
 //     credential store, which it already chose.
-//   - -y/--yes is not carried over. Confirming a write is the UI's job, and it adds
-//     --yes to the one run the user has just confirmed; a session that answered yes
-//     to everything in advance would be a UI that never asks.
+//   - -y/--yes is not carried over: a session that answered yes to everything in
+//     advance would be a UI that never asks. A command that asks puts its question
+//     to the user through the UI. Only the Projects screen's remove and allow-writes
+//     add --yes, because their typed-name dialogs are that question.
 //   - --debug is not carried over. A trace of every request would bury each run's
 //     own stderr, which the UI shows with its response; the UI can ask for one on
 //     the request being investigated.
