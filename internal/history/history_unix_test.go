@@ -80,3 +80,28 @@ var _ = Describe("a history path that is not a regular file", func() {
 		Expect(log.Path).To(BeAnExistingFile())
 	})
 })
+
+var _ = Describe("a history path that is a symlink", func() {
+	var (
+		log    history.Log
+		target string
+	)
+
+	BeforeEach(func() {
+		dir := GinkgoT().TempDir()
+		target = filepath.Join(dir, "elsewhere.txt")
+		Expect(os.WriteFile(target, []byte("untouched\n"), 0o600)).To(Succeed())
+		log = history.Log{Path: filepath.Join(dir, "history.jsonl")}
+		Expect(os.Symlink(target, log.Path)).To(Succeed())
+	})
+
+	It("is refused by an append, which leaves the file it points at alone", func() {
+		Expect(log.Append(entry("prod", "getFacility", 1))).To(MatchError(ContainSubstring("not a regular file")))
+		Expect(os.ReadFile(target)).To(BeEquivalentTo("untouched\n"))
+	})
+
+	It("is refused by a read", func() {
+		_, err := log.Read()
+		Expect(err).To(MatchError(ContainSubstring("not a regular file")))
+	})
+})

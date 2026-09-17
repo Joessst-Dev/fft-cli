@@ -101,7 +101,8 @@ const readLimitFactor = 4
 
 // errNotRegular is what every function here says about a history path that holds
 // something other than a file: a FIFO, which would hold up every command until
-// something read it, or a device, which may never end.
+// something read it, a device, which may never end, or a symlink, which would
+// have fft write to a file it does not own.
 var errNotRegular = errors.New("not a regular file; move it aside for fft to keep a history there")
 
 func (l Log) maxBytes() int64 {
@@ -238,14 +239,14 @@ func (l Log) Clear() (int, error) {
 // open opens the history file with flag, and refuses anything but a regular file
 // before a byte is read or written.
 //
-// The path is looked at first, so that a FIFO is named for what it is rather than
-// by the error an open of it without a reader gives; the opened file is looked at
-// again, in case the path changed in between.
+// The path is looked at first, without following a link, so that a FIFO or a
+// symlink is named for what it is rather than by the error its open gives; the
+// opened file is looked at again, in case the path changed in between.
 func (l Log) open(flag int) (*os.File, fs.FileInfo, error) {
-	if info, err := os.Stat(l.Path); err == nil && !info.Mode().IsRegular() {
+	if info, err := os.Lstat(l.Path); err == nil && !info.Mode().IsRegular() {
 		return nil, nil, fmt.Errorf("%s: %w", l.Path, errNotRegular)
 	}
-	f, err := os.OpenFile(l.Path, flag|openNonblock, atomicfile.FileMode)
+	f, err := os.OpenFile(l.Path, flag|openFlags, atomicfile.FileMode)
 	if err != nil {
 		return nil, nil, err
 	}
