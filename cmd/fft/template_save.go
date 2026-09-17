@@ -177,9 +177,19 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 					"facility ids, order ids and consumer emails in git history cannot be quietly taken back.",
 					path)
 			}
-			deps.Printer.Notef("Saved %s. Render it with 'fft template render %s'.", name, name)
-
 			view := templatePathView{Template: name, Path: path}
+			shadow, err := projectShadow(store, name, scope.scope())
+			if err != nil {
+				return err
+			}
+			if shadow != "" {
+				view.ShadowedBy = shadow
+				deps.Printer.Warnf("Saved %s, but the project template %s has the same name, and render and show "+
+					"use that one. Rename one of them to render this one.", name, shadow)
+			} else {
+				deps.Printer.Notef("Saved %s. Render it with 'fft template render %s'.", name, name)
+			}
+
 			return deps.Printer.Render(output.Rows{
 				Headers: []string{"TEMPLATE", "PATH"},
 				Rows:    [][]string{{view.Template, view.Path}},
@@ -215,6 +225,23 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 type templatePathView struct {
 	Template string `json:"template" yaml:"template"`
 	Path     string `json:"path" yaml:"path"`
+
+	// ShadowedBy is the project template that render and show resolve the name
+	// to instead, for a user template saved under a name the project uses.
+	ShadowedBy string `json:"shadowedBy,omitempty" yaml:"shadowedBy,omitempty"`
+}
+
+// projectShadow is the project template a user template of that name is hidden
+// by, "" when there is none.
+func projectShadow(store *template.Store, name string, scope template.Scope) (string, error) {
+	if scope != template.ScopeUser {
+		return "", nil
+	}
+	exists, err := store.Exists(name, template.ScopeProject)
+	if err != nil || !exists {
+		return "", err
+	}
+	return store.Path(name, template.ScopeProject)
 }
 
 // templateSource reads the body and works out which operation it belongs to.

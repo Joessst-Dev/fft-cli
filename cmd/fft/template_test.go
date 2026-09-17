@@ -218,6 +218,28 @@ var _ = Describe("fft template", func() {
 			Expect(c.errOut()).To(ContainSubstring("path and not a name"))
 		})
 
+		It("says when a project template of the same name hides the one it saved, on stderr and in its document", func() {
+			Expect(save("rush", "--local", "--file", "-")).To(Equal(exitcode.OK))
+			project := filepath.Join(".", ".fft", "templates", "rush.json")
+			Expect(project).To(BeAnExistingFile())
+
+			Expect(save("rush", "--file", "-", "-o", "json")).To(Equal(exitcode.OK))
+			Expect(c.errOut()).To(ContainSubstring("but the project template"))
+			Expect(c.errOut()).To(ContainSubstring("render and show use that one"))
+			Expect(c.errOut()).NotTo(ContainSubstring("Render it with"))
+
+			var view map[string]string
+			Expect(json.Unmarshal([]byte(c.out()), &view)).To(Succeed())
+			Expect(view["path"]).To(Equal(userPath("rush")))
+			Expect(view["shadowedBy"]).To(HaveSuffix(filepath.Join(".fft", "templates", "rush.json")))
+		})
+
+		It("names no shadow when nothing hides the template", func() {
+			Expect(save("rush", "--file", "-", "-o", "json")).To(Equal(exitcode.OK))
+			Expect(c.out()).NotTo(ContainSubstring("shadowedBy"))
+			Expect(c.errOut()).To(ContainSubstring("Render it with 'fft template render rush'"))
+		})
+
 		It("refuses a name that starts with a dash, which only works after --", func() {
 			Expect(save("--file", "-", "--", "-rush")).To(Equal(exitcode.Usage))
 			Expect(c.errOut()).To(ContainSubstring(`a template name cannot start with a dash, and "-rush" does`))

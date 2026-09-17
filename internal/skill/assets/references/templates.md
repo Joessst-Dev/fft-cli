@@ -32,7 +32,8 @@ fft template save rush-order --operation addOrder --file body.json
   Put one back at render time with `--set version=N` if you really mean to.
 - `--local` writes `./.fft/templates`, which is meant to be committed and shared. Without
   it templates go to `$XDG_DATA_HOME/fft/templates`, which is yours alone. A project
-  template of the same name wins.
+  template of the same name wins; saving a personal one it hides warns, and `-o json`
+  names the project file under `shadowedBy`.
 - A body bound for `--local` that looks like it carries a credential (a key name matching
   `password`, `secret`, `apikey`, `token` or `authorization`) is refused outright unless you
   confirm — or pass `--yes` on a script's non-interactive terminal.
