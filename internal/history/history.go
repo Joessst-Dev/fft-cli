@@ -212,7 +212,7 @@ func (l Log) compact() error {
 			out.WriteByte('\n')
 		}
 	}
-	return atomicfile.Write(l.Path, out.Bytes())
+	return replace(l.Path, out.Bytes())
 }
 
 // Read returns every entry in the file, oldest first. A file that does not exist
@@ -262,7 +262,7 @@ func (l Log) open(flag int) (*os.File, fs.FileInfo, error) {
 	if info, err := os.Lstat(l.Path); err == nil && !info.Mode().IsRegular() {
 		return nil, nil, fmt.Errorf("%s: %w", l.Path, errNotRegular)
 	}
-	f, err := os.OpenFile(l.Path, flag|openFlags, atomicfile.FileMode)
+	f, err := openFile(l.Path, flag|openFlags)
 	if err != nil {
 		return nil, nil, err
 	}
