@@ -28,7 +28,9 @@ command itself. In a pipe or a CI job, use the typed commands.
 
 It uses the terminal's alternate screen, so your scrollback is untouched when you quit.
 `--no-color`, `FFT_NO_COLOR` and `NO_COLOR` turn colour off, and no part of the UI depends
-on colour to be understood.
+on colour to be understood. In colour, the UI asks the terminal for its background when it
+starts, so that the key hint stays readable on light and dark terminals. Keys pressed in
+the first quarter second, before the terminal answers, are ignored (`ctrl+c` still quits).
 
 Some of the global flags you give `fft tui` also apply to the requests it sends:
 
@@ -54,7 +56,8 @@ how many are waiting for an answer, and the `$ fft …` command for the focused 
 
 Below the status bar, the key hint shows the keys that work right now. It takes as many
 lines as it needs: first the keys of the screen, then the global keys, ending with `? all
-keys`.
+keys`. On a terminal too short for all of that, the tabs and the status bar give up their
+rows first, then the screen's keys, so `? all keys` is always the last row.
 
 | Key | |
 |---|---|
@@ -68,8 +71,8 @@ keys`.
 `?` opens the key legend in place of the screen. It lists every key of that screen, the
 keys for each of its modes (typing in a field, searching, a form), the running commands
 panel, questions, and the global keys. It also lists keys that do nothing right now, such
-as `e` for an operation without a body, and says why they do nothing. `↑`/`↓` and
-`pgup`/`pgdn` scroll it, and `?` or `esc` closes it. While it is open, no other key reaches
+as `e` for an operation without a body, and says why they do nothing. When it does not fit,
+`↑`/`↓` (`j`/`k`) and `pgup`/`pgdn` scroll it. `?` or `esc` closes it. While it is open, no other key reaches
 the screen underneath. `q` and `ctrl+c` still quit.
 
 While a text field or a question has the keyboard, only `ctrl+c` still works: a `q` typed
@@ -143,7 +146,7 @@ current project has sent it three times (see [History](#history-6)).
 | Key | |
 |---|---|
 | `↑`/`↓` | select |
-| `←`/`→`, `pgup`/`pgdn` | previous or next page |
+| `←`/`→` (`h`/`l`), `pgup`/`pgdn` (`b`/`f`, `u`/`d`) | previous or next page |
 | `g`/`G`, `home`/`end` | first or last operation |
 | `/` | search by operation id, summary or command; `enter` keeps the search, `esc` drops it |
 | `esc` | clear the search you kept |
@@ -207,7 +210,7 @@ that ran.
 |---|---|
 | `←`/`→` | switch between JSON, Table and Stderr |
 | `↑`/`↓` (`j`/`k`), `h`/`l` | scroll |
-| `pgup`/`pgdn` (`b`/`f`), `u`/`d` | scroll a page, or half a page |
+| `pgup`/`pgdn` (`b`/`f`, `space` down), `u`/`d` (`ctrl+u`/`ctrl+d`) | scroll a page, or half a page |
 | `r` | send the same request again |
 | `s` | save the response body to a file |
 | `c` | cancel, while it runs |
