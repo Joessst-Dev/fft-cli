@@ -194,3 +194,40 @@ var _ = Describe("the --set path grammar", func() {
 		})
 	})
 })
+
+var _ = Describe("looking a path up", func() {
+	doc := func() any {
+		return decode(`{"order":{"ref":"00042","items":[{"qty":3}],"none":null},"a.b":1}`)
+	}
+
+	DescribeTable("finds what Apply would replace",
+		func(path string, want any) {
+			p, err := template.ParsePath(path)
+			Expect(err).NotTo(HaveOccurred())
+			got, found := template.Lookup(doc(), p)
+			Expect(found).To(BeTrue())
+			if want == nil {
+				Expect(got).To(BeNil())
+				return
+			}
+			Expect(got).To(Equal(want))
+		},
+		Entry("a string", "order.ref", "00042"),
+		Entry("an array element", "order.items.0.qty", json.Number("3")),
+		Entry("an explicit null", "order.none", nil),
+		Entry("an escaped dot", `a\.b`, json.Number("1")),
+	)
+
+	DescribeTable("finds nothing where nothing is",
+		func(path string) {
+			p, err := template.ParsePath(path)
+			Expect(err).NotTo(HaveOccurred())
+			_, found := template.Lookup(doc(), p)
+			Expect(found).To(BeFalse())
+		},
+		Entry("a missing key", "order.missing"),
+		Entry("past the end of an array", "order.items.1"),
+		Entry("a key into an array", "order.items.first"),
+		Entry("inside a string", "order.ref.x"),
+	)
+})

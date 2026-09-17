@@ -58,18 +58,29 @@ type templateParam struct {
 	Description string          `json:"description"`
 }
 
-// stringDefault reports whether the parameter's default is a JSON string. A value
-// typed for such a parameter is sent as a string whatever it looks like: an id made
-// only of digits would otherwise go out as a number.
-func (p templateParam) stringDefault() bool {
-	return len(p.Default) > 0 && p.Default[0] == '"'
-}
-
 // paramField is one row of a template's parameters form.
 type paramField struct {
 	name  string
 	spec  templateParam
 	input textinput.Model
+
+	// asString sends the value with --set-string, whatever it looks like: an id
+	// made only of digits would otherwise go out as a number.
+	asString bool
+}
+
+// takesString reports whether a value for p belongs in the body as a string: the
+// saved body holds one where p points, or p's default is one. body is the saved
+// body decoded, nil when it could not be.
+func takesString(p templateParam, body any) bool {
+	if path, err := template.ParsePath(p.Path); err == nil {
+		if v, found := template.Lookup(body, path); found {
+			if _, isString := v.(string); isString {
+				return true
+			}
+		}
+	}
+	return len(p.Default) > 0 && p.Default[0] == '"'
 }
 
 func (f *paramField) value() string { return strings.TrimSpace(f.input.Value()) }
@@ -80,7 +91,7 @@ func (f *paramField) setArgs() []string {
 		return nil
 	}
 	flag := "--set"
-	if f.spec.stringDefault() {
+	if f.asString {
 		flag = "--set-string"
 	}
 	return flagArg(flag, f.name+"="+f.value())
@@ -509,6 +520,12 @@ func (t *templatesScreen) setDoc(o *openTemplate, doc *templateDoc) {
 	slices.Sort(o.refused)
 
 	kept := t.values[o.row.key()]
+	var body any
+	dec := json.NewDecoder(bytes.NewReader(doc.Body))
+	dec.UseNumber()
+	if dec.Decode(&body) != nil {
+		body = nil
+	}
 	o.params = make([]*paramField, 0, len(names))
 	for _, name := range names {
 		spec := doc.Params[name]
@@ -518,7 +535,7 @@ func (t *templatesScreen) setDoc(o *openTemplate, doc *templateDoc) {
 		in.SetStyles(t.st.input)
 		in.Placeholder = paramPlaceholder(spec)
 		in.SetValue(kept[name])
-		o.params = append(o.params, &paramField{name: name, spec: spec, input: in})
+		o.params = append(o.params, &paramField{name: name, spec: spec, input: in, asString: takesString(spec, body)})
 	}
 }
 

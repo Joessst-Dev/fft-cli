@@ -226,7 +226,7 @@ var _ = Describe("the Templates screen", func() {
 			h.fillParam(0, "a@b.de")
 			Expect(h.view()).To(MatchRegexp(`> email\s+consumer.email\s+a@b.de`))
 			Expect(h.view()).To(ContainSubstring("Who is told"))
-			Expect(h.view()).To(ContainSubstring("$ fft template render rush --set 'email=a@b.de' --project staging |"))
+			Expect(h.view()).To(ContainSubstring("$ fft template render rush --set-string 'email=a@b.de' --project staging |"))
 		})
 
 		It("sends a value as a string when the parameter's default is one", func() {
@@ -237,9 +237,25 @@ var _ = Describe("the Templates screen", func() {
 			h.press("R")
 
 			Expect(h.last().Args).To(Equal([]string{
-				"template", "render", "rush", "--set", "email=a@b.de", "--set-string", "id=12345",
+				"template", "render", "rush", "--set-string", "email=a@b.de", "--set-string", "id=12345",
 			}))
 		})
+
+		DescribeTable("sends a value as a string when the saved body holds one where it goes",
+			func(spec, body, flag string) {
+				h.openTemplate(`{"schemaVersion":1,"operationId":"addPickJob","params":{"id":` + spec + `},"body":` + body + `}`)
+				h.press("p")
+				h.fillParam(0, "12345")
+				h.press("R")
+				Expect(h.last().Args).To(Equal([]string{"template", "render", "rush", flag, "id=12345"}))
+			},
+			Entry("a required parameter with no default", `{"path":"orderRef","required":true}`,
+				`{"orderRef":"00042"}`, "--set-string"),
+			Entry("inside an array", `{"path":"lines.0.ref"}`, `{"lines":[{"ref":"7"}]}`, "--set-string"),
+			Entry("a number in the body", `{"path":"qty","required":true}`, `{"qty":1}`, "--set"),
+			Entry("nothing in the body", `{"path":"qty","required":true}`, `{}`, "--set"),
+			Entry("nothing in the body, and a string default", `{"path":"ref","default":"1"}`, `{}`, "--set-string"),
+		)
 
 		It("keeps every key as text while a value is typed", func() {
 			h.openTemplate(rushDoc)
@@ -325,7 +341,7 @@ var _ = Describe("the Templates screen", func() {
 			h.fillParam(0, "a@b.de")
 			h.press("R")
 
-			id := h.lookup("template", "render", "rush", "--set", "email=a@b.de")
+			id := h.lookup("template", "render", "rush", "--set-string", "email=a@b.de")
 			Expect(h.r.invocation(id).Project).To(Equal("staging"))
 			Expect(h.r.stdin(id)).To(BeEmpty())
 
@@ -341,7 +357,7 @@ var _ = Describe("the Templates screen", func() {
 			h.fillParam(0, "a@b.de")
 			h.press("R")
 			h.finish(Result{Stdout: []byte(rendered), Stderr: []byte("Warning: addPickJob is deprecated.\n")},
-				"template", "render", "rush", "--set", "email=a@b.de")
+				"template", "render", "rush", "--set-string", "email=a@b.de")
 
 			Expect(h.view()).To(ContainSubstring("Warning: addPickJob is deprecated."))
 		})
@@ -350,7 +366,7 @@ var _ = Describe("the Templates screen", func() {
 			h.press("p")
 			h.fillParam(0, "a@b.de")
 			h.press("R")
-			h.finish(failed(exitcode.Usage, "Error: consumer.email is a string"), "template", "render", "rush", "--set", "email=a@b.de")
+			h.finish(failed(exitcode.Usage, "Error: consumer.email is a string"), "template", "render", "rush", "--set-string", "email=a@b.de")
 
 			Expect(h.view()).To(ContainSubstring("rendering rush failed: exit 2"))
 			Expect(h.view()).To(ContainSubstring("Saved body"))
@@ -372,7 +388,7 @@ var _ = Describe("the Templates screen", func() {
 			h.press("p")
 			h.fillParam(0, "a@b.de")
 			h.press("S")
-			h.finish(res, "template", "render", "rush", "--set", "email=a@b.de")
+			h.finish(res, "template", "render", "rush", "--set-string", "email=a@b.de")
 		}
 
 		BeforeEach(func() {
@@ -416,7 +432,7 @@ var _ = Describe("the Templates screen", func() {
 			Expect(h.m.current).To(Equal(tabTemplates))
 			Expect(h.view()).To(ContainSubstring("Rendering rush warned. Send it anyway?"))
 			Expect(h.view()).To(ContainSubstring(`Warning: rush was saved under project "prod"`))
-			Expect(h.m.templates.equivalent().line).To(Equal("fft template render rush --set 'email=a@b.de' --project staging | " +
+			Expect(h.m.templates.equivalent().line).To(Equal("fft template render rush --set-string 'email=a@b.de' --project staging | " +
 				"fft picking add-pick-job --file - --project staging"))
 			Expect(h.view()).To(ContainSubstring("runs: fft template render rush"))
 
@@ -508,7 +524,7 @@ var _ = Describe("the Templates screen", func() {
 			h.fillParam(0, "a@b.de")
 			h.press("S")
 			h.m.projects.selectProject("prod")
-			h.finish(ok(rendered), "template", "render", "rush", "--set", "email=a@b.de")
+			h.finish(ok(rendered), "template", "render", "rush", "--set-string", "email=a@b.de")
 
 			Expect(h.m.current).To(Equal(tabTemplates))
 			Expect(h.view()).To(ContainSubstring("The project changed while the template rendered, so nothing was sent."))
@@ -530,7 +546,7 @@ var _ = Describe("the Templates screen", func() {
 			h.press("p")
 			h.fillParam(0, "a@b.de")
 			h.press("S", "esc", "2")
-			h.finish(ok(rendered), "template", "render", "rush", "--set", "email=a@b.de")
+			h.finish(ok(rendered), "template", "render", "rush", "--set-string", "email=a@b.de")
 
 			Expect(h.m.current).To(Equal(tabOperations))
 			Expect(h.r.commandLines()).NotTo(ContainElement(HavePrefix("picking")))
@@ -563,7 +579,7 @@ var _ = Describe("the Templates screen", func() {
 			h.press("p")
 			h.fillParam(0, "a@b.de")
 			h.press("S")
-			renderID := h.lookup("template", "render", "rush", "--set", "email=a@b.de")
+			renderID := h.lookup("template", "render", "rush", "--set-string", "email=a@b.de")
 
 			h.finishID(saveID, ok(`{"template":"other","path":"/home/u/.local/share/fft/templates/other.json"}`))
 			h.lookup("template", "list")
@@ -593,7 +609,7 @@ var _ = Describe("the Templates screen", func() {
 			h.press("p")
 			h.fillParam(0, "a@b.de")
 			h.press("R")
-			renderID := h.lookup("template", "render", "rush", "--set", "email=a@b.de")
+			renderID := h.lookup("template", "render", "rush", "--set-string", "email=a@b.de")
 			h.press("esc", "x")
 			h.finish(failed(exitcode.Usage, "Error: cancelled"), "template", "remove", "rush")
 			h.lookup("template", "list")
@@ -609,7 +625,7 @@ var _ = Describe("the Templates screen", func() {
 			h.press("p")
 			h.fillParam(0, "a@b.de")
 			h.press("R", "esc", "esc")
-			h.finish(ok(rendered), "template", "render", "rush", "--set", "email=a@b.de")
+			h.finish(ok(rendered), "template", "render", "rush", "--set-string", "email=a@b.de")
 
 			Expect(h.m.templates.open).To(BeNil())
 			Expect(h.view()).NotTo(ContainSubstring("Rendering rush…"))
