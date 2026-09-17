@@ -40,6 +40,19 @@ the template on screen: if its file changed after it was opened, nothing is sent
 the template is read again. S asks before it replaces a Request form holding work
 you have not sent. x removes a template.
 
+The History screen lists the requests sent to the current project, newest first;
+t switches to the operations used most, and enter fills in the Request form the way
+a request was sent. Values history does not keep, such as header values and
+request bodies, are left empty. c clears the history, after asking. When requests
+are not being recorded, the screen says why. The Operations screen stars each
+operation with how often the current project sent it.
+
+The Roles screen shows your roles on the current project, their permissions, and
+the operations none of them permits. The Operations screen greys those, and the
+question before a request warns that you appear to lack the permission. It is only
+a hint: a role can be limited to some facilities, so a greyed operation can still
+be sent, and the tenant decides.
+
 Press ? for every key, i for the commands that are running, and y to copy the fft
 command the focused action stands for. Secrets you type and request bodies are
 passed to that command on stdin, never on its command line.
