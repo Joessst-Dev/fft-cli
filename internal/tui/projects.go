@@ -506,6 +506,8 @@ func (p *projectsScreen) legend() []legendSection {
 	}}
 	if p.s.headless {
 		main.note = "Running from the environment: enter, u, r, d and a change nothing here."
+		// The add form never opens here.
+		return []legendSection{main}
 	}
 	f := newFormKeys()
 	return []legendSection{main, {

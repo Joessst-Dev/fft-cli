@@ -295,7 +295,11 @@ const ruleMinBody = 8
 // hintLine is the keys that work right now, on as many rows as they need, under a
 // rule that sets them apart from the status bar.
 func (m *app) hintLine() string {
-	hint := hintView(m.st, m.width, m.bindings())
+	return m.hintLineOf(m.bindings())
+}
+
+func (m *app) hintLineOf(b helpKeys) string {
+	hint := hintView(m.st, m.width, b)
 	if m.width <= 0 || m.height-3-lipgloss.Height(hint)-1 < ruleMinBody {
 		return hint
 	}
@@ -489,7 +493,7 @@ func (m *app) bindings() helpKeys {
 	case ownerQuestion:
 		return helpKeys{local: m.s.asking().dialog.bindings()}
 	case ownerLegend:
-		return helpKeys{local: []key.Binding{m.legendKeys.up}, global: []key.Binding{m.keys.quit, m.legendKeys.close}}
+		return m.legendBindings(m.legendScrolls())
 	case ownerPanel:
 		return helpKeys{local: m.panel.bindings(), global: m.keys.bindings()}
 	default:

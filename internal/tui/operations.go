@@ -262,7 +262,7 @@ func (o *operationsScreen) legend() []legendSection {
 	return []legendSection{
 		{entries: []legendEntry{
 			{of: k.up, desc: "select an operation"},
-			{keys: "←/→, pgup/pgdn", desc: "previous or next page"},
+			{keys: "←/→, pgup/pgdn", desc: "previous or next page (so do h/l, b/f and u/d)"},
 			{keys: "g/G, home/end", desc: "first or last operation"},
 			{of: k.open, desc: "open its request form"},
 			{of: k.describe, desc: "describe it: path, access, permissions, body, flags"},

@@ -6,6 +6,7 @@ import (
 	"go/token"
 	"image/color"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -196,8 +197,11 @@ var _ = Describe("the key legend", func() {
 		Expect(view).To(MatchRegexp(`(?m)^  esc\s+back to Operations$`))
 		Expect(view).To(ContainSubstring(" While typing in a field\n" +
 			"  enter done · tab/shift+tab next/previous field · esc undo · ctrl+s send"))
-		Expect(view).To(MatchRegexp(`(?m)^ Everywhere\n  1-7, tab\s+switch screen\s+ctrl\+p\s+go to Projects$`))
-		Expect(view).To(MatchRegexp(`(?m)^  q, ctrl\+c\s+quit\s+\?\s+open or close this legend$`))
+		Expect(view).To(MatchRegexp(`(?m)^ Everywhere\n  1-7, tab\s+switch screen\s+shift\+tab\s+previous screen$`))
+		Expect(view).To(MatchRegexp(`(?m)^  y\s+copy the fft command\s+q, ctrl\+c\s+quit$`))
+		Expect(view).To(MatchRegexp(`(?m)^  \?\s+open or close this legend$`))
+		Expect(view).To(ContainSubstring("n/esc no · enter no on a yes/no question; confirms a typed name or value"))
+		Expect(view).To(ContainSubstring("↑/↓, j/k, pgup/pgdn scroll"))
 		Expect(view).To(ContainSubstring("In the running commands panel (i)"))
 		Expect(view).To(ContainSubstring("In a question"))
 	})
@@ -262,8 +266,52 @@ var _ = Describe("the key legend", func() {
 	It("offers only its own keys, and no command to copy", func() {
 		h.press("?")
 
-		Expect(h.hintRows()).To(Equal([]string{strings.Repeat("─", 120), "↑/↓ scroll", "q quit • ?/esc close"}))
+		Expect(h.hintRows()).To(Equal([]string{strings.Repeat("─", 120), "q quit • ?/esc close"}))
 		Expect(h.view()).NotTo(ContainSubstring("$ fft"))
+	})
+
+	It("offers to scroll only when it does not fit, as its title does", func() {
+		h.press("?")
+		Expect(h.view()).NotTo(ContainSubstring("↑/↓ scroll"))
+
+		seen := map[bool]bool{}
+		for height := 30; height >= 10; height-- {
+			h.send(tea.WindowSizeMsg{Width: 120, Height: height})
+			scrolls := strings.Contains(h.view(), "↓ more")
+			seen[scrolls] = true
+			keys := slices.DeleteFunc(h.hintRows(), func(row string) bool { return strings.HasPrefix(row, "─") })
+			want := []string{"q quit • ?/esc close"}
+			if scrolls {
+				want = []string{"↑/↓ scroll", "q quit • ?/esc close"}
+			}
+			Expect(keys).To(Equal(want), "at %d rows", height)
+			Expect(strings.Contains(h.view(), "↑/↓ scroll · ? or esc closes")).To(Equal(scrolls), "at %d rows", height)
+		}
+		Expect(seen).To(HaveKey(true))
+		Expect(seen).To(HaveKey(false))
+	})
+
+	It("draws its keys in the hint's colour, which follows the terminal's background", func() {
+		coloured := newHarness(Options{Color: true})
+		coloured.send(tea.BackgroundColorMsg{Color: color.White})
+		coloured.loaded(twoProjects, validToken)
+		coloured.send(tea.WindowSizeMsg{Width: 120, Height: 60})
+		coloured.press("?")
+
+		light := coloured.m.st.hint.key.Render("?")
+		Expect(light).NotTo(Equal(newHintStyles(true, true).key.Render("?")))
+		Expect(coloured.m.View().Content).To(MatchRegexp(`(?m)^  ` + regexp.QuoteMeta(light) + ` +open or close this legend$`))
+	})
+
+	It("leaves out the add form when the projects come from the environment", func() {
+		headless := newHarness(Options{Headless: true})
+		headless.send(tea.WindowSizeMsg{Width: 120, Height: 60})
+		headless.press("?")
+		Expect(headless.view()).To(ContainSubstring("Running from the environment"))
+		Expect(headless.view()).NotTo(ContainSubstring("In the add form"))
+
+		h.press("?")
+		Expect(h.view()).To(ContainSubstring("In the add form"))
 	})
 
 	It("quits at once when nothing is running", func() {
@@ -379,6 +427,56 @@ var _ = Describe("the key legend", func() {
 		Expect(view).To(HavePrefix(" Keys · Request"))
 		Expect(view).To(ContainSubstring("? or esc closes"))
 		Expect(strings.Count(view, "\n") + 1).To(Equal(6))
+	})
+
+	Describe("the keys it names for a component the screen hands keys to", func() {
+		It("scroll the response", func() {
+			id := h.sent(opGetPickJob, "pj-1")
+			h.finishID(id, ok("["+strings.Repeat(`"line",`, 200)+`"end"]`))
+			h.send(tea.WindowSizeMsg{Width: 80, Height: 30})
+			h.view()
+			offset := func() int { return h.m.response.vp.YOffset() }
+
+			steps := []struct {
+				key  tea.KeyPressMsg
+				down bool
+			}{
+				{tea.KeyPressMsg{Code: tea.KeySpace, Text: " "}, true},
+				{tea.KeyPressMsg{Code: 'f', Text: "f"}, true},
+				{tea.KeyPressMsg{Code: 'b', Text: "b"}, false},
+				{tea.KeyPressMsg{Code: 'd', Mod: tea.ModCtrl}, true},
+				{tea.KeyPressMsg{Code: 'u', Mod: tea.ModCtrl}, false},
+				{tea.KeyPressMsg{Code: 'd', Text: "d"}, true},
+				{tea.KeyPressMsg{Code: 'u', Text: "u"}, false},
+			}
+			for _, step := range steps {
+				before := offset()
+				h.send(step.key)
+				if step.down {
+					Expect(offset()).To(BeNumerically(">", before), "%s did not scroll down", step.key)
+				} else {
+					Expect(offset()).To(BeNumerically("<", before), "%s did not scroll up", step.key)
+				}
+			}
+		})
+
+		It("page the operations", func() {
+			h.press("2")
+			h.send(tea.WindowSizeMsg{Width: 80, Height: 12})
+			Expect(h.m.operations.list.Paginator.TotalPages).To(BeNumerically(">", 3))
+			page := func() int { return h.m.operations.list.Paginator.Page }
+
+			for _, k := range []string{"l", "f", "d"} {
+				before := page()
+				h.press(k)
+				Expect(page()).To(Equal(before+1), "%s did not turn the page", k)
+			}
+			for _, k := range []string{"h", "b", "u"} {
+				before := page()
+				h.press(k)
+				Expect(page()).To(Equal(before-1), "%s did not turn the page back", k)
+			}
+		})
 	})
 
 	Describe("as the screens declare it", func() {

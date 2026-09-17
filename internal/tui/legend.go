@@ -91,7 +91,7 @@ const legendGap = "  "
 func compactLines(st styles, width int, entries []legendEntry) []string {
 	items := make([]string, 0, len(entries))
 	for _, e := range entries {
-		items = append(items, st.selected.Render(e.label())+" "+e.desc)
+		items = append(items, st.hint.key.Render(e.label())+" "+e.desc)
 	}
 	packed := pack(items, " · ", max(width-len(legendIndent), 0))
 	for i, line := range packed {
@@ -108,7 +108,7 @@ func tableLines(st styles, width, keyWidth int, sec legendSection) []string {
 	}
 	for _, e := range sec.entries {
 		label := e.label()
-		cell := st.selected.Render(label) + strings.Repeat(" ", keyWidth-ansi.StringWidth(label)) + legendGap + e.desc
+		cell := st.hint.key.Render(label) + strings.Repeat(" ", keyWidth-ansi.StringWidth(label)) + legendGap + e.desc
 		cells = append(cells, cell)
 	}
 
@@ -150,11 +150,36 @@ func (m *app) legendSections() []legendSection {
 
 // legendHeight is how many rows the open legend is drawn in.
 func (m *app) legendHeight() int {
-	rows := m.bodyHeight(m.hintLine())
+	return m.legendHeightBeside(m.hintLine())
+}
+
+func (m *app) legendHeightBeside(hint string) int {
+	rows := m.bodyHeight(hint)
 	if m.height > 0 && rows < legendMinRows {
 		return m.height
 	}
 	return rows
+}
+
+// legendScrolls reports whether the legend is longer than the rows it has. It is
+// measured beside the hint that offers scrolling, the taller one: a legend that
+// fits beside it fits beside the shorter hint too, so the hint never offers a
+// scroll the legend does not need, nor hides one it does.
+func (m *app) legendScrolls() bool {
+	if m.height <= 0 {
+		return false
+	}
+	room := m.legendHeightBeside(m.hintLineOf(m.legendBindings(true))) - 1
+	return len(legendLines(m.st, m.width, m.legendSections())) > room
+}
+
+// legendBindings is what the hint offers while the legend is open.
+func (m *app) legendBindings(scrolls bool) helpKeys {
+	h := helpKeys{global: []key.Binding{m.keys.quit, m.legendKeys.close}}
+	if scrolls {
+		h.local = []key.Binding{m.legendKeys.up}
+	}
+	return h
 }
 
 // legendView draws the legend within height rows, scrolled as far as the user
@@ -164,7 +189,7 @@ func (m *app) legendView(height int) string {
 	title := " " + m.st.title.Render("Keys · "+screenNames[m.current])
 	hint := "? or esc closes"
 	room := height - 1
-	if height > 0 && len(lines) > room {
+	if m.legendScrolls() {
 		hint = "↑/↓ scroll · " + hint
 	}
 	title = clip(title+"   "+m.st.dim.Render(hint), m.width)

@@ -53,6 +53,7 @@ func (k globalKeys) legend() legendSection {
 		columns: true,
 		entries: []legendEntry{
 			{of: k.next, keys: "1-7, tab", desc: "switch screen"},
+			{of: k.prev, keys: "shift+tab", desc: "previous screen"},
 			{of: k.projects, desc: "go to Projects"},
 			{of: k.runs, desc: "running commands"},
 			{of: k.copy, desc: "copy the fft command"},
@@ -87,7 +88,7 @@ func (k legendKeys) legend() legendSection {
 		title:   "In this legend",
 		compact: true,
 		entries: []legendEntry{
-			{of: k.up, keys: "↑/↓, pgup/pgdn", desc: "scroll"},
+			{of: k.up, keys: "↑/↓, j/k, pgup/pgdn", desc: "scroll"},
 			{of: k.close, keys: "?, esc", desc: "close"},
 		},
 	}

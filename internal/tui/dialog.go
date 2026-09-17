@@ -44,8 +44,8 @@ func questionLegend() legendSection {
 		compact: true,
 		entries: []legendEntry{
 			{of: yesKey, desc: "yes"},
-			{of: noKey, keys: "n/esc/enter", desc: "no"},
-			{of: submitKey, desc: "confirm a typed name or value"},
+			{of: noKey, keys: "n/esc", desc: "no"},
+			{of: submitKey, desc: "no on a yes/no question; confirms a typed name or value"},
 			{of: cancelKey, desc: "cancel"},
 		},
 	}
