@@ -2,6 +2,7 @@ package tui
 
 import (
 	"slices"
+	"strconv"
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
@@ -639,6 +640,106 @@ var _ = Describe("the Templates screen", func() {
 			h.wait()
 			h.press("y")
 			Expect(h.last().Args).To(Equal([]string{"picking", "add-pick-job", "--file", "-"}))
+		})
+	})
+
+	Describe("the body a question about sending a template shows", func() {
+		projectList := strings.NewReplacer(`"scope":"user"`, `"scope":"project"`,
+			`/home/u/.local/share/fft/templates/rush.json`, `/work/.fft/templates/rush.json`).Replace(oneTemplate)
+		long := `{"lines":[` + strings.TrimSuffix(strings.Repeat(`{"sku":"A-1"},`, 30), ",") + `]}`
+
+		// sendProject renders the project template rush for addPickJob, and answers
+		// the render with body.
+		sendProject := func(body string) {
+			GinkgoHelper()
+			h.showTemplates(projectList)
+			h.openTemplate(docFor("addPickJob"))
+			h.press("S")
+			h.finish(ok(body), pinned(docFor("addPickJob"), "template", "render", "rush")...)
+		}
+
+		It("names a project template and its file, and starts the body, before a write goes", func() {
+			sendProject(long)
+
+			view := h.view()
+			Expect(view).To(ContainSubstring("Send Create a pick job to staging?"))
+			Expect(view).To(ContainSubstring("The body, " + strconv.Itoa(len(long)) + " bytes, from the project template rush"))
+			Expect(view).To(ContainSubstring("(/work/.fft/templates/rush.json):"))
+			Expect(view).To(ContainSubstring(`"lines": [`))
+			Expect(view).To(ContainSubstring(`"sku": "A-1"`))
+			Expect(view).To(ContainSubstring("… 82 more lines"))
+			Expect(view).To(ContainSubstring("y yes · n no"))
+		})
+
+		It("names a user template without a file", func() {
+			h.showTemplates(oneTemplate)
+			h.openTemplate(docFor("addPickJob"))
+			h.press("S")
+			h.finish(ok(`{"a":1}`), pinned(docFor("addPickJob"), "template", "render", "rush")...)
+
+			Expect(h.view()).To(ContainSubstring("The body, 7 bytes, from the user template rush:"))
+			Expect(h.view()).To(ContainSubstring(`"a": 1`))
+			Expect(h.view()).NotTo(ContainSubstring("more line"))
+		})
+
+		It("shows fewer lines of the body on a short terminal, and never cuts off the answer", func() {
+			h.send(tea.WindowSizeMsg{Width: 80, Height: 24})
+			sendProject(long)
+
+			content := strings.Split(h.view(), "\n")
+			Expect(len(content)).To(BeNumerically("<=", 24))
+			Expect(h.view()).To(ContainSubstring("y yes · n no"))
+			Expect(h.view()).To(ContainSubstring("from the project template rush"))
+			Expect(h.view()).To(MatchRegexp(`… \d+ more lines`))
+		})
+
+		It("draws nothing out of the body that a terminal would act on", func() {
+			sendProject("{\"note\":\"\\u001b]52;c;cGF5bG9hZA==\\u0007\\u001b[2J\"}")
+
+			Expect(h.view()).To(ContainSubstring("]52;c;cGF5bG9hZA=="), "the line is drawn")
+			content := h.m.View().Content
+			Expect(content).NotTo(ContainSubstring("\x1b]"))
+			Expect(content).NotTo(ContainSubstring("\x1b[2J"))
+			Expect(content).NotTo(ContainSubstring("\a"))
+		})
+
+		It("is shown with a render's warnings, before anything is handed over", func() {
+			h.showTemplates(projectList)
+			h.openTemplate(docFor("addPickJob"))
+			h.press("S")
+			h.finish(Result{Stdout: []byte(`{"a":1}`), Stderr: []byte("Warning: addPickJob is deprecated.\n")},
+				pinned(docFor("addPickJob"), "template", "render", "rush")...)
+
+			Expect(h.m.current).To(Equal(tabTemplates))
+			Expect(h.view()).To(ContainSubstring("from the project template rush"))
+			Expect(h.view()).To(ContainSubstring(`"a": 1`))
+		})
+
+		It("is shown under the question a command asks for itself", func() {
+			h.showTemplates(projectList)
+			h.openTemplate(docFor("purgeListings"))
+			h.press("S")
+			h.finish(ok(`{"a":1}`), pinned(docFor("purgeListings"), "template", "render", "rush")...)
+			id := h.lookup("listing", "purge", "--file", "-")
+
+			h.ask(id, "Purge 12 listings?", "purge")
+			Expect(h.view()).To(ContainSubstring("Type purge to confirm."))
+			Expect(h.view()).To(ContainSubstring("The body, 7 bytes, from the project template rush"))
+			Expect(h.view()).To(ContainSubstring(`"a": 1`))
+		})
+
+		It("stops naming the template once the body has been edited", func() {
+			h.showTemplates(oneTemplate)
+			h.openTemplate(docFor("replaceFacility"))
+			h.press("S")
+			h.finish(ok(`{"a":1}`), pinned(docFor("replaceFacility"), "template", "render", "rush")...)
+			h.press("e")
+			h.editorExits([]byte(`{"a":2}`), nil)
+			h.fill(0, "BER-01")
+			h.press("s")
+
+			Expect(h.view()).To(ContainSubstring("The body, 7 bytes:"))
+			Expect(h.view()).NotTo(ContainSubstring("template rush"))
 		})
 	})
 

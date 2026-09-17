@@ -742,7 +742,8 @@ func (t *templatesScreen) renderAndSend(o *openTemplate) tea.Cmd {
 			return nil
 		}
 		command := t.pipeline(o, op, project)
-		send := func() tea.Cmd { return t.handOver(op, body, project, asked, command, false) }
+		from := templateSource(o.row)
+		send := func() tea.Cmd { return t.handOver(op, body, from, project, asked, command, false) }
 		if len(warnings) == 0 {
 			return send()
 		}
@@ -752,6 +753,7 @@ func (t *templatesScreen) renderAndSend(o *openTemplate) tea.Cmd {
 			detail:   "Nothing has been sent yet. A write is asked about again before it goes.",
 			command:  command,
 			onYes:    send,
+			preview:  newBodyPreview(body, from),
 		}, t.s.now, true)
 		return nil
 	})
@@ -761,7 +763,7 @@ func (t *templatesScreen) renderAndSend(o *openTemplate) tea.Cmd {
 // sends a body the user wrote. The form it replaces may hold work of the user's
 // that was never sent; unless replace says they have agreed to lose it, they are
 // asked first.
-func (t *templatesScreen) handOver(op Operation, body []byte, project string, asked uint64,
+func (t *templatesScreen) handOver(op Operation, body []byte, from, project string, asked uint64,
 	command shellCommand, replace bool) tea.Cmd {
 	if t.s.switches != asked || t.s.target() != project {
 		t.say("The project changed before the template was sent, so nothing was sent. Press S to render it for " +
@@ -774,11 +776,22 @@ func (t *templatesScreen) handOver(op Operation, body []byte, project string, as
 			notes:    []string{"It holds " + lost + " that you have not sent. Replacing the form loses them."},
 			detail:   "Nothing has been sent yet. Answer n to keep the form, and send or clear it first.",
 			command:  command,
-			onYes:    func() tea.Cmd { return t.handOver(op, body, project, asked, command, true) },
+			onYes:    func() tea.Cmd { return t.handOver(op, body, from, project, asked, command, true) },
 		}, t.s.now, true)
 		return nil
 	}
-	return t.nav.sendBody(op, body)
+	return t.nav.sendBody(op, body, from)
+}
+
+// templateSource names row for a question about sending what it rendered: its
+// name, its scope, and — for a project template, which came with a clone and
+// may say nothing about where it was saved — the file it was read from.
+func templateSource(row templateRow) string {
+	from := row.Scope + " template " + row.Name
+	if row.Scope == projectScope {
+		from += " (" + row.Path + ")"
+	}
+	return from
 }
 
 // remove runs `template remove`, which asks its own question before it deletes
@@ -868,7 +881,7 @@ func (t *templatesScreen) view(width, height int) string {
 	st := t.st
 	if t.dialog != nil {
 		// A dialog has the keyboard, so it is drawn first, where no height can cut it.
-		return strings.Join([]string{st.title.Render("Templates"), "", t.dialog.view(st, width)}, "\n")
+		return strings.Join([]string{st.title.Render("Templates"), "", t.dialog.view(st, width, height-2)}, "\n")
 	}
 	if t.open != nil {
 		return t.detail(t.open, width, height)
@@ -1023,21 +1036,26 @@ func (t *templatesScreen) maxScroll(o *openTemplate) int {
 // longer than that is for a shell, where it can be paged and searched.
 const maxBodyLines = 10_000
 
-// bodyLines is a JSON body indented, one line per element, stripped of anything a
-// terminal would act on: it is the file's, and a project file comes with a clone.
+// bodyLines is prettyBody, one line per element.
 func bodyLines(body []byte) []string {
-	var indented bytes.Buffer
-	text := string(body)
-	if err := json.Indent(&indented, body, "  ", "  "); err == nil {
-		text = "  " + indented.String()
-	}
-	lines := strings.SplitN(strings.TrimRight(output.Sanitize(text), "\n"), "\n", maxBodyLines+1)
+	lines := strings.SplitN(prettyBody(body), "\n", maxBodyLines+1)
 	if len(lines) > maxBodyLines {
 		more := strings.Count(lines[maxBodyLines], "\n") + 1
 		lines = append(lines[:maxBodyLines],
 			fmt.Sprintf("  … %d more lines not shown: render it in a shell to read them all", more))
 	}
 	return lines
+}
+
+// prettyBody is a JSON body indented, stripped of anything a terminal would act
+// on: a body can come out of a file that arrived with a git clone.
+func prettyBody(body []byte) string {
+	var indented bytes.Buffer
+	text := string(body)
+	if err := json.Indent(&indented, body, "  ", "  "); err == nil {
+		text = "  " + indented.String()
+	}
+	return strings.TrimRight(output.Sanitize(text), "\n")
 }
 
 // operationLine says which operation the template is for, and the command that

@@ -1,12 +1,15 @@
 package tui
 
 import (
+	"fmt"
+	"slices"
 	"strings"
 	"time"
 
 	"charm.land/bubbles/v2/key"
 	"charm.land/bubbles/v2/textinput"
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"github.com/Joessst-Dev/fft-cli/internal/output"
 )
@@ -16,7 +19,9 @@ type dialog interface {
 	// update handles a key or a paste. It returns whether the dialog is finished,
 	// and what answering it started.
 	update(msg tea.Msg) (finished bool, cmd tea.Cmd)
-	view(st styles, width int) string
+	// view draws the dialog width columns wide, and within height rows where it
+	// can; 0 is a height nobody knows.
+	view(st styles, width, height int) string
 	bindings() []key.Binding
 
 	// equivalent is the command a yes would run, empty when a yes runs nothing yet.
@@ -82,6 +87,9 @@ type confirmDialog struct {
 	detail  string
 	command shellCommand
 	onYes   func() tea.Cmd
+
+	// preview is the request body a yes sends, nil for a question about none.
+	preview *bodyPreview
 }
 
 func (d *confirmDialog) update(msg tea.Msg) (bool, tea.Cmd) {
@@ -97,19 +105,20 @@ func (d *confirmDialog) update(msg tea.Msg) (bool, tea.Cmd) {
 	return false, nil
 }
 
-func (d *confirmDialog) view(st styles, width int) string {
-	lines := []string{st.title.Render(output.SanitizeCell(d.question))}
+func (d *confirmDialog) view(st styles, width, height int) string {
+	top := []string{st.title.Render(output.SanitizeCell(d.question))}
 	for _, note := range d.notes {
-		lines = append(lines, st.warnText.Render(output.SanitizeCell(note)))
+		top = append(top, st.warnText.Render(output.SanitizeCell(note)))
 	}
 	if d.detail != "" {
-		lines = append(lines, output.SanitizeCell(d.detail))
+		top = append(top, output.SanitizeCell(d.detail))
 	}
+	var bottom []string
 	if !d.command.empty() {
-		lines = append(lines, "", st.dim.Render("runs: "+output.SanitizeCell(d.command.String())))
+		bottom = append(bottom, "", st.dim.Render("runs: "+output.SanitizeCell(d.command.String())))
 	}
-	lines = append(lines, "", "y yes · n no")
-	return st.dialog.Width(dialogWidth(width)).Render(strings.Join(lines, "\n"))
+	bottom = append(bottom, "", "y yes · n no")
+	return framed(st, width, height, top, d.preview, bottom)
 }
 
 func (d *confirmDialog) bindings() []key.Binding { return []key.Binding{yesKey, noKey} }
@@ -131,6 +140,9 @@ type typeNameDialog struct {
 	input    textinput.Model
 	mismatch bool
 	onMatch  func() tea.Cmd
+
+	// preview is the request body the command acts with, nil for none.
+	preview *bodyPreview
 }
 
 func newTypeNameDialog(st styles, question, detail, name string, command shellCommand, onMatch func() tea.Cmd) *typeNameDialog {
@@ -168,27 +180,94 @@ func (d *typeNameDialog) update(msg tea.Msg) (bool, tea.Cmd) {
 	return false, cmd
 }
 
-func (d *typeNameDialog) view(st styles, width int) string {
+func (d *typeNameDialog) view(st styles, width, height int) string {
 	// A project name comes from the config file, which may have been edited by hand.
-	lines := []string{st.title.Render(output.SanitizeCell(d.question))}
+	top := []string{st.title.Render(output.SanitizeCell(d.question))}
 	if d.detail != "" {
-		lines = append(lines, output.SanitizeCell(d.detail))
+		top = append(top, output.SanitizeCell(d.detail))
 	}
-	lines = append(lines, "Type "+output.SanitizeCell(d.name)+" to confirm.", d.input.View())
+	bottom := []string{"", "Type " + output.SanitizeCell(d.name) + " to confirm.", d.input.View()}
 	if d.mismatch {
 		what := d.what
 		if what == "" {
 			what = "name"
 		}
-		lines = append(lines, st.errorText.Render("That is not the "+what+"; nothing was sent."))
+		bottom = append(bottom, st.errorText.Render("That is not the "+what+"; nothing was sent."))
 	}
-	lines = append(lines, "", st.dim.Render("runs: "+output.SanitizeCell(d.command.String())), "", "enter confirm · esc cancel")
-	return st.dialog.Width(dialogWidth(width)).Render(strings.Join(lines, "\n"))
+	bottom = append(bottom, "", st.dim.Render("runs: "+output.SanitizeCell(d.command.String())), "", "enter confirm · esc cancel")
+	return framed(st, width, height, top, d.preview, bottom)
 }
 
 func (d *typeNameDialog) bindings() []key.Binding { return []key.Binding{submitKey, cancelKey} }
 
 func (d *typeNameDialog) equivalent() shellCommand { return d.command }
+
+// framed draws a dialog's lines in its box, with the start of the body it is
+// about between top and bottom: as many lines of it as keep the whole dialog
+// within height rows, so that the answer keys are never cut off.
+func framed(st styles, width, height int, top []string, p *bodyPreview, bottom []string) string {
+	box := st.dialog.Width(dialogWidth(width))
+	draw := func(rows []string) string {
+		return box.Render(strings.Join(slices.Concat(top, rows, bottom), "\n"))
+	}
+	if p == nil {
+		return draw(nil)
+	}
+	inner := dialogWidth(width) - box.GetHorizontalFrameSize()
+	room := previewLines
+	if height > 0 {
+		room = min(room, max(height-lipgloss.Height(draw(p.rows(st, inner, 0))), 0))
+	}
+	return draw(p.rows(st, inner, room))
+}
+
+// previewLines is as much of a body as a question shows: enough to see what it
+// is, not so much that the question scrolls away.
+const previewLines = 12
+
+// bodyPreview is the start of a request body, as a question about sending it
+// shows it.
+type bodyPreview struct {
+	// source says where the body came from, "" for the form's own.
+	source string
+
+	head  []string
+	lines int
+	size  int
+}
+
+// newBodyPreview reads body once, when the question is asked: a body can run to
+// megabytes, and the question is drawn on every frame.
+func newBodyPreview(body []byte, source string) *bodyPreview {
+	text := prettyBody(body)
+	head := strings.SplitN(text, "\n", previewLines+1)
+	return &bodyPreview{
+		source: source,
+		head:   head[:min(len(head), previewLines)],
+		lines:  strings.Count(text, "\n") + 1,
+		size:   len(body),
+	}
+}
+
+// rows is the preview with at most room of the body's lines, each cut to width.
+func (p *bodyPreview) rows(st styles, width, room int) []string {
+	title := fmt.Sprintf("The body, %d bytes", p.size)
+	if p.source != "" {
+		title += ", from the " + p.source
+	}
+	rows := []string{"", wrap(st.dim.Render(output.SanitizeCell(title)+":"), width)}
+	shown := min(room, len(p.head))
+	for _, line := range p.head[:shown] {
+		rows = append(rows, clip(line, width))
+	}
+	switch more := p.lines - shown; {
+	case more == 1:
+		rows = append(rows, st.dim.Render("… 1 more line"))
+	case more > 1:
+		rows = append(rows, st.dim.Render(fmt.Sprintf("… %d more lines", more)))
+	}
+	return rows
+}
 
 // dialogWidth keeps a dialog readable: as wide as the text wants on a small
 // terminal, and not stretched across a large one.

@@ -605,6 +605,16 @@ var _ = Describe("the Request screen", func() {
 			Expect(env).NotTo(ContainElement(ContainSubstring("AIzaSyExample")))
 		})
 
+		It("is shown, from its start, in the question asked before a write sends it", func() {
+			const edited = `{"pickLineItems":[{"article":"A-1"}]}`
+			h.press("e")
+			h.editorExits([]byte(edited), nil)
+			h.press("s")
+
+			Expect(h.view()).To(ContainSubstring("The body, 37 bytes:"))
+			Expect(h.view()).To(ContainSubstring(`"article": "A-1"`))
+		})
+
 		It("travels on stdin, never on the command line, and the file is removed", func() {
 			const edited = `{"pickLineItems":[{"article":"stdin-only"}]}`
 			h.press("e")

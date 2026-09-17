@@ -145,9 +145,9 @@ func (m *app) openRequestScreen() tea.Cmd {
 	return nil
 }
 
-func (m *app) sendBody(op Operation, body []byte) tea.Cmd {
+func (m *app) sendBody(op Operation, body []byte, from string) tea.Cmd {
 	m.current = tabRequest
-	return m.request.sendBody(op, body)
+	return m.request.sendBody(op, body, from)
 }
 
 func (m *app) unsentForm(body []byte) (form, lost string) {
@@ -413,7 +413,7 @@ func (m *app) View() tea.View {
 	case ownerQuit:
 		body = m.quitDialog()
 	case ownerQuestion:
-		body = m.s.asking().dialog.view(m.st, m.width)
+		body = m.s.asking().dialog.view(m.st, m.width, bodyHeight)
 	default:
 		body = m.screens[m.current].view(m.width, bodyHeight)
 	}
@@ -524,7 +524,7 @@ func (m *app) quitDialog() string {
 		question: fmt.Sprintf("%d %s still running. Quit and cancel them?", n, noun),
 		detail:   "A write that is cancelled may already have reached the tenant.",
 	}
-	return d.view(m.st, m.width)
+	return d.view(m.st, m.width, 0)
 }
 
 // fit makes s exactly height lines tall: cut when it is longer, padded when it is

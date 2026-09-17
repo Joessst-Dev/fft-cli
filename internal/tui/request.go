@@ -119,6 +119,10 @@ type requestScreen struct {
 	body    []byte
 	example []byte
 
+	// from says where body came from — a saved template — for the question
+	// asked before it is sent; "" once it is the user's own.
+	from string
+
 	// busy is set while the example is being fetched or the editor is open, so
 	// that e does not open a second one.
 	busy bool
@@ -157,7 +161,7 @@ func (r *requestScreen) open(op Operation) {
 	r.op = &op
 	r.fields = nil
 	r.cursor, r.editing = 0, false
-	r.body, r.example, r.busy = nil, nil, false
+	r.body, r.example, r.busy, r.from = nil, nil, false, ""
 	r.sent, r.saved = nil, nil
 	r.dialog, r.notice, r.problems, r.failure, r.notes = nil, "", nil, nil, nil
 
@@ -415,6 +419,9 @@ func (r *requestScreen) receive(msg tea.Msg) tea.Cmd {
 	}
 
 	r.problems = nil
+	if !bytes.Equal(body, r.body) {
+		r.from = ""
+	}
 	switch {
 	case len(bytes.TrimSpace(body)) == 0:
 		r.body = nil
@@ -622,8 +629,18 @@ func (r *requestScreen) send() tea.Cmd {
 		detail:   writeDetail(*r.op, r.s.readOnly()),
 		command:  r.display(project),
 		onYes:    func() tea.Cmd { return r.start(project) },
+		preview:  r.preview(),
 	}, r.s.now, true)
 	return nil
+}
+
+// preview is the body the form sends, as a question about sending it shows it;
+// nil when there is none.
+func (r *requestScreen) preview() *bodyPreview {
+	if r.body == nil {
+		return nil
+	}
+	return newBodyPreview(r.body, r.from)
 }
 
 // asksFirst reports whether the UI asks before sending op. A write is asked about,
@@ -657,6 +674,7 @@ func (r *requestScreen) start(project string) tea.Cmd {
 			Project: project,
 		},
 		project: project,
+		from:    r.from,
 	}
 	a := action{inv: sent.inv, display: r.display(project)}
 	r.sent = &sentForm{args: sent.inv.Args, body: sent.inv.Stdin}
@@ -699,11 +717,13 @@ func (r *requestScreen) unsent(body []byte) (form, lost string) {
 	return form, strings.Join(parts, " and ")
 }
 
-// sendBody opens a form for op holding body, and sends it unless the command needs
-// more than the body, in which case the form waits for the rest.
-func (r *requestScreen) sendBody(op Operation, body []byte) tea.Cmd {
+// sendBody opens a form for op holding body, which came from from, and sends it
+// unless the command needs more than the body, in which case the form waits for
+// the rest.
+func (r *requestScreen) sendBody(op Operation, body []byte, from string) tea.Cmd {
 	r.open(op)
 	r.body = bytes.Clone(body)
+	r.from = from
 	if problems := r.validate(); len(problems) > 0 {
 		r.say("The body is in the form. Fill in what the command still needs, then press s to send it.")
 		r.problems = problems
@@ -830,7 +850,7 @@ func (r *requestScreen) equivalent() shellCommand {
 	return r.display(r.s.target())
 }
 
-func (r *requestScreen) view(width, _ int) string {
+func (r *requestScreen) view(width, height int) string {
 	st := r.st
 	if r.op == nil {
 		return st.title.Render("Request") + "\n\nChoose an operation on the Operations screen (2), and press enter."
@@ -841,7 +861,7 @@ func (r *requestScreen) view(width, _ int) string {
 		st.dim.Render(output.SanitizeCell(op.Method + " " + op.Path + " · " + op.ID)),
 	}
 	if r.dialog != nil {
-		return strings.Join(append(header, "", r.dialog.view(st, width)), "\n")
+		return strings.Join(append(header, "", r.dialog.view(st, width, height-len(header)-1)), "\n")
 	}
 
 	lines := header

@@ -50,8 +50,9 @@ type navigator interface {
 	openResponse(id RunID)
 
 	// sendBody shows the Request screen with a form for op holding body, and sends
-	// it as the form would once nothing more is needed.
-	sendBody(op Operation, body []byte) tea.Cmd
+	// it as the form would once nothing more is needed. from says where the body
+	// came from, for the question asked before it is sent.
+	sendBody(op Operation, body []byte, from string) tea.Cmd
 
 	// unsentForm names the Request screen's form and says what it holds that
 	// replacing it with a form for body would lose; lost is "" when nothing.

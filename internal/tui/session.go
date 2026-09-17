@@ -123,6 +123,9 @@ type sentRequest struct {
 	// project is the project it was pinned to, "" when fft's own resolution
 	// chose. The run's result says which one that was.
 	project string
+
+	// from says where the body came from, "" for the form's own.
+	from string
 }
 
 func newSession(opts Options, st styles) *session {
@@ -316,13 +319,21 @@ func (s *session) ask(ev RunEvent) {
 	}
 	detail += "."
 
+	// The command's question is about what it looked up, in its own words; the
+	// body it acts with is shown under it, because the question may not say.
+	var preview *bodyPreview
+	if sent := s.requests[ev.ID]; sent != nil && sent.inv.Stdin != nil {
+		preview = newBodyPreview(sent.inv.Stdin, sent.from)
+	}
+
 	var d dialog
 	if word := ev.Question.Confirm; word != "" {
 		typed := newTypeNameDialog(s.st, ev.Question.Text, detail+" It cannot be undone.", word, e.display, yes)
 		typed.what = "word"
+		typed.preview = preview
 		d = typed
 	} else {
-		d = &confirmDialog{question: ev.Question.Text, detail: detail, command: e.display, onYes: yes}
+		d = &confirmDialog{question: ev.Question.Text, detail: detail, command: e.display, onYes: yes, preview: preview}
 	}
 	// Armed only once it is in front of the user, which may be well after it came.
 	q.dialog = armed(d, s.now, false)

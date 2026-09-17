@@ -488,12 +488,12 @@ func (p *projectsScreen) equivalent() shellCommand {
 	return commandLine([]string{"project", "list"})
 }
 
-func (p *projectsScreen) view(width, _ int) string {
+func (p *projectsScreen) view(width, height int) string {
 	st := p.st
 	if p.dialog != nil {
 		// A dialog has the keyboard, over the list and over the form alike, so it is
 		// drawn in their place: first, where no height can cut it off.
-		return strings.Join([]string{st.title.Render("Projects"), "", p.dialog.view(st, width)}, "\n")
+		return strings.Join([]string{st.title.Render("Projects"), "", p.dialog.view(st, width, height-2)}, "\n")
 	}
 	if p.form != nil {
 		return p.form.view(width)

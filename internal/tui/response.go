@@ -229,7 +229,7 @@ func (p *responseScreen) rerun(e *runEntry) tea.Cmd {
 		return nil
 	}
 
-	again := &sentRequest{op: req.op, inv: req.inv, project: req.project}
+	again := &sentRequest{op: req.op, inv: req.inv, project: req.project, from: req.from}
 	again.inv.Stdin = bytes.Clone(req.inv.Stdin)
 	// The project the run acted on, when fft's own resolution chose it: the active
 	// project may have moved since.
@@ -252,8 +252,17 @@ func (p *responseScreen) rerun(e *runEntry) tea.Cmd {
 		detail:   writeDetail(req.op, false),
 		command:  a.display,
 		onYes:    send,
+		preview:  previewOf(again.inv.Stdin, again.from),
 	}, p.s.now, true)
 	return nil
+}
+
+// previewOf is newBodyPreview, nil for a request without a body.
+func previewOf(body []byte, from string) *bodyPreview {
+	if body == nil {
+		return nil
+	}
+	return newBodyPreview(body, from)
 }
 
 // askSavePath asks where to save the response body.
@@ -401,7 +410,7 @@ func (p *responseScreen) view(width, height int) string {
 	}
 	lines := []string{p.header(e), st.dim.Render(clip("$ "+output.SanitizeCell(e.display.String()), width))}
 	if p.dialog != nil {
-		return strings.Join(append(lines, "", p.dialog.view(st, width)), "\n")
+		return strings.Join(append(lines, "", p.dialog.view(st, width, height-len(lines)-1)), "\n")
 	}
 	if e.state != RunDone {
 		if e.asking {
@@ -610,7 +619,7 @@ func (d *inputDialog) update(msg tea.Msg) (bool, tea.Cmd) {
 	return false, cmd
 }
 
-func (d *inputDialog) view(st styles, width int) string {
+func (d *inputDialog) view(st styles, width, _ int) string {
 	lines := []string{st.title.Render(output.SanitizeCell(d.question))}
 	if d.detail != "" {
 		lines = append(lines, output.SanitizeCell(d.detail))
