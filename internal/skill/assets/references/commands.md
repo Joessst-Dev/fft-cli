@@ -251,15 +251,20 @@ fft ping
 fft version
 fft component list
 fft history top -o json
+fft history top --all-projects --limit 0 -o json
 fft history list --limit 10 -o json
+fft history list --project staging -o json
+fft history clear --yes
 ```
 
 - `fft auth whoami` prints the permissions the current credentials actually have. When
   something exits 5, this is the command that explains why.
-- `fft auth status -o json` says what is stored to sign in with — `store`, `signIn`
+- `fft auth status -o json` says what is stored to sign in as the current `project`
+  (with its `email` and `username`) — `store`, `signIn`
   (`password`, `idToken` or `none`), `hasPassword`, `hasRefreshToken`, `hasIdToken` — and the
   cached token's `token` state (`valid`, `expiring`, `expired`, `unknown`, `none`) with its
-  `expiresAt`. It sends nothing and mints nothing, so it is the cheap check before a long
+  `expiresAt` and `expiresIn`. It takes no flags of its own, and exits 3 when no project is
+  configured. It sends nothing and mints nothing, so it is the cheap check before a long
   run; `expired: true` is not an error, the next command renews the token. It never prints a
   credential.
 - `fft ping` needs no credentials at all. It is the way to tell "the tenant is down" apart
@@ -270,10 +275,20 @@ fft history list --limit 10 -o json
   somebody else does — a command in `--help` that came from a component is somebody else's
   code. See [components](components.md).
 - `fft history top -o json` lists the operations used most in the current project, each with
-  `operationId`, `command`, `count` and `lastUsed` — a quick way to learn what a user
-  normally does before suggesting a command. `--all-projects` counts every project.
-  `fft history list -o json` prints the recent requests, newest first. Neither holds a
-  request body, and inline `--data`, header values and credential-shaped flags appear as
-  `<redacted>`; history is off in headless mode, so in CI both print `[]`.
+  `project`, `operationId`, `command`, `count` and `lastUsed` — a quick way to learn what a
+  user normally does before suggesting a command. `--all-projects` counts every project,
+  each separately; `--limit` (default 10, `0` for all) caps the list. It needs a current
+  project unless `--all-projects` is given: exit 3 otherwise.
+- `fft history list -o json` prints the recent requests, newest first, from every project
+  unless `--project` names one; `--limit` defaults to 20, `0` for all. Each entry has `ts`,
+  `source` (`cli` or `tui`), `project`, `operationId`, `command`, `args`, `status` (left out
+  when no response arrived), `exit` and `durationMs`.
+- Neither holds a request body, and inline `--data`, header values, `--set` values and
+  credential-shaped flags appear as `<redacted>`. History is off in headless mode unless
+  `FFT_HISTORY=on`, so in CI both usually print `[]`; when nothing is being recorded, stderr
+  says why.
+- `fft history clear` deletes the whole history. It asks first, and without a terminal it
+  refuses with exit 2 unless `--yes` is given. It is the user's record: do not clear it
+  unless they ask.
 - `fft component init pricing` scaffolds a new component (a command or a transport, in shell,
   Go, Python or Node) that installs and runs straight away. See [components](components.md).
