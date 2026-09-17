@@ -100,6 +100,13 @@ func ValidateName(name string) error {
 			return exitcode.UsageError{Err: fmt.Errorf(
 				"a template name cannot start with a dot, and %q does", name)}
 		}
+		// A name is typed on its own after the command, where a leading dash makes
+		// it a flag: `fft template render -rush` is a parse error, and a committed
+		// --yes.json would be read as the flag by anything that runs its name.
+		if i == 0 && r == '-' {
+			return exitcode.UsageError{Err: fmt.Errorf(
+				"a template name cannot start with a dash, and %q does", name)}
+		}
 	}
 
 	// Windows reads a device name off the part before the first dot, so nul.json
@@ -253,10 +260,11 @@ func (s *Store) List() (Listing, error) {
 
 	seen := make(map[string]bool)
 	for _, scope := range []Scope{ScopeProject, ScopeUser} {
-		names, err := s.scan(scope)
+		names, refused, err := s.scan(scope)
 		if err != nil {
 			return Listing{}, err
 		}
+		out.Problems = append(out.Problems, refused...)
 
 		for _, name := range names {
 			saved, err := s.Load(name, scope)
@@ -341,37 +349,47 @@ func (s *Store) Exists(name string, scope Scope) (bool, error) {
 	}
 }
 
-// scan lists the template names in one scope. A directory that is not there is
-// an empty scope, not a failure: neither one has to exist for fft to work.
-func (s *Store) scan(scope Scope) ([]string, error) {
-	entries, err := os.ReadDir(s.Dir(scope))
+// scan lists the template names in one scope, and the template files whose name
+// no command could address. A directory that is not there is an empty scope, not
+// a failure: neither one has to exist for fft to work.
+//
+// A dot file is somebody else's and is passed over in silence. Any other file
+// with a refused name is reported: it looks like a template to whoever put it
+// there, and one that simply never appeared would leave them guessing.
+func (s *Store) scan(scope Scope) ([]string, []Problem, error) {
+	dir := s.Dir(scope)
+	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return nil, nil
+			return nil, nil, nil
 		}
-		return nil, fmt.Errorf("read %s: %w", s.Dir(scope), err)
+		return nil, nil, fmt.Errorf("read %s: %w", dir, err)
 	}
 
-	var names []string
+	var (
+		names   []string
+		refused []Problem
+	)
 	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ext) {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ext) || strings.HasPrefix(e.Name(), ".") {
 			continue
 		}
 		name := strings.TrimSuffix(e.Name(), ext)
-		if ValidateName(name) != nil {
+		if err := ValidateName(name); err != nil {
+			refused = append(refused, Problem{Path: filepath.Join(dir, e.Name()), Err: err})
 			continue
 		}
 		names = append(names, name)
 	}
 	slices.Sort(names)
-	return names, nil
+	return names, refused, nil
 }
 
 // names is every template name the store can see, for a "did you mean".
 func (s *Store) names() []string {
 	var out []string
 	for _, scope := range []Scope{ScopeProject, ScopeUser} {
-		names, err := s.scan(scope)
+		names, _, err := s.scan(scope)
 		if err != nil {
 			continue
 		}

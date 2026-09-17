@@ -216,6 +216,12 @@ var _ = Describe("fft template", func() {
 			Expect(c.errOut()).To(ContainSubstring("path and not a name"))
 		})
 
+		It("refuses a name that starts with a dash, which only works after --", func() {
+			Expect(save("--file", "-", "--", "-rush")).To(Equal(exitcode.Usage))
+			Expect(c.errOut()).To(ContainSubstring(`a template name cannot start with a dash, and "-rush" does`))
+			Expect(userPath("-rush")).NotTo(BeAnExistingFile())
+		})
+
 		It("refuses a parameter name --set would cut short, carried in from a shown template", func() {
 			c.stdin.WriteString(`{"schemaVersion":1,"body":{"status":"OPEN"},"params":{"a=b":{"path":"order.id"}}}`)
 			Expect(c.run("template", "save", "copy", "--file", "-")).To(Equal(exitcode.Usage))
