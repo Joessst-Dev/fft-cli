@@ -684,8 +684,14 @@ func (t *templatesScreen) remove(row templateRow) tea.Cmd {
 		args = append(args, "--local")
 	}
 	t.say("Removing " + row.Name + "…")
-	return t.s.start(action{inv: Invocation{Args: args}, display: commandLine(args)}, func(r Result) tea.Cmd {
-		if r.ExitCode != exitcode.OK {
+	var id RunID
+	id, cmd := t.s.launch(action{inv: Invocation{Args: args}, display: commandLine(args)}, func(r Result) tea.Cmd {
+		switch {
+		case r.ExitCode == exitcode.OK:
+		case id != 0 && t.s.wasDeclined(id):
+			t.say("Nothing was removed.")
+			return nil
+		default:
 			t.fail("removing "+row.Name, r)
 			return t.reload()
 		}
@@ -696,6 +702,7 @@ func (t *templatesScreen) remove(row templateRow) tea.Cmd {
 		delete(t.values, row.key())
 		return t.reload()
 	})
+	return cmd
 }
 
 // pipeline is the shell pipe that does what S does: the render, into the

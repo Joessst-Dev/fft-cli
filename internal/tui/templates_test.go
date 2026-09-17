@@ -640,13 +640,31 @@ var _ = Describe("the Templates screen", func() {
 			Expect(h.m.templates.open.row.Scope).To(Equal("project"))
 		})
 
-		It("says why nothing was removed", func() {
+		It("says nothing was removed when its question is answered no, and that is no failure", func() {
 			h.showTemplates(oneTemplate)
 			h.openTemplate(rushDoc)
 			h.press("x")
-			h.finish(failed(exitcode.Usage, "Error: cancelled"), "template", "remove", "rush")
+			id := h.lookup("template", "remove", "rush")
+			h.ask(id, "Remove the template rush?", "")
+			h.wait()
+			h.press("n")
+			Expect(h.r.answers).To(ConsistOf(answer{run: id, question: 1, yes: false}))
+			h.finishID(id, failed(exitcode.Usage, "Error: cancelled"))
 
-			Expect(h.view()).To(ContainSubstring("removing rush failed: exit 2"))
+			Expect(h.view()).To(ContainSubstring("Nothing was removed."))
+			Expect(h.view()).NotTo(ContainSubstring("failed"))
+			Expect(h.m.templates.open).NotTo(BeNil())
+			Expect(h.m.s.declined).To(BeEmpty(), "forgotten once the run has been reported")
+		})
+
+		It("says why nothing was removed when the command failed", func() {
+			h.showTemplates(oneTemplate)
+			h.openTemplate(rushDoc)
+			h.press("x")
+			h.finish(failed(exitcode.General, "Error: remove: permission denied"), "template", "remove", "rush")
+
+			Expect(h.view()).To(ContainSubstring("removing rush failed: exit 1"))
+			Expect(h.view()).To(ContainSubstring("permission denied"))
 			Expect(h.m.templates.open).NotTo(BeNil())
 		})
 	})

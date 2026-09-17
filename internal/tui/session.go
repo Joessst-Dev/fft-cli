@@ -89,6 +89,11 @@ type session struct {
 	// The first is the one asked; the others wait their turn.
 	questions []*question
 
+	// declined are the runs the user answered no, until the run's caller has
+	// heard how it ended: a command told no fails, and that failure is the
+	// user's choice rather than something that went wrong.
+	declined map[RunID]bool
+
 	// st draws the questions' dialogs.
 	st styles
 
@@ -155,6 +160,7 @@ func newSession(opts Options, st styles) *session {
 		startedHeadless: opts.Headless,
 		runs:            newRunList(),
 		done:            make(map[RunID]func(Result) tea.Cmd),
+		declined:        make(map[RunID]bool),
 	}
 }
 
@@ -264,12 +270,19 @@ func (s *session) handle(ev RunEvent) tea.Cmd {
 	// A run that has ended is asking nothing any more: it was cancelled, or timed
 	// out, while its question waited.
 	s.questions = slices.DeleteFunc(s.questions, func(q *question) bool { return q.run == ev.ID })
+	defer delete(s.declined, ev.ID)
 	done, ok := s.done[ev.ID]
 	if !ok {
 		return nil
 	}
 	delete(s.done, ev.ID)
 	return done(ev.Result)
+}
+
+// wasDeclined reports whether the user answered no to a question run id asked.
+// It is known until the run's caller has been told how the run ended.
+func (s *session) wasDeclined(id RunID) bool {
+	return s.declined[id]
 }
 
 // question is a question a running command asked, and the dialog that asks it.
@@ -338,6 +351,9 @@ func (s *session) answerWith(msg tea.Msg) tea.Cmd {
 	s.questions = s.questions[1:]
 	if e, ok := s.runs.byID[q.run]; ok {
 		e.asking = false
+	}
+	if !q.yes {
+		s.declined[q.run] = true
 	}
 	s.runner.Answer(q.run, q.id, q.yes)
 	return cmd
