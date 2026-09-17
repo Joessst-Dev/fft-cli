@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"charm.land/bubbles/v2/key"
@@ -483,8 +484,8 @@ func (m *app) View() tea.View {
 	hint := m.hintLine()
 
 	// Tabs, a blank line, the body, the status bar and the hint. On a terminal too
-	// small for all of it the body gets nothing, and the frame is cut to the height
-	// below, so that nothing is ever drawn past the last row.
+	// small for all of it the body gets nothing, and the frame loses rows from the
+	// top (chromeOnly), so that nothing is ever drawn past the last row.
 	bodyHeight := m.bodyHeight(hint)
 
 	owner := m.owner()
@@ -516,12 +517,10 @@ func (m *app) View() tea.View {
 		// A question that does not fit beside the chrome gets the whole terminal:
 		// the tabs and the help can go, the question the next key answers cannot.
 		content = fit(body, m.height)
+	case m.height > 0 && bodyHeight > 0:
+		content = strings.Join([]string{tabs, "", fit(body, bodyHeight), status, hint}, "\n")
 	case m.height > 0:
-		parts := []string{tabs, ""}
-		if bodyHeight > 0 {
-			parts = append(parts, fit(body, bodyHeight))
-		}
-		content = fit(strings.Join(append(parts, status, hint), "\n"), m.height)
+		content = chromeOnly(m.height, tabs, status, hint)
 	default:
 		content = strings.Join([]string{tabs, "", body, status, hint}, "\n")
 	}
@@ -531,6 +530,23 @@ func (m *app) View() tea.View {
 	v.AltScreen = true
 	v.WindowTitle = "fft"
 	return v
+}
+
+// chromeOnly draws the frame of a terminal with no row left for the body, within
+// height rows. What cannot fit goes from the top: the blank row, the tabs, the
+// status bar, then the hint's rows, the screen's keys before the global ones. The
+// hint's last row, which says where every other key is listed, goes last.
+func chromeOnly(height int, tabs, status, hint string) string {
+	rows := slices.Concat([]string{status}, strings.Split(hint, "\n"))
+	switch free := height - len(rows); {
+	case free >= 2:
+		rows = slices.Concat([]string{tabs, ""}, rows)
+	case free == 1:
+		rows = slices.Concat([]string{tabs}, rows)
+	default:
+		rows = rows[len(rows)-height:]
+	}
+	return fit(strings.Join(rows, "\n"), height)
 }
 
 // withPanel puts the command panel under body, both within bodyHeight rows. The

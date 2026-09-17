@@ -48,9 +48,9 @@ var _ = Describe("the key hint", func() {
 	})
 
 	DescribeTable("shows every key that works, whole, and always the way to the legend",
-		func(width int, open func(h *harness)) {
+		func(width, height int, open func(h *harness)) {
 			open(h)
-			h.send(tea.WindowSizeMsg{Width: width, Height: 30})
+			h.send(tea.WindowSizeMsg{Width: width, Height: height})
 
 			rows := h.hintRows()
 			Expect(rows[len(rows)-1]).To(HaveSuffix("? all keys"))
@@ -61,14 +61,36 @@ var _ = Describe("the key hint", func() {
 				Expect(row).NotTo(ContainSubstring("…"))
 				Expect(ansi.StringWidth(row)).To(BeNumerically("<=", width))
 			}
-			Expect(strings.Count(h.m.View().Content, "\n") + 1).To(BeNumerically("<=", 30))
+			Expect(strings.Count(h.m.View().Content, "\n") + 1).To(BeNumerically("<=", height))
 		},
-		Entry("on Projects at 120 columns", 120, func(*harness) {}),
-		Entry("on Projects at 80 columns", 80, func(*harness) {}),
-		Entry("on Request at 120 columns", 120, func(h *harness) { h.request(opReplaceFacility) }),
-		Entry("on Request at 80 columns", 80, func(h *harness) { h.request(opReplaceFacility) }),
-		Entry("on Request at 40 columns", 40, func(h *harness) { h.request(opReplaceFacility) }),
-		Entry("with the panel open at 80 columns", 80, func(h *harness) { h.press("i") }),
+		Entry("on Projects at 120 columns", 120, 30, func(*harness) {}),
+		Entry("on Projects at 80 columns", 80, 30, func(*harness) {}),
+		Entry("on Request at 120 columns", 120, 30, func(h *harness) { h.request(opReplaceFacility) }),
+		Entry("on Request at 80 columns", 80, 30, func(h *harness) { h.request(opReplaceFacility) }),
+		Entry("on Request at 40 columns", 40, 30, func(h *harness) { h.request(opReplaceFacility) }),
+		Entry("with the panel open at 80 columns", 80, 30, func(h *harness) { h.press("i") }),
+		Entry("on Request at 20x12, where the hint leaves no row for the tabs", 20, 12, func(h *harness) { h.request(opReplaceFacility) }),
+		Entry("on Projects at 20x12", 20, 12, func(*harness) {}),
+		Entry("on Request at 30x8", 30, 8, func(h *harness) { h.request(opReplaceFacility) }),
+	)
+
+	DescribeTable("keeps the way to the legend on a terminal too short for the whole hint",
+		func(width, height int, open func(h *harness)) {
+			open(h)
+			h.send(tea.WindowSizeMsg{Width: width, Height: height})
+
+			lines := strings.Split(h.view(), "\n")
+			Expect(len(lines)).To(BeNumerically("<=", height))
+			Expect(lines[len(lines)-1]).To(HaveSuffix("? all keys"))
+			for _, line := range strings.Split(h.m.View().Content, "\n") {
+				Expect(ansi.StringWidth(line)).To(BeNumerically("<=", width))
+			}
+		},
+		Entry("on Request at 20x6", 20, 6, func(h *harness) { h.request(opReplaceFacility) }),
+		Entry("on Request at 20x3", 20, 3, func(h *harness) { h.request(opReplaceFacility) }),
+		Entry("on Projects at 20x10", 20, 10, func(*harness) {}),
+		Entry("on Projects at 12x4", 12, 4, func(*harness) {}),
+		Entry("on Projects with one row", 80, 1, func(*harness) {}),
 	)
 
 	It("puts the screen's keys and the global ones on rows of their own", func() {

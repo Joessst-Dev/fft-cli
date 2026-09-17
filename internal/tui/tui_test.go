@@ -807,8 +807,9 @@ var _ = Describe("the UI", func() {
 			Expect(strings.Count(content, "\n") + 1).To(BeNumerically("<=", height))
 			Expect(h.view()).To(ContainSubstring(visible))
 		},
-		Entry("the list, one row", 80, 1, func(*harness) {}, "1 Projects"),
-		Entry("the list, three rows", 80, 3, func(*harness) {}, "1 Projects"),
+		Entry("the list, one row", 80, 1, func(*harness) {}, "? all keys"),
+		Entry("the list, three rows", 80, 3, func(*harness) {}, "? all keys"),
+		Entry("the list, with a row for the tabs", 80, 5, func(*harness) {}, "1 Projects"),
 		Entry("the list with the panel open", 80, 7, func(h *harness) { h.press("i") }, "Commands"),
 		Entry("a dialog on a short terminal", 40, 9, func(h *harness) { h.press("r") }, "Make staging"),
 		Entry("the panel on a narrow one", 12, 20, func(h *harness) { h.press("i") }, "Comm"),
