@@ -455,6 +455,9 @@ func (r *requestScreen) fail(what string, err error) {
 // anything runs. It is a courtesy: the command checks again.
 func (r *requestScreen) validate() []string {
 	var problems []string
+	// An argument is known by its place, so one left empty would have the next one
+	// filled in taken for it.
+	var emptyArg *requestField
 	for _, f := range r.fields {
 		v := f.value()
 		if f.toggle() {
@@ -464,9 +467,15 @@ func (r *requestScreen) validate() []string {
 			if f.required() {
 				problems = append(problems, f.label()+" is required")
 			}
+			if f.arg != nil && emptyArg == nil {
+				emptyArg = f
+			}
 			continue
 		}
 		if f.flag == nil {
+			if emptyArg != nil && !emptyArg.required() {
+				problems = append(problems, fmt.Sprintf("%s needs %s filled in before it", f.label(), emptyArg.label()))
+			}
 			continue
 		}
 		var err error

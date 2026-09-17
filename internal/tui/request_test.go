@@ -209,6 +209,31 @@ var _ = Describe("the Request screen", func() {
 			Expect(h.view()).To(ContainSubstring("--pick-job-id is required"))
 		})
 
+		Context("with two optional arguments", func() {
+			op := Operation{
+				ID: "evaluateNode", Summary: "Evaluate a node", Method: "GET", Path: "/api/nodes/{from}/{to}",
+				Command: Command{Path: []string{"node", "evaluate"}, Args: []Arg{{Name: "from"}, {Name: "to"}}},
+			}
+
+			It("refuses the second without the first, rather than send it as the first", func() {
+				h.request(op)
+				h.fill(1, "n-2")
+				n := len(h.r.started)
+				h.press("s")
+
+				Expect(h.r.started).To(HaveLen(n))
+				Expect(h.view()).To(ContainSubstring("<to> needs <from> filled in before it"))
+			})
+
+			It("sends the first alone", func() {
+				h.request(op)
+				h.fill(0, "n-1")
+				h.press("s")
+
+				Expect(h.last().Args).To(Equal([]string{"node", "evaluate", "n-1"}))
+			})
+		})
+
 		It("sends from a field being edited with ctrl+s", func() {
 			h.request(opGetPickJob)
 			h.press("enter")
