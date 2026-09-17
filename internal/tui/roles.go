@@ -96,10 +96,14 @@ func (r *rolesScreen) want() tea.Cmd {
 	if r.requested && r.asked == r.s.scope() {
 		return nil
 	}
-	return r.load()
+	return r.load(true)
 }
 
-func (r *rolesScreen) load() tea.Cmd {
+// load reads the roles. background is a read nobody asked for, which the request
+// history leaves out: it would count as a use of the operation, and star it on the
+// Operations list, every time the UI looked. An r is the user's own request, and
+// is recorded as `fft auth whoami` typed in a shell would be.
+func (r *rolesScreen) load(background bool) tea.Cmd {
 	asked := r.s.scope()
 	r.asked, r.requested, r.loading = asked, true, true
 	r.gen++
@@ -108,6 +112,7 @@ func (r *rolesScreen) load() tea.Cmd {
 	a := r.s.scoped("auth", "whoami")
 	target := r.s.target()
 	a.inv.Project = target
+	a.inv.Background = background
 	return r.s.start(a, func(res Result) tea.Cmd {
 		// An answer for a project the UI has left is not about this one, and the
 		// switch asks again once the roles are looked at.
@@ -156,7 +161,7 @@ func (r *rolesScreen) update(msg tea.Msg) tea.Cmd {
 	}
 	switch {
 	case key.Matches(keyMsg, r.keys.refresh):
-		return r.load()
+		return r.load(false)
 	case key.Matches(keyMsg, r.keys.up):
 		r.scroll = max(r.scroll-1, 0)
 	case key.Matches(keyMsg, r.keys.down):

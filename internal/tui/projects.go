@@ -299,6 +299,8 @@ func (p *projectsScreen) warmUp() tea.Cmd {
 	p.warmed = true
 	a := p.s.scoped("auth", "whoami")
 	a.inv.Exclusive = true
+	// The user asked for a switch, not for this request: history leaves it out.
+	a.inv.Background = true
 	// Named now: by the time it answers, the UI may have switched on, and a failure
 	// must name the project that failed, not the one in use.
 	name := p.s.currentProject()

@@ -100,6 +100,17 @@ var _ = Describe("the Roles screen", func() {
 		Expect(whoamiRuns()).To(Equal(2))
 	})
 
+	It("reads them in the background, but for an r, which the user asked for", func() {
+		h.press("7")
+		Expect(h.r.invocation(h.lookup("auth", "whoami")).Background).To(BeTrue(),
+			"nobody asked for this request, so history does not keep it")
+		h.whoamiFor("staging", readOnlyRoles)
+
+		h.press("r")
+		Expect(h.r.invocation(h.lookup("auth", "whoami")).Background).To(BeFalse(),
+			"r is the user's own request, as if they had typed fft auth whoami")
+	})
+
 	It("reads them again for the project switched to, and drops the old project's", func() {
 		h.press("7")
 		h.whoamiFor("staging", readOnlyRoles)

@@ -19,9 +19,11 @@ import (
 // runRecord collects, while a command runs, what its history entry needs and only
 // the run itself learns: the project it resolved and the last HTTP status it got.
 // Both are written from whichever goroutine made the request, hence atomics.
+// recorded says, once the run is over, whether its entry was written.
 type runRecord struct {
-	project atomic.Pointer[string]
-	status  atomic.Int64
+	project  atomic.Pointer[string]
+	status   atomic.Int64
+	recorded atomic.Bool
 }
 
 // observe is the API client's status observer for this run: it keeps the status
@@ -106,6 +108,10 @@ func (d *Deps) recordHistory(cmd *cobra.Command, code int, elapsed time.Duration
 		}
 	}()
 
+	if d.ui != nil && d.ui.background {
+		d.debugHistory("not recorded: fft tui ran it on its own, not at the user's request")
+		return
+	}
 	entry, ok := d.historyEntry(cmd, code, elapsed)
 	if !ok {
 		return
@@ -121,6 +127,10 @@ func (d *Deps) recordHistory(cmd *cobra.Command, code int, elapsed time.Duration
 	}
 	if err != nil {
 		d.debugHistory("not recorded: %v", err)
+		return
+	}
+	if d.run != nil {
+		d.run.recorded.Store(true)
 	}
 }
 

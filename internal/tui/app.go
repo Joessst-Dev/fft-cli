@@ -184,8 +184,8 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width, m.height = msg.Width, msg.Height
 		m.help.SetWidth(msg.Width)
 	case runEventMsg:
-		if msg.State == RunDone {
-			// Recorded, if it is recorded at all, before the runner says it is done.
+		if msg.State == RunDone && msg.Result.Recorded {
+			// Recorded before the runner says it is done.
 			m.history.runFinished()
 		}
 		m.response.observe(RunEvent(msg))

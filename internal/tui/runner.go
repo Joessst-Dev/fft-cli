@@ -42,6 +42,12 @@ type Invocation struct {
 	// events; this is for a sequence the UI knows must not interleave with anything
 	// else.
 	Exclusive bool
+
+	// Background marks a run the UI started on its own — reading the user's roles,
+	// signing in ahead of the first request — rather than one the user asked for.
+	// It is left out of the request history, which is a record of what the user
+	// sent, and whose counts the Operations list shows.
+	Background bool
 }
 
 // RunState is where an invocation is in its life.
@@ -86,6 +92,10 @@ type Result struct {
 
 	// Duration is how long the command executed, excluding the time it queued.
 	Duration time.Duration
+
+	// Recorded says the run was added to the request history, and so that what
+	// the UI read of the history is out of date.
+	Recorded bool
 }
 
 // RunEvent reports a change in an invocation's state.

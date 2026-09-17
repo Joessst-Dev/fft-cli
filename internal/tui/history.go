@@ -76,8 +76,8 @@ type historyScreen struct {
 	read    bool
 	gen     uint64
 
-	// stale says the file may have changed since it was read: a run has finished.
-	// reading is set while a read is on its way.
+	// stale says the file may have changed since it was read: a run was recorded,
+	// or the history was cleared. reading is set while a read is on its way.
 	stale   bool
 	reading bool
 
@@ -120,13 +120,13 @@ func newHistoryScreen(s *session, st styles, nav navigator, cat Catalog, src His
 
 func (h *historyScreen) focused() bool { return h.dialog != nil }
 
-// runFinished says a run has ended, and so may have been recorded.
+// runFinished says a run has ended and was recorded.
 func (h *historyScreen) runFinished() { h.stale = true }
 
 // want reads the history if it may have changed since it was last read. It is
 // called while a screen that shows it is on display; a read already on its way
-// is not doubled, and the next call after it answers reads again if a run ended
-// meanwhile.
+// is not doubled, and the next call after it answers reads again if a run was
+// recorded meanwhile.
 func (h *historyScreen) want() tea.Cmd {
 	if h.src == nil || !h.stale || h.reading {
 		return nil

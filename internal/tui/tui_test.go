@@ -60,6 +60,7 @@ var _ = Describe("the UI", func() {
 
 			id := h.lookup("auth", "whoami")
 			Expect(h.r.exclusive(id)).To(BeTrue())
+			Expect(h.r.invocation(id).Background).To(BeTrue(), "the user sent nothing, so history keeps nothing")
 
 			h.finishID(id, ok(`{}`))
 			Expect(h.r.commandLines()).To(HaveLen(4))
@@ -199,6 +200,7 @@ var _ = Describe("the UI", func() {
 
 			whoami := h.lookup("auth", "whoami")
 			Expect(h.r.exclusive(whoami)).To(BeTrue())
+			Expect(h.r.invocation(whoami).Background).To(BeTrue())
 			h.lookup("project", "list")
 
 			h.finishID(whoami, ok(`{}`))

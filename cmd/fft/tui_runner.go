@@ -149,7 +149,8 @@ type job struct {
 	// runner owns this copy and clears it once the run is over.
 	stdin []byte
 
-	// ui is the session as it was at Start, the selected project included.
+	// ui is the session as it was at Start, the selected project included, and
+	// whether the UI started this run on its own.
 	ui uiRun
 
 	// confirm is the word the user types to answer the command's question yes, ""
@@ -213,6 +214,7 @@ func (r *cliRunner) Start(inv tui.Invocation) (tui.RunID, error) {
 	if inv.Project != "" {
 		j.ui.project = inv.Project
 	}
+	j.ui.background = inv.Background
 
 	exclusive, confirm := r.classify(inv.Args)
 	j.confirm = confirm
@@ -437,6 +439,7 @@ func (r *cliRunner) execute(ctx context.Context, id tui.RunID, j job) tui.Result
 		StdoutTruncated: stdout.dropped,
 		StderrTruncated: stderr.dropped,
 		Duration:        time.Since(started),
+		Recorded:        deps.run.recorded.Load(),
 	}
 	if p := deps.run.project.Load(); p != nil {
 		res.Project = *p

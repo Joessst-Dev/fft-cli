@@ -180,6 +180,38 @@ var _ = Describe("request history", func() {
 			)))
 		})
 
+		It("tells the UI which of its runs were recorded", func() {
+			r := c.newRunner()
+			read := start(r, tui.Invocation{Args: []string{"facility", "list"}})
+			bare := start(r, tui.Invocation{Args: []string{"project", "list"}})
+			results := awaitDone(r, read, bare)
+
+			Expect(results[read].Recorded).To(BeTrue())
+			Expect(results[bare].Recorded).To(BeFalse(), "project list addresses no operation")
+		})
+
+		It("records nothing for a run the UI started on its own", func() {
+			r := c.newRunner()
+			id := start(r, tui.Invocation{Args: []string{"auth", "whoami"}, Background: true})
+			res := awaitDone(r, id)[id]
+			Expect(res.ExitCode).To(Equal(exitcode.OK), string(res.Stderr))
+			Expect(res.Recorded).To(BeFalse())
+			Expect(recorded(log)).To(BeEmpty())
+
+			id = start(r, tui.Invocation{Args: []string{"auth", "whoami"}})
+			Expect(awaitDone(r, id)[id].Recorded).To(BeTrue())
+			Expect(recorded(log)).To(ConsistOf(HaveField("OperationID", "getEffectivePermissions")))
+		})
+
+		It("does not carry a background run's exemption over to the next run", func() {
+			r := c.newRunner()
+			id := start(r, tui.Invocation{Args: []string{"facility", "list"}, Background: true})
+			awaitDone(r, id)
+			id = start(r, tui.Invocation{Args: []string{"facility", "list"}})
+			awaitDone(r, id)
+			Expect(recorded(log)).To(HaveLen(1))
+		})
+
 		It("records nothing when the config file says not to", func() {
 			cfg, err := c.deps.Config.Load()
 			Expect(err).NotTo(HaveOccurred())

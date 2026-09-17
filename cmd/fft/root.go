@@ -263,6 +263,11 @@ type uiRun struct {
 	// timeout is `fft tui --timeout`, the bound for every run that does not give
 	// its own; nil when the session was started without one.
 	timeout *time.Duration
+
+	// background is a run the UI started on its own rather than at the user's
+	// request, which the request history leaves out. It is the run's, never the
+	// session's: see [tui.Invocation.Background].
+	background bool
 }
 
 // forRun returns the Deps one concurrent run of the command tree should use,

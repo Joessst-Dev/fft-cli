@@ -123,13 +123,20 @@ var _ = Describe("the History screen", func() {
 		Expect(h.view()).To(ContainSubstring("History · recent requests"))
 	})
 
-	It("is read again once a run has finished, while it is on display", func() {
+	It("is read again once a recorded run has finished, while it is on display", func() {
 		show()
 		src.add(entry(5, "staging", "getPickJob", "fft picking get-pick-job", "--pick-job-id=pj-2"))
 		h.send(h.m.projects.reload())
-		h.pump(h.finish(ok(twoProjects), "project", "list"))
+		h.pump(h.finish(Result{Stdout: []byte(twoProjects), Recorded: true}, "project", "list"))
 		Expect(h.view()).To(ContainSubstring("--pick-job-id=pj-2"))
 		Expect(src.readCount()).To(Equal(2))
+	})
+
+	It("is not read again after a run that was not recorded", func() {
+		show()
+		h.send(h.m.projects.reload())
+		h.pump(h.finish(ok(twoProjects), "project", "list"))
+		Expect(src.readCount()).To(Equal(1))
 	})
 
 	It("is read again with ctrl+r", func() {
@@ -419,7 +426,8 @@ var _ = Describe("use counts on the Operations screen", func() {
 		Expect(src.readCount()).To(Equal(1))
 
 		src.add(entry(5, "staging", "getPickJob", "fft picking get-pick-job"))
-		h.pump(h.finish(ok(`{"roles":[]}`), "auth", "whoami"))
+		h.send(h.m.projects.reload())
+		h.pump(h.finish(Result{Stdout: []byte(twoProjects), Recorded: true}, "project", "list"))
 		Expect(h.m.hint(opGetPickJob).uses).To(Equal(2))
 		Expect(src.readCount()).To(Equal(2))
 	})
