@@ -149,12 +149,12 @@ func (p *projectsScreen) listKey(msg tea.KeyPressMsg) tea.Cmd {
 		if p.refuseHeadless() {
 			return nil
 		}
-		p.dialog = p.readOnlyDialog(row)
+		p.dialog = armed(p.readOnlyDialog(row), p.s.now, true)
 	case key.Matches(msg, p.keys.remove):
 		if p.refuseHeadless() {
 			return nil
 		}
-		p.dialog = p.removeDialog(row)
+		p.dialog = armed(p.removeDialog(row), p.s.now, true)
 	}
 	return nil
 }
@@ -467,11 +467,13 @@ func (p *projectsScreen) submitForm() tea.Cmd {
 			return p.reload()
 		}
 		p.succeed("Added " + name + ".")
-		p.dialog = &confirmDialog{
+		// The form was still open, so the question is in front of the user now, and
+		// may meet a key meant for the form.
+		p.dialog = armed(&confirmDialog{
 			question: fmt.Sprintf("Switch to %s now?", name),
 			command:  p.useAction(name).display,
 			onYes:    func() tea.Cmd { return p.use(name) },
-		}
+		}, p.s.now, true)
 		return p.reload()
 	})
 }

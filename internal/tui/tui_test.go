@@ -300,6 +300,7 @@ var _ = Describe("the UI", func() {
 			Expect(h.view()).To(ContainSubstring("runs: fft project read-only staging"))
 
 			for _, no := range []string{"n", "esc", "enter"} {
+				h.wait()
 				h.press(no)
 				Expect(h.view()).NotTo(ContainSubstring("Make staging read-only?"))
 				h.press("r")
@@ -307,8 +308,15 @@ var _ = Describe("the UI", func() {
 			Expect(h.r.commandLines()).To(HaveLen(2))
 		})
 
+		It("is not answered by a y pressed as it opens", func() {
+			h.press("r", "y")
+			Expect(h.view()).To(ContainSubstring("Make staging read-only?"))
+			Expect(h.r.commandLines()).To(HaveLen(2))
+		})
+
 		It("is not answered by pasted text", func() {
 			h.press("r")
+			h.wait()
 			h.send(tea.PasteMsg{Content: "y"})
 
 			Expect(h.view()).To(ContainSubstring("Make staging read-only?"))
@@ -316,7 +324,9 @@ var _ = Describe("the UI", func() {
 		})
 
 		It("makes a project read-only on yes, without a --yes it does not need", func() {
-			h.press("r", "y")
+			h.press("r")
+			h.wait()
+			h.press("y")
 
 			id := h.lookup("project", "read-only", "staging")
 			Expect(h.r.exclusive(id)).To(BeTrue())
@@ -328,6 +338,7 @@ var _ = Describe("the UI", func() {
 		When("the project is read-only", func() {
 			BeforeEach(func() {
 				h.press("down", "r")
+				h.wait()
 			})
 
 			It("asks for the name to be typed, and takes no y for an answer", func() {
@@ -364,6 +375,7 @@ var _ = Describe("the UI", func() {
 			h = newHarness(Options{ReadOnly: true})
 			h.loaded(twoProjects, validToken)
 			h.press("down", "r")
+			h.wait()
 			h.typeText("prod")
 			h.press("enter")
 			h.finish(ok(""), "project", "read-only", "prod", "--off", "--yes")
@@ -376,9 +388,23 @@ var _ = Describe("the UI", func() {
 		BeforeEach(func() {
 			h.loaded(twoProjects, validToken)
 			h.press("down", "d")
+			h.wait()
+		})
+
+		It("takes nothing typed as it opens", func() {
+			h = newHarness(Options{})
+			h.loaded(twoProjects, validToken)
+			h.press("down", "d")
+			h.typeText("prod")
+			h.press("enter")
+
+			Expect(h.view()).To(ContainSubstring("Remove prod and its stored credentials?"))
+			Expect(h.view()).NotTo(ContainSubstring("> prod"))
+			Expect(h.r.commandLines()).To(HaveLen(2))
 		})
 
 		It("asks for the name to be typed, and sends nothing until it is", func() {
+			h.wait()
 			Expect(h.view()).To(ContainSubstring("Remove prod and its stored credentials?"))
 			Expect(h.view()).To(ContainSubstring("Type prod to confirm."))
 
@@ -425,6 +451,7 @@ var _ = Describe("the UI", func() {
 			h = newHarness(Options{Project: "prod"})
 			h.loaded(twoProjects, validToken)
 			h.press("d")
+			h.wait()
 			h.typeText("prod")
 			h.press("enter")
 			h.finish(ok(""), "project", "remove", "prod", "--yes")
@@ -583,6 +610,10 @@ var _ = Describe("the UI", func() {
 
 			Expect(h.view()).To(ContainSubstring("Switch to qa now?"))
 			h.lookup("project", "list")
+			h.press("y")
+			Expect(h.r.commandLines()).NotTo(ContainElement("project use qa"), "a y typed at once answered")
+
+			h.wait()
 			h.press("y")
 			h.lookup("project", "use", "qa")
 		})
@@ -754,6 +785,7 @@ var _ = Describe("the UI", func() {
 			h.press("ctrl+s")
 			h.m.showPanel = true
 			h.finishID(3, ok(`{"name":"qa","active":false}`))
+			h.wait()
 
 			view := h.view()
 			Expect(view).To(ContainSubstring("Switch to qa now?"))

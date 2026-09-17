@@ -275,6 +275,7 @@ var _ = Describe("the Roles screen", func() {
 		It("forgets the roles of a removed staging at once, before the list says what is current now", func() {
 			readRoles()
 			h.press("d")
+			h.wait()
 			h.typeText("staging")
 			h.press("enter")
 			h.finish(ok(""), "project", "remove", "staging", "--yes")
