@@ -109,16 +109,31 @@ var _ = Describe("commands that rewrite a shared file", func() {
 		}
 	})
 
-	It("marks every one of them to run alone", func() {
-		paths := slices.Concat(slices.Collect(maps.Values(configSavers)), otherWriters)
-		for _, path := range paths {
+	find := func(path string) *cobra.Command {
+		GinkgoHelper()
+		cmd, _, err := root.Find(strings.Fields(path)[1:])
+		Expect(err).NotTo(HaveOccurred())
+		Expect(cmd.CommandPath()).To(Equal(path))
+		return cmd
+	}
+
+	// The value, not only the key: the TUI forgets its session's tokens after a run
+	// only when the command names the config file, so a config saver marked with
+	// another file's value would run alone and still sign the next run in as
+	// whoever the project used to be.
+	It("marks every config saver to run alone, as rewriting the config file", func() {
+		for fn, path := range configSavers {
 			if path == "" {
 				continue
 			}
-			cmd, _, err := root.Find(strings.Fields(path)[1:])
-			Expect(err).NotTo(HaveOccurred())
-			Expect(cmd.CommandPath()).To(Equal(path))
-			Expect(cmd.Annotations).To(HaveKey(annotationExclusive), "%s rewrites a shared file", path)
+			Expect(find(path).Annotations).To(HaveKeyWithValue(annotationExclusive, exclusiveConfig),
+				"%s saves the config file", fn)
+		}
+	})
+
+	It("marks every other writer to run alone", func() {
+		for _, path := range otherWriters {
+			Expect(find(path).Annotations).To(HaveKey(annotationExclusive), "%s rewrites a shared file", path)
 		}
 	})
 })
