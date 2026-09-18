@@ -100,6 +100,19 @@ var _ = Describe("the file store's loose-permission warning", func() {
 		Expect(warnings[0]).To(ContainSubstring("chmod 700"))
 	})
 
+	It("hands the warning to the sink a caller configured, rather than to stderr", func() {
+		dir := GinkgoT().TempDir()
+		path := filepath.Join(dir, "credentials.json")
+		Expect(os.WriteFile(path, []byte(`{"fft:staging:password":"s3cret"}`), 0o644)).To(Succeed())
+
+		var warnings []string
+		s := NewFile(path, WithWarn(func(m string) { warnings = append(warnings, m) }))
+
+		_, err := s.Get("fft:staging:password")
+		Expect(err).NotTo(HaveOccurred())
+		Expect(warnings).To(ContainElement(ContainSubstring("chmod 600")))
+	})
+
 	It("stays quiet for a 0600 file in a 0700 directory", func() {
 		dir := GinkgoT().TempDir()
 		Expect(os.Chmod(dir, 0o700)).To(Succeed())

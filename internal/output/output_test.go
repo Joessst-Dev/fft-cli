@@ -215,6 +215,54 @@ var _ = Describe("Printer", func() {
 			Expect(out.String()).To(Equal("STATUS\nONLINE\n"))
 		})
 
+		DescribeTable("keeps every value on its own row, away from the terminal's controls",
+			func(color bool) {
+				p, out, _ := printer(output.Table, color)
+				style := p.Style()
+
+				Expect(p.Render(output.Rows{
+					Headers: []string{"NAME", "STATUS"},
+					Rows: [][]string{
+						{"real\nforged\x1b]52;c;cGF5bG9hZA==\a\u202e", style.Green("ON\rLINE")},
+					},
+				}, nil)).To(Succeed())
+
+				lines := strings.Split(strings.TrimRight(out.String(), "\n"), "\n")
+				Expect(lines).To(HaveLen(2))
+				Expect(visible(lines[1])).To(HavePrefix("real forged]52;c;cGF5bG9hZA==   ONLINE"))
+				Expect(out.String()).NotTo(ContainSubstring("\x1b]"))
+				Expect(out.String()).NotTo(ContainSubstring("\a"))
+				Expect(out.String()).NotTo(ContainSubstring("\u202e"))
+				if color {
+					Expect(lines[1]).To(ContainSubstring(style.Green("ONLINE")), "the printer's own colour survives")
+				} else {
+					Expect(out.String()).NotTo(ContainSubstring("\x1b"))
+				}
+			},
+			Entry("in colour", true),
+			Entry("without colour", false),
+		)
+
+		It("keeps only its own colours in a value, and never lets one bleed past its cell", func() {
+			p, out, _ := printer(output.Table, true)
+			style := p.Style()
+
+			Expect(p.Render(output.Rows{
+				Headers: []string{"NAME", "CITY"},
+				Rows: [][]string{
+					{"\x1b[8mhidden", "Berlin"},
+					{"\x1b[31mred", style.Green("ONLINE")},
+				},
+			}, nil)).To(Succeed())
+
+			lines := strings.Split(strings.TrimRight(out.String(), "\n"), "\n")
+			Expect(lines).To(HaveLen(3))
+			Expect(out.String()).NotTo(ContainSubstring("\x1b[8m"), "a value concealed itself")
+			Expect(lines[1]).To(HavePrefix("hidden   "))
+			Expect(lines[2]).To(HavePrefix("\x1b[31mred\x1b[0m"), "the value's colour runs on into the next cell")
+			Expect(lines[2]).To(HaveSuffix(style.Green("ONLINE")))
+		})
+
 		It("leaves no trailing whitespace on a line", func() {
 			p, out, _ := printer(output.Table, false)
 

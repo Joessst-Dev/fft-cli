@@ -50,6 +50,7 @@ fft [flags]
 - [fft connection](./fft_connection.md) — Manage interfacility connections
 - [fft emulator](./fft_emulator.md) — Run a local offline fulfillmenttools API emulator
 - [fft facility](./fft_facility.md) — Manage facilities
+- [fft history](./fft_history.md) — Show the requests fft has sent
 - [fft listing](./fft_listing.md) — Manage listings (the article-at-facility catalog entry)
 - [fft order](./fft_order.md) — Manage orders
 - [fft ping](./fft_ping.md) — Check that the tenant is reachable
@@ -59,6 +60,7 @@ fft [flags]
 - [fft sourcing](./fft_sourcing.md) — Simulate how an order would be routed
 - [fft stock](./fft_stock.md) — Manage stocks (the quantity of an article at a facility)
 - [fft template](./fft_template.md) — Save request bodies and render them with parameters
+- [fft tui](./fft_tui.md) — Browse and send requests in an interactive terminal UI
 - [fft update](./fft_update.md) — Check whether a newer fft release is available
 - [fft version](./fft_version.md) — Print the fft version
 

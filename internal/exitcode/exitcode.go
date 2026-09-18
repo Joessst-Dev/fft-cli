@@ -1,4 +1,8 @@
-// Package exitcode maps errors to the process exit codes documented in `fft help exit-codes`.
+// Package exitcode maps errors to fft's process exit codes.
+//
+// The codes are documented for scripts and agents in the skill's troubleshooting
+// reference (internal/skill/assets/references/troubleshooting.md), which the docs
+// site publishes as the Troubleshooting guide.
 package exitcode
 
 import (
@@ -56,4 +60,31 @@ func FromError(err error) int {
 		return c.ExitCode()
 	}
 	return General
+}
+
+// meanings are the short descriptions the troubleshooting reference's table gives
+// each code. Every constant above must have one; a spec reads the const block to
+// hold that.
+var meanings = map[int]string{
+	OK:          "success",
+	General:     "unclassified failure",
+	Usage:       "bad flags or arguments",
+	Config:      "no active project, or the config is unusable",
+	Auth:        "authentication failed",
+	Forbidden:   "authenticated, but not permitted",
+	NotFound:    "not found",
+	Conflict:    "version conflict",
+	Partial:     "partial bulk write",
+	Unavailable: "upstream unreachable or erroring",
+	ReadOnly:    "read-only: fft refused a write, nothing was sent",
+	Interrupted: "interrupted",
+}
+
+// Meaning describes code in a few words, for a person reading a result rather than
+// a script branching on it. A code fft never exits with is described as unknown.
+func Meaning(code int) string {
+	if m, ok := meanings[code]; ok {
+		return m
+	}
+	return "unknown exit code"
 }

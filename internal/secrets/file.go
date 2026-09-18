@@ -38,15 +38,32 @@ type fileStore struct {
 
 	// warnOnce keeps the loose-permissions warning to one line per process, since
 	// load runs on every read. warn receives it; nil sends it to stderr, where every
-	// other notice goes. A spec replaces warn to capture it.
+	// other notice goes. See [WithWarn] for why a caller replaces it.
 	warnOnce sync.Once
 	warn     func(string)
 }
 
+// Option configures a Store. Only the file store has anything to configure.
+type Option func(*fileStore)
+
+// WithWarn sends the file store's loose-permissions warning to warn instead of
+// straight to os.Stderr.
+//
+// The process's stderr is not always where a notice can be read. Under `fft tui`
+// it is the screen the UI is drawing, and a line written past the renderer lands
+// in the middle of a frame; the caller owns its streams and so it owns this.
+func WithWarn(warn func(msg string)) Option {
+	return func(s *fileStore) { s.warn = warn }
+}
+
 // NewFile returns a Store backed by the JSON file at path. The file and its
 // parent directory are created on first write, with modes 0600 and 0700.
-func NewFile(path string) Store {
-	return &fileStore{path: path}
+func NewFile(path string, opts ...Option) Store {
+	s := &fileStore{path: path}
+	for _, opt := range opts {
+		opt(s)
+	}
+	return s
 }
 
 // DefaultFilePath is the credentials file fft falls back to when the keychain is
@@ -80,6 +97,19 @@ func (s *fileStore) Get(key string) (string, error) {
 		return "", ErrNotFound
 	}
 	return val, nil
+}
+
+// Exists implements [Checker]. The file is read whole either way; what this
+// saves is the secret leaving the store.
+func (s *fileStore) Exists(key string) (bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	values, err := s.load()
+	if err != nil {
+		return false, err
+	}
+	return values[key] != "", nil
 }
 
 func (s *fileStore) Set(key, val string) error {

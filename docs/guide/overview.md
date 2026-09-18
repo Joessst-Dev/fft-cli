@@ -22,6 +22,9 @@ production facility just as happily as a test one.
 Exit code 3 means no project is configured — see [recipes](./recipes.md), and ask
 the user rather than inventing credentials.
 
+Never run `fft tui`. It is the interactive mode for a person at a terminal, and without one
+it refuses with exit 2; every screen in it is an fft command you can run directly.
+
 ## Reading
 
 Pass `-o json` whenever you are going to parse the answer:
@@ -52,6 +55,9 @@ fastest route from a word the user said to a command line you can run:
 ```sh
 fft api list --search handover -o json
 ```
+
+What this user normally runs is on record: `fft history top -o json` lists the operations
+used most in the current project, with the `command` behind each.
 
 1. **Curated** — `fft order`, `fft facility`, `fft connection`, `fft listing`, `fft stock`, `fft sourcing`, `fft routing`.
    Typed flags, real tables. Use these when they fit; see [commands](./commands.md).

@@ -12,7 +12,9 @@ import "fmt"
 // The environment-backed store is not reachable from here: it belongs to the
 // ephemeral project synthesized in headless mode, which the caller detects
 // before it ever asks for a store.
-func Open(noKeyring bool) (Store, error) {
+//
+// opts apply to the file store, and are ignored for the keychain.
+func Open(noKeyring bool, opts ...Option) (Store, error) {
 	if !noKeyring {
 		return NewKeyring(), nil
 	}
@@ -21,5 +23,5 @@ func Open(noKeyring bool) (Store, error) {
 	if err != nil {
 		return nil, fmt.Errorf("locate the credentials file: %w", err)
 	}
-	return NewFile(path), nil
+	return NewFile(path, opts...), nil
 }

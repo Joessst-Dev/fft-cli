@@ -449,6 +449,12 @@ func registerParamFlags(cmd *cobra.Command, op api.Operation, reserved map[strin
 		if len(p.Enum) > 0 {
 			registerEnumCompletion(cmd, f.name, p.Enum)
 		}
+		if p.Required {
+			// Not cobra's MarkFlagRequired: buildRequest already refuses a missing
+			// parameter, as a usage error that names it. This only tells the TUI's form
+			// to mark the field.
+			annotateFlag(cmd, f.name, flagAnnotationRequired, []string{"true"})
+		}
 		out = append(out, f)
 	}
 

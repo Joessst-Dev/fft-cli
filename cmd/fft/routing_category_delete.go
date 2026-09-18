@@ -28,7 +28,10 @@ func newRoutingCategoryDeleteCmd(deps *Deps) *cobra.Command {
 		Args:    usageArgs(cobra.ExactArgs(1)),
 		Aliases: []string{"rm"},
 
-		Annotations: map[string]string{annotationOperationID: "deleteRoutingStrategyNodeConfigCategory"},
+		Annotations: map[string]string{
+			annotationOperationID: "deleteRoutingStrategyNodeConfigCategory",
+			annotationConfirms:    "delete",
+		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := tenantClient(deps)

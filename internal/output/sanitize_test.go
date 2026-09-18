@@ -17,6 +17,9 @@ var _ = Describe("Sanitize", func() {
 		Entry("an ESC that would start a CSI sequence", "a\x1b[31mb", "a[31mb"),
 		Entry("a BEL", "a\ab", "ab"),
 		Entry("a C1 control code point", "a"+string(rune(0x9b))+"b", "ab"),
+		Entry("a right-to-left override that would reorder what follows", "a\u202eb", "ab"),
+		Entry("a bidi isolate", "a\u2066b\u2069", "ab"),
+		Entry("right-to-left text itself survives", "שלום", "שלום"),
 		Entry("tab and newline survive, since multi-line text stays multi-line",
 			"a\tb\nc", "a\tb\nc"),
 	)

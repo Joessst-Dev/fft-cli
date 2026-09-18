@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -48,9 +47,20 @@ type pageFlags struct {
 // promised 20 to a command that would be given 25 is a small lie, and it is exactly
 // the kind a user only discovers by counting the rows.
 func (p *pageFlags) register(f *pflag.FlagSet, noun string, defaultSize int) {
+	p.registerSized(f, noun, fmt.Sprintf(" (default %d)", defaultSize))
+}
+
+// registerWithFile is register for a command whose --file body may carry a size of
+// its own. The request form shows the usage beside that body, and a default of 20
+// next to a body saying 10 has to say which one wins.
+func (p *pageFlags) registerWithFile(f *pflag.FlagSet, noun string, defaultSize int) {
+	p.registerSized(f, noun, fmt.Sprintf(", in place of the file's size (default: the file's, else %d)", defaultSize))
+}
+
+func (p *pageFlags) registerSized(f *pflag.FlagSet, noun, sizeDefault string) {
 	f.IntVar(&p.size, "size", 0,
-		fmt.Sprintf("%s per page, %d–%d (default %d)",
-			strings.ToUpper(noun[:1])+noun[1:], client.MinSize, client.MaxSize, defaultSize))
+		fmt.Sprintf("%s per page, %d–%d%s",
+			strings.ToUpper(noun[:1])+noun[1:], client.MinSize, client.MaxSize, sizeDefault))
 	f.BoolVar(&p.all, "all", false, "Page to the end and return every match, not just the first page")
 	f.BoolVar(&p.total, "total", false, "Also count the matches, and report the total on stderr")
 	f.IntVar(&p.maxItems, "max-items", client.DefaultMaxItems,
@@ -327,31 +337,6 @@ func renderList(deps *Deps, view listView, items []json.RawMessage) error {
 	}
 
 	return deps.Printer.RenderRaw(rows, raw)
-}
-
-// searchPayload decodes a `search --file` body, and refuses one the API would not
-// understand.
-//
-// DisallowUnknownFields is the point. A query is a deep tree of optional filters,
-// and the API's answer to `{"statuz": …}` is not an error but a 200 listing
-// everything — a filter that silently does not filter. Checking the body against
-// the generated schema turns that into "unknown field statuz", before a byte goes
-// over the wire.
-func searchPayload[Q, S any](deps *Deps, path, entity string) (client.SearchPayload[Q, S], error) {
-	var payload client.SearchPayload[Q, S]
-
-	raw, err := readBody(deps, path)
-	if err != nil {
-		return payload, err
-	}
-
-	dec := json.NewDecoder(bytes.NewReader(raw))
-	dec.DisallowUnknownFields()
-
-	if err := dec.Decode(&payload); err != nil {
-		return payload, exitcode.UsageError{Err: fmt.Errorf("%s is not a valid %s search: %w", path, entity, err)}
-	}
-	return payload, nil
 }
 
 // parseSort turns --sort field:asc into the API's sort object.

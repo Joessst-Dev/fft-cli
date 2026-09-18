@@ -299,7 +299,8 @@ func (d *Deps) terminal(cmd *cobra.Command) bool {
 // updateExempt reports whether cmd is one the notice must never interrupt.
 //
 // `fft version` and `fft update` are about versions already; `fft completion`
-// emits a shell script; and the two hidden completion commands run on every
+// emits a shell script; `fft tui` owns the screen the notice would be written
+// over; and the two hidden completion commands run on every
 // press of the TAB key, which is the last place to be starting an HTTP request.
 //
 // It is the *top-level* command that decides, not any ancestor. `fft facility
@@ -316,7 +317,7 @@ func updateExempt(cmd *cobra.Command) bool {
 	}
 
 	switch top.Name() {
-	case "version", "completion", "update",
+	case "version", "completion", "update", "tui",
 		cobra.ShellCompRequestCmd, cobra.ShellCompNoDescRequestCmd:
 		return true
 	}

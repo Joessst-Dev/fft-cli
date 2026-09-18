@@ -21,6 +21,7 @@ import (
 	"github.com/Joessst-Dev/fft-cli/internal/output"
 	"github.com/Joessst-Dev/fft-cli/internal/prompt"
 	"github.com/Joessst-Dev/fft-cli/internal/secrets"
+	"github.com/Joessst-Dev/fft-cli/internal/tui"
 	"github.com/Joessst-Dev/fft-cli/internal/update"
 )
 
@@ -67,6 +68,13 @@ type InstallerFunc func(root string) *component.Installer
 // overrides only what it cares about. Printer is the exception: it is rebuilt
 // from the command's streams on every run, because that is what lets a spec
 // capture the output with cmd.SetOut.
+//
+// A Deps is not safe for concurrent runs: [Deps.complete] rewrites a good part of
+// it on every one. `fft tui` runs commands side by side, so each gets its own copy
+// from [Deps.forRun] — and that copy is an explicit list of fields, not a struct
+// copy. A new field must therefore be classified there as shared, set per run, or
+// rebuilt by complete; a field nobody classified is simply absent from a TUI run,
+// which is a bug that is found, rather than state that is silently shared.
 type Deps struct {
 	Config         *config.Store
 	Secrets        secrets.Store
@@ -176,6 +184,36 @@ type Deps struct {
 	// stderr — which is the whole contract.
 	Terminal *bool
 
+	// StartTUI shows the interactive UI. nil means [tui.Run]; a spec replaces it,
+	// because a real one needs a real terminal.
+	StartTUI func(ctx context.Context, opts tui.Options) error
+
+	// observeStatus, when set, is told the HTTP status of every response the API
+	// client receives. The TUI's runner uses it to report what a run got back.
+	observeStatus func(status int)
+
+	// tokens, when set, is the token sources a `fft tui` session shares between its
+	// runs; see [sessionTokens]. The runner sets it on each run. A command typed in
+	// a shell is its own session, and builds its source itself.
+	tokens *sessionTokens
+
+	// HistoryPath is the request history file. "" means the real one in the state
+	// directory; a spec points it somewhere it can read, or somewhere unwritable.
+	HistoryPath string
+
+	// historyMaxBytes is the size at which the history is compacted, 0 for the
+	// real limit. A spec lowers it rather than write a megabyte.
+	historyMaxBytes int64
+
+	// run collects what this run's history entry needs to know. [execute] sets a
+	// fresh one for every command line.
+	run *runRecord
+
+	// ui is set on a run that `fft tui` started, and nil on a command line typed in
+	// a shell. Unlike the fields complete rebuilds, it is never reset: it is how a
+	// flag given to the session reaches a run that parses only its own flags.
+	ui *uiRun
+
 	// cfg caches the parsed config file, so that a command reading it twice does
 	// not read the disk twice and a mutation followed by a save sees its own
 	// writes.
@@ -199,6 +237,83 @@ type Deps struct {
 	// finished — under the specs that is a race with Ginkgo's temp-directory
 	// cleanup, and a goroutine that can be joined is simply a goroutine one owns.
 	updateDone chan struct{}
+}
+
+// uiRun is what makes a run inside `fft tui` differ from the same command line in
+// a shell: the project the UI selected, and the flags the session was started with.
+//
+// They cannot simply be copied onto the run's Deps, because [Deps.complete]
+// rewrites those fields from the run's own command line — which never saw them.
+// Nor can they be appended to that command line: a value-taking flag left
+// dangling at its end would swallow the first of them, and the rest would be
+// parsed as something else entirely.
+//
+// A run inside the UI also always answers in JSON, which the UI parses, and never
+// starts a component, which would inherit the terminal the UI is drawing on.
+type uiRun struct {
+	// project is the project the UI selected, "" to leave the choice to fft's own
+	// resolution. It decides; a run's own --project is refused rather than weighed
+	// against it.
+	project string
+
+	// readOnly is `fft tui --read-only`: a floor under every run in the session,
+	// which a run's own --read-only=false may not lower, exactly like FFT_READ_ONLY.
+	readOnly bool
+
+	// timeout is `fft tui --timeout`, the bound for every run that does not give
+	// its own; nil when the session was started without one.
+	timeout *time.Duration
+
+	// background is a run the UI started on its own rather than at the user's
+	// request, which the request history leaves out. It is the run's, never the
+	// session's: see [tui.Invocation.Background].
+	background bool
+}
+
+// forRun returns the Deps one concurrent run of the command tree should use,
+// reading its standard input from in, inside the session ui describes.
+//
+// Every field is accounted for, in one of three groups. What is shared is safe to
+// share: stores that serialise their own access, pure functions, and seams a spec
+// set. What is set per run is what makes a run inside the UI different from one
+// in a shell. Everything else is left zero, because [Deps.complete] and
+// [newRootCmd] rebuild it from the run's own flags and streams — and sharing it
+// would be a data race between runs, or one run's --project leaking into another.
+func (d *Deps) forRun(in io.Reader, ui uiRun) *Deps {
+	return &Deps{
+		// Shared.
+		Config:         d.Config,
+		Secrets:        d.Secrets,
+		Clock:          d.Clock,
+		Verify:         d.Verify,
+		NewTokenSource: d.NewTokenSource,
+		NewInstaller:   d.NewInstaller,
+		Retry:          d.Retry,
+		Update:         d.Update,
+		unused:         d.unused,
+		HistoryPath:    d.HistoryPath,
+
+		historyMaxBytes: d.historyMaxBytes,
+		// Read-only once discovered, and discovering it costs a directory walk per
+		// run. A component installed from inside the UI therefore appears only in the
+		// next session, which is also when its commands could first be run.
+		Components: d.Components,
+
+		// Per run. A run inside the UI has no terminal of its own: nothing may prompt,
+		// and no update notice may be drawn over the screen.
+		In:       in,
+		Terminal: ptr(false),
+		ui:       &ui,
+
+		// Rebuilt by complete, by newRootCmd or by execute, from this run's flags and
+		// streams — run among them:
+		// Printer, Debug, Project, Ephemeral, Timeout, AssumeYes, ReadOnlyFlag,
+		// ReadOnlyEnv, noKeyringFromConfig, explicitNoKeyring, cfg,
+		// componentWarnings and the update-check plumbing. StartTUI stays nil — a
+		// run cannot open a second UI, it has no terminal — and observeStatus,
+		// tokens and Prompt are the caller's to set: the runner's Prompt asks the
+		// run's questions in the UI.
+	}
 }
 
 // LoadConfig returns the parsed config file, reading it at most once.
@@ -233,6 +348,7 @@ func (d *Deps) SaveConfig(cfg *config.Config) error {
 // the environment wins, which is what makes a CI job deterministic.
 func (d *Deps) ActiveProject() (config.Project, error) {
 	if d.Ephemeral != nil && (d.Project == "" || d.Project == d.Ephemeral.Name) {
+		d.noteProject(d.Ephemeral.Name)
 		return *d.Ephemeral, nil
 	}
 
@@ -262,7 +378,15 @@ func (d *Deps) ActiveProject() (config.Project, error) {
 		key = p.LegacyFirebaseAPIKey
 	}
 	p.FirebaseAPIKey = key
+	d.noteProject(p.Name)
 	return p, nil
+}
+
+// noteProject remembers the project this run acts on, for its history entry.
+func (d *Deps) noteProject(name string) {
+	if d.run != nil {
+		d.run.project.Store(&name)
+	}
 }
 
 // Context bounds the command's work by --timeout. A zero timeout means no bound.
@@ -384,6 +508,8 @@ func newRootCmd(deps *Deps) *cobra.Command {
 		newUpdateCmd(deps),
 		newComponentCmd(deps),
 		newGenDocsCmd(deps),
+		newTUICmd(deps),
+		newHistoryCmd(deps),
 	} {
 		c.GroupID = groupCore
 		cmd.AddCommand(c)
@@ -438,6 +564,29 @@ func registerEnumCompletion(cmd *cobra.Command, flag string, values []string) {
 		// error, and one better found at startup than never.
 		panic(fmt.Sprintf("register --%s completion on %q: %v", flag, cmd.Name(), err))
 	}
+	// The same values, where the TUI's form can read them without calling the
+	// completion function.
+	annotateFlag(cmd, flag, flagAnnotationEnum, values)
+}
+
+// Flag annotations fft sets for the TUI's request form. cobra reads its own
+// annotations off the same map, so these carry a prefix of their own.
+const (
+	flagAnnotationRequired = "fft_required"
+	flagAnnotationEnum     = "fft_enum"
+
+	// flagAnnotationPairs marks a repeatable name=value flag. A value may hold a
+	// comma of its own — --query status=OPEN,CLOSED — so the form must not split
+	// one at every comma, as it does a plain list.
+	flagAnnotationPairs = "fft_pairs"
+)
+
+// annotateFlag sets an annotation on one of cmd's own flags.
+func annotateFlag(cmd *cobra.Command, flag, key string, values []string) {
+	if err := cmd.Flags().SetAnnotation(flag, key, values); err != nil {
+		// As above: only a flag name that does not exist can get here.
+		panic(fmt.Sprintf("annotate --%s on %q: %v", flag, cmd.Name(), err))
+	}
 }
 
 // complete fills in whatever the caller did not supply. It runs before every
@@ -491,9 +640,26 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 		return err
 	}
 
+	if err := d.refuseUIOwnedFlags(cmd); err != nil {
+		return err
+	}
+
 	d.Project = v.GetString("project")
+	if d.ui != nil && d.ui.project != "" {
+		d.Project = d.ui.project
+	}
 	d.Timeout = v.GetDuration("timeout")
+	if d.ui != nil && d.ui.timeout != nil && !rootFlagChanged(cmd, "timeout") {
+		d.Timeout = *d.ui.timeout
+	}
 	d.AssumeYes = v.GetBool("yes")
+	if d.ui != nil {
+		// FFT_YES answers a shell's questions in advance. A TUI run's questions are the
+		// UI's to ask, so only a --yes on the run's own command line counts: the one
+		// the UI adds after asking in a dialog of its own.
+		d.AssumeYes = rootFlagChanged(cmd, "yes") &&
+			cmd.Root().PersistentFlags().Lookup("yes").Value.String() == "true"
+	}
 
 	// Assigned on every run, absence included: the spec harness reuses one Deps
 	// across commands, and a --read-only left over from the previous run would be a
@@ -505,8 +671,8 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 	// for "block writes in this session". And read off the flag rather than viper,
 	// so that FFT_READ_ONLY cannot be talked down to a default — see [Deps.ReadOnlyEnv].
 	d.ReadOnlyFlag = nil
-	if f := cmd.Root().PersistentFlags().Lookup("read-only"); f != nil && f.Changed {
-		d.ReadOnlyFlag = ptr(f.Value.String() == "true")
+	if rootFlagChanged(cmd, "read-only") {
+		d.ReadOnlyFlag = ptr(cmd.Root().PersistentFlags().Lookup("read-only").Value.String() == "true")
 	}
 	d.ReadOnlyEnv = config.ReadOnlyFromEnv(os.LookupEnv)
 
@@ -516,14 +682,18 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 		d.Debug = cmd.ErrOrStderr()
 	}
 
-	format, err := output.ParseFormat(v.GetString("output"))
+	formatName := v.GetString("output")
+	if d.ui != nil {
+		formatName = string(output.JSON)
+	}
+	format, err := output.ParseFormat(formatName)
 	if err != nil {
 		return exitcode.UsageError{Err: err}
 	}
 	// The printer is rebuilt from the command's streams on every run, so a spec
 	// that calls cmd.SetOut captures the output without constructing one.
 	out := cmd.OutOrStdout()
-	d.Printer = output.New(out, cmd.ErrOrStderr(), format, useColor(v, out))
+	d.Printer = output.New(out, cmd.ErrOrStderr(), format, d.ui == nil && useColor(v, out))
 
 	if d.Secrets == nil {
 		if d.Secrets, err = d.openSecrets(v.GetBool("no-keyring")); err != nil {
@@ -543,6 +713,37 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 		}
 	}
 	return nil
+}
+
+// uiOwnedFlags are the global flags a run inside `fft tui` may not give, because
+// the session decides them: the project is the one selected in the UI, the output
+// is the JSON the UI parses, and the credential store is the one the session
+// opened. Refused rather than ignored — a flag that silently does nothing is a
+// command line that says one thing and does another.
+var uiOwnedFlags = []string{"project", "output", "no-keyring"}
+
+// refuseUIOwnedFlags rejects a run inside the UI that gives one of [uiOwnedFlags].
+// It asks the parsed flag set, never the raw arguments: "--project" can just as
+// well be the value of the flag before it.
+func (d *Deps) refuseUIOwnedFlags(cmd *cobra.Command) error {
+	if d.ui == nil {
+		return nil
+	}
+	for _, name := range uiOwnedFlags {
+		if rootFlagChanged(cmd, name) {
+			return exitcode.UsageError{Err: fmt.Errorf(
+				"--%s cannot be given to a command run from fft tui, which decides it for every run", name)}
+		}
+	}
+	return nil
+}
+
+// rootFlagChanged reports whether the global flag name was given on this command
+// line. It asks the root's persistent set, for the reason complete reads
+// --read-only there: a subcommand may declare a local flag of the same name.
+func rootFlagChanged(cmd *cobra.Command, name string) bool {
+	f := cmd.Root().PersistentFlags().Lookup(name)
+	return f != nil && f.Changed
 }
 
 // bindFlags builds the flag → env → config → default precedence chain.
@@ -618,7 +819,14 @@ func (d *Deps) openSecrets(noKeyring bool) (secrets.Store, error) {
 	if d.Ephemeral != nil {
 		return secrets.NewEnv(os.LookupEnv), nil
 	}
-	return secrets.Open(noKeyring)
+	// Through the printer, not the process's stderr: whoever built this run chose
+	// where its notices go, and the file store has no way to know. The printer is
+	// read when the warning is raised, not now — it does not exist yet. Under
+	// `fft tui` that printer draws on the screen, which is why the UI makes the
+	// store warn before it starts; see [announceSecretsWarnings].
+	return secrets.Open(noKeyring, secrets.WithWarn(func(msg string) {
+		d.Printer.Notef("%s", msg)
+	}))
 }
 
 // noteInheritedFileStore says, once per run, that credentials are being kept in

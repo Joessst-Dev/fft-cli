@@ -300,3 +300,49 @@ var _ = Describe("ReadOnlyFromEnv", func() {
 		Expect(config.ReadOnlyFromEnv(func(string) (string, bool) { return "", false })).To(BeFalse())
 	})
 })
+
+var _ = Describe("HistoryFromEnv", func() {
+	lookup := func(value string) func(string) (string, bool) {
+		return func(name string) (string, bool) {
+			if name != config.EnvHistory {
+				return "", false
+			}
+			return value, true
+		}
+	}
+
+	DescribeTable("switching it on",
+		func(value string) {
+			enabled, set := config.HistoryFromEnv(lookup(value))
+			Expect(set).To(BeTrue())
+			Expect(enabled).To(BeTrue())
+		},
+		Entry("on", "on"),
+		Entry("ON, padded", "  ON "),
+		Entry("one", "1"),
+		Entry("true", "true"),
+		Entry("yes", "yes"),
+	)
+
+	// A record kept on disk must not be started by a typo, so everything that is
+	// not a yes is a no.
+	DescribeTable("switching it off",
+		func(value string) {
+			enabled, set := config.HistoryFromEnv(lookup(value))
+			Expect(set).To(BeTrue())
+			Expect(enabled).To(BeFalse())
+		},
+		Entry("off", "off"),
+		Entry("zero", "0"),
+		Entry("false", "false"),
+		Entry("a typo nobody meant as a no", "onn"),
+	)
+
+	It("leaves the decision to the rest of fft when the variable is unset or empty", func() {
+		_, set := config.HistoryFromEnv(func(string) (string, bool) { return "", false })
+		Expect(set).To(BeFalse())
+
+		_, set = config.HistoryFromEnv(lookup(""))
+		Expect(set).To(BeFalse())
+	})
+})

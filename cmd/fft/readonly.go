@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -35,6 +36,14 @@ import (
 // rather than an annotation; it gates itself with [Deps.guardOperation].
 func (d *Deps) guard(cmd *cobra.Command, args []string) error {
 	if name, ok := cmd.Annotations[annotationComponent]; ok {
+		if d.ui != nil {
+			// A component is another process, and it would inherit the terminal the UI
+			// is drawing on. Refused here, inside the run, so that nothing the runner
+			// concluded about the command line beforehand can be what lets it through.
+			return exitcode.UsageError{Err: fmt.Errorf(
+				"%q runs the %s component, which needs a terminal of its own; run it from a shell",
+				cmd.CommandPath(), name)}
+		}
 		return d.guardComponent(cmd, name, args)
 	}
 
@@ -170,6 +179,8 @@ func (e *componentReadOnlyError) Hint() string {
 		return fmt.Sprintf("Unset %s to allow writes.", config.EnvReadOnly)
 	case sourceFlag:
 		return "Drop --read-only to allow writes."
+	case sourceSession:
+		return "Restart fft tui without --read-only to allow writes."
 	default:
 		return fmt.Sprintf("Run 'fft project read-only %s --off' to allow writes.", e.project)
 	}
@@ -222,6 +233,9 @@ func (d *Deps) guardOperation(cmd *cobra.Command, op api.Operation) error {
 		case sourceEnv:
 			return exitcode.UsageError{Err: fmt.Errorf(
 				"--read-only=false cannot loosen %s, which is set", config.EnvReadOnly)}
+		case sourceSession:
+			return exitcode.UsageError{Err: errors.New(
+				"--read-only=false cannot loosen this fft tui session, which was started with --read-only")}
 		}
 	}
 
@@ -247,6 +261,10 @@ func (d *Deps) readOnlySource(p config.Project) (readOnlySource, bool) {
 	case p.ReadOnly, d.ReadOnlyEnv:
 		// An ephemeral project is read-only only because the environment said so.
 		return sourceEnv, true
+	case d.ui != nil && d.ui.readOnly:
+		// Ahead of the run's own flag: its remedy is the one that works, since a
+		// run inside the session cannot drop a --read-only it never typed.
+		return sourceSession, true
 	case d.ReadOnlyFlag != nil && *d.ReadOnlyFlag:
 		return sourceFlag, true
 	default:
@@ -270,6 +288,8 @@ const (
 	sourceProject readOnlySource = iota + 1
 	sourceEnv
 	sourceFlag
+	// sourceSession is `fft tui --read-only`, which covers every run in the UI.
+	sourceSession
 )
 
 // readOnlyError is a write refused before it was sent.
@@ -297,6 +317,8 @@ func (e *readOnlyError) Hint() string {
 		return fmt.Sprintf("Unset %s to allow writes.", config.EnvReadOnly)
 	case sourceFlag:
 		return "Drop --read-only to allow writes."
+	case sourceSession:
+		return "Restart fft tui without --read-only to allow writes."
 	default:
 		return fmt.Sprintf("Run 'fft project read-only %s --off' to allow writes.", e.project)
 	}

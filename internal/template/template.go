@@ -13,6 +13,8 @@ package template
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"slices"
@@ -96,10 +98,24 @@ func Decode(data []byte) (*Template, error) {
 		return nil, fmt.Errorf("the template has no %q", "body")
 	}
 	if err := t.validateParams(); err != nil {
-		return nil, fmt.Errorf("read the template: %w", err)
+		return nil, fmt.Errorf("read the template: %w", &ParamError{Err: err})
 	}
 	return &t, nil
 }
+
+// ParamError is a template file whose declared parameters [Decode] refuses. The
+// body is fine; editing the "params" object in the file is the fix, and a caller
+// that knows where the file is says so.
+//
+// A file an earlier fft saved can be one: its parameter names were checked for
+// less than they are now.
+type ParamError struct {
+	Err error
+}
+
+func (e *ParamError) Error() string { return e.Err.Error() }
+
+func (e *ParamError) Unwrap() error { return e.Err }
 
 // validateParams keeps the one namespace resolve reads unambiguous.
 //
@@ -110,15 +126,8 @@ func Decode(data []byte) (*Template, error) {
 func (t *Template) validateParams() error {
 	body, _ := t.Body.(map[string]any)
 	for name, p := range t.Params {
-		if name == "" {
-			return fmt.Errorf("a parameter needs a name")
-		}
-		for _, r := range name {
-			if r == '.' || r == '\\' {
-				return fmt.Errorf(
-					"parameter %q cannot contain %q, because that is what makes it a path and not a name",
-					name, string(r))
-			}
+		if err := ValidateParamName(name); err != nil {
+			return err
 		}
 		if _, clash := body[name]; clash && name != p.Path {
 			return fmt.Errorf(
@@ -142,6 +151,41 @@ func (t *Template) validateParams() error {
 	return nil
 }
 
+// ValidateParamName refuses a parameter name that --set could not address as
+// itself.
+//
+// --set splits its argument at the first '=' and trims the name, so a name
+// holding an '=' or starting or ending in white space is never the key a --set
+// arrives with: `--set a=b=x` would set a parameter "a" to "b=x", or a top-level
+// field "a" that the template author never meant. A dot or a backslash makes a
+// name a path. A leading dash reads as a flag wherever the name is typed on its
+// own. Each of these is a name that works in the file and misroutes the value
+// the moment somebody uses it.
+func ValidateParamName(name string) error {
+	if name == "" {
+		return fmt.Errorf("a parameter needs a name")
+	}
+	if strings.TrimSpace(name) != name {
+		return fmt.Errorf("parameter %q cannot start or end with white space, which --set trims away", name)
+	}
+	if strings.HasPrefix(name, "-") {
+		return fmt.Errorf("parameter %q cannot start with a dash, which reads as a flag", name)
+	}
+	for _, r := range name {
+		switch r {
+		case '.', '\\':
+			return fmt.Errorf(
+				"parameter %q cannot contain %q, because that is what makes it a path and not a name",
+				name, string(r))
+		case '=':
+			return fmt.Errorf(
+				"parameter %q cannot contain %q, because --set name=value ends the name at the first one",
+				name, string(r))
+		}
+	}
+	return nil
+}
+
 // Encode renders a template for the disk: indented, key-sorted and newline
 // terminated, so that two saves of the same body produce the same file and a
 // project-local template diffs like the source it sits next to.
@@ -151,6 +195,44 @@ func Encode(t *Template) ([]byte, error) {
 		return nil, fmt.Errorf("write the template: %w", err)
 	}
 	return append(data, '\n'), nil
+}
+
+// Digest identifies what a template says: the SHA-256, in hex, of what [Encode]
+// writes for it.
+//
+// It is taken over the encoding rather than the file's bytes so that anything
+// holding the decoded template — `fft template show -o json` decoded again, say —
+// arrives at the same digest as the command that read the file: Encode sorts the
+// keys and keeps every number's digits, so a template and its re-decoded copy
+// encode alike.
+func Digest(t *Template) (string, error) {
+	data, err := Encode(t)
+	if err != nil {
+		return "", err
+	}
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:]), nil
+}
+
+// ChangedError is a template that is no longer the one a caller read: its
+// digest is not the one the caller expected. It exits 7, as a stale version
+// does, and for the same reason: what the caller decided on has moved under it.
+type ChangedError struct {
+	Name     string
+	Expected string
+	Actual   string
+}
+
+func (e *ChangedError) Error() string {
+	return fmt.Sprintf("the template %q has changed: its digest is %s, not %s", e.Name, e.Actual, e.Expected)
+}
+
+// ExitCode implements the interface exitcode.FromError looks for.
+func (e *ChangedError) ExitCode() int { return exitcode.Conflict }
+
+// Hint says how to see what it says now.
+func (e *ChangedError) Hint() string {
+	return fmt.Sprintf("Read it again with 'fft template show %s' before you render it.", e.Name)
 }
 
 // Render applies the declared defaults and then the given overrides, and returns

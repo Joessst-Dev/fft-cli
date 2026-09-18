@@ -53,6 +53,9 @@ var commandsWithoutOperation = map[string]string{
 
 	"fft auth token":   "mints a token at Google, never at the tenant",
 	"fft auth refresh": "mints a token at Google, never at the tenant",
+	// The one auth command that makes no request at all: the TUI asks it for the
+	// token's state on every project switch, which must not cost a sign-in.
+	"fft auth status": "reads the credential store; no network",
 
 	"fft api list":     "reads the embedded spec table; no network",
 	"fft api describe": "reads the embedded spec table; no network",
@@ -76,6 +79,16 @@ var commandsWithoutOperation = map[string]string{
 	"fft template remove": "deletes a local template file; no network",
 
 	"fft update check": "asks GitHub for the latest release",
+
+	// The request history is a file on this machine that fft writes after a request,
+	// not a request of its own.
+	"fft history list":  "reads the local request history; no network",
+	"fft history top":   "reads the local request history; no network",
+	"fft history clear": "deletes the local request history; no network",
+
+	// The UI sends nothing itself. Every request it makes is an fft command line run
+	// through the tree, so each is gated by the annotation of the command it names.
+	"fft tui": "runs other fft commands, each of which passes the read-only gate on its own",
 
 	// Renders the command tree to Markdown for the docs site. Builds a tree and
 	// prints it — no project, no network, nothing that reaches the tenant.
@@ -205,7 +218,7 @@ func (c *cli) readOnlyProject(readOnly bool) *tenant {
 		body, err := io.ReadAll(r.Body)
 		Expect(err).NotTo(HaveOccurred())
 
-		t.calls = append(t.calls, call{Method: r.Method, Path: r.URL.Path, Body: body})
+		t.record(call{Method: r.Method, Path: r.URL.Path, Body: body})
 
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"facilities":[],"total":0}`))

@@ -46,6 +46,12 @@ func (s envStore) Get(key string) (string, error) {
 	return val, nil
 }
 
+// Exists implements [Checker].
+func (s envStore) Exists(key string) (bool, error) {
+	_, err := s.Get(key)
+	return err == nil, nil
+}
+
 func (envStore) Set(string, string) error { return ErrReadOnly }
 
 // Delete is a no-op rather than an error: tearing down a project that was never

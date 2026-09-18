@@ -39,6 +39,7 @@ func newAuthCmd(deps *Deps) *cobra.Command {
 
 	cmd.AddCommand(
 		newAuthWhoamiCmd(deps),
+		newAuthStatusCmd(deps),
 		newAuthTokenCmd(deps),
 		newAuthRefreshCmd(deps),
 	)
@@ -125,6 +126,9 @@ func (d *Deps) apiClient(p config.Project, src auth.TokenSource) (*client.Client
 	if d.Debug != nil {
 		opts = append(opts, client.WithDebug(d.Debug))
 	}
+	if d.run != nil || d.observeStatus != nil {
+		opts = append(opts, client.WithObserver(d.observe))
+	}
 
 	c, err := client.New(p.BaseURL, opts...)
 	if err != nil {
@@ -151,7 +155,18 @@ func (d *Deps) tokenSource() (config.Project, auth.TokenSource, error) {
 		return config.Project{}, nil, err
 	}
 
-	src, err := d.NewTokenSource(p, d.Secrets, d.Clock, d.Debug)
+	build := func() (auth.TokenSource, error) {
+		return d.NewTokenSource(p, d.Secrets, d.Clock, d.Debug)
+	}
+	// A run with --debug builds a source of its own: the shared one would trace to
+	// the stderr of whichever run built it, and this run's trace would not show the
+	// sign-in it is being asked to show.
+	var src auth.TokenSource
+	if d.tokens != nil && d.Debug == nil {
+		src, err = d.tokens.source(p, build)
+	} else {
+		src, err = build()
+	}
 	if err != nil {
 		return config.Project{}, nil, err
 	}

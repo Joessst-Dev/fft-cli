@@ -45,6 +45,7 @@ var _ = Describe("ValidateProjectName", func() {
 		Entry("simple", "staging"),
 		Entry("with a dash and dot", "acme-prod.eu"),
 		Entry("with underscores", "acme_prod_1"),
+		Entry("in another script", "склад-берлин"),
 	)
 
 	DescribeTable("rejects a name that would break the storage key",
@@ -57,6 +58,10 @@ var _ = Describe("ValidateProjectName", func() {
 		Entry("blank", "   "),
 		Entry("with a control character", "acme\x00prod"),
 		Entry("with a newline", "acme\nprod"),
+		Entry("with a delete", "acme\x7fprod"),
+		Entry("with a C1 control, which some terminals read as an escape", "acme\u009bprod"),
+		Entry("with a right-to-left override", "acme\u202eprod"),
+		Entry("with a bidi isolate", "acme\u2067prod"),
 	)
 })
 
@@ -102,6 +107,17 @@ func storeContract(name string, newStore func() secrets.Store) {
 			Expect(store.Delete("fft:staging:password")).To(Succeed())
 		})
 
+		It("says whether a key holds a secret, and counts an empty one as none", func() {
+			Expect(secrets.Exists(store, "fft:staging:password")).To(BeFalse())
+
+			Expect(store.Set("fft:staging:password", "s3cret")).To(Succeed())
+			Expect(store.Set("fft:staging:idToken", "")).To(Succeed())
+
+			Expect(secrets.Exists(store, "fft:staging:password")).To(BeTrue())
+			Expect(secrets.Exists(store, "fft:staging:idToken")).To(BeFalse())
+			Expect(secrets.Exists(store, "fft:prod:password")).To(BeFalse())
+		})
+
 		It("keeps one project's secrets separate from another's", func() {
 			Expect(store.Set("fft:staging:password", "staging-secret")).To(Succeed())
 			Expect(store.Set("fft:prod:password", "prod-secret")).To(Succeed())
@@ -128,6 +144,35 @@ var _ = Describe("the store implementations", func() {
 		return secrets.NewFile(filepath.Join(GinkgoT().TempDir(), "fft", "credentials.json"))
 	})
 })
+
+var _ = Describe("Exists", func() {
+	It("asks a store that can answer without the secret, and never reads it", func() {
+		store := &checkingStore{Store: secrets.NewMem(), exists: true}
+		Expect(secrets.Exists(store, "fft:staging:password")).To(BeTrue())
+		Expect(store.reads).To(BeZero())
+	})
+
+	It("passes on a store's failure to answer", func() {
+		store := &checkingStore{Store: secrets.NewMem(), err: secrets.ErrKeyringUnavailable}
+		_, err := secrets.Exists(store, "fft:staging:password")
+		Expect(err).To(MatchError(secrets.ErrKeyringUnavailable))
+	})
+})
+
+// checkingStore is a Store that answers Exists itself, and counts the reads.
+type checkingStore struct {
+	secrets.Store
+	exists bool
+	err    error
+	reads  int
+}
+
+func (s *checkingStore) Get(key string) (string, error) {
+	s.reads++
+	return s.Store.Get(key)
+}
+
+func (s *checkingStore) Exists(string) (bool, error) { return s.exists, s.err }
 
 var _ = Describe("the file store", func() {
 	var path string
@@ -187,6 +232,13 @@ var _ = Describe("the environment store", func() {
 		_, err := store().Get(secrets.Key("env", secrets.KindRefreshToken))
 
 		Expect(err).To(MatchError(secrets.ErrNotFound))
+	})
+
+	It("says which secrets the environment holds without handing them over", func() {
+		checker, ok := store().(secrets.Checker)
+		Expect(ok).To(BeTrue())
+		Expect(checker.Exists(secrets.Key("env", secrets.KindPassword))).To(BeTrue())
+		Expect(checker.Exists(secrets.Key("env", secrets.KindRefreshToken))).To(BeFalse())
 	})
 
 	It("refuses to be written to, because a CI runner has nowhere durable to put a token", func() {
@@ -276,4 +328,20 @@ var _ = Describe("storing a project's secrets", func() {
 			Expect(secrets.Has(store, "staging")).To(BeFalse())
 		})
 	})
+})
+
+var _ = Describe("LooksLikeCredential", func() {
+	DescribeTable("recognises a name that holds a credential, however it is spelled",
+		func(name string, want bool) {
+			Expect(secrets.LooksLikeCredential(name)).To(Equal(want))
+		},
+		Entry("a JSON key", "clientSecret", true),
+		Entry("a camel-cased key", "firebaseWebApiKey", true),
+		Entry("a flag", "firebase-api-key", true),
+		Entry("a snake-cased name", "ID_TOKEN", true),
+		Entry("a header", "Authorization", true),
+		Entry("a password field", "newPassword", true),
+		Entry("an ordinary field", "tenantFacilityId", false),
+		Entry("a key that is not an API key", "keyboard", false),
+	)
 })

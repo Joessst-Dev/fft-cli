@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/output"
+	"github.com/Joessst-Dev/fft-cli/internal/secrets"
 	"github.com/Joessst-Dev/fft-cli/internal/template"
 )
 
@@ -21,6 +23,11 @@ The body comes from --file, --data or --from:
     fft template save rush --file body.json
     fft order get ORDER-1 -o json | fft template save rush --file -
     fft template save rush --from createOrder        seeds from the spec's example
+
+--operation records the operation a --file or --data body is for, the way --from does
+for the example it seeds. The id must be one this fft knows and one that takes a body:
+
+    fft template save rush --operation addOrder --file body.json
 
 --param declares a parameter: a short name for a path inside the body, so that
 '--set email=…' works instead of '--set order.consumer.email=…'. Give it a default
@@ -49,17 +56,30 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 		description string
 		params      []string
 		required    []string
+		operation   string
 		force       bool
 	)
 
 	cmd := &cobra.Command{
-		Use:   "save <name>",
+		Use: "save <name>",
+		Annotations: map[string]string{
+			annotationExclusive: exclusiveTemplates,
+			annotationConfirms:  confirmsYes,
+		},
 		Short: "Save a request body as a template",
 		Long:  templateSaveLong,
 		Args:  usageArgs(cobra.ExactArgs(1)),
 		RunE: func(_ *cobra.Command, args []string) error {
 			name := args[0]
 			if err := template.ValidateName(name); err != nil {
+				return err
+			}
+
+			// Checked before anything is read or written: a template recorded against
+			// an operation that does not exist, or that sends no body, is one no
+			// render can ever deliver anywhere.
+			declaredOp, err := templateOperation(operation)
+			if err != nil {
 				return err
 			}
 
@@ -91,9 +111,15 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			body, envelope := unwrapShownTemplate(body)
+			body, envelope, err := unwrapShownTemplate(body)
+			if err != nil {
+				return err
+			}
 			if description == "" {
 				description = envelope.Description
+			}
+			if declaredOp != "" {
+				operationID = declaredOp
 			}
 			if operationID == "" {
 				operationID = envelope.OperationID
@@ -155,9 +181,19 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 					"facility ids, order ids and consumer emails in git history cannot be quietly taken back.",
 					path)
 			}
-			deps.Printer.Notef("Saved %s. Render it with 'fft template render %s'.", name, name)
-
 			view := templatePathView{Template: name, Path: path}
+			shadow, err := projectShadow(store, name, scope.scope())
+			if err != nil {
+				return err
+			}
+			if shadow != "" {
+				view.ShadowedBy = shadow
+				deps.Printer.Warnf("Saved %s, but the project template %s has the same name, and render and show "+
+					"use that one. Rename one of them to render this one.", name, shadow)
+			} else {
+				deps.Printer.Notef("Saved %s. Render it with 'fft template render %s'.", name, name)
+			}
+
 			return deps.Printer.Render(output.Rows{
 				Headers: []string{"TEMPLATE", "PATH"},
 				Rows:    [][]string{{view.Template, view.Path}},
@@ -170,6 +206,7 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 	f.StringVar(&file, "file", "", "JSON file holding the request body ('-' for stdin)")
 	f.StringVar(&data, "data", "", "Request body: inline JSON, @file, or '-' for stdin")
 	f.StringVar(&from, "from", "", "Seed the body from this operation's example")
+	f.StringVar(&operation, "operation", "", "Record the operation (an operationId) the body is sent with")
 	f.StringVar(&description, "description", "", "What this template is for")
 	f.StringArrayVar(&params, "param", nil,
 		"Declare a parameter: --param name=path[=default] (repeatable)")
@@ -180,6 +217,8 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 	cmd.MarkFlagsMutuallyExclusive("file", "data")
 	cmd.MarkFlagsMutuallyExclusive("file", "from")
 	cmd.MarkFlagsMutuallyExclusive("data", "from")
+	// --from already names the operation, and two names for it could disagree.
+	cmd.MarkFlagsMutuallyExclusive("operation", "from")
 
 	return cmd
 }
@@ -190,6 +229,23 @@ func newTemplateSaveCmd(deps *Deps) *cobra.Command {
 type templatePathView struct {
 	Template string `json:"template" yaml:"template"`
 	Path     string `json:"path" yaml:"path"`
+
+	// ShadowedBy is the project template that render and show resolve the name
+	// to instead, for a user template saved under a name the project uses.
+	ShadowedBy string `json:"shadowedBy,omitempty" yaml:"shadowedBy,omitempty"`
+}
+
+// projectShadow is the project template a user template of that name is hidden
+// by, "" when there is none.
+func projectShadow(store *template.Store, name string, scope template.Scope) (string, error) {
+	if scope != template.ScopeUser {
+		return "", nil
+	}
+	exists, err := store.Exists(name, template.ScopeProject)
+	if err != nil || !exists {
+		return "", err
+	}
+	return store.Path(name, template.ScopeProject)
 }
 
 // templateSource reads the body and works out which operation it belongs to.
@@ -219,6 +275,23 @@ func templateSource(deps *Deps, file, data, from string) ([]byte, string, error)
 			"a template needs a body: pass --file, --data or --from")}
 	}
 	return raw, "", nil
+}
+
+// templateOperation resolves --operation to the operationId it names, "" when the
+// flag was not given.
+func templateOperation(id string) (string, error) {
+	if id == "" {
+		return "", nil
+	}
+	op, err := findOperation(id)
+	if err != nil {
+		return "", err
+	}
+	if !op.HasBody {
+		return "", exitcode.UsageError{Err: fmt.Errorf(
+			"%s takes no request body, so a template has nothing to send it", op.ID)}
+	}
+	return op.ID, nil
 }
 
 // declaredParams builds the params block from --param and --require.
@@ -293,21 +366,35 @@ func declaredParams(body entityDoc, params, required []string) (map[string]templ
 // flag, because a template file carries nothing that says "I was printed by
 // show": schemaVersion plus a body is what any template file looks like, on
 // disk or piped from show alike, and a real fulfillmenttools request body has
-// no plausible reason to declare a top-level "schemaVersion" of its own.
+// no plausible reason to declare both top-level keys of its own.
+//
+// It is an envelope whatever the two keys hold. One this fft cannot unwrap — a
+// schema version it does not know, a body that is not an object — is refused
+// rather than saved whole: the whole of show's document includes "resolved",
+// the absolute path of the file it read, which has no business in a template
+// meant to be committed.
 //
 // The caller decides what to do with the returned envelope: an explicit flag
 // (--description, --param, --require) still wins over what was carried in.
-func unwrapShownTemplate(body entityDoc) (entityDoc, template.Template) {
-	sv, ok := body["schemaVersion"].(json.Number)
-	if !ok {
-		return body, template.Template{}
+func unwrapShownTemplate(body entityDoc) (entityDoc, template.Template, error) {
+	sv, hasVersion := body["schemaVersion"]
+	rawInner, hasBody := body["body"]
+	if !hasVersion || !hasBody {
+		return body, template.Template{}, nil
 	}
-	if n, err := sv.Int64(); err != nil || n <= 0 || n > template.Version {
-		return body, template.Template{}
+
+	version, isNumber := sv.(json.Number)
+	n, err := version.Int64()
+	if !isNumber || err != nil || n <= 0 || n > template.Version {
+		return nil, template.Template{}, exitcode.UsageError{Err: fmt.Errorf(
+			"the input is a template of schema version %v, as 'fft template show' prints it, "+
+				"and this fft reads versions 1 to %d: a newer fft may save it", sv, template.Version)}
 	}
-	inner, ok := body["body"].(map[string]any)
+	inner, ok := rawInner.(map[string]any)
 	if !ok {
-		return body, template.Template{}
+		return nil, template.Template{}, exitcode.UsageError{Err: errors.New(
+			"the input is a template as 'fft template show' prints it, and its body is not a JSON object: " +
+				"fft template save only saves an object body")}
 	}
 
 	// Re-decoded with UseNumber, the same way template.Decode reads a template
@@ -320,14 +407,8 @@ func unwrapShownTemplate(body entityDoc) (entityDoc, template.Template) {
 		dec.UseNumber()
 		_ = dec.Decode(&envelope) // best effort: inner is authoritative for the body regardless
 	}
-	return inner, envelope
+	return inner, envelope, nil
 }
-
-// credentialFieldPatterns are key-name substrings, matched case-insensitively,
-// that a real fulfillmenttools credential-shaped field carries — a password on
-// user creation, a clientSecret or firebaseWebApiKey on SSO/OIDC config, a
-// bearer token, an Authorization header value.
-var credentialFieldPatterns = []string{"password", "secret", "apikey", "token", "authorization"}
 
 // credentialLikePaths lists the dotted paths in body whose key looks like it
 // might hold a credential, so save --local can ask before writing one into a
@@ -348,12 +429,8 @@ func credentialLikePaths(body entityDoc) []string {
 				if path != "" {
 					sub = path + "." + key
 				}
-				lower := strings.ToLower(key)
-				for _, pattern := range credentialFieldPatterns {
-					if strings.Contains(lower, pattern) {
-						out = append(out, sub)
-						break
-					}
+				if secrets.LooksLikeCredential(key) {
+					out = append(out, sub)
 				}
 				walk(v, sub)
 			}
@@ -371,8 +448,8 @@ func credentialLikePaths(body entityDoc) []string {
 
 // validateParamName keeps the one namespace --set reads unambiguous.
 //
-// A name with a dot in it would be indistinguishable from a path, so it is
-// refused outright. A name that is also a top-level key of the body is refused
+// A name --set could not address as itself — a dot makes it a path, an '='
+// ends it early — is refused outright, by the same rule a loaded file meets. A name that is also a top-level key of the body is refused
 // only when it points somewhere *else* — `--require name=name` is the obvious
 // thing to type for a top-level field, and it is not ambiguous at all, because
 // both readings of `--set name=x` land in the same place. What is ambiguous is a
@@ -383,15 +460,8 @@ func credentialLikePaths(body entityDoc) []string {
 // Both checks run at save time, so that --set never needs a precedence rule for
 // a user to remember at the point of use.
 func validateParamName(name, path string, body entityDoc) error {
-	if name == "" {
-		return exitcode.UsageError{Err: fmt.Errorf("a parameter needs a name")}
-	}
-	for _, r := range name {
-		if r == '.' || r == '\\' {
-			return exitcode.UsageError{Err: fmt.Errorf(
-				"a parameter name cannot contain %q, because that is what makes it a path and not a name",
-				string(r))}
-		}
+	if err := template.ValidateParamName(name); err != nil {
+		return exitcode.UsageError{Err: err}
 	}
 	if _, clash := body[name]; clash && name != path {
 		return exitcode.UsageError{Err: fmt.Errorf(

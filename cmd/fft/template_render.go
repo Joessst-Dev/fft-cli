@@ -37,10 +37,17 @@ Rendering makes no request. It needs no project, no credentials and no network,
 and it always prints JSON — even under -o yaml — because the body is going into a
 command that reads JSON.
 
+--if-digest renders only the template whose digest 'fft template show' printed, and
+exits 7 when the file has changed since: a script that reviewed a template sends that
+template, not whatever the file says by the time it renders.
+
 Called with no name on a terminal, it asks which template to render.`
 
 func newTemplateRenderCmd(deps *Deps) *cobra.Command {
-	var sets setFlags
+	var (
+		sets     setFlags
+		ifDigest string
+	)
 
 	cmd := &cobra.Command{
 		Use:               "render [name]",
@@ -62,6 +69,11 @@ func newTemplateRenderCmd(deps *Deps) *cobra.Command {
 			saved, err := store.Resolve(name)
 			if err != nil {
 				return err
+			}
+			if ifDigest != "" {
+				if err := checkDigest(saved, ifDigest); err != nil {
+					return err
+				}
 			}
 
 			overrides, err := sets.parse()
@@ -93,8 +105,24 @@ func newTemplateRenderCmd(deps *Deps) *cobra.Command {
 		"Set a parameter or a path: --set email=a@b.de (repeatable)")
 	f.Var(sets.value(true), "set-string",
 		"Set a value as a string, whatever it looks like: --set-string id=12345 (repeatable)")
+	f.StringVar(&ifDigest, "if-digest", "",
+		"Render only if the template's digest, as 'fft template show' prints it, is still this one")
 
 	return cmd
+}
+
+// checkDigest refuses a template whose digest is not want. The digest is of the
+// template this command has already read, so what it renders is exactly what
+// was checked.
+func checkDigest(saved template.Saved, want string) error {
+	got, err := template.Digest(saved.Template)
+	if err != nil {
+		return err
+	}
+	if !strings.EqualFold(got, strings.TrimSpace(want)) {
+		return &template.ChangedError{Name: saved.Name, Expected: want, Actual: got}
+	}
+	return nil
 }
 
 // setFlags collects --set and --set-string in the single order pflag actually

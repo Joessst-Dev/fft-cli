@@ -113,6 +113,7 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/guide/overview' },
             { text: 'Commands', link: '/guide/commands' },
+            { text: 'Interactive mode', link: '/guide/tui' },
             { text: 'Discovery', link: '/guide/discovery' },
             { text: 'Recipes', link: '/guide/recipes' },
             { text: 'Templates', link: '/guide/templates' },

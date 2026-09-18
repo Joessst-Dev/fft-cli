@@ -54,11 +54,17 @@ func (p *Printer) table(t Rows) error {
 	if len(t.Headers) > 0 {
 		header := make([]string, len(t.Headers))
 		for i, h := range t.Headers {
-			header[i] = style.Bold(h)
+			header[i] = style.Bold(p.safeCell(h))
 		}
 		lines = append(lines, header)
 	}
-	lines = append(lines, t.Rows...)
+	for _, row := range t.Rows {
+		safe := make([]string, len(row))
+		for i, cell := range row {
+			safe[i] = p.safeCell(cell)
+		}
+		lines = append(lines, safe)
+	}
 
 	widths := columnWidths(lines)
 
@@ -80,6 +86,54 @@ func (p *Printer) table(t Rows) error {
 	}
 	return nil
 }
+
+// safeCell keeps a cell on its own row and away from the terminal's controls,
+// whatever the value it came from — most cells are the API's data, and a
+// newline in one forges a row on a stdout that is supposed to be only data.
+//
+// With colour on, the SGR sequences a row builder painted with [Style] must
+// survive, so those are kept and everything between them is sanitized. Only the
+// sequences a Style emits are kept: a value cannot conceal itself, blink or paint
+// a background. It can still say one of fft's own colours, and so a cell that
+// leaves a colour on ends in a reset, lest it bleed into the cells after it. With
+// colour off no cell has a reason to hold one, and none survives.
+func (p *Printer) safeCell(cell string) string {
+	if !p.color {
+		return SanitizeCell(cell)
+	}
+	var b strings.Builder
+	last := 0
+	open := false
+	for _, loc := range sgr.FindAllStringIndex(cell, -1) {
+		b.WriteString(SanitizeCell(cell[last:loc[0]]))
+		if seq := cell[loc[0]:loc[1]]; styleSGR[seq] {
+			b.WriteString(seq)
+			open = seq != sgrReset
+		}
+		last = loc[1]
+	}
+	b.WriteString(SanitizeCell(cell[last:]))
+	if open {
+		b.WriteString(sgrReset)
+	}
+	return b.String()
+}
+
+// sgrReset turns every attribute off.
+const sgrReset = "\x1b[0m"
+
+// styleSGR is every SGR sequence a [Style] emits, taken from Style itself so that
+// a colour added there is kept here too.
+var styleSGR = func() map[string]bool {
+	style := Style{enabled: true}
+	seqs := map[string]bool{sgrReset: true}
+	for _, paint := range []func(string) string{style.Bold, style.Faint, style.Green, style.Yellow, style.Red} {
+		for _, seq := range sgr.FindAllString(paint("x"), -1) {
+			seqs[seq] = true
+		}
+	}
+	return seqs
+}()
 
 // columnWidths measures each column across every line. A ragged row — one with
 // fewer cells than the header — widens only the columns it actually has, rather

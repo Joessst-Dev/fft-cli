@@ -114,6 +114,17 @@ var _ = Describe("fft component", func() {
 			Expect(c.out()).To(ContainSubstring("get-pick-job"))
 		})
 
+		It("refuses the name of an output format, which a dangling flag would resolve to", func() {
+			// `fft --project -o json` takes -o for the project, and json for the command.
+			c.installFake(fakeManifest("json"))
+
+			Expect(c.run("--project", "-o", "json")).NotTo(Equal(exitcode.OK))
+			Expect(c.out()).To(BeEmpty(), "the component ran")
+
+			Expect(c.run("--help")).To(Equal(exitcode.OK))
+			Expect(c.errOut()).To(ContainSubstring(`component declares a command called "json"`))
+		})
+
 		DescribeTable("refuses a name one of cobra's own lazily-added commands owns",
 			func(name string) {
 				// help and completion are registered by cobra on first Execute, so root.Find
