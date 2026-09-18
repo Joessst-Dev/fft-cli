@@ -70,6 +70,26 @@ var _ = Describe("a question a command asks in the TUI", func() {
 		Expect(string(res.Stderr)).To(ContainSubstring("This cannot be undone. [y/N]: y"))
 	})
 
+	It("is asked even when FFT_YES answers every question in the shell", func() {
+		c.setenv("FFT_YES", "true")
+
+		id := start(r, deleteFacility)
+		q := awaitQuestion(r, id)
+		Expect(t.recorded()).To(BeEmpty(), "the facility was deleted before anyone answered")
+
+		r.Answer(id, q.ID, false)
+		Expect(awaitDone(r, id)[id].ExitCode).To(Equal(exitcode.OK))
+		Expect(deletes()).To(BeEmpty())
+	})
+
+	It("is not asked when the UI passed --yes after asking itself", func() {
+		id := start(r, tui.Invocation{Args: []string{"facility", "delete", "BER-01", "--yes"}})
+		res := awaitDone(r, id)[id]
+
+		Expect(res.ExitCode).To(Equal(exitcode.OK), "stderr: %s", res.Stderr)
+		Expect(deletes()).To(HaveLen(1))
+	})
+
 	It("sends nothing on no", func() {
 		id := start(r, deleteFacility)
 		q := awaitQuestion(r, id)

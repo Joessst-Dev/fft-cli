@@ -653,6 +653,13 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 		d.Timeout = *d.ui.timeout
 	}
 	d.AssumeYes = v.GetBool("yes")
+	if d.ui != nil {
+		// FFT_YES answers a shell's questions in advance. A TUI run's questions are the
+		// UI's to ask, so only a --yes on the run's own command line counts: the one
+		// the UI adds after asking in a dialog of its own.
+		d.AssumeYes = rootFlagChanged(cmd, "yes") &&
+			cmd.Root().PersistentFlags().Lookup("yes").Value.String() == "true"
+	}
 
 	// Assigned on every run, absence included: the spec harness reuses one Deps
 	// across commands, and a --read-only left over from the previous run would be a
