@@ -77,7 +77,10 @@ func newStockActionsCmd(deps *Deps) *cobra.Command {
 		Args:    usageArgs(cobra.NoArgs),
 		Aliases: []string{"action"},
 
-		Annotations: map[string]string{annotationOperationID: "performStocksActions"},
+		Annotations: map[string]string{
+			annotationOperationID: "performStocksActions",
+			annotationConfirms:    "run",
+		},
 
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if example {

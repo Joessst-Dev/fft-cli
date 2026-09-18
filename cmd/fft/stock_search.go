@@ -44,7 +44,10 @@ func newStockSearchCmd(deps *Deps) *cobra.Command {
 		Long:  stockSearchLong,
 		Args:  usageArgs(cobra.NoArgs),
 
-		Annotations: map[string]string{annotationOperationID: "searchStock"},
+		Annotations: map[string]string{
+			annotationOperationID:      "searchStock",
+			annotationSharedReadSender: "true",
+		},
 
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			// --example needs no project, no credentials and no network, so it is
@@ -68,7 +71,7 @@ func newStockSearchCmd(deps *Deps) *cobra.Command {
 	f := cmd.Flags()
 	f.StringVar(&file, "file", "", "JSON file holding the search payload ('-' for stdin)")
 	f.BoolVar(&example, "example", false, "Print a sample request body and exit")
-	page.register(f, "stocks", client.DefaultSize)
+	page.registerWithFile(f, "stocks", client.DefaultSize)
 
 	cmd.MarkFlagsMutuallyExclusive("file", "example")
 

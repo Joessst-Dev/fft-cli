@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -13,6 +14,7 @@ import (
 
 	"github.com/Joessst-Dev/fft-cli/internal/config"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
+	"github.com/Joessst-Dev/fft-cli/internal/template"
 )
 
 var _ = Describe("fft template", func() {
@@ -137,6 +139,59 @@ var _ = Describe("fft template", func() {
 			Expect(c.out()).To(ContainSubstring(`"operationId": "addFacility"`))
 		})
 
+		Describe("--operation", func() {
+			It("records the operation a body from a file is for", func() {
+				Expect(save("rush", "--operation", "addOrder", "--file", "-")).To(Equal(exitcode.OK), c.errOut())
+
+				Expect(c.run("template", "show", "rush", "-o", "json")).To(Equal(exitcode.OK))
+				Expect(c.out()).To(ContainSubstring(`"operationId": "addOrder"`))
+				Expect(c.out()).To(ContainSubstring(`"tenantOrderId": "A-1"`))
+			})
+
+			It("wins over the operation a body piped from show carried", func() {
+				Expect(c.run("template", "save", "fac", "--from", "addFacility")).To(Equal(exitcode.OK))
+				Expect(c.run("template", "show", "fac", "-o", "json")).To(Equal(exitcode.OK))
+				shown := c.out()
+
+				c.stdin.WriteString(shown)
+				Expect(c.run("template", "save", "copy", "--operation", "addOrder", "--file", "-")).
+					To(Equal(exitcode.OK), c.errOut())
+
+				Expect(c.run("template", "show", "copy", "-o", "json")).To(Equal(exitcode.OK))
+				Expect(c.out()).To(ContainSubstring(`"operationId": "addOrder"`))
+			})
+
+			It("refuses an operation this fft does not know, naming the likely one and writing nothing", func() {
+				Expect(save("rush", "--operation", "addOrdr", "--file", "-")).To(Equal(exitcode.Usage))
+				Expect(c.errOut()).To(ContainSubstring(`there is no operation "addOrdr"`))
+				Expect(c.errOut()).To(ContainSubstring("addOrder"))
+				Expect(userPath("rush")).NotTo(BeAnExistingFile())
+				Expect(c.stdin.String()).To(Equal(body), "a refused save must not consume stdin")
+			})
+
+			It("refuses an operation that takes no body, writing nothing", func() {
+				Expect(save("rush", "--operation", "getFacility", "--file", "-")).To(Equal(exitcode.Usage))
+				Expect(c.errOut()).To(ContainSubstring("getFacility takes no request body"))
+				Expect(userPath("rush")).NotTo(BeAnExistingFile())
+			})
+
+			It("cannot be given with --from, which names the operation already", func() {
+				Expect(c.run("template", "save", "fac", "--from", "addFacility", "--operation", "addOrder")).
+					To(Equal(exitcode.Usage))
+				Expect(c.errOut()).To(ContainSubstring("[from operation]"))
+				Expect(userPath("fac")).NotTo(BeAnExistingFile())
+			})
+
+			It("still asks before a credential-shaped field goes to the project scope", func() {
+				c.stdin.Reset()
+				c.stdin.WriteString(`{"clientSecret":"shh","facility":"BER-01"}`)
+				Expect(c.run("template", "save", "creds", "--local", "--operation", "addOrder", "--file", "-")).
+					To(Equal(exitcode.Usage))
+				Expect(c.errOut()).To(ContainSubstring("--yes"))
+				Expect(filepath.Join(".fft", "templates", "creds.json")).NotTo(BeAnExistingFile())
+			})
+		})
+
 		It("refuses a body it was never given", func() {
 			Expect(c.run("template", "save", "rush")).To(Equal(exitcode.Usage))
 			Expect(c.errOut()).To(ContainSubstring("--file, --data or --from"))
@@ -161,6 +216,41 @@ var _ = Describe("fft template", func() {
 			Expect(save("rush", "--file", "-", "--param", "a.b=order.items.0.quantity")).
 				To(Equal(exitcode.Usage))
 			Expect(c.errOut()).To(ContainSubstring("path and not a name"))
+		})
+
+		It("says when a project template of the same name hides the one it saved, on stderr and in its document", func() {
+			Expect(save("rush", "--local", "--file", "-")).To(Equal(exitcode.OK))
+			project := filepath.Join(".", ".fft", "templates", "rush.json")
+			Expect(project).To(BeAnExistingFile())
+
+			Expect(save("rush", "--file", "-", "-o", "json")).To(Equal(exitcode.OK))
+			Expect(c.errOut()).To(ContainSubstring("but the project template"))
+			Expect(c.errOut()).To(ContainSubstring("render and show use that one"))
+			Expect(c.errOut()).NotTo(ContainSubstring("Render it with"))
+
+			var view map[string]string
+			Expect(json.Unmarshal([]byte(c.out()), &view)).To(Succeed())
+			Expect(view["path"]).To(Equal(userPath("rush")))
+			Expect(view["shadowedBy"]).To(HaveSuffix(filepath.Join(".fft", "templates", "rush.json")))
+		})
+
+		It("names no shadow when nothing hides the template", func() {
+			Expect(save("rush", "--file", "-", "-o", "json")).To(Equal(exitcode.OK))
+			Expect(c.out()).NotTo(ContainSubstring("shadowedBy"))
+			Expect(c.errOut()).To(ContainSubstring("Render it with 'fft template render rush'"))
+		})
+
+		It("refuses a name that starts with a dash, which only works after --", func() {
+			Expect(save("--file", "-", "--", "-rush")).To(Equal(exitcode.Usage))
+			Expect(c.errOut()).To(ContainSubstring(`a template name cannot start with a dash, and "-rush" does`))
+			Expect(userPath("-rush")).NotTo(BeAnExistingFile())
+		})
+
+		It("refuses a parameter name --set would cut short, carried in from a shown template", func() {
+			c.stdin.WriteString(`{"schemaVersion":1,"body":{"status":"OPEN"},"params":{"a=b":{"path":"order.id"}}}`)
+			Expect(c.run("template", "save", "copy", "--file", "-")).To(Equal(exitcode.Usage))
+			Expect(c.errOut()).To(ContainSubstring(`parameter "a=b" cannot contain "="`))
+			Expect(userPath("copy")).NotTo(BeAnExistingFile())
 		})
 
 		It("refuses a parameter name the body uses at the top level for somewhere else", func() {
@@ -374,6 +464,43 @@ var _ = Describe("fft template", func() {
 			Expect(c.out()).To(ContainSubstring("a@b.de"))
 		})
 
+		Describe("--if-digest", func() {
+			// digest is what show prints under DIGEST for rush.
+			digest := func() string {
+				GinkgoHelper()
+				Expect(c.run("template", "show", "rush")).To(Equal(exitcode.OK))
+				m := regexp.MustCompile(`DIGEST\n  ([0-9a-f]{64})\n`).FindStringSubmatch(c.out())
+				Expect(m).To(HaveLen(2), c.out())
+				return m[1]
+			}
+
+			It("renders the template show described", func() {
+				d := digest()
+				Expect(c.run("template", "render", "rush", "--if-digest", d, "--set", "email=a@b.de")).
+					To(Equal(exitcode.OK), c.errOut())
+				Expect(c.out()).To(ContainSubstring("a@b.de"))
+			})
+
+			It("is the digest of show -o json's document, decoded again", func() {
+				Expect(c.run("template", "show", "rush", "-o", "json")).To(Equal(exitcode.OK))
+				t, err := template.Decode([]byte(c.out()))
+				Expect(err).NotTo(HaveOccurred())
+				Expect(template.Digest(t)).To(Equal(digest()))
+			})
+
+			It("refuses, with exit 7 and nothing on stdout, a template that changed since", func() {
+				d := digest()
+				Expect(save("rush", "--file", "-", "--force",
+					"--require", "email=order.consumer.email", "--description", "changed")).To(Equal(exitcode.OK))
+
+				Expect(c.run("template", "render", "rush", "--if-digest", d, "--set", "email=a@b.de")).
+					To(Equal(exitcode.Conflict))
+				Expect(c.out()).To(BeEmpty())
+				Expect(c.errOut()).To(ContainSubstring(`the template "rush" has changed`))
+				Expect(c.errOut()).To(ContainSubstring("fft template show rush"))
+			})
+		})
+
 		It("refuses to guess which template when there is nobody to ask", func() {
 			Expect(c.run("template", "render")).To(Equal(exitcode.Usage))
 			Expect(c.errOut()).To(ContainSubstring("name the template to render"))
@@ -496,6 +623,47 @@ var _ = Describe("fft template", func() {
 			Expect(c.errOut()).To(ContainSubstring("shadows a user template"))
 		})
 
+		Describe("under -o json", func() {
+			resolved := func() map[string]any {
+				GinkgoHelper()
+				Expect(c.run("template", "show", "rush", "-o", "json")).To(Equal(exitcode.OK))
+				var doc struct {
+					Resolved map[string]any `json:"resolved"`
+				}
+				Expect(json.Unmarshal([]byte(c.out()), &doc)).To(Succeed())
+				return doc.Resolved
+			}
+
+			It("names the template it read: its name, its scope and its file", func() {
+				Expect(resolved()).To(Equal(map[string]any{
+					"name":  "rush",
+					"scope": "user",
+					"path":  userPath("rush"),
+				}))
+			})
+
+			It("names the project template once one of the same name hides the user one", func() {
+				Expect(resolved()).To(HaveKeyWithValue("scope", "user"))
+				Expect(save("rush", "--local", "--file", "-")).To(Equal(exitcode.OK))
+
+				now := resolved()
+				Expect(now).To(HaveKeyWithValue("scope", "project"))
+				Expect(now["path"]).To(HaveSuffix(filepath.Join(".fft", "templates", "rush.json")))
+				Expect(c.errOut()).To(ContainSubstring("shadows a user template"))
+			})
+
+			It("keeps the digest a render pins to: the extra key is not part of the template", func() {
+				Expect(c.run("template", "show", "rush", "-o", "json")).To(Equal(exitcode.OK))
+				shown, err := template.Decode([]byte(c.out()))
+				Expect(err).NotTo(HaveOccurred())
+				digest, err := template.Digest(shown)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(c.run("template", "render", "rush", "--if-digest", digest,
+					"--set", "email=a@b.de")).To(Equal(exitcode.OK))
+			})
+		})
+
 		It("round-trips through save under -o json, description and required params included", func() {
 			Expect(c.run("template", "show", "rush", "-o", "json")).To(Equal(exitcode.OK))
 			shown := c.out()
@@ -518,6 +686,74 @@ var _ = Describe("fft template", func() {
 
 			Expect(c.run("template", "render", "rush", "--set", "email=old@example.de")).To(Equal(exitcode.OK))
 			Expect(copied).To(MatchJSON(c.out()))
+		})
+
+		// show -o json names the file it read, an absolute path under the user's home.
+		// A project template is meant to be committed, so that path must never end up
+		// in one, whatever the shown template looks like.
+		Describe("piped back into a project template", func() {
+			// shown is what show -o json prints for a template file holding doc.
+			shown := func(name, doc string) string {
+				GinkgoHelper()
+				Expect(os.WriteFile(userPath(name), []byte(doc), 0o600)).To(Succeed())
+				Expect(c.run("template", "show", name, "-o", "json")).To(Equal(exitcode.OK), c.errOut())
+				Expect(c.out()).To(ContainSubstring(`"resolved"`))
+				return c.out()
+			}
+
+			saveLocal := func(doc string) int {
+				c.stdin.Reset()
+				c.stdin.WriteString(doc)
+				return c.run("template", "save", "copy", "--local", "--file", "-")
+			}
+
+			projectTemplates := func() []string {
+				GinkgoHelper()
+				files, err := filepath.Glob(filepath.Join(".fft", "templates", "*"))
+				Expect(err).NotTo(HaveOccurred())
+				return files
+			}
+
+			It("keeps the template, not the envelope show wraps it in", func() {
+				Expect(saveLocal(shown("rush", readFile(userPath("rush"))))).To(Equal(exitcode.OK), c.errOut())
+
+				saved := readFile(filepath.Join(".fft", "templates", "copy.json"))
+				Expect(saved).NotTo(ContainSubstring(`"resolved"`))
+				Expect(saved).NotTo(ContainSubstring(dataDir))
+			})
+
+			It("refuses one whose body is not a JSON object, rather than save the envelope as the body", func() {
+				doc := shown("batch", `{"schemaVersion":1,"body":[{"facilityRef":"BER-01"}]}`)
+
+				Expect(saveLocal(doc)).To(Equal(exitcode.Usage))
+				Expect(c.errOut()).To(ContainSubstring("fft template show"))
+				Expect(c.errOut()).To(ContainSubstring("not a JSON object"))
+				Expect(projectTemplates()).To(BeEmpty())
+			})
+
+			// show refuses to print such a template, so this envelope is written by hand.
+			It("refuses one whose body is null", func() {
+				doc := `{"schemaVersion":1,"body":null,` +
+					`"resolved":{"name":"empty","scope":"user","path":"/home/someone/.local/share/fft/templates/empty.json"}}`
+
+				Expect(saveLocal(doc)).To(Equal(exitcode.Usage))
+				Expect(projectTemplates()).To(BeEmpty())
+			})
+
+			It("refuses one of a schema version this fft does not know, rather than save the envelope", func() {
+				doc := strings.Replace(shown("rush", readFile(userPath("rush"))),
+					`"schemaVersion": 1`, `"schemaVersion": 99`, 1)
+				Expect(doc).To(ContainSubstring(`"schemaVersion": 99`))
+
+				Expect(saveLocal(doc)).To(Equal(exitcode.Usage))
+				Expect(c.errOut()).To(ContainSubstring("schema version 99"))
+				Expect(projectTemplates()).To(BeEmpty())
+			})
+
+			It("still saves a body that only has a schemaVersion of its own", func() {
+				Expect(saveLocal(`{"schemaVersion":"2026-01","payload":{"a":1}}`)).To(Equal(exitcode.OK), c.errOut())
+				Expect(readFile(filepath.Join(".fft", "templates", "copy.json"))).To(ContainSubstring(`"payload"`))
+			})
 		})
 
 		It("lets an explicit --param/--require replace the params carried in from show, rather than merge", func() {

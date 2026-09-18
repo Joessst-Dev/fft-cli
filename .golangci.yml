@@ -118,6 +118,12 @@ linters:
         linters:
           - gosec
         text: G304
+      # G304 flags opening a variable path. The path is the history file's own name
+      # with ".lock" appended — fft's state directory or the test seam, never input.
+      - path: ^internal/history/lock_(unix|windows)\.go$
+        linters:
+          - gosec
+        text: G304
       # G404 flags math/rand for the retry backoff jitter. Jitter spreads load; it
       # is not a secret and does not want a CSPRNG.
       - path: ^internal/client/do\.go$
@@ -140,6 +146,21 @@ linters:
         linters:
           - gosec
         text: G204
+      # G204 flags exec.Command with a non-constant program. The program is the
+      # user's own $EDITOR (or $VISUAL), run as the user, which is what the setting
+      # is for. It is split into words without a shell, so nothing in it is expanded
+      # or chained, and the only other argument is the private file fft created.
+      - path: ^internal/tui/editor\.go$
+        linters:
+          - gosec
+        text: G204
+      # G304 flags opening a variable path. The path is the body file fft itself
+      # created in its own private temporary directory for the editor, read back
+      # once the editor exits.
+      - path: ^internal/tui/editor\.go$
+        linters:
+          - gosec
+        text: G304
       # The component installer's entire job is to write files it downloaded and run
       # a binary it installed, so G304 (open a variable path), G122 (write inside a
       # WalkDir callback) and G204 (exec a variable path) fire on the feature rather

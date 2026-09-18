@@ -193,6 +193,7 @@ composes with any command that takes `--file`:
 
 ```sh
 fft template save rush-order --file body.json --require email=order.consumer.email
+fft template save rush-order --operation addOrder --file body.json
 fft template list
 fft template show rush-order
 fft template render rush-order --set email=a@b.de | fft order create --file -
@@ -204,6 +205,12 @@ fft template remove rush-order
 - `--set` takes a declared parameter or a path (`--set order.items.0.quantity=3`). An id
   made only of digits needs `--set-string`, or it goes out as a number.
 - Saving strips a top-level `version`, because replaying a stale one is a guaranteed 409.
+- `--operation <operationId>` records which operation the body is for; an unknown id, or
+  one that takes no body, is exit 2.
+- `render --if-digest <digest>` renders only the template whose DIGEST `show` printed, and
+  exits 7 if the file changed since — for a script that reviews a template before it sends it.
+- `show -o json` names the file it read under `resolved` (`name`, `scope`, `path`): a
+  project template hides a user one of the same name.
 - `--local` writes `./.fft/templates`, which the repository commits. Read one before you
   commit it: a body captured from real work carries real ids and consumer emails.
 - Full rules in [templates.md](templates.md).
@@ -239,13 +246,29 @@ fft project current
 fft project use staging
 fft project read-only prod
 fft auth whoami
+fft auth status -o json
 fft ping
 fft version
 fft component list
+fft history top -o json
+fft history top --all-projects --limit 0 -o json
+fft history list --limit 10 -o json
+fft history list --project staging -o json
+fft history list --all-projects -o json
+# only when the user asks; it asks first
+fft history clear
 ```
 
 - `fft auth whoami` prints the permissions the current credentials actually have. When
   something exits 5, this is the command that explains why.
+- `fft auth status -o json` says what is stored to sign in as the current `project`
+  (with its `email` and `username`) — `store`, `signIn`
+  (`password`, `idToken` or `none`), `hasPassword`, `hasRefreshToken`, `hasIdToken` — and the
+  cached token's `token` state (`valid`, `expiring`, `expired`, `unknown`, `none`) with its
+  `expiresAt` and `expiresIn`. It takes no flags of its own, and exits 3 when no project is
+  configured. It sends nothing and mints nothing, so it is the cheap check before a long
+  run; `expired: true` is not an error, the next command renews the token. It never prints a
+  credential.
 - `fft ping` needs no credentials at all. It is the way to tell "the tenant is down" apart
   from "my token is wrong".
 - `fft project read-only prod` marks a project read-only for good, in the config file. It is
@@ -253,5 +276,25 @@ fft component list
 - `fft component list` says which components are installed, and whether fft ships them or
   somebody else does — a command in `--help` that came from a component is somebody else's
   code. See [components](components.md).
+- `fft history top -o json` lists the operations used most in the current project, each with
+  `project`, `operationId`, `command`, `count` and `lastUsed` — a quick way to learn what a
+  user normally does before suggesting a command. `--all-projects` counts every project,
+  each separately; `--limit` (default 10, `0` for all) caps the list. It needs a current
+  project unless `--all-projects` is given: exit 3 otherwise.
+- `fft history list -o json` prints the recent requests in the current project, newest
+  first; `--all-projects` lists every project's; `--limit` defaults to 20, `0` for all. Like
+  `top`, it needs a current project unless `--all-projects` is given: exit 3 otherwise.
+  Each entry has `v` (the record's format version), `ts`, `source` (`cli` or `tui`),
+  `project`, `operationId`, `command`, `args`, `status` (left out when no response
+  arrived), `exit` and `durationMs`.
+- Neither holds a request body, and inline `--data`, header values, `--set` values,
+  credential-shaped flags and flags or query parameters named like a person's data
+  (`--email`, `--query email=…`, `--search-term`) appear as `<redacted>`; ids and other
+  values are kept as typed. History is off in headless mode unless
+  `FFT_HISTORY=on`, so in CI both usually print `[]`; when nothing is being recorded, stderr
+  says why.
+- `fft history clear` deletes the whole history. It asks first, and without a terminal it
+  refuses with exit 2 unless `--yes` is given. It is the user's record: do not clear it
+  unless they ask.
 - `fft component init pricing` scaffolds a new component (a command or a transport, in shell,
   Go, Python or Node) that installs and runs straight away. See [components](components.md).

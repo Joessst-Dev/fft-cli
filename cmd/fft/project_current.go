@@ -46,6 +46,8 @@ func runProjectCurrent(deps *Deps) error {
 			deps.Printer.Notef("This session is read-only: %s is set, so writes will be refused.", config.EnvReadOnly)
 		case sourceFlag:
 			deps.Printer.Notef("This session is read-only: --read-only was given, so writes will be refused.")
+		case sourceSession:
+			deps.Printer.Notef("This session is read-only: fft tui was started with --read-only, so writes will be refused.")
 		}
 	}
 	return nil

@@ -31,7 +31,14 @@ const (
 	// EnvReadOnly refuses every request that would change the tenant, whatever the
 	// project's own configuration says. See [ReadOnlyFromEnv].
 	EnvReadOnly = "FFT_READ_ONLY"
+
+	// EnvHistory switches the local request history on or off, whatever the config
+	// file says. See [HistoryFromEnv].
+	EnvHistory = "FFT_HISTORY"
 )
+
+// affirmations are the only ways to say yes to [EnvHistory].
+var affirmations = map[string]bool{"1": true, "t": true, "true": true, "yes": true, "on": true}
 
 // denials are the only ways to say no to [EnvReadOnly].
 var denials = map[string]bool{"": true, "0": true, "f": true, "false": true, "no": true, "off": true}
@@ -71,6 +78,28 @@ func ReadOnlyFromEnv(lookup func(string) (string, bool)) bool {
 	}
 	v, _ := lookup(EnvReadOnly)
 	return !denials[strings.ToLower(strings.TrimSpace(v))]
+}
+
+// HistoryFromEnv reads FFT_HISTORY: whether it records, and whether it was set at
+// all. An unset or empty variable leaves the decision to the config file and to
+// headless mode.
+//
+// The parse fails closed in the opposite direction to [ReadOnlyFromEnv], because
+// what is being guarded is the opposite: history is a record kept on disk, so a
+// typo must not start one. Only an affirmation switches it on, and any other value
+// switches it off.
+//
+// lookup may be nil, in which case os.LookupEnv is used.
+func HistoryFromEnv(lookup func(string) (string, bool)) (enabled, set bool) {
+	if lookup == nil {
+		lookup = os.LookupEnv
+	}
+	v, _ := lookup(EnvHistory)
+	v = strings.ToLower(strings.TrimSpace(v))
+	if v == "" {
+		return false, false
+	}
+	return affirmations[v], true
 }
 
 // FromEnv synthesizes an ephemeral project from the environment, reporting

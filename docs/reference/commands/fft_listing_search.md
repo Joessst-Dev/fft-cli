@@ -43,7 +43,7 @@ fft listing search --file <file> [flags]
       --example         Print a sample request body and exit
       --file string     JSON file holding the search payload ('-' for stdin)
       --max-items int   With --all, stop after this many listings (default 10000)
-      --size int        Listings per page, 1–250 (default 20)
+      --size int        Listings per page, 1–250, in place of the file's size (default: the file's, else 20)
       --total           Also count the matches, and report the total on stderr
 ```
 

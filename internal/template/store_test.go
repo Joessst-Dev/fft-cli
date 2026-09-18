@@ -59,7 +59,7 @@ var _ = Describe("the template store", func() {
 		})
 
 		It("refuses anything that could escape the directory", func() {
-			for _, name := range []string{"", "..", ".", ".hidden", "a/b", `a\b`, "a b", "a:b"} {
+			for _, name := range []string{"", "..", ".", ".hidden", "a/b", `a\b`, "a b", "a:b", "-rush", "--yes"} {
 				err := template.ValidateName(name)
 				Expect(err).To(HaveOccurred(), "expected %q to be refused", name)
 				Expect(exitcode.FromError(err)).To(Equal(exitcode.Usage))
@@ -211,6 +211,38 @@ var _ = Describe("the template store", func() {
 			Expect(listing.Found[0].Name).To(Equal("good"))
 			Expect(listing.Problems).To(HaveLen(1))
 			Expect(listing.Problems[0].Path).To(Equal(bad))
+		})
+
+		It("reports a file whose parameter no --set could reach, and lists the rest", func() {
+			_, err := store.Write("good", template.ScopeUser, sample(""))
+			Expect(err).NotTo(HaveOccurred())
+
+			bad := filepath.Join(dataDir, "fft", "templates", "misrouted.json")
+			Expect(os.WriteFile(bad, []byte(
+				`{"schemaVersion":1,"body":{"status":"OPEN"},"params":{"a=b":{"path":"order.id"}}}`), 0o600)).To(Succeed())
+
+			listing, err := store.List()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(listing.Found).To(ConsistOf(HaveField("Name", "good")))
+			Expect(listing.Problems).To(ConsistOf(HaveField("Path", bad)))
+			Expect(listing.Problems[0].Err).To(MatchError(ContainSubstring(`parameter "a=b" cannot contain "="`)))
+			Expect(listing.Problems[0].Err).To(MatchError(ContainSubstring(`edit its "params"`)))
+			Expect(listing.Problems[0].Err).To(MatchError(ContainSubstring("'fft template remove misrouted'")))
+		})
+
+		It("reports a template file whose name no command could address, and passes over a dot file", func() {
+			_, err := store.Write("good", template.ScopeUser, sample(""))
+			Expect(err).NotTo(HaveOccurred())
+			dir := filepath.Join(dataDir, "fft", "templates")
+			dashed := filepath.Join(dir, "--yes.json")
+			Expect(os.WriteFile(dashed, []byte(`{"schemaVersion":1,"body":{}}`), 0o600)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(dir, ".draft.json"), []byte(`{}`), 0o600)).To(Succeed())
+
+			listing, err := store.List()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(listing.Found).To(ConsistOf(HaveField("Name", "good")))
+			Expect(listing.Problems).To(ConsistOf(HaveField("Path", dashed)))
+			Expect(listing.Problems[0].Err).To(MatchError(ContainSubstring("cannot start with a dash")))
 		})
 
 		It("ignores files that are not templates", func() {

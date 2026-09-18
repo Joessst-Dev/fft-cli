@@ -69,6 +69,10 @@ type Settings struct {
 	//
 	// omitempty, so that adding this field churns no existing config file.
 	NoKeyring bool `yaml:"noKeyring,omitempty"`
+
+	// NoHistory stops fft from recording the requests it sends in its local
+	// history. FFT_HISTORY still wins, as the environment does over every setting.
+	NoHistory bool `yaml:"noHistory,omitempty"`
 }
 
 // Project is one configured fulfillmenttools tenant. It holds no secrets: the

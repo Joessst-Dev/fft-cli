@@ -191,6 +191,27 @@ var _ = Describe("Store", func() {
 			Expect(string(data)).NotTo(ContainSubstring("noKeyring"))
 		})
 
+		It("writes no noHistory key while history is on", func() {
+			data, err := os.ReadFile(path)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(string(data)).NotTo(ContainSubstring("noHistory"))
+		})
+
+		It("round-trips the history setting", func() {
+			cfg := sampleConfig()
+			cfg.Settings.NoHistory = true
+			Expect(store.Save(cfg)).To(Succeed())
+
+			data, err := os.ReadFile(path)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(string(data)).To(ContainSubstring("noHistory: true"))
+
+			reloaded, err := store.Load()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(reloaded.Settings.NoHistory).To(BeTrue())
+		})
+
 		It("round-trips the credential-store setting", func() {
 			cfg := sampleConfig()
 			cfg.Settings.NoKeyring = true

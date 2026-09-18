@@ -68,10 +68,11 @@ type Client struct {
 type Option func(*options)
 
 type options struct {
-	source auth.TokenSource
-	hc     *http.Client
-	debug  io.Writer
-	retry  Retry
+	source   auth.TokenSource
+	hc       *http.Client
+	debug    io.Writer
+	retry    Retry
+	observer func(status int)
 }
 
 // WithTokenSource authenticates every request with src.
@@ -96,6 +97,19 @@ func WithDebug(w io.Writer) Option {
 // WithRetry replaces the retry policy. Fields left zero keep their default.
 func WithRetry(r Retry) Option {
 	return func(o *options) { o.retry = r }
+}
+
+// WithObserver reports the HTTP status of every response the tenant sends back.
+//
+// It sees each attempt, not each call: a 401 answered by a refresh and a retry is
+// two reports, the last of which is what the call finally got. A request that never
+// received a response — refused, timed out, cancelled — is not reported at all,
+// because there is no status to report and inventing one (0, say) would be a lie a
+// history view would faithfully repeat.
+//
+// observe runs on the goroutine that sent the request and must not block.
+func WithObserver(observe func(status int)) Option {
+	return func(o *options) { o.observer = observe }
 }
 
 // New returns the client for the tenant at baseURL.
@@ -127,6 +141,11 @@ func New(baseURL string, opts ...Option) (*Client, error) {
 	}
 	if o.source != nil {
 		base = &auth.Transport{Source: o.source, Base: base}
+	}
+	// Outermost, so that what it reports is what the caller's attempt actually got —
+	// after the token was attached, and whatever the layers beneath made of it.
+	if o.observer != nil {
+		base = observingTransport{observe: o.observer, base: base}
 	}
 
 	signed := &http.Client{
@@ -193,6 +212,20 @@ func originHost(u *url.URL) string {
 		return host
 	}
 	return net.JoinHostPort(host, port)
+}
+
+// observingTransport hands each response's status to observe.
+type observingTransport struct {
+	observe func(status int)
+	base    http.RoundTripper
+}
+
+func (t observingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	resp, err := t.base.RoundTrip(req)
+	if err == nil && resp != nil {
+		t.observe(resp.StatusCode)
+	}
+	return resp, err
 }
 
 // transport is the default transport for tenant traffic: TLS 1.2 as the floor,

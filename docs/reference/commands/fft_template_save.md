@@ -15,6 +15,11 @@ The body comes from --file, --data or --from:
     fft order get ORDER-1 -o json | fft template save rush --file -
     fft template save rush --from createOrder        seeds from the spec's example
 
+--operation records the operation a --file or --data body is for, the way --from does
+for the example it seeds. The id must be one this fft knows and one that takes a body:
+
+    fft template save rush --operation addOrder --file body.json
+
 --param declares a parameter: a short name for a path inside the body, so that
 '--set email=…' works instead of '--set order.consumer.email=…'. Give it a default
 with a second '=', and mark it required with --require:
@@ -48,6 +53,7 @@ fft template save <name> [flags]
       --force                 Replace a template of the same name
       --from string           Seed the body from this operation's example
       --local                 Write to ./.fft/templates, the directory this repository commits
+      --operation string      Record the operation (an operationId) the body is sent with
       --param stringArray     Declare a parameter: --param name=path[=default] (repeatable)
       --require stringArray   Declare a required parameter: --require name=path (repeatable)
 ```

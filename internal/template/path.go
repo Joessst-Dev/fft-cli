@@ -175,6 +175,31 @@ func (d *donePath) subject() string {
 	return d.String()
 }
 
+// Lookup finds the value at path inside doc, by the same reading of a segment
+// Apply uses. The second result is false when there is nothing there.
+func Lookup(doc any, path Path) (any, bool) {
+	node := doc
+	for _, seg := range path {
+		switch n := node.(type) {
+		case map[string]any:
+			child, ok := n[seg]
+			if !ok {
+				return nil, false
+			}
+			node = child
+		case []any:
+			i, ok := index(seg)
+			if !ok || i >= len(n) {
+				return nil, false
+			}
+			node = n[i]
+		default:
+			return nil, false
+		}
+	}
+	return node, true
+}
+
 // set walks one segment and recurses. done is the prefix already traversed, and
 // exists only so that an error can name the part of the path that went wrong
 // rather than the whole of it.

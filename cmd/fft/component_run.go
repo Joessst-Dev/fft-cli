@@ -105,9 +105,17 @@ func addComponentCommands(deps *Deps, root *cobra.Command) {
 	// parent); and cobra's own `help` and `completion`, which it registers lazily on
 	// first Execute — so root.Find cannot see them now, and a component named `help`
 	// would shadow the one command every CLI must have.
+	//
+	// The output formats are reserved as well. They are what follows -o, so they are
+	// what a command line with a dangling value-taking flag — `fft --project -o json`
+	// — resolves to as a command, and that mistake must end in an error, not in
+	// somebody's component being started.
 	reserved := generatedGroupNames()
 	reserved["help"] = true
 	reserved["completion"] = true
+	for _, format := range output.Formats() {
+		reserved[format] = true
+	}
 
 	for _, c := range deps.Components.All() {
 		if c.Kind != component.KindCommand {

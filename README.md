@@ -57,6 +57,17 @@ a typo in the password fails at setup rather than becoming a mystery an hour lat
 many projects as you like and switch with `fft project use`, or run one command elsewhere
 with `--project`. Secrets go to your OS keychain, never to the config file.
 
+## Interactive mode
+
+```sh
+fft tui
+```
+
+A full-screen UI for browsing the operations, filling in a request, sending it and reading
+the response. Every action in it runs the same fft command you would type, with the same
+read-only gate and exit codes, and `y` copies that command. It draws on stderr and needs a
+terminal. See the [interactive mode guide](https://joessst-dev.github.io/fft-cli/guide/tui).
+
 ## Try it without a tenant
 
 `fft emulator` is a local, in-memory stand-in for the API — no account, no credentials, no

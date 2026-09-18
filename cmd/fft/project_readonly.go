@@ -36,7 +36,11 @@ func newProjectReadOnlyCmd(deps *Deps) *cobra.Command {
 		// `current`: allowing it to default to the active project is exactly the
 		// accident this command exists to prevent — `fft project read-only --off` with
 		// prod merely *active* would disarm the wrong tenant.
-		Use:               "read-only <name>",
+		Use: "read-only <name>",
+		Annotations: map[string]string{
+			annotationExclusive: exclusiveConfig,
+			annotationConfirms:  confirmsYes,
+		},
 		Short:             "Refuse every request that would change a project",
 		Long:              projectReadOnlyLong,
 		Aliases:           []string{"readonly", "ro"},
@@ -131,7 +135,7 @@ func confirmWritable(deps *Deps, name string) (bool, error) {
 		return true, nil
 	}
 
-	if !deps.Prompt.Interactive() {
+	if !deps.Prompt.CanConfirm() {
 		return false, exitcode.UsageError{Err: errors.New(
 			"stdin is not a terminal, so fft cannot ask for confirmation: pass --yes to allow writes again")}
 	}

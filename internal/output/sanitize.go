@@ -14,6 +14,11 @@ import "strings"
 // broader "never let an untrusted string steer the terminal" rule, applied
 // before the string is printed at all. Tab and newline survive: multi-line
 // text stays multi-line.
+//
+// The explicit bidirectional overrides and isolates go too. They move nothing
+// on the terminal, but they reorder what it draws after them, so a value can
+// display as something it does not say — a name that reads as another, a
+// command whose arguments appear in a different order.
 func Sanitize(s string) string {
 	return strings.Map(func(r rune) rune {
 		switch {
@@ -23,10 +28,19 @@ func Sanitize(s string) string {
 			return -1
 		case r >= 0x80 && r <= 0x9f:
 			return -1
+		case IsBidiControl(r):
+			return -1
 		default:
 			return r
 		}
 	}, s)
+}
+
+// IsBidiControl reports whether r is an explicit bidirectional embedding,
+// override or isolate (U+202A–U+202E, U+2066–U+2069): a character that changes
+// the order in which the text after it is displayed.
+func IsBidiControl(r rune) bool {
+	return (r >= 0x202a && r <= 0x202e) || (r >= 0x2066 && r <= 0x2069)
 }
 
 // SanitizeCell is [Sanitize] for a string going into one cell of a table or one

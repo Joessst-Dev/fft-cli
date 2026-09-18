@@ -31,7 +31,10 @@ func newConnectionDeleteCmd(deps *Deps) *cobra.Command {
 		Args:    usageArgs(cobra.ExactArgs(1)),
 		Aliases: []string{"rm"},
 
-		Annotations: map[string]string{annotationOperationID: "deleteFacilityConnection"},
+		Annotations: map[string]string{
+			annotationOperationID: "deleteFacilityConnection",
+			annotationConfirms:    "delete",
+		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := requireFlag(cmd, "facility"); err != nil {

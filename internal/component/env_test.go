@@ -234,3 +234,24 @@ var _ = Describe("the environment a component is given", func() {
 		})
 	})
 })
+
+var _ = Describe("an environment without fft's variables", func() {
+	It("drops every FFT_ variable, whatever its case, and keeps the rest in order", func() {
+		got := component.WithoutFFT([]string{
+			"PATH=/usr/bin",
+			config.EnvPassword + "=the-real-password",
+			"fft_api_key=AIzaSyREAL",
+			"Fft_Id_Token=a-real-token",
+			"HOME=/home/dev",
+			"NOT_FFT_X=kept",
+			"=C:=C:\\",
+		})
+		Expect(got).To(Equal([]string{"PATH=/usr/bin", "HOME=/home/dev", "NOT_FFT_X=kept", "=C:=C:\\"}))
+	})
+
+	It("is empty rather than nil, which a process would read as everything", func() {
+		got := component.WithoutFFT([]string{config.EnvPassword + "=x"})
+		Expect(got).NotTo(BeNil())
+		Expect(got).To(BeEmpty())
+	})
+})

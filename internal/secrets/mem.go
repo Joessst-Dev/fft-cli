@@ -5,7 +5,10 @@ import (
 	"sync"
 )
 
-var _ Store = (*MemStore)(nil)
+var (
+	_ Store   = (*MemStore)(nil)
+	_ Checker = (*MemStore)(nil)
+)
 
 // MemStore keeps secrets in memory for the lifetime of the process. It backs the
 // specs — which is why it is exported: they need [MemStore.Snapshot] to assert
@@ -33,6 +36,14 @@ func (s *MemStore) Get(key string) (string, error) {
 		return "", ErrNotFound
 	}
 	return val, nil
+}
+
+// Exists implements [Checker].
+func (s *MemStore) Exists(key string) (bool, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	return s.values[key] != "", nil
 }
 
 // Set implements [Store].

@@ -14,6 +14,7 @@ the choice for a single command.`
 func newProjectUseCmd(deps *Deps) *cobra.Command {
 	return &cobra.Command{
 		Use:               "use <name>",
+		Annotations:       map[string]string{annotationExclusive: exclusiveConfig},
 		Short:             "Set the active project",
 		Long:              projectUseLong,
 		Args:              usageArgs(cobra.ExactArgs(1)),

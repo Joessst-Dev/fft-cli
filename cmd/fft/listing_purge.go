@@ -42,7 +42,10 @@ func newListingPurgeCmd(deps *Deps) *cobra.Command {
 		Long:  listingPurgeLong,
 		Args:  usageArgs(cobra.NoArgs),
 
-		Annotations: map[string]string{annotationOperationID: "deleteListingsOfFacility"},
+		Annotations: map[string]string{
+			annotationOperationID: "deleteListingsOfFacility",
+			annotationConfirms:    "purge",
+		},
 
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if err := requireFlag(cmd, "facility"); err != nil {

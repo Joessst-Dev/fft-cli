@@ -16,6 +16,7 @@ file nor the keychain**:
 | `FFT_PROJECT_ID` | needed to derive the email from `FFT_USERNAME` |
 | `FFT_ENV` | likewise |
 | `FFT_READ_ONLY` | optional; refuse every request that would change the tenant — see [Read-only projects](./read-only.md) |
+| `FFT_HISTORY` | optional; the request history is off in headless mode, and `on` records it — see [Request history](./configuration.md#request-history) |
 
 `FFT_BASE_URL` is held to the same rule as `fft project add`: it must be `https`, or
 `http` only to a loopback address (`localhost`/`127.0.0.1`). Plain `http` to any other

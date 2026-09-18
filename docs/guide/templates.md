@@ -24,16 +24,21 @@ not a new way to reach the tenant.
 fft template save rush-order --file body.json --description "Rush order for the flagship"
 fft order get ORDER-1 -o json | fft template save from-order --file -
 fft template save facility --from addFacility
+fft template save rush-order --operation addOrder --file body.json
 ```
 
 - `--from <operationId>` seeds the body from the spec's own example and records which
   operation it is for, which is the fastest way to start one from nothing.
+- `--operation <operationId>` records the operation a `--file` or `--data` body is for. The
+  id must be one `fft api list` shows, and one that takes a body; anything else is exit 2
+  and nothing is written. It cannot be combined with `--from`, which names one already.
 - A top-level `version` is **dropped on the way in**, and fft says so. A version is only
   true of the entity at the moment it was read; replaying a saved one is a guaranteed 409.
   Put one back at render time with `--set version=N` if you really mean to.
 - `--local` writes `./.fft/templates`, which is meant to be committed and shared. Without
   it templates go to `$XDG_DATA_HOME/fft/templates`, which is yours alone. A project
-  template of the same name wins.
+  template of the same name wins; saving a personal one it hides warns, and `-o json`
+  names the project file under `shadowedBy`.
 - A body bound for `--local` that looks like it carries a credential (a key name matching
   `password`, `secret`, `apikey`, `token` or `authorization`) is refused outright unless you
   confirm — or pass `--yes` on a script's non-interactive terminal.
@@ -49,6 +54,11 @@ fft template save rush-order --file body.json --require email=order.consumer.ema
 `fft template show rush-order` then prints what the template wants before you type a
 `--set`, and rendering without a required parameter fails with exit 2 naming **all** of the
 missing ones at once.
+
+A parameter name is what `--set name=value` addresses, so it cannot hold a `.`, a `\` or an
+`=`, start with a dash, or start or end with white space. A template file that declares
+such a name — a hand-edited or committed one — is refused when it is read, and
+`fft template list` names it on stderr.
 
 ## Changing values
 
@@ -77,6 +87,25 @@ else in fft — see [Ids are not numbers](./recipes.md) — arriving from the ot
 ```sh
 fft template render rush-order --set-string order.tenantOrderId=12345
 ```
+
+## Rendering what you reviewed
+
+`fft template show` prints a `DIGEST` for the template as it read it. `render --if-digest`
+renders only while the template still has that digest, and otherwise exits 7 with nothing
+on stdout — so a script, or a person, that read a template before sending it sends that
+template, not whatever a `git pull` has made of the file since:
+
+```sh
+fft template render rush-order --if-digest 3f5a… --set email=a@b.de | fft order create --file -
+```
+
+The digest is the SHA-256 of the template's own encoding, the fields `show -o json`
+prints, so it does not move when the file is merely re-indented.
+
+`show -o json` also prints a `resolved` object — `name`, `scope` (`project` or `user`) and
+`path` — naming the file it read. A project template hides a user template of the same
+name, so read the scope from there rather than from an earlier `template list`. The key is
+not part of the template: piping the document into `template save --file -` ignores it.
 
 ## Tenants do not share ids
 
