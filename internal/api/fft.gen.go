@@ -353,6 +353,21 @@ func (e BasePriceCostDetailType) Valid() bool {
 	}
 }
 
+// Defines values for BulkInvalidatePromiseOrderActionParameterName.
+const (
+	BULKINVALIDATEPROMISE BulkInvalidatePromiseOrderActionParameterName = "BULK_INVALIDATE_PROMISE"
+)
+
+// Valid indicates whether the value is a known member of the BulkInvalidatePromiseOrderActionParameterName enum.
+func (e BulkInvalidatePromiseOrderActionParameterName) Valid() bool {
+	switch e {
+	case BULKINVALIDATEPROMISE:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for BulkOperationErrorType.
 const (
 	BulkOperationErrorTypeNOTALLOWED BulkOperationErrorType = "NOT_ALLOWED"
@@ -2620,8 +2635,9 @@ func (e InterFacilityConnectionSurchargeContextTypes) Valid() bool {
 
 // Defines values for InterFacilityConnectionTransferSurchargeType.
 const (
-	ABSOLUTESURCHARGETYPE InterFacilityConnectionTransferSurchargeType = "ABSOLUTE_SURCHARGE_TYPE"
-	RELATIVESURCHARGETYPE InterFacilityConnectionTransferSurchargeType = "RELATIVE_SURCHARGE_TYPE"
+	ABSOLUTESURCHARGETYPE  InterFacilityConnectionTransferSurchargeType = "ABSOLUTE_SURCHARGE_TYPE"
+	RELATIVESURCHARGETYPE  InterFacilityConnectionTransferSurchargeType = "RELATIVE_SURCHARGE_TYPE"
+	THRESHOLDSURCHARGETYPE InterFacilityConnectionTransferSurchargeType = "THRESHOLD_SURCHARGE_TYPE"
 )
 
 // Valid indicates whether the value is a known member of the InterFacilityConnectionTransferSurchargeType enum.
@@ -2630,6 +2646,8 @@ func (e InterFacilityConnectionTransferSurchargeType) Valid() bool {
 	case ABSOLUTESURCHARGETYPE:
 		return true
 	case RELATIVESURCHARGETYPE:
+		return true
+	case THRESHOLDSURCHARGETYPE:
 		return true
 	default:
 		return false
@@ -4295,6 +4313,21 @@ func (e OrderForceCancelActionParameterName) Valid() bool {
 	}
 }
 
+// Defines values for OrderInvalidationActionParameterName.
+const (
+	INVALIDATEPROMISE OrderInvalidationActionParameterName = "INVALIDATE_PROMISE"
+)
+
+// Valid indicates whether the value is a known member of the OrderInvalidationActionParameterName enum.
+func (e OrderInvalidationActionParameterName) Valid() bool {
+	switch e {
+	case INVALIDATEPROMISE:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for OrderLineItemCustomAttributesUpdateParameterName.
 const (
 	UPDATECUSTOMATTRIBUTES OrderLineItemCustomAttributesUpdateParameterName = "UPDATE_CUSTOM_ATTRIBUTES"
@@ -4903,6 +4936,7 @@ const (
 	PermissionKeyORDERCANCEL                     PermissionKey = "ORDER_CANCEL"
 	PermissionKeyORDERCONSUMERWRITE              PermissionKey = "ORDER_CONSUMER_WRITE"
 	PermissionKeyORDERCUSTOMATTRIBUTESWRITE      PermissionKey = "ORDER_CUSTOM_ATTRIBUTES_WRITE"
+	PermissionKeyORDERDELIVERYPROMISEWRITE       PermissionKey = "ORDER_DELIVERY_PROMISE_WRITE"
 	PermissionKeyORDERFORCECANCEL                PermissionKey = "ORDER_FORCE_CANCEL"
 	PermissionKeyORDERLINEITEMWRITE              PermissionKey = "ORDER_LINEITEM_WRITE"
 	PermissionKeyORDERREAD                       PermissionKey = "ORDER_READ"
@@ -5150,6 +5184,8 @@ func (e PermissionKey) Valid() bool {
 		return true
 	case PermissionKeyORDERCUSTOMATTRIBUTESWRITE:
 		return true
+	case PermissionKeyORDERDELIVERYPROMISEWRITE:
+		return true
 	case PermissionKeyORDERFORCECANCEL:
 		return true
 	case PermissionKeyORDERLINEITEMWRITE:
@@ -5323,6 +5359,7 @@ const (
 	PermissionOperationCREATE                PermissionOperation = "CREATE"
 	PermissionOperationCUSTOMATTRIBUTESWRITE PermissionOperation = "CUSTOM_ATTRIBUTES_WRITE"
 	PermissionOperationDELETE                PermissionOperation = "DELETE"
+	PermissionOperationDELIVERYPROMISEWRITE  PermissionOperation = "DELIVERY_PROMISE_WRITE"
 	PermissionOperationFORCECANCEL           PermissionOperation = "FORCE_CANCEL"
 	PermissionOperationLINEITEMWRITE         PermissionOperation = "LINEITEM_WRITE"
 	PermissionOperationLIST                  PermissionOperation = "LIST"
@@ -5352,6 +5389,8 @@ func (e PermissionOperation) Valid() bool {
 	case PermissionOperationCUSTOMATTRIBUTESWRITE:
 		return true
 	case PermissionOperationDELETE:
+		return true
+	case PermissionOperationDELIVERYPROMISEWRITE:
 		return true
 	case PermissionOperationFORCECANCEL:
 		return true
@@ -7528,6 +7567,7 @@ const (
 	RolePermissionsORDERCANCEL                     RolePermissions = "ORDER_CANCEL"
 	RolePermissionsORDERCONSUMERWRITE              RolePermissions = "ORDER_CONSUMER_WRITE"
 	RolePermissionsORDERCUSTOMATTRIBUTESWRITE      RolePermissions = "ORDER_CUSTOM_ATTRIBUTES_WRITE"
+	RolePermissionsORDERDELIVERYPROMISEWRITE       RolePermissions = "ORDER_DELIVERY_PROMISE_WRITE"
 	RolePermissionsORDERFORCECANCEL                RolePermissions = "ORDER_FORCE_CANCEL"
 	RolePermissionsORDERLINEITEMWRITE              RolePermissions = "ORDER_LINEITEM_WRITE"
 	RolePermissionsORDERREAD                       RolePermissions = "ORDER_READ"
@@ -7774,6 +7814,8 @@ func (e RolePermissions) Valid() bool {
 	case RolePermissionsORDERCONSUMERWRITE:
 		return true
 	case RolePermissionsORDERCUSTOMATTRIBUTESWRITE:
+		return true
+	case RolePermissionsORDERDELIVERYPROMISEWRITE:
 		return true
 	case RolePermissionsORDERFORCECANCEL:
 		return true
@@ -8023,6 +8065,7 @@ const (
 	RoleForCreationPermissionsORDERCANCEL                     RoleForCreationPermissions = "ORDER_CANCEL"
 	RoleForCreationPermissionsORDERCONSUMERWRITE              RoleForCreationPermissions = "ORDER_CONSUMER_WRITE"
 	RoleForCreationPermissionsORDERCUSTOMATTRIBUTESWRITE      RoleForCreationPermissions = "ORDER_CUSTOM_ATTRIBUTES_WRITE"
+	RoleForCreationPermissionsORDERDELIVERYPROMISEWRITE       RoleForCreationPermissions = "ORDER_DELIVERY_PROMISE_WRITE"
 	RoleForCreationPermissionsORDERFORCECANCEL                RoleForCreationPermissions = "ORDER_FORCE_CANCEL"
 	RoleForCreationPermissionsORDERLINEITEMWRITE              RoleForCreationPermissions = "ORDER_LINEITEM_WRITE"
 	RoleForCreationPermissionsORDERREAD                       RoleForCreationPermissions = "ORDER_READ"
@@ -8269,6 +8312,8 @@ func (e RoleForCreationPermissions) Valid() bool {
 	case RoleForCreationPermissionsORDERCONSUMERWRITE:
 		return true
 	case RoleForCreationPermissionsORDERCUSTOMATTRIBUTESWRITE:
+		return true
+	case RoleForCreationPermissionsORDERDELIVERYPROMISEWRITE:
 		return true
 	case RoleForCreationPermissionsORDERFORCECANCEL:
 		return true
@@ -8518,6 +8563,7 @@ const (
 	RoleForPatchPermissionsORDERCANCEL                     RoleForPatchPermissions = "ORDER_CANCEL"
 	RoleForPatchPermissionsORDERCONSUMERWRITE              RoleForPatchPermissions = "ORDER_CONSUMER_WRITE"
 	RoleForPatchPermissionsORDERCUSTOMATTRIBUTESWRITE      RoleForPatchPermissions = "ORDER_CUSTOM_ATTRIBUTES_WRITE"
+	RoleForPatchPermissionsORDERDELIVERYPROMISEWRITE       RoleForPatchPermissions = "ORDER_DELIVERY_PROMISE_WRITE"
 	RoleForPatchPermissionsORDERFORCECANCEL                RoleForPatchPermissions = "ORDER_FORCE_CANCEL"
 	RoleForPatchPermissionsORDERLINEITEMWRITE              RoleForPatchPermissions = "ORDER_LINEITEM_WRITE"
 	RoleForPatchPermissionsORDERREAD                       RoleForPatchPermissions = "ORDER_READ"
@@ -8764,6 +8810,8 @@ func (e RoleForPatchPermissions) Valid() bool {
 	case RoleForPatchPermissionsORDERCONSUMERWRITE:
 		return true
 	case RoleForPatchPermissionsORDERCUSTOMATTRIBUTESWRITE:
+		return true
+	case RoleForPatchPermissionsORDERDELIVERYPROMISEWRITE:
 		return true
 	case RoleForPatchPermissionsORDERFORCECANCEL:
 		return true
@@ -9013,6 +9061,7 @@ const (
 	RoleForUpdatePermissionsORDERCANCEL                     RoleForUpdatePermissions = "ORDER_CANCEL"
 	RoleForUpdatePermissionsORDERCONSUMERWRITE              RoleForUpdatePermissions = "ORDER_CONSUMER_WRITE"
 	RoleForUpdatePermissionsORDERCUSTOMATTRIBUTESWRITE      RoleForUpdatePermissions = "ORDER_CUSTOM_ATTRIBUTES_WRITE"
+	RoleForUpdatePermissionsORDERDELIVERYPROMISEWRITE       RoleForUpdatePermissions = "ORDER_DELIVERY_PROMISE_WRITE"
 	RoleForUpdatePermissionsORDERFORCECANCEL                RoleForUpdatePermissions = "ORDER_FORCE_CANCEL"
 	RoleForUpdatePermissionsORDERLINEITEMWRITE              RoleForUpdatePermissions = "ORDER_LINEITEM_WRITE"
 	RoleForUpdatePermissionsORDERREAD                       RoleForUpdatePermissions = "ORDER_READ"
@@ -9259,6 +9308,8 @@ func (e RoleForUpdatePermissions) Valid() bool {
 	case RoleForUpdatePermissionsORDERCONSUMERWRITE:
 		return true
 	case RoleForUpdatePermissionsORDERCUSTOMATTRIBUTESWRITE:
+		return true
+	case RoleForUpdatePermissionsORDERDELIVERYPROMISEWRITE:
 		return true
 	case RoleForUpdatePermissionsORDERFORCECANCEL:
 		return true
@@ -11573,6 +11624,21 @@ func (e SupportedLocale) Valid() bool {
 	}
 }
 
+// Defines values for ThresholdSurchargeCostDetailType.
+const (
+	THRESHOLDSURCHARGE ThresholdSurchargeCostDetailType = "THRESHOLD_SURCHARGE"
+)
+
+// Valid indicates whether the value is a known member of the ThresholdSurchargeCostDetailType enum.
+func (e ThresholdSurchargeCostDetailType) Valid() bool {
+	switch e {
+	case THRESHOLDSURCHARGE:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for TimeTriggeredConfigContextType.
 const (
 	TimeTriggeredConfigContextTypeFACILITY      TimeTriggeredConfigContextType = "FACILITY"
@@ -12256,6 +12322,7 @@ const (
 	UserRoleWithPermissionsPermissionsORDERCANCEL                     UserRoleWithPermissionsPermissions = "ORDER_CANCEL"
 	UserRoleWithPermissionsPermissionsORDERCONSUMERWRITE              UserRoleWithPermissionsPermissions = "ORDER_CONSUMER_WRITE"
 	UserRoleWithPermissionsPermissionsORDERCUSTOMATTRIBUTESWRITE      UserRoleWithPermissionsPermissions = "ORDER_CUSTOM_ATTRIBUTES_WRITE"
+	UserRoleWithPermissionsPermissionsORDERDELIVERYPROMISEWRITE       UserRoleWithPermissionsPermissions = "ORDER_DELIVERY_PROMISE_WRITE"
 	UserRoleWithPermissionsPermissionsORDERFORCECANCEL                UserRoleWithPermissionsPermissions = "ORDER_FORCE_CANCEL"
 	UserRoleWithPermissionsPermissionsORDERLINEITEMWRITE              UserRoleWithPermissionsPermissions = "ORDER_LINEITEM_WRITE"
 	UserRoleWithPermissionsPermissionsORDERREAD                       UserRoleWithPermissionsPermissions = "ORDER_READ"
@@ -12502,6 +12569,8 @@ func (e UserRoleWithPermissionsPermissions) Valid() bool {
 	case UserRoleWithPermissionsPermissionsORDERCONSUMERWRITE:
 		return true
 	case UserRoleWithPermissionsPermissionsORDERCUSTOMATTRIBUTESWRITE:
+		return true
+	case UserRoleWithPermissionsPermissionsORDERDELIVERYPROMISEWRITE:
 		return true
 	case UserRoleWithPermissionsPermissionsORDERFORCECANCEL:
 		return true
@@ -12955,6 +13024,7 @@ const (
 	GetPermissionsParamsKeyORDERCANCEL                     GetPermissionsParamsKey = "ORDER_CANCEL"
 	GetPermissionsParamsKeyORDERCONSUMERWRITE              GetPermissionsParamsKey = "ORDER_CONSUMER_WRITE"
 	GetPermissionsParamsKeyORDERCUSTOMATTRIBUTESWRITE      GetPermissionsParamsKey = "ORDER_CUSTOM_ATTRIBUTES_WRITE"
+	GetPermissionsParamsKeyORDERDELIVERYPROMISEWRITE       GetPermissionsParamsKey = "ORDER_DELIVERY_PROMISE_WRITE"
 	GetPermissionsParamsKeyORDERFORCECANCEL                GetPermissionsParamsKey = "ORDER_FORCE_CANCEL"
 	GetPermissionsParamsKeyORDERLINEITEMWRITE              GetPermissionsParamsKey = "ORDER_LINEITEM_WRITE"
 	GetPermissionsParamsKeyORDERREAD                       GetPermissionsParamsKey = "ORDER_READ"
@@ -13201,6 +13271,8 @@ func (e GetPermissionsParamsKey) Valid() bool {
 	case GetPermissionsParamsKeyORDERCONSUMERWRITE:
 		return true
 	case GetPermissionsParamsKeyORDERCUSTOMATTRIBUTESWRITE:
+		return true
+	case GetPermissionsParamsKeyORDERDELIVERYPROMISEWRITE:
 		return true
 	case GetPermissionsParamsKeyORDERFORCECANCEL:
 		return true
@@ -13904,6 +13976,15 @@ type BulkForceCancelOrderParameter struct {
 	Version int `json:"version"`
 }
 
+// BulkInvalidatePromiseOrderActionParameter Action to invalidate promise orders.
+type BulkInvalidatePromiseOrderActionParameter struct {
+	Name   BulkInvalidatePromiseOrderActionParameterName `json:"name"`
+	Orders []BulkPromiseOrderParameter                   `json:"orders"`
+}
+
+// BulkInvalidatePromiseOrderActionParameterName defines model for BulkInvalidatePromiseOrderActionParameter.Name.
+type BulkInvalidatePromiseOrderActionParameterName string
+
 // BulkOperationError BulkOperationError
 type BulkOperationError struct {
 	Message string                 `json:"message"`
@@ -13956,6 +14037,14 @@ type BulkOrderUnlockActionParameter struct {
 
 // BulkOrderUnlockActionParameterName defines model for BulkOrderUnlockActionParameter.Name.
 type BulkOrderUnlockActionParameterName string
+
+// BulkPromiseOrderParameter BulkPromiseOrderParameter
+type BulkPromiseOrderParameter struct {
+	OrderId string `json:"orderId"`
+
+	// Version Version of the entity to be changed
+	Version int `json:"version"`
+}
 
 // BulkUnlockOrderParameter BulkUnlockOrderParameter
 type BulkUnlockOrderParameter struct {
@@ -16866,6 +16955,17 @@ type InterFacilityConnectionTransferRelativeSurcharge struct {
 // InterFacilityConnectionTransferSurchargeType InterFacilityConnectionTransferSurchargeType
 type InterFacilityConnectionTransferSurchargeType string
 
+// InterFacilityConnectionTransferThresholdSurcharge A surcharge that is charged as the greater of minimumAmount and percentage of the amount it is applied to, for example a cash on delivery fee of at least 5.80 EUR but 3 % of a larger transfer.
+type InterFacilityConnectionTransferThresholdSurcharge struct {
+	Context *[]InterFacilityConnectionSurchargeContext `json:"context,omitempty"`
+
+	// MinimumAmount InterFacilityConnectionsMoney
+	MinimumAmount       InterFacilityConnectionsMoney                `json:"minimumAmount"`
+	Percentage          float32                                      `json:"percentage"`
+	TenantSurchargeType string                                       `json:"tenantSurchargeType"`
+	Type                InterFacilityConnectionTransferSurchargeType `json:"type"`
+}
+
 // InterFacilityConnections InterFacilityConnections
 type InterFacilityConnections struct {
 	InterFacilityConnections []InterFacilityConnection `json:"interFacilityConnections"`
@@ -19257,6 +19357,17 @@ type OrderForceCancelActionParameter struct {
 
 // OrderForceCancelActionParameterName defines model for OrderForceCancelActionParameter.Name.
 type OrderForceCancelActionParameterName string
+
+// OrderInvalidationActionParameter Action to Invalidate an order.
+type OrderInvalidationActionParameter struct {
+	Name OrderInvalidationActionParameterName `json:"name"`
+
+	// Version Version of the entity to be changed
+	Version int `json:"version"`
+}
+
+// OrderInvalidationActionParameterName defines model for OrderInvalidationActionParameter.Name.
+type OrderInvalidationActionParameterName string
 
 // OrderLineItem OrderLineItem
 type OrderLineItem struct {
@@ -26241,6 +26352,40 @@ type TenantSourceId struct {
 	TenantSourceId string `json:"tenantSourceId"`
 }
 
+// ThresholdSurchargeCostDetail A surcharge charged as the greater of minimumAmount and percentage of calculationBaseAmount, so amount is whichever of the two applied.
+type ThresholdSurchargeCostDetail struct {
+	// Amount Money
+	Amount Money `json:"amount"`
+
+	// AppliedToCostDetailIds The same-level cost details that make up calculationBaseAmount. Empty when the base is not itself a cost detail.
+	AppliedToCostDetailIds *[]string `json:"appliedToCostDetailIds,omitempty"`
+
+	// CalculationBaseAmount Money
+	CalculationBaseAmount Money `json:"calculationBaseAmount"`
+
+	// Id Position of this detail within its own costDetails list, referenced by appliedToCostDetailIds
+	//
+	// Example: 0
+	Id string `json:"id"`
+
+	// MinimumAmount Money
+	MinimumAmount Money `json:"minimumAmount"`
+
+	// Percentage The configured percentage
+	//
+	// Example: 3
+	Percentage float32 `json:"percentage"`
+
+	// TenantSurchargeType The tenant surcharge id
+	//
+	// Example: cashOnDelivery
+	TenantSurchargeType string                           `json:"tenantSurchargeType"`
+	Type                ThresholdSurchargeCostDetailType `json:"type"`
+}
+
+// ThresholdSurchargeCostDetailType defines model for ThresholdSurchargeCostDetail.Type.
+type ThresholdSurchargeCostDetailType string
+
 // TimeRange TimeRange
 type TimeRange struct {
 	Capacity *float32 `json:"capacity,omitempty"`
@@ -28136,6 +28281,32 @@ func (t *BulkOrderActionsParameter) MergeBulkOrderUnlockActionParameter(v BulkOr
 	return err
 }
 
+// AsBulkInvalidatePromiseOrderActionParameter returns the union data inside the BulkOrderActionsParameter as a BulkInvalidatePromiseOrderActionParameter
+func (t BulkOrderActionsParameter) AsBulkInvalidatePromiseOrderActionParameter() (BulkInvalidatePromiseOrderActionParameter, error) {
+	var body BulkInvalidatePromiseOrderActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromBulkInvalidatePromiseOrderActionParameter overwrites any union data inside the BulkOrderActionsParameter as the provided BulkInvalidatePromiseOrderActionParameter
+func (t *BulkOrderActionsParameter) FromBulkInvalidatePromiseOrderActionParameter(v BulkInvalidatePromiseOrderActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeBulkInvalidatePromiseOrderActionParameter performs a merge with any union data inside the BulkOrderActionsParameter, using the provided BulkInvalidatePromiseOrderActionParameter
+func (t *BulkOrderActionsParameter) MergeBulkInvalidatePromiseOrderActionParameter(v BulkInvalidatePromiseOrderActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
 func (t BulkOrderActionsParameter) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
@@ -29902,6 +30073,40 @@ func (t *InterFacilityConnection_SurchargesPerTransfer_Item) MergeInterFacilityC
 	return err
 }
 
+// AsInterFacilityConnectionTransferThresholdSurcharge returns the union data inside the InterFacilityConnection_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferThresholdSurcharge
+func (t InterFacilityConnection_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferThresholdSurcharge() (InterFacilityConnectionTransferThresholdSurcharge, error) {
+	var body InterFacilityConnectionTransferThresholdSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferThresholdSurcharge overwrites any union data inside the InterFacilityConnection_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferThresholdSurcharge
+func (t *InterFacilityConnection_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferThresholdSurcharge(v InterFacilityConnectionTransferThresholdSurcharge) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE_TYPE"}`))
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferThresholdSurcharge performs a merge with any union data inside the InterFacilityConnection_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferThresholdSurcharge
+func (t *InterFacilityConnection_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferThresholdSurcharge(v InterFacilityConnectionTransferThresholdSurcharge) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE_TYPE"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
 func (t InterFacilityConnection_SurchargesPerTransfer_Item) Discriminator() (string, error) {
 	var discriminator struct {
 		Discriminator string `json:"type"`
@@ -29920,6 +30125,8 @@ func (t InterFacilityConnection_SurchargesPerTransfer_Item) ValueByDiscriminator
 		return t.AsInterFacilityConnectionTransferAbsoluteSurcharge()
 	case "RELATIVE_SURCHARGE_TYPE":
 		return t.AsInterFacilityConnectionTransferRelativeSurcharge()
+	case "THRESHOLD_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferThresholdSurcharge()
 	default:
 		return nil, errors.New("unknown discriminator value: " + discriminator)
 	}
@@ -30140,6 +30347,40 @@ func (t *InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item
 	return err
 }
 
+// AsInterFacilityConnectionTransferThresholdSurcharge returns the union data inside the InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferThresholdSurcharge
+func (t InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferThresholdSurcharge() (InterFacilityConnectionTransferThresholdSurcharge, error) {
+	var body InterFacilityConnectionTransferThresholdSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferThresholdSurcharge overwrites any union data inside the InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferThresholdSurcharge
+func (t *InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferThresholdSurcharge(v InterFacilityConnectionTransferThresholdSurcharge) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE_TYPE"}`))
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferThresholdSurcharge performs a merge with any union data inside the InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferThresholdSurcharge
+func (t *InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferThresholdSurcharge(v InterFacilityConnectionTransferThresholdSurcharge) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE_TYPE"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
 func (t InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item) Discriminator() (string, error) {
 	var discriminator struct {
 		Discriminator string `json:"type"`
@@ -30158,6 +30399,8 @@ func (t InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item)
 		return t.AsInterFacilityConnectionTransferAbsoluteSurcharge()
 	case "RELATIVE_SURCHARGE_TYPE":
 		return t.AsInterFacilityConnectionTransferRelativeSurcharge()
+	case "THRESHOLD_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferThresholdSurcharge()
 	default:
 		return nil, errors.New("unknown discriminator value: " + discriminator)
 	}
@@ -30241,6 +30484,40 @@ func (t *InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item) 
 	return err
 }
 
+// AsInterFacilityConnectionTransferThresholdSurcharge returns the union data inside the InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferThresholdSurcharge
+func (t InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferThresholdSurcharge() (InterFacilityConnectionTransferThresholdSurcharge, error) {
+	var body InterFacilityConnectionTransferThresholdSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferThresholdSurcharge overwrites any union data inside the InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferThresholdSurcharge
+func (t *InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferThresholdSurcharge(v InterFacilityConnectionTransferThresholdSurcharge) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE_TYPE"}`))
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferThresholdSurcharge performs a merge with any union data inside the InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferThresholdSurcharge
+func (t *InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferThresholdSurcharge(v InterFacilityConnectionTransferThresholdSurcharge) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE_TYPE"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
 func (t InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item) Discriminator() (string, error) {
 	var discriminator struct {
 		Discriminator string `json:"type"`
@@ -30259,6 +30536,8 @@ func (t InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item) V
 		return t.AsInterFacilityConnectionTransferAbsoluteSurcharge()
 	case "RELATIVE_SURCHARGE_TYPE":
 		return t.AsInterFacilityConnectionTransferRelativeSurcharge()
+	case "THRESHOLD_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferThresholdSurcharge()
 	default:
 		return nil, errors.New("unknown discriminator value: " + discriminator)
 	}
@@ -30342,6 +30621,40 @@ func (t *InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransf
 	return err
 }
 
+// AsInterFacilityConnectionTransferThresholdSurcharge returns the union data inside the InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferThresholdSurcharge
+func (t InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferThresholdSurcharge() (InterFacilityConnectionTransferThresholdSurcharge, error) {
+	var body InterFacilityConnectionTransferThresholdSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferThresholdSurcharge overwrites any union data inside the InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferThresholdSurcharge
+func (t *InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferThresholdSurcharge(v InterFacilityConnectionTransferThresholdSurcharge) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE_TYPE"}`))
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferThresholdSurcharge performs a merge with any union data inside the InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferThresholdSurcharge
+func (t *InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferThresholdSurcharge(v InterFacilityConnectionTransferThresholdSurcharge) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE_TYPE"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
 func (t InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item) Discriminator() (string, error) {
 	var discriminator struct {
 		Discriminator string `json:"type"`
@@ -30360,6 +30673,8 @@ func (t InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfe
 		return t.AsInterFacilityConnectionTransferAbsoluteSurcharge()
 	case "RELATIVE_SURCHARGE_TYPE":
 		return t.AsInterFacilityConnectionTransferRelativeSurcharge()
+	case "THRESHOLD_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferThresholdSurcharge()
 	default:
 		return nil, errors.New("unknown discriminator value: " + discriminator)
 	}
@@ -30443,6 +30758,40 @@ func (t *InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer
 	return err
 }
 
+// AsInterFacilityConnectionTransferThresholdSurcharge returns the union data inside the InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferThresholdSurcharge
+func (t InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferThresholdSurcharge() (InterFacilityConnectionTransferThresholdSurcharge, error) {
+	var body InterFacilityConnectionTransferThresholdSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferThresholdSurcharge overwrites any union data inside the InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferThresholdSurcharge
+func (t *InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferThresholdSurcharge(v InterFacilityConnectionTransferThresholdSurcharge) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE_TYPE"}`))
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferThresholdSurcharge performs a merge with any union data inside the InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferThresholdSurcharge
+func (t *InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferThresholdSurcharge(v InterFacilityConnectionTransferThresholdSurcharge) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE_TYPE"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
 func (t InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item) Discriminator() (string, error) {
 	var discriminator struct {
 		Discriminator string `json:"type"`
@@ -30461,6 +30810,8 @@ func (t InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_
 		return t.AsInterFacilityConnectionTransferAbsoluteSurcharge()
 	case "RELATIVE_SURCHARGE_TYPE":
 		return t.AsInterFacilityConnectionTransferRelativeSurcharge()
+	case "THRESHOLD_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferThresholdSurcharge()
 	default:
 		return nil, errors.New("unknown discriminator value: " + discriminator)
 	}
@@ -30544,6 +30895,40 @@ func (t *InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item
 	return err
 }
 
+// AsInterFacilityConnectionTransferThresholdSurcharge returns the union data inside the InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferThresholdSurcharge
+func (t InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferThresholdSurcharge() (InterFacilityConnectionTransferThresholdSurcharge, error) {
+	var body InterFacilityConnectionTransferThresholdSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferThresholdSurcharge overwrites any union data inside the InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferThresholdSurcharge
+func (t *InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferThresholdSurcharge(v InterFacilityConnectionTransferThresholdSurcharge) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE_TYPE"}`))
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferThresholdSurcharge performs a merge with any union data inside the InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferThresholdSurcharge
+func (t *InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferThresholdSurcharge(v InterFacilityConnectionTransferThresholdSurcharge) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE_TYPE"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
 func (t InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item) Discriminator() (string, error) {
 	var discriminator struct {
 		Discriminator string `json:"type"`
@@ -30562,6 +30947,8 @@ func (t InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item)
 		return t.AsInterFacilityConnectionTransferAbsoluteSurcharge()
 	case "RELATIVE_SURCHARGE_TYPE":
 		return t.AsInterFacilityConnectionTransferRelativeSurcharge()
+	case "THRESHOLD_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferThresholdSurcharge()
 	default:
 		return nil, errors.New("unknown discriminator value: " + discriminator)
 	}
@@ -30645,6 +31032,40 @@ func (t *InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) 
 	return err
 }
 
+// AsInterFacilityConnectionTransferThresholdSurcharge returns the union data inside the InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item as a InterFacilityConnectionTransferThresholdSurcharge
+func (t InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) AsInterFacilityConnectionTransferThresholdSurcharge() (InterFacilityConnectionTransferThresholdSurcharge, error) {
+	var body InterFacilityConnectionTransferThresholdSurcharge
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromInterFacilityConnectionTransferThresholdSurcharge overwrites any union data inside the InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item as the provided InterFacilityConnectionTransferThresholdSurcharge
+func (t *InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) FromInterFacilityConnectionTransferThresholdSurcharge(v InterFacilityConnectionTransferThresholdSurcharge) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE_TYPE"}`))
+	t.union = b
+	return err
+}
+
+// MergeInterFacilityConnectionTransferThresholdSurcharge performs a merge with any union data inside the InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item, using the provided InterFacilityConnectionTransferThresholdSurcharge
+func (t *InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) MergeInterFacilityConnectionTransferThresholdSurcharge(v InterFacilityConnectionTransferThresholdSurcharge) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE_TYPE"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
 func (t InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) Discriminator() (string, error) {
 	var discriminator struct {
 		Discriminator string `json:"type"`
@@ -30663,6 +31084,8 @@ func (t InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) V
 		return t.AsInterFacilityConnectionTransferAbsoluteSurcharge()
 	case "RELATIVE_SURCHARGE_TYPE":
 		return t.AsInterFacilityConnectionTransferRelativeSurcharge()
+	case "THRESHOLD_SURCHARGE_TYPE":
+		return t.AsInterFacilityConnectionTransferThresholdSurcharge()
 	default:
 		return nil, errors.New("unknown discriminator value: " + discriminator)
 	}
@@ -31157,6 +31580,32 @@ func (t *OrderActionsParameter) FromOrderUnlockActionParameter(v OrderUnlockActi
 
 // MergeOrderUnlockActionParameter performs a merge with any union data inside the OrderActionsParameter, using the provided OrderUnlockActionParameter
 func (t *OrderActionsParameter) MergeOrderUnlockActionParameter(v OrderUnlockActionParameter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsOrderInvalidationActionParameter returns the union data inside the OrderActionsParameter as a OrderInvalidationActionParameter
+func (t OrderActionsParameter) AsOrderInvalidationActionParameter() (OrderInvalidationActionParameter, error) {
+	var body OrderInvalidationActionParameter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOrderInvalidationActionParameter overwrites any union data inside the OrderActionsParameter as the provided OrderInvalidationActionParameter
+func (t *OrderActionsParameter) FromOrderInvalidationActionParameter(v OrderInvalidationActionParameter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeOrderInvalidationActionParameter performs a merge with any union data inside the OrderActionsParameter, using the provided OrderInvalidationActionParameter
+func (t *OrderActionsParameter) MergeOrderInvalidationActionParameter(v OrderInvalidationActionParameter) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -33037,6 +33486,40 @@ func (t *SourcingOptionTransfer_CostDetails_Item) MergeRelativeSurchargeCostDeta
 	return err
 }
 
+// AsThresholdSurchargeCostDetail returns the union data inside the SourcingOptionTransfer_CostDetails_Item as a ThresholdSurchargeCostDetail
+func (t SourcingOptionTransfer_CostDetails_Item) AsThresholdSurchargeCostDetail() (ThresholdSurchargeCostDetail, error) {
+	var body ThresholdSurchargeCostDetail
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromThresholdSurchargeCostDetail overwrites any union data inside the SourcingOptionTransfer_CostDetails_Item as the provided ThresholdSurchargeCostDetail
+func (t *SourcingOptionTransfer_CostDetails_Item) FromThresholdSurchargeCostDetail(v ThresholdSurchargeCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE"}`))
+	t.union = b
+	return err
+}
+
+// MergeThresholdSurchargeCostDetail performs a merge with any union data inside the SourcingOptionTransfer_CostDetails_Item, using the provided ThresholdSurchargeCostDetail
+func (t *SourcingOptionTransfer_CostDetails_Item) MergeThresholdSurchargeCostDetail(v ThresholdSurchargeCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
 func (t SourcingOptionTransfer_CostDetails_Item) Discriminator() (string, error) {
 	var discriminator struct {
 		Discriminator string `json:"type"`
@@ -33061,6 +33544,8 @@ func (t SourcingOptionTransfer_CostDetails_Item) ValueByDiscriminator() (interfa
 		return t.AsOverflowCostDetail()
 	case "RELATIVE_SURCHARGE":
 		return t.AsRelativeSurchargeCostDetail()
+	case "THRESHOLD_SURCHARGE":
+		return t.AsThresholdSurchargeCostDetail()
 	default:
 		return nil, errors.New("unknown discriminator value: " + discriminator)
 	}
@@ -33246,6 +33731,40 @@ func (t *SourcingOptionsTransferPackagingInformation_CostDetails_Item) MergeRela
 	return err
 }
 
+// AsThresholdSurchargeCostDetail returns the union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item as a ThresholdSurchargeCostDetail
+func (t SourcingOptionsTransferPackagingInformation_CostDetails_Item) AsThresholdSurchargeCostDetail() (ThresholdSurchargeCostDetail, error) {
+	var body ThresholdSurchargeCostDetail
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromThresholdSurchargeCostDetail overwrites any union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item as the provided ThresholdSurchargeCostDetail
+func (t *SourcingOptionsTransferPackagingInformation_CostDetails_Item) FromThresholdSurchargeCostDetail(v ThresholdSurchargeCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE"}`))
+	t.union = b
+	return err
+}
+
+// MergeThresholdSurchargeCostDetail performs a merge with any union data inside the SourcingOptionsTransferPackagingInformation_CostDetails_Item, using the provided ThresholdSurchargeCostDetail
+func (t *SourcingOptionsTransferPackagingInformation_CostDetails_Item) MergeThresholdSurchargeCostDetail(v ThresholdSurchargeCostDetail) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	b, err = runtime.JSONMerge(b, []byte(`{"type":"THRESHOLD_SURCHARGE"}`))
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
 func (t SourcingOptionsTransferPackagingInformation_CostDetails_Item) Discriminator() (string, error) {
 	var discriminator struct {
 		Discriminator string `json:"type"`
@@ -33270,6 +33789,8 @@ func (t SourcingOptionsTransferPackagingInformation_CostDetails_Item) ValueByDis
 		return t.AsOverflowCostDetail()
 	case "RELATIVE_SURCHARGE":
 		return t.AsRelativeSurchargeCostDetail()
+	case "THRESHOLD_SURCHARGE":
+		return t.AsThresholdSurchargeCostDetail()
 	default:
 		return nil, errors.New("unknown discriminator value: " + discriminator)
 	}
