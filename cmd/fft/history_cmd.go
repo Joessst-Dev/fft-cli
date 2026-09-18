@@ -35,8 +35,8 @@ The record is ~/.local/state/fft/history.jsonl (or under $XDG_STATE_HOME), mode
 before it records. It never leaves the machine.
 
 Recording is off in headless mode (FFT_BASE_URL and friends, with no --project
-naming a configured project) unless FFT_HISTORY=on is set. FFT_HISTORY=off, or settings.noHistory: true in the config file, switches
-it off everywhere.`
+naming a configured project) unless FFT_HISTORY=on is set. FFT_HISTORY=off, or
+settings.noHistory: true in the config file, switches it off everywhere.`
 
 const historyListLong = `List the most recent requests, newest first.
 
