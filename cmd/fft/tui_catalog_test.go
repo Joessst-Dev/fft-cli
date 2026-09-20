@@ -48,10 +48,12 @@ var _ = Describe("the TUI's catalog of operations", func() {
 		root *cobra.Command
 		cat  *cliCatalog
 		ops  map[string]tui.Operation
+		deps *Deps
 	)
 
 	BeforeEach(func() {
 		c := newCLI()
+		deps = c.deps
 		root = newRootCmd(c.deps)
 		cat = newCLICatalog(newRootCmd(c.deps))
 		ops = catalogOps(cat)
@@ -397,32 +399,28 @@ var _ = Describe("the TUI's catalog of operations", func() {
 
 	When("the command is generated", func() {
 		It("offers a flag per parameter, marking the required ones and their values", func() {
-			var (
-				found bool
-				op    api.Operation
-				param api.Param
-			)
-			for _, candidate := range api.Operations() {
-				if ops[candidate.ID].Command.Curated {
-					continue
-				}
-				for _, p := range candidate.Params {
-					if p.Required && len(p.Enum) > 0 {
-						op, param, found = candidate, p, true
-					}
-				}
-				if found {
-					break
-				}
+			// Built here rather than found by scanning the live spec for a required,
+			// enum-constrained parameter: that made the assertion depend on an
+			// upstream spec property (that such a parameter exists somewhere) rather
+			// than on fft's own flag-rendering behavior, and it silently had nothing
+			// to find once the spec's one example was widened away from an enum.
+			op := api.Operation{
+				ID:     "testRequiredEnumParam",
+				Method: http.MethodGet,
+				Path:   "/api/test",
+				Params: []api.Param{
+					{Name: "status", In: api.InQuery, Required: true, Type: api.TypeString, Enum: []string{"A", "B"}},
+				},
 			}
-			Expect(found).To(BeTrue(), "the spec has no generated operation with a required enum parameter")
 
-			cmd := ops[op.ID].Command
+			generated := newGeneratedCmd(deps, op, reservedFlags(root))
+			cmd := describeCommand(generated, op, map[string]bool{})
 			Expect(cmd.Curated).To(BeFalse())
 			Expect(cmd.Args).To(BeEmpty())
-			f := flagNamed(cmd, kebab(param.Name))
+
+			f := flagNamed(cmd, kebab(op.Params[0].Name))
 			Expect(f.Required).To(BeTrue())
-			Expect(f.Enum).To(Equal(param.Enum))
+			Expect(f.Enum).To(Equal(op.Params[0].Enum))
 		})
 
 		It("takes the body's requirement from the spec, and its example from the spec's sample", func() {
