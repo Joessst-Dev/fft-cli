@@ -2609,6 +2609,66 @@ func (e InterFacilityConnectionPackageTypeSpecificShipmentRestrictionType) Valid
 	}
 }
 
+// Defines values for InterFacilityConnectionPricingMeasurementUnit.
+const (
+	InterFacilityConnectionPricingMeasurementUnitCUBICMETER InterFacilityConnectionPricingMeasurementUnit = "CUBIC_METER"
+	InterFacilityConnectionPricingMeasurementUnitGRAM       InterFacilityConnectionPricingMeasurementUnit = "GRAM"
+)
+
+// Valid indicates whether the value is a known member of the InterFacilityConnectionPricingMeasurementUnit enum.
+func (e InterFacilityConnectionPricingMeasurementUnit) Valid() bool {
+	switch e {
+	case InterFacilityConnectionPricingMeasurementUnitCUBICMETER:
+		return true
+	case InterFacilityConnectionPricingMeasurementUnitGRAM:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for InterFacilityConnectionPricingQuantity.
+const (
+	ACTUALWEIGHT           InterFacilityConnectionPricingQuantity = "ACTUAL_WEIGHT"
+	LOADINGMETEREQUIVALENT InterFacilityConnectionPricingQuantity = "LOADING_METER_EQUIVALENT"
+	VOLUMETRICWEIGHT       InterFacilityConnectionPricingQuantity = "VOLUMETRIC_WEIGHT"
+)
+
+// Valid indicates whether the value is a known member of the InterFacilityConnectionPricingQuantity enum.
+func (e InterFacilityConnectionPricingQuantity) Valid() bool {
+	switch e {
+	case ACTUALWEIGHT:
+		return true
+	case LOADINGMETEREQUIVALENT:
+		return true
+	case VOLUMETRICWEIGHT:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for InterFacilityConnectionPricingUnit.
+const (
+	InterFacilityConnectionPricingUnitCUBICMETER   InterFacilityConnectionPricingUnit = "CUBIC_METER"
+	InterFacilityConnectionPricingUnitGRAM         InterFacilityConnectionPricingUnit = "GRAM"
+	InterFacilityConnectionPricingUnitLOADINGMETER InterFacilityConnectionPricingUnit = "LOADING_METER"
+)
+
+// Valid indicates whether the value is a known member of the InterFacilityConnectionPricingUnit enum.
+func (e InterFacilityConnectionPricingUnit) Valid() bool {
+	switch e {
+	case InterFacilityConnectionPricingUnitCUBICMETER:
+		return true
+	case InterFacilityConnectionPricingUnitGRAM:
+		return true
+	case InterFacilityConnectionPricingUnitLOADINGMETER:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for InterFacilityConnectionSurchargeContextTypes.
 const (
 	InterFacilityConnectionSurchargeContextTypesCATEGORY         InterFacilityConnectionSurchargeContextTypes = "CATEGORY"
@@ -16550,7 +16610,10 @@ type InterFacilityConnection struct {
 	NonDeliveryDays                         *[]NonDeliveryDaysPerCountryAndProvince                          `json:"nonDeliveryDays,omitempty"`
 	PackageTypeSpecificShipmentRestrictions *[]InterFacilityConnectionPackageTypeSpecificShipmentRestriction `json:"packageTypeSpecificShipmentRestrictions,omitempty"`
 	PackagingUnitsByContexts                *[]PackagingUnitsByContext                                       `json:"packagingUnitsByContexts,omitempty"`
-	SourceFacilityRef                       string                                                           `json:"sourceFacilityRef"`
+
+	// PricingPerTransfer Prices the transfer as one shipment instead of per packaging unit, for carriers whose tariff charges the aggregated weight of all packaging units of a transfer (e.g. UPS Italy). When this is configured, the base price is resolved once per transfer from `pricing` and the prices configured on the packaging units of that transfer are ignored. Surcharges are unaffected: those configured per packaging unit and those in `surchargesPerTransfer` both still apply, each on its own level.
+	PricingPerTransfer *InterFacilityConnectionTransferPricing `json:"pricingPerTransfer,omitempty"`
+	SourceFacilityRef  string                                  `json:"sourceFacilityRef"`
 
 	// SurchargesPerTransfer This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
 	SurchargesPerTransfer *[]InterFacilityConnection_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
@@ -16593,6 +16656,15 @@ type InterFacilityConnectionContext struct {
 
 // InterFacilityConnectionContextTypes InterFacilityConnectionContextTypes
 type InterFacilityConnectionContextTypes string
+
+// InterFacilityConnectionCostCoefficient The configured rate charged per measurement unit, applied to the measured value.
+type InterFacilityConnectionCostCoefficient struct {
+	// MeasurementUnit The unit of measurement for the cost coefficient.
+	MeasurementUnit InterFacilityConnectionPricingMeasurementUnit `json:"measurementUnit"`
+
+	// Value InterFacilityConnectionsMoney
+	Value InterFacilityConnectionsMoney `json:"value"`
+}
 
 // InterFacilityConnectionCustomerTarget InterFacilityConnectionCustomerTarget
 type InterFacilityConnectionCustomerTarget = InterFacilityConnectionBaseTarget
@@ -16651,6 +16723,60 @@ type InterFacilityConnectionPackageTypeSpecificShipmentRestriction struct {
 // InterFacilityConnectionPackageTypeSpecificShipmentRestrictionType InterFacilityConnectionPackageTypeSpecificShipmentRestrictionType
 type InterFacilityConnectionPackageTypeSpecificShipmentRestrictionType string
 
+// InterFacilityConnectionPricesByTier InterFacilityConnectionPricesByTier
+type InterFacilityConnectionPricesByTier struct {
+	// Price InterFacilityConnectionsMoney
+	Price InterFacilityConnectionsMoney `json:"price"`
+
+	// UpperThreshold The threshold in pricingUnit up to which this price applies.
+	//
+	// Example: 15000
+	UpperThreshold int64 `json:"upperThreshold"`
+}
+
+// InterFacilityConnectionPricingBasis InterFacilityConnectionPricingBasis
+type InterFacilityConnectionPricingBasis struct {
+	// PricingQuantities The quantities compared, each converted to pricingUnit; the highest one determines the chargeable amount.
+	PricingQuantities []InterFacilityConnectionPricingQuantity `json:"pricingQuantities"`
+
+	// PricingUnit The unit the pricing quantities are converted to and priced in.
+	PricingUnit InterFacilityConnectionPricingUnit `json:"pricingUnit"`
+}
+
+// InterFacilityConnectionPricingByZone InterFacilityConnectionPricingByZone
+type InterFacilityConnectionPricingByZone struct {
+	// OverflowFactor Additional costs in case the price definition is exceeded.
+	OverflowFactor *InterFacilityConnectionPricingOverflowFactor `json:"overflowFactor,omitempty"`
+
+	// Prices The prices of this zone, by upper threshold.
+	Prices []InterFacilityConnectionPricesByTier `json:"prices"`
+
+	// Zone The shipping zone for which the pricing applies. Please provide the ISO 3166-2 country code, followed by a dash and the first digits of the postal code, e.g. DE-50 for Cologne, Germany.
+	//
+	// Example: IT-20
+	Zone *string `json:"zone,omitempty"`
+}
+
+// InterFacilityConnectionPricingMeasurementUnit The unit of measurement for the cost coefficient.
+type InterFacilityConnectionPricingMeasurementUnit string
+
+// InterFacilityConnectionPricingOverflowFactor Additional costs in case the price definition is exceeded.
+type InterFacilityConnectionPricingOverflowFactor struct {
+	// Factor The factor appliable when the highest configured threshold is exceeded.
+	//
+	// Example: 1.5
+	Factor float32 `json:"factor"`
+
+	// Price InterFacilityConnectionsMoney
+	Price InterFacilityConnectionsMoney `json:"price"`
+}
+
+// InterFacilityConnectionPricingQuantity A quantity of the transfer that can determine the chargeable amount.
+type InterFacilityConnectionPricingQuantity string
+
+// InterFacilityConnectionPricingUnit The unit the pricing quantities are converted to and priced in.
+type InterFacilityConnectionPricingUnit string
+
 // InterFacilityConnectionSupplierTarget InterFacilityConnectionSupplierTarget
 type InterFacilityConnectionSupplierTarget struct {
 	ExcludedFacilityGroupRefs *[]string `json:"excludedFacilityGroupRefs,omitempty"`
@@ -16695,12 +16821,15 @@ type InterFacilityConnectionToCustomerForCreation struct {
 	FallbackCosts *[]InterFacilityConnectionDeliveryCost `json:"fallbackCosts,omitempty"`
 
 	// FallbackTransitTime CarrierTransitTime
-	FallbackTransitTime                     *CarrierTransitTime                                                        `json:"fallbackTransitTime,omitempty"`
-	GeneralShipmentRestrictions             *[]InterFacilityConnectionGeneralShipmentRestriction                       `json:"generalShipmentRestrictions,omitempty"`
-	NonDeliveryDays                         *[]NonDeliveryDaysPerCountryAndProvince                                    `json:"nonDeliveryDays,omitempty"`
-	PackageTypeSpecificShipmentRestrictions *[]InterFacilityConnectionPackageTypeSpecificShipmentRestriction           `json:"packageTypeSpecificShipmentRestrictions,omitempty"`
-	PackagingUnitsByContexts                *[]PackagingUnitsByContext                                                 `json:"packagingUnitsByContexts,omitempty"`
-	SurchargesPerTransfer                   *[]InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
+	FallbackTransitTime                     *CarrierTransitTime                                              `json:"fallbackTransitTime,omitempty"`
+	GeneralShipmentRestrictions             *[]InterFacilityConnectionGeneralShipmentRestriction             `json:"generalShipmentRestrictions,omitempty"`
+	NonDeliveryDays                         *[]NonDeliveryDaysPerCountryAndProvince                          `json:"nonDeliveryDays,omitempty"`
+	PackageTypeSpecificShipmentRestrictions *[]InterFacilityConnectionPackageTypeSpecificShipmentRestriction `json:"packageTypeSpecificShipmentRestrictions,omitempty"`
+	PackagingUnitsByContexts                *[]PackagingUnitsByContext                                       `json:"packagingUnitsByContexts,omitempty"`
+
+	// PricingPerTransfer Prices the transfer as one shipment instead of per packaging unit, for carriers whose tariff charges the aggregated weight of all packaging units of a transfer (e.g. UPS Italy). When this is configured, the base price is resolved once per transfer from `pricing` and the prices configured on the packaging units of that transfer are ignored. Surcharges are unaffected: those configured per packaging unit and those in `surchargesPerTransfer` both still apply, each on its own level.
+	PricingPerTransfer    *InterFacilityConnectionTransferPricing                                    `json:"pricingPerTransfer,omitempty"`
+	SurchargesPerTransfer *[]InterFacilityConnectionToCustomerForCreation_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
 
 	// Target InterFacilityConnectionCustomerTarget
 	Target InterFacilityConnectionCustomerTarget `json:"target"`
@@ -16738,12 +16867,15 @@ type InterFacilityConnectionToCustomerForUpdate struct {
 	FallbackCosts *[]InterFacilityConnectionDeliveryCost `json:"fallbackCosts,omitempty"`
 
 	// FallbackTransitTime CarrierTransitTime
-	FallbackTransitTime                     *CarrierTransitTime                                                      `json:"fallbackTransitTime,omitempty"`
-	GeneralShipmentRestrictions             *[]InterFacilityConnectionGeneralShipmentRestriction                     `json:"generalShipmentRestrictions,omitempty"`
-	NonDeliveryDays                         *[]NonDeliveryDaysPerCountryAndProvince                                  `json:"nonDeliveryDays,omitempty"`
-	PackageTypeSpecificShipmentRestrictions *[]InterFacilityConnectionPackageTypeSpecificShipmentRestriction         `json:"packageTypeSpecificShipmentRestrictions,omitempty"`
-	PackagingUnitsByContexts                *[]PackagingUnitsByContext                                               `json:"packagingUnitsByContexts,omitempty"`
-	SurchargesPerTransfer                   *[]InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
+	FallbackTransitTime                     *CarrierTransitTime                                              `json:"fallbackTransitTime,omitempty"`
+	GeneralShipmentRestrictions             *[]InterFacilityConnectionGeneralShipmentRestriction             `json:"generalShipmentRestrictions,omitempty"`
+	NonDeliveryDays                         *[]NonDeliveryDaysPerCountryAndProvince                          `json:"nonDeliveryDays,omitempty"`
+	PackageTypeSpecificShipmentRestrictions *[]InterFacilityConnectionPackageTypeSpecificShipmentRestriction `json:"packageTypeSpecificShipmentRestrictions,omitempty"`
+	PackagingUnitsByContexts                *[]PackagingUnitsByContext                                       `json:"packagingUnitsByContexts,omitempty"`
+
+	// PricingPerTransfer Prices the transfer as one shipment instead of per packaging unit, for carriers whose tariff charges the aggregated weight of all packaging units of a transfer (e.g. UPS Italy). When this is configured, the base price is resolved once per transfer from `pricing` and the prices configured on the packaging units of that transfer are ignored. Surcharges are unaffected: those configured per packaging unit and those in `surchargesPerTransfer` both still apply, each on its own level.
+	PricingPerTransfer    *InterFacilityConnectionTransferPricing                                  `json:"pricingPerTransfer,omitempty"`
+	SurchargesPerTransfer *[]InterFacilityConnectionToCustomerForUpdate_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
 
 	// Target InterFacilityConnectionCustomerTarget
 	Target InterFacilityConnectionCustomerTarget `json:"target"`
@@ -16782,12 +16914,15 @@ type InterFacilityConnectionToManagedFacilityForCreation struct {
 	FallbackCosts *[]InterFacilityConnectionDeliveryCost `json:"fallbackCosts,omitempty"`
 
 	// FallbackTransitTime CarrierTransitTime
-	FallbackTransitTime                     *CarrierTransitTime                                                               `json:"fallbackTransitTime,omitempty"`
-	GeneralShipmentRestrictions             *[]InterFacilityConnectionGeneralShipmentRestriction                              `json:"generalShipmentRestrictions,omitempty"`
-	NonDeliveryDays                         *[]NonDeliveryDaysPerCountryAndProvince                                           `json:"nonDeliveryDays,omitempty"`
-	PackageTypeSpecificShipmentRestrictions *[]InterFacilityConnectionPackageTypeSpecificShipmentRestriction                  `json:"packageTypeSpecificShipmentRestrictions,omitempty"`
-	PackagingUnitsByContexts                *[]PackagingUnitsByContext                                                        `json:"packagingUnitsByContexts,omitempty"`
-	SurchargesPerTransfer                   *[]InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
+	FallbackTransitTime                     *CarrierTransitTime                                              `json:"fallbackTransitTime,omitempty"`
+	GeneralShipmentRestrictions             *[]InterFacilityConnectionGeneralShipmentRestriction             `json:"generalShipmentRestrictions,omitempty"`
+	NonDeliveryDays                         *[]NonDeliveryDaysPerCountryAndProvince                          `json:"nonDeliveryDays,omitempty"`
+	PackageTypeSpecificShipmentRestrictions *[]InterFacilityConnectionPackageTypeSpecificShipmentRestriction `json:"packageTypeSpecificShipmentRestrictions,omitempty"`
+	PackagingUnitsByContexts                *[]PackagingUnitsByContext                                       `json:"packagingUnitsByContexts,omitempty"`
+
+	// PricingPerTransfer Prices the transfer as one shipment instead of per packaging unit, for carriers whose tariff charges the aggregated weight of all packaging units of a transfer (e.g. UPS Italy). When this is configured, the base price is resolved once per transfer from `pricing` and the prices configured on the packaging units of that transfer are ignored. Surcharges are unaffected: those configured per packaging unit and those in `surchargesPerTransfer` both still apply, each on its own level.
+	PricingPerTransfer    *InterFacilityConnectionTransferPricing                                           `json:"pricingPerTransfer,omitempty"`
+	SurchargesPerTransfer *[]InterFacilityConnectionToManagedFacilityForCreation_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
 
 	// Target InterFacilityConnectionManagedFacilityTarget
 	Target InterFacilityConnectionManagedFacilityTarget `json:"target"`
@@ -16825,12 +16960,15 @@ type InterFacilityConnectionToManagedFacilityForUpdate struct {
 	FallbackCosts *[]InterFacilityConnectionDeliveryCost `json:"fallbackCosts,omitempty"`
 
 	// FallbackTransitTime CarrierTransitTime
-	FallbackTransitTime                     *CarrierTransitTime                                                             `json:"fallbackTransitTime,omitempty"`
-	GeneralShipmentRestrictions             *[]InterFacilityConnectionGeneralShipmentRestriction                            `json:"generalShipmentRestrictions,omitempty"`
-	NonDeliveryDays                         *[]NonDeliveryDaysPerCountryAndProvince                                         `json:"nonDeliveryDays,omitempty"`
-	PackageTypeSpecificShipmentRestrictions *[]InterFacilityConnectionPackageTypeSpecificShipmentRestriction                `json:"packageTypeSpecificShipmentRestrictions,omitempty"`
-	PackagingUnitsByContexts                *[]PackagingUnitsByContext                                                      `json:"packagingUnitsByContexts,omitempty"`
-	SurchargesPerTransfer                   *[]InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
+	FallbackTransitTime                     *CarrierTransitTime                                              `json:"fallbackTransitTime,omitempty"`
+	GeneralShipmentRestrictions             *[]InterFacilityConnectionGeneralShipmentRestriction             `json:"generalShipmentRestrictions,omitempty"`
+	NonDeliveryDays                         *[]NonDeliveryDaysPerCountryAndProvince                          `json:"nonDeliveryDays,omitempty"`
+	PackageTypeSpecificShipmentRestrictions *[]InterFacilityConnectionPackageTypeSpecificShipmentRestriction `json:"packageTypeSpecificShipmentRestrictions,omitempty"`
+	PackagingUnitsByContexts                *[]PackagingUnitsByContext                                       `json:"packagingUnitsByContexts,omitempty"`
+
+	// PricingPerTransfer Prices the transfer as one shipment instead of per packaging unit, for carriers whose tariff charges the aggregated weight of all packaging units of a transfer (e.g. UPS Italy). When this is configured, the base price is resolved once per transfer from `pricing` and the prices configured on the packaging units of that transfer are ignored. Surcharges are unaffected: those configured per packaging unit and those in `surchargesPerTransfer` both still apply, each on its own level.
+	PricingPerTransfer    *InterFacilityConnectionTransferPricing                                         `json:"pricingPerTransfer,omitempty"`
+	SurchargesPerTransfer *[]InterFacilityConnectionToManagedFacilityForUpdate_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
 
 	// Target InterFacilityConnectionManagedFacilityTarget
 	Target InterFacilityConnectionManagedFacilityTarget `json:"target"`
@@ -16869,12 +17007,15 @@ type InterFacilityConnectionToSupplierForCreation struct {
 	FallbackCosts *[]InterFacilityConnectionDeliveryCost `json:"fallbackCosts,omitempty"`
 
 	// FallbackTransitTime CarrierTransitTime
-	FallbackTransitTime                     *CarrierTransitTime                                                        `json:"fallbackTransitTime,omitempty"`
-	GeneralShipmentRestrictions             *[]InterFacilityConnectionGeneralShipmentRestriction                       `json:"generalShipmentRestrictions,omitempty"`
-	NonDeliveryDays                         *[]NonDeliveryDaysPerCountryAndProvince                                    `json:"nonDeliveryDays,omitempty"`
-	PackageTypeSpecificShipmentRestrictions *[]InterFacilityConnectionPackageTypeSpecificShipmentRestriction           `json:"packageTypeSpecificShipmentRestrictions,omitempty"`
-	PackagingUnitsByContexts                *[]PackagingUnitsByContext                                                 `json:"packagingUnitsByContexts,omitempty"`
-	SurchargesPerTransfer                   *[]InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
+	FallbackTransitTime                     *CarrierTransitTime                                              `json:"fallbackTransitTime,omitempty"`
+	GeneralShipmentRestrictions             *[]InterFacilityConnectionGeneralShipmentRestriction             `json:"generalShipmentRestrictions,omitempty"`
+	NonDeliveryDays                         *[]NonDeliveryDaysPerCountryAndProvince                          `json:"nonDeliveryDays,omitempty"`
+	PackageTypeSpecificShipmentRestrictions *[]InterFacilityConnectionPackageTypeSpecificShipmentRestriction `json:"packageTypeSpecificShipmentRestrictions,omitempty"`
+	PackagingUnitsByContexts                *[]PackagingUnitsByContext                                       `json:"packagingUnitsByContexts,omitempty"`
+
+	// PricingPerTransfer Prices the transfer as one shipment instead of per packaging unit, for carriers whose tariff charges the aggregated weight of all packaging units of a transfer (e.g. UPS Italy). When this is configured, the base price is resolved once per transfer from `pricing` and the prices configured on the packaging units of that transfer are ignored. Surcharges are unaffected: those configured per packaging unit and those in `surchargesPerTransfer` both still apply, each on its own level.
+	PricingPerTransfer    *InterFacilityConnectionTransferPricing                                    `json:"pricingPerTransfer,omitempty"`
+	SurchargesPerTransfer *[]InterFacilityConnectionToSupplierForCreation_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
 
 	// Target InterFacilityConnectionSupplierTarget
 	Target InterFacilityConnectionSupplierTarget `json:"target"`
@@ -16912,12 +17053,15 @@ type InterFacilityConnectionToSupplierForUpdate struct {
 	FallbackCosts *[]InterFacilityConnectionDeliveryCost `json:"fallbackCosts,omitempty"`
 
 	// FallbackTransitTime CarrierTransitTime
-	FallbackTransitTime                     *CarrierTransitTime                                                      `json:"fallbackTransitTime,omitempty"`
-	GeneralShipmentRestrictions             *[]InterFacilityConnectionGeneralShipmentRestriction                     `json:"generalShipmentRestrictions,omitempty"`
-	NonDeliveryDays                         *[]NonDeliveryDaysPerCountryAndProvince                                  `json:"nonDeliveryDays,omitempty"`
-	PackageTypeSpecificShipmentRestrictions *[]InterFacilityConnectionPackageTypeSpecificShipmentRestriction         `json:"packageTypeSpecificShipmentRestrictions,omitempty"`
-	PackagingUnitsByContexts                *[]PackagingUnitsByContext                                               `json:"packagingUnitsByContexts,omitempty"`
-	SurchargesPerTransfer                   *[]InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
+	FallbackTransitTime                     *CarrierTransitTime                                              `json:"fallbackTransitTime,omitempty"`
+	GeneralShipmentRestrictions             *[]InterFacilityConnectionGeneralShipmentRestriction             `json:"generalShipmentRestrictions,omitempty"`
+	NonDeliveryDays                         *[]NonDeliveryDaysPerCountryAndProvince                          `json:"nonDeliveryDays,omitempty"`
+	PackageTypeSpecificShipmentRestrictions *[]InterFacilityConnectionPackageTypeSpecificShipmentRestriction `json:"packageTypeSpecificShipmentRestrictions,omitempty"`
+	PackagingUnitsByContexts                *[]PackagingUnitsByContext                                       `json:"packagingUnitsByContexts,omitempty"`
+
+	// PricingPerTransfer Prices the transfer as one shipment instead of per packaging unit, for carriers whose tariff charges the aggregated weight of all packaging units of a transfer (e.g. UPS Italy). When this is configured, the base price is resolved once per transfer from `pricing` and the prices configured on the packaging units of that transfer are ignored. Surcharges are unaffected: those configured per packaging unit and those in `surchargesPerTransfer` both still apply, each on its own level.
+	PricingPerTransfer    *InterFacilityConnectionTransferPricing                                  `json:"pricingPerTransfer,omitempty"`
+	SurchargesPerTransfer *[]InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item `json:"surchargesPerTransfer,omitempty"`
 
 	// Target InterFacilityConnectionSupplierTarget
 	Target InterFacilityConnectionSupplierTarget `json:"target"`
@@ -16942,6 +17086,43 @@ type InterFacilityConnectionTransferAbsoluteSurcharge struct {
 	Context             *[]InterFacilityConnectionSurchargeContext   `json:"context,omitempty"`
 	TenantSurchargeType string                                       `json:"tenantSurchargeType"`
 	Type                InterFacilityConnectionTransferSurchargeType `json:"type"`
+}
+
+// InterFacilityConnectionTransferPricing Prices the transfer as one shipment instead of per packaging unit, for carriers whose tariff charges the aggregated weight of all packaging units of a transfer (e.g. UPS Italy). When this is configured, the base price is resolved once per transfer from `pricing` and the prices configured on the packaging units of that transfer are ignored. Surcharges are unaffected: those configured per packaging unit and those in `surchargesPerTransfer` both still apply, each on its own level.
+type InterFacilityConnectionTransferPricing struct {
+	// CostCoefficient The configured rate charged per measurement unit, applied to the measured value.
+	CostCoefficient *InterFacilityConnectionCostCoefficient `json:"costCoefficient,omitempty"`
+
+	// LdmToWeightFactor The grams equivalent to 1 loading meter, converting between weight and loading meters.
+	//
+	// Example: 1850
+	LdmToWeightFactor *float32 `json:"ldmToWeightFactor,omitempty"`
+
+	// MaxVolumetricWeight Caps the chargeable volumetric weight in grams.
+	//
+	// Example: 30000
+	MaxVolumetricWeight *int `json:"maxVolumetricWeight,omitempty"`
+
+	// Pricing The price matrix of this connection, by zone.
+	Pricing []InterFacilityConnectionPricingByZone `json:"pricing"`
+
+	// PricingBasis InterFacilityConnectionPricingBasis
+	PricingBasis *InterFacilityConnectionPricingBasis `json:"pricingBasis,omitempty"`
+
+	// VolumeBufferInPercent The buffer in percent applied to the aggregated volume of all packaging units.
+	//
+	// Example: 10
+	VolumeBufferInPercent *int `json:"volumeBufferInPercent,omitempty"`
+
+	// VolumetricWeightFactor Converts the aggregated volume of all packaging units into a volumetric weight.
+	//
+	// Example: 0.2
+	VolumetricWeightFactor *float32 `json:"volumetricWeightFactor,omitempty"`
+
+	// WeightToVolumeFactor Converts the aggregated weight of all packaging units into a volume. Required when pricingUnit is CUBIC_METER.
+	//
+	// Example: 0.005
+	WeightToVolumeFactor *float32 `json:"weightToVolumeFactor,omitempty"`
 }
 
 // InterFacilityConnectionTransferRelativeSurcharge InterFacilityConnectionTransferRelativeSurcharge
