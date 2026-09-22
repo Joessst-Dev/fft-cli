@@ -46001,6 +46001,8 @@ components:
           maxItems: 500
           minItems: 0
           type: array
+        pricingPerTransfer:
+          $ref: '#/components/schemas/InterFacilityConnectionTransferPricing'
         sourceFacilityRef:
           type: string
         surchargesPerTransfer:
@@ -46097,6 +46099,21 @@ components:
       type: string
       title: InterFacilityConnectionContextTypes
       description: InterFacilityConnectionContextTypes
+    InterFacilityConnectionCostCoefficient:
+      additionalProperties: false
+      description: >-
+        The configured rate charged per measurement unit, applied to the
+        measured value.
+      properties:
+        measurementUnit:
+          $ref: '#/components/schemas/InterFacilityConnectionPricingMeasurementUnit'
+        value:
+          $ref: '#/components/schemas/InterFacilityConnectionsMoney'
+      required:
+        - value
+        - measurementUnit
+      title: InterFacilityConnectionCostCoefficient
+      type: object
     InterFacilityConnectionCustomerTarget:
       allOf:
         - $ref: '#/components/schemas/InterFacilityConnectionBaseTarget'
@@ -46207,6 +46224,8 @@ components:
           maxItems: 500
           minItems: 0
           type: array
+        pricingPerTransfer:
+          $ref: '#/components/schemas/InterFacilityConnectionTransferPricing'
         surchargesPerTransfer:
           items:
             discriminator:
@@ -46295,6 +46314,8 @@ components:
           maxItems: 500
           minItems: 0
           type: array
+        pricingPerTransfer:
+          $ref: '#/components/schemas/InterFacilityConnectionTransferPricing'
         surchargesPerTransfer:
           items:
             discriminator:
@@ -46397,6 +46418,110 @@ components:
       type: string
       title: InterFacilityConnectionPackageTypeSpecificShipmentRestrictionType
       description: InterFacilityConnectionPackageTypeSpecificShipmentRestrictionType
+    InterFacilityConnectionPricesByTier:
+      additionalProperties: false
+      properties:
+        price:
+          $ref: '#/components/schemas/InterFacilityConnectionsMoney'
+        upperThreshold:
+          description: The threshold in pricingUnit up to which this price applies.
+          example: 15000
+          format: int64
+          minimum: 0
+          type: integer
+      required:
+        - upperThreshold
+        - price
+      title: InterFacilityConnectionPricesByTier
+      type: object
+      description: InterFacilityConnectionPricesByTier
+    InterFacilityConnectionPricingBasis:
+      additionalProperties: false
+      properties:
+        pricingQuantities:
+          description: >-
+            The quantities compared, each converted to pricingUnit; the highest
+            one determines the chargeable amount.
+          items:
+            $ref: '#/components/schemas/InterFacilityConnectionPricingQuantity'
+          maxItems: 3
+          minItems: 1
+          type: array
+        pricingUnit:
+          $ref: '#/components/schemas/InterFacilityConnectionPricingUnit'
+      required:
+        - pricingUnit
+        - pricingQuantities
+      title: InterFacilityConnectionPricingBasis
+      type: object
+      description: InterFacilityConnectionPricingBasis
+    InterFacilityConnectionPricingByZone:
+      additionalProperties: false
+      properties:
+        overflowFactor:
+          $ref: '#/components/schemas/InterFacilityConnectionPricingOverflowFactor'
+        prices:
+          description: The prices of this zone, by upper threshold.
+          items:
+            $ref: '#/components/schemas/InterFacilityConnectionPricesByTier'
+          maxItems: 500
+          minItems: 1
+          type: array
+        zone:
+          description: >-
+            The shipping zone for which the pricing applies. Please provide the
+            ISO 3166-2 country code, followed by a dash and the first digits of
+            the postal code, e.g. DE-50 for Cologne, Germany.
+          example: IT-20
+          pattern: ^[A-Z]{2}-\d+$
+          type: string
+      required:
+        - prices
+      title: InterFacilityConnectionPricingByZone
+      type: object
+      description: InterFacilityConnectionPricingByZone
+    InterFacilityConnectionPricingMeasurementUnit:
+      description: The unit of measurement for the cost coefficient.
+      enum:
+        - GRAM
+        - CUBIC_METER
+      title: InterFacilityConnectionPricingMeasurementUnit
+      type: string
+    InterFacilityConnectionPricingOverflowFactor:
+      additionalProperties: false
+      description: Additional costs in case the price definition is exceeded.
+      properties:
+        factor:
+          description: >-
+            The factor appliable when the highest configured threshold is
+            exceeded.
+          example: 1.5
+          format: float
+          minimum: 0
+          type: number
+        price:
+          $ref: '#/components/schemas/InterFacilityConnectionsMoney'
+      required:
+        - price
+        - factor
+      title: InterFacilityConnectionPricingOverflowFactor
+      type: object
+    InterFacilityConnectionPricingQuantity:
+      description: A quantity of the transfer that can determine the chargeable amount.
+      enum:
+        - ACTUAL_WEIGHT
+        - VOLUMETRIC_WEIGHT
+        - LOADING_METER_EQUIVALENT
+      title: InterFacilityConnectionPricingQuantity
+      type: string
+    InterFacilityConnectionPricingUnit:
+      description: The unit the pricing quantities are converted to and priced in.
+      enum:
+        - GRAM
+        - CUBIC_METER
+        - LOADING_METER
+      title: InterFacilityConnectionPricingUnit
+      type: string
     InterFacilityConnections:
       additionalProperties: false
       properties:
@@ -46539,6 +46664,8 @@ components:
           maxItems: 500
           minItems: 0
           type: array
+        pricingPerTransfer:
+          $ref: '#/components/schemas/InterFacilityConnectionTransferPricing'
         surchargesPerTransfer:
           items:
             discriminator:
@@ -46630,6 +46757,8 @@ components:
           maxItems: 500
           minItems: 0
           type: array
+        pricingPerTransfer:
+          $ref: '#/components/schemas/InterFacilityConnectionTransferPricing'
         surchargesPerTransfer:
           items:
             discriminator:
@@ -46724,6 +46853,8 @@ components:
           maxItems: 500
           minItems: 0
           type: array
+        pricingPerTransfer:
+          $ref: '#/components/schemas/InterFacilityConnectionTransferPricing'
         surchargesPerTransfer:
           items:
             discriminator:
@@ -46815,6 +46946,8 @@ components:
           maxItems: 500
           minItems: 0
           type: array
+        pricingPerTransfer:
+          $ref: '#/components/schemas/InterFacilityConnectionTransferPricing'
         surchargesPerTransfer:
           items:
             discriminator:
@@ -46909,6 +47042,8 @@ components:
           maxItems: 500
           minItems: 0
           type: array
+        pricingPerTransfer:
+          $ref: '#/components/schemas/InterFacilityConnectionTransferPricing'
         surchargesPerTransfer:
           items:
             discriminator:
@@ -47000,6 +47135,8 @@ components:
           maxItems: 500
           minItems: 0
           type: array
+        pricingPerTransfer:
+          $ref: '#/components/schemas/InterFacilityConnectionTransferPricing'
         surchargesPerTransfer:
           items:
             discriminator:
@@ -47062,6 +47199,68 @@ components:
       title: InterFacilityConnectionTransferAbsoluteSurcharge
       type: object
       description: InterFacilityConnectionTransferAbsoluteSurcharge
+    InterFacilityConnectionTransferPricing:
+      additionalProperties: false
+      description: >-
+        Prices the transfer as one shipment instead of per packaging unit, for
+        carriers whose tariff charges the aggregated weight of all packaging
+        units of a transfer (e.g. UPS Italy). When this is configured, the base
+        price is resolved once per transfer from `pricing` and the prices
+        configured on the packaging units of that transfer are ignored.
+        Surcharges are unaffected: those configured per packaging unit and those
+        in `surchargesPerTransfer` both still apply, each on its own level.
+      properties:
+        costCoefficient:
+          $ref: '#/components/schemas/InterFacilityConnectionCostCoefficient'
+        ldmToWeightFactor:
+          description: >-
+            The grams equivalent to 1 loading meter, converting between weight
+            and loading meters.
+          example: 1850
+          format: float
+          minimum: 0
+          type: number
+        maxVolumetricWeight:
+          description: Caps the chargeable volumetric weight in grams.
+          example: 30000
+          minimum: 0
+          type: integer
+        pricing:
+          description: The price matrix of this connection, by zone.
+          items:
+            $ref: '#/components/schemas/InterFacilityConnectionPricingByZone'
+          maxItems: 500
+          minItems: 1
+          type: array
+        pricingBasis:
+          $ref: '#/components/schemas/InterFacilityConnectionPricingBasis'
+        volumeBufferInPercent:
+          description: >-
+            The buffer in percent applied to the aggregated volume of all
+            packaging units.
+          example: 10
+          minimum: 0
+          type: integer
+        volumetricWeightFactor:
+          description: >-
+            Converts the aggregated volume of all packaging units into a
+            volumetric weight.
+          example: 0.2
+          format: float
+          minimum: 0
+          type: number
+        weightToVolumeFactor:
+          description: >-
+            Converts the aggregated weight of all packaging units into a volume.
+            Required when pricingUnit is CUBIC_METER.
+          example: 0.005
+          format: float
+          minimum: 0
+          type: number
+      required:
+        - pricing
+      title: InterFacilityConnectionTransferPricing
+      type: object
     InterFacilityConnectionTransferRelativeSurcharge:
       properties:
         context:
@@ -60539,8 +60738,9 @@ components:
       properties:
         pricingQuantities:
           description: >-
-            The quantities compared, each converted to pricingUnit; the highest
-            one determines the chargeable amount.
+            The physical quantities compared, each converted to pricingUnit; the
+            highest one determines the chargeable amount. At least one must be
+            given.
           items:
             $ref: '#/components/schemas/PackagingUnitPricingQuantity'
           maxItems: 3
@@ -60564,12 +60764,13 @@ components:
           label: ALPHA
     PackagingUnitPricingQuantity:
       description: >-
-        The quantities compared, each converted to pricingUnit; the highest one
-        determines the chargeable amount.
+        The physical quantities compared, each converted to pricingUnit; the
+        highest one determines the chargeable amount. At least one must be
+        given.
       enum:
-        - ACTUAL_WEIGHT
-        - VOLUMETRIC_WEIGHT
-        - LOADING_METER_EQUIVALENT
+        - WEIGHT
+        - VOLUME
+        - LOADING_METERS
       title: PackagingUnitPricingQuantity
       type: string
     PackagingUnitPricingUnit:
