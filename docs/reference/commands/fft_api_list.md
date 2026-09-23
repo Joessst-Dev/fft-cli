@@ -10,7 +10,7 @@ List the API's operations
 List the operations of the fulfillmenttools API.
 
 The list comes from the spec, not from the network: it works offline and needs no
-project. 562 operations is more than a screen, so filter.
+project. 566 operations is more than a screen, so filter.
 
   fft api list --tag picking
   fft api list --search pickjob
