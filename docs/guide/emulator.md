@@ -19,6 +19,9 @@ remote endpoint.
 Run `fft emulator --help` and `fft emulator emit --help` for the flags. The notes below
 are the things `--help` will not tell you.
 
+A person can also start and stop it from the Projects screen of `fft tui`, which shows its
+output as it runs and the recipe below. You should run `fft emulator` yourself instead.
+
 ## Installing it
 
 The emulator is a **component** — a separate binary fft ships but does not bundle, so that

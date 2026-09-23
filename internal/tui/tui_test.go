@@ -157,13 +157,16 @@ var _ = Describe("the UI", func() {
 
 			h.press("7")
 			Expect(h.view()).To(ContainSubstring("[7 Roles]"))
+
+			h.press("8")
+			Expect(h.view()).To(ContainSubstring("[8 Components]"))
 		})
 
 		It("cycles with tab and shift+tab, and ctrl+p goes back to Projects", func() {
 			h.press("tab")
 			Expect(h.view()).To(ContainSubstring("[2 Operations]"))
 			h.press("shift+tab", "shift+tab")
-			Expect(h.view()).To(ContainSubstring("[7 Roles]"))
+			Expect(h.view()).To(ContainSubstring("[8 Components]"))
 			h.press("ctrl+p")
 			Expect(h.view()).To(ContainSubstring("[1 Projects]"))
 		})
@@ -804,7 +807,7 @@ var _ = Describe("the UI", func() {
 				view := h.view()
 				Expect(view).To(ContainSubstring(own))
 				Expect(view).NotTo(ContainSubstring("y copy"))
-				Expect(view).NotTo(ContainSubstring("1-7/tab screens"))
+				Expect(view).NotTo(ContainSubstring("1-8/tab screens"))
 				Expect(view).NotTo(ContainSubstring("all keys"), "? does not open the legend here")
 				Expect(view).NotTo(ContainSubstring("$ fft"), "the status bar offers a command to copy")
 			},

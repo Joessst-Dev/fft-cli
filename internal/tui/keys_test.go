@@ -99,8 +99,8 @@ var _ = Describe("the key hint", func() {
 
 		Expect(h.hintRows()).To(Equal([]string{
 			strings.Repeat("─", 120),
-			"↑/↓ select • enter use • r read-only on/off • d remove • R refresh token • a add • ctrl+r reload",
-			"1-7/tab screens • ctrl+p project • i running • y copy • q quit • ? all keys",
+			"↑/↓ select • enter use • r read-only on/off • d remove • R refresh token • a add • ctrl+r reload • e emulator",
+			"1-8/tab screens • ctrl+p project • i running • y copy • q quit • ? all keys",
 		}))
 	})
 
@@ -158,7 +158,7 @@ var _ = Describe("the key hint", func() {
 
 	It("draws the keys plainly without colour, and within the terminal with it", func() {
 		Expect(h.m.View().Content).To(Equal(h.view()), "no escape sequences without colour")
-		Expect(h.view()).To(ContainSubstring("1-7/tab screens • ctrl+p project"))
+		Expect(h.view()).To(ContainSubstring("1-8/tab screens • ctrl+p project"))
 
 		coloured := newHarness(Options{Color: true})
 		coloured.loaded(twoProjects, validToken)
@@ -289,7 +289,7 @@ var _ = Describe("the key legend", func() {
 		Expect(h.view()).NotTo(ContainSubstring("↑/↓ scroll"))
 
 		seen := map[bool]bool{}
-		for height := 30; height >= 10; height-- {
+		for height := 44; height >= 10; height-- {
 			h.send(tea.WindowSizeMsg{Width: 120, Height: height})
 			scrolls := strings.Contains(h.view(), "↓ more")
 			seen[scrolls] = true
@@ -513,6 +513,11 @@ var _ = Describe("the key legend", func() {
 			"templateKeys":  func(m *app) []legendSection { return m.templates.legend() },
 			"historyKeys":   func(m *app) []legendSection { return m.history.legend() },
 			"roleKeys":      func(m *app) []legendSection { return m.roles.legend() },
+			"componentKeys": func(m *app) []legendSection { return m.components.legend() },
+			"installPromptKeys": func(m *app) []legendSection {
+				return m.components.legend()
+			},
+			"emulatorKeys": func(m *app) []legendSection { return m.projects.legend() },
 		}
 
 		It("lists every key a screen gives help text for, in that screen's own legend", func() {

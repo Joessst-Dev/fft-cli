@@ -200,6 +200,12 @@ func (h *harness) ask(id RunID, text, confirm string) uint64 {
 	return h.questions
 }
 
+// chunk has run id produce output, as the runner reports a streaming run's.
+func (h *harness) chunk(id RunID, text string) {
+	h.send(runEventMsg{ID: id, State: RunRunning, Invocation: h.r.invocation(id), At: h.now,
+		Chunk: &Chunk{Stderr: true, Bytes: []byte(text)}})
+}
+
 func ok(stdout string) Result { return Result{ExitCode: 0, Stdout: []byte(stdout)} }
 
 func failed(code int, stderr string) Result {

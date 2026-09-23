@@ -38,6 +38,7 @@ type projectKeys struct {
 	refresh  key.Binding
 	add      key.Binding
 	reload   key.Binding
+	emulator key.Binding
 }
 
 func newProjectKeys() projectKeys {
@@ -50,6 +51,7 @@ func newProjectKeys() projectKeys {
 		refresh:  key.NewBinding(key.WithKeys("R"), key.WithHelp("R", "refresh token")),
 		add:      key.NewBinding(key.WithKeys("a"), key.WithHelp("a", "add")),
 		reload:   key.NewBinding(key.WithKeys("ctrl+r"), key.WithHelp("ctrl+r", "reload")),
+		emulator: key.NewBinding(key.WithKeys("e"), key.WithHelp("e", "emulator")),
 	}
 }
 
@@ -70,10 +72,20 @@ type projectsScreen struct {
 
 	dialog dialog
 	form   *addForm
+
+	// emulator runs the local offline tenant. It is a pane of this screen rather
+	// than a screen of its own: what it offers is another thing to work against.
+	emulator *emulatorPane
 }
 
 func newProjectsScreen(s *session, st styles) *projectsScreen {
-	return &projectsScreen{s: s, st: st, keys: newProjectKeys()}
+	return &projectsScreen{s: s, st: st, keys: newProjectKeys(), emulator: newEmulatorPane(s, st)}
+}
+
+// components is where the emulator pane learns whether the emulator is installed;
+// see [componentSource].
+func (p *projectsScreen) setComponents(src componentSource) {
+	p.emulator.components = src
 }
 
 // init loads the list and the current project's credential state.
@@ -121,8 +133,20 @@ func (p *projectsScreen) update(msg tea.Msg) tea.Cmd {
 
 // listKey handles a key on the list, with neither a dialog nor the form open.
 func (p *projectsScreen) listKey(msg tea.KeyPressMsg) tea.Cmd {
+	if p.emulator.open {
+		// The pane is what is drawn, so it is what the keys act on: an a here must not
+		// open the add form over a list nobody can see.
+		return p.emulator.update(msg)
+	}
 	row, ok := p.selected()
 	switch {
+	case key.Matches(msg, p.keys.emulator):
+		p.emulator.open = true
+		// Read once, so the pane can say whether the emulator is installed.
+		if p.emulator.components != nil {
+			return p.emulator.components.want()
+		}
+		return nil
 	case key.Matches(msg, p.keys.up):
 		p.cursor--
 		p.selected()
@@ -498,12 +522,15 @@ func (p *projectsScreen) bindings() []key.Binding {
 	case p.form != nil:
 		return p.form.bindings()
 	}
+	if p.emulator.open {
+		return p.emulator.bindings()
+	}
 	k := p.keys
 	if p.s.headless {
 		// The changes are refused here, so the help does not offer them.
-		return []key.Binding{k.up, k.refresh, k.reload}
+		return []key.Binding{k.up, k.refresh, k.reload, k.emulator}
 	}
-	return []key.Binding{k.up, k.use, k.readOnly, k.remove, k.refresh, k.add, k.reload}
+	return []key.Binding{k.up, k.use, k.readOnly, k.remove, k.refresh, k.add, k.reload, k.emulator}
 }
 
 func (p *projectsScreen) legend() []legendSection {
@@ -516,11 +543,12 @@ func (p *projectsScreen) legend() []legendSection {
 		{of: k.refresh, desc: "sign in again now (fft auth refresh)"},
 		{of: k.add, desc: "add a project"},
 		{of: k.reload, desc: "read the list and the credentials again"},
+		{of: k.emulator, desc: "run the local offline emulator"},
 	}}
 	if p.s.headless {
 		main.note = "Running from the environment: enter, u, r, d and a change nothing here."
-		// The add form never opens here.
-		return []legendSection{main}
+		// The add form never opens here; the emulator pane still does.
+		return []legendSection{main, p.emulator.legend()}
 	}
 	f := newFormKeys()
 	return []legendSection{main, {
@@ -533,7 +561,7 @@ func (p *projectsScreen) legend() []legendSection {
 			{of: f.submit, desc: "add the project (so does enter on the last field)"},
 			{of: f.cancel, desc: "cancel"},
 		},
-	}}
+	}, p.emulator.legend()}
 }
 
 func (p *projectsScreen) equivalent() shellCommand {
@@ -542,6 +570,8 @@ func (p *projectsScreen) equivalent() shellCommand {
 		return p.dialog.equivalent()
 	case p.form != nil:
 		return commandLine(p.form.args())
+	case p.emulator.open:
+		return p.emulator.equivalent()
 	}
 	if row, ok := p.selected(); ok && !p.s.headless {
 		return p.useAction(row.Name).display
@@ -558,6 +588,9 @@ func (p *projectsScreen) view(width, height int) string {
 	}
 	if p.form != nil {
 		return p.form.view(width)
+	}
+	if p.emulator.open {
+		return p.emulator.view(width, height)
 	}
 
 	lines := []string{st.title.Render("Projects")}

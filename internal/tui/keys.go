@@ -29,7 +29,7 @@ func newGlobalKeys() globalKeys {
 	}
 	return globalKeys{
 		screens:  screens,
-		next:     key.NewBinding(key.WithKeys("tab"), key.WithHelp("1-7/tab", "screens")),
+		next:     key.NewBinding(key.WithKeys("tab"), key.WithHelp("1-8/tab", "screens")),
 		prev:     key.NewBinding(key.WithKeys("shift+tab")),
 		projects: key.NewBinding(key.WithKeys("ctrl+p"), key.WithHelp("ctrl+p", "project")),
 		help:     key.NewBinding(key.WithKeys("?"), key.WithHelp("?", "all keys")),

@@ -268,6 +268,12 @@ type uiRun struct {
 	// request, which the request history leaves out. It is the run's, never the
 	// session's: see [tui.Invocation.Background].
 	background bool
+
+	// stream says the UI is showing this run's output as it is produced rather
+	// than waiting for the result. It is what lets the run dispatch to a component,
+	// whose output is worth nothing to a screen that will only be handed it once the
+	// process has ended; see [Deps.guard].
+	stream bool
 }
 
 // forRun returns the Deps one concurrent run of the command tree should use,
@@ -295,8 +301,10 @@ func (d *Deps) forRun(in io.Reader, ui uiRun) *Deps {
 
 		historyMaxBytes: d.historyMaxBytes,
 		// Read-only once discovered, and discovering it costs a directory walk per
-		// run. A component installed from inside the UI therefore appears only in the
-		// next session, which is also when its commands could first be run.
+		// run, so the scan is shared rather than repeated. It is a snapshot, and the
+		// TUI's runner replaces the one it hands each run after an install, an upgrade
+		// or a removal ([cliRunner.rescanComponents]) — which is what lets a component
+		// installed from inside the UI be listed, and run, without restarting it.
 		Components: d.Components,
 
 		// Per run. A run inside the UI has no terminal of its own: nothing may prompt,
