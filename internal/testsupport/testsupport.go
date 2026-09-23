@@ -2,8 +2,8 @@
 // packages. Nothing outside a _test.go file imports it.
 //
 // It exists for assertions that more than one suite needs and that mean
-// something different per platform. Two things live here today, and they are
-// unlike each other:
+// something different per platform. A few things live here today, and they
+// are unlike each other:
 //
 // The mode assertions. fft writes its config, its credentials fallback and its
 // update cache owner-only; four suites check that; and on Windows none of those
@@ -15,11 +15,12 @@
 // written down on the docs site, under guide/auth — a skipped security
 // assertion must not be the only record that the guarantee is weaker.
 //
-// Making a directory unwritable. This one is not a mode-bits problem and does
-// not skip anywhere. The spec it serves pins atomicfile's contract — a save that
-// cannot complete leaves the previous file intact — which every platform is
-// meant to keep. Windows only needs a different lever to pull: a deny ACE
-// instead of a mode bit.
+// Making a directory unwritable, or unreadable. Neither is a mode-bits problem
+// and neither skips anywhere. The specs they serve pin contracts every platform
+// is meant to keep — atomicfile's "a save that cannot complete leaves the
+// previous file intact", and a component registry rescan's "a root that exists
+// but cannot be listed must not look like one that was never there". Windows
+// only needs a different lever to pull: a deny ACE instead of a mode bit.
 package testsupport
 
 import (
@@ -110,5 +111,36 @@ func expectNoFileCanBeCreatedIn(dir string) {
 				"the spec that called this would be asserting a failure that never happens",
 			dir, filepath.Base(name)))
 	}
+	gomega.Expect(err).To(gomega.MatchError(fs.ErrPermission))
+}
+
+// MakeUnreadableDir denies the right to list dir's contents for the rest of the
+// spec, leaving dir itself in place — for a spec that needs a real read failure
+// to tell apart from a directory that was never there. The right is restored on
+// cleanup, or the suite's own temp-directory teardown would be unable to remove
+// dir.
+//
+// Like MakeUnwritableDir, it proves the lever worked before handing control
+// back: a platform where it quietly did nothing would otherwise fail the
+// calling spec for the wrong reason, deep inside the code under test.
+func MakeUnreadableDir(dir string) {
+	ginkgo.GinkgoHelper()
+
+	makeUnreadable(dir)
+	expectDirCannotBeListed(dir)
+}
+
+func expectDirCannotBeListed(dir string) {
+	ginkgo.GinkgoHelper()
+
+	_, err := os.ReadDir(dir)
+	if err == nil {
+		ginkgo.Fail(fmt.Sprintf(
+			"%s was supposed to be unreadable, but listing it succeeded — "+
+				"the spec that called this would be asserting a failure that never happens",
+			dir))
+	}
+	gomega.Expect(err).NotTo(gomega.MatchError(fs.ErrNotExist),
+		"the calling spec needs a real read failure, not one indistinguishable from a missing directory")
 	gomega.Expect(err).To(gomega.MatchError(fs.ErrPermission))
 }

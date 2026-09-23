@@ -181,12 +181,10 @@ var _ = Describe("the component registry inside the TUI", func() {
 		// machine with no components looks like, and produces no Problem — so it
 		// would not be caught by rescanComponents' check and is not what this spec is
 		// about. What must not replace a good scan with an empty one is a root that
-		// exists but fails to list: replacing the directory with a regular file forces
-		// os.ReadDir to fail with something other than fs.ErrNotExist, which chmod
-		// would not reliably do when the suite runs as root.
+		// exists but fails to list; breakComponentRoot forces exactly that, by
+		// whatever means holds on the platform running this spec.
 		root := before.Root()
-		Expect(os.RemoveAll(root)).To(Succeed())
-		Expect(os.WriteFile(root, []byte("not a directory"), 0o600)).To(Succeed())
+		breakComponentRoot(root)
 
 		r.rescanComponents()
 
