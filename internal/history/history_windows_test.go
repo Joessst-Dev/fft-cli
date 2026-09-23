@@ -26,7 +26,7 @@ var _ = Describe("a history file another process holds open", func() {
 
 		var data []byte
 		for i := range 60 {
-			line, err := json.Marshal(entry("prod", fmt.Sprintf("op%03d", i), i%60))
+			line, err := json.Marshal(entry("prod", fmt.Sprintf("op%03d", i), i))
 			Expect(err).NotTo(HaveOccurred())
 			data = append(append(data, line...), '\n')
 		}
