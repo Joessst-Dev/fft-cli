@@ -48,6 +48,16 @@ type Invocation struct {
 	// It is left out of the request history, which is a record of what the user
 	// sent, and whose counts the Operations list shows.
 	Background bool
+
+	// Stream asks for the run's output as it is produced, on [RunEvent.Chunk],
+	// rather than only in the [Result] at the end. A run that does not end on its
+	// own — the emulator, which serves until it is stopped — shows nothing at all
+	// without it.
+	//
+	// It is opt-in because every chunk is an event, and the runner's event buffer
+	// backs up onto the runs rather than onto the UI: streaming every run would
+	// make a `--all` over a large tenant pay for output nobody is watching.
+	Stream bool
 }
 
 // RunState is where an invocation is in its life.
@@ -117,6 +127,34 @@ type RunEvent struct {
 	// goes on. The run waits until [Runner.Answer] answers it, or until it is
 	// cancelled, which answers no.
 	Question *Question
+
+	// Chunk, on a [RunRunning] event, is output the run has produced since the
+	// last one. It arrives only for an [Invocation] that asked to Stream, and it
+	// says nothing about the run's state: a chunk is not a start, and a consumer
+	// that times a run must leave its clock alone.
+	Chunk *Chunk
+}
+
+// Chunk is part of a streaming run's output, as it was written.
+//
+// It is a copy the runner is done with, so a consumer may keep it. What arrives
+// here is also still counted towards the capped [Result] the run ends with, so a
+// screen that shows chunks live and a screen that shows the result at the end
+// agree about what was written.
+type Chunk struct {
+	// Stderr says the bytes were written to standard error rather than standard
+	// output. Each stream is coalesced on its own, and their chunks interleave in
+	// the order the runner flushed them, which is not necessarily the order the
+	// command wrote them in.
+	Stderr bool
+
+	// Bytes is the output, which is not split on any boundary: a chunk may end
+	// mid-line, and mid-rune.
+	Bytes []byte
+
+	// Dropped says output was discarded before this chunk because the UI was not
+	// keeping up. A run is never held up to deliver its output.
+	Dropped bool
 }
 
 // Question is what a running command asks the user, in its own words: the

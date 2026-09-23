@@ -98,6 +98,11 @@ type session struct {
 	// The first is the one asked; the others wait their turn.
 	questions []*question
 
+	// streams are the callbacks watching a streaming run's output, by run. A run
+	// that asked to stream reports its output as it goes, and only whoever started
+	// it knows what to do with it. Dropped when the run ends.
+	streams map[RunID]func(*Chunk)
+
 	// declined are the runs the user answered no, until the run's caller has
 	// heard how it ended: a command told no fails, and that failure is the
 	// user's choice rather than something that went wrong.
@@ -172,6 +177,7 @@ func newSession(opts Options, st styles) *session {
 		startedHeadless: opts.Headless,
 		runs:            newRunList(),
 		done:            make(map[RunID]func(Result) tea.Cmd),
+		streams:         make(map[RunID]func(*Chunk)),
 		declined:        make(map[RunID]bool),
 	}
 }
@@ -265,6 +271,15 @@ func (s *session) displayFor(args []string, project string) shellCommand {
 	return commandLine(append(slices.Clone(args), "--project", project))
 }
 
+// watch has f called with every chunk of run id's output, until the run ends. It
+// is only ever called for an [Invocation] that asked to Stream.
+func (s *session) watch(id RunID, f func(*Chunk)) {
+	if id == 0 {
+		return
+	}
+	s.streams[id] = f
+}
+
 // start runs a, and calls done with its result once it has finished.
 func (s *session) start(a action, done func(Result) tea.Cmd) tea.Cmd {
 	_, cmd := s.launch(a, done)
@@ -304,12 +319,21 @@ func (s *session) cleanup() {
 // wants to happen next.
 func (s *session) handle(ev RunEvent) tea.Cmd {
 	s.runs.update(ev)
+	if ev.Chunk != nil {
+		// Output, not a change of state: it goes to whoever asked to watch this run,
+		// and nothing else about the run has happened.
+		if watch := s.streams[ev.ID]; watch != nil {
+			watch(ev.Chunk)
+		}
+		return nil
+	}
 	if ev.Question != nil {
 		s.ask(ev)
 	}
 	if ev.State != RunDone {
 		return nil
 	}
+	delete(s.streams, ev.ID)
 	// A run that has ended is asking nothing any more: it was cancelled, or timed
 	// out, while its question waited.
 	s.questions = slices.DeleteFunc(s.questions, func(q *question) bool { return q.run == ev.ID })

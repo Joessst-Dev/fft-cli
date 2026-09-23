@@ -117,7 +117,7 @@ var _ = Describe("the Operations screen", func() {
 			h.search("pick")
 
 			Expect(h.view()).To(ContainSubstring("enter done"))
-			Expect(h.view()).NotTo(ContainSubstring("1-7/tab screens"))
+			Expect(h.view()).NotTo(ContainSubstring("1-8/tab screens"))
 			Expect(h.view()).NotTo(ContainSubstring("$ fft"))
 		})
 

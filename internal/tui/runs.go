@@ -69,6 +69,11 @@ func (l *runList) update(ev RunEvent) {
 	case RunQueued:
 		e.queued = ev.At
 	case RunRunning:
+		if ev.Chunk != nil {
+			// Output while it runs: it started when it said so first, and how long it
+			// has been going is not reset by having something to say.
+			return
+		}
 		if ev.Question != nil {
 			// Asked while it runs: it started when it said so first.
 			e.asking = true

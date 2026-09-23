@@ -36,12 +36,17 @@ import (
 // rather than an annotation; it gates itself with [Deps.guardOperation].
 func (d *Deps) guard(cmd *cobra.Command, args []string) error {
 	if name, ok := cmd.Annotations[annotationComponent]; ok {
-		if d.ui != nil {
-			// A component is another process, and it would inherit the terminal the UI
-			// is drawing on. Refused here, inside the run, so that nothing the runner
-			// concluded about the command line beforehand can be what lets it through.
+		if d.ui != nil && !d.ui.stream {
+			// A component is another process whose output arrives while it runs, and a
+			// run the UI is not streaming hands that output back only once it has ended
+			// — which for a server is never. So it is refused unless the UI said it is
+			// watching: the emulator pane does, and it is drawn from what the child
+			// writes. The child is on pipes either way, never on the UI's terminal.
+			//
+			// Refused here, inside the run, so that nothing the runner concluded about
+			// the command line beforehand can be what lets it through.
 			return exitcode.UsageError{Err: fmt.Errorf(
-				"%q runs the %s component, which needs a terminal of its own; run it from a shell",
+				"%q runs the %s component, whose output fft tui only shows for a run it is watching; run it from a shell",
 				cmd.CommandPath(), name)}
 		}
 		return d.guardComponent(cmd, name, args)

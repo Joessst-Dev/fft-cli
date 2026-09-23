@@ -50,7 +50,7 @@ cannot be added, switched, changed or removed until the `FFT_*` variables are un
 
 ## Around every screen
 
-The tab bar lists seven screens. The status bar under them shows the project (marked
+The tab bar lists eight screens. The status bar under them shows the project (marked
 `RO` when writes are refused), the state of its token, how many commands are running and
 how many are waiting for an answer, and the `$ fft …` command for the focused action.
 
@@ -61,7 +61,7 @@ rows first, then the screen's keys, so `? all keys` is always the last row.
 
 | Key | |
 |---|---|
-| `1`–`7`, `tab`, `shift+tab` | switch screen |
+| `1`–`8`, `tab`, `shift+tab` | switch screen |
 | `ctrl+p` | go to the Projects screen |
 | `?` | open the key legend |
 | `i` | open or close the panel of running commands |
@@ -126,6 +126,7 @@ token, signs in.
 | `R` | sign in again now (`fft auth refresh`) |
 | `a` | add a project |
 | `ctrl+r` | read the list again |
+| `e` | run the local offline emulator |
 
 Making a project read-only asks `y`/`n`. Allowing writes again, and removing a project,
 want its name typed back.
@@ -135,6 +136,40 @@ between fields, `space` switches a toggle, `ctrl+s` adds the project (so does `e
 the last field) and `esc` cancels. The API key
 and the password go to the command on stdin (`--api-key-stdin --password-stdin`), never on
 its command line, so the command the UI shows holds neither.
+
+### The emulator
+
+`e` opens the emulator pane. The [emulator](./emulator.md) is a local server that answers
+every operation the API has, offline and in memory, so it belongs here: it is another
+tenant to work against, not another way to send requests.
+
+| Key | |
+|---|---|
+| `s` | run the emulator, or stop the one running |
+| `c` | copy the `FFT_*` recipe that points a shell at it |
+| `esc` | back to the projects |
+
+The pane says whether the emulator component is installed — it ships with fft but is
+installed separately, so if it is not there, press `8` for Components and `a` to install
+it. `s` starts it, and its output fills the pane as it is written rather than after it has
+stopped. `s` again stops it, the way `ctrl+c` would in a shell.
+
+The emulator is the one thing the UI runs that never ends on its own, so it holds one of
+the four slots the UI runs commands in until you stop it.
+
+**The session does not switch to the emulator.** The UI stays on whatever project it was
+on; what the pane gives you is the recipe, for a second shell:
+
+```sh
+export FFT_BASE_URL=http://localhost:8080
+export FFT_FIREBASE_API_KEY=emulator
+export FFT_EMAIL=dev@localhost
+export FFT_ID_TOKEN=emulator-token
+```
+
+That is the only way in: the emulator cannot stand in for Google's sign-in, so
+`fft project add` does not work against it, and fft reaches it through those variables
+alone.
 
 ## Operations (2)
 
@@ -307,6 +342,34 @@ lack the permission. The question before sending says the tenant may refuse the 
 with `403`, and that your roles may still allow it for some facilities. The same note
 appears when you send the request again from Response and in a command's own question. An
 operation whose permission the API does not document is never dimmed.
+
+## Components (8)
+
+The [components](./components.md) fft can see: what each one is, whether it is installed,
+which version, and whether fft ships it or somebody else does (`fft component list`).
+
+| Key | |
+|---|---|
+| `↑`/`↓` | select |
+| `enter` | show everything its manifest says, and back |
+| `a` | install one (`fft component install`) |
+| `u` | upgrade the selected one (`fft component upgrade`) |
+| `d` | remove the selected one (`fft component remove`) |
+| `ctrl+r` | read the list again |
+
+`a` asks for one thing: a name fft ships (`emulator`), an `owner/repo[@version]` on GitHub,
+or a directory to install from — spelled as a path, `./x`, `../x`, `/x` or `~/x`, which is
+what tells a local directory from an `owner/repo`.
+
+Installing, upgrading and removing each ask their own question first, in the command's own
+words — what is about to be installed, where it came from, and that it will run as you.
+The UI does not answer for you and never passes `--yes`.
+
+None of this touches the tenant, so a read-only project changes nothing here. What the
+read-only gate does refuse is *running* a component that says it makes requests.
+
+A component installed here is listed straight away, and the commands it adds are in the
+tree for the very next command the UI runs — you do not have to restart.
 
 ## Read-only projects
 

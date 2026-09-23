@@ -47,6 +47,19 @@ question before a request warns that you appear to lack the permission. It is on
 a hint: a role can be limited to some facilities, so a greyed operation can still
 be sent, and the tenant decides.
 
+The Components screen lists the components fft can see: what each one is, whether
+it is installed, and who ships it. enter shows everything its manifest says, a
+installs one — by name, by owner/repo[@version], or from a directory — u upgrades
+the selected one and d removes it. Those three ask their own question, in their own
+words, before anything is unpacked or deleted. A component installed here is listed,
+and its commands can be run, without restarting the UI.
+
+The emulator is on the Projects screen, where e opens it: it is a tenant to work
+against rather than a seventh thing to send requests with. s runs the local offline
+emulator and s again stops it, its output fills the pane as it is written, and c
+copies the FFT_* recipe that points another shell at it. Pointing this session at
+the emulator is not possible yet; the recipe and a second shell are.
+
 Press ? for every key, i for the commands that are running, and y to copy the fft
 command the focused action stands for. Secrets you type and request bodies are
 passed to that command on stdin, never on its command line.

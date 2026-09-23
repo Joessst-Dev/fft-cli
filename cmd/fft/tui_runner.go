@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"slices"
 	"sync"
 	"sync/atomic"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/Joessst-Dev/fft-cli/internal/component"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/prompt"
 	"github.com/Joessst-Dev/fft-cli/internal/tui"
@@ -33,6 +35,19 @@ const (
 // runnerEventBuffer absorbs a burst of state changes while the UI is busy
 // drawing. A full buffer blocks the runs, not the UI, which is the right way round.
 const runnerEventBuffer = 64
+
+// How a streaming run's output is forwarded to the UI.
+//
+// The flush interval coalesces: the emulator with --verbose logs a line per
+// request, and one event per line would spend the whole event buffer on a screen
+// that redraws far less often than that. The chunk limit bounds what one flush
+// carries — beyond it the *newest* bytes are kept, because what a live log shows
+// is its tail, and the run's own capped output still holds the whole of what was
+// written.
+const (
+	runnerStreamFlush = 100 * time.Millisecond
+	runnerStreamChunk = 64 << 10
+)
 
 // errRunnerClosed is what Start answers once the runner has been shut down.
 var errRunnerClosed = errors.New("the command runner has been shut down")
@@ -67,6 +82,15 @@ const annotationConfirms = "confirms"
 
 // confirmsYes is the [annotationConfirms] value of a question a y answers.
 const confirmsYes = "true"
+
+// annotationRescans marks a command that changes what is installed under the
+// component root. The TUI's runner re-reads the registry after one of them
+// succeeds, so that the next run — and the command tree built for it — sees what
+// just appeared or went away, rather than the scan taken when the UI started.
+//
+// componentsRescan_test.go finds every command that writes to the root and fails
+// until it carries this.
+const annotationRescans = "rescansComponents"
 
 const (
 	// exclusiveConfig is the config file.
@@ -134,8 +158,20 @@ type cliRunner struct {
 	// tokens is the session's token sources, shared by every run.
 	tokens sessionTokens
 
+	// components is the component registry each run is given, and the command tree
+	// for it is built from. It is replaced after a run that installs, upgrades or
+	// removes one: [component.Open] scans the root once, so the registry the UI
+	// started with would otherwise go on describing a directory that has changed
+	// underneath it.
+	components atomic.Pointer[component.Registry]
+
 	// stdoutLimit and stderrLimit are how much of each run's output is kept.
 	stdoutLimit, stderrLimit int
+
+	// streamFlush and streamChunk are how a streaming run's output is forwarded;
+	// see [runnerStreamFlush].
+	streamFlush time.Duration
+	streamChunk int
 }
 
 var _ tui.Runner = (*cliRunner)(nil)
@@ -168,6 +204,10 @@ type job struct {
 	// are forgotten once it finishes. An exclusive run is not necessarily one: the
 	// UI also runs a sign-in alone, and the token it mints is the point of it.
 	rewritesConfig bool
+
+	// rescansComponents is set for a command that changes what is installed under
+	// the component root; see [annotationRescans].
+	rescansComponents bool
 }
 
 // newCLIRunner returns a runner whose runs are all cancelled when ctx is. deps is
@@ -175,8 +215,11 @@ type job struct {
 // started with; see [Deps.forRun].
 func newCLIRunner(ctx context.Context, deps *Deps, session uiRun) *cliRunner {
 	ctx, stop := context.WithCancel(ctx)
+	// Resolved here rather than taken as it is, so that the registry the runs are
+	// given is never nil and can always be replaced by one read later.
+	deps.openComponents()
 	tree := newRootCmd(deps.forRun(nil, session))
-	return &cliRunner{
+	r := &cliRunner{
 		deps:    deps,
 		session: session,
 		ctx:     ctx,
@@ -193,7 +236,11 @@ func newCLIRunner(ctx context.Context, deps *Deps, session uiRun) *cliRunner {
 
 		stdoutLimit: runnerStdoutLimit,
 		stderrLimit: runnerStderrLimit,
+		streamFlush: runnerStreamFlush,
+		streamChunk: runnerStreamChunk,
 	}
+	r.components.Store(deps.Components)
+	return r
 }
 
 // Start implements [tui.Runner].
@@ -220,11 +267,13 @@ func (r *cliRunner) Start(inv tui.Invocation) (tui.RunID, error) {
 		j.ui.project = inv.Project
 	}
 	j.ui.background = inv.Background
+	j.ui.stream = inv.Stream
 
-	rewrites, confirm := r.classify(inv.Args)
-	j.confirm = confirm
-	j.rewritesConfig = rewrites == exclusiveConfig
-	j.exclusive = inv.Exclusive || rewrites != ""
+	cl := r.classify(inv.Args)
+	j.confirm = cl.confirm
+	j.rewritesConfig = cl.rewrites == exclusiveConfig
+	j.rescansComponents = cl.rescans
+	j.exclusive = inv.Exclusive || cl.rewrites != ""
 	inv.Exclusive = j.exclusive
 	j.inv = inv
 	if j.exclusive {
@@ -244,19 +293,37 @@ func (r *cliRunner) Start(inv tui.Invocation) (tui.RunID, error) {
 	return id, nil
 }
 
-// classify resolves args in the catalog tree, and reports the files the command
-// rewrites, "" when nothing requires it to run alone ([annotationExclusive]), and
-// what a user types to confirm its question ([annotationConfirms]). It must be
-// called with mu held.
-func (r *cliRunner) classify(args []string) (rewrites, confirm string) {
+// classification is what the catalog says about a command line. It is decided
+// when the run is queued, because its place in line depends on it.
+type classification struct {
+	// rewrites are the files the command rewrites, "" when nothing requires it to
+	// run alone ([annotationExclusive]).
+	rewrites string
+
+	// confirm is what a user types to confirm its question ([annotationConfirms]),
+	// "" when a y answers it or it asks nothing.
+	confirm string
+
+	// rescans says the command changes what is installed under the component root
+	// ([annotationRescans]).
+	rescans bool
+}
+
+// classify resolves args in the catalog tree and reports what it says about the
+// command. It must be called with mu held.
+func (r *cliRunner) classify(args []string) classification {
 	target, _, err := r.catalog.Find(args)
 	if err != nil {
-		return "", ""
+		return classification{}
+	}
+	cl := classification{
+		rewrites: target.Annotations[annotationExclusive],
+		rescans:  target.Annotations[annotationRescans] != "",
 	}
 	if word := target.Annotations[annotationConfirms]; word != confirmsYes {
-		confirm = word
+		cl.confirm = word
 	}
-	return target.Annotations[annotationExclusive], confirm
+	return cl
 }
 
 // Cancel implements [tui.Runner].
@@ -404,6 +471,9 @@ func (r *cliRunner) execute(ctx context.Context, id tui.RunID, j job) tui.Result
 	in := bytes.NewReader(j.stdin)
 	deps := r.deps.forRun(in, j.ui)
 	deps.tokens = &r.tokens
+	// The registry as it is now, not as it was when the UI started: a component
+	// installed a moment ago is one this run's command tree should have in it.
+	deps.Components = r.components.Load()
 
 	var status atomic.Int64
 	deps.observeStatus = func(code int) { status.Store(int64(code)) }
@@ -435,10 +505,27 @@ func (r *cliRunner) execute(ctx context.Context, id tui.RunID, j job) tui.Result
 	// The run has no terminal, so its questions are asked in the UI. Everything
 	// else a Prompter reads still needs one, and is refused.
 	deps.Prompt = prompt.New(in, &stderr, prompt.WithConfirmer(r.confirmer(ctx, id, j)))
+
+	// The capped buffers stay the Result's source of truth whether or not anyone is
+	// watching; streaming only forwards a copy of what they are being given, so the
+	// live view and the final one agree about what was written.
+	var out, errOut io.Writer = &stdout, &stderr
+	if j.inv.Stream {
+		so := &streamWriter{to: &stdout, limit: r.streamChunk}
+		se := &streamWriter{to: &stderr, limit: r.streamChunk, stderr: true}
+		out, errOut = so, se
+		// Deferred, so the last of the output is forwarded before execute returns
+		// and the run is reported done.
+		defer r.stream(id, j.inv, so, se)()
+	}
+
 	started := time.Now()
 	// The command line is run exactly as given; the run's Deps carries what the UI
 	// decides.
-	code := executeRoot(ctx, deps, newRootCmd(deps), j.inv.Args, in, &stdout, &stderr)
+	code := executeRoot(ctx, deps, newRootCmd(deps), j.inv.Args, in, out, errOut)
+	if j.rescansComponents && code == exitcode.OK {
+		r.rescanComponents()
+	}
 
 	res := tui.Result{
 		ExitCode:        code,
@@ -454,6 +541,123 @@ func (r *cliRunner) execute(ctx context.Context, id tui.RunID, j job) tui.Result
 		res.Project = *p
 	}
 	return res
+}
+
+// rescanComponents reads the component root again, so that the runs after an
+// install, an upgrade or a removal are given what is there now.
+//
+// A failure leaves the previous registry in place: [component.Open] swallows a
+// root it cannot read into an empty registry, and replacing a good scan with an
+// empty one would make every installed component vanish from the UI because one
+// directory listing happened to fail.
+func (r *cliRunner) rescanComponents() {
+	old := r.components.Load()
+	if old == nil {
+		return
+	}
+	root := old.Root()
+	if root == "" {
+		// Components are disabled for this process; there is nothing to read.
+		return
+	}
+	r.components.Store(component.Open(root))
+}
+
+// streamWriter passes everything through to the run's capped buffer, and keeps a
+// copy of the most recent output for the UI to be given between flushes.
+//
+// It holds the newest bytes rather than the oldest: what a live log shows is its
+// tail, and everything written is in the capped buffer regardless.
+type streamWriter struct {
+	to     io.Writer
+	limit  int
+	stderr bool
+
+	// mu guards the pending output, which the run writes and the flush loop takes.
+	mu      sync.Mutex
+	pending []byte
+	dropped bool
+}
+
+func (w *streamWriter) Write(p []byte) (int, error) {
+	n, err := w.to.Write(p)
+
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.pending = append(w.pending, p...)
+	if len(w.pending) > w.limit {
+		w.pending = w.pending[len(w.pending)-w.limit:]
+		w.dropped = true
+	}
+	return n, err
+}
+
+// take is the output written since the last take, and nil when there is none.
+// The bytes are handed over rather than copied: the caller owns them, and this
+// writer starts again from empty.
+func (w *streamWriter) take() *tui.Chunk {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if len(w.pending) == 0 && !w.dropped {
+		return nil
+	}
+	c := &tui.Chunk{Stderr: w.stderr, Bytes: w.pending, Dropped: w.dropped}
+	w.pending, w.dropped = nil, false
+	return c
+}
+
+// drop records that a chunk never reached the UI, so that the next one that does
+// says so.
+func (w *streamWriter) drop() {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.dropped = true
+}
+
+// stream forwards the output of run id every streamFlush, and returns the function
+// that stops it — which flushes once more, after the command has finished writing.
+func (r *cliRunner) stream(id tui.RunID, inv tui.Invocation, writers ...*streamWriter) func() {
+	done := make(chan struct{})
+	stopped := make(chan struct{})
+	go func() {
+		defer close(stopped)
+		t := time.NewTicker(r.streamFlush)
+		defer t.Stop()
+		for {
+			select {
+			case <-t.C:
+				r.flush(id, inv, writers)
+			case <-done:
+				return
+			}
+		}
+	}()
+	return func() {
+		close(done)
+		<-stopped
+		r.flush(id, inv, writers)
+	}
+}
+
+// flush hands the UI whatever each writer has, or drops it and remembers to say
+// so on the next one.
+//
+// A streaming run is never held up to deliver its output. Blocking here would
+// stop a command mid-write because the UI is busy drawing, and the whole of what
+// was written is in the run's Result either way.
+func (r *cliRunner) flush(id tui.RunID, inv tui.Invocation, writers []*streamWriter) {
+	for _, w := range writers {
+		c := w.take()
+		if c == nil {
+			continue
+		}
+		ev := tui.RunEvent{ID: id, State: tui.RunRunning, Invocation: inv, At: time.Now(), Chunk: c}
+		select {
+		case r.events <- ev:
+		default:
+			w.drop()
+		}
+	}
 }
 
 // cappedBuffer keeps the first limit bytes written to it, and drops the rest.

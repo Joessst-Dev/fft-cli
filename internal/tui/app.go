@@ -16,7 +16,9 @@ import (
 
 // screenNames are the screens in tab order; the number key for each is its
 // position, counting from one.
-var screenNames = []string{"Projects", "Operations", "Request", "Response", "Templates", "History", "Roles"}
+var screenNames = []string{
+	"Projects", "Operations", "Request", "Response", "Templates", "History", "Roles", "Components",
+}
 
 // The screens' positions in screenNames.
 const (
@@ -27,6 +29,7 @@ const (
 	tabTemplates
 	tabHistory
 	tabRoles
+	tabComponents
 )
 
 // screen is one tab of the UI.
@@ -78,6 +81,7 @@ type app struct {
 	templates  *templatesScreen
 	history    *historyScreen
 	roles      *rolesScreen
+	components *componentsScreen
 
 	panel     *runsPanel
 	showPanel bool
@@ -117,7 +121,11 @@ func newApp(opts Options) *app {
 	m.templates = newTemplatesScreen(s, st, m, opts.Catalog)
 	m.history = newHistoryScreen(s, st, m, opts.Catalog, opts.History)
 	m.roles = newRolesScreen(s, st, opts.Catalog)
+	m.components = newComponentsScreen(s, st)
 	m.operations.hint = m.hint
+	// The emulator is a component, and the pane that runs it asks this screen
+	// whether it is installed rather than reading the list a second time.
+	m.projects.setComponents(m.components)
 	m.screens = []screen{
 		m.projects,
 		m.operations,
@@ -126,6 +134,7 @@ func newApp(opts Options) *app {
 		m.templates,
 		m.history,
 		m.roles,
+		m.components,
 	}
 	return m
 }
@@ -262,9 +271,9 @@ func (m *app) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // readShown reads what the screen on display shows and is not current: the
-// templates, the history, the user's roles. Each is read when somebody looks, not
-// when the UI starts, and read again once it may have changed — after a run for
-// the history, after a project switch for the roles.
+// templates, the history, the user's roles, the installed components. Each is read
+// when somebody looks, not when the UI starts, and read again once it may have
+// changed — after a run for the history, after a project switch for the roles.
 func (m *app) readShown() tea.Cmd {
 	switch m.screens[m.current] {
 	case m.templates:
@@ -277,6 +286,8 @@ func (m *app) readShown() tea.Cmd {
 		return m.history.want()
 	case m.roles:
 		return m.roles.want()
+	case m.components:
+		return m.components.want()
 	}
 	return nil
 }
