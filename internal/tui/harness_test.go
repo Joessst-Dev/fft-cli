@@ -22,6 +22,7 @@ type fakeRunner struct {
 	cancelled []RunID
 	answers   []answer
 	projects  []string
+	emulators []string
 	events    chan RunEvent
 	startErr  error
 }
@@ -54,6 +55,7 @@ func (r *fakeRunner) Answer(id RunID, q uint64, yes bool) {
 	r.answers = append(r.answers, answer{run: id, question: q, yes: yes})
 }
 func (r *fakeRunner) SetProject(name string)         { r.projects = append(r.projects, name) }
+func (r *fakeRunner) SetEmulator(base string)        { r.emulators = append(r.emulators, base) }
 func (r *fakeRunner) args(id RunID) []string         { return r.started[id-1].Args }
 func (r *fakeRunner) stdin(id RunID) string          { return string(r.started[id-1].Stdin) }
 func (r *fakeRunner) exclusive(id RunID) bool        { return r.started[id-1].Exclusive }

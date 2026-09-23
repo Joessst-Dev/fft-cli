@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/Joessst-Dev/fft-cli/internal/component"
+	"github.com/Joessst-Dev/fft-cli/internal/config"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/prompt"
 	"github.com/Joessst-Dev/fft-cli/internal/tui"
@@ -83,6 +84,19 @@ const annotationConfirms = "confirms"
 // confirmsYes is the [annotationConfirms] value of a question a y answers.
 const confirmsYes = "true"
 
+// annotationManagesProjects marks a command that manages fft's own configuration
+// rather than acting on a tenant: the `fft project` group. It is set on the group
+// and found by walking up from the command, since cobra does not inherit
+// annotations.
+//
+// Such a command always runs against the *real* environment, whatever the session
+// has been pointed at. A run with an environment of its own is headless, and a
+// headless `fft project list` reports only the environment's project — so pointing
+// the session at the emulator would empty the Projects screen of the very rows the
+// user switches back from, and `project use` would refuse. The config file is the
+// same file whichever tenant the session is talking to.
+const annotationManagesProjects = "managesProjects"
+
 // annotationRescans marks a command that changes what is installed under the
 // component root. The TUI's runner re-reads the registry after one of them
 // succeeds, so that the next run — and the command tree built for it — sees what
@@ -137,6 +151,11 @@ type cliRunner struct {
 	// started, not when it executes: the user confirmed it against the project
 	// on screen then, and a switch while it queues must not redirect it.
 	project string
+
+	// emulator is the base URL of the local emulator the UI has pointed the session
+	// at, "" when its runs go to a configured project. Taken at Start for the same
+	// reason project is.
+	emulator string
 
 	// catalog is a command tree that is never executed. Start resolves a command
 	// line in it to learn whether the command must run alone, which has to be
@@ -273,6 +292,13 @@ func (r *cliRunner) Start(inv tui.Invocation) (tui.RunID, error) {
 	j.ui.stream = inv.Stream
 
 	cl := r.classify(inv.Args)
+	if r.emulator != "" && !cl.managesProjects {
+		// The emulator is reached the way a shell reaches it: through the environment,
+		// which is also the only way — it cannot stand in for Google's sign-in. The
+		// selected project goes with it, since that environment names its own.
+		j.ui.env = config.EmulatorEnv(r.emulator)
+		j.ui.project = ""
+	}
 	j.confirm = cl.confirm
 	j.rewritesConfig = cl.rewrites == exclusiveConfig
 	j.rescansComponents = cl.rescans
@@ -310,6 +336,10 @@ type classification struct {
 	// rescans says the command changes what is installed under the component root
 	// ([annotationRescans]).
 	rescans bool
+
+	// managesProjects says the command acts on the config file rather than on a
+	// tenant, so it runs against the real environment ([annotationManagesProjects]).
+	managesProjects bool
 }
 
 // classify resolves args in the catalog tree and reports what it says about the
@@ -322,6 +352,12 @@ func (r *cliRunner) classify(args []string) classification {
 	cl := classification{
 		rewrites: target.Annotations[annotationExclusive],
 		rescans:  target.Annotations[annotationRescans] != "",
+	}
+	for c := target; c != nil; c = c.Parent() {
+		if c.Annotations[annotationManagesProjects] != "" {
+			cl.managesProjects = true
+			break
+		}
 	}
 	if word := target.Annotations[annotationConfirms]; word != confirmsYes {
 		cl.confirm = word
@@ -409,6 +445,35 @@ func (r *cliRunner) SetProject(name string) {
 	r.tokens.forget()
 }
 
+// sessionRun is what the session's decisions amount to right now: the selected
+// project, or the emulator the UI has pointed it at. [cliRunner.Start] refines it
+// per invocation; a caller that is not a run — the History screen, which asks why
+// nothing is being recorded — reads it as it stands.
+func (r *cliRunner) sessionRun() uiRun {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	ui := r.session
+	ui.project = r.project
+	if r.emulator != "" {
+		ui.env = config.EmulatorEnv(r.emulator)
+		ui.project = ""
+	}
+	return ui
+}
+
+// SetEmulator implements [tui.Runner]. It applies to the runs started after it.
+func (r *cliRunner) SetEmulator(baseURL string) {
+	r.mu.Lock()
+	r.emulator = baseURL
+	r.mu.Unlock()
+	// Outside mu, as SetProject does it. The tokens are keyed by the project they
+	// were minted for, so nothing would be handed to the wrong tenant either way;
+	// they are dropped because a switch is also a good moment to stop holding a real
+	// tenant's credential in memory.
+	r.tokens.forget()
+}
+
 // Close cancels every run, waits for them to finish, and closes Events. It is
 // safe to call more than once.
 func (r *cliRunner) Close() {
@@ -481,7 +546,8 @@ func (r *cliRunner) execute(ctx context.Context, id tui.RunID, j job) tui.Result
 	var status atomic.Int64
 	deps.observeStatus = func(code int) { status.Store(int64(code)) }
 
-	if j.exclusive {
+	switch {
+	case j.exclusive:
 		r.config.Lock()
 		defer r.config.Unlock()
 		if j.rewritesConfig {
@@ -491,7 +557,26 @@ func (r *cliRunner) execute(ctx context.Context, id tui.RunID, j job) tui.Result
 			// pick the old one up in between.
 			defer r.tokens.forget()
 		}
-	} else {
+
+	case j.inv.Stream:
+		// Deliberately unlocked. A streamed run is one that does not end on its own —
+		// the emulator serves until it is stopped — and holding the config file's read
+		// lock for that long would make the next `project use` wait for the server to
+		// be stopped. Worse, Go's RWMutex queues new readers behind a waiting writer,
+		// so every run after that one would wait too: one `fft emulator` started from
+		// the UI would freeze it.
+		//
+		// What the lock protects against is a lost update between a command that reads
+		// the config file, decides, and writes it back. A streamed run is a component
+		// server: it is handed its session once, before the child starts, and never
+		// reads the file again. A save that lands during that one read is atomic, so
+		// the child gets the file as it was before or as it is after — and a switch the
+		// user made after starting a server is not a switch that server was promised.
+		//
+		// The one read-modify-write such a run would otherwise do is the pre-v2 API key
+		// sweep, which [Deps.complete] skips for exactly this reason.
+
+	default:
 		r.config.RLock()
 		defer r.config.RUnlock()
 	}

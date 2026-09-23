@@ -614,6 +614,10 @@ func (m *app) tabBar() string {
 func (m *app) statusBar() string {
 	project := m.s.currentProject()
 	switch {
+	case m.s.usingEmulator():
+		// Named by where it is, not by a name: the emulator is not a project, and the
+		// bar must not read like one the user could switch back to by name.
+		project = "emulator (" + m.s.emulator + ")"
 	case project == "":
 		project = "no project"
 	case m.s.headless && m.s.project == "":

@@ -76,6 +76,23 @@ var _ = Describe("the UI", func() {
 			Entry("a fixed id token", `{"project":"env","store":"env","signIn":"idToken","token":"unknown"}`),
 		)
 
+		It("lists the emulator under the configured projects, marked as what it is", func() {
+			h.loaded(twoProjects, validToken)
+
+			Expect(h.view()).To(MatchRegexp(`emulator\s+http://localhost:8080\s+dev@localhost\s+env\s+writable\s+\(emulator\)`))
+			// It came from nowhere but the UI: `fft project list` reads the config file.
+			Expect(h.r.commandLines()).To(Equal([]string{"project list", "auth status"}))
+		})
+
+		It("does not call a list it could not read an empty one", func() {
+			h.finish(failed(exitcode.Config, "Error: the config file cannot be read"), "project", "list")
+			h.finish(failed(exitcode.Config, "Error: no active project"), "auth", "status")
+
+			Expect(h.view()).To(ContainSubstring("listing the projects failed"))
+			Expect(h.view()).NotTo(ContainSubstring("No projects are configured"),
+				"a list that could not be read says nothing about what is configured")
+		})
+
 		It("shows no project and no error when none is configured", func() {
 			h.finish(ok(`[]`), "project", "list")
 			h.finish(failed(exitcode.Config, "Error: no active project"), "auth", "status")
@@ -208,6 +225,37 @@ var _ = Describe("the UI", func() {
 
 			h.finishID(whoami, ok(`{}`))
 			h.lookup("auth", "status")
+		})
+
+		It("does not move the session back onto the project once the emulator has been chosen while the switch was still in flight", func() {
+			// The emulator is already listening, but the session is not yet pointed
+			// at it.
+			h.press("e")
+			h.finish(ok(emulatorInstalled), "component", "list")
+			h.press("s")
+			h.chunk(h.lookup("emulator", "--port", "8080"), "fft emulator listening on http://localhost:8080\n")
+			h.press("esc")
+
+			// Cursor is on prod (this Describe's own BeforeEach). Enter starts an
+			// exclusive project use, which does not answer yet — project use can queue
+			// behind a run holding the config file's read lock, and long enough for
+			// the user to change their mind meanwhile.
+			h.press("enter")
+			id := h.lookup("project", "use", "prod")
+
+			h.press("down")
+			h.press("enter")
+			Expect(h.r.emulators).To(Equal([]string{"http://localhost:8080"}),
+				"enter on the running emulator row should point the session at once")
+
+			// project use finally answers, and did change fft's own active project —
+			// but the session has since moved on to the emulator, and following it now
+			// would silently move the session back.
+			h.finishID(id, ok(""))
+
+			Expect(h.r.emulators).To(Equal([]string{"http://localhost:8080"}),
+				"a slow project use moved the session back to the project after the emulator was chosen")
+			Expect(h.view()).To(ContainSubstring("fft · emulator (http://localhost:8080)"))
 		})
 
 		It("takes u as well as enter", func() {
@@ -696,9 +744,11 @@ var _ = Describe("the UI", func() {
 		It("says the projects are read-only here, and offers no key that would change them", func() {
 			Expect(h.view()).To(ContainSubstring("Running from the environment"))
 			Expect(h.view()).To(ContainSubstring("R refresh token"))
-			Expect(h.view()).NotTo(ContainSubstring("enter use"))
 			Expect(h.view()).NotTo(ContainSubstring("a add"))
 			Expect(h.view()).To(ContainSubstring("fft · env (environment) · fixed token expiry unknown"))
+			// enter is still offered: the emulator row is not in the config file, so
+			// selecting it is not a change this mode has any reason to refuse.
+			Expect(h.view()).To(ContainSubstring("enter use"))
 		})
 
 		DescribeTable("refuses every change to the config file, sending nothing",
@@ -718,6 +768,23 @@ var _ = Describe("the UI", func() {
 		It("still refreshes the token, which is not a config change", func() {
 			h.press("R")
 			h.lookup("auth", "refresh")
+		})
+
+		It("still points the session at the emulator, and back off it again", func() {
+			// The emulator row is last, after the one project the environment names.
+			h.press("down")
+			h.press("enter")
+			h.finish(ok(emulatorInstalled), "component", "list")
+			h.chunk(h.lookup("emulator", "--port", "8080"), "fft emulator listening on http://localhost:8080\n")
+			Expect(h.r.emulators).To(Equal([]string{"http://localhost:8080"}))
+
+			// And back: leaving is not a change to the config file, so there is no
+			// `project use` to refuse — the environment already names where fft goes.
+			h.press("esc", "up")
+			h.press("enter")
+			Expect(h.r.emulators).To(Equal([]string{"http://localhost:8080", ""}))
+			Expect(h.r.commandLines()).NotTo(ContainElement(HavePrefix("project use")))
+			Expect(h.view()).To(ContainSubstring("No longer using the emulator."))
 		})
 	})
 

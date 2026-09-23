@@ -1,7 +1,6 @@
 package tui
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -72,12 +71,14 @@ func newEmulatorKeys() emulatorKeys {
 // emulatorPane runs the local offline emulator and shows what it is saying.
 //
 // It lives on the Projects screen because the emulator is a tenant you could be
-// working against, not a seventh thing to send requests with. Running it from here
-// is as far as this goes for now: pointing the session itself at the emulator needs
-// a seam that does not exist yet — Deps.Ephemeral and the credential store are both
-// rebuilt per run from the process environment (config.FromEnv, Deps.openSecrets),
-// so the UI would have to be able to override that environment for its runs rather
-// than read it. Until then the pane offers the recipe, and another shell uses it.
+// working against, not a seventh thing to send requests with — and the screen's
+// emulator row is how a session comes to work against it. Pointing the session is
+// the row's; starting, stopping and the output are the pane's, and the two meet
+// here: a row that asks for a session that is not running yet sets useWhenReady,
+// and the line that says the port is bound is what points it.
+//
+// The recipe stays, because a second shell is still a reasonable thing to want, and
+// it is the same four variables the runs are given ([config.EmulatorEnv]).
 //
 // The emulator holds one of the runner's slots for as long as it runs, which is why
 // only one can be started from here.
@@ -95,6 +96,30 @@ type emulatorPane struct {
 	state emulatorState
 	run   RunID
 	port  int
+
+	// useWhenReady says the session is to be pointed at this emulator as soon as it
+	// reports the port bound. Set by the Projects screen's emulator row, which is
+	// asked to use an emulator that is not running yet.
+	//
+	// armedAt is session.selections when that was asked for — the count of the
+	// user's own project/emulator choices, not [session.switches], which also
+	// advances for a project removed out from under the current selection and
+	// would cancel this arm on a change the user never made. A server can take
+	// seconds to bind, and a user who changes their mind meanwhile and picks a
+	// project bumps selections — so the ready line, arriving after, must not
+	// quietly move the session back. What was asked for last wins.
+	useWhenReady bool
+	armedAt      uint64
+
+	// afterUse is what the Projects screen wants done once the session has been
+	// pointed: say so, and read the credential state again, which is now the
+	// environment's rather than a configured project's.
+	afterUse func() tea.Cmd
+
+	// afterStop is called when the emulator ends while the session is still pointed
+	// at it, so that the list behind the pane stops saying the session is using an
+	// emulator that is answering.
+	afterStop func()
 
 	// log is the tail of what the emulator has printed, newest last.
 	log []string
@@ -132,19 +157,18 @@ func (e *emulatorPane) running() bool {
 }
 
 func (e *emulatorPane) baseURL() string {
-	return fmt.Sprintf("http://localhost:%d", e.port)
+	return config.EmulatorBaseURL(e.port)
 }
 
 // recipe is the environment that points another shell at the emulator. It is
 // computed rather than read out of the emulator's output: the emulator prints the
 // same four lines, and they follow from the port alone.
 func (e *emulatorPane) recipe() string {
-	return strings.Join([]string{
-		"export " + config.EnvBaseURL + "=" + e.baseURL(),
-		"export " + config.EnvFirebaseAPIKey + "=emulator",
-		"export " + config.EnvEmail + "=dev@localhost",
-		"export " + config.EnvIDToken + "=emulator-token",
-	}, "\n")
+	lines := make([]string, 0, 4)
+	for _, v := range config.EmulatorEnv(e.baseURL()) {
+		lines = append(lines, "export "+v.Name+"="+v.Value)
+	}
+	return strings.Join(lines, "\n")
 }
 
 func (e *emulatorPane) startArgs() []string {
@@ -171,15 +195,77 @@ func (e *emulatorPane) toggle() tea.Cmd {
 		e.notice = "Stopping the emulator…"
 		return nil
 	}
-	return e.start()
+	cmd, _ := e.start()
+	return cmd
 }
 
-func (e *emulatorPane) start() tea.Cmd {
+// use points the session at the emulator, starting it first if it is not running.
+// It reports what the user should be told about that, and the work it started.
+func (e *emulatorPane) use() (notice string, f *failure, cmd tea.Cmd) {
+	if e.running() {
+		switch {
+		case e.s.usingEmulator():
+			return "This session is already using the emulator.", nil, nil
+		case e.state == emulatorRunning:
+			return "", nil, e.useNow()
+		}
+		// Still binding the port: the ready line points the session, as it would have.
+		e.arm()
+		return "The emulator is starting; this session will use it once it is listening.", nil, nil
+	}
+
+	// Not running — and that includes an emulator the session is still pointed at,
+	// because stopping one leaves the session where it was. Pressing enter on the row
+	// then is exactly the request to have it answering again, so it is started rather
+	// than reported as already in use.
+	again := e.s.usingEmulator()
+	cmd, started := e.start()
+	if !started {
+		// Nothing runs, so nothing will ever be ready. Why is the pane's to say — the
+		// component is not installed, or the runner refused the run.
+		return e.notice, e.failure, cmd
+	}
+	e.arm()
+
+	// There is output to watch now, so show where it goes rather than leave the user
+	// on a list that only says it is starting. The component list is read with it,
+	// which is how a session that has not looked yet comes to be told that the
+	// emulator is not installed after all.
+	e.open = true
+	if e.components != nil {
+		cmd = tea.Batch(e.components.want(), cmd)
+	}
+	if again {
+		return "Starting the emulator again; this session is pointed at it.", nil, cmd
+	}
+	return "Starting the emulator; this session will use it once it is listening.", nil, cmd
+}
+
+// arm asks for the session to be pointed at this emulator once it reports the port
+// bound, and records the selection that asked; see [emulatorPane.useWhenReady].
+func (e *emulatorPane) arm() {
+	e.useWhenReady, e.armedAt = true, e.s.selections
+}
+
+// useNow points the session at an emulator that is already listening.
+func (e *emulatorPane) useNow() tea.Cmd {
+	e.useWhenReady = false
+	e.s.selectEmulator(e.baseURL())
+	e.notice = "The emulator is listening on " + e.baseURL() + "; this session is using it."
+	if e.afterUse == nil {
+		return nil
+	}
+	return e.afterUse()
+}
+
+// start runs the emulator, and reports whether anything was started. Nothing is
+// when the component is not installed: there is then no run to wait on.
+func (e *emulatorPane) start() (tea.Cmd, bool) {
 	if yes, known := e.installed(); known && !yes {
-		e.notice = ""
+		e.useWhenReady = false
 		e.failure = nil
 		e.notice = "The emulator is not installed. Press 8 for Components, then a to install it."
-		return nil
+		return nil, false
 	}
 
 	args := e.startArgs()
@@ -204,22 +290,39 @@ func (e *emulatorPane) start() tea.Cmd {
 			e.state = emulatorStopped
 			e.notice = "The emulator has stopped."
 			e.failure = nil
+			if e.s.usingEmulator() {
+				// The session is left where it is. Moving it back on the emulator's way
+				// out would change what the next request reaches without the user asking,
+				// and what they asked for was to stop a server, not to talk to a tenant.
+				e.notice = "The emulator has stopped, and this session is still pointed at it: " +
+					"press s to start it again, or choose a project on the Projects screen."
+			}
 		default:
+			// The failure stands, whether or not the session is pointed here. A restart
+			// that could not bind the port has something to say, and "it has stopped" is
+			// not it: saying that instead would leave the user with no way to find out
+			// why pressing enter did nothing.
 			e.state = emulatorFailed
 			e.notice = ""
 			e.failure = &failure{what: "running the emulator", result: r}
+		}
+		e.useWhenReady = false
+		if e.s.usingEmulator() && e.afterStop != nil {
+			// Either way the list behind the pane must stop saying the session is using
+			// an emulator that is answering.
+			e.afterStop()
 		}
 		return nil
 	})
 	e.run = id
 	e.s.watch(id, e.observe)
-	return cmd
+	return cmd, e.state == emulatorStarting
 }
 
 // observe takes a chunk of the emulator's output. Both streams go to the same log:
 // the emulator says everything it has to say on stderr, and a line that did arrive
 // on stdout is still something the user should see where they are looking.
-func (e *emulatorPane) observe(c *Chunk) {
+func (e *emulatorPane) observe(c *Chunk) tea.Cmd {
 	if c.Dropped {
 		e.append("… some output was dropped while the screen was busy …")
 	}
@@ -231,11 +334,26 @@ func (e *emulatorPane) observe(c *Chunk) {
 	lines := strings.Split(text, "\n")
 	// The last piece has no newline after it yet, and is held until it does.
 	*partial = lines[len(lines)-1]
+	var cmd tea.Cmd
 	for _, line := range lines[:len(lines)-1] {
 		e.append(line)
 		if e.state == emulatorStarting && strings.Contains(line, emulatorReady) {
 			e.state = emulatorRunning
 			e.notice = "The emulator is listening on " + e.baseURL() + "."
+			if e.useWhenReady {
+				// Only now: the line is printed by the ready callback, after the listen
+				// succeeded, so pointing the session here means it is pointed at a port
+				// that answers. And only if nothing has been selected since it was asked
+				// for — a user who started the emulator and then chose a project meant
+				// the project. selections, not switches: an unrelated invalidation (a
+				// project removed out from under the current selection, say) must not
+				// silently cancel an arm the user never contradicted.
+				stillWanted := e.armedAt == e.s.selections
+				e.useWhenReady = false
+				if stillWanted {
+					cmd = e.useNow()
+				}
+			}
 		}
 	}
 	if len(*partial) > emulatorPartialLimit {
@@ -244,6 +362,7 @@ func (e *emulatorPane) observe(c *Chunk) {
 		e.append(*partial)
 		*partial = ""
 	}
+	return cmd
 }
 
 // flush shows whatever each stream's partial line still holds. Called once the run
@@ -274,7 +393,7 @@ func (e *emulatorPane) legend() legendSection {
 		compact: true,
 		entries: []legendEntry{
 			{of: e.keys.toggle, desc: "run the emulator, or stop the one running"},
-			{of: e.keys.copy, desc: "copy the FFT_* recipe that points a shell at it"},
+			{of: e.keys.copy, desc: "copy the FFT_* recipe that points another shell at it"},
 			{of: e.keys.close, desc: "back to the projects"},
 		},
 	}
@@ -309,6 +428,13 @@ func (e *emulatorPane) view(width, height int) string {
 	default:
 		lines = append(lines, st.dim.Render(status))
 	}
+
+	session := "Session: not using it — press 1, then enter on the emulator row"
+	style := st.dim
+	if e.s.usingEmulator() {
+		session, style = "Session: using it — every request goes to "+e.s.emulator, st.okText
+	}
+	lines = append(lines, style.Render(session))
 
 	yes, known := e.installed()
 	switch {

@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -65,7 +64,7 @@ func (d *Deps) historyLog() (history.Log, error) {
 // It may run for a command that failed before [Deps.complete] did, so it opens
 // what it needs itself rather than relying on what complete would have set.
 func (d *Deps) historyOff() string {
-	if enabled, set := config.HistoryFromEnv(os.LookupEnv); set {
+	if enabled, set := config.HistoryFromEnv(d.env()); set {
 		if enabled {
 			return ""
 		}
@@ -100,7 +99,7 @@ func (d *Deps) historyOff() string {
 // fails before it acts on anything.
 func (d *Deps) actsOnEnvironment() bool {
 	if d.Ephemeral == nil {
-		if _, headless, err := config.FromEnv(os.LookupEnv); !headless && err == nil {
+		if _, headless, err := config.FromEnv(d.env()); !headless && err == nil {
 			return false
 		}
 	}

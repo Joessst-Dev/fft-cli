@@ -119,6 +119,18 @@ type Deps struct {
 	// While it is set, no command may read the config file or the keychain.
 	Ephemeral *config.Project
 
+	// lookupEnv is where every FFT_* variable this run reads comes from, nil for the
+	// process's own environment ([Deps.complete] fills it in).
+	//
+	// It is a seam rather than a direct os.LookupEnv because a run's tenant is
+	// decided by the environment — config.FromEnv synthesizes [Deps.Ephemeral] from
+	// it, and [Deps.openSecrets] reads the credential out of it — and `fft tui` has
+	// to be able to point one run at the local emulator while the rest of the
+	// session goes on talking to the configured project. An environment a caller can
+	// decide is what makes that a per-run choice rather than a property of the
+	// process; see [uiRun.env].
+	lookupEnv func(string) (string, bool)
+
 	// Timeout bounds a single command's API calls.
 	Timeout time.Duration
 
@@ -274,6 +286,78 @@ type uiRun struct {
 	// whose output is worth nothing to a screen that will only be handed it once the
 	// process has ended; see [Deps.guard].
 	stream bool
+
+	// env is the FFT_* environment the UI decided for this run, nil for the
+	// process's own. It is how the session points a run at the local emulator: the
+	// emulator cannot stand in for Google's sign-in, so the headless recipe
+	// ([config.EmulatorEnv]) is the only way to address it, and a run's environment
+	// is the one thing the UI could not previously decide.
+	//
+	// It is not merely overlaid on the process's environment; see [maskedEnv].
+	env []config.EnvVar
+}
+
+// uiEnvPassThrough are the FFT_* variables an environment the UI supplied does not
+// hide. They say what fft may do, not which tenant it does it to: dropping them
+// would disarm the session's read-only floor because the user changed tenant, and
+// would move the component root out from under a run that is only being pointed
+// somewhere else.
+var uiEnvPassThrough = map[string]bool{
+	config.EnvReadOnly: true,
+	config.EnvHistory:  true,
+	"FFT_NO_KEYRING":   true,
+	component.EnvRoot:  true,
+}
+
+// env is where this run reads its FFT_* variables.
+//
+// It is an accessor rather than the field itself because two callers run before
+// [Deps.complete] has filled the field in — historyOff, for a command that failed
+// before complete did, and openComponents, while the command tree is being built —
+// and a run the UI pointed at another tenant must not read the process's
+// environment for those two and its own for everything else.
+func (d *Deps) env() func(string) (string, bool) {
+	if d.lookupEnv != nil {
+		return d.lookupEnv
+	}
+	if d.ui != nil && d.ui.env != nil {
+		return maskedEnv(d.ui.env)
+	}
+	return os.LookupEnv
+}
+
+// maskedEnv reads env, and reports every other FFT_* variable as unset.
+//
+// Masking rather than overlaying, and fail closed. A shell that already exports a
+// real tenant's FFT_TENANT, FFT_USERNAME or FFT_PASSWORD must not have them
+// half-adopted by the project synthesized here — [config.FromEnv] would build one
+// project out of two tenants' variables — and a tenant variable the upstream spec
+// grows later is hidden by this rule before anyone has thought about it, which is
+// the direction to be wrong in.
+//
+// Anything without the FFT_ prefix is the machine's, not the tenant's: XDG_DATA_HOME
+// and XDG_STATE_HOME still say where this machine keeps its files.
+//
+// The name is matched without regard to case, because Windows environment lookups
+// ignore it: a mask that a lowercase fft_password walks through is not a mask. It
+// costs nothing where the case was canonical already, and it is what lets this be
+// the single rule — [Deps.componentBaseEnv] filters a whole os.Environ through it,
+// whatever case the entries happen to have.
+func maskedEnv(env []config.EnvVar) func(string) (string, bool) {
+	supplied := make(map[string]string, len(env))
+	for _, v := range env {
+		supplied[strings.ToUpper(v.Name)] = v.Value
+	}
+	return func(name string) (string, bool) {
+		upper := strings.ToUpper(name)
+		if v, ok := supplied[upper]; ok {
+			return v, true
+		}
+		if strings.HasPrefix(upper, "FFT_") && !uiEnvPassThrough[upper] {
+			return "", false
+		}
+		return os.LookupEnv(name)
+	}
 }
 
 // forRun returns the Deps one concurrent run of the command tree should use,
@@ -288,8 +372,12 @@ type uiRun struct {
 func (d *Deps) forRun(in io.Reader, ui uiRun) *Deps {
 	return &Deps{
 		// Shared.
-		Config:         d.Config,
-		Secrets:        d.Secrets,
+		Config: d.Config,
+		// Except when the UI decided this run's environment: the credential then lives
+		// in that environment rather than in the session's store, and leaving the field
+		// nil is what has complete open the environment-backed one — the same store a
+		// shell given the same recipe would get.
+		Secrets:        sharedSecrets(d.Secrets, ui),
 		Clock:          d.Clock,
 		Verify:         d.Verify,
 		NewTokenSource: d.NewTokenSource,
@@ -315,13 +403,28 @@ func (d *Deps) forRun(in io.Reader, ui uiRun) *Deps {
 
 		// Rebuilt by complete, by newRootCmd or by execute, from this run's flags and
 		// streams — run among them:
-		// Printer, Debug, Project, Ephemeral, Timeout, AssumeYes, ReadOnlyFlag,
-		// ReadOnlyEnv, noKeyringFromConfig, explicitNoKeyring, cfg,
+		// Printer, Debug, Project, Ephemeral, lookupEnv, Timeout, AssumeYes,
+		// ReadOnlyFlag, ReadOnlyEnv, noKeyringFromConfig, explicitNoKeyring, cfg,
 		// componentWarnings and the update-check plumbing. StartTUI stays nil — a
 		// run cannot open a second UI, it has no terminal — and observeStatus,
 		// tokens and Prompt are the caller's to set: the runner's Prompt asks the
 		// run's questions in the UI.
 	}
+}
+
+// sharedSecrets is the store a UI run inherits: the session's, unless the UI gave
+// the run an environment of its own, in which case the run opens the store that
+// environment describes.
+//
+// The two go together. An environment the UI supplied names a project and the
+// credential to reach it with; a keychain entry for a project this run cannot even
+// see is not the credential it needs, and reading one would be the session's tenant
+// answering for the one the run was pointed at.
+func sharedSecrets(store secrets.Store, ui uiRun) secrets.Store {
+	if ui.env != nil {
+		return nil
+	}
+	return store
 }
 
 // LoadConfig returns the parsed config file, reading it at most once.
@@ -600,6 +703,10 @@ func annotateFlag(cmd *cobra.Command, flag, key string, values []string) {
 // complete fills in whatever the caller did not supply. It runs before every
 // subcommand, so a RunE can assume every field is set.
 func (d *Deps) complete(cmd *cobra.Command) error {
+	// Decided first: everything below that reads a variable reads it through here,
+	// and a run the UI pointed elsewhere must not see the process's own for even one
+	// of them.
+	d.lookupEnv = d.env()
 	if d.Clock == nil {
 		d.Clock = time.Now
 	}
@@ -632,7 +739,7 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 	// Headless mode is decided before anything reads the disk, because the whole
 	// point of it is that nothing does.
 	if d.Ephemeral == nil {
-		p, ok, err := config.FromEnv(os.LookupEnv)
+		p, ok, err := config.FromEnv(d.lookupEnv)
 		if err != nil {
 			// A headless set that names an unusable base URL (http to a real
 			// tenant, say) is a hard stop, not a quiet fall-back to the config file.
@@ -655,6 +762,14 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 	d.Project = v.GetString("project")
 	if d.ui != nil && d.ui.project != "" {
 		d.Project = d.ui.project
+	}
+	if d.ui != nil && d.ui.env != nil {
+		// An environment the UI supplied describes exactly one project — the ephemeral
+		// one above — and nothing else in this process can be reached from it. Cleared
+		// rather than left alone because viper reads FFT_PROJECT from the *process*
+		// ([Deps.bindFlags] cannot be given a lookup), and a configured project named
+		// there would otherwise beat the tenant the UI pointed this run at.
+		d.Project = ""
 	}
 	d.Timeout = v.GetDuration("timeout")
 	if d.ui != nil && d.ui.timeout != nil && !rootFlagChanged(cmd, "timeout") {
@@ -682,7 +797,7 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 	if rootFlagChanged(cmd, "read-only") {
 		d.ReadOnlyFlag = ptr(cmd.Root().PersistentFlags().Lookup("read-only").Value.String() == "true")
 	}
-	d.ReadOnlyEnv = config.ReadOnlyFromEnv(os.LookupEnv)
+	d.ReadOnlyEnv = config.ReadOnlyFromEnv(d.lookupEnv)
 
 	// The trace goes to stderr, never to stdout: `fft facility list -o json --debug
 	// | jq` must still be piping JSON and nothing else.
@@ -715,7 +830,13 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 	// Sweep any pre-v2 cleartext API key out of the config file and into the
 	// secret store now that both are open. Headless runs touch neither file, so
 	// there is nothing to migrate there.
-	if d.Ephemeral == nil {
+	//
+	// Nor does a run the UI is streaming. That run holds no lock on the config file,
+	// because it may serve until it is stopped (see [cliRunner.execute]) — and this
+	// sweep is a read-modify-write, which is exactly the lost update the lock exists
+	// to prevent. It is idempotent and keyed off the cleartext key rather than the
+	// file's version, so the next ordinary run does it instead.
+	if d.Ephemeral == nil && (d.ui == nil || !d.ui.stream) {
 		if err := d.migrateAPIKeys(); err != nil {
 			return err
 		}
@@ -813,7 +934,7 @@ func (d *Deps) bindFlags(cmd *cobra.Command) (*viper.Viper, error) {
 	// Non-empty, because that is what viper itself requires before an env value
 	// beats a default: FFT_NO_KEYRING= would otherwise leave the config's choice
 	// standing and silence the warning about it at the same time.
-	if val, ok := os.LookupEnv("FFT_NO_KEYRING"); ok && val != "" {
+	if val, ok := d.lookupEnv("FFT_NO_KEYRING"); ok && val != "" {
 		d.explicitNoKeyring = true
 	}
 
@@ -825,7 +946,7 @@ func (d *Deps) bindFlags(cmd *cobra.Command) (*viper.Viper, error) {
 // is not merely inconvenient, it does not exist.
 func (d *Deps) openSecrets(noKeyring bool) (secrets.Store, error) {
 	if d.Ephemeral != nil {
-		return secrets.NewEnv(os.LookupEnv), nil
+		return secrets.NewEnv(d.lookupEnv), nil
 	}
 	// Through the printer, not the process's stderr: whoever built this run chose
 	// where its notices go, and the file store has no way to know. The printer is

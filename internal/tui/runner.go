@@ -204,4 +204,18 @@ type Runner interface {
 	// leaves the choice to fft's own resolution: the active project, or the
 	// environment.
 	SetProject(name string)
+
+	// SetEmulator points the invocations started after it at a local emulator
+	// serving baseURL, "" to point them back at the selected project.
+	//
+	// It is not a project: the emulator is not in fft's config file and must never
+	// be written to it, and it cannot stand in for Google's sign-in, so a runner
+	// reaches it by giving a run the headless environment a shell would export. The
+	// commands that manage the config file are not redirected — the projects the UI
+	// switches back to are in that file, and a run that could not read it would
+	// leave the UI with nothing to return to.
+	//
+	// Like SetProject, it is taken when a run is started: a run already in flight
+	// keeps the target it was started with.
+	SetEmulator(baseURL string)
 }

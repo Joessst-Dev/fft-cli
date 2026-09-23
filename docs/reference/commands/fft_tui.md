@@ -54,11 +54,14 @@ the selected one and d removes it. Those three ask their own question, in their 
 words, before anything is unpacked or deleted. A component installed here is listed,
 and its commands can be run, without restarting the UI.
 
-The emulator is on the Projects screen, where e opens it: it is a tenant to work
-against rather than a seventh thing to send requests with. s runs the local offline
-emulator and s again stops it, its output fills the pane as it is written, and c
-copies the FFT_* recipe that points another shell at it. Pointing this session at
-the emulator is not possible yet; the recipe and a second shell are.
+The emulator is on the Projects screen: it lists as a row beside your projects,
+because it is a tenant to work against rather than a seventh thing to send requests
+with. enter on that row starts it if it is not running and sends every request in the
+session to it once it is listening; enter on a configured project goes back. It is
+never written to the config file, so r and d refuse it. e opens the pane behind the
+row: s runs the emulator and s again stops it, its output fills the pane as it is
+written, and c copies the FFT_* recipe that points another shell at it. Stopping it
+leaves the session pointed at it and says so, rather than moving the session for you.
 
 Press ? for every key, i for the commands that are running, and y to copy the fft
 command the focused action stands for. Secrets you type and request bodies are

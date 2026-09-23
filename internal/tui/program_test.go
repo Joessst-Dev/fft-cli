@@ -19,13 +19,14 @@ import (
 // answers as a tenant with two projects would. It is safe for the program's
 // goroutines.
 type scriptedRunner struct {
-	mu       sync.Mutex
-	events   chan RunEvent
-	next     RunID
-	log      []string
-	selected []string
-	active   string
-	hold     map[string]bool
+	mu        sync.Mutex
+	events    chan RunEvent
+	next      RunID
+	log       []string
+	selected  []string
+	emulators []string
+	active    string
+	hold      map[string]bool
 }
 
 func newScriptedRunner() *scriptedRunner {
@@ -91,6 +92,12 @@ func (r *scriptedRunner) SetProject(name string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.selected = append(r.selected, name)
+}
+
+func (r *scriptedRunner) SetEmulator(base string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.emulators = append(r.emulators, base)
 }
 
 func (r *scriptedRunner) commandLines() []string {

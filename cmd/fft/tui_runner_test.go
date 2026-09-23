@@ -758,7 +758,10 @@ var _ = Describe("the TUI's command runner", func() {
 // added to Deps and not here fails the spec below, which is the prompt to decide
 // whether a concurrent TUI run may share it.
 var runDepsClassification = map[string]string{
-	"Config":         "shared",
+	"Config": "shared",
+	// Shared, except for a run the UI gave an environment of its own: the credential
+	// then lives in that environment, and the run opens the store it describes. See
+	// [sharedSecrets].
 	"Secrets":        "shared",
 	"Clock":          "shared",
 	"Verify":         "shared",
@@ -776,6 +779,7 @@ var runDepsClassification = map[string]string{
 	"Debug":               "rebuilt",
 	"Project":             "rebuilt",
 	"Ephemeral":           "rebuilt",
+	"lookupEnv":           "rebuilt",
 	"Timeout":             "rebuilt",
 	"AssumeYes":           "rebuilt",
 	"ReadOnlyFlag":        "rebuilt",

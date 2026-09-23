@@ -53,7 +53,7 @@ func (d *Deps) openComponents() {
 		return
 	}
 
-	root, enabled, err := component.Root(os.LookupEnv)
+	root, enabled, err := component.Root(d.env())
 	if err != nil || !enabled {
 		d.Components = component.Open("")
 		return
@@ -281,7 +281,42 @@ func (d *Deps) componentEnv(ctx context.Context, c component.Component, spec com
 		opts.Session = session
 	}
 
-	return component.Environ(os.Environ(), c, spec, opts)
+	return component.Environ(d.componentBaseEnv(), c, spec, opts)
+}
+
+// componentBaseEnv is the environment a component's own child process inherits,
+// before [component.Environ] applies the manifest's declared FFT_ forwarding.
+//
+// A run pointed at another tenant by the UI ([uiRun.env]) must give the component
+// the same masked view [maskedEnv] gives everything else in that run — otherwise a
+// component declaring a forwardable FFT_ variable (the emulator's own
+// FFT_BASE_URL, say) reads the shell's real one straight out of os.Environ,
+// bypassing the masking entirely. The process's own environment is the right base
+// for every other run, which is what os.Environ alone already was.
+//
+// The filtering asks [Deps.env] rather than reproducing what it decides, so the
+// rule lives in one place: an entry survives only if the run's own lookup still
+// reports it, whatever case the environment spells it in.
+func (d *Deps) componentBaseEnv() []string {
+	if d.ui == nil || d.ui.env == nil {
+		return os.Environ()
+	}
+
+	environ := os.Environ()
+	lookup := d.env()
+	base := make([]string, 0, len(environ)+len(d.ui.env))
+	for _, entry := range environ {
+		name, _, _ := strings.Cut(entry, "=")
+		if v, ok := lookup(name); ok {
+			base = append(base, name+"="+v)
+		}
+	}
+	// Last, and unconditionally: the supplied variables describe the tenant this run
+	// was pointed at, and need not be in the process's own environment at all.
+	for _, v := range d.ui.env {
+		base = append(base, v.Name+"="+v.Value)
+	}
+	return base
 }
 
 // componentSession resolves the tenant session a component is to be given: the
