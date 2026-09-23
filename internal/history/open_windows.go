@@ -51,13 +51,21 @@ func openFile(path string, flag int) (*os.File, error) {
 // Such a refusal reads as access denied, which is why that error is retried here
 // and nowhere else: from an open it means what it says.
 //
-// Only the rename can be busy. atomicfile.Write creates a temporary file first,
-// and a state directory that genuinely refuses that answers with the same access
+// Only the rename is taken for busy. atomicfile.Write creates a temporary file
+// first, and a state directory that refuses that answers with the same access
 // denied — a standing "no" that has to keep reading as a failure rather than as a
 // turn to skip. A directory can refuse it while the history file itself stays
 // appendable, so the append that got this far proves nothing about it. os.Rename
-// is the one step of the write that reports an *os.LinkError, which is what tells
-// the two apart.
+// is the one step of the write that reports an *os.LinkError, which is how the two
+// are told apart.
+//
+// That separates the steps, not the temporary from the permanent: Windows does not
+// distinguish them here, and an ACL that lets a file be created but not replaced
+// refuses the rename with the same access denied a held handle does. It reads as
+// busy for as long as it stands, and compaction then stops happening and says
+// nothing. Nothing else changes — no command fails, and the file grows exactly as
+// it did when this was reported instead — which is why it is left rather than paid
+// for by probing the target on a path every append takes.
 func replace(path string, data []byte) error {
 	busy, err := retryShared(func() error {
 		return atomicfile.Write(path, data)
