@@ -94,9 +94,9 @@ type Log struct {
 }
 
 // readLimitFactor bounds a read relative to MaxBytes. Append keeps the file under
-// MaxBytes, give or take a compaction skipped while another process held the
-// lock, so only a file something else wrote comes near it; and the newest entries
-// of such a file are the ones worth reading.
+// MaxBytes, give or take a compaction that stood down (see [Log.compact]), so only
+// a file something else wrote comes near it; and the newest entries of such a file
+// are the ones worth reading.
 const readLimitFactor = 4
 
 // errNotRegular is what every function here says about a history path that holds
@@ -105,10 +105,24 @@ const readLimitFactor = 4
 // have fft write to a file it does not own.
 var errNotRegular = errors.New("not a regular file; move it aside for fft to keep a history there")
 
+// errBusy marks a failure that is nothing but another process's open handle.
+// Windows opens files without FILE_SHARE_DELETE, so an open and a rename of the
+// same path exclude each other: an appender's handle refuses the rename that ends
+// a compaction, and that rename refuses every open. The retry in open_windows.go
+// gives up with this rather than with the bare "access is denied", so that a file
+// compaction could not have to itself is told apart from one it could not write.
+// On unix, where a rename over an open file is ordinary, it never occurs.
+//
+// It says why, not what to do. Compaction skips its turn on it; an append must
+// not. An entry that lost the race was never written, and [Log.Append] has to
+// keep saying so.
+var errBusy = errors.New("the history file is held open by another process")
+
 // CompactError is what [Log.Append] returns when the entry itself was written but
 // the trailing compaction it triggered failed. Unwrap it to inspect the cause; a
 // caller that only cares whether the entry was recorded should treat it as
-// success and report the wrapped error on its own debug channel instead.
+// success and report the wrapped error on its own debug channel instead. A
+// compaction that only stood down is not a failure and is not one of these.
 type CompactError struct {
 	Err error
 }
@@ -131,7 +145,8 @@ func (l Log) maxBytes() int64 {
 // The entry is one write to a file opened for appending, which is what lets any
 // number of fft processes record at once without a lock: the operating system
 // places each write at the end, whole. Only compaction, which rewrites the file,
-// takes a lock — and skips its turn rather than wait for one.
+// takes a lock — and skips its turn rather than wait, for that lock or for the
+// handles that keep it from renaming anything into place on Windows.
 func (l Log) Append(e Entry) error {
 	line, err := json.Marshal(e)
 	if err != nil {
@@ -175,6 +190,11 @@ func (l Log) Append(e Entry) error {
 
 // compact rewrites the file with its newest entries, about half of MaxBytes.
 //
+// It is allowed to do nothing. Another process holding the lock, or on Windows
+// holding a handle no rename can get past, leaves the file over its limit until an
+// append finds it quiet — a cost paid in bytes, where failing would be paid by a
+// command that has already been recorded.
+//
 // An append that lands between the read and the rename below is written to the
 // file being replaced and is lost with it. That is the price of never making an
 // append wait, and it is paid at most once per megabyte of history.
@@ -190,6 +210,12 @@ func (l Log) compact() error {
 
 	data, err := l.read()
 	if err != nil {
+		// Losing the file to another process's handle is the same non-event as
+		// losing the lock above: nothing is wrong with the history, and whichever
+		// append next finds it over the limit and quiet compacts it.
+		if errors.Is(err, errBusy) {
+			return nil
+		}
 		return err
 	}
 	// Another process may have compacted while this one waited for the lock.
@@ -222,7 +248,12 @@ func (l Log) compact() error {
 			out.WriteByte('\n')
 		}
 	}
-	return replace(l.Path, out.Bytes())
+	// Same as the read above: a rename no appender's handle would let through is a
+	// turn skipped, not a failure.
+	if err := replace(l.Path, out.Bytes()); err != nil && !errors.Is(err, errBusy) {
+		return err
+	}
+	return nil
 }
 
 // Read returns every entry in the file, oldest first. A file that does not exist
