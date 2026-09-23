@@ -91,6 +91,16 @@ type Log struct {
 	// it, keeping the newest entries. Zero means [DefaultMaxBytes]. A read keeps
 	// at most the last [readLimitFactor] times MaxBytes of the file.
 	MaxBytes int64
+
+	// OnSkip, when set, is told why a compaction stood down instead of running. It
+	// is not an error channel: nothing failed, and Append still reports success.
+	//
+	// It exists for the one stand-down that may never end. A lock another process
+	// holds is being used to compact right now, so the next append finds the work
+	// done; a rename Windows refuses can, in the worst case, be refused for good
+	// (see errBusy), and a file that then stays over its limit for ever is worth a
+	// line on a caller's debug channel rather than silence.
+	OnSkip func(error)
 }
 
 // readLimitFactor bounds a read relative to MaxBytes. Append keeps the file under
@@ -130,6 +140,15 @@ type CompactError struct {
 func (e *CompactError) Error() string { return "compact history: " + e.Err.Error() }
 
 func (e *CompactError) Unwrap() error { return e.Err }
+
+// skip reports a compaction that stood down, and returns the nil that says so to
+// [Log.Append]. Failing to say it is not itself worth failing over.
+func (l Log) skip(err error) error {
+	if l.OnSkip != nil {
+		l.OnSkip(err)
+	}
+	return nil
+}
 
 func (l Log) maxBytes() int64 {
 	if l.MaxBytes > 0 {
@@ -193,7 +212,8 @@ func (l Log) Append(e Entry) error {
 // It is allowed to do nothing. Another process holding the lock, or on Windows
 // holding a handle no rename can get past, leaves the file over its limit until an
 // append finds it quiet — a cost paid in bytes, where failing would be paid by a
-// command that has already been recorded.
+// command that has already been recorded. [Log.OnSkip] hears about it, so that a
+// file which stays over its limit for ever can still be accounted for.
 //
 // An append that lands between the read and the rename below is written to the
 // file being replaced and is lost with it. That is the price of never making an
@@ -214,7 +234,7 @@ func (l Log) compact() error {
 		// losing the lock above: nothing is wrong with the history, and whichever
 		// append next finds it over the limit and quiet compacts it.
 		if errors.Is(err, errBusy) {
-			return nil
+			return l.skip(err)
 		}
 		return err
 	}
@@ -248,9 +268,12 @@ func (l Log) compact() error {
 			out.WriteByte('\n')
 		}
 	}
-	// Same as the read above: a rename no appender's handle would let through is a
-	// turn skipped, not a failure.
-	if err := replace(l.Path, out.Bytes()); err != nil && !errors.Is(err, errBusy) {
+	if err := replace(l.Path, out.Bytes()); err != nil {
+		// Same as the read above: a rename no appender's handle would let through is
+		// a turn skipped, not a failure.
+		if errors.Is(err, errBusy) {
+			return l.skip(err)
+		}
 		return err
 	}
 	return nil

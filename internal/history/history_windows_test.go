@@ -22,7 +22,12 @@ import (
 var _ = Describe("a history file another process holds open", func() {
 	It("is left uncompacted by an append, which still records its entry", func() {
 		dir := GinkgoT().TempDir()
-		log := history.Log{Path: filepath.Join(dir, "history.jsonl"), MaxBytes: 4096}
+		var skipped []error
+		log := history.Log{
+			Path:     filepath.Join(dir, "history.jsonl"),
+			MaxBytes: 4096,
+			OnSkip:   func(err error) { skipped = append(skipped, err) },
+		}
 
 		var data []byte
 		for i := range 60 {
@@ -45,6 +50,10 @@ var _ = Describe("a history file another process holds open", func() {
 		info, err := os.Stat(log.Path)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(info.Size()).To(BeNumerically(">", log.MaxBytes), "the file was compacted after all")
+
+		// Silence here would be a history that stops shrinking with nothing to say why.
+		Expect(skipped).To(HaveLen(1))
+		Expect(skipped[0]).To(MatchError(ContainSubstring("held open by another process")))
 
 		read, err := log.Read()
 		Expect(err).NotTo(HaveOccurred())

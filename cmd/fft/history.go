@@ -45,7 +45,10 @@ func (d *Deps) historyLog() (history.Log, error) {
 			return history.Log{}, err
 		}
 	}
-	return history.Log{Path: path, MaxBytes: d.historyMaxBytes}, nil
+	// A compaction that stood down is not a failure and must not read as one, but a
+	// history that stops shrinking is worth being able to find out about.
+	onSkip := func(err error) { d.debugHistory("compaction skipped: %v", err) }
+	return history.Log{Path: path, MaxBytes: d.historyMaxBytes, OnSkip: onSkip}, nil
 }
 
 // historyOff says why this run records no history, and "" when it does.
