@@ -245,6 +245,30 @@ var _ = Describe("the emulator pane", func() {
 			Expect(h.view()).To(ContainSubstring("fft · staging"))
 		})
 
+		It("still points the session at it once ready, when an unrelated project removal invalidated the current project's cache while it was starting", func() {
+			open(emulatorInstalled)
+			h.press("esc")
+			selectEmulatorRow()
+			h.press("enter")
+			id := h.lookup("emulator", "--port", "8080")
+
+			// Still binding the port. staging is the project the session would go
+			// back to, and removing it invalidates the cached current-project state
+			// (session.switches) exactly the way a competing selection does — but the
+			// user has not chosen anything else, and the pending arm must survive it.
+			h.press("esc", "up", "up")
+			h.press("d")
+			h.wait()
+			h.typeText("staging")
+			h.press("enter")
+			h.finish(ok(`{}`), "project", "remove", "staging", "--yes")
+			Expect(h.r.emulators).To(BeEmpty(), "the emulator has not reported ready yet")
+
+			h.chunk(id, "fft emulator listening on http://localhost:8080\n")
+			Expect(h.r.emulators).To(Equal([]string{"http://localhost:8080"}),
+				"an unrelated project removal silently cancelled the pending arm")
+		})
+
 		It("starts it again when the session is pointed at one that has stopped", func() {
 			open(emulatorInstalled)
 			h.press("esc")

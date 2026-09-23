@@ -227,6 +227,37 @@ var _ = Describe("the UI", func() {
 			h.lookup("auth", "status")
 		})
 
+		It("does not move the session back onto the project once the emulator has been chosen while the switch was still in flight", func() {
+			// The emulator is already listening, but the session is not yet pointed
+			// at it.
+			h.press("e")
+			h.finish(ok(emulatorInstalled), "component", "list")
+			h.press("s")
+			h.chunk(h.lookup("emulator", "--port", "8080"), "fft emulator listening on http://localhost:8080\n")
+			h.press("esc")
+
+			// Cursor is on prod (this Describe's own BeforeEach). Enter starts an
+			// exclusive project use, which does not answer yet — project use can queue
+			// behind a run holding the config file's read lock, and long enough for
+			// the user to change their mind meanwhile.
+			h.press("enter")
+			id := h.lookup("project", "use", "prod")
+
+			h.press("down")
+			h.press("enter")
+			Expect(h.r.emulators).To(Equal([]string{"http://localhost:8080"}),
+				"enter on the running emulator row should point the session at once")
+
+			// project use finally answers, and did change fft's own active project —
+			// but the session has since moved on to the emulator, and following it now
+			// would silently move the session back.
+			h.finishID(id, ok(""))
+
+			Expect(h.r.emulators).To(Equal([]string{"http://localhost:8080"}),
+				"a slow project use moved the session back to the project after the emulator was chosen")
+			Expect(h.view()).To(ContainSubstring("fft · emulator (http://localhost:8080)"))
+		})
+
 		It("takes u as well as enter", func() {
 			h.press("u")
 			h.lookup("project", "use", "prod")

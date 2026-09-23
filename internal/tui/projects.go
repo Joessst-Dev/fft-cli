@@ -470,11 +470,23 @@ func (p *projectsScreen) useAction(name string) action {
 // it before anything else can run.
 func (p *projectsScreen) use(name string) tea.Cmd {
 	p.succeed("Switching to " + name + "…")
+	// project use is exclusive and can queue behind a run already holding the
+	// config file's read lock, so it can take a while — long enough for the user
+	// to change their mind and press enter on the emulator row instead. Recording
+	// the selection count now, and checking it below, is the same staleness guard
+	// the emulator's own arm uses against the mirror-image race.
+	asked := p.s.selections
 	return p.s.start(p.useAction(name), func(r Result) tea.Cmd {
 		if r.ExitCode != exitcode.OK {
 			// A refused switch changed nothing, so there is nothing to reload.
 			p.fail("switching to "+name, r)
 			return nil
+		}
+		if p.s.selections != asked {
+			// The session has moved on to something else since this was asked for;
+			// selecting the project now would silently move it back. The list is
+			// still worth a reload, since fft's own active project did change.
+			return p.reload()
 		}
 		p.selectProject(name)
 		p.succeed("Now using " + name + ".")
@@ -579,6 +591,9 @@ func (p *projectsScreen) submitForm() tea.Cmd {
 	name := form.value(rowName)
 	form.submitting = true
 	form.failure = nil
+	// See use: the add can take a while, and the emulator row is reachable while
+	// it is in flight.
+	asked := p.s.selections
 	return p.s.start(a, func(r Result) tea.Cmd {
 		form.submitting = false
 		if r.ExitCode != exitcode.OK {
@@ -598,8 +613,10 @@ func (p *projectsScreen) submitForm() tea.Cmd {
 		// has already succeeded, and the list is about to be reloaded.
 		_ = json.Unmarshal(r.Stdout, &added)
 
-		if added.Active && p.s.project == "" {
-			// fft made it the active project, and the UI follows fft's choice.
+		if added.Active && p.s.project == "" && p.s.selections == asked {
+			// fft made it the active project, and the UI follows fft's choice — unless
+			// the user has since chosen something else, the emulator included, in which
+			// case following it now would silently move the session back.
 			p.succeed("Added " + name + "; it is now the active project.")
 			p.selectProject(name)
 			return tea.Batch(p.reload(), p.warmUp())

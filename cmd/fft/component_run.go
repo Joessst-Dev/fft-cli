@@ -281,7 +281,32 @@ func (d *Deps) componentEnv(ctx context.Context, c component.Component, spec com
 		opts.Session = session
 	}
 
-	return component.Environ(os.Environ(), c, spec, opts)
+	return component.Environ(d.componentBaseEnv(), c, spec, opts)
+}
+
+// componentBaseEnv is the environment a component's own child process inherits,
+// before [component.Environ] applies the manifest's declared FFT_ forwarding.
+//
+// A run pointed at another tenant by the UI ([uiRun.env]) must give the component
+// the same masked view [maskedEnv] gives everything else in that run — otherwise a
+// component declaring a forwardable FFT_ variable (the emulator's own
+// FFT_BASE_URL, say) reads the shell's real one straight out of os.Environ,
+// bypassing the masking entirely. The process's own environment is the right base
+// for every other run, which is what os.Environ alone already was.
+func (d *Deps) componentBaseEnv() []string {
+	if d.ui == nil || d.ui.env == nil {
+		return os.Environ()
+	}
+	base := component.WithoutFFT(os.Environ())
+	for _, v := range d.ui.env {
+		base = append(base, v.Name+"="+v.Value)
+	}
+	for name := range uiEnvPassThrough {
+		if v, ok := os.LookupEnv(name); ok {
+			base = append(base, name+"="+v)
+		}
+	}
+	return base
 }
 
 // componentSession resolves the tenant session a component is to be given: the

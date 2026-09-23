@@ -52,8 +52,13 @@ var _ = Describe("the environment a TUI run is given", func() {
 		// Policy, not identity.
 		GinkgoT().Setenv(config.EnvReadOnly, "1")
 		GinkgoT().Setenv(config.EnvHistory, "on")
+		GinkgoT().Setenv("FFT_NO_KEYRING", "1")
 		GinkgoT().Setenv(component.EnvRoot, "/tmp/components")
 		GinkgoT().Setenv("XDG_DATA_HOME", "/tmp/data")
+		// A variable the upstream spec has not grown yet, standing in for one it
+		// grows later: maskedEnv's fail-closed rule has to hide it without anyone
+		// having taught it the name.
+		GinkgoT().Setenv("FFT_SOME_FUTURE_VAR", "should-not-leak")
 
 		lookup := maskedEnv(config.EmulatorEnv("http://localhost:8080"))
 
@@ -76,11 +81,16 @@ var _ = Describe("the environment a TUI run is given", func() {
 		Expect(hasToken).To(BeTrue())
 		Expect(token).To(Equal("emulator-token"))
 
-		for _, name := range []string{config.EnvReadOnly, config.EnvHistory, component.EnvRoot, "XDG_DATA_HOME"} {
+		for _, name := range []string{config.EnvReadOnly, config.EnvHistory, "FFT_NO_KEYRING", component.EnvRoot, "XDG_DATA_HOME"} {
 			v, ok := lookup(name)
 			Expect(ok).To(BeTrue(), "%s was hidden, and it says what fft may do rather than to whom", name)
 			Expect(v).To(Equal(os.Getenv(name)))
 		}
+
+		// The actual fail-closed rule: an FFT_ variable maskedEnv does not know by
+		// name is hidden too, not merely the ones this spec happens to set above.
+		_, hasFuture := lookup("FFT_SOME_FUTURE_VAR")
+		Expect(hasFuture).To(BeFalse(), "an FFT_ variable the recipe and the pass-through list both leave out must stay hidden")
 	})
 })
 
@@ -106,6 +116,33 @@ var _ = Describe("a TUI session pointed at the emulator", func() {
 		Expect(res.Project).To(Equal(config.EphemeralName))
 		Expect(e.recorded()).To(HaveLen(1))
 		Expect(t.recorded()).To(BeEmpty(), "the configured tenant was sent a request")
+	})
+
+	It("gives a component it dispatches to the emulator's masked environment, not the shell's own", func() {
+		base, _ := c.fakeEmulator()
+		// The shell's own tenant, exported before fft started. The bug this guards
+		// against had componentEnv build the child's environment from os.Environ
+		// directly, so this leaked straight through instead of being hidden by
+		// maskedEnv like everything else a run pointed at the emulator sees.
+		c.setenv(config.EnvBaseURL, "https://acme.api.fulfillmenttools.com")
+
+		m := fakeManifest("probe")
+		m.Env = []string{config.EnvBaseURL}
+		c.installFake(m)
+
+		r := c.newRunner()
+		r.SetEmulator(base)
+
+		// A component dispatch from the UI is refused unless the run is streamed;
+		// see Deps.guard.
+		id := start(r, tui.Invocation{Args: []string{"probe"}, Stream: true})
+		res := awaitDone(r, id)[id]
+		Expect(res.ExitCode).To(Equal(exitcode.OK), "stderr: %s", res.Stderr)
+
+		var rep fakeReport
+		Expect(json.Unmarshal(res.Stdout, &rep)).To(Succeed(), "stdout: %s", res.Stdout)
+		Expect(rep.Env[config.EnvBaseURL]).To(Equal(base),
+			"the component read the shell's real FFT_BASE_URL instead of the emulator's own")
 	})
 
 	It("signs in to nothing, whatever the shell was going to sign in as", func() {

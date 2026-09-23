@@ -101,10 +101,13 @@ type emulatorPane struct {
 	// reports the port bound. Set by the Projects screen's emulator row, which is
 	// asked to use an emulator that is not running yet.
 	//
-	// armedAt is the session's selection count when that was asked for. A server can
-	// take seconds to bind, and a user who changes their mind meanwhile and picks a
-	// project bumps that count — so the ready line, arriving after, must not quietly
-	// move the session back. What was asked for last wins.
+	// armedAt is session.selections when that was asked for — the count of the
+	// user's own project/emulator choices, not [session.switches], which also
+	// advances for a project removed out from under the current selection and
+	// would cancel this arm on a change the user never made. A server can take
+	// seconds to bind, and a user who changes their mind meanwhile and picks a
+	// project bumps selections — so the ready line, arriving after, must not
+	// quietly move the session back. What was asked for last wins.
 	useWhenReady bool
 	armedAt      uint64
 
@@ -241,7 +244,7 @@ func (e *emulatorPane) use() (notice string, f *failure, cmd tea.Cmd) {
 // arm asks for the session to be pointed at this emulator once it reports the port
 // bound, and records the selection that asked; see [emulatorPane.useWhenReady].
 func (e *emulatorPane) arm() {
-	e.useWhenReady, e.armedAt = true, e.s.switches
+	e.useWhenReady, e.armedAt = true, e.s.selections
 }
 
 // useNow points the session at an emulator that is already listening.
@@ -337,8 +340,10 @@ func (e *emulatorPane) observe(c *Chunk) tea.Cmd {
 				// succeeded, so pointing the session here means it is pointed at a port
 				// that answers. And only if nothing has been selected since it was asked
 				// for — a user who started the emulator and then chose a project meant
-				// the project.
-				stillWanted := e.armedAt == e.s.switches
+				// the project. selections, not switches: an unrelated invalidation (a
+				// project removed out from under the current selection, say) must not
+				// silently cancel an arm the user never contradicted.
+				stillWanted := e.armedAt == e.s.selections
 				e.useWhenReady = false
 				if stillWanted {
 					cmd = e.useNow()

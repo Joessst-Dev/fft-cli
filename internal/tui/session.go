@@ -58,10 +58,21 @@ type session struct {
 	// reported it.
 	resolved string
 
-	// switches counts the UI's project selections. A run that reads something
-	// about the current project notes it when it starts, and an answer that
-	// arrives after a switch is about a project the UI has left.
+	// switches counts every invalidation of what is known about the current
+	// project — a selection, but also a project removed out from under it
+	// ([session.forgetProject], [session.forgetCurrent]). A run that reads
+	// something about the current project notes it when it starts, and an answer
+	// that arrives after a switch is about a project the UI has left.
 	switches uint64
+
+	// selections counts only the UI's own choice of a project or the emulator —
+	// [session.selectProject] and [session.selectEmulator] specifically, not
+	// every reason switches advances. A pending "use it when ready" arm
+	// ([emulatorPane.armedAt]) needs that narrower signal: a project removed out
+	// from under the current selection also bumps switches, but it is not the
+	// user choosing something else, and must not cancel an arm they never
+	// contradicted.
+	selections uint64
 
 	// readOnlyFloor is fft tui --read-only or FFT_READ_ONLY: every project is
 	// read-only for this session, whatever its configuration says.
@@ -245,6 +256,7 @@ func (s *session) selectProject(name string) {
 	// how a session stops talking to it.
 	s.selectEmulator("")
 	s.setProject(name)
+	s.selections++
 }
 
 // forgetProject drops the UI's selection and leaves the choice to fft's own
@@ -265,6 +277,7 @@ func (s *session) setProject(name string) {
 // The UI's own project selection is left standing underneath, so that pointing back
 // returns to the project the user was on rather than to whatever fft would resolve.
 func (s *session) selectEmulator(baseURL string) {
+	s.selections++
 	if s.emulator == baseURL {
 		return
 	}
