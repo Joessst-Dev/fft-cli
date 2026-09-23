@@ -31,12 +31,3 @@ func makeUnwritable(dir string) {
 		gomega.Expect(os.Chmod(dir, dirMode)).To(gomega.Succeed())
 	})
 }
-
-func makeUnreadable(dir string) {
-	ginkgo.GinkgoHelper()
-
-	gomega.Expect(os.Chmod(dir, 0)).To(gomega.Succeed())
-	ginkgo.DeferCleanup(func() {
-		gomega.Expect(os.Chmod(dir, dirMode)).To(gomega.Succeed())
-	})
-}

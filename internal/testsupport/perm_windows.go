@@ -65,30 +65,6 @@ func makeUnwritable(dir string) {
 	})
 }
 
-// makeUnreadable denies the account running the suite the right to list dir's
-// contents, leaving dir itself in place as a real directory.
-//
-// This is the lever a spec needs when it must tell "the directory exists but
-// cannot be read" apart from "the directory is missing" — replacing dir with a
-// file does not do that on Windows, where os.ReadDir on a path that used to be
-// a directory reports the same shape as a path that was never there. (RD) is
-// the right that lets FindFirstFile enumerate a directory's entries; denying
-// it for the account's own SID beats every allow ACE the directory inherits,
-// including the ones held through Administrators group membership — which is
-// what CI runs as — because Windows checks deny entries first.
-func makeUnreadable(dir string) {
-	ginkgo.GinkgoHelper()
-
-	me, err := user.Current()
-	gomega.Expect(err).NotTo(gomega.HaveOccurred())
-	sid := "*" + me.Uid
-
-	icacls(dir, "/deny", sid+":(RD)")
-	ginkgo.DeferCleanup(func() {
-		icacls(dir, "/remove:d", sid)
-	})
-}
-
 // icacls runs the Windows ACL editor over dir and fails the spec with its output
 // if it does not succeed. The output is the whole diagnosis: icacls reports
 // "Failed processing 1 files" on its stdout and merely exits non-zero.
