@@ -613,10 +613,13 @@ func (p *projectsScreen) submitForm() tea.Cmd {
 		// has already succeeded, and the list is about to be reloaded.
 		_ = json.Unmarshal(r.Stdout, &added)
 
-		if added.Active && p.s.project == "" && p.s.selections == asked {
+		if added.Active && p.s.project == "" && p.s.selections == asked && !p.s.usingEmulator() {
 			// fft made it the active project, and the UI follows fft's choice — unless
-			// the user has since chosen something else, the emulator included, in which
-			// case following it now would silently move the session back.
+			// the user has since chosen something else, or is working against the
+			// emulator, in which case following it now would silently move the session
+			// onto a tenant. Adding a project is not a request to leave the emulator,
+			// and a first run with nothing configured is exactly when both happen at
+			// once; the switch is offered below instead of made here.
 			p.succeed("Added " + name + "; it is now the active project.")
 			p.selectProject(name)
 			return tea.Batch(p.reload(), p.warmUp())
@@ -628,6 +631,22 @@ func (p *projectsScreen) submitForm() tea.Cmd {
 			p.s.forgetCurrent()
 			p.succeed("Replaced " + name + ".")
 			return tea.Batch(p.reload(), p.warmUp())
+		}
+
+		if p.s.usingEmulator() {
+			// Said plainly, because fft may well have made it active and the table is
+			// about to mark it so while the session goes on reaching the emulator.
+			p.succeed("Added " + name + ", but this session is still using the emulator.")
+			if !stillOpen {
+				return p.reload()
+			}
+			p.dialog = armed(&confirmDialog{
+				question: fmt.Sprintf("Switch to %s now?", name),
+				detail:   "This session stops using the emulator, which goes on running.",
+				command:  p.useAction(name).display,
+				onYes:    func() tea.Cmd { return p.use(name) },
+			}, p.s.now, true)
+			return p.reload()
 		}
 
 		if !stillOpen {

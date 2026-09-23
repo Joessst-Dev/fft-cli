@@ -290,22 +290,27 @@ func (e *emulatorPane) start() (tea.Cmd, bool) {
 			e.state = emulatorStopped
 			e.notice = "The emulator has stopped."
 			e.failure = nil
+			if e.s.usingEmulator() {
+				// The session is left where it is. Moving it back on the emulator's way
+				// out would change what the next request reaches without the user asking,
+				// and what they asked for was to stop a server, not to talk to a tenant.
+				e.notice = "The emulator has stopped, and this session is still pointed at it: " +
+					"press s to start it again, or choose a project on the Projects screen."
+			}
 		default:
+			// The failure stands, whether or not the session is pointed here. A restart
+			// that could not bind the port has something to say, and "it has stopped" is
+			// not it: saying that instead would leave the user with no way to find out
+			// why pressing enter did nothing.
 			e.state = emulatorFailed
 			e.notice = ""
 			e.failure = &failure{what: "running the emulator", result: r}
 		}
 		e.useWhenReady = false
-		if e.s.usingEmulator() {
-			// The session is left where it is. Moving it back on the emulator's way out
-			// would change what the next request reaches without the user asking, and
-			// what they asked for was to stop a server, not to talk to their tenant.
-			e.notice = "The emulator has stopped, and this session is still pointed at it: " +
-				"press s to start it again, or choose a project on the Projects screen."
-			e.failure = nil
-			if e.afterStop != nil {
-				e.afterStop()
-			}
+		if e.s.usingEmulator() && e.afterStop != nil {
+			// Either way the list behind the pane must stop saying the session is using
+			// an emulator that is answering.
+			e.afterStop()
 		}
 		return nil
 	})

@@ -311,6 +311,87 @@ var _ = Describe("the emulator pane", func() {
 			Expect(h.m.s.usingEmulator()).To(BeTrue())
 		})
 
+		It("keeps using the emulator when the first project is added, and offers the switch", func() {
+			// A first run: nothing configured, working against the emulator. fft makes
+			// the added project active, and the UI must not follow that onto a tenant.
+			h = newHarness(Options{})
+			h.loaded(`[]`, `{"project":"","store":"keyring","signIn":"none","token":"none"}`)
+			h.press("e")
+			h.finish(ok(emulatorInstalled), "component", "list")
+			h.press("s")
+			h.chunk(h.lookup("emulator", "--port", "8080"), "fft emulator listening on http://localhost:8080\n")
+			h.press("esc")
+			h.press("enter")
+			Expect(h.m.s.usingEmulator()).To(BeTrue())
+
+			h.press("a")
+			h.typeText("demo")
+			h.press("tab")
+			h.typeText("https://demo.example.com")
+			h.press("tab")
+			h.typeText("AIzaSyKey")
+			h.press("tab", "tab")
+			h.typeText("bot")
+			h.press("tab")
+			h.typeText("acme")
+			h.press("tab")
+			h.typeText("pre")
+			h.press("tab", "tab")
+			h.typeText("secret")
+			h.press("ctrl+s")
+			h.finishID(RunID(len(h.r.started)), Result{ExitCode: 0, Stdout: []byte(`{"name":"demo","active":true}`)})
+
+			Expect(h.m.s.usingEmulator()).To(BeTrue(), "adding a project moved the session off the emulator")
+			// Offered, not taken: the switch is a question, and it says what it costs.
+			Expect(h.view()).To(ContainSubstring("Switch to demo now?"))
+			Expect(h.view()).To(ContainSubstring("This session stops using the emulator"))
+
+			h.wait()
+			h.press("n")
+			Expect(h.m.s.usingEmulator()).To(BeTrue())
+			Expect(h.view()).To(ContainSubstring("but this session is still using the emulator"))
+			Expect(h.r.emulators).To(Equal([]string{"http://localhost:8080"}))
+		})
+
+		It("says why a restart could not bind, rather than that it stopped", func() {
+			open(emulatorInstalled)
+			h.press("esc")
+			selectEmulatorRow()
+			h.press("enter")
+			first := h.lookup("emulator", "--port", "8080")
+			h.chunk(first, "fft emulator listening on http://localhost:8080\n")
+			h.finishID(first, Result{ExitCode: exitcode.Interrupted})
+			Expect(h.view()).To(ContainSubstring("still pointed at it"))
+
+			h.press("esc")
+			selectEmulatorRow()
+			h.press("enter")
+			h.finish(failed(exitcode.General, "listen tcp 127.0.0.1:8080: address already in use"),
+				"emulator", "--port", "8080")
+
+			Expect(h.view()).To(ContainSubstring("running the emulator failed: exit 1"))
+			Expect(h.view()).To(ContainSubstring("address already in use"))
+			Expect(h.view()).NotTo(ContainSubstring("The emulator has stopped"),
+				"the real failure was overwritten by the stopped notice")
+		})
+
+		It("drops a pending arm when the project already in use is chosen again", func() {
+			open(emulatorInstalled)
+			h.press("esc")
+			selectEmulatorRow()
+			h.press("enter")
+			id := h.lookup("emulator", "--port", "8080")
+
+			// staging is already the current project, so this changes nothing about the
+			// session — but it is still the user contradicting the arm.
+			h.press("esc", "up", "up")
+			h.press("enter")
+			h.finish(ok(`{}`), "project", "use", "staging")
+
+			h.chunk(id, "fft emulator listening on http://localhost:8080\n")
+			Expect(h.r.emulators).To(BeEmpty(), "the arm survived a competing selection")
+		})
+
 		It("refuses to protect or remove a row that is not in the config file", func() {
 			open(emulatorInstalled)
 			h.press("esc")

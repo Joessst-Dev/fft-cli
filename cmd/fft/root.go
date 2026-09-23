@@ -337,16 +337,23 @@ func (d *Deps) env() func(string) (string, bool) {
 //
 // Anything without the FFT_ prefix is the machine's, not the tenant's: XDG_DATA_HOME
 // and XDG_STATE_HOME still say where this machine keeps its files.
+//
+// The name is matched without regard to case, because Windows environment lookups
+// ignore it: a mask that a lowercase fft_password walks through is not a mask. It
+// costs nothing where the case was canonical already, and it is what lets this be
+// the single rule — [Deps.componentBaseEnv] filters a whole os.Environ through it,
+// whatever case the entries happen to have.
 func maskedEnv(env []config.EnvVar) func(string) (string, bool) {
 	supplied := make(map[string]string, len(env))
 	for _, v := range env {
-		supplied[v.Name] = v.Value
+		supplied[strings.ToUpper(v.Name)] = v.Value
 	}
 	return func(name string) (string, bool) {
-		if v, ok := supplied[name]; ok {
+		upper := strings.ToUpper(name)
+		if v, ok := supplied[upper]; ok {
 			return v, true
 		}
-		if strings.HasPrefix(name, "FFT_") && !uiEnvPassThrough[name] {
+		if strings.HasPrefix(upper, "FFT_") && !uiEnvPassThrough[upper] {
 			return "", false
 		}
 		return os.LookupEnv(name)

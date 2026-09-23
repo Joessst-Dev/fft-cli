@@ -293,18 +293,28 @@ func (d *Deps) componentEnv(ctx context.Context, c component.Component, spec com
 // FFT_BASE_URL, say) reads the shell's real one straight out of os.Environ,
 // bypassing the masking entirely. The process's own environment is the right base
 // for every other run, which is what os.Environ alone already was.
+//
+// The filtering asks [Deps.env] rather than reproducing what it decides, so the
+// rule lives in one place: an entry survives only if the run's own lookup still
+// reports it, whatever case the environment spells it in.
 func (d *Deps) componentBaseEnv() []string {
 	if d.ui == nil || d.ui.env == nil {
 		return os.Environ()
 	}
-	base := component.WithoutFFT(os.Environ())
-	for _, v := range d.ui.env {
-		base = append(base, v.Name+"="+v.Value)
-	}
-	for name := range uiEnvPassThrough {
-		if v, ok := os.LookupEnv(name); ok {
+
+	environ := os.Environ()
+	lookup := d.env()
+	base := make([]string, 0, len(environ)+len(d.ui.env))
+	for _, entry := range environ {
+		name, _, _ := strings.Cut(entry, "=")
+		if v, ok := lookup(name); ok {
 			base = append(base, name+"="+v)
 		}
+	}
+	// Last, and unconditionally: the supplied variables describe the tenant this run
+	// was pointed at, and need not be in the process's own environment at all.
+	for _, v := range d.ui.env {
+		base = append(base, v.Name+"="+v.Value)
 	}
 	return base
 }

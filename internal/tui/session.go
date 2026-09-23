@@ -253,9 +253,12 @@ func (s *session) readOnly() bool {
 func (s *session) selectProject(name string) {
 	// A project and the emulator are alternatives, and this is the way back: the
 	// emulator row has no fft project use to run, so choosing a configured project is
-	// how a session stops talking to it.
-	s.selectEmulator("")
+	// how a session stops talking to it. setEmulator rather than selectEmulator,
+	// because this is one choice and must count once.
+	s.setEmulator("")
 	s.setProject(name)
+	// Unconditionally, even when it names the project already in use: choosing it
+	// again is still a choice, and a pending emulator arm it contradicts must go.
 	s.selections++
 }
 
@@ -278,6 +281,13 @@ func (s *session) setProject(name string) {
 // returns to the project the user was on rather than to whatever fft would resolve.
 func (s *session) selectEmulator(baseURL string) {
 	s.selections++
+	s.setEmulator(baseURL)
+}
+
+// setEmulator changes where the runs go without counting a choice, for the caller
+// that is already counting one of its own. A call that changes nothing does
+// nothing: it is not a selection, and must not cancel a pending arm.
+func (s *session) setEmulator(baseURL string) {
 	if s.emulator == baseURL {
 		return
 	}

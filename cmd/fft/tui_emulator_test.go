@@ -277,6 +277,35 @@ var _ = Describe("a run the TUI is streaming", func() {
 		awaitDone(r, held)
 	})
 
+	It("hides a tenant variable from a component whatever case the shell spelled it in", func() {
+		c := newCLI()
+		base, _ := c.fakeEmulator()
+		// Windows environment lookups ignore case, so a mask that only strips the
+		// canonical spelling is one a child can walk straight through. The component
+		// asks for the canonical name; the shell exported the other one.
+		c.setenv("fft_password", "real-secret")
+		c.setenv(config.EnvBaseURL, "https://acme.api.fulfillmenttools.com")
+
+		m := fakeManifest("probe")
+		m.Env = []string{config.EnvBaseURL}
+		c.installFake(m)
+
+		r := c.newRunner()
+		r.SetEmulator(base)
+
+		id := start(r, tui.Invocation{Args: []string{"probe"}, Stream: true})
+		res := awaitDone(r, id)[id]
+		Expect(res.ExitCode).To(Equal(exitcode.OK), "stderr: %s", res.Stderr)
+
+		var rep fakeReport
+		Expect(json.Unmarshal(res.Stdout, &rep)).To(Succeed(), "stdout: %s", res.Stdout)
+		Expect(rep.Env[config.EnvBaseURL]).To(Equal(base))
+		for name, v := range rep.Env {
+			Expect(strings.ToUpper(name)).NotTo(Equal(config.EnvPassword),
+				"the shell's password reached the component as %q=%q", name, v)
+		}
+	})
+
 	It("does not sweep a pre-v2 config file, which it holds no lock on", func() {
 		c := newCLI()
 		// A version-1 config with the Firebase API key still in the plaintext field,
