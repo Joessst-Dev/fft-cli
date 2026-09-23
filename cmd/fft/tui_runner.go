@@ -572,6 +572,9 @@ func (r *cliRunner) execute(ctx context.Context, id tui.RunID, j job) tui.Result
 		// reads the file again. A save that lands during that one read is atomic, so
 		// the child gets the file as it was before or as it is after — and a switch the
 		// user made after starting a server is not a switch that server was promised.
+		//
+		// The one read-modify-write such a run would otherwise do is the pre-v2 API key
+		// sweep, which [Deps.complete] skips for exactly this reason.
 
 	default:
 		r.config.RLock()

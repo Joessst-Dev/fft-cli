@@ -545,7 +545,10 @@ func (p *projectsScreen) removeDialog(row projectRow) dialog {
 			switch row.Name {
 			case p.s.project:
 				// The UI's choice is gone with it; fft's own resolution decides again.
-				p.selectProject("")
+				// A session working against the emulator stays there: it is the project
+				// it would have gone back to that was removed, not the emulator.
+				p.s.forgetProject()
+				p.syncCurrent()
 			case p.s.currentProject():
 				// fft's own choice is gone; until the list says what it chooses now,
 				// nothing known about the removed project may pass for the current one.
@@ -727,9 +730,12 @@ func (p *projectsScreen) view(width, height int) string {
 	case !p.loaded && p.failure == nil:
 		lines = append(lines, st.dim.Render("Loading projects…"))
 	default:
-		// Said above the table rather than instead of it: the emulator row is always
-		// there, and it is the one thing a first run can usefully press enter on.
-		if p.listed == 0 {
+		// Said above the table rather than instead of it: once the list has been read,
+		// the emulator row is still there, and it is the one thing a first run can
+		// usefully press enter on. Only once it has been read — a list that could not
+		// be read says nothing about what is configured, and the failure below says
+		// what actually happened.
+		if p.loaded && p.listed == 0 {
 			lines = append(lines, "No projects are configured. Press a to add one.", "")
 		}
 		lines = append(lines, p.table(width)...)

@@ -823,7 +823,13 @@ func (d *Deps) complete(cmd *cobra.Command) error {
 	// Sweep any pre-v2 cleartext API key out of the config file and into the
 	// secret store now that both are open. Headless runs touch neither file, so
 	// there is nothing to migrate there.
-	if d.Ephemeral == nil {
+	//
+	// Nor does a run the UI is streaming. That run holds no lock on the config file,
+	// because it may serve until it is stopped (see [cliRunner.execute]) — and this
+	// sweep is a read-modify-write, which is exactly the lost update the lock exists
+	// to prevent. It is idempotent and keyed off the cleartext key rather than the
+	// file's version, so the next ordinary run does it instead.
+	if d.Ephemeral == nil && (d.ui == nil || !d.ui.stream) {
 		if err := d.migrateAPIKeys(); err != nil {
 			return err
 		}

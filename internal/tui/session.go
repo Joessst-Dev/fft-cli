@@ -244,6 +244,16 @@ func (s *session) selectProject(name string) {
 	// emulator row has no fft project use to run, so choosing a configured project is
 	// how a session stops talking to it.
 	s.selectEmulator("")
+	s.setProject(name)
+}
+
+// forgetProject drops the UI's selection and leaves the choice to fft's own
+// resolution. Unlike [session.selectProject] it does not change where the runs go:
+// it is for a project that has been *removed*, and removing one is not a request to
+// stop working against the emulator.
+func (s *session) forgetProject() { s.setProject("") }
+
+func (s *session) setProject(name string) {
 	s.project = name
 	s.forgetCurrent()
 	s.runner.SetProject(name)

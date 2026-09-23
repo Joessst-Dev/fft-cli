@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -237,6 +238,37 @@ var _ = Describe("a run the TUI is streaming", func() {
 
 		close(release)
 		awaitDone(r, held)
+	})
+
+	It("does not sweep a pre-v2 config file, which it holds no lock on", func() {
+		c := newCLI()
+		// A version-1 config with the Firebase API key still in the plaintext field,
+		// as a pre-migration fft would have left it.
+		Expect(os.MkdirAll(filepath.Dir(c.configPath), 0o700)).To(Succeed())
+		Expect(os.WriteFile(c.configPath, []byte(`version: 1
+activeProject: legacy
+projects:
+    - name: legacy
+      baseUrl: https://legacy.api.fulfillmenttools.com
+      firebaseApiKey: AIzaSyLegacy
+      email: bot@ocff-acme-prd.com
+`), 0o600)).To(Succeed())
+
+		r := c.newRunner()
+		id := start(r, tui.Invocation{Args: []string{"project", "list"}, Stream: true})
+		Expect(awaitDone(r, id)[id].ExitCode).To(Equal(exitcode.OK))
+
+		// The sweep is a read-modify-write, and this run takes no lock: doing it here
+		// is how it loses an exclusive run's update.
+		Expect(c.secrets.Snapshot()).NotTo(HaveKey("fft:legacy:apiKey"))
+		data, err := os.ReadFile(c.configPath)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(string(data)).To(ContainSubstring("firebaseApiKey"))
+
+		// Deferred, not dropped: the next ordinary run holds the lock and does it.
+		id = start(r, tui.Invocation{Args: []string{"project", "list"}})
+		Expect(awaitDone(r, id)[id].ExitCode).To(Equal(exitcode.OK))
+		Expect(c.secrets.Snapshot()).To(HaveKeyWithValue("fft:legacy:apiKey", "AIzaSyLegacy"))
 	})
 })
 

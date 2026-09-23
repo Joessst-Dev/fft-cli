@@ -100,7 +100,13 @@ type emulatorPane struct {
 	// useWhenReady says the session is to be pointed at this emulator as soon as it
 	// reports the port bound. Set by the Projects screen's emulator row, which is
 	// asked to use an emulator that is not running yet.
+	//
+	// armedAt is the session's selection count when that was asked for. A server can
+	// take seconds to bind, and a user who changes their mind meanwhile and picks a
+	// project bumps that count — so the ready line, arriving after, must not quietly
+	// move the session back. What was asked for last wins.
 	useWhenReady bool
+	armedAt      uint64
 
 	// afterUse is what the Projects screen wants done once the session has been
 	// pointed: say so, and read the credential state again, which is now the
@@ -193,24 +199,30 @@ func (e *emulatorPane) toggle() tea.Cmd {
 // use points the session at the emulator, starting it first if it is not running.
 // It reports what the user should be told about that, and the work it started.
 func (e *emulatorPane) use() (notice string, f *failure, cmd tea.Cmd) {
-	switch {
-	case e.s.usingEmulator():
-		return "This session is already using the emulator.", nil, nil
-	case e.state == emulatorRunning:
-		return "", nil, e.useNow()
-	case e.running():
-		// Starting: the ready line points the session, as it would have anyway.
-		e.useWhenReady = true
+	if e.running() {
+		switch {
+		case e.s.usingEmulator():
+			return "This session is already using the emulator.", nil, nil
+		case e.state == emulatorRunning:
+			return "", nil, e.useNow()
+		}
+		// Still binding the port: the ready line points the session, as it would have.
+		e.arm()
 		return "The emulator is starting; this session will use it once it is listening.", nil, nil
 	}
 
+	// Not running — and that includes an emulator the session is still pointed at,
+	// because stopping one leaves the session where it was. Pressing enter on the row
+	// then is exactly the request to have it answering again, so it is started rather
+	// than reported as already in use.
+	again := e.s.usingEmulator()
 	cmd, started := e.start()
 	if !started {
 		// Nothing runs, so nothing will ever be ready. Why is the pane's to say — the
 		// component is not installed, or the runner refused the run.
 		return e.notice, e.failure, cmd
 	}
-	e.useWhenReady = true
+	e.arm()
 
 	// There is output to watch now, so show where it goes rather than leave the user
 	// on a list that only says it is starting. The component list is read with it,
@@ -220,7 +232,16 @@ func (e *emulatorPane) use() (notice string, f *failure, cmd tea.Cmd) {
 	if e.components != nil {
 		cmd = tea.Batch(e.components.want(), cmd)
 	}
+	if again {
+		return "Starting the emulator again; this session is pointed at it.", nil, cmd
+	}
 	return "Starting the emulator; this session will use it once it is listening.", nil, cmd
+}
+
+// arm asks for the session to be pointed at this emulator once it reports the port
+// bound, and records the selection that asked; see [emulatorPane.useWhenReady].
+func (e *emulatorPane) arm() {
+	e.useWhenReady, e.armedAt = true, e.s.switches
 }
 
 // useNow points the session at an emulator that is already listening.
@@ -314,8 +335,14 @@ func (e *emulatorPane) observe(c *Chunk) tea.Cmd {
 			if e.useWhenReady {
 				// Only now: the line is printed by the ready callback, after the listen
 				// succeeded, so pointing the session here means it is pointed at a port
-				// that answers.
-				cmd = e.useNow()
+				// that answers. And only if nothing has been selected since it was asked
+				// for — a user who started the emulator and then chose a project meant
+				// the project.
+				stillWanted := e.armedAt == e.s.switches
+				e.useWhenReady = false
+				if stillWanted {
+					cmd = e.useNow()
+				}
 			}
 		}
 	}

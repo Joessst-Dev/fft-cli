@@ -84,6 +84,15 @@ var _ = Describe("the UI", func() {
 			Expect(h.r.commandLines()).To(Equal([]string{"project list", "auth status"}))
 		})
 
+		It("does not call a list it could not read an empty one", func() {
+			h.finish(failed(exitcode.Config, "Error: the config file cannot be read"), "project", "list")
+			h.finish(failed(exitcode.Config, "Error: no active project"), "auth", "status")
+
+			Expect(h.view()).To(ContainSubstring("listing the projects failed"))
+			Expect(h.view()).NotTo(ContainSubstring("No projects are configured"),
+				"a list that could not be read says nothing about what is configured")
+		})
+
 		It("shows no project and no error when none is configured", func() {
 			h.finish(ok(`[]`), "project", "list")
 			h.finish(failed(exitcode.Config, "Error: no active project"), "auth", "status")

@@ -135,7 +135,8 @@ var _ = Describe("the emulator pane", func() {
 		selectEmulatorRow := func() {
 			GinkgoHelper()
 			h.press("down", "down")
-			Expect(h.view()).To(MatchRegexp(`> \s+emulator`))
+			// The row carries a * of its own once the session is using it.
+			Expect(h.view()).To(MatchRegexp(`>\s+\*?\s*emulator`))
 		}
 
 		It("starts the emulator first, and points the session only once it is listening", func() {
@@ -222,6 +223,68 @@ var _ = Describe("the emulator pane", func() {
 			Expect(h.r.emulators).To(Equal([]string{"http://localhost:8080", ""}))
 			Expect(h.view()).To(ContainSubstring("Now using staging."))
 			Expect(h.view()).To(ContainSubstring("fft · staging"))
+		})
+
+		It("leaves the session alone when a project is chosen while it is still starting", func() {
+			open(emulatorInstalled)
+			h.press("esc")
+			selectEmulatorRow()
+			h.press("enter")
+			id := h.lookup("emulator", "--port", "8080")
+
+			// Changed their mind before the port was bound.
+			h.press("esc", "up", "up")
+			h.press("enter")
+			h.finish(ok(`{}`), "project", "use", "staging")
+			Expect(h.r.emulators).To(BeEmpty())
+
+			// The ready line arrives after, and must not overrule what was asked for
+			// last: the session stays on the project.
+			h.chunk(id, "fft emulator listening on http://localhost:8080\n")
+			Expect(h.r.emulators).To(BeEmpty(), "the session was moved after the user chose a project")
+			Expect(h.view()).To(ContainSubstring("fft · staging"))
+		})
+
+		It("starts it again when the session is pointed at one that has stopped", func() {
+			open(emulatorInstalled)
+			h.press("esc")
+			selectEmulatorRow()
+			h.press("enter")
+			first := h.lookup("emulator", "--port", "8080")
+			h.chunk(first, "fft emulator listening on http://localhost:8080\n")
+			h.finishID(first, Result{ExitCode: exitcode.Interrupted})
+			Expect(h.m.s.usingEmulator()).To(BeTrue(), "stopping it does not move the session")
+
+			h.press("esc")
+			selectEmulatorRow()
+			started := len(h.r.started)
+			h.press("enter")
+
+			Expect(len(h.r.started)).To(BeNumerically(">", started),
+				"enter on a session pointed at a stopped emulator must start it again")
+			h.lookup("emulator", "--port", "8080")
+			Expect(h.view()).To(ContainSubstring("Status: starting"))
+		})
+
+		It("keeps working against the emulator when the project behind it is removed", func() {
+			open(emulatorInstalled)
+			h.press("esc")
+			selectEmulatorRow()
+			h.press("enter")
+			h.chunk(h.lookup("emulator", "--port", "8080"), "fft emulator listening on http://localhost:8080\n")
+			Expect(h.r.emulators).To(Equal([]string{"http://localhost:8080"}))
+
+			// staging is the project the session would go back to, and it is removed.
+			h.press("esc", "up", "up")
+			h.press("d")
+			h.wait()
+			h.typeText("staging")
+			h.press("enter")
+			h.finish(ok(`{}`), "project", "remove", "staging", "--yes")
+
+			Expect(h.r.emulators).To(Equal([]string{"http://localhost:8080"}),
+				"removing a project is not a request to stop using the emulator")
+			Expect(h.m.s.usingEmulator()).To(BeTrue())
 		})
 
 		It("refuses to protect or remove a row that is not in the config file", func() {
