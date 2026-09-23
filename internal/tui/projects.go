@@ -9,6 +9,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/Joessst-Dev/fft-cli/internal/config"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/output"
 )
@@ -18,7 +19,15 @@ import (
 const headlessExplanation = "fft is running from the environment (FFT_BASE_URL is set), so projects " +
 	"cannot be added, switched, changed or removed here. Unset the FFT_* variables to manage the config file."
 
-// projectRow is one entry of `fft project list -o json`.
+// emulatorExplanation is why the Projects screen changes nothing about the
+// emulator row. It is not the headless one: unsetting FFT_* would not help, because
+// the emulator was never in the config file to begin with.
+const emulatorExplanation = "the emulator is not a configured project — it is the local server the " +
+	"UI starts, and it is never written to the config file. Press enter to work against it, " +
+	"or e for the pane that runs it."
+
+// projectRow is one entry of `fft project list -o json`, or the row the UI adds
+// for the emulator.
 type projectRow struct {
 	Name       string `json:"name"`
 	Active     bool   `json:"active"`
@@ -27,6 +36,11 @@ type projectRow struct {
 	Credential string `json:"credential"`
 	ReadOnly   bool   `json:"readOnly"`
 	Ephemeral  bool   `json:"ephemeral"`
+
+	// emulator marks the row the UI adds rather than one fft listed, and is never
+	// decoded: `fft project list` reads the config file, and the emulator is not in
+	// it — nor may it ever be, since it cannot be signed in to.
+	emulator bool
 }
 
 type projectKeys struct {
@@ -62,12 +76,23 @@ type projectsScreen struct {
 	st   styles
 	keys projectKeys
 
-	rows    []projectRow
-	cursor  int
+	rows   []projectRow
+	cursor int
+
+	// listed is how many rows fft returned, which the emulator row the UI adds is
+	// not one of: "no projects are configured" is a statement about the config file.
+	listed int
+
 	loaded  bool
 	warmed  bool
 	notice  string
 	refused bool
+
+	// refusedEmulator is the emulator row's counterpart to refused: a change refused
+	// because the row is not in the config file, rather than because this process
+	// may not write to it.
+	refusedEmulator bool
+
 	failure *failure
 
 	dialog dialog
@@ -79,7 +104,20 @@ type projectsScreen struct {
 }
 
 func newProjectsScreen(s *session, st styles) *projectsScreen {
-	return &projectsScreen{s: s, st: st, keys: newProjectKeys(), emulator: newEmulatorPane(s, st)}
+	p := &projectsScreen{s: s, st: st, keys: newProjectKeys(), emulator: newEmulatorPane(s, st)}
+	// What follows the pane pointing the session, whether the user asked from the
+	// row or the emulator became ready a moment later: say so where the row is, and
+	// read the credential state again — it is the environment's now, not a
+	// configured project's.
+	p.emulator.afterUse = func() tea.Cmd {
+		p.succeed("Now using the emulator at " + p.emulator.baseURL() + ".")
+		p.syncCurrent()
+		return p.refreshStatus(false)
+	}
+	// The list behind the pane said the session was using the emulator; once it has
+	// stopped, only the warning above the table is still true.
+	p.emulator.afterStop = func() { p.notice = "" }
+	return p
 }
 
 // components is where the emulator pane learns whether the emulator is installed;
@@ -165,22 +203,65 @@ func (p *projectsScreen) listKey(msg tea.KeyPressMsg) tea.Cmd {
 	case !ok:
 		return nil
 	case key.Matches(msg, p.keys.use):
-		if p.refuseHeadless() {
+		switch {
+		case row.emulator:
+			return p.useEmulator()
+		case p.s.usingEmulator() && p.s.headless:
+			// Leaving the emulator is not a change to the config file, so headless mode
+			// has nothing to refuse: the environment already names the project fft goes
+			// back to, and there is no `project use` to run.
+			return p.leaveEmulator()
+		case p.refuseHeadless():
 			return nil
 		}
 		return p.use(row.Name)
 	case key.Matches(msg, p.keys.readOnly):
-		if p.refuseHeadless() {
+		if p.refuseEmulator(row) || p.refuseHeadless() {
 			return nil
 		}
 		p.dialog = armed(p.readOnlyDialog(row), p.s.now, true)
 	case key.Matches(msg, p.keys.remove):
-		if p.refuseHeadless() {
+		if p.refuseEmulator(row) || p.refuseHeadless() {
 			return nil
 		}
 		p.dialog = armed(p.removeDialog(row), p.s.now, true)
 	}
 	return nil
+}
+
+// useEmulator points the session at the emulator, starting it first if it is not
+// already listening.
+func (p *projectsScreen) useEmulator() tea.Cmd {
+	// The pane owns the emulator's lifetime, and says what it did; the row only
+	// shows it where the user pressed the key.
+	notice, f, cmd := p.emulator.use()
+	if f != nil {
+		p.notice, p.refused, p.refusedEmulator, p.failure = "", false, false, f
+		return cmd
+	}
+	if notice != "" {
+		p.succeed(notice)
+	}
+	return cmd
+}
+
+// leaveEmulator points the session back at the project fft's own resolution picks.
+func (p *projectsScreen) leaveEmulator() tea.Cmd {
+	p.s.selectEmulator("")
+	p.syncCurrent()
+	p.succeed("No longer using the emulator.")
+	return p.refreshStatus(false)
+}
+
+// refuseEmulator stops a change to a row that is not in the config file, and says
+// why. Nothing is sent.
+func (p *projectsScreen) refuseEmulator(row projectRow) bool {
+	if !row.emulator {
+		return false
+	}
+	p.notice = ""
+	p.refusedEmulator = true
+	return true
 }
 
 // refuseHeadless stops a change to the config file that headless mode would
@@ -196,7 +277,7 @@ func (p *projectsScreen) refuseHeadless() bool {
 
 func (p *projectsScreen) succeed(notice string) {
 	p.notice = notice
-	p.refused = false
+	p.refused, p.refusedEmulator = false, false
 	p.failure = nil
 }
 
@@ -224,8 +305,12 @@ func (p *projectsScreen) reload() tea.Cmd {
 
 func (p *projectsScreen) setRows(rows []projectRow) {
 	first := !p.loaded
-	p.rows, p.loaded = rows, true
+	p.listed = len(rows)
+	p.rows, p.loaded = append(rows, p.emulatorRow()), true
 
+	// From what fft listed, never from the row the UI added: the emulator says
+	// nothing about which project fft resolves, or about whether the config file is
+	// this process's to change.
 	p.s.resolved, p.s.headless = "", p.s.startedHeadless
 	for _, r := range rows {
 		if r.Active {
@@ -242,6 +327,29 @@ func (p *projectsScreen) setRows(rows []projectRow) {
 	p.selected()
 }
 
+// emulatorRow is the local emulator, as the list shows it. It is composed, not
+// read: the emulator is not in the config file, so nothing lists it, and everything
+// about it follows from the port the pane would start it on.
+func (p *projectsScreen) emulatorRow() projectRow {
+	row := projectRow{
+		Name:    "emulator",
+		BaseURL: p.emulator.baseURL(),
+		// The environment-backed store, which is what a run pointed here reads its
+		// credential from and what `fft auth status` then reports. ReadOnly is left
+		// false: the session's floor is the only thing that protects a local server
+		// that is thrown away, and the table already applies it to every row.
+		Credential: "env",
+		emulator:   true,
+	}
+	// Read out of what the runs are actually given, rather than written again here.
+	for _, v := range config.EmulatorEnv(row.BaseURL) {
+		if v.Name == config.EnvEmail {
+			row.Email = v.Value
+		}
+	}
+	return row
+}
+
 // selectProject makes name the UI's project, and carries over what the list
 // already says about it rather than waiting for the list to be read again.
 func (p *projectsScreen) selectProject(name string) {
@@ -255,7 +363,10 @@ func (p *projectsScreen) syncCurrent() int {
 	current := p.s.currentProject()
 	p.s.projectReadOnly = false
 	for i, r := range p.rows {
-		if r.Name == current {
+		// Never the emulator's row, whose name is the UI's label rather than one out
+		// of the config file: a configured project that happens to be called emulator
+		// is a different thing that lists under the same word.
+		if !r.emulator && r.Name == current {
 			p.s.projectReadOnly = r.ReadOnly
 			return i
 		}
@@ -527,8 +638,9 @@ func (p *projectsScreen) bindings() []key.Binding {
 	}
 	k := p.keys
 	if p.s.headless {
-		// The changes are refused here, so the help does not offer them.
-		return []key.Binding{k.up, k.refresh, k.reload, k.emulator}
+		// The changes are refused here, so the help does not offer them — but the
+		// emulator row is still selectable, and enter is what selects it.
+		return []key.Binding{k.up, k.use, k.refresh, k.reload, k.emulator}
 	}
 	return []key.Binding{k.up, k.use, k.readOnly, k.remove, k.refresh, k.add, k.reload, k.emulator}
 }
@@ -537,7 +649,7 @@ func (p *projectsScreen) legend() []legendSection {
 	k := p.keys
 	main := legendSection{entries: []legendEntry{
 		{of: k.up, desc: "select a project"},
-		{of: k.use, keys: "enter, u", desc: "use it (fft project use)"},
+		{of: k.use, keys: "enter, u", desc: "use it (fft project use), or the emulator row to work offline"},
 		{of: k.readOnly, desc: "make it read-only, or allow writes again"},
 		{of: k.remove, desc: "remove it and its stored credentials"},
 		{of: k.refresh, desc: "sign in again now (fft auth refresh)"},
@@ -546,7 +658,8 @@ func (p *projectsScreen) legend() []legendSection {
 		{of: k.emulator, desc: "run the local offline emulator"},
 	}}
 	if p.s.headless {
-		main.note = "Running from the environment: enter, u, r, d and a change nothing here."
+		main.note = "Running from the environment: enter, u, r, d and a change nothing here, " +
+			"except on the emulator row, which is not in the config file."
 		// The add form never opens here; the emulator pane still does.
 		return []legendSection{main, p.emulator.legend()}
 	}
@@ -573,8 +686,15 @@ func (p *projectsScreen) equivalent() shellCommand {
 	case p.emulator.open:
 		return p.emulator.equivalent()
 	}
-	if row, ok := p.selected(); ok && !p.s.headless {
-		return p.useAction(row.Name).display
+	if row, ok := p.selected(); ok {
+		if row.emulator {
+			// There is no `fft project use emulator` to show — it is not in the config
+			// file. What a shell does instead is run the emulator and export the recipe.
+			return p.emulator.equivalent()
+		}
+		if !p.s.headless {
+			return p.useAction(row.Name).display
+		}
 	}
 	return commandLine([]string{"project", "list"})
 }
@@ -597,14 +717,21 @@ func (p *projectsScreen) view(width, height int) string {
 	if p.s.headless {
 		lines = append(lines, st.warnText.Render("Running from the environment: projects are read-only here."))
 	}
+	if p.s.usingEmulator() && !p.emulator.running() {
+		lines = append(lines, st.warnText.Render(
+			"Using the emulator, which is not running: requests fail until it is started (e, then s)."))
+	}
 	lines = append(lines, "")
 
 	switch {
 	case !p.loaded && p.failure == nil:
 		lines = append(lines, st.dim.Render("Loading projects…"))
-	case p.loaded && len(p.rows) == 0:
-		lines = append(lines, "No projects are configured. Press a to add one.")
 	default:
+		// Said above the table rather than instead of it: the emulator row is always
+		// there, and it is the one thing a first run can usefully press enter on.
+		if p.listed == 0 {
+			lines = append(lines, "No projects are configured. Press a to add one.", "")
+		}
 		lines = append(lines, p.table(width)...)
 	}
 
@@ -615,13 +742,19 @@ func (p *projectsScreen) view(width, height int) string {
 	if p.refused {
 		lines = append(lines, wrap(st.warnText.Render("Nothing was sent: "+headlessExplanation), width))
 	}
+	if p.refusedEmulator {
+		lines = append(lines, wrap(st.warnText.Render("Nothing was sent: "+emulatorExplanation), width))
+	}
 	if p.failure != nil {
 		lines = append(lines, p.failure.view(st, width))
 	}
 	return strings.Join(lines, "\n")
 }
 
-var projectColumns = []string{"NAME", "BASE URL", "EMAIL", "CREDENTIAL", "ACCESS"}
+// projectColumns ends in an unnamed one, which only the emulator row fills: it is
+// not a configured project, and a table that did not say so would be offering a
+// row that r and d refuse.
+var projectColumns = []string{"NAME", "BASE URL", "EMAIL", "CREDENTIAL", "ACCESS", ""}
 
 func (p *projectsScreen) table(width int) []string {
 	current := p.s.currentProject()
@@ -629,12 +762,16 @@ func (p *projectsScreen) table(width int) []string {
 	cells = append(cells, projectColumns)
 	for _, r := range p.rows {
 		name := "  " + r.Name
-		if r.Name == current {
+		if r.emulator && p.s.usingEmulator() || !r.emulator && r.Name == current {
 			name = "* " + r.Name
 		}
 		access := "writable"
 		if r.ReadOnly || p.s.readOnlyFloor {
 			access = "read-only"
+		}
+		mark := ""
+		if r.emulator {
+			mark = "(emulator)"
 		}
 		cells = append(cells, []string{
 			output.SanitizeCell(name),
@@ -642,6 +779,7 @@ func (p *projectsScreen) table(width int) []string {
 			output.SanitizeCell(r.Email),
 			output.SanitizeCell(r.Credential),
 			access,
+			mark,
 		})
 	}
 
@@ -662,7 +800,10 @@ func (p *projectsScreen) table(width int) []string {
 			}
 		}
 		marker := "  "
-		line := b.String()
+		// Trimmed because the last column is empty on every row but the emulator's,
+		// and a header line padded out to a column nothing in it fills is trailing
+		// whitespace on every screen.
+		line := strings.TrimRight(b.String(), " ")
 		switch {
 		case i == 0:
 			line = p.st.dim.Render(marker + line)

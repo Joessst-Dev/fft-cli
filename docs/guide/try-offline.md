@@ -28,4 +28,8 @@ with the sign-in removed. State lives in memory and dies with the process. More 
 fixtures, the container image, eventing — in the
 [emulator guide](https://joessst-dev.github.io/fft-cli/guide/emulator).
 
+One shell is enough in `fft tui`: the emulator is a row on the Projects screen, `enter`
+starts it and points the whole session at it, and `enter` on a configured project goes
+back. See [the emulator in the UI](./tui.md#the-emulator).
+
 ---

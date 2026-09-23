@@ -53,7 +53,7 @@ func (d *Deps) openComponents() {
 		return
 	}
 
-	root, enabled, err := component.Root(os.LookupEnv)
+	root, enabled, err := component.Root(d.env())
 	if err != nil || !enabled {
 		d.Components = component.Open("")
 		return

@@ -27,6 +27,11 @@ func newProjectCmd(deps *Deps) *cobra.Command {
 		Aliases: []string{"projects"},
 		Args:    usageArgs(cobra.NoArgs),
 
+		// Set on the group, and inherited by the walk in [cliRunner.classify]: every
+		// command here reads or writes the config file rather than a tenant, and the
+		// config file is the same file whichever tenant the session is pointed at.
+		Annotations: map[string]string{annotationManagesProjects: "true"},
+
 		// A bare `fft project` is a user asking what the group can do.
 		RunE: func(cmd *cobra.Command, _ []string) error { return cmd.Help() },
 	}

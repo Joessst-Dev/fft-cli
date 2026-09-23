@@ -310,6 +310,23 @@ var _ = Describe("the Roles screen", func() {
 		Expect(h.m.s.grants).To(BeNil())
 	})
 
+	It("sends nothing, and greys nothing, while the session is using the emulator", func() {
+		// The emulator answers whoami from the spec's own sample, so a read here would
+		// show a fixture as the user's roles and go on to grey operations with it.
+		h.m.s.selectEmulator("http://localhost:8080")
+
+		h.press("7")
+		Expect(whoamiRuns()).To(BeZero())
+		Expect(h.view()).To(ContainSubstring("the emulator, which authenticates nobody"))
+		Expect(h.m.s.grants).To(BeNil())
+		Expect(h.m.hint(opDeleteFacility).lacking).To(BeEmpty())
+
+		// And it is read again for the project the session goes back to.
+		h.m.s.selectProject("prod")
+		h.press("1", "7")
+		Expect(whoamiRuns()).To(Equal(1))
+	})
+
 	It("says the project comes from the environment in headless mode", func() {
 		h = newHarness(Options{Catalog: roleCatalog{}, Headless: true})
 		h.loaded(`[{"name":"ci","active":true,"ephemeral":true,"baseUrl":"https://ci.example.com"}]`, validToken)

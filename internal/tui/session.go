@@ -79,6 +79,15 @@ type session struct {
 	// projectReadOnly is whether the current project is configured read-only.
 	projectReadOnly bool
 
+	// emulator is the base URL of the local emulator this session points its runs
+	// at, "" when they go to a configured project.
+	//
+	// It is not a project name. The emulator is not in the config file and must
+	// never be written to it, so it is held here rather than in project — and the
+	// `fft project` commands, which manage that file, go on seeing the real
+	// environment whatever this says.
+	emulator string
+
 	// status is the current project's credential state, nil until known.
 	status *authStatus
 
@@ -101,7 +110,11 @@ type session struct {
 	// streams are the callbacks watching a streaming run's output, by run. A run
 	// that asked to stream reports its output as it goes, and only whoever started
 	// it knows what to do with it. Dropped when the run ends.
-	streams map[RunID]func(*Chunk)
+	//
+	// A watcher may answer with work of its own: the emulator's pane points the
+	// session at it on the line that says the port is bound, and what follows from
+	// that is a read of the credential state.
+	streams map[RunID]func(*Chunk) tea.Cmd
 
 	// declined are the runs the user answered no, until the run's caller has
 	// heard how it ended: a command told no fails, and that failure is the
@@ -177,14 +190,20 @@ func newSession(opts Options, st styles) *session {
 		startedHeadless: opts.Headless,
 		runs:            newRunList(),
 		done:            make(map[RunID]func(Result) tea.Cmd),
-		streams:         make(map[RunID]func(*Chunk)),
+		streams:         make(map[RunID]func(*Chunk) tea.Cmd),
 		declined:        make(map[RunID]bool),
 	}
 }
 
+// usingEmulator reports whether this session's runs go to the local emulator.
+func (s *session) usingEmulator() bool { return s.emulator != "" }
+
 // currentProject is the name of the project the next run acts on, "" when none
-// is known.
+// is known — the emulator included, which is not one.
 func (s *session) currentProject() string {
+	if s.usingEmulator() {
+		return ""
+	}
 	if s.project != "" {
 		return s.project
 	}
@@ -196,7 +215,7 @@ func (s *session) currentProject() string {
 // decide — headless, where the environment names the project and the config file
 // is not consulted, and before the UI has learnt which project is active.
 func (s *session) target() string {
-	if s.headless {
+	if s.headless || s.usingEmulator() {
 		return ""
 	}
 	return s.currentProject()
@@ -204,6 +223,9 @@ func (s *session) target() string {
 
 // named is how a question names the project a request goes to.
 func (s *session) named() string {
+	if s.usingEmulator() {
+		return "the emulator"
+	}
 	if p := s.currentProject(); p != "" {
 		return p
 	}
@@ -218,9 +240,27 @@ func (s *session) readOnly() bool {
 // selectProject makes name the project every later run acts on. What was known
 // about the previous one no longer applies.
 func (s *session) selectProject(name string) {
+	// A project and the emulator are alternatives, and this is the way back: the
+	// emulator row has no fft project use to run, so choosing a configured project is
+	// how a session stops talking to it.
+	s.selectEmulator("")
 	s.project = name
 	s.forgetCurrent()
 	s.runner.SetProject(name)
+}
+
+// selectEmulator points every later run at the local emulator serving baseURL, ""
+// to point them back at the selected project.
+//
+// The UI's own project selection is left standing underneath, so that pointing back
+// returns to the project the user was on rather than to whatever fft would resolve.
+func (s *session) selectEmulator(baseURL string) {
+	if s.emulator == baseURL {
+		return
+	}
+	s.emulator = baseURL
+	s.forgetCurrent()
+	s.runner.SetEmulator(baseURL)
 }
 
 // forgetCurrent drops what is known about the current project, and has every read
@@ -236,6 +276,11 @@ func (s *session) forgetCurrent() {
 // lacking is the permissions op wants that the user appears to hold none of on the
 // current project, nil when they hold one or when nobody can tell. See [grants].
 func (s *session) lacking(op Operation) []string {
+	if s.usingEmulator() {
+		// The emulator authenticates nobody, so there are no roles to lack: greying an
+		// operation here would be a guess dressed up as the tenant's answer.
+		return nil
+	}
 	if s.grants == nil || s.grants.project != s.currentProject() {
 		return nil
 	}
@@ -265,7 +310,10 @@ func (s *session) scoped(args ...string) action {
 // --project the UI decides beside the command line. The environment's project is
 // the one a shell with the same environment reaches without it.
 func (s *session) displayFor(args []string, project string) shellCommand {
-	if project == "" || s.headless {
+	// The emulator is addressed by an environment, not by a --project, so a shell
+	// reaching it runs the bare command with the recipe exported; the emulator pane
+	// is where that recipe is.
+	if project == "" || s.headless || s.usingEmulator() {
 		return commandLine(args)
 	}
 	return commandLine(append(slices.Clone(args), "--project", project))
@@ -273,7 +321,7 @@ func (s *session) displayFor(args []string, project string) shellCommand {
 
 // watch has f called with every chunk of run id's output, until the run ends. It
 // is only ever called for an [Invocation] that asked to Stream.
-func (s *session) watch(id RunID, f func(*Chunk)) {
+func (s *session) watch(id RunID, f func(*Chunk) tea.Cmd) {
 	if id == 0 {
 		return
 	}
@@ -323,7 +371,7 @@ func (s *session) handle(ev RunEvent) tea.Cmd {
 		// Output, not a change of state: it goes to whoever asked to watch this run,
 		// and nothing else about the run has happened.
 		if watch := s.streams[ev.ID]; watch != nil {
-			watch(ev.Chunk)
+			return watch(ev.Chunk)
 		}
 		return nil
 	}

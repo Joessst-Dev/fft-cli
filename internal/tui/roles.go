@@ -121,6 +121,19 @@ func (r *rolesScreen) load(background bool) tea.Cmd {
 	r.gen++
 	gen := r.gen
 
+	if r.s.usingEmulator() {
+		// Nothing is sent. The emulator accepts every request without looking at the
+		// bearer token, so it has no accounts and no roles — and it answers whoami
+		// from the spec's own sample, which would read as the user's roles and go on
+		// to grey operations on the strength of a fixture.
+		r.loading, r.shown = false, asked
+		r.me, r.missing, r.failure = nil, nil, nil
+		r.s.grants = nil
+		r.notice = "This session is using the emulator, which authenticates nobody: there is no " +
+			"sign-in and no account, so there are no roles to show and no operation is greyed."
+		return nil
+	}
+
 	a := r.s.scoped("auth", "whoami")
 	target := r.s.target()
 	a.inv.Project = target

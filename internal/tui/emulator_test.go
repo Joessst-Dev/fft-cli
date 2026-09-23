@@ -129,6 +129,115 @@ var _ = Describe("the emulator pane", func() {
 		})
 	})
 
+	Describe("pointing the session at it", func() {
+		// selectEmulatorRow puts the cursor on the emulator row, which is last: the
+		// two configured projects come from `project list`, and the UI adds this one.
+		selectEmulatorRow := func() {
+			GinkgoHelper()
+			h.press("down", "down")
+			Expect(h.view()).To(MatchRegexp(`> \s+emulator`))
+		}
+
+		It("starts the emulator first, and points the session only once it is listening", func() {
+			open(emulatorInstalled)
+			h.press("esc")
+			selectEmulatorRow()
+			h.press("enter")
+
+			id := h.lookup("emulator", "--port", "8080")
+			Expect(h.r.invocation(id).Stream).To(BeTrue())
+			Expect(h.r.emulators).To(BeEmpty(), "pointed at a port that is not answering yet")
+			// The pane is where the output goes, so it is what the row hands over to.
+			Expect(h.view()).To(ContainSubstring("Status: starting"))
+			Expect(h.view()).To(ContainSubstring("Session: not using it"))
+
+			h.chunk(id, "fft emulator listening on http://localhost:8080\n")
+
+			Expect(h.r.emulators).To(Equal([]string{"http://localhost:8080"}))
+			Expect(h.view()).To(ContainSubstring("this session is using it"))
+			Expect(h.view()).To(ContainSubstring("fft · emulator (http://localhost:8080)"))
+			// The credential state is read again: it is the environment's now.
+			h.lookup("auth", "status")
+
+			h.press("esc")
+			Expect(h.view()).To(ContainSubstring("Now using the emulator at http://localhost:8080."))
+			Expect(h.view()).To(MatchRegexp(`\* emulator`))
+		})
+
+		It("points the session at once when it is already listening", func() {
+			open(emulatorInstalled)
+			h.press("s")
+			h.chunk(h.lookup("emulator", "--port", "8080"), "fft emulator listening on http://localhost:8080\n")
+			Expect(h.r.emulators).To(BeEmpty(), "s runs it; it does not point the session")
+
+			h.press("esc")
+			selectEmulatorRow()
+			h.press("enter")
+
+			Expect(h.r.emulators).To(Equal([]string{"http://localhost:8080"}))
+			Expect(h.view()).To(ContainSubstring("Now using the emulator at http://localhost:8080."))
+		})
+
+		It("points nothing when the component is missing, and says where to install it", func() {
+			open(twoComponents)
+			h.press("esc")
+			selectEmulatorRow()
+
+			before := len(h.r.started)
+			h.press("enter")
+			Expect(len(h.r.started)).To(Equal(before), "nothing to run, so nothing was run")
+			Expect(h.r.emulators).To(BeEmpty())
+			Expect(h.view()).To(ContainSubstring("The emulator is not installed. Press 8 for Components"))
+		})
+
+		It("stays pointed at an emulator that stops, and says so rather than moving the session", func() {
+			open(emulatorInstalled)
+			h.press("esc")
+			selectEmulatorRow()
+			h.press("enter")
+			id := h.lookup("emulator", "--port", "8080")
+			h.chunk(id, "fft emulator listening on http://localhost:8080\n")
+
+			h.finishID(id, Result{ExitCode: exitcode.Interrupted})
+
+			Expect(h.r.emulators).To(Equal([]string{"http://localhost:8080"}), "the session was moved on its own")
+			Expect(h.view()).To(ContainSubstring("fft · emulator (http://localhost:8080)"))
+			Expect(h.view()).To(ContainSubstring("The emulator has stopped, and this session is still pointed at it"))
+
+			h.press("esc")
+			Expect(h.view()).To(ContainSubstring("Using the emulator, which is not running"))
+		})
+
+		It("goes back to a configured project, and stops pointing at the emulator", func() {
+			open(emulatorInstalled)
+			h.press("esc")
+			selectEmulatorRow()
+			h.press("enter")
+			h.chunk(h.lookup("emulator", "--port", "8080"), "fft emulator listening on http://localhost:8080\n")
+
+			h.press("esc", "up", "up")
+			h.press("enter")
+			h.finish(ok(`{}`), "project", "use", "staging")
+
+			Expect(h.r.emulators).To(Equal([]string{"http://localhost:8080", ""}))
+			Expect(h.view()).To(ContainSubstring("Now using staging."))
+			Expect(h.view()).To(ContainSubstring("fft · staging"))
+		})
+
+		It("refuses to protect or remove a row that is not in the config file", func() {
+			open(emulatorInstalled)
+			h.press("esc")
+			selectEmulatorRow()
+
+			before := len(h.r.started)
+			h.press("r")
+			Expect(h.view()).To(ContainSubstring("Nothing was sent: the emulator is not a configured project"))
+			h.press("d")
+			Expect(h.view()).To(ContainSubstring("Nothing was sent: the emulator is not a configured project"))
+			Expect(len(h.r.started)).To(Equal(before))
+		})
+	})
+
 	It("sends nothing and says where to install when the component is missing", func() {
 		open(twoComponents)
 		Expect(h.view()).To(ContainSubstring("Component: not installed"))

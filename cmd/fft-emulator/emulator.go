@@ -129,14 +129,13 @@ func openComponents() *component.Registry {
 // never contacts Firebase — the only way in, since the emulator cannot stand in for
 // Google's sign-in.
 func printEmulatorRecipe(w io.Writer, port int, eventing []emulator.TargetStatus) {
-	base := fmt.Sprintf("http://localhost:%d", port)
+	base := config.EmulatorBaseURL(port)
 
 	fmt.Fprintf(w, "fft emulator listening on %s\n\n", base)
 	fmt.Fprintln(w, "Point fft at it from another shell:")
-	fmt.Fprintf(w, "  export %s=%s\n", config.EnvBaseURL, base)
-	fmt.Fprintf(w, "  export %s=emulator\n", config.EnvFirebaseAPIKey)
-	fmt.Fprintf(w, "  export %s=dev@localhost\n", config.EnvEmail)
-	fmt.Fprintf(w, "  export %s=emulator-token\n", config.EnvIDToken)
+	for _, v := range config.EmulatorEnv(base) {
+		fmt.Fprintf(w, "  export %s=%s\n", v.Name, v.Value)
+	}
 	fmt.Fprintln(w, "\nThen: fft facility create --file facility.json && fft facility list")
 
 	printEmulatorEventing(w, eventing)

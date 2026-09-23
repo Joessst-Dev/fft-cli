@@ -113,20 +113,20 @@ that body, and names the template it came from, if any.
 
 ## Projects (1)
 
-The projects in your config file, with the active one marked `*`. On startup the UI checks
-the current project's credentials and, if it signs in with a password and has no valid
-token, signs in.
+The projects in your config file, with the one in use marked `*`, and the local
+[emulator](#the-emulator) under them. On startup the UI checks the current project's
+credentials and, if it signs in with a password and has no valid token, signs in.
 
 | Key | |
 |---|---|
 | `↑`/`↓` | select |
-| `enter`, `u` | use this project (`fft project use`) |
+| `enter`, `u` | use this project (`fft project use`), or the emulator row to work offline |
 | `r` | make it read-only, or allow writes again (`fft project read-only`) |
 | `d` | remove it and its stored credentials (`fft project remove`) |
 | `R` | sign in again now (`fft auth refresh`) |
 | `a` | add a project |
 | `ctrl+r` | read the list again |
-| `e` | run the local offline emulator |
+| `e` | the emulator pane: run it, and watch what it says |
 
 Making a project read-only asks `y`/`n`. Allowing writes again, and removing a project,
 want its name typed back.
@@ -139,26 +139,45 @@ its command line, so the command the UI shows holds neither.
 
 ### The emulator
 
-`e` opens the emulator pane. The [emulator](./emulator.md) is a local server that answers
-every operation the API has, offline and in memory, so it belongs here: it is another
-tenant to work against, not another way to send requests.
+The [emulator](./emulator.md) is a local server that answers every operation the API has,
+offline and in memory. It is listed on this screen, under your projects, because that is
+what it is: another tenant to work against, not another way to send requests.
+
+`enter` on its row points the session at it. If it is not running, it is started first and
+the session follows once it reports the port bound — so what you get is never a session
+aimed at a port that does not answer. `enter` on a configured project goes back.
+
+The emulator is not in your config file, and must never be written to it: `fft project add`
+cannot create it, because the emulator cannot stand in for Google's sign-in. `r` and `d`
+therefore refuse that row and say so. Everything the UI sends while the session is pointed
+here goes to the emulator; the `fft project` commands are the exception, since the projects
+you switch back to are in the config file and a run that could not read it would leave you
+with nowhere to go.
+
+`e` opens the pane behind the row, which runs it and shows what it is saying:
 
 | Key | |
 |---|---|
 | `s` | run the emulator, or stop the one running |
-| `c` | copy the `FFT_*` recipe that points a shell at it |
+| `c` | copy the `FFT_*` recipe that points another shell at it |
 | `esc` | back to the projects |
 
 The pane says whether the emulator component is installed — it ships with fft but is
 installed separately, so if it is not there, press `8` for Components and `a` to install
 it. `s` starts it, and its output fills the pane as it is written rather than after it has
-stopped. `s` again stops it, the way `ctrl+c` would in a shell.
+stopped. `s` again stops it, the way `ctrl+c` would in a shell. Stopping it does **not**
+move the session back to a project: the session stays pointed at it, the screen says so,
+and requests fail until you start it again or choose a project yourself.
 
 The emulator is the one thing the UI runs that never ends on its own, so it holds one of
 the four slots the UI runs commands in until you stop it.
 
-**The session does not switch to the emulator.** The UI stays on whatever project it was
-on; what the pane gives you is the recipe, for a second shell:
+While the session is pointed here, the status bar reads `emulator (http://localhost:8080)`
+and the Roles screen (`7`) says there are no roles to show: the emulator accepts every
+request without looking at the bearer token, so there is no account to have roles. Nothing
+in the Operations list is greyed for want of a permission.
+
+`c` copies the same environment the UI gives its own runs, for a second shell:
 
 ```sh
 export FFT_BASE_URL=http://localhost:8080
@@ -167,9 +186,10 @@ export FFT_EMAIL=dev@localhost
 export FFT_ID_TOKEN=emulator-token
 ```
 
-That is the only way in: the emulator cannot stand in for Google's sign-in, so
-`fft project add` does not work against it, and fft reaches it through those variables
-alone.
+That is the only way in, which is why the UI uses it too. A run pointed at the emulator
+sees those four variables and *no* other `FFT_*` variable your shell exports, so a real
+tenant's `FFT_TENANT` or `FFT_PASSWORD` cannot end up half-adopted by it. `FFT_READ_ONLY`
+is the deliberate exception: a session that refuses writes goes on refusing them here.
 
 ## Operations (2)
 
