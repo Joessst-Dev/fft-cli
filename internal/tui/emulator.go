@@ -23,6 +23,12 @@ const emulatorPort = 8080
 // not end until the emulator is stopped.
 const emulatorLogLines = 200
 
+// emulatorPartialLimit bounds a line that never gets its newline. The emulator's
+// own output is complete lines, so this is not reached today, but a partial that
+// grew without bound while nothing terminated it would still have to be shown
+// eventually — the same tail-not-transcript reasoning as emulatorLogLines.
+const emulatorPartialLimit = 16 << 10
+
 // emulatorReady is what the emulator prints once the port is bound. It is printed
 // by the ready callback, after the listen succeeds, so seeing it means the server
 // is actually answering.
@@ -93,8 +99,12 @@ type emulatorPane struct {
 	// log is the tail of what the emulator has printed, newest last.
 	log []string
 
-	// partial is the end of the last chunk, which need not be a whole line.
-	partial string
+	// partialOut and partialErr are the end of the last chunk on each stream, which
+	// need not be a whole line. Kept apart because stdout and stderr are written by
+	// different goroutines in the child: joining an unfinished fragment from one
+	// with the next chunk from the other would show a line that was never actually
+	// written.
+	partialOut, partialErr string
 
 	notice  string
 	failure *failure
@@ -174,7 +184,7 @@ func (e *emulatorPane) start() tea.Cmd {
 
 	args := e.startArgs()
 	a := action{inv: Invocation{Args: args, Stream: true}, display: commandLine(args)}
-	e.state, e.log, e.partial = emulatorStarting, nil, ""
+	e.state, e.log, e.partialOut, e.partialErr = emulatorStarting, nil, "", ""
 	e.failure = nil
 	e.notice = "Starting the emulator…"
 
@@ -185,6 +195,9 @@ func (e *emulatorPane) start() tea.Cmd {
 			return nil
 		}
 		e.run = 0
+		// Nothing observes this run again after it is done, so whatever each stream
+		// was still holding has to be shown now or not at all.
+		e.flush()
 		switch {
 		case r.ExitCode == exitcode.OK, r.ExitCode == exitcode.Interrupted:
 			// Interrupted is how a server that was told to stop ends.
@@ -210,15 +223,36 @@ func (e *emulatorPane) observe(c *Chunk) {
 	if c.Dropped {
 		e.append("… some output was dropped while the screen was busy …")
 	}
-	text := e.partial + string(c.Bytes)
+	partial := &e.partialOut
+	if c.Stderr {
+		partial = &e.partialErr
+	}
+	text := *partial + string(c.Bytes)
 	lines := strings.Split(text, "\n")
 	// The last piece has no newline after it yet, and is held until it does.
-	e.partial = lines[len(lines)-1]
+	*partial = lines[len(lines)-1]
 	for _, line := range lines[:len(lines)-1] {
 		e.append(line)
 		if e.state == emulatorStarting && strings.Contains(line, emulatorReady) {
 			e.state = emulatorRunning
 			e.notice = "The emulator is listening on " + e.baseURL() + "."
+		}
+	}
+	if len(*partial) > emulatorPartialLimit {
+		// A fragment this long is not going to complete into a line worth waiting
+		// for; show what there is rather than let it grow without bound.
+		e.append(*partial)
+		*partial = ""
+	}
+}
+
+// flush shows whatever each stream's partial line still holds. Called once the run
+// has ended, since observe otherwise never learns that no more bytes are coming.
+func (e *emulatorPane) flush() {
+	for _, p := range []*string{&e.partialOut, &e.partialErr} {
+		if *p != "" {
+			e.append(*p)
+			*p = ""
 		}
 	}
 }

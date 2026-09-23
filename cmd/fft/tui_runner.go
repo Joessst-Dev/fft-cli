@@ -87,9 +87,6 @@ const confirmsYes = "true"
 // component root. The TUI's runner re-reads the registry after one of them
 // succeeds, so that the next run — and the command tree built for it — sees what
 // just appeared or went away, rather than the scan taken when the UI started.
-//
-// componentsRescan_test.go finds every command that writes to the root and fails
-// until it carries this.
 const annotationRescans = "rescansComponents"
 
 const (
@@ -164,6 +161,12 @@ type cliRunner struct {
 	// started with would otherwise go on describing a directory that has changed
 	// underneath it.
 	components atomic.Pointer[component.Registry]
+
+	// rescanMu serializes rescanComponents against itself. Two of the commands it
+	// follows can finish close together, and without a lock the rescan that started
+	// first could still be the one that stores last — reverting the registry to a
+	// state that predates the more recent install or removal.
+	rescanMu sync.Mutex
 
 	// stdoutLimit and stderrLimit are how much of each run's output is kept.
 	stdoutLimit, stderrLimit int
@@ -502,9 +505,6 @@ func (r *cliRunner) execute(ctx context.Context, id tui.RunID, j job) tui.Result
 
 	stdout := cappedBuffer{limit: r.stdoutLimit}
 	stderr := cappedBuffer{limit: r.stderrLimit}
-	// The run has no terminal, so its questions are asked in the UI. Everything
-	// else a Prompter reads still needs one, and is refused.
-	deps.Prompt = prompt.New(in, &stderr, prompt.WithConfirmer(r.confirmer(ctx, id, j)))
 
 	// The capped buffers stay the Result's source of truth whether or not anyone is
 	// watching; streaming only forwards a copy of what they are being given, so the
@@ -518,6 +518,13 @@ func (r *cliRunner) execute(ctx context.Context, id tui.RunID, j job) tui.Result
 		// and the run is reported done.
 		defer r.stream(id, j.inv, so, se)()
 	}
+
+	// The run has no terminal, so its questions are asked in the UI. Everything
+	// else a Prompter reads still needs one, and is refused. Its writer is errOut,
+	// not the capped buffer directly, so a question asked mid-stream reaches the
+	// pane the same way the command's own output does, instead of only surfacing
+	// once the run is done.
+	deps.Prompt = prompt.New(in, errOut, prompt.WithConfirmer(r.confirmer(ctx, id, j)))
 
 	started := time.Now()
 	// The command line is run exactly as given; the run's Deps carries what the UI
@@ -546,11 +553,17 @@ func (r *cliRunner) execute(ctx context.Context, id tui.RunID, j job) tui.Result
 // rescanComponents reads the component root again, so that the runs after an
 // install, an upgrade or a removal are given what is there now.
 //
-// A failure leaves the previous registry in place: [component.Open] swallows a
-// root it cannot read into an empty registry, and replacing a good scan with an
-// empty one would make every installed component vanish from the UI because one
-// directory listing happened to fail.
+// A failure leaves the previous registry in place. [component.Open] cannot tell
+// "the root is empty" from "the root could not be read" on its own: a real read
+// error still comes back as a registry that only knows the first-party table,
+// recorded instead as a [component.Problem] on the root itself. Storing that
+// unconditionally would make every installed component vanish from the UI
+// because one directory listing happened to fail — so a rescan that carries such
+// a Problem is discarded, and the last good registry stays in place.
 func (r *cliRunner) rescanComponents() {
+	r.rescanMu.Lock()
+	defer r.rescanMu.Unlock()
+
 	old := r.components.Load()
 	if old == nil {
 		return
@@ -560,7 +573,12 @@ func (r *cliRunner) rescanComponents() {
 		// Components are disabled for this process; there is nothing to read.
 		return
 	}
-	r.components.Store(component.Open(root))
+
+	next := component.Open(root)
+	if slices.ContainsFunc(next.Problems(), func(p component.Problem) bool { return p.Dir == root }) {
+		return
+	}
+	r.components.Store(next)
 }
 
 // streamWriter passes everything through to the run's capped buffer, and keeps a

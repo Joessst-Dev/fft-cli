@@ -168,7 +168,7 @@ var _ = Describe("the component registry inside the TUI", func() {
 		Expect(awaitDone(r, run)[run].ExitCode).To(Equal(exitcode.OK))
 	})
 
-	It("keeps the registry it has when a rescan would find nothing", func() {
+	It("keeps the registry it has when the root cannot be read", func() {
 		c.installFake(fakeManifest("weather"))
 		r := c.newRunner()
 
@@ -177,10 +177,23 @@ var _ = Describe("the component registry inside the TUI", func() {
 		_, found := before.Lookup("weather")
 		Expect(found).To(BeTrue())
 
-		// A root that cannot be read must not replace a good scan with an empty one.
-		Expect(os.RemoveAll(before.Root())).To(Succeed())
+		// A missing root is not a read failure to component.Open — it is what a
+		// machine with no components looks like, and produces no Problem — so it
+		// would not be caught by rescanComponents' check and is not what this spec is
+		// about. What must not replace a good scan with an empty one is a root that
+		// exists but fails to list: replacing the directory with a regular file forces
+		// os.ReadDir to fail with something other than fs.ErrNotExist, which chmod
+		// would not reliably do when the suite runs as root.
+		root := before.Root()
+		Expect(os.RemoveAll(root)).To(Succeed())
+		Expect(os.WriteFile(root, []byte("not a directory"), 0o600)).To(Succeed())
+
 		r.rescanComponents()
-		Expect(r.components.Load()).NotTo(BeNil())
+
+		after := r.components.Load()
+		Expect(after).To(BeIdenticalTo(before), "a failed rescan must keep the last good registry")
+		_, found = after.Lookup("weather")
+		Expect(found).To(BeTrue())
 	})
 
 	It("does nothing when components are disabled", func() {
