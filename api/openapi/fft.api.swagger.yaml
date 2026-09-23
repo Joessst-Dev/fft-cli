@@ -230,6 +230,14 @@ paths:
               type: string
             maxItems: 50
             type: array
+        - description: >-
+            Additionaly calculate the current thresholds for each facilityStock
+            entry
+          in: query
+          name: includeThresholds
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
@@ -1440,6 +1448,223 @@ paths:
       x-badges:
         - color: orange
           label: BETA
+  /api/configurations/availability/thresholds:
+    post:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Creates a new stock availability threshold configuration.
+      operationId: postStockAvailabilityThresholdConfig
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockAvailabilityThresholdConfigForCreation'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/components/schemas/StockAvailabilityThresholdConfigValidationOutcome
+          description: The created stock availability threshold configuration
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/components/schemas/StockAvailabilityThresholdConfigValidationOutcome
+          description: The provided threshold configuration failed validation
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+      summary: Create stock availability threshold configuration
+      x-fft-permissions:
+        - AVAILABILITY_THRESHOLDS_WRITE
+      tags:
+        - Stock Availability Thresholds (Inventory)
+      x-badges:
+        - color: red
+          label: ALPHA
+  /api/configurations/availability/thresholds/{thresholdId}:
+    delete:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Deletes a stock availability threshold configuration.
+      operationId: deleteStockAvailabilityThresholdConfig
+      parameters:
+        - in: path
+          name: thresholdId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The stock availability threshold configuration was found & deleted.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The requested entity was not found
+      summary: Delete stock availability threshold configuration
+      x-fft-permissions:
+        - AVAILABILITY_THRESHOLDS_WRITE
+      tags:
+        - Stock Availability Thresholds (Inventory)
+      x-badges:
+        - color: red
+          label: ALPHA
+    get:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Returns a single stock availability threshold configuration by id.
+      operationId: getStockAvailabilityThresholdConfig
+      parameters:
+        - in: path
+          name: thresholdId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockAvailabilityThresholdConfig'
+          description: The stock availability threshold configuration
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The requested entity was not found
+      summary: Get stock availability threshold configuration
+      x-fft-permissions:
+        - AVAILABILITY_THRESHOLDS_READ
+      tags:
+        - Stock Availability Thresholds (Inventory)
+      x-badges:
+        - color: red
+          label: ALPHA
+    put:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Updates an existing stock availability threshold configuration.
+      operationId: putStockAvailabilityThresholdConfig
+      parameters:
+        - in: path
+          name: thresholdId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockAvailabilityThresholdConfigForUpdate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/components/schemas/StockAvailabilityThresholdConfigValidationOutcome
+          description: The updated stock availability threshold configuration
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/components/schemas/StockAvailabilityThresholdConfigValidationOutcome
+          description: The provided threshold configuration failed validation
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The requested entity was not found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: A version conflict occurred.
+      summary: Update stock availability threshold configuration
+      x-fft-permissions:
+        - AVAILABILITY_THRESHOLDS_WRITE
+      tags:
+        - Stock Availability Thresholds (Inventory)
+      x-badges:
+        - color: red
+          label: ALPHA
   /api/configurations/capacityplanningtimeframe:
     get:
       description: ''
@@ -19178,6 +19403,7 @@ paths:
               - ADMIN_DATA_RESET
               - ADMIN_MODULES_READ
               - ADMIN_MODULES_WRITE
+              - ADMIN_INTER_FACILITY_CONNECTION_MIGRATION
               - TENANT_CONNECTOR_CONFIG_READ
               - CUSTOM_SERVICE_WRITE
               - CUSTOM_SERVICE_READ
@@ -34539,6 +34765,7 @@ components:
           description: >-
             Supported events for triggering external notifications:
             PICK_JOB_CREATED, UPCOMING_TIME_TRIGGERED_REROUTE,
+            INVENTORY_FACILITY_STOCK_THRESHOLD_TRANSITIONED,
             ROUTING_PLAN_NOT_ROUTABLE, ROUTING_PLAN_WAITING, ORDER_MODIFIED,
             ORDER_UNLOCKED, LOCKED_ORDER_CREATED, ORDER_FORCE_CANCELLED,
             ORDER_CANCELLED_BY_EXPIRY, ORDER_CANCELLED.
@@ -34546,6 +34773,7 @@ components:
             enum:
               - PICK_JOB_CREATED
               - UPCOMING_TIME_TRIGGERED_REROUTE
+              - INVENTORY_FACILITY_STOCK_THRESHOLD_TRANSITIONED
               - ROUTING_PLAN_NOT_ROUTABLE
               - ROUTING_PLAN_WAITING
               - ORDER_MODIFIED
@@ -34580,6 +34808,7 @@ components:
           description: >-
             Supported events for triggering external notifications:
             PICK_JOB_CREATED, UPCOMING_TIME_TRIGGERED_REROUTE,
+            INVENTORY_FACILITY_STOCK_THRESHOLD_TRANSITIONED,
             ROUTING_PLAN_NOT_ROUTABLE, ROUTING_PLAN_WAITING, ORDER_MODIFIED,
             ORDER_UNLOCKED, LOCKED_ORDER_CREATED, ORDER_FORCE_CANCELLED,
             ORDER_CANCELLED_BY_EXPIRY, ORDER_CANCELLED.
@@ -34587,6 +34816,7 @@ components:
             enum:
               - PICK_JOB_CREATED
               - UPCOMING_TIME_TRIGGERED_REROUTE
+              - INVENTORY_FACILITY_STOCK_THRESHOLD_TRANSITIONED
               - ROUTING_PLAN_NOT_ROUTABLE
               - ROUTING_PLAN_WAITING
               - ORDER_MODIFIED
@@ -37086,6 +37316,7 @@ components:
           description: >-
             Supported events for triggering external notifications:
             PICK_JOB_CREATED, UPCOMING_TIME_TRIGGERED_REROUTE,
+            INVENTORY_FACILITY_STOCK_THRESHOLD_TRANSITIONED,
             ROUTING_PLAN_NOT_ROUTABLE, ROUTING_PLAN_WAITING, ORDER_MODIFIED,
             ORDER_UNLOCKED, LOCKED_ORDER_CREATED, ORDER_FORCE_CANCELLED,
             ORDER_CANCELLED_BY_EXPIRY, ORDER_CANCELLED.
@@ -37093,6 +37324,7 @@ components:
             enum:
               - PICK_JOB_CREATED
               - UPCOMING_TIME_TRIGGERED_REROUTE
+              - INVENTORY_FACILITY_STOCK_THRESHOLD_TRANSITIONED
               - ROUTING_PLAN_NOT_ROUTABLE
               - ROUTING_PLAN_WAITING
               - ORDER_MODIFIED
@@ -37134,6 +37366,7 @@ components:
           description: >-
             Supported events for triggering external notifications:
             PICK_JOB_CREATED, UPCOMING_TIME_TRIGGERED_REROUTE,
+            INVENTORY_FACILITY_STOCK_THRESHOLD_TRANSITIONED,
             ROUTING_PLAN_NOT_ROUTABLE, ROUTING_PLAN_WAITING, ORDER_MODIFIED,
             ORDER_UNLOCKED, LOCKED_ORDER_CREATED, ORDER_FORCE_CANCELLED,
             ORDER_CANCELLED_BY_EXPIRY, ORDER_CANCELLED.
@@ -37141,6 +37374,7 @@ components:
             enum:
               - PICK_JOB_CREATED
               - UPCOMING_TIME_TRIGGERED_REROUTE
+              - INVENTORY_FACILITY_STOCK_THRESHOLD_TRANSITIONED
               - ROUTING_PLAN_NOT_ROUTABLE
               - ROUTING_PLAN_WAITING
               - ORDER_MODIFIED
@@ -37210,6 +37444,7 @@ components:
             - ROUTING_PLAN
             - PROCESS
             - PICK_JOB
+            - LISTING
           type: string
       required:
         - ref
@@ -41104,6 +41339,10 @@ components:
           type: number
         stockOnHand:
           type: number
+        thresholds:
+          items:
+            $ref: '#/components/schemas/StockAvailabilityThreshold'
+          type: array
         totalAmount:
           minimum: 0
           type: number
@@ -41120,6 +41359,7 @@ components:
         - stockOnHand
         - facilityId
         - facilityName
+        - thresholds
       title: FacilityStockDistribution
       type: object
       description: FacilityStockDistribution
@@ -46579,6 +46819,27 @@ components:
       type: object
       title: InterFacilityConnectionSupplierTarget
       description: InterFacilityConnectionSupplierTarget
+    InterFacilityConnectionSurchargeCalculationScope:
+      additionalProperties: false
+      description: >-
+        The charges a percentage is calculated against: exactly the referenced
+        ones, or the charged price without them. A reference that matches
+        nothing contributes nothing.
+      properties:
+        mode:
+          $ref: '#/components/schemas/InterFacilityConnectionSurchargeScopeMode'
+        references:
+          items:
+            $ref: >-
+              #/components/schemas/InterFacilityConnectionSurchargeScopeReference
+          maxItems: 500
+          minItems: 1
+          type: array
+      required:
+        - mode
+        - references
+      title: InterFacilityConnectionSurchargeCalculationScope
+      type: object
     InterFacilityConnectionSurchargeContext:
       additionalProperties: false
       properties:
@@ -46607,6 +46868,60 @@ components:
       type: string
       title: InterFacilityConnectionSurchargeContextTypes
       description: InterFacilityConnectionSurchargeContextTypes
+    InterFacilityConnectionSurchargeScopeLevel:
+      description: >-
+        The pricing level that made a charge. PACKAGING_UNIT is what the
+        packaging units of the transfer charged, TRANSFER what the transfer
+        itself charged.
+      enum:
+        - PACKAGING_UNIT
+        - TRANSFER
+      title: InterFacilityConnectionSurchargeScopeLevel
+      type: string
+    InterFacilityConnectionSurchargeScopeMode:
+      description: >-
+        Whether a scope names the charges a percentage is calculated on, or the
+        ones it is not calculated on.
+      enum:
+        - INCLUDE
+        - EXCLUDE
+      title: InterFacilityConnectionSurchargeScopeMode
+      type: string
+    InterFacilityConnectionSurchargeScopeReference:
+      additionalProperties: false
+      description: One entry of a calculation scope.
+      properties:
+        kind:
+          $ref: >-
+            #/components/schemas/InterFacilityConnectionSurchargeScopeReferenceKind
+        level:
+          allOf:
+            - $ref: '#/components/schemas/InterFacilityConnectionSurchargeScopeLevel'
+          description: >-
+            Restricts the reference to the charges made on one pricing level. If
+            omitted, charges of both levels are selected, so a
+            tenantSurchargeType configured on both matches both.
+        tenantSurchargeType:
+          description: >-
+            The referenced tenant surcharge type. Only read for TENANT_SURCHARGE
+            references.
+          type: string
+      required:
+        - kind
+      title: InterFacilityConnectionSurchargeScopeReference
+      type: object
+    InterFacilityConnectionSurchargeScopeReferenceKind:
+      description: >-
+        What a scope reference selects. BASE_PRICE is the resolved base price of
+        the transfer, TENANT_SURCHARGE every charge made under the reference's
+        tenantSurchargeType, and PACKAGING_UNITS everything the packaging units
+        of the transfer charged.
+      enum:
+        - BASE_PRICE
+        - TENANT_SURCHARGE
+        - PACKAGING_UNITS
+      title: InterFacilityConnectionSurchargeScopeReferenceKind
+      type: string
     InterFacilityConnectionToCustomerForCreation:
       additionalProperties: false
       properties:
@@ -47184,6 +47499,14 @@ components:
           maxItems: 500
           minItems: 0
           type: array
+        priority:
+          description: >-
+            Places the surcharge in the transfer's application sequence, which
+            all surcharge types share. Ascending; gaps are allowed. If no
+            surcharge of a transfer declares one, every percentage is calculated
+            on the base price and the packaging units together.
+          minimum: 0
+          type: integer
         tenantSurchargeType:
           type: string
         type:
@@ -47263,6 +47586,9 @@ components:
       type: object
     InterFacilityConnectionTransferRelativeSurcharge:
       properties:
+        calculationScope:
+          $ref: >-
+            #/components/schemas/InterFacilityConnectionSurchargeCalculationScope
         context:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionSurchargeContext'
@@ -47273,6 +47599,14 @@ components:
           format: float
           minimum: 0
           type: number
+        priority:
+          description: >-
+            Places the surcharge in the transfer's application sequence, which
+            all surcharge types share. Ascending; gaps are allowed. If no
+            surcharge of a transfer declares one, every percentage is calculated
+            on the base price and the packaging units together.
+          minimum: 0
+          type: integer
         tenantSurchargeType:
           type: string
         type:
@@ -47302,6 +47636,9 @@ components:
         percentage of the amount it is applied to, for example a cash on
         delivery fee of at least 5.80 EUR but 3 % of a larger transfer.
       properties:
+        calculationScope:
+          $ref: >-
+            #/components/schemas/InterFacilityConnectionSurchargeCalculationScope
         context:
           items:
             $ref: '#/components/schemas/InterFacilityConnectionSurchargeContext'
@@ -47314,6 +47651,14 @@ components:
           format: float
           minimum: 0
           type: number
+        priority:
+          description: >-
+            Places the surcharge in the transfer's application sequence, which
+            all surcharge types share. Ascending; gaps are allowed. If no
+            surcharge of a transfer declares one, every percentage is calculated
+            on the base price and the packaging units together.
+          minimum: 0
+          type: integer
         tenantSurchargeType:
           type: string
         type:
@@ -51333,6 +51678,12 @@ components:
             - MANDATORY
           example: MANDATORY
           type: string
+        validations:
+          items:
+            $ref: '#/components/schemas/RecordableAttributeValidation'
+          maxItems: 1
+          minItems: 0
+          type: array
         value:
           description: The value of the attribute
           example: Germany
@@ -51357,6 +51708,12 @@ components:
             - MANDATORY
           example: MANDATORY
           type: string
+        validations:
+          items:
+            $ref: '#/components/schemas/RecordableAttributeValidation'
+          maxItems: 1
+          minItems: 0
+          type: array
         value:
           description: The value of the attribute
           example: Germany
@@ -57709,6 +58066,7 @@ components:
           description: quantity of the specific article that has been ordered
           example: 21
           format: int64
+          maximum: 2147483647
           minimum: 1
           type: integer
         scannableCodes:
@@ -57725,6 +58083,7 @@ components:
           description: Secondary quantity of the specific article that has been ordered
           example: 21
           format: int64
+          maximum: 2147483647
           minimum: 0
           type: integer
         shopPrice:
@@ -57759,6 +58118,7 @@ components:
         quantity:
           description: The quantity of this order line item.
           example: 2
+          maximum: 2147483647
           type: number
       title: OrderLineItemForUpdate
       description: OrderLineItemForUpdate
@@ -58059,6 +58419,8 @@ components:
           label: BETA
     OrderPricingFee:
       properties:
+        nameLocalized:
+          $ref: '#/components/schemas/LocaleString'
         name:
           description: Name of the fee
           type: string
@@ -60500,6 +60862,14 @@ components:
             $ref: '#/components/schemas/PackagingUnitSurchargeContext'
           maxItems: 500
           type: array
+        priority:
+          description: >-
+            Places the surcharge in the packagingUnit's application sequence,
+            which all surcharge types share. Ascending; gaps are allowed. If no
+            surcharge of a packagingUnit declares one, every percentage is
+            calculated on the base price only.
+          minimum: 0
+          type: number
         tenantSurchargeType:
           description: The tenant specific identifier for the surcharge type.
           type: string
@@ -60640,6 +61010,12 @@ components:
       description: PackagingUnitDetailPricingByZone
     PackagingUnitDetailRelativeSurcharge:
       properties:
+        calculationScope:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitSurchargeCalculationScope'
+          description: >-
+            The charges the percentage is calculated on. If omitted, it is
+            calculated on everything charged before it.
         context:
           description: >-
             Restricts the surcharge to the given contexts. If omitted, the
@@ -60650,6 +61026,14 @@ components:
           type: array
         percentage:
           description: The percentage of the surcharge.
+          type: number
+        priority:
+          description: >-
+            Places the surcharge in the packagingUnit's application sequence,
+            which all surcharge types share. Ascending; gaps are allowed. If no
+            surcharge of a packagingUnit declares one, every percentage is
+            calculated on the base price only.
+          minimum: 0
           type: number
         tenantSurchargeType:
           description: The tenant specific identifier for the surcharge type.
@@ -60668,6 +61052,12 @@ components:
       description: PackagingUnitDetailRelativeSurcharge
     PackagingUnitDetailThresholdSurcharge:
       properties:
+        calculationScope:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitSurchargeCalculationScope'
+          description: >-
+            The charges the percentage is calculated on. If omitted, it is
+            calculated on everything charged before it.
         context:
           description: >-
             Restricts the surcharge to the given contexts. If omitted, the
@@ -60686,6 +61076,14 @@ components:
           description: >-
             The percentage of the surcharge, charged whenever it exceeds the
             minimum amount.
+          type: number
+        priority:
+          description: >-
+            Places the surcharge in the packagingUnit's application sequence,
+            which all surcharge types share. Ascending; gaps are allowed. If no
+            surcharge of a packagingUnit declares one, every percentage is
+            calculated on the base price only.
+          minimum: 0
           type: number
         tenantSurchargeType:
           description: The tenant specific identifier for the surcharge type.
@@ -60748,7 +61146,9 @@ components:
         pricingUnit:
           allOf:
             - $ref: '#/components/schemas/PackagingUnitPricingUnit'
-          description: The unit the pricing quantities are converted to and priced in.
+          description: >-
+            The unit the pricing quantities are converted to and priced in.
+            LOADING_METER is not supported yet and is rejected.
       required:
         - pricingUnit
         - pricingQuantities
@@ -60774,7 +61174,9 @@ components:
       title: PackagingUnitPricingQuantity
       type: string
     PackagingUnitPricingUnit:
-      description: The unit the pricing quantities are converted to and priced in.
+      description: >-
+        The unit the pricing quantities are converted to and priced in.
+        LOADING_METER is not supported yet and is rejected.
       enum:
         - GRAM
         - CUBIC_METER
@@ -60821,6 +61223,29 @@ components:
       title: PackagingUnitsMoney
       type: object
       description: PackagingUnitsMoney
+    PackagingUnitSurchargeCalculationScope:
+      properties:
+        mode:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitSurchargeScopeMode'
+          description: >-
+            Whether the references name the charges the percentage is calculated
+            on, or the ones it is not calculated on.
+        references:
+          description: >-
+            The charges the mode is applied to. A reference that matches nothing
+            contributes nothing.
+          items:
+            $ref: '#/components/schemas/PackagingUnitSurchargeScopeReference'
+          maxItems: 500
+          minItems: 1
+          type: array
+      required:
+        - mode
+        - references
+      title: PackagingUnitSurchargeCalculationScope
+      type: object
+      description: PackagingUnitSurchargeCalculationScope
     PackagingUnitSurchargeContext:
       properties:
         operator:
@@ -60855,6 +61280,56 @@ components:
         - TARGET_POSTALCODE
         - TARGET_COUNTRY
       title: PackagingUnitSurchargeContextTypes
+      type: string
+    PackagingUnitSurchargeScopeLevel:
+      description: >-
+        Restricts the reference to the charges made on one pricing level. If
+        omitted, charges of both levels are selected, so a tenantSurchargeType
+        configured on both matches both.
+      enum:
+        - PACKAGING_UNIT
+        - TRANSFER
+      title: PackagingUnitSurchargeScopeLevel
+      type: string
+    PackagingUnitSurchargeScopeMode:
+      description: >-
+        Whether the references name the charges the percentage is calculated on,
+        or the ones it is not calculated on.
+      enum:
+        - INCLUDE
+        - EXCLUDE
+      title: PackagingUnitSurchargeScopeMode
+      type: string
+    PackagingUnitSurchargeScopeReference:
+      properties:
+        kind:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitSurchargeScopeReferenceKind'
+          description: What the reference selects.
+        level:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitSurchargeScopeLevel'
+          description: >-
+            Restricts the reference to the charges made on one pricing level. If
+            omitted, charges of both levels are selected, so a
+            tenantSurchargeType configured on both matches both.
+        tenantSurchargeType:
+          description: >-
+            The referenced tenant surcharge type. Only read for TENANT_SURCHARGE
+            references.
+          type: string
+      required:
+        - kind
+      title: PackagingUnitSurchargeScopeReference
+      type: object
+      description: PackagingUnitSurchargeScopeReference
+    PackagingUnitSurchargeScopeReferenceKind:
+      description: What the reference selects.
+      enum:
+        - BASE_PRICE
+        - TENANT_SURCHARGE
+        - PACKAGING_UNITS
+      title: PackagingUnitSurchargeScopeReferenceKind
       type: string
     PackagingUnitType:
       description: The type of the packagingUnit.
@@ -65022,6 +65497,7 @@ components:
             - ADMIN_DATA_RESET
             - ADMIN_MODULES_READ
             - ADMIN_MODULES_WRITE
+            - ADMIN_INTER_FACILITY_CONNECTION_MIGRATION
             - TENANT_CONNECTOR_CONFIG_READ
             - CUSTOM_SERVICE_WRITE
             - CUSTOM_SERVICE_READ
@@ -65751,6 +66227,7 @@ components:
         - $ref: '#/components/schemas/PickJobAddTargetTimeActionParameter'
         - $ref: '#/components/schemas/PickJobCancelActionParameter'
         - $ref: '#/components/schemas/PickJobCloseActionParameter'
+        - $ref: '#/components/schemas/PickJobTriggerAllowedValuesReloadParameter'
       title: PickJobActionsParameter
       description: PickJobActionsParameter
     PickJobAddTargetTimeActionEnum:
@@ -66764,6 +67241,29 @@ components:
       title: PickJobTransfersListFilter
       type: object
       description: PickJobTransfersListFilter
+    PickJobTriggerAllowedValuesReloadEnum:
+      enum:
+        - TRIGGER_ALLOWED_VALUES_RELOAD
+      type: string
+      title: PickJobTriggerAllowedValuesReloadEnum
+      description: PickJobTriggerAllowedValuesReloadEnum
+    PickJobTriggerAllowedValuesReloadParameter:
+      additionalProperties: false
+      description: >-
+        Action resend the business event PICK_JOB_ALLOWED_VALUES_REQUESTED for
+        this pick job.
+      properties:
+        name:
+          $ref: '#/components/schemas/PickJobTriggerAllowedValuesReloadEnum'
+        version:
+          description: Version of the entity to be closed
+          minimum: 0
+          type: integer
+      required:
+        - name
+        - version
+      title: PickJobTriggerAllowedValuesReloadParameter
+      type: object
     PickjobWebHookEvent:
       allOf:
         - $ref: '#/components/schemas/WebHookEvent'
@@ -71680,6 +72180,12 @@ components:
             - MANDATORY
           example: MANDATORY
           type: string
+        validations:
+          items:
+            $ref: '#/components/schemas/RecordableAttributeValidation'
+          maxItems: 1
+          minItems: 0
+          type: array
         value:
           description: The value of the attribute
           example: Germany
@@ -71715,6 +72221,12 @@ components:
             - MANDATORY
           example: MANDATORY
           type: string
+        validations:
+          items:
+            $ref: '#/components/schemas/RecordableAttributeValidation'
+          maxItems: 1
+          minItems: 0
+          type: array
         value:
           description: The value of the attribute to set
           example: Germany
@@ -71725,6 +72237,35 @@ components:
       title: RecordableAttributeForUpdate
       type: object
       description: RecordableAttributeForUpdate
+    RecordableAttributeValidation:
+      properties:
+        allowedValues:
+          items:
+            $ref: '#/components/schemas/RecordableAttributeValidationsAllowedValue'
+          maxItems: 60
+          minItems: 0
+          type: array
+        type:
+          enum:
+            - EXACT_MATCH
+          type: string
+      required:
+        - type
+        - allowedValues
+      title: RecordableAttributeValidation
+      type: object
+      description: RecordableAttributeValidation
+    RecordableAttributeValidationsAllowedValue:
+      properties:
+        type:
+          enum:
+            - STRING
+          type: string
+      required:
+        - type
+      title: RecordableAttributeValidationsAllowedValue
+      type: object
+      description: RecordableAttributeValidationsAllowedValue
     ReductionSection:
       properties:
         diagnostics:
@@ -74270,6 +74811,7 @@ components:
               - ADMIN_DATA_RESET
               - ADMIN_MODULES_READ
               - ADMIN_MODULES_WRITE
+              - ADMIN_INTER_FACILITY_CONNECTION_MIGRATION
               - TENANT_CONNECTOR_CONFIG_READ
               - CUSTOM_SERVICE_WRITE
               - CUSTOM_SERVICE_READ
@@ -74504,6 +75046,7 @@ components:
               - ADMIN_DATA_RESET
               - ADMIN_MODULES_READ
               - ADMIN_MODULES_WRITE
+              - ADMIN_INTER_FACILITY_CONNECTION_MIGRATION
               - TENANT_CONNECTOR_CONFIG_READ
               - CUSTOM_SERVICE_WRITE
               - CUSTOM_SERVICE_READ
@@ -74729,6 +75272,7 @@ components:
               - ADMIN_DATA_RESET
               - ADMIN_MODULES_READ
               - ADMIN_MODULES_WRITE
+              - ADMIN_INTER_FACILITY_CONNECTION_MIGRATION
               - TENANT_CONNECTOR_CONFIG_READ
               - CUSTOM_SERVICE_WRITE
               - CUSTOM_SERVICE_READ
@@ -74960,6 +75504,7 @@ components:
               - ADMIN_DATA_RESET
               - ADMIN_MODULES_READ
               - ADMIN_MODULES_WRITE
+              - ADMIN_INTER_FACILITY_CONNECTION_MIGRATION
               - TENANT_CONNECTOR_CONFIG_READ
               - CUSTOM_SERVICE_WRITE
               - CUSTOM_SERVICE_READ
@@ -79281,6 +79826,12 @@ components:
             $ref: '#/components/schemas/AssignedUser'
           maxItems: 10
           type: array
+        channel:
+          enum:
+            - COLLECT
+            - SHIPPING
+          example: COLLECT
+          type: string
         created:
           description: >-
             The date this entity was created by fulfillmenttools. This value is
@@ -79687,6 +80238,12 @@ components:
               - $ref: '#/components/schemas/AssignedUserForCreationById'
           maxItems: 10
           type: array
+        channel:
+          enum:
+            - COLLECT
+            - SHIPPING
+          example: COLLECT
+          type: string
         customAttributes:
           description: >-
             Attributes that can be added to the service job. These attributes
@@ -80246,6 +80803,12 @@ components:
             $ref: '#/components/schemas/AssignedUser'
           maxItems: 10
           type: array
+        channel:
+          enum:
+            - COLLECT
+            - SHIPPING
+          example: COLLECT
+          type: string
         created:
           description: >-
             The date this entity was created by fulfillmenttools. This value is
@@ -83953,6 +84516,259 @@ components:
       title: StockActionResult
       type: object
       description: StockActionResult
+    StockAvailabilityThreshold:
+      properties:
+        config:
+          $ref: '#/components/schemas/StockAvailabilityThresholdTransitionConfig'
+        thresholdLevel:
+          $ref: '#/components/schemas/TriggeredThresholdLevel'
+        thresholdOnValue:
+          enum:
+            - AVAILABLE_FOR_PICKING
+            - STOCK_ON_HAND
+          type: string
+      required:
+        - config
+        - thresholdOnValue
+        - thresholdLevel
+      title: StockAvailabilityThreshold
+      type: object
+      description: StockAvailabilityThreshold
+    StockAvailabilityThresholdConfig:
+      properties:
+        created:
+          description: Creation date of this stockAvailabilityThresholdConfig
+          format: date-time
+          type: string
+        id:
+          description: Unique identifier of this stockAvailabilityThresholdConfig
+          example: 5aa18b4d-45de-4e9e-92db-936288040272
+          type: string
+        lastModified:
+          description: Last modification date of this stockAvailabilityThresholdConfig
+          format: date-time
+          type: string
+        target:
+          allOf:
+            - $ref: '#/components/schemas/StockAvailabilityThresholdConfigTarget'
+          description: >-
+            Targeting definition (context entries) this threshold configuration
+            applies to
+        tenantThresholdId:
+          description: Tenant-unique identifier of this threshold configuration
+          example: LOW_STOCK_ARTICLE_ABC123
+          type: string
+        thresholds:
+          description: >-
+            List of threshold level groups, each evaluated against a distinct
+            stock field. Currently limited to a single entry.
+          items:
+            $ref: '#/components/schemas/StockAvailabilityThresholdConfigGroup'
+          maxItems: 1
+          type: array
+        version:
+          description: Version number of this stockAvailabilityThresholdConfig
+          example: 1
+          type: number
+      required:
+        - target
+        - thresholds
+        - id
+        - version
+        - created
+        - lastModified
+      title: StockAvailabilityThresholdConfig
+      type: object
+      description: StockAvailabilityThresholdConfig
+    StockAvailabilityThresholdConfigContext:
+      properties:
+        type:
+          description: Type of the targeted context entry
+          enum:
+            - ARTICLE
+            - CATEGORY
+            - FACILITY
+            - FACILITY_GROUP
+          example: FACILITY
+          type: string
+        values:
+          description: Values for the targeted context entry
+          example:
+            - facilityRef1
+          items:
+            type: string
+          maxItems: 5
+          type: array
+      required:
+        - type
+        - values
+      title: StockAvailabilityThresholdConfigContext
+      type: object
+      description: StockAvailabilityThresholdConfigContext
+    StockAvailabilityThresholdConfigForCreation:
+      properties:
+        target:
+          allOf:
+            - $ref: '#/components/schemas/StockAvailabilityThresholdConfigTarget'
+          description: >-
+            Targeting definition (context entries) this threshold configuration
+            applies to
+        tenantThresholdId:
+          description: Tenant-unique identifier of this threshold configuration
+          example: LOW_STOCK_ARTICLE_ABC123
+          type: string
+        thresholds:
+          description: >-
+            List of threshold level groups, each evaluated against a distinct
+            stock field. Currently limited to a single entry.
+          items:
+            $ref: '#/components/schemas/StockAvailabilityThresholdConfigGroup'
+          maxItems: 1
+          type: array
+      required:
+        - target
+        - thresholds
+        - tenantThresholdId
+      title: StockAvailabilityThresholdConfigForCreation
+      type: object
+      description: StockAvailabilityThresholdConfigForCreation
+    StockAvailabilityThresholdConfigForUpdate:
+      properties:
+        target:
+          allOf:
+            - $ref: '#/components/schemas/StockAvailabilityThresholdConfigTarget'
+          description: >-
+            Targeting definition (context entries) this threshold configuration
+            applies to
+        thresholds:
+          description: >-
+            List of threshold level groups, each evaluated against a distinct
+            stock field. Currently limited to a single entry.
+          items:
+            $ref: '#/components/schemas/StockAvailabilityThresholdConfigGroup'
+          maxItems: 1
+          type: array
+        version:
+          description: Version number of this stockAvailabilityThresholdConfig
+          example: 1
+          minimum: 1
+          type: integer
+      required:
+        - version
+      title: StockAvailabilityThresholdConfigForUpdate
+      type: object
+      description: StockAvailabilityThresholdConfigForUpdate
+    StockAvailabilityThresholdConfigGroup:
+      properties:
+        levels:
+          items:
+            $ref: '#/components/schemas/StockAvailabilityThresholdConfigLevel'
+          maxItems: 5
+          type: array
+        thresholdOnValue:
+          description: Stock field this threshold group is evaluated against
+          enum:
+            - AVAILABLE_FOR_PICKING
+            - STOCK_ON_HAND
+          example: AVAILABLE_FOR_PICKING
+          type: string
+      required:
+        - thresholdOnValue
+        - levels
+      title: StockAvailabilityThresholdConfigGroup
+      type: object
+      description: StockAvailabilityThresholdConfigGroup
+    StockAvailabilityThresholdConfigLevel:
+      properties:
+        key:
+          description: Unique key of a threshold level within its group
+          example: LOW_STOCK
+          type: string
+        limit:
+          description: Cutoff stock quantity of a threshold level
+          example: 100
+          minimum: 0
+          type: integer
+        sticker:
+          allOf:
+            - $ref: '#/components/schemas/Sticker'
+          description: UI displays for stock that falls into this threshold level
+      required:
+        - key
+        - limit
+      title: StockAvailabilityThresholdConfigLevel
+      type: object
+      description: StockAvailabilityThresholdConfigLevel
+    StockAvailabilityThresholdConfigTarget:
+      properties:
+        context:
+          description: >-
+            Targeting definition (context entries) this threshold configuration
+            applies to
+          items:
+            $ref: '#/components/schemas/StockAvailabilityThresholdConfigContext'
+          maxItems: 5
+          type: array
+      required:
+        - context
+      title: StockAvailabilityThresholdConfigTarget
+      type: object
+      description: StockAvailabilityThresholdConfigTarget
+    StockAvailabilityThresholdConfigValidationIssue:
+      properties:
+        field:
+          description: >-
+            The field that failed validation, if the issue can be attributed to
+            a single field.
+          type: string
+        message:
+          description: A human-readable description of the validation failure.
+          type: string
+      required:
+        - message
+      title: StockAvailabilityThresholdConfigValidationIssue
+      type: object
+      description: StockAvailabilityThresholdConfigValidationIssue
+    StockAvailabilityThresholdConfigValidationOutcome:
+      properties:
+        result:
+          allOf:
+            - $ref: '#/components/schemas/StockAvailabilityThresholdConfig'
+          description: Created/updated threshold configuration on success.
+        success:
+          description: Whether the threshold configuration passed business validation.
+          type: boolean
+        validations:
+          description: >-
+            The business validation issues that prevented the threshold
+            configuration from being saved.
+          items:
+            $ref: >-
+              #/components/schemas/StockAvailabilityThresholdConfigValidationIssue
+          type: array
+      required:
+        - success
+      title: StockAvailabilityThresholdConfigValidationOutcome
+      type: object
+      description: StockAvailabilityThresholdConfigValidationOutcome
+    StockAvailabilityThresholdTransitionConfig:
+      properties:
+        id:
+          type: string
+        revision:
+          type: number
+        tenantThresholdId:
+          type: string
+        version:
+          type: number
+      required:
+        - id
+        - version
+        - revision
+        - tenantThresholdId
+      title: StockAvailabilityThresholdTransitionConfig
+      type: object
+      description: StockAvailabilityThresholdTransitionConfig
     StockConditionEnumFilter:
       properties:
         eq:
@@ -90486,6 +91302,21 @@ components:
       type: object
       title: TransportDetails
       description: TransportDetails
+    TriggeredThresholdLevel:
+      properties:
+        actual:
+          type: number
+        key:
+          type: string
+        limit:
+          type: number
+      required:
+        - key
+        - limit
+        - actual
+      title: TriggeredThresholdLevel
+      type: object
+      description: TriggeredThresholdLevel
     TwoManHandlingDetails:
       properties:
         dimensions:
@@ -91930,6 +92761,7 @@ components:
               - ADMIN_DATA_RESET
               - ADMIN_MODULES_READ
               - ADMIN_MODULES_WRITE
+              - ADMIN_INTER_FACILITY_CONNECTION_MIGRATION
               - TENANT_CONNECTOR_CONFIG_READ
               - CUSTOM_SERVICE_WRITE
               - CUSTOM_SERVICE_READ
@@ -93030,6 +93862,20 @@ tags:
     name: Routing Strategy (DOMS)
   - description: Endpoints for processing the routing decision logs.
     name: Sourcing Options (DOMS)
+  - description: Endpoints to analyze the sourcing options a routing request would produce.
+    name: Analyze (DOMS)
+  - description: Search endpoint for order records.
+    name: OrderRecords
+  - description: Endpoints to create, update, read, and delete order source configurations.
+    name: Orders Source (DOMS)
+  - description: Endpoints to distribute items across packaging units (bin packing).
+    name: Routing (DOMS)
+  - description: Endpoints to read the journal entries recorded for a routing process.
+    name: RoutingJournal (doms)
+  - description: >-
+      Endpoints to create, update, and read simulation orders used to try out
+      routing behavior.
+    name: Simulation Orders (DOMS)
   - description: Endpoints to create, update, and read carriers.
     name: Carriers (Operations)
   - description: Endpoints to create, update, and read carriers configuration.
@@ -93070,6 +93916,22 @@ tags:
     name: Shipments Configuration (Operations)
   - description: Endpoints to operate with stacks.
     name: Stacks (Operations)
+  - description: Endpoints to create, update, and read shipping labels.
+    name: Label (Operations)
+  - description: Endpoints to create and read the parcel information reported by a carrier.
+    name: Parcel Information (Operations)
+  - description: Endpoints to create, update, and read pickup services.
+    name: PickupService (operations)
+  - description: Endpoints to create a pickup-receipt PDF from a captured signature.
+    name: Signature (Operations)
+  - description: Endpoints to read and update the shipping configuration.
+    name: ShippingConfiguration (carrier)
+  - description: Endpoints to create and read the shipping information of a parcel.
+    name: ShippingInformation (carrier)
+  - description: >-
+      Endpoints to create, read, and act on the tracking information of a
+      parcel.
+    name: TrackingInformation (Carrier)
   - description: Endpoints to create, update, and read categories.
     name: Categories (Inventory)
   - description: Endpoints to configure and get channel availability.
@@ -93078,6 +93940,8 @@ tags:
     name: Inbound (Inventory)
   - description: These endpoints handle the reservations.
     name: Reservations (Inventory)
+  - description: Endpoints to create, update, and read stock availability thresholds.
+    name: Stock Availability Thresholds (Inventory)
   - description: Endpoints to create, update, and read stocks.
     name: Stocks (Inventory)
   - description: Endpoints to create, update, and read stocks configuration.
@@ -93132,6 +93996,24 @@ tags:
     name: User Management (Core)
   - description: Validate properties accepted by fulfillmenttools.
     name: Validations (Core)
+  - description: >-
+      Endpoints to create, update, and read export containers, export requests,
+      and export operations.
+    name: Export
+  - description: Endpoints to read notifications and perform actions on them.
+    name: Notifications (Core)
+  - description: Endpoints to calculate the purchase prices of a listing.
+    name: Purchase Prices (Core)
+  - description: >-
+      Endpoints to execute support actions such as activation, status check,
+      extension, and deactivation.
+    name: Support (Core)
+  - description: Search endpoint for tags.
+    name: Tags
+  - description: Endpoints to create, update, and read workflow definitions.
+    name: Workflow (Core)
+  - description: Search endpoint for workflows.
+    name: Workflow Management (Core)
   - description: Obtain artifact information provided by fulfillmenttools.
     name: Artifacts (Infrastructure)
   - description: Configure features of fulfillmenttools.
@@ -93142,5 +94024,7 @@ tags:
     name: Health (Infrastructure)
   - description: Endpoints to configure external IDPs.
     name: OIDC Configuration (Infrastructure)
+  - description: Endpoints serving statically hosted HTML content.
+    name: Static
 security:
   - BearerToken: []
