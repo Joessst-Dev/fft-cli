@@ -170,7 +170,7 @@ func (o Operation) Tag() string {
 func Operations() []Operation { return slices.Clone(operations) }
 
 // index is the operationId lookup, built once on first use rather than in an
-// init() — a `fft version` should not pay for a map of 566 entries it will not
+// init() — a `fft version` should not pay for a map of 567 entries it will not
 // read.
 var index = sync.OnceValue(func() map[string]Operation {
 	m := make(map[string]Operation, len(operations))
@@ -283,7 +283,7 @@ func SuggestOperations(id string) []string {
 }
 
 // distance is the Levenshtein edit distance between a and b, computed with two
-// rows rather than a full matrix: this runs 566 times per suggestion.
+// rows rather than a full matrix: this runs 567 times per suggestion.
 func distance(a, b string) int {
 	ar, br := []rune(a), []rune(b)
 

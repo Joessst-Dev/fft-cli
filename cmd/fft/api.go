@@ -132,7 +132,7 @@ func newAPICmd(deps *Deps) *cobra.Command {
 // findOperation resolves an operationId, or says what the user probably meant.
 //
 // A typo is exit 2, not a 404: the operation does not exist in the spec, so nothing
-// was ever going to be sent. The suggestion is the point — there are 566 ids and
+// was ever going to be sent. The suggestion is the point — there are 567 ids and
 // nobody remembers whether it is getPickJob or getPickjob.
 func findOperation(id string) (api.Operation, error) {
 	op, ok := api.LookupOperation(strings.TrimSpace(id))
