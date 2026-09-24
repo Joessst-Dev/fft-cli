@@ -1665,6 +1665,53 @@ paths:
       x-badges:
         - color: red
           label: ALPHA
+  /api/configurations/availability/thresholds/search:
+    post:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Search for StockAvailabilityThresholdConfig
+      operationId: searchStockAvailabilityThresholdConfig
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: >-
+                #/components/schemas/StockAvailabilityThresholdConfigSearchPayload
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/components/schemas/StockAvailabilityThresholdConfigPaginatedResult
+          description: Your search result
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+      summary: Search stock availability threshold configurations
+      x-fft-permissions:
+        - AVAILABILITY_THRESHOLDS_READ
+      tags:
+        - Stock Availability Thresholds (Inventory)
+      x-badges:
+        - color: red
+          label: ALPHA
   /api/configurations/capacityplanningtimeframe:
     get:
       description: ''
@@ -32574,6 +32621,9 @@ components:
         maxWeight:
           description: The maximum weight in grams that the packagingUnit can hold.
           type: number
+        minItemQuantity:
+          description: The minimum number of items that can fit in the packagingUnit.
+          type: number
         packagingPricingDetails:
           $ref: '#/components/schemas/PackagingPricingDetails'
         pricingBasis:
@@ -42380,10 +42430,24 @@ components:
       type: object
       title: HandledItem
       description: HandledItem
+    HandoverAdditionalItemsConfiguration:
+      additionalProperties: false
+      properties:
+        active:
+          default: false
+          description: Activate or Deactivate additional items handling on handover job
+          type: boolean
+      required:
+        - active
+      type: object
+      title: HandoverAdditionalItemsConfiguration
+      description: HandoverAdditionalItemsConfiguration
     HandoverConfiguration:
       allOf:
         - $ref: '#/components/schemas/VersionedResource'
       properties:
+        additionalItems:
+          $ref: '#/components/schemas/HandoverAdditionalItemsConfiguration'
         availableRefusedReasons:
           items:
             $ref: '#/components/schemas/AvailableRefusedReason'
@@ -42407,6 +42471,8 @@ components:
     HandoverConfigurationForCreate:
       additionalProperties: false
       properties:
+        additionalItems:
+          $ref: '#/components/schemas/HandoverAdditionalItemsConfiguration'
         availableRefusedReasons:
           items:
             $ref: '#/components/schemas/AvailableRefuseReasonForCreation'
@@ -52752,6 +52818,9 @@ components:
         maxWeight:
           description: The maximum weight in grams that the packagingUnit can hold.
           type: number
+        minItemQuantity:
+          description: The minimum number of items that can fit in the packagingUnit.
+          type: number
         packagingPricingDetails:
           $ref: '#/components/schemas/PackagingPricingDetails'
         pricingBasis:
@@ -56752,6 +56821,7 @@ components:
       required:
         - version
         - id
+        - status
         - nameLocalized
         - allowedOperativeTypes
       title: OperativeContainerType
@@ -63213,6 +63283,9 @@ components:
         maxWeight:
           description: The maximum weight in grams that the packagingUnit can hold.
           type: number
+        minItemQuantity:
+          description: The minimum number of items that can fit in the packagingUnit.
+          type: number
         packagingPricingDetails:
           $ref: '#/components/schemas/PackagingPricingDetails'
         pricingBasis:
@@ -63441,6 +63514,9 @@ components:
               label: ALPHA
         maxWeight:
           description: The maximum weight in grams that the packagingUnit can hold.
+          type: number
+        minItemQuantity:
+          description: The minimum number of items that can fit in the packagingUnit.
           type: number
         packagingPricingDetails:
           $ref: '#/components/schemas/PackagingPricingDetails'
@@ -84699,6 +84775,115 @@ components:
       title: StockAvailabilityThresholdConfigLevel
       type: object
       description: StockAvailabilityThresholdConfigLevel
+    StockAvailabilityThresholdConfigPaginatedResult:
+      properties:
+        pageInfo:
+          allOf:
+            - $ref: '#/components/schemas/PageInfo'
+          description: Pagination information for the search result.
+        stockAvailabilityThresholdConfigs:
+          items:
+            $ref: '#/components/schemas/StockAvailabilityThresholdConfig'
+          type: array
+        total:
+          description: >-
+            The total number of items matching the search criteria. Only filled,
+            if withTotal is set to true in the search options.
+          minimum: 0
+          type: number
+      required:
+        - pageInfo
+        - stockAvailabilityThresholdConfigs
+      title: StockAvailabilityThresholdConfigPaginatedResult
+      type: object
+      description: StockAvailabilityThresholdConfigPaginatedResult
+    StockAvailabilityThresholdConfigSearchPayload:
+      properties:
+        after:
+          deprecated: false
+          description: >-
+            The cursor to start after for forward pagination. The value is
+            provided in the `pageInfo.endCursor` field of the response. Cannot
+            be used with `before` or `last`.
+          type: string
+        before:
+          description: >-
+            The cursor to start before for backward pagination. The value is
+            provided in the `pageInfo.startCursor` field of the response. Cannot
+            be used with `after` or `size` (first).
+          type: string
+        last:
+          description: >-
+            Number of items to return for backward pagination. Cannot be used
+            with 'size' (first). Default: 20.
+          maximum: 250
+          minimum: 1
+          type: number
+        options:
+          $ref: '#/components/schemas/SearchOptions'
+        query:
+          $ref: '#/components/schemas/StockAvailabilityThresholdConfigSearchQuery'
+        size:
+          description: >-
+            Number of items to return for forward pagination. Cannot be used
+            with 'last'. Default: 20.
+          example: 10
+          maximum: 250
+          minimum: 1
+          type: number
+        sort:
+          description: Use for sorting the result.
+          items:
+            $ref: '#/components/schemas/StockAvailabilityThresholdConfigSort'
+          maxItems: 1
+          minItems: 1
+          type: array
+        startAfterId:
+          deprecated: true
+          description: >-
+            The ID to start after. Deprecated, use `after` with the value
+            provided in `pageInfo.endCursor` instead.
+          type: string
+      required:
+        - query
+      title: StockAvailabilityThresholdConfigSearchPayload
+      type: object
+      description: StockAvailabilityThresholdConfigSearchPayload
+    StockAvailabilityThresholdConfigSearchQuery:
+      properties:
+        and:
+          items:
+            $ref: '#/components/schemas/StockAvailabilityThresholdConfigSearchQuery'
+          maxItems: 500
+          type: array
+        id:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by id
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+        or:
+          items:
+            $ref: '#/components/schemas/StockAvailabilityThresholdConfigSearchQuery'
+          maxItems: 500
+          type: array
+        tenantThresholdId:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by tenantThresholdId
+          example: MY_THRESHOLD_ID
+      title: StockAvailabilityThresholdConfigSearchQuery
+      type: object
+      description: StockAvailabilityThresholdConfigSearchQuery
+    StockAvailabilityThresholdConfigSort:
+      properties:
+        id:
+          enum:
+            - ASC
+            - DESC
+          type: string
+      title: StockAvailabilityThresholdConfigSort
+      type: object
+      description: StockAvailabilityThresholdConfigSort
     StockAvailabilityThresholdConfigTarget:
       properties:
         context:
@@ -91340,6 +91525,9 @@ components:
           type: number
         maxWeight:
           description: The maximum weight in grams that the packagingUnit can hold.
+          type: number
+        minItemQuantity:
+          description: The minimum number of items that can fit in the packagingUnit.
           type: number
         packagingPricingDetails:
           $ref: '#/components/schemas/PackagingPricingDetails'

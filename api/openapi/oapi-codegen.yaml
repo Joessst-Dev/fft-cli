@@ -38,8 +38,9 @@ output-options:
   # operation reaches it. Excluding a schema drops it from the output but does NOT
   # decrement the ref counts it contributed, so its filter children stay above zero and
   # survive too — every schema in the orphaned subgraph must be named here, not just the
-  # recursive root. Neither Audits (Core) nor Export is an included tag. Extend this list
-  # if a future spec sync leaks another recursive, unreachable schema.
+  # recursive root. Neither Audits (Core), Export, nor Stock Availability Thresholds
+  # (Inventory) is an included tag. Extend this list if a future spec sync leaks another
+  # recursive, unreachable schema.
   exclude-schemas:
     - AuditSearchQuery
     - AuditedEntityTypeEnumFilter
@@ -49,6 +50,7 @@ output-options:
     - ExportOperationSearchQuery
     - ExportOperationStatusEnumFilter
     - ExportOperationExportSourceTypeEnumFilter
+    - StockAvailabilityThresholdConfigSearchQuery
 
   # The spec is VERSIONLESS and regenerated upstream without notice; keeping
   # the raw body on responses lets us decode ApiError (a JSON *array*)

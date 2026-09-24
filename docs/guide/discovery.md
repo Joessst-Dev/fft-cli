@@ -5,7 +5,7 @@ source: internal/skill/assets/references/discovery.md
 
 # Finding the operation you need
 
-566 operations. You are not expected to know them, and you must not guess them. Everything
+567 operations. You are not expected to know them, and you must not guess them. Everything
 here reads the spec compiled into the binary: it works offline, needs no project, sends no
 request, and is free.
 

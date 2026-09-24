@@ -16,7 +16,7 @@ const apiLong = `Call any operation of the fulfillmenttools API by its operation
 This is the escape hatch. fft curates the entities it knows well (facility,
 listing, stock) and generates a command for every other operation, but when the
 spec moves faster than fft does, this reaches whatever the spec says exists —
-all 566 operations of it.
+all 567 operations of it.
 
   fft api list --tag picking              # what is there?
   fft api describe getPickJob             # what does it take?
