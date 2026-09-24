@@ -233,7 +233,7 @@ var _ = Describe("Mutates", func() {
 			}
 		})
 
-		It("accounts for all 159 of the spec's POSTs", func() {
+		It("accounts for all 160 of the spec's POSTs", func() {
 			var posts int
 			for _, op := range Operations() {
 				if op.Method == http.MethodPost {
@@ -243,7 +243,7 @@ var _ = Describe("Mutates", func() {
 			Expect(posts).To(Equal(len(readPOSTs) + len(knownMutatingPOSTs)))
 			// Pin the literal in the spec's own name too: the check above is purely
 			// relational and would stay green even if this description's number drifted.
-			Expect(posts).To(Equal(159))
+			Expect(posts).To(Equal(160))
 		})
 	})
 

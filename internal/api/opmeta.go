@@ -14,8 +14,8 @@ import (
 //
 // The generated client covers eight tags: facilities, listings, stocks, health,
 // user management, sourcing options, orders and routing strategy. That is 95
-// methods out of the API's 566 operations. Tier-2 and Tier-3 commands have to
-// reach the other 471, and they cannot do it through a typed client that does not
+// methods out of the API's 567 operations. Tier-2 and Tier-3 commands have to
+// reach the other 472, and they cannot do it through a typed client that does not
 // have them.
 //
 // So they build requests from metadata instead: method, path template, parameters,
@@ -104,7 +104,7 @@ type Operation struct {
 	Description string
 
 	// Permissions are the operation's x-fft-permissions, empty when it declares
-	// none. 328 of the 566 operations declare them.
+	// none. 329 of the 567 operations declare them.
 	Permissions []string
 
 	// Params are the operation's parameters, sorted: path first, then query, then
@@ -170,7 +170,7 @@ func (o Operation) Tag() string {
 func Operations() []Operation { return slices.Clone(operations) }
 
 // index is the operationId lookup, built once on first use rather than in an
-// init() — a `fft version` should not pay for a map of 566 entries it will not
+// init() — a `fft version` should not pay for a map of 567 entries it will not
 // read.
 var index = sync.OnceValue(func() map[string]Operation {
 	m := make(map[string]Operation, len(operations))
@@ -283,7 +283,7 @@ func SuggestOperations(id string) []string {
 }
 
 // distance is the Levenshtein edit distance between a and b, computed with two
-// rows rather than a full matrix: this runs 566 times per suggestion.
+// rows rather than a full matrix: this runs 567 times per suggestion.
 func distance(a, b string) int {
 	ar, br := []rune(a), []rune(b)
 

@@ -947,7 +947,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"allowedOperativeTypes\": [\n    \"PICKING\"\n  ],\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"weightLimitInG\": 2500\n}\n",
-		SampleResponse: "{\n  \"allowedOperativeTypes\": [\n    \"PICKING\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
+		SampleResponse: "{\n  \"allowedOperativeTypes\": [\n    \"PICKING\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"status\": \"INACTIVE\",\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
 	},
 	{
 		ID:           "createPackagingUnitDetail",
@@ -3371,7 +3371,7 @@ var operations = []Operation{
 			{Name: "operativeContainerTypeId", In: InPath, Type: TypeString, Required: true},
 			{Name: "locale", In: InQuery, Type: TypeString, Description: "Provide the localized names and descriptions for the operativeContainerTypes. If not provided the default locale is used. For example de_DE."},
 		},
-		SampleResponse: "{\n  \"allowedOperativeTypes\": [\n    \"PICKING\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
+		SampleResponse: "{\n  \"allowedOperativeTypes\": [\n    \"PICKING\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"status\": \"INACTIVE\",\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
 	},
 	{
 		ID:          "getOperativeContainerTypes",
@@ -6773,6 +6773,19 @@ var operations = []Operation{
 		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"stocks\": [\n    {\n      \"available\": 1,\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"facility\": {\n        \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n        \"tenantFacilityId\": \"MY_FACILITY_ID\"\n      },\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"facilityWideReserved\": 1,\n      \"id\": \"string\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"locationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"receiptDate\": \"2026-06-17T12:00:00.000Z\",\n      \"reserved\": 1,\n      \"serializedProperties\": \"string\",\n      \"tenantArticleId\": \"MY_ARTICLE_ID\",\n      \"tenantStockId\": \"MY_STOCK_ID\",\n      \"traits\": [\n        \"PICKABLE\"\n      ],\n      \"value\": 42,\n      \"version\": 1\n    }\n  ]\n}\n",
 	},
 	{
+		ID:             "searchStockAvailabilityThresholdConfig",
+		Method:         "POST",
+		Path:           "/api/configurations/availability/thresholds/search",
+		Tags:           []string{"Stock Availability Thresholds (Inventory)"},
+		Summary:        "Search stock availability threshold configurations",
+		Description:    "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Search for StockAvailabilityThresholdConfig",
+		Permissions:    []string{"AVAILABILITY_THRESHOLDS_READ"},
+		HasBody:        true,
+		BodyRequired:   true,
+		SampleBody:     "{\n  \"query\": {\n    \"id\": {},\n    \"tenantThresholdId\": {}\n  },\n  \"size\": 10\n}\n",
+		SampleResponse: "{\n  \"pageInfo\": {\n    \"endCursor\": \"string\",\n    \"hasNextPage\": false,\n    \"hasPreviousPage\": false,\n    \"startCursor\": \"string\"\n  },\n  \"stockAvailabilityThresholdConfigs\": [\n    {\n      \"created\": \"2026-01-01T00:00:00Z\",\n      \"id\": \"5aa18b4d-45de-4e9e-92db-936288040272\",\n      \"lastModified\": \"2026-01-01T00:00:00Z\",\n      \"target\": {\n        \"context\": [\n          {\n            \"type\": \"FACILITY\",\n            \"values\": [\n              \"facilityRef1\"\n            ]\n          }\n        ]\n      },\n      \"tenantThresholdId\": \"LOW_STOCK_ARTICLE_ABC123\",\n      \"thresholds\": [\n        {\n          \"levels\": [\n            {}\n          ],\n          \"thresholdOnValue\": \"AVAILABLE_FOR_PICKING\"\n        }\n      ],\n      \"version\": 1\n    }\n  ]\n}\n",
+	},
+	{
 		ID:             "searchStorageLocation",
 		Method:         "POST",
 		Path:           "/api/storagelocations/search",
@@ -7206,7 +7219,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"version\": 1,\n  \"weightLimitInG\": 2500\n}\n",
-		SampleResponse: "{\n  \"allowedOperativeTypes\": [\n    \"PICKING\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
+		SampleResponse: "{\n  \"allowedOperativeTypes\": [\n    \"PICKING\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"status\": \"INACTIVE\",\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
 	},
 	{
 		ID:          "updateOrder",
@@ -7397,7 +7410,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"content\": \"JVBERi0xLjEKJcKlwrHDqwoKMSAwIG9iagogIDw8IC9UeXBlIC9DYXRhbG9nCiAgICAgL1BhZ2VzIDIgMCBSCiAgPj4KZW5kb2JqCgoyIDAgb2JqCiAgPDwgL1R5cGUgL1BhZ2VzCiAgICAgL0tpZHMgWzMgMCBSXQogICAgIC9Db3VudCAxCiAgICAgL01lZGlhQm94IFswIDAgMzAwIDE0NF0KICA+PgplbmRvYmoKCjMgMCBvYmoKICA8PCAgL1R5cGUgL1BhZ2UKICAgICAgL1BhcmVudCAyIDAgUgogICAgICAvUmVzb3VyY2VzCiAgICAgICA8PCAvRm9udAogICAgICAgICAgIDw8IC9GMQogICAgICAgICAgICAgICA8PCAvVHlwZSAvRm9udAogICAgICAgICAgICAgICAgICAvU3VidHlwZSAvVHlwZTEKICAgICAgICAgICAgICAgICAgL0Jhc2VGb250IC9UaW1lcy1Sb21hbgogICAgICAgICAgICAgICA+PgogICAgICAgICAgID4+CiAgICAgICA+PgogICAgICAvQ29udGVudHMgNCAwIFIKICA+PgplbmRvYmoKCjQgMCBvYmoKICA8PCAvTGVuZ3RoIDU1ID4+CnN0cmVhbQogIEJUCiAgICAvRjEgMTggVGYKICAgIDAgMCBUZAogICAgKEhlbGxvIFdvcmxkKSBUagogIEVUCmVuZHN0cmVhbQplbmRvYmoKCnhyZWYKMCA1CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAxOCAwMDAwMCBuIAowMDAwMDAwMDc3IDAwMDAwIG4gCjAwMDAwMDAxNzggMDAwMDAgbiAKMDAwMDAwMDQ1NyAwMDAwMCBuIAp0cmFpbGVyCiAgPDwgIC9Sb290IDEgMCBSCiAgICAgIC9TaXplIDUKICA+PgpzdGFydHhyZWYKNTY1CiUlRU9GCg==\",\n  \"name\": \"example.pdf\"\n}\n",
-		SampleResponse: "{\n  \"allowedOperativeTypes\": [\n    \"PICKING\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
+		SampleResponse: "{\n  \"allowedOperativeTypes\": [\n    \"PICKING\"\n  ],\n  \"created\": \"2020-02-03T08:45:51.525Z\",\n  \"descriptionLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"id\": \"string\",\n  \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n  \"nameLocalized\": {\n    \"de_DE\": \"Wert\",\n    \"en_US\": \"Value\",\n    \"ru_RU\": \"значение\"\n  },\n  \"priority\": 100,\n  \"status\": \"INACTIVE\",\n  \"version\": 42,\n  \"weightLimitInG\": 2500\n}\n",
 	},
 	{
 		ID:             "upsertExpiryConfiguration",
