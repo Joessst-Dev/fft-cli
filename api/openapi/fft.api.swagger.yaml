@@ -46980,12 +46980,15 @@ components:
       description: >-
         What a scope reference selects. BASE_PRICE is the resolved base price of
         the transfer, TENANT_SURCHARGE every charge made under the reference's
-        tenantSurchargeType, and PACKAGING_UNITS everything the packaging units
-        of the transfer charged.
+        tenantSurchargeType, PACKAGING_UNITS everything the packaging units of
+        the transfer charged, and GOODS_VALUE the order's goods value that ships
+        with the transfer. PACKAGING_UNITS and GOODS_VALUE are only available on
+        the transfer level.
       enum:
         - BASE_PRICE
         - TENANT_SURCHARGE
         - PACKAGING_UNITS
+        - GOODS_VALUE
       title: InterFacilityConnectionSurchargeScopeReferenceKind
       type: string
     InterFacilityConnectionToCustomerForCreation:
@@ -62604,7 +62607,7 @@ components:
       required:
         - name
         - move
-      title: PackJobReplaceAssignedUsersActionParameter
+      title: PackJobMoveEachesToSourceContainerActionParameter
       type: object
     PackJobMoveEachesToTargetContainerActionEnum:
       enum:
@@ -62623,7 +62626,7 @@ components:
       required:
         - name
         - move
-      title: PackJobReplaceAssignedUsersActionParameter
+      title: PackJobMoveEachesToTargetContainerActionParameter
       type: object
     PackJobOrderBy:
       description: Attribute to order a packJobs by
@@ -84936,6 +84939,31 @@ components:
       title: StockAvailabilityThresholdConfigValidationOutcome
       type: object
       description: StockAvailabilityThresholdConfigValidationOutcome
+    StockAvailabilityThresholdTransition:
+      properties:
+        config:
+          $ref: '#/components/schemas/StockAvailabilityThresholdTransitionConfig'
+        thresholdLevel:
+          $ref: '#/components/schemas/TriggeredThresholdLevel'
+        thresholdOnValue:
+          enum:
+            - AVAILABLE_FOR_PICKING
+            - STOCK_ON_HAND
+          type: string
+        transition:
+          enum:
+            - TO_ON
+            - TO_OFF
+            - NONE
+          type: string
+      required:
+        - config
+        - transition
+        - thresholdOnValue
+        - thresholdLevel
+      title: StockAvailabilityThresholdTransition
+      type: object
+      description: StockAvailabilityThresholdTransition
     StockAvailabilityThresholdTransitionConfig:
       properties:
         id:
@@ -84954,6 +84982,35 @@ components:
       title: StockAvailabilityThresholdTransitionConfig
       type: object
       description: StockAvailabilityThresholdTransitionConfig
+    StockAvailabilityThresholdTransitionedEventPayload:
+      properties:
+        facilityId:
+          type: string
+        tenantArticleId:
+          type: string
+        thresholds:
+          items:
+            $ref: '#/components/schemas/StockAvailabilityThresholdTransition'
+          type: array
+      required:
+        - tenantArticleId
+        - facilityId
+        - thresholds
+      title: StockAvailabilityThresholdTransitionedEventPayload
+      type: object
+      description: StockAvailabilityThresholdTransitionedEventPayload
+    StockAvailabilityThresholdTransitionedWebHookEvent:
+      allOf:
+        - $ref: '#/components/schemas/WebHookEvent'
+      properties:
+        payload:
+          $ref: >-
+            #/components/schemas/StockAvailabilityThresholdTransitionedEventPayload
+      required:
+        - payload
+      title: StockAvailabilityThresholdTransitionedWebHookEvent
+      type: object
+      description: StockAvailabilityThresholdTransitionedWebHookEvent
     StockConditionEnumFilter:
       properties:
         eq:

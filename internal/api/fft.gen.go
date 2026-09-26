@@ -2732,6 +2732,7 @@ func (e InterFacilityConnectionSurchargeScopeMode) Valid() bool {
 // Defines values for InterFacilityConnectionSurchargeScopeReferenceKind.
 const (
 	InterFacilityConnectionSurchargeScopeReferenceKindBASEPRICE       InterFacilityConnectionSurchargeScopeReferenceKind = "BASE_PRICE"
+	InterFacilityConnectionSurchargeScopeReferenceKindGOODSVALUE      InterFacilityConnectionSurchargeScopeReferenceKind = "GOODS_VALUE"
 	InterFacilityConnectionSurchargeScopeReferenceKindPACKAGINGUNITS  InterFacilityConnectionSurchargeScopeReferenceKind = "PACKAGING_UNITS"
 	InterFacilityConnectionSurchargeScopeReferenceKindTENANTSURCHARGE InterFacilityConnectionSurchargeScopeReferenceKind = "TENANT_SURCHARGE"
 )
@@ -2740,6 +2741,8 @@ const (
 func (e InterFacilityConnectionSurchargeScopeReferenceKind) Valid() bool {
 	switch e {
 	case InterFacilityConnectionSurchargeScopeReferenceKindBASEPRICE:
+		return true
+	case InterFacilityConnectionSurchargeScopeReferenceKindGOODSVALUE:
 		return true
 	case InterFacilityConnectionSurchargeScopeReferenceKindPACKAGINGUNITS:
 		return true
@@ -16942,7 +16945,7 @@ type InterFacilityConnectionSurchargeScopeMode string
 
 // InterFacilityConnectionSurchargeScopeReference One entry of a calculation scope.
 type InterFacilityConnectionSurchargeScopeReference struct {
-	// Kind What a scope reference selects. BASE_PRICE is the resolved base price of the transfer, TENANT_SURCHARGE every charge made under the reference's tenantSurchargeType, and PACKAGING_UNITS everything the packaging units of the transfer charged.
+	// Kind What a scope reference selects. BASE_PRICE is the resolved base price of the transfer, TENANT_SURCHARGE every charge made under the reference's tenantSurchargeType, PACKAGING_UNITS everything the packaging units of the transfer charged, and GOODS_VALUE the order's goods value that ships with the transfer. PACKAGING_UNITS and GOODS_VALUE are only available on the transfer level.
 	Kind InterFacilityConnectionSurchargeScopeReferenceKind `json:"kind"`
 
 	// Level Restricts the reference to the charges made on one pricing level. If omitted, charges of both levels are selected, so a tenantSurchargeType configured on both matches both.
@@ -16952,7 +16955,7 @@ type InterFacilityConnectionSurchargeScopeReference struct {
 	TenantSurchargeType *string `json:"tenantSurchargeType,omitempty"`
 }
 
-// InterFacilityConnectionSurchargeScopeReferenceKind What a scope reference selects. BASE_PRICE is the resolved base price of the transfer, TENANT_SURCHARGE every charge made under the reference's tenantSurchargeType, and PACKAGING_UNITS everything the packaging units of the transfer charged.
+// InterFacilityConnectionSurchargeScopeReferenceKind What a scope reference selects. BASE_PRICE is the resolved base price of the transfer, TENANT_SURCHARGE every charge made under the reference's tenantSurchargeType, PACKAGING_UNITS everything the packaging units of the transfer charged, and GOODS_VALUE the order's goods value that ships with the transfer. PACKAGING_UNITS and GOODS_VALUE are only available on the transfer level.
 type InterFacilityConnectionSurchargeScopeReferenceKind string
 
 // InterFacilityConnectionToCustomerForCreation InterFacilityConnectionToCustomerForCreation
