@@ -4979,6 +4979,7 @@ const (
 	PermissionKeyADMININTERFACILITYCONNECTIONMIGRATION PermissionKey = "ADMIN_INTER_FACILITY_CONNECTION_MIGRATION"
 	PermissionKeyADMINMODULESREAD                      PermissionKey = "ADMIN_MODULES_READ"
 	PermissionKeyADMINMODULESWRITE                     PermissionKey = "ADMIN_MODULES_WRITE"
+	PermissionKeyADMINROUTINGPLANANALYSIS              PermissionKey = "ADMIN_ROUTING_PLAN_ANALYSIS"
 	PermissionKeyAIASSISTANTACCESS                     PermissionKey = "AI_ASSISTANT_ACCESS"
 	PermissionKeyANALYTICSDASHBOARDREAD                PermissionKey = "ANALYTICS_DASHBOARD_READ"
 	PermissionKeyAUDITREAD                             PermissionKey = "AUDIT_READ"
@@ -5150,6 +5151,8 @@ func (e PermissionKey) Valid() bool {
 	case PermissionKeyADMINMODULESREAD:
 		return true
 	case PermissionKeyADMINMODULESWRITE:
+		return true
+	case PermissionKeyADMINROUTINGPLANANALYSIS:
 		return true
 	case PermissionKeyAIASSISTANTACCESS:
 		return true
@@ -7643,6 +7646,7 @@ const (
 	RolePermissionsADMININTERFACILITYCONNECTIONMIGRATION RolePermissions = "ADMIN_INTER_FACILITY_CONNECTION_MIGRATION"
 	RolePermissionsADMINMODULESREAD                      RolePermissions = "ADMIN_MODULES_READ"
 	RolePermissionsADMINMODULESWRITE                     RolePermissions = "ADMIN_MODULES_WRITE"
+	RolePermissionsADMINROUTINGPLANANALYSIS              RolePermissions = "ADMIN_ROUTING_PLAN_ANALYSIS"
 	RolePermissionsAIASSISTANTACCESS                     RolePermissions = "AI_ASSISTANT_ACCESS"
 	RolePermissionsANALYTICSDASHBOARDREAD                RolePermissions = "ANALYTICS_DASHBOARD_READ"
 	RolePermissionsAUDITREAD                             RolePermissions = "AUDIT_READ"
@@ -7814,6 +7818,8 @@ func (e RolePermissions) Valid() bool {
 	case RolePermissionsADMINMODULESREAD:
 		return true
 	case RolePermissionsADMINMODULESWRITE:
+		return true
+	case RolePermissionsADMINROUTINGPLANANALYSIS:
 		return true
 	case RolePermissionsAIASSISTANTACCESS:
 		return true
@@ -8144,6 +8150,7 @@ const (
 	RoleForCreationPermissionsADMININTERFACILITYCONNECTIONMIGRATION RoleForCreationPermissions = "ADMIN_INTER_FACILITY_CONNECTION_MIGRATION"
 	RoleForCreationPermissionsADMINMODULESREAD                      RoleForCreationPermissions = "ADMIN_MODULES_READ"
 	RoleForCreationPermissionsADMINMODULESWRITE                     RoleForCreationPermissions = "ADMIN_MODULES_WRITE"
+	RoleForCreationPermissionsADMINROUTINGPLANANALYSIS              RoleForCreationPermissions = "ADMIN_ROUTING_PLAN_ANALYSIS"
 	RoleForCreationPermissionsAIASSISTANTACCESS                     RoleForCreationPermissions = "AI_ASSISTANT_ACCESS"
 	RoleForCreationPermissionsANALYTICSDASHBOARDREAD                RoleForCreationPermissions = "ANALYTICS_DASHBOARD_READ"
 	RoleForCreationPermissionsAUDITREAD                             RoleForCreationPermissions = "AUDIT_READ"
@@ -8315,6 +8322,8 @@ func (e RoleForCreationPermissions) Valid() bool {
 	case RoleForCreationPermissionsADMINMODULESREAD:
 		return true
 	case RoleForCreationPermissionsADMINMODULESWRITE:
+		return true
+	case RoleForCreationPermissionsADMINROUTINGPLANANALYSIS:
 		return true
 	case RoleForCreationPermissionsAIASSISTANTACCESS:
 		return true
@@ -8645,6 +8654,7 @@ const (
 	RoleForPatchPermissionsADMININTERFACILITYCONNECTIONMIGRATION RoleForPatchPermissions = "ADMIN_INTER_FACILITY_CONNECTION_MIGRATION"
 	RoleForPatchPermissionsADMINMODULESREAD                      RoleForPatchPermissions = "ADMIN_MODULES_READ"
 	RoleForPatchPermissionsADMINMODULESWRITE                     RoleForPatchPermissions = "ADMIN_MODULES_WRITE"
+	RoleForPatchPermissionsADMINROUTINGPLANANALYSIS              RoleForPatchPermissions = "ADMIN_ROUTING_PLAN_ANALYSIS"
 	RoleForPatchPermissionsAIASSISTANTACCESS                     RoleForPatchPermissions = "AI_ASSISTANT_ACCESS"
 	RoleForPatchPermissionsANALYTICSDASHBOARDREAD                RoleForPatchPermissions = "ANALYTICS_DASHBOARD_READ"
 	RoleForPatchPermissionsAUDITREAD                             RoleForPatchPermissions = "AUDIT_READ"
@@ -8816,6 +8826,8 @@ func (e RoleForPatchPermissions) Valid() bool {
 	case RoleForPatchPermissionsADMINMODULESREAD:
 		return true
 	case RoleForPatchPermissionsADMINMODULESWRITE:
+		return true
+	case RoleForPatchPermissionsADMINROUTINGPLANANALYSIS:
 		return true
 	case RoleForPatchPermissionsAIASSISTANTACCESS:
 		return true
@@ -9146,6 +9158,7 @@ const (
 	RoleForUpdatePermissionsADMININTERFACILITYCONNECTIONMIGRATION RoleForUpdatePermissions = "ADMIN_INTER_FACILITY_CONNECTION_MIGRATION"
 	RoleForUpdatePermissionsADMINMODULESREAD                      RoleForUpdatePermissions = "ADMIN_MODULES_READ"
 	RoleForUpdatePermissionsADMINMODULESWRITE                     RoleForUpdatePermissions = "ADMIN_MODULES_WRITE"
+	RoleForUpdatePermissionsADMINROUTINGPLANANALYSIS              RoleForUpdatePermissions = "ADMIN_ROUTING_PLAN_ANALYSIS"
 	RoleForUpdatePermissionsAIASSISTANTACCESS                     RoleForUpdatePermissions = "AI_ASSISTANT_ACCESS"
 	RoleForUpdatePermissionsANALYTICSDASHBOARDREAD                RoleForUpdatePermissions = "ANALYTICS_DASHBOARD_READ"
 	RoleForUpdatePermissionsAUDITREAD                             RoleForUpdatePermissions = "AUDIT_READ"
@@ -9317,6 +9330,8 @@ func (e RoleForUpdatePermissions) Valid() bool {
 	case RoleForUpdatePermissionsADMINMODULESREAD:
 		return true
 	case RoleForUpdatePermissionsADMINMODULESWRITE:
+		return true
+	case RoleForUpdatePermissionsADMINROUTINGPLANANALYSIS:
 		return true
 	case RoleForUpdatePermissionsAIASSISTANTACCESS:
 		return true
@@ -12428,6 +12443,7 @@ const (
 	UserRoleWithPermissionsPermissionsADMININTERFACILITYCONNECTIONMIGRATION UserRoleWithPermissionsPermissions = "ADMIN_INTER_FACILITY_CONNECTION_MIGRATION"
 	UserRoleWithPermissionsPermissionsADMINMODULESREAD                      UserRoleWithPermissionsPermissions = "ADMIN_MODULES_READ"
 	UserRoleWithPermissionsPermissionsADMINMODULESWRITE                     UserRoleWithPermissionsPermissions = "ADMIN_MODULES_WRITE"
+	UserRoleWithPermissionsPermissionsADMINROUTINGPLANANALYSIS              UserRoleWithPermissionsPermissions = "ADMIN_ROUTING_PLAN_ANALYSIS"
 	UserRoleWithPermissionsPermissionsAIASSISTANTACCESS                     UserRoleWithPermissionsPermissions = "AI_ASSISTANT_ACCESS"
 	UserRoleWithPermissionsPermissionsANALYTICSDASHBOARDREAD                UserRoleWithPermissionsPermissions = "ANALYTICS_DASHBOARD_READ"
 	UserRoleWithPermissionsPermissionsAUDITREAD                             UserRoleWithPermissionsPermissions = "AUDIT_READ"
@@ -12599,6 +12615,8 @@ func (e UserRoleWithPermissionsPermissions) Valid() bool {
 	case UserRoleWithPermissionsPermissionsADMINMODULESREAD:
 		return true
 	case UserRoleWithPermissionsPermissionsADMINMODULESWRITE:
+		return true
+	case UserRoleWithPermissionsPermissionsADMINROUTINGPLANANALYSIS:
 		return true
 	case UserRoleWithPermissionsPermissionsAIASSISTANTACCESS:
 		return true
@@ -13133,6 +13151,7 @@ const (
 	GetPermissionsParamsKeyADMININTERFACILITYCONNECTIONMIGRATION GetPermissionsParamsKey = "ADMIN_INTER_FACILITY_CONNECTION_MIGRATION"
 	GetPermissionsParamsKeyADMINMODULESREAD                      GetPermissionsParamsKey = "ADMIN_MODULES_READ"
 	GetPermissionsParamsKeyADMINMODULESWRITE                     GetPermissionsParamsKey = "ADMIN_MODULES_WRITE"
+	GetPermissionsParamsKeyADMINROUTINGPLANANALYSIS              GetPermissionsParamsKey = "ADMIN_ROUTING_PLAN_ANALYSIS"
 	GetPermissionsParamsKeyAIASSISTANTACCESS                     GetPermissionsParamsKey = "AI_ASSISTANT_ACCESS"
 	GetPermissionsParamsKeyANALYTICSDASHBOARDREAD                GetPermissionsParamsKey = "ANALYTICS_DASHBOARD_READ"
 	GetPermissionsParamsKeyAUDITREAD                             GetPermissionsParamsKey = "AUDIT_READ"
@@ -13304,6 +13323,8 @@ func (e GetPermissionsParamsKey) Valid() bool {
 	case GetPermissionsParamsKeyADMINMODULESREAD:
 		return true
 	case GetPermissionsParamsKeyADMINMODULESWRITE:
+		return true
+	case GetPermissionsParamsKeyADMINROUTINGPLANANALYSIS:
 		return true
 	case GetPermissionsParamsKeyAIASSISTANTACCESS:
 		return true
@@ -25216,7 +25237,6 @@ type StockAvailabilityThresholdThresholdOnValue string
 // StockAvailabilityThresholdTransitionConfig StockAvailabilityThresholdTransitionConfig
 type StockAvailabilityThresholdTransitionConfig struct {
 	Id                string  `json:"id"`
-	Revision          float32 `json:"revision"`
 	TenantThresholdId string  `json:"tenantThresholdId"`
 	Version           float32 `json:"version"`
 }
