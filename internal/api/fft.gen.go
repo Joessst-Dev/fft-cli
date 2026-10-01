@@ -13992,7 +13992,7 @@ type ArticleAttributeItem struct {
 	//  clients.
 	//
 	// Example: %%subtitle%%
-	Key string `json:"key"`
+	Key ArticleAttributeItem_Key `json:"key"`
 
 	// KeyLocalized The translations for the key of the attribute. This can be only filled with a descriptive category. Excluding for %%subtitle%%
 	KeyLocalized *LocaleString `json:"keyLocalized,omitempty"`
@@ -14024,6 +14024,23 @@ type ArticleAttributeItem struct {
 // and their correct use, refer to the documentation.
 // Default value: miscellaneous
 type ArticleAttributeItemCategory string
+
+// ArticleAttributeItemKey0 defines model for ArticleAttributeItem.Key.0.
+type ArticleAttributeItemKey0 = string
+
+// ArticleAttributeItemKey1 defines model for ArticleAttributeItem.Key.1.
+type ArticleAttributeItemKey1 = interface{}
+
+// ArticleAttributeItem_Key Providing the key %%subtitle%% (see example) here will cause the
+// value to appear, for example, in the App.
+// With all other attributes also the key will be displayed in the
+//
+//	clients.
+//
+// Example: %%subtitle%%
+type ArticleAttributeItem_Key struct {
+	union json.RawMessage
+}
 
 // ArticleAttributeItemType The type of the attribute.
 //
@@ -17644,7 +17661,7 @@ type ListingAttributeItem struct {
 	//  clients.
 	//
 	// Example: %%subtitle%%
-	Key string `json:"key"`
+	Key ListingAttributeItem_Key `json:"key"`
 
 	// KeyLocalized Provides localized values. The key is the locale, the value is the translation. https://docs.fulfillmenttools.com/documentation/getting-started/authentication-and-authorization/localization
 	//
@@ -17680,6 +17697,23 @@ type ListingAttributeItem struct {
 // and their correct use, refer to the documentation.
 // Default value: miscellaneous
 type ListingAttributeItemCategory string
+
+// ListingAttributeItemKey0 defines model for ListingAttributeItem.Key.0.
+type ListingAttributeItemKey0 = string
+
+// ListingAttributeItemKey1 defines model for ListingAttributeItem.Key.1.
+type ListingAttributeItemKey1 = interface{}
+
+// ListingAttributeItem_Key Providing the key %%subtitle%% (see example) here will cause the
+// value to appear, for example, in the App.
+// With all other attributes also the key will be displayed in the
+//
+//	clients.
+//
+// Example: %%subtitle%%
+type ListingAttributeItem_Key struct {
+	union json.RawMessage
+}
 
 // ListingAttributeItemType The type of the attribute.
 //
@@ -18307,6 +18341,9 @@ type ListingSearchQuery struct {
 
 	// Price Search by price
 	Price *NumberFilter `json:"price,omitempty"`
+
+	// ScannableCodes Search by scannableCodes
+	ScannableCodes *StringListFilter `json:"scannableCodes,omitempty"`
 
 	// Status Search by status
 	Status *ListingStatusEnumEnumFilter `json:"status,omitempty"`
@@ -28630,6 +28667,68 @@ func (a StockForCreationVersionless_Properties) MarshalJSON() ([]byte, error) {
 	return json.Marshal(object)
 }
 
+// AsArticleAttributeItemKey0 returns the union data inside the ArticleAttributeItem_Key as a ArticleAttributeItemKey0
+func (t ArticleAttributeItem_Key) AsArticleAttributeItemKey0() (ArticleAttributeItemKey0, error) {
+	var body ArticleAttributeItemKey0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromArticleAttributeItemKey0 overwrites any union data inside the ArticleAttributeItem_Key as the provided ArticleAttributeItemKey0
+func (t *ArticleAttributeItem_Key) FromArticleAttributeItemKey0(v ArticleAttributeItemKey0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeArticleAttributeItemKey0 performs a merge with any union data inside the ArticleAttributeItem_Key, using the provided ArticleAttributeItemKey0
+func (t *ArticleAttributeItem_Key) MergeArticleAttributeItemKey0(v ArticleAttributeItemKey0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsArticleAttributeItemKey1 returns the union data inside the ArticleAttributeItem_Key as a ArticleAttributeItemKey1
+func (t ArticleAttributeItem_Key) AsArticleAttributeItemKey1() (ArticleAttributeItemKey1, error) {
+	var body ArticleAttributeItemKey1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromArticleAttributeItemKey1 overwrites any union data inside the ArticleAttributeItem_Key as the provided ArticleAttributeItemKey1
+func (t *ArticleAttributeItem_Key) FromArticleAttributeItemKey1(v ArticleAttributeItemKey1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeArticleAttributeItemKey1 performs a merge with any union data inside the ArticleAttributeItem_Key, using the provided ArticleAttributeItemKey1
+func (t *ArticleAttributeItem_Key) MergeArticleAttributeItemKey1(v ArticleAttributeItemKey1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ArticleAttributeItem_Key) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ArticleAttributeItem_Key) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
 // AsBulkOrderForceCancelActionParameter returns the union data inside the BulkOrderActionsParameter as a BulkOrderForceCancelActionParameter
 func (t BulkOrderActionsParameter) AsBulkOrderForceCancelActionParameter() (BulkOrderForceCancelActionParameter, error) {
 	var body BulkOrderForceCancelActionParameter
@@ -31524,6 +31623,68 @@ func (t InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) M
 }
 
 func (t *InterFacilityConnectionToSupplierForUpdate_SurchargesPerTransfer_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsListingAttributeItemKey0 returns the union data inside the ListingAttributeItem_Key as a ListingAttributeItemKey0
+func (t ListingAttributeItem_Key) AsListingAttributeItemKey0() (ListingAttributeItemKey0, error) {
+	var body ListingAttributeItemKey0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromListingAttributeItemKey0 overwrites any union data inside the ListingAttributeItem_Key as the provided ListingAttributeItemKey0
+func (t *ListingAttributeItem_Key) FromListingAttributeItemKey0(v ListingAttributeItemKey0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeListingAttributeItemKey0 performs a merge with any union data inside the ListingAttributeItem_Key, using the provided ListingAttributeItemKey0
+func (t *ListingAttributeItem_Key) MergeListingAttributeItemKey0(v ListingAttributeItemKey0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsListingAttributeItemKey1 returns the union data inside the ListingAttributeItem_Key as a ListingAttributeItemKey1
+func (t ListingAttributeItem_Key) AsListingAttributeItemKey1() (ListingAttributeItemKey1, error) {
+	var body ListingAttributeItemKey1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromListingAttributeItemKey1 overwrites any union data inside the ListingAttributeItem_Key as the provided ListingAttributeItemKey1
+func (t *ListingAttributeItem_Key) FromListingAttributeItemKey1(v ListingAttributeItemKey1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeListingAttributeItemKey1 performs a merge with any union data inside the ListingAttributeItem_Key, using the provided ListingAttributeItemKey1
+func (t *ListingAttributeItem_Key) MergeListingAttributeItemKey1(v ListingAttributeItemKey1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ListingAttributeItem_Key) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ListingAttributeItem_Key) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }

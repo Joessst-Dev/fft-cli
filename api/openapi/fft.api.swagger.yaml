@@ -30130,6 +30130,20 @@ components:
         - quantity
       title: AdditionalHandoverJobLineItemForCreation
       description: AdditionalHandoverJobLineItemForCreation
+    AdditionalHandoverJobLineItemForUpdate:
+      properties:
+        id:
+          example: 01a0ec88-a27d-716f-bb10-a62f9f90a9de
+          minLength: 1
+          type: string
+        quantity:
+          format: int64
+          minimum: 1
+          type: integer
+      required:
+        - id
+      title: AdditionalHandoverJobLineItemForUpdate
+      description: AdditionalHandoverJobLineItemForUpdate
     AdditionalInformation:
       properties:
         nameLocalized:
@@ -30768,6 +30782,21 @@ components:
             Context for salesPrice category and valuePerUnit key. Can only be
             set via Listing endpoints.
         key:
+          anyOf:
+            - type: string
+            - enum:
+                - billableWeightPerUnit
+                - weightPerUnit
+                - currency
+                - valuePerUnit
+                - hsCode
+                - numberOfDecimalPlaces
+                - decimalPlaces
+                - value
+                - countryOfManufacture
+                - percentage
+                - valueOfMeasureForBasePrice
+                - unitKeyOfMeasureForBasePrice
           description: |-
             Providing the key %%subtitle%% (see example) here will cause the
             value to appear, for example, in the App.
@@ -30775,7 +30804,6 @@ components:
              clients.
           example: '%%subtitle%%'
           minLength: 1
-          type: string
         priority:
           description: >-
             This value gives the priority in the respective attribute category.
@@ -30844,6 +30872,27 @@ components:
       xml:
         name: ArticleAttributeItemType
       title: ArticleAttributeItemType
+    ArticleAttributeKey:
+      description: >-
+        Defined values for Article Attributes which are used inside the workflow
+        e.g. for price calculation or label requests.
+      enum:
+        - billableWeightPerUnit
+        - weightPerUnit
+        - currency
+        - valuePerUnit
+        - hsCode
+        - numberOfDecimalPlaces
+        - decimalPlaces
+        - value
+        - countryOfManufacture
+        - percentage
+        - valueOfMeasureForBasePrice
+        - unitKeyOfMeasureForBasePrice
+      type: string
+      xml:
+        name: ArticleAttributeKey
+      title: ArticleAttributeKey
     ArticleAvailabilityStockValues:
       properties:
         availableForPicking:
@@ -43757,6 +43806,8 @@ components:
             #/components/schemas/HandoverJobRemoveAdditionalLineItemsActionParameter
         - $ref: >-
             #/components/schemas/HandoverJobAddAdditionalLineItemsActionParameter
+        - $ref: >-
+            #/components/schemas/HandoverJobUpdateAdditionalLineItemsActionParameter
       title: HandoverJobActionsParameter
       description: HandoverJobActionsParameter
     HandoverJobAddAdditionalLineItemsActionEnum:
@@ -44848,6 +44899,34 @@ components:
           $ref: '#/components/schemas/StickerConfiguration'
       title: HandoverJobTagConfiguration
       description: HandoverJobTagConfiguration
+    HandoverJobUpdateAdditionalLineItemsActionEnum:
+      enum:
+        - UPDATE_ADDITIONAL_HANDOVER_JOB_LINE_ITEMS
+      type: string
+      title: HandoverJobUpdateAdditionalLineItemsActionEnum
+      description: HandoverJobUpdateAdditionalLineItemsActionEnum
+    HandoverJobUpdateAdditionalLineItemsActionParameter:
+      additionalProperties: false
+      description: Action to update line items in additionalHandoverJobLineItems
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/AdditionalHandoverJobLineItemForUpdate'
+          maxItems: 100
+          minItems: 1
+          type: array
+        name:
+          $ref: '#/components/schemas/HandoverJobUpdateAdditionalLineItemsActionEnum'
+        version:
+          description: Version of the entity to be changed
+          minimum: 0
+          type: integer
+      required:
+        - name
+        - version
+        - items
+      title: HandoverJobUpdateAdditionalLineItemsActionParameter
+      type: object
     HandoverJobWebHookEvent:
       allOf:
         - $ref: '#/components/schemas/WebHookEvent'
@@ -49899,6 +49978,16 @@ components:
             type: string
           maxItems: 100
           type: array
+        stickers:
+          items:
+            $ref: '#/components/schemas/Sticker'
+          maxItems: 50
+          type: array
+        tags:
+          items:
+            $ref: '#/components/schemas/TagReference'
+          maxItems: 50
+          type: array
       required:
         - id
         - article
@@ -49998,6 +50087,16 @@ components:
             type: string
           maxItems: 100
           minItems: 0
+          type: array
+        stickers:
+          items:
+            $ref: '#/components/schemas/Sticker'
+          maxItems: 50
+          type: array
+        tags:
+          items:
+            $ref: '#/components/schemas/TagReference'
+          maxItems: 50
           type: array
       required:
         - article
@@ -52577,6 +52676,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/NumberFilter'
           description: Search by price
+        scannableCodes:
+          allOf:
+            - $ref: '#/components/schemas/StringListFilter'
+          description: Search by scannableCodes
         status:
           allOf:
             - $ref: '#/components/schemas/ListingStatusEnumEnumFilter'
@@ -66453,6 +66556,9 @@ components:
           $ref: '#/components/schemas/PickingMethodsConfiguration'
         pickingShortPickConfiguration:
           $ref: '#/components/schemas/PickingShortPickConfiguration'
+        recordableAttributeValidation:
+          $ref: >-
+            #/components/schemas/PickingRecordableAttributeValidationConfiguration
         restartPickJobConfiguration:
           $ref: '#/components/schemas/RestartPickJobConfiguration'
         scanCodeValidationConfiguration:
@@ -66707,6 +66813,20 @@ components:
         name: PickingPatchActions
       title: PickingPatchActions
       description: PickingPatchActions
+    PickingRecordableAttributeValidationConfiguration:
+      additionalProperties: false
+      properties:
+        active:
+          default: false
+          description: >-
+            Enable or disable validation on recordable attributes in pick line
+            items
+          type: boolean
+      required:
+        - active
+      type: object
+      title: PickingRecordableAttributeValidationConfiguration
+      description: PickingRecordableAttributeValidationConfiguration
     PickingScanCodeValidationConfiguration:
       properties:
         pickingScanCodeValidationType:
@@ -69924,6 +70044,13 @@ components:
           items:
             type: string
           type: array
+        progressLogs:
+          description: >-
+            The progress logs of the process, which are used to track the status
+            changes of the process and its related entities.
+          items:
+            $ref: '#/components/schemas/ProgressLog'
+          type: array
         returnRefs:
           deprecated: true
           description: >-
@@ -72105,6 +72232,82 @@ components:
       type: string
       title: ProductValueType
       description: ProductValueType
+    ProgressLog:
+      allOf:
+        - $ref: '#/components/schemas/VersionedResource'
+      properties:
+        attributes:
+          type: object
+        domain:
+          $ref: '#/components/schemas/DomainType'
+        domainEntityProcessStatus:
+          $ref: '#/components/schemas/DomainStatus'
+        domainLastModified:
+          description: The last modified date of the related domain entity
+          example: 2020-02-03T09:45:51.525Z
+          format: date-time
+          type: string
+        domainRef:
+          type: string
+        domainStatus:
+          type: string
+        domainVersion:
+          description: The version of the related domain entity
+          example: 1
+          format: int64
+          type: integer
+        facilityRef:
+          description: The id of the facility an entity possibly belongs to.
+          type: string
+        id:
+          type: string
+        moduleEntity:
+          $ref: '#/components/schemas/ModuleEntity'
+        moduleEntityLastModified:
+          description: The last modified date of the related module entity
+          example: 2020-02-03T09:45:51.525Z
+          format: date-time
+          type: string
+        moduleEntityRef:
+          type: string
+        moduleEntityStatus:
+          description: Original status of the related module entity
+          type: string
+        moduleEntityStatusForProcess:
+          $ref: '#/components/schemas/ModuleEntityStatus'
+          description: >-
+            Module entity's original status mapped to the ModuleEntityStatus for
+            process
+        moduleEntitySubStatuses:
+          description: >-
+            Sub-statuses reported by the module entity for this progress log
+            entry.
+          items:
+            $ref: '#/components/schemas/ProcessSubStatus'
+          nullable: true
+          type: array
+        moduleEntityVersion:
+          description: The version of the related module entity
+          example: 1
+          format: int64
+          type: integer
+        schemaVersion:
+          type: number
+        statusChangeReasonKey:
+          description: >-
+            This property captures the reason for the entity’s status change.
+            Each module can define its own set of reasons, represented as an
+            ENUM
+          type: string
+      required:
+        - id
+        - domainVersion
+        - domainEntityProcessStatus
+        - domain
+        - domainRef
+        - domainStatus
+      title: ProgressLog
+      description: ProgressLog
     PromiseCarrier:
       additionalProperties: false
       properties:
