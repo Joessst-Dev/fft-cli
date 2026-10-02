@@ -43139,6 +43139,7 @@ components:
           type: string
       required:
         - tenantArticleId
+        - quantity
       type: object
       title: HandledItem
       description: HandledItem
@@ -61807,9 +61808,12 @@ components:
       type: object
       description: PackagingUnitDetailForUpdate
     PackagingUnitDetailOverflowFactor:
+      additionalProperties: false
       properties:
         factor:
           description: The factor appliable when the overflow factor is exceeded
+          exclusiveMinimum: true
+          minimum: 0
           type: number
         price:
           $ref: '#/components/schemas/PackagingUnitsMoney'
@@ -61820,11 +61824,14 @@ components:
       type: object
       description: PackagingUnitDetailOverflowFactor
     PackagingUnitDetailPricesByWeight:
+      additionalProperties: false
       properties:
         price:
           $ref: '#/components/schemas/PackagingUnitsMoney'
         upperThreshold:
           description: The weight threshold in grams up to which this price applies.
+          exclusiveMinimum: true
+          minimum: 0
           type: number
       required:
         - price
@@ -61833,6 +61840,7 @@ components:
       type: object
       description: PackagingUnitDetailPricesByWeight
     PackagingUnitDetailPricingByZone:
+      additionalProperties: false
       properties:
         overflowFactor:
           $ref: '#/components/schemas/PackagingUnitDetailOverflowFactor'
@@ -61846,6 +61854,7 @@ components:
             The shipping zone for which the pricing applies. Please proivide the
             ISO 3166-2 Country Code, followed by a dash and the first digits of
             the postal code, e.g. DE-50 for Cologne, Germany.
+          pattern: ^[A-Z]{2}-\d+$
           type: string
       required:
         - prices
@@ -62049,6 +62058,7 @@ components:
       title: PackagingUnitsByContext
       description: PackagingUnitsByContext
     PackagingUnitsMoney:
+      additionalProperties: false
       properties:
         currency:
           description: The ISO 4217 currency code, e.g. EUR for Euro.
@@ -62057,9 +62067,13 @@ components:
           default: 2
           description: The number of decimal places used by the currency, e.g. 2 for Euro.
           example: 2
+          exclusiveMinimum: true
+          minimum: 0
           type: number
         value:
           description: The monetary value in the smallest currency unit
+          exclusiveMinimum: true
+          minimum: 0
           type: number
       required:
         - currency
@@ -85198,6 +85212,7 @@ components:
     SourcingOptionTransferExistenceReason:
       enum:
         - KEPT_FROM_LAST_RUN
+        - REDUCED_ON_ORDER_SPLIT
       type: string
       title: SourcingOptionTransferExistenceReason
       description: SourcingOptionTransferExistenceReason

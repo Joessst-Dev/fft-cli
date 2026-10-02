@@ -10906,13 +10906,16 @@ func (e SimulationOrderDeliveryPreferencesShippingServiceLevelEnumFilterNotEq) V
 
 // Defines values for SourcingOptionTransferExistenceReason.
 const (
-	KEPTFROMLASTRUN SourcingOptionTransferExistenceReason = "KEPT_FROM_LAST_RUN"
+	KEPTFROMLASTRUN     SourcingOptionTransferExistenceReason = "KEPT_FROM_LAST_RUN"
+	REDUCEDONORDERSPLIT SourcingOptionTransferExistenceReason = "REDUCED_ON_ORDER_SPLIT"
 )
 
 // Valid indicates whether the value is a known member of the SourcingOptionTransferExistenceReason enum.
 func (e SourcingOptionTransferExistenceReason) Valid() bool {
 	switch e {
 	case KEPTFROMLASTRUN:
+		return true
+	case REDUCEDONORDERSPLIT:
 		return true
 	default:
 		return false
@@ -16167,8 +16170,8 @@ type FenceMode string
 
 // HandledItem HandledItem
 type HandledItem struct {
-	Quantity        *float32 `json:"quantity,omitempty"`
-	TenantArticleId string   `json:"tenantArticleId"`
+	Quantity        float32 `json:"quantity"`
+	TenantArticleId string  `json:"tenantArticleId"`
 }
 
 // HandoverJobAdditionalHandoverJobLineItemsArticleFilter HandoverJobAdditionalHandoverJobLineItemsArticleFilter
