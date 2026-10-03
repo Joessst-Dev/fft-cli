@@ -13176,21 +13176,21 @@ paths:
         - Returns (Operations)
   /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}/parcels:
     post:
+      deprecated: false
       description: >-
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
-        />Returns all parcels for an itemReturn.
+        />Create a parcel matching the item return values to represent the
+        return label
       operationId: createItemReturnParcel
       parameters:
-        - description: itemReturnJobId
-          in: path
+        - in: path
           name: itemReturnJobId
           required: true
           schema:
             type: string
-        - description: id of the itemReturn to create a parcel for
-          in: path
+        - in: path
           name: itemReturnId
           required: true
           schema:
@@ -13200,7 +13200,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ParcelForCreation'
-        description: Payload of the parcel you want to create
         required: true
       responses:
         '201':
@@ -13208,7 +13207,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Parcel'
-          description: Create a parcel for an itemReturn
+          description: Created Parcel
         '401':
           content:
             application/json:
@@ -13228,8 +13227,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
-      summary: Create item return parcel
+          description: The requested entity was not found
+      summary: Create a parcel for the item return
+      x-fft-permissions:
+        - RETURN_WRITE
       tags:
         - Returns (Operations)
       x-badges:
@@ -29779,8 +29780,6 @@ components:
             - ModifyOrderSplit
             - ModifyPrioritization
             - ModifyFeature
-            - ModifyParcel
-            - ModifyParcelLoadUnit
             - ModifyPartialStock
             - AddTagsToProcess
             - AssignFacilityToProcess
@@ -30683,6 +30682,7 @@ components:
           type: array
       required:
         - alternativeReturnAddressPerTag
+      type: object
       title: AlternativeReturnAddressConfiguration
       description: AlternativeReturnAddressConfiguration
     AlternativeReturnAddressPerTag:
@@ -30702,6 +30702,7 @@ components:
         - tagRef
         - matchingValues
         - alternativeReturnAddress
+      type: object
       title: AlternativeReturnAddressPerTag
       description: AlternativeReturnAddressPerTag
     AnnounceItemReturnActionParameter:
@@ -32785,6 +32786,17 @@ components:
         maxLength:
           description: The maximum length in millimeters of the packagingUnit.
           type: number
+        maxVolumetricWeight:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />Caps the chargeable volumetric weight in grams. It does not
+            restrict what the packagingUnit can hold.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
         maxWeight:
           description: The maximum weight in grams that the packagingUnit can hold.
           type: number
@@ -37093,6 +37105,7 @@ components:
               example: Germany
               type: string
           type: object
+      type: object
       title: DhlTrackingLocation
     DhlTrackingStatus:
       additionalProperties: false
@@ -47470,6 +47483,15 @@ components:
     InterFacilityConnectionPricesByTier:
       additionalProperties: false
       properties:
+        factor:
+          description: >-
+            Charges price once per this many units of pricingUnit started,
+            rounded up, instead of as a flat price for the tier. Use 1 to bill
+            exactly. Omit it to charge price flat.
+          example: 100000
+          format: float
+          minimum: 0
+          type: number
         price:
           $ref: '#/components/schemas/InterFacilityConnectionsMoney'
         upperThreshold:
@@ -53590,6 +53612,17 @@ components:
         maxLength:
           description: The maximum length in millimeters of the packagingUnit.
           type: number
+        maxVolumetricWeight:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />Caps the chargeable volumetric weight in grams. It does not
+            restrict what the packagingUnit can hold.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
         maxWeight:
           description: The maximum weight in grams that the packagingUnit can hold.
           type: number
@@ -55533,78 +55566,74 @@ components:
       xml:
         name: ModifyPackLineItem
     ModifyParcel:
-      allOf:
-        - $ref: '#/components/schemas/AbstractModificationAction'
-        - additionalProperties: false
-          properties:
-            action:
-              description: Use value 'ModifyParcel', because you want to modify a Parcel
-              enum:
-                - ModifyParcel
-              type: string
-            carrierInformation:
-              $ref: '#/components/schemas/ParcelCarrierInformation'
-            carrierProduct:
-              description: Only changable on status OPEN or FAILED of the existing Parcel
-              nullable: true
-              type: string
-            customAttributes:
-              type: object
-            customProductValue:
-              description: >-
-                Set this value if you want to overwrite the calculated product
-                value of the parcel.
-              example: 12.5
-              type: number
-            dimensions:
-              $ref: '#/components/schemas/ParcelDimensions'
-            pickUpInformation:
-              $ref: '#/components/schemas/ParcelPickUpInformation'
-            productValue:
-              description: >-
-                Monetary value of all goods in this parcel. Needed for sending
-                cross border packages (customs) To be interpreted as money in
-                the currency given under paymentInformation.currency
-              example: 12.5
-              nullable: true
-              type: number
-            result:
-              $ref: '#/components/schemas/ParcelResult'
-            services:
-              $ref: '#/components/schemas/ParcelServices'
-            status:
-              $ref: '#/components/schemas/ParcelStatus'
-            tenantParcelId:
-              type: string
-          required:
-            - action
-          type: object
+      additionalProperties: false
       description: Modify Parcel Action.
+      properties:
+        action:
+          description: Use value "ModifyParcel", because you want to modify a Parcel
+          enum:
+            - ModifyParcel
+          type: string
+        carrierInformation:
+          $ref: '#/components/schemas/ParcelCarrierInformation'
+        carrierProduct:
+          description: Only changable on status OPEN or FAILED of the existing Parcel
+          nullable: true
+          type: string
+        customAttributes:
+          type: object
+        customProductValue:
+          description: >-
+            Set this value if you want to overwrite the calculated product value
+            of the parcel.
+          example: 12.5
+          type: number
+        dimensions:
+          $ref: '#/components/schemas/ParcelDimensions'
+        pickUpInformation:
+          $ref: '#/components/schemas/ParcelPickUpInformation'
+        productValue:
+          description: >-
+            Monetary value of all goods in this parcel. Needed for sending cross
+            border packages (customs) To be interpreted as money in the currency
+            given under paymentInformation.currency
+          example: 12.5
+          nullable: true
+          type: number
+        result:
+          $ref: '#/components/schemas/ParcelResult'
+        services:
+          $ref: '#/components/schemas/ParcelServices'
+        status:
+          $ref: '#/components/schemas/ParcelStatus'
+        tenantParcelId:
+          type: string
+      required:
+        - action
       title: ModifyParcelAction
+      type: object
       xml:
         name: ModifyParcel
     ModifyParcelLoadUnit:
-      allOf:
-        - $ref: '#/components/schemas/AbstractModificationAction'
-        - additionalProperties: false
-          properties:
-            action:
-              description: >-
-                Use value 'ModifyParcelLoadUnit', because you want to modify
-                loadunitRefs in Parcel
-              enum:
-                - ModifyParcelLoadUnit
-              type: string
-            loadUnitRefs:
-              items:
-                type: string
-              type: array
-          required:
-            - action
-            - loadUnitRefs
-          type: object
+      additionalProperties: false
       description: Modify Parcels of a LoadUnit.
+      properties:
+        action:
+          description: >-
+            Use value "ModifyParcelLoadUnit", because you want to modify
+            loadunitRefs in Parcel
+          enum:
+            - ModifyParcelLoadUnit
+          type: string
+        loadUnitRefs:
+          items:
+            type: string
+          type: array
+      required:
+        - action
+        - loadUnitRefs
       title: ModifyParcelLoadUnitsAction
+      type: object
       xml:
         name: ModifyParcelLoadUnit
     ModifyPartialStock:
@@ -61826,6 +61855,13 @@ components:
     PackagingUnitDetailPricesByWeight:
       additionalProperties: false
       properties:
+        factor:
+          description: >-
+            Charges price once per this many units of pricingUnit started,
+            rounded up, instead of as a flat price for the tier. Use 1 to bill
+            exactly. Omit it to charge price flat.
+          example: 100000
+          type: number
         price:
           $ref: '#/components/schemas/PackagingUnitsMoney'
         upperThreshold:
@@ -64062,8 +64098,8 @@ components:
             This part of the API is in Alpha status. For details, see the <a
             href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
             target="_blank">API release lifecycle documentation</a>.<br /><br
-            />The maximum volumetric weight the packagingUnit can hold, as a
-            feasibility cap.
+            />Caps the chargeable volumetric weight in grams. It does not
+            restrict what the packagingUnit can hold.
           type: number
           x-badges:
             - color: red
@@ -64249,6 +64285,7 @@ components:
         - $ref: >-
             #/components/schemas/UpdateParcelItemRecordableAttributesActionParameter
         - $ref: '#/components/schemas/AddLabelsToParcelActionParameter'
+      type: object
       title: ParcelActionsParameter
       description: ParcelActionsParameter
     ParcelArticleAttributeItemForUpdate:
@@ -64259,6 +64296,7 @@ components:
         - key
         - value
         - category
+      type: object
       title: ParcelArticleAttributeItemForUpdate
       description: ParcelArticleAttributeItemForUpdate
     ParcelCarrierInformation:
@@ -64294,8 +64332,8 @@ components:
             This part of the API is in Alpha status. For details, see the <a
             href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
             target="_blank">API release lifecycle documentation</a>.<br /><br
-            />The maximum volumetric weight the packagingUnit can hold, as a
-            feasibility cap.
+            />Caps the chargeable volumetric weight in grams. It does not
+            restrict what the packagingUnit can hold.
           type: number
           x-badges:
             - color: red
@@ -65190,6 +65228,7 @@ components:
             - id
             - quantity
           type: object
+      type: object
       xml:
         name: ParcelItem
       title: ParcelItem
@@ -65204,6 +65243,7 @@ components:
               maxItems: 40
               type: array
           type: object
+      type: object
       xml:
         name: ParcelItemArticle
       title: ParcelItemArticle
@@ -65271,7 +65311,8 @@ components:
           maxItems: 40
           type: array
         parcelItemValue:
-          $ref: '#/components/schemas/ParcelItemValue'
+          anyOf:
+            - $ref: '#/components/schemas/ParcelItemValue'
           deprecated: true
           description: >-
             Deprecated - use article.attribute.pricePerUnit and
@@ -65519,6 +65560,7 @@ components:
       required:
         - currency
         - value
+      type: object
       title: ParcelPostalCharge
       description: ParcelPostalCharge
     ParcelProductValue:
@@ -65947,6 +65989,7 @@ components:
           $ref: '#/components/schemas/AlternativeReturnAddressConfiguration'
       required:
         - alternativeReturnAddressConfiguration
+      type: object
       title: ParcelTagConfiguration
       description: ParcelTagConfiguration
     ParcelTagConfigurationForUpsert:
@@ -65960,6 +66003,7 @@ components:
           type: number
       required:
         - alternativeReturnAddressConfiguration
+      type: object
       title: ParcelTagConfigurationForUpsert
       description: ParcelTagConfigurationForUpsert
     ParcelTrackingData:
@@ -70674,7 +70718,8 @@ components:
           description: Original status of the related module entity
           type: string
         moduleEntityStatusForProcess:
-          $ref: '#/components/schemas/ModuleEntityStatus'
+          allOf:
+            - $ref: '#/components/schemas/ModuleEntityStatus'
           description: >-
             Module entity's original status mapped to the ModuleEntityStatus for
             process
@@ -72288,7 +72333,8 @@ components:
           description: Original status of the related module entity
           type: string
         moduleEntityStatusForProcess:
-          $ref: '#/components/schemas/ModuleEntityStatus'
+          allOf:
+            - $ref: '#/components/schemas/ModuleEntityStatus'
           description: >-
             Module entity's original status mapped to the ModuleEntityStatus for
             process
@@ -73409,6 +73455,7 @@ components:
           type: string
       required:
         - quantity
+      type: object
       title: RefusedItem
       description: RefusedItem
     RefusedItemForUpdate:
@@ -92682,6 +92729,17 @@ components:
         maxVolume:
           description: The maximum volume in cubicle millimeters of the packagingUnit.
           type: number
+        maxVolumetricWeight:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />Caps the chargeable volumetric weight in grams. It does not
+            restrict what the packagingUnit can hold.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
         maxWeight:
           description: The maximum weight in grams that the packagingUnit can hold.
           type: number
@@ -94958,6 +95016,47 @@ components:
         en_US: Fraud check workflow
       title: WorkflowDescriptionLocaleString
       type: object
+    WorkflowGuardAppliesWebHookEvent:
+      allOf:
+        - $ref: '#/components/schemas/WebHookEvent'
+      properties:
+        payload:
+          $ref: '#/components/schemas/WorkflowGuardAppliesWebHookEventPayload'
+      required:
+        - payload
+      type: object
+      title: WorkflowGuardAppliesWebHookEvent
+      description: WorkflowGuardAppliesWebHookEvent
+    WorkflowGuardAppliesWebHookEventPayload:
+      properties:
+        guardInfo:
+          properties:
+            entity:
+              type: string
+            expression:
+              type: string
+            nodeKey:
+              type: string
+            preconfigured:
+              type: string
+          required:
+            - nodeKey
+          type: object
+        instanceRef:
+          type: string
+        nodeRef:
+          type: string
+        relatedRefs:
+          items:
+            type: string
+          type: array
+      required:
+        - instanceRef
+        - nodeRef
+        - relatedRefs
+      type: object
+      title: WorkflowGuardAppliesWebHookEventPayload
+      description: WorkflowGuardAppliesWebHookEventPayload
     WorkflowInformation:
       additionalProperties: false
       properties:
