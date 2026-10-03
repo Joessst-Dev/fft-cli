@@ -48,8 +48,6 @@ const (
 	AbstractModificationActionActionModifyListing                    AbstractModificationActionAction = "ModifyListing"
 	AbstractModificationActionActionModifyListingReactivationAfter   AbstractModificationActionAction = "ModifyListingReactivationAfter"
 	AbstractModificationActionActionModifyOrderSplit                 AbstractModificationActionAction = "ModifyOrderSplit"
-	AbstractModificationActionActionModifyParcel                     AbstractModificationActionAction = "ModifyParcel"
-	AbstractModificationActionActionModifyParcelLoadUnit             AbstractModificationActionAction = "ModifyParcelLoadUnit"
 	AbstractModificationActionActionModifyPartialStock               AbstractModificationActionAction = "ModifyPartialStock"
 	AbstractModificationActionActionModifyPrioritization             AbstractModificationActionAction = "ModifyPrioritization"
 	AbstractModificationActionActionModifyRating                     AbstractModificationActionAction = "ModifyRating"
@@ -87,10 +85,6 @@ func (e AbstractModificationActionAction) Valid() bool {
 	case AbstractModificationActionActionModifyListingReactivationAfter:
 		return true
 	case AbstractModificationActionActionModifyOrderSplit:
-		return true
-	case AbstractModificationActionActionModifyParcel:
-		return true
-	case AbstractModificationActionActionModifyParcelLoadUnit:
 		return true
 	case AbstractModificationActionActionModifyPartialStock:
 		return true
@@ -16896,6 +16890,11 @@ type InterFacilityConnectionPackageTypeSpecificShipmentRestrictionType string
 
 // InterFacilityConnectionPricesByTier InterFacilityConnectionPricesByTier
 type InterFacilityConnectionPricesByTier struct {
+	// Factor Charges price once per this many units of pricingUnit started, rounded up, instead of as a flat price for the tier. Use 1 to bill exactly. Omit it to charge price flat.
+	//
+	// Example: 100000
+	Factor *float32 `json:"factor,omitempty"`
+
 	// Price InterFacilityConnectionsMoney
 	Price InterFacilityConnectionsMoney `json:"price"`
 
