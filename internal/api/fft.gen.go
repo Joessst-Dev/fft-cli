@@ -2768,6 +2768,24 @@ func (e InterFacilityConnectionTransferSurchargeType) Valid() bool {
 	}
 }
 
+// Defines values for InterFacilityConnectionWeightBasis.
+const (
+	BILLABLEWEIGHT InterFacilityConnectionWeightBasis = "BILLABLE_WEIGHT"
+	WEIGHT         InterFacilityConnectionWeightBasis = "WEIGHT"
+)
+
+// Valid indicates whether the value is a known member of the InterFacilityConnectionWeightBasis enum.
+func (e InterFacilityConnectionWeightBasis) Valid() bool {
+	switch e {
+	case BILLABLEWEIGHT:
+		return true
+	case WEIGHT:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ListingStatus.
 const (
 	ListingStatusACTIVE   ListingStatus = "ACTIVE"
@@ -17320,6 +17338,9 @@ type InterFacilityConnectionTransferPricing struct {
 	// Example: 0.2
 	VolumetricWeightFactor *float32 `json:"volumetricWeightFactor,omitempty"`
 
+	// WeightBasis The article weight the aggregated weight of the transfer is calculated from: WEIGHT (weightPerUnit) or BILLABLE_WEIGHT (billableWeightPerUnit). Defaults to WEIGHT.
+	WeightBasis *InterFacilityConnectionWeightBasis `json:"weightBasis,omitempty"`
+
 	// WeightToVolumeFactor Converts the aggregated weight of all packaging units into a volume. Required when pricingUnit is CUBIC_METER.
 	//
 	// Example: 0.005
@@ -17357,6 +17378,9 @@ type InterFacilityConnectionTransferThresholdSurcharge struct {
 	TenantSurchargeType string                                       `json:"tenantSurchargeType"`
 	Type                InterFacilityConnectionTransferSurchargeType `json:"type"`
 }
+
+// InterFacilityConnectionWeightBasis The article weight the aggregated weight of the transfer is calculated from: WEIGHT (weightPerUnit) or BILLABLE_WEIGHT (billableWeightPerUnit). Defaults to WEIGHT.
+type InterFacilityConnectionWeightBasis string
 
 // InterFacilityConnections InterFacilityConnections
 type InterFacilityConnections struct {
@@ -25276,7 +25300,7 @@ type StockAvailabilityThresholdThresholdOnValue string
 // StockAvailabilityThresholdTransitionConfig StockAvailabilityThresholdTransitionConfig
 type StockAvailabilityThresholdTransitionConfig struct {
 	Id                string  `json:"id"`
-	TenantThresholdId string  `json:"tenantThresholdId"`
+	TenantThresholdId *string `json:"tenantThresholdId,omitempty"`
 	Version           float32 `json:"version"`
 }
 

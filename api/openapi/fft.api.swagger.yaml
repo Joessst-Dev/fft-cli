@@ -20470,6 +20470,79 @@ paths:
       tags:
         - Picking (Operations)
   /api/pickupservices:
+    get:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Retrieves all matching pickupServices respecting the filter criteria.
+      operationId: getPickupServices
+      parameters:
+        - description: number of entities to show
+          in: query
+          name: size
+          required: true
+          schema:
+            default: 25
+            example: 25
+            maximum: 500
+            minimum: 1
+            type: integer
+        - description: all entities after given Id
+          in: query
+          name: startAfterId
+          required: false
+          schema:
+            example: 6db6a29b-143d-4ffd-ab8b-45cd299cdb00
+            minLength: 1
+            type: string
+        - description: Whether this pickupService is active
+          in: query
+          name: active
+          required: false
+          schema:
+            nullable: true
+            type: boolean
+        - description: >-
+            Filter by facility reference. Matches pickupServices whose context
+            contains a FACILITY entry with this value.
+          in: query
+          name: facilityRef
+          required: false
+          schema:
+            example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            nullable: true
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PickupServices'
+          description: Successfully retrieved the pickupServices.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+      summary: Get a pickupServices by filter
+      x-fft-permissions:
+        - PICKUP_SERVICE_READ
+      tags:
+        - PickupService (operations)
+      x-badges:
+        - color: red
+          label: ALPHA
     post:
       deprecated: false
       description: >-
@@ -32557,8 +32630,6 @@ components:
       required:
         - version
         - carrierRef
-        - customerId
-        - supportPhoneNumber
       title: BringCarrierConfigurationForUpdate
       type: object
       description: BringCarrierConfigurationForUpdate
@@ -32831,6 +32902,19 @@ components:
             target="_blank">API release lifecycle documentation</a>.<br /><br
             />The volumetric weight factor for the packagingUnit.
           type: number
+          x-badges:
+            - color: red
+              label: ALPHA
+        weightBasis:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitWeightBasis'
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The article weight the packagingUnit is priced on: WEIGHT
+            (weightPerUnit) or BILLABLE_WEIGHT (billableWeightPerUnit). Defaults
+            to WEIGHT.
           x-badges:
             - color: red
               label: ALPHA
@@ -37241,6 +37325,12 @@ components:
           description: Track and trace URL
           example: https://example.com/resource
           type: string
+        useShipmentTargetTimeAsShipDate:
+          description: >-
+            Whether the target time of the shipment should be passed as the
+            shipDate
+          example: true
+          type: boolean
         version:
           description: >-
             The version of the document to be used in optimistic locking
@@ -37353,6 +37443,12 @@ components:
           description: Track and trace URL
           example: https://example.com/resource
           type: string
+        useShipmentTargetTimeAsShipDate:
+          description: >-
+            Whether the target time of the shipment should be passed as the
+            shipDate
+          example: 2026-06-17T12:00:00.000Z
+          type: boolean
         version:
           description: >-
             The version of the document to be used in optimistic locking
@@ -42341,11 +42437,6 @@ components:
       required:
         - version
         - carrierRef
-        - useEconomyService
-        - defaultPriceValue
-        - defaultPriceCurrency
-        - defaultManufactureCountry
-        - defaultCommodityDescription
       title: FedexCarrierConfigurationForUpdate
       type: object
       description: FedexCarrierConfigurationForUpdate
@@ -48406,6 +48497,8 @@ components:
           format: float
           minimum: 0
           type: number
+        weightBasis:
+          $ref: '#/components/schemas/InterFacilityConnectionWeightBasis'
         weightToVolumeFactor:
           description: >-
             Converts the aggregated weight of all packaging units into a volume.
@@ -48508,6 +48601,16 @@ components:
         - percentage
       title: InterFacilityConnectionTransferThresholdSurcharge
       type: object
+    InterFacilityConnectionWeightBasis:
+      description: >-
+        The article weight the aggregated weight of the transfer is calculated
+        from: WEIGHT (weightPerUnit) or BILLABLE_WEIGHT (billableWeightPerUnit).
+        Defaults to WEIGHT.
+      enum:
+        - WEIGHT
+        - BILLABLE_WEIGHT
+      title: InterFacilityConnectionWeightBasis
+      type: string
     InventoryArticle:
       properties:
         titleLocalized:
@@ -53598,9 +53701,19 @@ components:
             The height in millimeters of the empty load carrier (e.g. pallet or
             skid) itself.
           type: number
+        loadCarrierLength:
+          description: >-
+            The length in millimeters of the empty load carrier (e.g. pallet or
+            skid) itself.
+          type: number
         loadCarrierWeight:
           description: >-
             The tare weight in grams of the empty load carrier (e.g. pallet or
+            skid) itself.
+          type: number
+        loadCarrierWidth:
+          description: >-
+            The width in millimeters of the empty load carrier (e.g. pallet or
             skid) itself.
           type: number
         maxGirth:
@@ -53652,6 +53765,13 @@ components:
         volumetricWeightFactor:
           description: The volumetric weight factor for the packagingUnit.
           type: number
+        weightBasis:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitWeightBasis'
+          description: >-
+            The article weight the packagingUnit is priced on: WEIGHT
+            (weightPerUnit) or BILLABLE_WEIGHT (billableWeightPerUnit). Defaults
+            to WEIGHT.
       required:
         - type
         - packagingPricingDetails
@@ -62235,6 +62355,16 @@ components:
         - LONG_GOODS
       title: PackagingUnitType
       type: string
+    PackagingUnitWeightBasis:
+      description: >-
+        The article weight the packagingUnit is priced on: WEIGHT
+        (weightPerUnit) or BILLABLE_WEIGHT (billableWeightPerUnit). Defaults to
+        WEIGHT.
+      enum:
+        - WEIGHT
+        - BILLABLE_WEIGHT
+      title: PackagingUnitWeightBasis
+      type: string
     PackingConfigurations:
       allOf:
         - $ref: '#/components/schemas/VersionedResource'
@@ -64079,12 +64209,34 @@ components:
           x-badges:
             - color: red
               label: ALPHA
+        loadCarrierLength:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The length in millimeters of the empty load carrier (e.g. pallet
+            or skid) itself.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
         loadCarrierWeight:
           description: >-
             This part of the API is in Alpha status. For details, see the <a
             href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
             target="_blank">API release lifecycle documentation</a>.<br /><br
             />The tare weight in grams of the empty load carrier (e.g. pallet or
+            skid) itself.
+          type: number
+          x-badges:
+            - color: red
+              label: ALPHA
+        loadCarrierWidth:
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The width in millimeters of the empty load carrier (e.g. pallet or
             skid) itself.
           type: number
           x-badges:
@@ -64134,6 +64286,19 @@ components:
         volumetricWeightFactor:
           description: The volumetric weight factor for the packagingUnit.
           type: number
+        weightBasis:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitWeightBasis'
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The article weight the packagingUnit is priced on: WEIGHT
+            (weightPerUnit) or BILLABLE_WEIGHT (billableWeightPerUnit). Defaults
+            to WEIGHT.
+          x-badges:
+            - color: red
+              label: ALPHA
       required:
         - type
         - dimensions
@@ -64372,6 +64537,19 @@ components:
             target="_blank">API release lifecycle documentation</a>.<br /><br
             />The volumetric weight factor for the packagingUnit.
           type: number
+          x-badges:
+            - color: red
+              label: ALPHA
+        weightBasis:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitWeightBasis'
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The article weight the packagingUnit is priced on: WEIGHT
+            (weightPerUnit) or BILLABLE_WEIGHT (billableWeightPerUnit). Defaults
+            to WEIGHT.
           x-badges:
             - color: red
               label: ALPHA
@@ -69297,9 +69475,7 @@ components:
           format: date-time
           type: string
         description:
-          description: >-
-            Description of this pickupService, derived from descriptionLocalized
-            for the requested locale
+          description: Description of this pickupService
           type: string
         id:
           description: Unique identifier of this pickupService
@@ -69310,9 +69486,7 @@ components:
           format: date-time
           type: string
         name:
-          description: >-
-            Name of this pickupService, derived from nameLocalized for the
-            requested locale
+          description: Name of this pickupService
           type: string
         type:
           description: Type of this pickupService
@@ -69446,6 +69620,21 @@ components:
       title: PickupServiceForUpdate
       type: object
       description: PickupServiceForUpdate
+    PickupServices:
+      properties:
+        pickupServices:
+          description: List of pickup services matching the query
+          items:
+            $ref: '#/components/schemas/PickupService'
+          maxItems: 500
+          type: array
+        total:
+          description: Total number of found entities for this query
+          example: 42
+          type: integer
+      title: PickupServices
+      type: object
+      description: PickupServices
     PickUpServiceUpdate:
       additionalProperties: false
       properties:
@@ -86124,7 +86313,6 @@ components:
       required:
         - id
         - version
-        - tenantThresholdId
       title: StockAvailabilityThresholdTransitionConfig
       type: object
       description: StockAvailabilityThresholdTransitionConfig
@@ -92774,6 +92962,19 @@ components:
             target="_blank">API release lifecycle documentation</a>.<br /><br
             />The volumetric weight factor for the packagingUnit.
           type: number
+          x-badges:
+            - color: red
+              label: ALPHA
+        weightBasis:
+          allOf:
+            - $ref: '#/components/schemas/PackagingUnitWeightBasis'
+          description: >-
+            This part of the API is in Alpha status. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />The article weight the packagingUnit is priced on: WEIGHT
+            (weightPerUnit) or BILLABLE_WEIGHT (billableWeightPerUnit). Defaults
+            to WEIGHT.
           x-badges:
             - color: red
               label: ALPHA
