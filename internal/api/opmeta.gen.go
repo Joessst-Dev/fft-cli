@@ -3926,6 +3926,22 @@ var operations = []Operation{
 		SampleResponse: "{\n  \"active\": false,\n  \"context\": [\n    {\n      \"type\": \"FACILITY_GROUP\",\n      \"values\": [\n        \"string\"\n      ]\n    }\n  ],\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"descriptionLocalized\": {},\n  \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"nameLocalized\": {},\n  \"type\": \"ID_CHECK\",\n  \"version\": 1\n}\n",
 	},
 	{
+		ID:          "getPickupServices",
+		Method:      "GET",
+		Path:        "/api/pickupservices",
+		Tags:        []string{"PickupService (operations)"},
+		Summary:     "Get a pickupServices by filter",
+		Description: "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Retrieves all matching pickupServices respecting the filter criteria.",
+		Permissions: []string{"PICKUP_SERVICE_READ"},
+		Params: []Param{
+			{Name: "active", In: InQuery, Type: TypeBoolean, Description: "Whether this pickupService is active"},
+			{Name: "facilityRef", In: InQuery, Type: TypeString, Description: "Filter by facility reference. Matches pickupServices whose context contains a FACILITY entry with this value."},
+			{Name: "size", In: InQuery, Type: TypeInteger, Required: true, Description: "number of entities to show"},
+			{Name: "startAfterId", In: InQuery, Type: TypeString, Description: "all entities after given Id"},
+		},
+		SampleResponse: "{\n  \"total\": 42\n}\n",
+	},
+	{
 		ID:          "getProcess",
 		Method:      "GET",
 		Path:        "/api/process",
@@ -4574,7 +4590,7 @@ var operations = []Operation{
 			{Name: "facilityStatus", In: InQuery, Type: TypeArray, Item: TypeString, Enum: []string{"ONLINE", "SUSPENDED", "OFFLINE"}},
 			{Name: "includeThresholds", In: InQuery, Type: TypeBoolean, Description: "Additionaly calculate the current thresholds for each facilityStock entry"},
 		},
-		SampleResponse: "{\n  \"facilityStocks\": [\n    {\n      \"available\": 1,\n      \"availableForPicking\": 1,\n      \"availableOnStock\": 1,\n      \"availableToPromise\": 1,\n      \"byTrait\": {\n        \"ACCESSIBLE\": 1,\n        \"PICKABLE\": 1\n      },\n      \"facilityId\": \"string\",\n      \"facilityName\": \"string\",\n      \"readyToPick\": 1,\n      \"reserved\": 1,\n      \"safetyStock\": 1,\n      \"stockOnHand\": 1,\n      \"thresholds\": [\n        {\n          \"config\": {\n            \"id\": \"string\",\n            \"tenantThresholdId\": \"string\",\n            \"version\": 1\n          },\n          \"thresholdLevel\": {\n            \"actual\": 1,\n            \"key\": \"string\",\n            \"limit\": 1\n          },\n          \"thresholdOnValue\": \"AVAILABLE_FOR_PICKING\"\n        }\n      ],\n      \"totalAmount\": 1\n    }\n  ],\n  \"summary\": {\n    \"available\": 1,\n    \"availableForPicking\": 1,\n    \"availableOnStock\": 1,\n    \"availableToPromise\": 1,\n    \"byTrait\": {\n      \"ACCESSIBLE\": 1,\n      \"PICKABLE\": 1\n    },\n    \"readyToPick\": 1,\n    \"reserved\": 1,\n    \"safetyStock\": 1,\n    \"stockOnHand\": 1,\n    \"totalAmount\": 1\n  },\n  \"tenantArticleId\": \"string\"\n}\n",
+		SampleResponse: "{\n  \"facilityStocks\": [\n    {\n      \"available\": 1,\n      \"availableForPicking\": 1,\n      \"availableOnStock\": 1,\n      \"availableToPromise\": 1,\n      \"byTrait\": {\n        \"ACCESSIBLE\": 1,\n        \"PICKABLE\": 1\n      },\n      \"facilityId\": \"string\",\n      \"facilityName\": \"string\",\n      \"readyToPick\": 1,\n      \"reserved\": 1,\n      \"safetyStock\": 1,\n      \"stockOnHand\": 1,\n      \"thresholds\": [\n        {\n          \"config\": {\n            \"id\": \"string\",\n            \"version\": 1\n          },\n          \"thresholdLevel\": {\n            \"actual\": 1,\n            \"key\": \"string\",\n            \"limit\": 1\n          },\n          \"thresholdOnValue\": \"AVAILABLE_FOR_PICKING\"\n        }\n      ],\n      \"totalAmount\": 1\n    }\n  ],\n  \"summary\": {\n    \"available\": 1,\n    \"availableForPicking\": 1,\n    \"availableOnStock\": 1,\n    \"availableToPromise\": 1,\n    \"byTrait\": {\n      \"ACCESSIBLE\": 1,\n      \"PICKABLE\": 1\n    },\n    \"readyToPick\": 1,\n    \"reserved\": 1,\n    \"safetyStock\": 1,\n    \"stockOnHand\": 1,\n    \"totalAmount\": 1\n  },\n  \"tenantArticleId\": \"string\"\n}\n",
 	},
 	{
 		ID:          "getStockSummaries",
