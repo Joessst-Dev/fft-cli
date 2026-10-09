@@ -278,6 +278,81 @@ func (e ArticleAttributeItemContextType) Valid() bool {
 	}
 }
 
+// Defines values for ArticleAttributeItemForUpsertCategory.
+const (
+	ArticleAttributeItemForUpsertCategoryBasePrice       ArticleAttributeItemForUpsertCategory = "basePrice"
+	ArticleAttributeItemForUpsertCategoryCarrierService  ArticleAttributeItemForUpsertCategory = "carrierService"
+	ArticleAttributeItemForUpsertCategoryCustoms         ArticleAttributeItemForUpsertCategory = "customs"
+	ArticleAttributeItemForUpsertCategoryDescriptive     ArticleAttributeItemForUpsertCategory = "descriptive"
+	ArticleAttributeItemForUpsertCategoryDimensions      ArticleAttributeItemForUpsertCategory = "dimensions"
+	ArticleAttributeItemForUpsertCategoryDiscount        ArticleAttributeItemForUpsertCategory = "discount"
+	ArticleAttributeItemForUpsertCategoryInsurance       ArticleAttributeItemForUpsertCategory = "insurance"
+	ArticleAttributeItemForUpsertCategoryMiscellaneous   ArticleAttributeItemForUpsertCategory = "miscellaneous"
+	ArticleAttributeItemForUpsertCategoryPickingSequence ArticleAttributeItemForUpsertCategory = "pickingSequence"
+	ArticleAttributeItemForUpsertCategorySalesPrice      ArticleAttributeItemForUpsertCategory = "salesPrice"
+	ArticleAttributeItemForUpsertCategoryShop            ArticleAttributeItemForUpsertCategory = "shop"
+	ArticleAttributeItemForUpsertCategorySurcharge       ArticleAttributeItemForUpsertCategory = "surcharge"
+	ArticleAttributeItemForUpsertCategoryTax             ArticleAttributeItemForUpsertCategory = "tax"
+)
+
+// Valid indicates whether the value is a known member of the ArticleAttributeItemForUpsertCategory enum.
+func (e ArticleAttributeItemForUpsertCategory) Valid() bool {
+	switch e {
+	case ArticleAttributeItemForUpsertCategoryBasePrice:
+		return true
+	case ArticleAttributeItemForUpsertCategoryCarrierService:
+		return true
+	case ArticleAttributeItemForUpsertCategoryCustoms:
+		return true
+	case ArticleAttributeItemForUpsertCategoryDescriptive:
+		return true
+	case ArticleAttributeItemForUpsertCategoryDimensions:
+		return true
+	case ArticleAttributeItemForUpsertCategoryDiscount:
+		return true
+	case ArticleAttributeItemForUpsertCategoryInsurance:
+		return true
+	case ArticleAttributeItemForUpsertCategoryMiscellaneous:
+		return true
+	case ArticleAttributeItemForUpsertCategoryPickingSequence:
+		return true
+	case ArticleAttributeItemForUpsertCategorySalesPrice:
+		return true
+	case ArticleAttributeItemForUpsertCategoryShop:
+		return true
+	case ArticleAttributeItemForUpsertCategorySurcharge:
+		return true
+	case ArticleAttributeItemForUpsertCategoryTax:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ArticleAttributeItemForUpsertType.
+const (
+	ArticleAttributeItemForUpsertTypeBOOLEAN  ArticleAttributeItemForUpsertType = "BOOLEAN"
+	ArticleAttributeItemForUpsertTypeCURRENCY ArticleAttributeItemForUpsertType = "CURRENCY"
+	ArticleAttributeItemForUpsertTypeNUMBER   ArticleAttributeItemForUpsertType = "NUMBER"
+	ArticleAttributeItemForUpsertTypeSTRING   ArticleAttributeItemForUpsertType = "STRING"
+)
+
+// Valid indicates whether the value is a known member of the ArticleAttributeItemForUpsertType enum.
+func (e ArticleAttributeItemForUpsertType) Valid() bool {
+	switch e {
+	case ArticleAttributeItemForUpsertTypeBOOLEAN:
+		return true
+	case ArticleAttributeItemForUpsertTypeCURRENCY:
+		return true
+	case ArticleAttributeItemForUpsertTypeNUMBER:
+		return true
+	case ArticleAttributeItemForUpsertTypeSTRING:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ArticleStockForecastPeriod.
 const (
 	ArticleStockForecastPeriodDAILY ArticleStockForecastPeriod = "DAILY"
@@ -14074,6 +14149,79 @@ type ArticleAttributeItemContext struct {
 // ArticleAttributeItemContextType Indicates the entity type the value refers to.
 type ArticleAttributeItemContextType string
 
+// ArticleAttributeItemForUpsert ArticleAttributeItemForUpsert
+type ArticleAttributeItemForUpsert struct {
+	// Category This category is used by fulfillmenttools to customize implemented processes.
+	// Categorized attributes are used by various processes and tools
+	// throughout fulfillmenttools. For a complete list of possible categories
+	// and their correct use, refer to the documentation.
+	// Default value: miscellaneous
+	Category *ArticleAttributeItemForUpsertCategory `json:"category,omitempty"`
+
+	// Context Context for salesPrice category and valuePerUnit key. Can only be set via Listing endpoints.
+	Context *ArticleAttributeItemContext `json:"context,omitempty"`
+
+	// Key Providing the key %%subtitle%% (see example) here will cause the
+	// value to appear, for example, in the App.
+	// With all other attributes also the key will be displayed in the
+	//  clients.
+	//
+	// Example: %%subtitle%%
+	Key ArticleAttributeItemForUpsert_Key `json:"key"`
+
+	// KeyLocalized The translations for the key of the attribute. This can be only filled with a descriptive category. Excluding for %%subtitle%%
+	KeyLocalized *LocaleString `json:"keyLocalized,omitempty"`
+
+	// Priority This value gives the priority in the respective attribute category.
+	// The lower the value the higher is the priority, for example, priority 1 is
+	// higher than priority 10. Attributes that have the highest priority
+	// might be selected for display in different articles of fulfillmenttools. Default
+	// value is 1001. For details please contact the product owners.
+	//
+	// Example: 100
+	Priority *int64 `json:"priority,omitempty"`
+
+	// Type The type of the attribute.
+	//
+	// Example: STRING
+	Type *ArticleAttributeItemForUpsertType `json:"type,omitempty"`
+
+	// Value Example: 585er Gold
+	Value string `json:"value"`
+
+	// ValueLocalized The translations for the key of the attribute. This can be only filled with a descriptive category
+	ValueLocalized *LocaleString `json:"valueLocalized,omitempty"`
+}
+
+// ArticleAttributeItemForUpsertCategory This category is used by fulfillmenttools to customize implemented processes.
+// Categorized attributes are used by various processes and tools
+// throughout fulfillmenttools. For a complete list of possible categories
+// and their correct use, refer to the documentation.
+// Default value: miscellaneous
+type ArticleAttributeItemForUpsertCategory string
+
+// ArticleAttributeItemForUpsertKey0 defines model for ArticleAttributeItemForUpsert.Key.0.
+type ArticleAttributeItemForUpsertKey0 = string
+
+// ArticleAttributeItemForUpsertKey1 defines model for ArticleAttributeItemForUpsert.Key.1.
+type ArticleAttributeItemForUpsertKey1 = interface{}
+
+// ArticleAttributeItemForUpsert_Key Providing the key %%subtitle%% (see example) here will cause the
+// value to appear, for example, in the App.
+// With all other attributes also the key will be displayed in the
+//
+//	clients.
+//
+// Example: %%subtitle%%
+type ArticleAttributeItemForUpsert_Key struct {
+	union json.RawMessage
+}
+
+// ArticleAttributeItemForUpsertType The type of the attribute.
+//
+// Example: STRING
+type ArticleAttributeItemForUpsertType string
+
 // ArticleItem ArticleItem
 type ArticleItem struct {
 	Quantity         float32 `json:"quantity"`
@@ -19455,6 +19603,9 @@ type OrderActionsParameter struct {
 // OrderArticleAttributeItem OrderArticleAttributeItem
 type OrderArticleAttributeItem = ArticleAttributeItem
 
+// OrderArticleAttributeItemForUpsert OrderArticleAttributeItemForUpsert
+type OrderArticleAttributeItemForUpsert = ArticleAttributeItemForUpsert
+
 // OrderCancelActionParameter Action to cancel an order.
 type OrderCancelActionParameter struct {
 	// CancelationReasonId ID of the cancelation reason
@@ -19892,11 +20043,43 @@ type OrderLineItemArticle struct {
 	Weight *float32 `json:"weight,omitempty"`
 }
 
+// OrderLineItemArticleForCreation OrderLineItemArticleForCreation
+type OrderLineItemArticleForCreation struct {
+	// Attributes Attributes are used in fulfillmenttools to impose a certain degree of customization to a process, such as improving the appearance in the platform and clients.
+	// Details about usage can be found in the<a href="https://docs.fulfillmenttools.com/documentation/by-pillar/global-inventory-hub/articles/article-attributes">article attributes article</a>.
+	Attributes *[]OrderArticleAttributeItemForUpsert `json:"attributes,omitempty"`
+
+	// CustomAttributes @deprecated Please use customAttributes in OrderLineItem.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	CustomAttributes *map[string]interface{} `json:"customAttributes,omitempty"`
+
+	// ImageUrl A web link to a picture of this article. Ensure that no authentication is needed to fetch the image.
+	//
+	// Example: https://example.com/resource
+	ImageUrl *string `json:"imageUrl,omitempty"`
+
+	// TenantArticleId This is a reference to an article number
+	//
+	// Example: 4711
+	TenantArticleId string `json:"tenantArticleId"`
+
+	// Title The title of the product
+	//
+	// Example: Cologne Water
+	Title string `json:"title"`
+
+	// TitleLocalized The translations for the title of the product
+	TitleLocalized *LocaleString `json:"titleLocalized,omitempty"`
+
+	// Weight Weight value is in gram
+	Weight *float32 `json:"weight,omitempty"`
+}
+
 // OrderLineItemArticleForUpdate OrderLineItemArticleForUpdate
 type OrderLineItemArticleForUpdate struct {
 	// Attributes Attributes are used in fulfillmenttools to impose a certain degree of customization to a process, such as improving the appearance in the platform and clients.
 	// Details about usage can be found in the <a href="https://docs.fulfillmenttools.com/documentation/by-pillar/global-inventory-hub/articles/article-attributes">article attributes article</a>.
-	Attributes *[]OrderArticleAttributeItem `json:"attributes,omitempty"`
+	Attributes *[]OrderArticleAttributeItemForUpsert `json:"attributes,omitempty"`
 
 	// CustomAttributes @deprecated Please use customAttributes in OrderLineItem.
 	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
@@ -19942,8 +20125,8 @@ type OrderLineItemForCreation struct {
 	// AllowedSubstitutes Array of allowed substitutes for given orderLineItem. If an empty array is provided, no substitute is allowed for this orderLineItem. If allowedSubstitutes is not provided, this configured substitutes on listing level will be available
 	AllowedSubstitutes *[]Substitute `json:"allowedSubstitutes,omitempty"`
 
-	// Article OrderLineItemArticle
-	Article OrderLineItemArticle `json:"article"`
+	// Article OrderLineItemArticleForCreation
+	Article OrderLineItemArticleForCreation `json:"article"`
 
 	// CustomAttributes Attributes that can be added to the orderline. These attributes cannot be used within fulfillment processes, but it could be useful to have the informations carried here.
 	CustomAttributes *map[string]interface{} `json:"customAttributes,omitempty"`
@@ -28751,6 +28934,68 @@ func (t ArticleAttributeItem_Key) MarshalJSON() ([]byte, error) {
 }
 
 func (t *ArticleAttributeItem_Key) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsArticleAttributeItemForUpsertKey0 returns the union data inside the ArticleAttributeItemForUpsert_Key as a ArticleAttributeItemForUpsertKey0
+func (t ArticleAttributeItemForUpsert_Key) AsArticleAttributeItemForUpsertKey0() (ArticleAttributeItemForUpsertKey0, error) {
+	var body ArticleAttributeItemForUpsertKey0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromArticleAttributeItemForUpsertKey0 overwrites any union data inside the ArticleAttributeItemForUpsert_Key as the provided ArticleAttributeItemForUpsertKey0
+func (t *ArticleAttributeItemForUpsert_Key) FromArticleAttributeItemForUpsertKey0(v ArticleAttributeItemForUpsertKey0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeArticleAttributeItemForUpsertKey0 performs a merge with any union data inside the ArticleAttributeItemForUpsert_Key, using the provided ArticleAttributeItemForUpsertKey0
+func (t *ArticleAttributeItemForUpsert_Key) MergeArticleAttributeItemForUpsertKey0(v ArticleAttributeItemForUpsertKey0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsArticleAttributeItemForUpsertKey1 returns the union data inside the ArticleAttributeItemForUpsert_Key as a ArticleAttributeItemForUpsertKey1
+func (t ArticleAttributeItemForUpsert_Key) AsArticleAttributeItemForUpsertKey1() (ArticleAttributeItemForUpsertKey1, error) {
+	var body ArticleAttributeItemForUpsertKey1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromArticleAttributeItemForUpsertKey1 overwrites any union data inside the ArticleAttributeItemForUpsert_Key as the provided ArticleAttributeItemForUpsertKey1
+func (t *ArticleAttributeItemForUpsert_Key) FromArticleAttributeItemForUpsertKey1(v ArticleAttributeItemForUpsertKey1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeArticleAttributeItemForUpsertKey1 performs a merge with any union data inside the ArticleAttributeItemForUpsert_Key, using the provided ArticleAttributeItemForUpsertKey1
+func (t *ArticleAttributeItemForUpsert_Key) MergeArticleAttributeItemForUpsertKey1(v ArticleAttributeItemForUpsertKey1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ArticleAttributeItemForUpsert_Key) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ArticleAttributeItemForUpsert_Key) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }

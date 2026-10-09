@@ -30935,6 +30935,115 @@ components:
       title: ArticleAttributeItemContext
       type: object
       description: ArticleAttributeItemContext
+    ArticleAttributeItemForUpsert:
+      properties:
+        valueLocalized:
+          allOf:
+            - $ref: '#/components/schemas/LocaleString'
+          description: >-
+            The translations for the key of the attribute. This can be only
+            filled with a descriptive category
+        keyLocalized:
+          allOf:
+            - $ref: '#/components/schemas/LocaleString'
+          description: >-
+            The translations for the key of the attribute. This can be only
+            filled with a descriptive category. Excluding for %%subtitle%%
+        category:
+          description: >-
+            This category is used by fulfillmenttools to customize implemented
+            processes.
+
+            Categorized attributes are used by various processes and tools
+
+            throughout fulfillmenttools. For a complete list of possible
+            categories
+
+            and their correct use, refer to the documentation.
+
+            Default value: miscellaneous
+          enum:
+            - descriptive
+            - miscellaneous
+            - pickingSequence
+            - customs
+            - insurance
+            - shop
+            - dimensions
+            - carrierService
+            - salesPrice
+            - basePrice
+            - tax
+            - discount
+            - surcharge
+          type: string
+        context:
+          allOf:
+            - $ref: '#/components/schemas/ArticleAttributeItemContext'
+          description: >-
+            Context for salesPrice category and valuePerUnit key. Can only be
+            set via Listing endpoints.
+        key:
+          anyOf:
+            - type: string
+            - enum:
+                - billableWeightPerUnit
+                - weightPerUnit
+                - currency
+                - valuePerUnit
+                - hsCode
+                - numberOfDecimalPlaces
+                - decimalPlaces
+                - value
+                - countryOfManufacture
+                - percentage
+                - valueOfMeasureForBasePrice
+                - unitKeyOfMeasureForBasePrice
+          description: |-
+            Providing the key %%subtitle%% (see example) here will cause the
+            value to appear, for example, in the App.
+            With all other attributes also the key will be displayed in the
+             clients.
+          example: '%%subtitle%%'
+          minLength: 1
+        priority:
+          description: >-
+            This value gives the priority in the respective attribute category.
+
+            The lower the value the higher is the priority, for example,
+            priority 1 is
+
+            higher than priority 10. Attributes that have the highest priority
+
+            might be selected for display in different articles of
+            fulfillmenttools. Default
+
+            value is 1001. For details please contact the product owners.
+          example: 100
+          format: int64
+          maximum: 1001
+          minimum: 1
+          type: integer
+        type:
+          default: STRING
+          description: The type of the attribute.
+          enum:
+            - STRING
+            - NUMBER
+            - CURRENCY
+            - BOOLEAN
+          example: STRING
+          type: string
+        value:
+          example: 585er Gold
+          minLength: 1
+          type: string
+      required:
+        - key
+        - value
+      title: ArticleAttributeItemForUpsert
+      type: object
+      description: ArticleAttributeItemForUpsert
     ArticleAttributeItemType:
       description: The type of the attribute.
       enum:
@@ -58237,6 +58346,11 @@ components:
         - $ref: '#/components/schemas/ArticleAttributeItem'
       title: OrderArticleAttributeItem
       description: OrderArticleAttributeItem
+    OrderArticleAttributeItemForUpsert:
+      allOf:
+        - $ref: '#/components/schemas/ArticleAttributeItemForUpsert'
+      title: OrderArticleAttributeItemForUpsert
+      description: OrderArticleAttributeItemForUpsert
     OrderCancelActionParameter:
       allOf:
         - $ref: '#/components/schemas/AbstractOrderActionsParameter'
@@ -58896,6 +59010,8 @@ components:
       allOf:
         - $ref: '#/components/schemas/OrderLineItemForCreation'
         - properties:
+            article:
+              $ref: '#/components/schemas/OrderLineItemArticle'
             id:
               description: >-
                 The id of this orderline. It is generated during creation
@@ -58904,6 +59020,7 @@ components:
               example: LGMl2DuvPnfPoSHhYFOm
               type: string
           required:
+            - article
             - id
           type: object
       title: OrderLineItem
@@ -58942,6 +59059,34 @@ components:
         name: OrderLineItemArticle
       title: OrderLineItemArticle
       description: OrderLineItemArticle
+    OrderLineItemArticleForCreation:
+      allOf:
+        - $ref: '#/components/schemas/AbstractArticle'
+        - properties:
+            attributes:
+              description: >-
+                Attributes are used in fulfillmenttools to impose a certain
+                degree of customization to a process, such as improving the
+                appearance in the platform and clients.
+
+                Details about usage can be found in the<a
+                href="https://docs.fulfillmenttools.com/documentation/by-pillar/global-inventory-hub/articles/article-attributes">article
+                attributes article</a>.
+              items:
+                $ref: '#/components/schemas/OrderArticleAttributeItemForUpsert'
+              maxItems: 500
+              type: array
+            customAttributes:
+              deprecated: true
+              description: |
+                @deprecated Please use customAttributes in OrderLineItem.
+              nullable: true
+              type: object
+          type: object
+      xml:
+        name: OrderLineItemArticleForCreation
+      title: OrderLineItemArticleForCreation
+      description: OrderLineItemArticleForCreation
     OrderLineItemArticleForUpdate:
       allOf:
         - $ref: '#/components/schemas/AbstractArticleForCreation'
@@ -58956,7 +59101,7 @@ components:
                 href="https://docs.fulfillmenttools.com/documentation/by-pillar/global-inventory-hub/articles/article-attributes">article
                 attributes article</a>.
               items:
-                $ref: '#/components/schemas/OrderArticleAttributeItem'
+                $ref: '#/components/schemas/OrderArticleAttributeItemForUpsert'
               maxItems: 500
               type: array
             customAttributes:
@@ -59043,7 +59188,7 @@ components:
           maxItems: 500
           type: array
         article:
-          $ref: '#/components/schemas/OrderLineItemArticle'
+          $ref: '#/components/schemas/OrderLineItemArticleForCreation'
         customAttributes:
           description: >-
             Attributes that can be added to the orderline. These attributes
