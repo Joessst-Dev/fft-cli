@@ -190,9 +190,11 @@ jobs:
           # Must be bumped by hand whenever Go releases a new major: golangci-lint
           # type-checks against its own vendored go/types, so a release that predates
           # the `stable` toolchain above dies on the stdlib itself — not on our code —
-          # and every job goes red at once. Dependabot cannot see this: it tracks the
-          # action ref, not this input.
-          version: v2.13.1
+          # and every job goes red at once. A point release can do it too: v2.13.1,
+          # built with go1.27.0, could not read go1.27.2's stdlib export data. A
+          # `typecheck` issue in a stdlib import is this, not a lint finding.
+          # Dependabot cannot see this: it tracks the action ref, not this input.
+          version: v2.14.0
 
   vulncheck:
     name: govulncheck
