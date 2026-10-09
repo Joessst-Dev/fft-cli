@@ -22,6 +22,18 @@ production facility just as happily as a test one.
 Exit code 3 means no project is configured — see [recipes](./recipes.md), and ask
 the user rather than inventing credentials.
 
+`metadata.version` in this file's frontmatter is the fft release that installed it. When
+`fft version` names a different one, this skill may describe flags that have since moved:
+
+```sh
+fft version
+fft skill status
+```
+
+`OUTDATED` means the user should run `fft skill install` (`--local` for a project skill);
+it writes to their disk, so say so rather than doing it unasked. A `dev` build compares
+nothing.
+
 Never run `fft tui`. It is the interactive mode for a person at a terminal, and without one
 it refuses with exit 2; every screen in it is an fft command you can run directly.
 

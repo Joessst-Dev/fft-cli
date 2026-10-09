@@ -18,7 +18,11 @@ necessarily a write, and that it must ask before it changes anything.
 The skill ships inside this binary, so it is always the one that describes the
 commands you actually have. Every fft invocation in it is resolved against the real
 command tree by a spec, so a renamed flag fails fft's build rather than quietly
-making the skill lie to your agent.`
+making the skill lie to your agent.
+
+An installed copy is another matter: it describes the fft that installed it. It
+records that version, fft mentions on stderr when it no longer matches the binary,
+and fft skill status reports it.`
 
 func newSkillCmd(deps *Deps) *cobra.Command {
 	cmd := &cobra.Command{
@@ -34,6 +38,7 @@ func newSkillCmd(deps *Deps) *cobra.Command {
 	cmd.AddCommand(
 		newSkillInstallCmd(deps),
 		newSkillShowCmd(deps),
+		newSkillStatusCmd(deps),
 	)
 
 	return cmd

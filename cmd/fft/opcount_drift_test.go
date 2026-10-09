@@ -100,13 +100,15 @@ var _ = Describe("the operation counts the repo documents", func() {
 // prose is every file in the repo that can state a count: documentation, the Go
 // comments that justify the three-tier design, and the YAML comments in the
 // codegen config that state the spec's path and schema counts. Only trees that
-// are not ours are skipped. Generated pages are deliberately scanned along with
-// their sources — docs/guide holds hand-written pages next to skill-derived
-// ones, and a gate that skipped the directory would miss every hand-written page
-// in it. The vendored spec itself (fft.api.swagger.yaml) is scanned too — it is
+// are not ours are skipped, and internal/skill/testdata: a byte-for-byte copy
+// of a released skill, frozen so that upgrading from it stays tested, which
+// states what was true of the API then and must not be edited to say otherwise.
+// Generated pages are deliberately scanned along with their sources — docs/guide
+// holds hand-written pages next to skill-derived ones, and a gate that skipped the
+// directory would miss every hand-written page in it. The vendored spec itself (fft.api.swagger.yaml) is scanned too — it is
 // large, but a plain regex pass over it costs nothing worth special-casing for.
 func prose() []string {
-	skip := []string{"node_modules", ".vitepress/dist", ".git", ".claude"}
+	skip := []string{"node_modules", ".vitepress/dist", ".git", ".claude", "internal/skill/testdata"}
 
 	var out []string
 	err := filepath.WalkDir(repoRoot, func(path string, d fs.DirEntry, err error) error {

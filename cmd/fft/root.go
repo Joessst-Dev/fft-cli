@@ -566,8 +566,9 @@ func newRootCmd(deps *Deps) *cobra.Command {
 
 		// Cobra runs this only when the command succeeded, which is the only time a
 		// "by the way, there is a new version" is worth reading.
-		PersistentPostRun: func(*cobra.Command, []string) {
+		PersistentPostRun: func(cmd *cobra.Command, _ []string) {
 			deps.reportUpdate()
+			deps.reportSkill(cmd)
 		},
 	}
 

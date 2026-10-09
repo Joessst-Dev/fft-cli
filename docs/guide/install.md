@@ -72,6 +72,9 @@ A binary install is upgraded by repeating the download above over the old `fft.e
 locks a running executable and the copy fails with a sharing violation rather than a
 clear error.
 
+An installed [agent skill](/guide/agents) is a copy too, and still describes the old
+release: `fft skill install` brings it up to date, and fft reminds you until it has.
+
 [Components](/guide/components) are upgraded separately: a new fft does not carry new
 component binaries, and `fft component upgrade <name>` refetches one from wherever it was
 installed from.

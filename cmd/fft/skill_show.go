@@ -25,12 +25,13 @@ that wants to read those.`
 // skillDocView is the skill as a record, for the caller who asked for one.
 //
 // Content is the whole file, frontmatter included, because that is what an agent
-// has to be given — and Name and Description are lifted out of it so that a tool
-// deciding *whether* to install the skill does not have to parse markdown to find
-// out what it is for.
+// has to be given — and Name, Description and Version are lifted out of it so
+// that a tool deciding *whether* to install the skill, or whether the copy it has
+// is behind, does not have to parse markdown to find out.
 type skillDocView struct {
 	Name        string `json:"name" yaml:"name"`
 	Description string `json:"description" yaml:"description"`
+	Version     string `json:"version" yaml:"version"`
 	Content     string `json:"content" yaml:"content"`
 }
 
@@ -67,6 +68,7 @@ func runSkillShow(deps *Deps) error {
 	return deps.Printer.Render(output.Rows{}, skillDocView{
 		Name:        meta.Name,
 		Description: meta.Description,
+		Version:     meta.Version(),
 		Content:     doc,
 	})
 }

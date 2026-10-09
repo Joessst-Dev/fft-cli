@@ -49,6 +49,13 @@ func commandLine(args []string) shellCommand {
 	return cmd
 }
 
+// ShellQuote is s spelled for a command line that fft prints for a user to paste:
+// [shellQuote]'s spelling, without the verdict on whether it is portable.
+func ShellQuote(s string) string {
+	quoted, _ := shellQuote(s)
+	return quoted
+}
+
 // shellQuote quotes s so that a POSIX shell, fish and PowerShell all read it back
 // as s, and leaves it bare when none of them would read it as anything else.
 //
