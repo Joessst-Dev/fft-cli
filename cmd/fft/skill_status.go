@@ -173,6 +173,11 @@ func skillLocations(local bool, dir string) []skillLocation {
 // project's .claude/skills, or its fft, a link to the personal one — it is
 // reported once. One skill dressed up as two would be two rows, and two notices,
 // about the same file.
+//
+// The home and working directories are compared too, not only the skill
+// directories under them: with nothing installed yet neither skill directory
+// exists to be followed, and a home reached through a symlink — macOS's /var is
+// /private/var — is spelled differently by $HOME and by os.Getwd.
 func defaultSkillLocations() []skillLocation {
 	user := skillLocation{scope: "user", fix: "fft skill install"}
 	user.root, user.err = skill.UserDir()
@@ -180,7 +185,9 @@ func defaultSkillLocations() []skillLocation {
 	project := projectLocation()
 
 	if user.err == nil && project.err == nil &&
-		(sameDir(user.root, project.root) || sameDir(skillDir(user.root), skillDir(project.root))) {
+		(sameDir(base(user.root), base(project.root)) ||
+			sameDir(user.root, project.root) ||
+			sameDir(skillDir(user.root), skillDir(project.root))) {
 		return []skillLocation{user}
 	}
 	return []skillLocation{user, project}
@@ -190,6 +197,12 @@ func projectLocation() skillLocation {
 	loc := skillLocation{scope: "project", fix: "fft skill install --local"}
 	loc.root, loc.err = skill.ProjectDir()
 	return loc
+}
+
+// base is the directory a skills root hangs under: the home directory for
+// ~/.claude/skills, the working directory for ./.claude/skills.
+func base(root string) string {
+	return filepath.Dir(filepath.Dir(root))
 }
 
 // sameDir reports two paths that name one directory: spelled alike, or — through

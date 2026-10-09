@@ -532,6 +532,22 @@ var _ = Describe("fft skill status", func() {
 		Expect(status().Installs).To(ConsistOf(HaveField("Scope", "user")))
 	})
 
+	// $HOME names the link and the working directory names its target — macOS's
+	// temp directories, under /var, are exactly this — and with nothing installed
+	// there is no skill directory to follow the link through.
+	It("reports the home directory's skill once when HOME is reached through a link", func() {
+		real := GinkgoT().TempDir()
+		link := filepath.Join(GinkgoT().TempDir(), "home")
+		if err := os.Symlink(real, link); err != nil {
+			Skip("cannot create a symlink here: " + err.Error())
+		}
+		GinkgoT().Setenv("HOME", link)
+		GinkgoT().Setenv("USERPROFILE", link)
+		GinkgoT().Chdir(real)
+
+		Expect(status().Installs).To(ConsistOf(HaveField("Scope", "user")))
+	})
+
 	It("reports a project skill that links to the personal one once", func() {
 		Expect(c.run("skill", "install")).To(Equal(exitcode.OK))
 		home, err := os.UserHomeDir()
