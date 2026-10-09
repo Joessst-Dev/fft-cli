@@ -309,17 +309,21 @@ func (d *Deps) terminal(cmd *cobra.Command) bool {
 // notice — and the cache stamp with it — to anyone whose daily driver is one of
 // them.
 func updateExempt(cmd *cobra.Command) bool {
-	// Walk up to the root's own child: `fft update check` is exempt because it
-	// hangs below `fft update`, while `fft facility update` hangs below `facility`.
-	top := cmd
-	for top.Parent() != nil && top.Parent().Parent() != nil {
-		top = top.Parent()
-	}
-
-	switch top.Name() {
+	switch topCommand(cmd).Name() {
 	case "version", "completion", "update", "tui",
 		cobra.ShellCompRequestCmd, cobra.ShellCompNoDescRequestCmd:
 		return true
 	}
 	return false
+}
+
+// topCommand is the root's own child that cmd hangs below — `update` for
+// `fft update check`, `facility` for `fft facility update` — or cmd itself when it
+// is the root or one of its children.
+func topCommand(cmd *cobra.Command) *cobra.Command {
+	top := cmd
+	for top.Parent() != nil && top.Parent().Parent() != nil {
+		top = top.Parent()
+	}
+	return top
 }

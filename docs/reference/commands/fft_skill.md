@@ -23,6 +23,10 @@ commands you actually have. Every fft invocation in it is resolved against the r
 command tree by a spec, so a renamed flag fails fft's build rather than quietly
 making the skill lie to your agent.
 
+An installed copy is another matter: it describes the fft that installed it. It
+records that version, fft mentions on stderr when it no longer matches the binary,
+and fft skill status reports it.
+
 ## Usage
 
 ```
@@ -33,6 +37,7 @@ fft skill
 
 - [fft skill install](./fft_skill_install.md) — Install the skill for an AI assistant to read
 - [fft skill show](./fft_skill_show.md) — Print the skill's markdown to stdout
+- [fft skill status](./fft_skill_status.md) — Report which fft version each installed skill describes
 
 ## See also
 

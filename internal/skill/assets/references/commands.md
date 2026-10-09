@@ -249,6 +249,7 @@ fft auth whoami
 fft auth status -o json
 fft ping
 fft version
+fft skill status -o json
 fft component list
 fft history top -o json
 fft history top --all-projects --limit 0 -o json
@@ -273,6 +274,13 @@ fft history clear
   from "my token is wrong".
 - `fft project read-only prod` marks a project read-only for good, in the config file. It is
   the right suggestion whenever a user tells you a project is production.
+- `fft skill status -o json` compares each installed copy of this skill with the running
+  fft: `{fft, installs: [{scope, dir, version, status, error}]}`, where `status` is
+  `CURRENT`, `OUTDATED` (installed by another fft version), `MODIFIED` (edited since),
+  `MISSING`, `NOT_SKILL` or `UNREADABLE` (with the reason in `error`). `fft skill install`
+  updates an `OUTDATED` copy without `--force` unless the user edited a file in it; then
+  it stops and asks. Status only reads the installed files, sends nothing, and always
+  exits 0.
 - `fft component list` says which components are installed, and whether fft ships them or
   somebody else does — a command in `--help` that came from a component is somebody else's
   code. See [components](components.md).

@@ -1,13 +1,8 @@
----
-title: Commands
-source: internal/skill/assets/references/commands.md
----
-
 # The curated commands
 
 Hand-written commands for the entities most people touch, plus the core commands that
 have nothing to do with the API. Everything else lives in
-[discovery.md](./discovery.md).
+[discovery.md](discovery.md).
 
 Run `--help` on any of them. It tells you the endpoint, the permission it needs, and a
 sample body. The notes below are the things `--help` will *not* tell you.
@@ -113,7 +108,7 @@ fft sourcing get 284f32cc-b106-487d-b633-f90d93d8c251
   a set of options.
 - Every transfer carries a `facilityConnectionRef`. That is the join to `fft connection get`,
   and it is how you answer "why *there*?" — see the recipe in
-  [recipes.md](./recipes.md).
+  [recipes.md](recipes.md).
 
 ## Routing
 
@@ -218,7 +213,7 @@ fft template remove rush-order
   project template hides a user one of the same name.
 - `--local` writes `./.fft/templates`, which the repository commits. Read one before you
   commit it: a body captured from real work carries real ids and consumer emails.
-- Full rules in [templates.md](./templates.md).
+- Full rules in [templates.md](templates.md).
 
 ## Paging
 
@@ -254,7 +249,6 @@ fft auth whoami
 fft auth status -o json
 fft ping
 fft version
-fft skill status -o json
 fft component list
 fft history top -o json
 fft history top --all-projects --limit 0 -o json
@@ -279,16 +273,9 @@ fft history clear
   from "my token is wrong".
 - `fft project read-only prod` marks a project read-only for good, in the config file. It is
   the right suggestion whenever a user tells you a project is production.
-- `fft skill status -o json` compares each installed copy of this skill with the running
-  fft: `{fft, installs: [{scope, dir, version, status, error}]}`, where `status` is
-  `CURRENT`, `OUTDATED` (installed by another fft version), `MODIFIED` (edited since),
-  `MISSING`, `NOT_SKILL` or `UNREADABLE` (with the reason in `error`). `fft skill install`
-  updates an `OUTDATED` copy without `--force` unless the user edited a file in it; then
-  it stops and asks. Status only reads the installed files, sends nothing, and always
-  exits 0.
 - `fft component list` says which components are installed, and whether fft ships them or
   somebody else does — a command in `--help` that came from a component is somebody else's
-  code. See [components](./components.md).
+  code. See [components](components.md).
 - `fft history top -o json` lists the operations used most in the current project, each with
   `project`, `operationId`, `command`, `count` and `lastUsed` — a quick way to learn what a
   user normally does before suggesting a command. `--all-projects` counts every project,
@@ -310,4 +297,4 @@ fft history clear
   refuses with exit 2 unless `--yes` is given. It is the user's record: do not clear it
   unless they ask.
 - `fft component init pricing` scaffolds a new component (a command or a transport, in shell,
-  Go, Python or Node) that installs and runs straight away. See [components](./components.md).
+  Go, Python or Node) that installs and runs straight away. See [components](components.md).

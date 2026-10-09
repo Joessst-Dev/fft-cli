@@ -66,6 +66,7 @@ var commandsWithoutOperation = map[string]string{
 	// runs, before `fft project add`.
 	"fft skill install": "copies the embedded skill onto the local disk; no network",
 	"fft skill show":    "prints the embedded skill; no network",
+	"fft skill status":  "reads the installed skill's frontmatter; no network",
 
 	// A template is a file on this machine, not an entity in the tenant. None of
 	// these builds a request — which is also why `save` is allowed on a read-only

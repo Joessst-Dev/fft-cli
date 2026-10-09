@@ -30,16 +30,28 @@ const (
 // The distinction that earns its keep is UNCHANGED against CONFLICT. Installing
 // twice must be silent and must ask nothing — an agent, or a provisioning script,
 // will do it on every run — while a file the *user* has edited is a decision only
-// they can make. Comparing the bytes is what tells those apart; a timestamp or a
-// version marker would not.
+// they can make.
+//
+// Comparing the bytes tells those two apart, and it cannot tell apart the two
+// ways a file comes to differ: fft's own text from an older release, and the
+// user's edit. Every release that changes a word of the skill makes an untouched
+// install look edited — and if that asked for --force, a notice saying "run fft
+// skill install" would send an agent, with no terminal to be asked on, straight
+// into a refusal. So fft keeps a record of what it wrote ([ManifestName]), and
+// knows every text it shipped before it kept one ([legacy]). A file that matches
+// either is OUTDATED, or OBSOLETE if fft no longer ships it, and changes without
+// a question. Anything else that differs is still CONFLICT or STALE.
 type Status string
 
 const (
 	StatusNew       Status = "NEW"       // nothing is there
 	StatusUnchanged Status = "UNCHANGED" // already byte-for-byte what fft ships
+	StatusOutdated  Status = "OUTDATED"  // what an older fft wrote, untouched since; replaced without asking
 	StatusConflict  Status = "CONFLICT"  // something else is there; --force replaces it
-	StatusStale     Status = "STALE"     // fft does not ship this any more; --force removes it
+	StatusObsolete  Status = "OBSOLETE"  // an older fft wrote this and fft no longer ships it; removed without asking
+	StatusStale     Status = "STALE"     // not fft's, or edited since; --force removes it
 	StatusWritten   Status = "WRITTEN"   // Apply created it
+	StatusUpdated   Status = "UPDATED"   // Apply restamped an OUTDATED
 	StatusReplaced  Status = "REPLACED"  // Apply overwrote a CONFLICT
 	StatusRemoved   Status = "REMOVED"   // Apply pruned a STALE
 )
@@ -91,6 +103,7 @@ func NewPlan(root string) (Plan, error) {
 	}
 
 	plan := Plan{Dir: dir}
+	record := readManifest(dir)
 
 	ours := make([]string, 0, 8)
 	err = fs.WalkDir(tree, ".", func(name string, d fs.DirEntry, err error) error {
@@ -99,7 +112,7 @@ func NewPlan(root string) (Plan, error) {
 		}
 		ours = append(ours, name)
 
-		plan.Files = append(plan.Files, Change{File: name, Status: compare(dir, name)})
+		plan.Files = append(plan.Files, Change{File: name, Status: compare(dir, name, record)})
 		return nil
 	})
 	if err != nil {
@@ -121,7 +134,7 @@ func NewPlan(root string) (Plan, error) {
 			return Plan{}, err
 		}
 		for _, name := range stale {
-			plan.Files = append(plan.Files, Change{File: name, Status: StatusStale})
+			plan.Files = append(plan.Files, Change{File: name, Status: retired(dir, name, record)})
 		}
 	}
 
@@ -138,7 +151,7 @@ func entry(c Change) int {
 	switch {
 	case c.File == Doc:
 		return 0
-	case c.Status == StatusStale:
+	case c.Status == StatusStale, c.Status == StatusObsolete:
 		return 2
 	default:
 		return 1
@@ -156,12 +169,14 @@ func entry(c Change) int {
 // in a place nothing looks at any more. Resolving it here means everything below
 // only ever sees a real directory.
 func resolve(dir string) (string, error) {
+	// The errors below are returned as they are: an *fs.PathError already names
+	// the path, and wrapping it in another would print it twice.
 	info, err := os.Lstat(dir)
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
 		return dir, nil
 	case err != nil:
-		return "", fmt.Errorf("stat %s: %w", dir, err)
+		return "", err
 	case info.Mode()&fs.ModeSymlink == 0:
 		return dir, nil
 	}
@@ -185,7 +200,7 @@ func recognise(dir string) (bool, error) {
 	case errors.Is(err, fs.ErrNotExist):
 		return false, nil
 	case err != nil:
-		return false, fmt.Errorf("stat %s: %w", dir, err)
+		return false, err
 	case !info.IsDir():
 		return false, fmt.Errorf("%s is a file, not a directory: %w", dir, ErrNotSkill)
 	}
@@ -206,7 +221,7 @@ func recognise(dir string) (bool, error) {
 		}
 		return false, fmt.Errorf("%s holds files and no %s: %w", dir, Doc, ErrNotSkill)
 	default:
-		return false, fmt.Errorf("stat %s: %w", filepath.Join(dir, Doc), err)
+		return false, err
 	}
 }
 
@@ -227,14 +242,18 @@ func recognise(dir string) (bool, error) {
 //
 // The litter is still named in the plan and still reported when it goes. This
 // decides only whose directory it is, and whose consent removing it needs.
+//
+// fft's manifest does not count either, for the same reason: fft wrote it. A
+// directory holding one and no SKILL.md is a skill whose SKILL.md somebody
+// deleted, not a stranger's directory.
 func vacant(dir string) (bool, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
-		return false, fmt.Errorf("read %s: %w", dir, err)
+		return false, err
 	}
 
 	for _, e := range entries {
-		if !strings.HasPrefix(e.Name(), atomicfile.TempPrefix) {
+		if e.Name() != ManifestName && !strings.HasPrefix(e.Name(), atomicfile.TempPrefix) {
 			return false, nil
 		}
 	}
@@ -246,23 +265,72 @@ func vacant(dir string) (bool, error) {
 // An unreadable file is a CONFLICT rather than an error: fft is about to overwrite
 // it anyway, and if the overwrite fails the user hears about it then, with the
 // error that actually stopped it.
-func compare(dir, name string) Status {
-	want, err := fs.ReadFile(tree, name)
+//
+// The stamp-only comparison is kept beside the record for an install whose
+// manifest has gone — deleted, or lost to a copy that skipped dotfiles. Its
+// SKILL.md still carries the stamp that says fft wrote it, and that is narrow
+// enough to trust: [unstamp] removes exactly what fft added and nothing else.
+//
+// Only a regular file can be OUTDATED, as only a regular file can be OBSOLETE
+// (see [retired]). A symlink is something the user made, whatever its target
+// holds, and replacing it is not a no-consent change: the write is an atomic
+// rename, which puts a regular file where the link was and leaves the target —
+// the user's dotfiles copy — holding the old text. A link whose target already
+// is what fft ships is UNCHANGED, and is left alone; one that differs is theirs
+// to decide about.
+func compare(dir, name string, record manifest) Status {
+	want, err := content(name)
 	if err != nil {
 		panic(fmt.Sprintf("embedded skill: %v", err))
 	}
 
-	got, err := os.ReadFile(filepath.Join(dir, filepath.FromSlash(name)))
+	path := filepath.Join(dir, filepath.FromSlash(name))
+	info, err := os.Lstat(path)
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
 		return StatusNew
 	case err != nil:
 		return StatusConflict
+	}
+
+	got, err := os.ReadFile(path)
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
+		// A dangling link: there is something there, and it is not fft's.
+		return StatusConflict
+	case err != nil:
+		return StatusConflict
 	case bytes.Equal(got, want):
 		return StatusUnchanged
+	case !info.Mode().IsRegular():
+		return StatusConflict
+	case record.ours(name, got):
+		return StatusOutdated
+	case name == Doc && bytes.Equal(unstamp(got), unstamp(want)):
+		return StatusOutdated
 	default:
 		return StatusConflict
 	}
+}
+
+// retired says whether a stray is a file an older fft wrote and nobody has
+// touched since — OBSOLETE, which goes without a question — or anything else,
+// which is STALE and is the user's to decide about.
+//
+// Only a regular file qualifies. A symlink is something the user made, whatever
+// its target happens to hold.
+func retired(dir, name string, record manifest) Status {
+	path := filepath.Join(dir, filepath.FromSlash(name))
+
+	info, err := os.Lstat(path)
+	if err != nil || !info.Mode().IsRegular() {
+		return StatusStale
+	}
+	data, err := os.ReadFile(path)
+	if err != nil || !record.ours(name, data) {
+		return StatusStale
+	}
+	return StatusObsolete
 }
 
 // strays are the files under dir that fft does not ship, sorted.
@@ -292,7 +360,7 @@ func strays(dir string, ours []string) ([]string, error) {
 		}
 
 		name := filepath.ToSlash(rel)
-		if slices.Contains(ours, name) {
+		if slices.Contains(ours, name) || name == ManifestName {
 			return nil
 		}
 
@@ -321,7 +389,8 @@ func strays(dir string, ours []string) ([]string, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("read %s: %w", dir, err)
+		// WalkDir's own errors already name the path they are about.
+		return nil, err
 	}
 
 	slices.Sort(out)
@@ -330,7 +399,8 @@ func strays(dir string, ours []string) ([]string, error) {
 
 // Pending are the changes that need the user's blessing: a file of theirs to be
 // overwritten, or one to be removed. Everything else — a new file, a file already
-// correct — needs nobody's permission.
+// correct, a file an older fft wrote and nobody has touched since — needs
+// nobody's permission.
 //
 // fft's own crash litter is not the user's file, and asking them to consent to the
 // removal of something they have never heard of and did not write teaches them
@@ -361,9 +431,11 @@ func litter(name string) bool {
 //
 // It removes exactly the files the plan named — plus the directories that removing
 // them emptied, which held nothing to consent to. That is the invariant: every file
-// fft deletes appeared in the plan, and every one of them but fft's own litter was
-// shown to the user and agreed to ([Plan.Pending] is where that distinction is
-// drawn, and why). So an install that reports no changes has made none.
+// fft deletes appeared in the plan, and every one of them but fft's own litter and
+// fft's own untouched old files was shown to the user and agreed to
+// ([Plan.Pending] is where that distinction is drawn, and why). So an install that
+// reports no changes has removed and replaced nothing of anybody's. The one file
+// it may still write is its own record, [ManifestName], when that is missing.
 //
 // An UNCHANGED file is not rewritten. Re-installing on every run of a script must
 // not churn the mtime of a file an editor or a watcher is holding open.
@@ -380,7 +452,7 @@ func (p Plan) Apply() (Plan, error) {
 			done.Files = append(done.Files, c)
 			continue
 
-		case StatusStale:
+		case StatusStale, StatusObsolete:
 			// os.Remove, never os.RemoveAll: a stray that is a symlink must lose the link
 			// and not whatever it points at, which may be a file of the user's somewhere
 			// else entirely. strays() has already ruled out a directory.
@@ -392,7 +464,7 @@ func (p Plan) Apply() (Plan, error) {
 			continue
 		}
 
-		data, err := fs.ReadFile(tree, c.File)
+		data, err := content(c.File)
 		if err != nil {
 			return Plan{}, fmt.Errorf("read the embedded %s: %w", c.File, err)
 		}
@@ -401,10 +473,20 @@ func (p Plan) Apply() (Plan, error) {
 		}
 
 		status := StatusWritten
-		if c.Status == StatusConflict {
+		switch c.Status {
+		case StatusOutdated:
+			status = StatusUpdated
+		case StatusConflict:
 			status = StatusReplaced
 		}
 		done.Files = append(done.Files, Change{File: c.File, Status: status})
+	}
+
+	// Last, so that a record only ever describes files that are already there: an
+	// Apply cut short leaves the previous record, and the files it did write are
+	// UNCHANGED to the next plan anyway.
+	if err := writeManifest(p.Dir); err != nil {
+		return Plan{}, err
 	}
 
 	p.tidy(emptied)
