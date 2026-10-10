@@ -11797,6 +11797,49 @@ paths:
       tags:
         - Handovers (Operations)
   /api/handoverjobs/{handoverJobId}/signature:
+    get:
+      description: Create a signature draft document for an existing handover job
+      operationId: getHandoverJobSignatureDraftPdf
+      parameters:
+        - description: ID of handover job you want to retrieve the signature draft for
+          in: path
+          name: handoverJobId
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          content:
+            application/pdf:
+              schema:
+                format: binary
+                type: string
+          description: The signature draft pdf was successfully created.
+        '401':
+          content:
+            application/pdf:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/pdf:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/pdf:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: handover job not found
+      summary: Get handover job signature draft pdf
+      x-fft-permissions:
+        - HANDOVERJOB_READ
+      tags:
+        - Shipments (Operations)
     post:
       description: >-
         Generates a PDF pickup receipt for the handover job, with a blank
@@ -28428,6 +28471,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Facility listing not found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Substitutes version conflict
       summary: Set substitutes
       tags:
         - Picking (Operations)
@@ -30181,6 +30230,14 @@ components:
           format: int64
           minimum: 1
           type: integer
+        stickers:
+          items:
+            $ref: '#/components/schemas/Sticker'
+          type: array
+        tags:
+          items:
+            $ref: '#/components/schemas/TagReference'
+          type: array
       required:
         - id
         - article
@@ -30197,6 +30254,14 @@ components:
           format: int64
           minimum: 1
           type: integer
+        stickers:
+          items:
+            $ref: '#/components/schemas/Sticker'
+          type: array
+        tags:
+          items:
+            $ref: '#/components/schemas/TagReference'
+          type: array
       required:
         - article
         - quantity
@@ -79173,7 +79238,7 @@ components:
           pattern: ^P(?:(\d+W)|(\d+Y)?(\d+M)?(\d+D)?(?:T(\d+H)?(\d+M)?(\d+S)?)?)$
           type: string
         timeTriggered:
-          $ref: '#/components/schemas/RoutingStrategyRerouteTimeTriggeredConfig'
+          $ref: '#/components/schemas/RoutingStrategyGlobalRerouteTimeTriggeredConfig'
         timeTriggeredByContext:
           items:
             $ref: '#/components/schemas/TimeTriggeredConfigurationContext'
@@ -79186,6 +79251,35 @@ components:
         name: RoutingStrategyGlobalConfiguration
       title: RoutingStrategyGlobalConfiguration
       description: RoutingStrategyGlobalConfiguration
+    RoutingStrategyGlobalRerouteConfiguration:
+      allOf:
+        - $ref: '#/components/schemas/RerouteConfiguration'
+      properties:
+        rerouteAttemptThreshold:
+          description: >-
+            The maximum number of attempts made to time-triggered reroute an
+            order or parts of it.
+          maximum: 200
+          minimum: 1
+          type: integer
+      title: RoutingStrategyGlobalRerouteConfiguration
+      description: RoutingStrategyGlobalRerouteConfiguration
+    RoutingStrategyGlobalRerouteTimeTriggeredConfig:
+      additionalProperties: false
+      properties:
+        clickAndCollectReroute:
+          $ref: '#/components/schemas/RoutingStrategyGlobalRerouteConfiguration'
+        shipFromStoreDeliveryReroute:
+          $ref: '#/components/schemas/RoutingStrategyGlobalRerouteConfiguration'
+        shipFromStoreSamedayReroute:
+          $ref: '#/components/schemas/RoutingStrategyGlobalRerouteConfiguration'
+      required:
+        - clickAndCollectReroute
+        - shipFromStoreDeliveryReroute
+        - shipFromStoreSamedayReroute
+      type: object
+      title: RoutingStrategyGlobalRerouteTimeTriggeredConfig
+      description: RoutingStrategyGlobalRerouteTimeTriggeredConfig
     RoutingStrategyNode:
       additionalProperties: false
       properties:
@@ -91735,6 +91829,17 @@ components:
         - rerouteDate
       title: TimeTriggeredRerouteFailedWebHookEventPayload
       description: TimeTriggeredRerouteFailedWebHookEventPayload
+    TimeTriggeredRerouteLimitReachedWebHookEvent:
+      allOf:
+        - $ref: '#/components/schemas/WebHookEvent'
+      properties:
+        payload:
+          $ref: '#/components/schemas/RoutingPlan'
+      required:
+        - payload
+      type: object
+      title: TimeTriggeredRerouteLimitReachedWebHookEvent
+      description: TimeTriggeredRerouteLimitReachedWebHookEvent
     TimeZone:
       description: Timezone for information retrieved e.g. by the Google Maps API
       properties:
