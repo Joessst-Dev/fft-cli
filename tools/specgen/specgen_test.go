@@ -31,7 +31,7 @@ var _ = Describe("specgen", func() {
 			Expect(op.Summary).To(Equal("Get thing"))
 		})
 
-		It("carries x-fft-permissions, which 331 of the 568 operations declare", func() {
+		It("carries x-fft-permissions, which 332 of the 569 operations declare", func() {
 			Expect(find(ops, "getThing").Permissions).To(Equal([]string{"AUDIT_READ", "THING_READ"}))
 		})
 
