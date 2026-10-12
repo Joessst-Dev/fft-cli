@@ -10,6 +10,18 @@ title: Install
 brew install Joessst-Dev/tap/fft
 ```
 
+**Scoop** (Windows):
+
+```powershell
+scoop bucket add joessst https://github.com/Joessst-Dev/scoop-bucket
+scoop install fft
+```
+
+Open a new terminal afterwards if `fft` is not found: Scoop puts its shim directory on
+`PATH` when Scoop itself is set up, and a terminal opened before that does not see it.
+Scoop checks the archive against the manifest's sha256 (the same hash `checksums.txt`
+carries) before it unpacks anything.
+
 **Go** (any platform, needs Go 1.26+):
 
 ```sh
@@ -30,8 +42,7 @@ sudo mv fft /usr/local/bin/
 gh release download --repo Joessst-Dev/fft-cli --pattern 'fft_*_linux_amd64.tar.gz' --output - | tar xz
 ```
 
-**Windows** — there is no winget or scoop package; the Homebrew cask is macOS-only. Unzip
-the archive and put `fft.exe` somewhere on `PATH`:
+**Windows without Scoop**: unzip the archive and put `fft.exe` somewhere on `PATH`:
 
 ```powershell
 $Version = "0.8.0"
@@ -64,6 +75,7 @@ binary. How you upgrade is how you installed:
 
 ```sh
 brew upgrade fft                                          # Homebrew
+scoop update fft                                          # Scoop
 go install github.com/Joessst-Dev/fft-cli/cmd/fft@latest  # Go
 ```
 

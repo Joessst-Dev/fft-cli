@@ -85,3 +85,7 @@ jobs:
           # it is scoped to this repository only. This must be a PAT with `contents:
           # write` on the tap repo — see CONTRIBUTING.md, "Releasing".
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          # Pushes bucket/fft.json to Joessst-Dev/scoop-bucket, for the same reason: a
+          # PAT with `contents: write` on the bucket repo. The tap PAT with its repo
+          # access widened to the bucket serves both.
+          SCOOP_BUCKET_TOKEN: ${{ secrets.SCOOP_BUCKET_TOKEN }}

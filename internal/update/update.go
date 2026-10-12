@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -64,6 +65,7 @@ type Checker struct {
 	url       string
 	client    *http.Client
 	now       func() time.Time
+	upgrade   string
 }
 
 // Option configures a [Checker].
@@ -79,6 +81,13 @@ func WithURL(url string) Option {
 // sleeping.
 func WithClock(now func() time.Time) Option {
 	return func(c *Checker) { c.now = now }
+}
+
+// WithUpgradeHint replaces the upgrade command the notice names. Production
+// derives it from the OS fft was built for; specs pin it so the notice they
+// assert on is the same on every CI runner.
+func WithUpgradeHint(hint string) Option {
+	return func(c *Checker) { c.upgrade = hint }
 }
 
 // New returns a Checker for the running fft version, caching its answer in the
@@ -99,8 +108,9 @@ func New(version, cachePath string, opts ...Option) *Checker {
 		// bounds the request — [Timeout] for the background check, --timeout for
 		// `fft update check` — and a deadline baked in here would silently overrule
 		// both.
-		client: &http.Client{},
-		now:    time.Now,
+		client:  &http.Client{},
+		now:     time.Now,
+		upgrade: upgradeHint(runtime.GOOS),
 	}
 	for _, opt := range opts {
 		opt(c)
@@ -410,8 +420,19 @@ func (c *Checker) Notice(s State) string {
 	if !Newer(c.version, s.LatestVersion) {
 		return ""
 	}
-	return fmt.Sprintf("⚡ fft %s is available (you have %s) — brew upgrade fft",
-		canonical(s.LatestVersion), canonical(c.version))
+	return fmt.Sprintf("⚡ fft %s is available (you have %s) — %s",
+		canonical(s.LatestVersion), canonical(c.version), c.upgrade)
+}
+
+// upgradeHint is the package manager command that upgrades fft on goos. The
+// Homebrew cask is macOS-only and the Scoop bucket Windows-only, so the build
+// target is the best guess fft has at how it was installed; a Linux or `go
+// install` user is told brew, as before, and knows their own path.
+func upgradeHint(goos string) string {
+	if goos == "windows" {
+		return "scoop update fft"
+	}
+	return "brew upgrade fft"
 }
 
 // Comparable reports whether v has a place in the version ordering at all — that

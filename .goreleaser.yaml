@@ -289,6 +289,36 @@ homebrew_casks:
             system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/fft"]
           end
 
+# Scoop, for Windows — the counterpart of the macOS-only cask above. The bucket
+# (Joessst-Dev/scoop-bucket) is shared with other Joessst-Dev tools, so only
+# bucket/fft.json is ours to write.
+#
+# `ids: [fft]` matters: the component archives are Windows zips too, and without it
+# GoReleaser would offer them as candidates for the fft manifest. The manifest's
+# `hash` is the archive's sha256 — the same value checksums.txt carries and cosign
+# vouches for — and Scoop checks it before it unpacks anything. fft.exe sits at the
+# zip's root, so the generated `bin` entry resolves without an extract_dir.
+scoops:
+  - name: fft
+    ids: [fft]
+    repository:
+      owner: Joessst-Dev
+      name: scoop-bucket
+      branch: main
+      # A PAT with `contents: write` on the bucket repo, for the same reason the cask
+      # needs HOMEBREW_TAP_TOKEN: GITHUB_TOKEN cannot push to another repository.
+      token: "{{ .Env.SCOOP_BUCKET_TOKEN }}"
+    directory: bucket
+    homepage: https://github.com/Joessst-Dev/fft-cli
+    description: A CLI for the fulfillmenttools API — every operation reachable from your shell.
+    license: MIT
+    commit_author:
+      name: goreleaser-bot
+      email: bot@goreleaser.com
+    commit_msg_template: "scoop: fft {{ .Tag }}"
+    # A prerelease must never become `scoop install fft`.
+    skip_upload: auto
+
 release:
   draft: false
   prerelease: auto
@@ -297,6 +327,13 @@ release:
 
     ```sh
     brew install Joessst-Dev/tap/fft
+    ```
+
+    Windows, with [Scoop](https://scoop.sh):
+
+    ```powershell
+    scoop bucket add joessst https://github.com/Joessst-Dev/scoop-bucket
+    scoop install fft
     ```
 
     **Full changelog**: https://github.com/Joessst-Dev/fft-cli/compare/{{ .PreviousTag }}...{{ .Tag }}

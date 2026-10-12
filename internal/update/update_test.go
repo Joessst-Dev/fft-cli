@@ -103,6 +103,7 @@ var _ = Describe("update.Checker", func() {
 		return update.New(version, cachePath,
 			update.WithURL(url),
 			update.WithClock(func() time.Time { return clock }),
+			update.WithUpgradeHint("brew upgrade fft"),
 		)
 	}
 
@@ -528,6 +529,13 @@ var _ = Describe("update.Checker", func() {
 			Entry("nothing at all on a dev build", "dev", "v1.3.0", ""),
 			Entry("nothing at all when nothing is known yet", "v1.2.1", "", ""),
 		)
+
+		It("names the upgrade command it was given", func() {
+			c := update.New("v1.2.1", cachePath, update.WithUpgradeHint("scoop update fft"))
+
+			Expect(c.Notice(update.State{LatestVersion: "v1.3.0"})).To(Equal(
+				"⚡ fft v1.3.0 is available (you have v1.2.1) — scoop update fft"))
+		})
 	})
 
 	Describe("Newer", func() {
