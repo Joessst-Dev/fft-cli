@@ -105,9 +105,14 @@ Tag it. `release.yml` does the rest.
 git tag v0.1.0 && git push origin v0.1.0
 ```
 
-This requires two things to exist:
+This requires four things to exist:
 
 - The tap repository **`Joessst-Dev/homebrew-tap`** — a separate repo, created by hand.
 - A repository secret **`HOMEBREW_TAP_TOKEN`**: a fine-grained PAT with `contents: write`
   on that tap repo. The workflow's built-in `GITHUB_TOKEN` cannot push to another
   repository, which is the whole reason this secret exists.
+- The Scoop bucket **`Joessst-Dev/scoop-bucket`** — also a separate repo, shared with
+  other Joessst-Dev tools; the release writes only `bucket/fft.json`.
+- A repository secret **`SCOOP_BUCKET_TOKEN`**: a PAT with `contents: write` on the
+  bucket repo. The tap PAT with its repository access widened to the bucket can serve
+  as both.

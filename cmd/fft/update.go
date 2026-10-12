@@ -255,7 +255,7 @@ func (d *Deps) updateAllowed(cmd *cobra.Command) bool {
 	switch {
 	case !buildinfo.IsRelease():
 		// A `go build` has no version to compare, and a developer running the thing
-		// they are working on does not need to be told to brew upgrade it.
+		// they are working on does not need to be told to upgrade it.
 		return false
 
 	case os.Getenv(envNoUpdateCheck) != "":
