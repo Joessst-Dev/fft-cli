@@ -10,6 +10,17 @@ title: Install
 brew install Joessst-Dev/tap/fft
 ```
 
+**Scoop** (Windows):
+
+```powershell
+scoop bucket add joessst https://github.com/Joessst-Dev/scoop-bucket
+scoop install joessst/fft
+```
+
+`joessst/fft` names the bucket as well as the app, so another bucket's `fft` can never be
+the one installed. Scoop checks the archive against the manifest's sha256 — the same
+hash `checksums.txt` carries — before it unpacks anything.
+
 **Go** (any platform, needs Go 1.26+):
 
 ```sh
@@ -30,8 +41,7 @@ sudo mv fft /usr/local/bin/
 gh release download --repo Joessst-Dev/fft-cli --pattern 'fft_*_linux_amd64.tar.gz' --output - | tar xz
 ```
 
-**Windows** — there is no winget or scoop package; the Homebrew cask is macOS-only. Unzip
-the archive and put `fft.exe` somewhere on `PATH`:
+**Windows without Scoop**: unzip the archive and put `fft.exe` somewhere on `PATH`:
 
 ```powershell
 $Version = "0.8.0"
@@ -64,8 +74,13 @@ binary. How you upgrade is how you installed:
 
 ```sh
 brew upgrade fft                                          # Homebrew
+scoop update; scoop update fft                            # Scoop
 go install github.com/Joessst-Dev/fft-cli/cmd/fft@latest  # Go
 ```
+
+The bare `scoop update` refreshes the buckets first. Without it, `scoop update fft` can
+skip the refresh when the buckets were last pulled recently, and then report the old
+fft as current right after fft said a new one was out.
 
 A binary install is upgraded by repeating the download above over the old `fft.exe` or
 `fft`. On Windows, close any running `fft` first — `fft tui` especially — because Windows

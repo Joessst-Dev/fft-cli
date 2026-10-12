@@ -60,6 +60,7 @@ func (c *cli) fakeGitHub(handler http.HandlerFunc) *github {
 	c.deps.Update = update.New(testVersion, c.updateCache,
 		update.WithURL(srv.URL),
 		update.WithClock(func() time.Time { return testNow }),
+		update.WithUpgradeHint("brew upgrade fft"),
 	)
 
 	// The background check outlives the command on purpose — in production the

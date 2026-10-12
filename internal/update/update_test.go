@@ -103,6 +103,7 @@ var _ = Describe("update.Checker", func() {
 		return update.New(version, cachePath,
 			update.WithURL(url),
 			update.WithClock(func() time.Time { return clock }),
+			update.WithUpgradeHint("brew upgrade fft"),
 		)
 	}
 
@@ -528,6 +529,38 @@ var _ = Describe("update.Checker", func() {
 			Entry("nothing at all on a dev build", "dev", "v1.3.0", ""),
 			Entry("nothing at all when nothing is known yet", "v1.2.1", "", ""),
 		)
+
+		DescribeTable("the upgrade it names goes by where fft lives",
+			func(exe, expected string) {
+				Expect(update.UpgradeHint(exe)).To(Equal(expected))
+			},
+			Entry("a Homebrew cask on Apple silicon",
+				"/opt/homebrew/Caskroom/fft/1.2.1/fft", "brew upgrade fft"),
+			Entry("a Homebrew cask on Intel",
+				"/usr/local/Caskroom/fft/1.2.1/fft", "brew upgrade fft"),
+			Entry("Scoop in its default root",
+				`C:\Users\dev\scoop\apps\fft\current\fft.exe`, "scoop update; scoop update fft"),
+			Entry("Scoop under a custom $SCOOP, in a versioned directory",
+				`D:\tools\Apps\fft\1.2.1\fft.exe`, "scoop update; scoop update fft"),
+			Entry("a hand-unpacked zip on Windows",
+				`C:\Users\dev\AppData\Local\Programs\fft\fft.exe`,
+				"see https://joessst-dev.github.io/fft-cli/guide/install#upgrading"),
+			Entry("a tarball on Linux",
+				"/usr/local/bin/fft",
+				"see https://joessst-dev.github.io/fft-cli/guide/install#upgrading"),
+			Entry("another app's Scoop directory",
+				`C:\Users\dev\scoop\apps\fft-other\current\fft.exe`,
+				"see https://joessst-dev.github.io/fft-cli/guide/install#upgrading"),
+			Entry("an executable path fft could not learn",
+				"", "see https://joessst-dev.github.io/fft-cli/guide/install#upgrading"),
+		)
+
+		It("names the upgrade command it was given", func() {
+			c := update.New("v1.2.1", cachePath, update.WithUpgradeHint("scoop update fft"))
+
+			Expect(c.Notice(update.State{LatestVersion: "v1.3.0"})).To(Equal(
+				"⚡ fft v1.3.0 is available (you have v1.2.1) — scoop update fft"))
+		})
 	})
 
 	Describe("Newer", func() {

@@ -70,7 +70,7 @@ Tier 2 and Tier 3 already reach every operation. To give a tag a *typed generate
 
 ## Release
 
-Tag `vX.Y.Z` and push — `.github/workflows/release.yml` runs GoReleaser (cross-platform binaries, SBOMs, cosign signatures) and updates the Homebrew tap at `Joessst-Dev/homebrew-tap` (a cask, `Casks/fft.rb`). Requires the `HOMEBREW_TAP_TOKEN` secret. Version is injected via ldflags into `internal/buildinfo`.
+Tag `vX.Y.Z` and push — `.github/workflows/release.yml` runs GoReleaser (cross-platform binaries, SBOMs, cosign signatures) and updates the Homebrew tap at `Joessst-Dev/homebrew-tap` (a cask, `Casks/fft.rb`) and the Scoop bucket at `Joessst-Dev/scoop-bucket` (`bucket/fft.json`, the bucket is shared with other tools). Requires the `HOMEBREW_TAP_TOKEN` and `SCOOP_BUCKET_TOKEN` secrets; prerelease tags skip both pushes. Version is injected via ldflags into `internal/buildinfo`.
 
 ## Conventions
 
