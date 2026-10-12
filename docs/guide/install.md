@@ -14,13 +14,12 @@ brew install Joessst-Dev/tap/fft
 
 ```powershell
 scoop bucket add joessst https://github.com/Joessst-Dev/scoop-bucket
-scoop install fft
+scoop install joessst/fft
 ```
 
-Open a new terminal afterwards if `fft` is not found: Scoop puts its shim directory on
-`PATH` when Scoop itself is set up, and a terminal opened before that does not see it.
-Scoop checks the archive against the manifest's sha256 (the same hash `checksums.txt`
-carries) before it unpacks anything.
+`joessst/fft` names the bucket as well as the app, so another bucket's `fft` can never be
+the one installed. Scoop checks the archive against the manifest's sha256 — the same
+hash `checksums.txt` carries — before it unpacks anything.
 
 **Go** (any platform, needs Go 1.26+):
 
@@ -75,9 +74,13 @@ binary. How you upgrade is how you installed:
 
 ```sh
 brew upgrade fft                                          # Homebrew
-scoop update fft                                          # Scoop
+scoop update; scoop update fft                            # Scoop
 go install github.com/Joessst-Dev/fft-cli/cmd/fft@latest  # Go
 ```
+
+The bare `scoop update` refreshes the buckets first. Without it, `scoop update fft` can
+skip the refresh when the buckets were last pulled recently, and then report the old
+fft as current right after fft said a new one was out.
 
 A binary install is upgraded by repeating the download above over the old `fft.exe` or
 `fft`. On Windows, close any running `fft` first — `fft tui` especially — because Windows

@@ -14,7 +14,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -83,9 +82,9 @@ func WithClock(now func() time.Time) Option {
 	return func(c *Checker) { c.now = now }
 }
 
-// WithUpgradeHint replaces the upgrade command the notice names. Production
-// derives it from the OS fft was built for; specs pin it so the notice they
-// assert on is the same on every CI runner.
+// WithUpgradeHint replaces the upgrade advice the notice ends with. Production
+// derives it from where the running binary lives; specs pin it so the notice
+// they assert on does not depend on where the test binary was built.
 func WithUpgradeHint(hint string) Option {
 	return func(c *Checker) { c.upgrade = hint }
 }
@@ -110,7 +109,7 @@ func New(version, cachePath string, opts ...Option) *Checker {
 		// both.
 		client:  &http.Client{},
 		now:     time.Now,
-		upgrade: upgradeHint(runtime.GOOS),
+		upgrade: upgradeHint(executable()),
 	}
 	for _, opt := range opts {
 		opt(c)
@@ -424,15 +423,53 @@ func (c *Checker) Notice(s State) string {
 		canonical(s.LatestVersion), canonical(c.version), c.upgrade)
 }
 
-// upgradeHint is the package manager command that upgrades fft on goos. The
-// Homebrew cask is macOS-only and the Scoop bucket Windows-only, so the build
-// target is the best guess fft has at how it was installed; a Linux or `go
-// install` user is told brew, as before, and knows their own path.
-func upgradeHint(goos string) string {
-	if goos == "windows" {
-		return "scoop update fft"
+// upgradeGuide is the advice for an install no package manager owns. Only a
+// release build is ever told to upgrade, and `go install` does not stamp a
+// version, so what lands here is in practice a hand-unpacked archive — and the
+// guide's Upgrading section is the one place that says how to replace it.
+const upgradeGuide = "see https://joessst-dev.github.io/fft-cli/guide/install#upgrading"
+
+// upgradeHint names the upgrade for the install that owns the binary at exe.
+//
+// It goes by where the binary lives, not by the OS it was built for: a Windows
+// user who unzipped fft by hand does not have Scoop, and telling them to run it
+// is worse than saying nothing. Both package managers keep the real binary in a
+// directory named after the app — Homebrew in Caskroom/fft/<version>/, Scoop in
+// <root>/apps/fft/<version or current>/, where <root> is wherever $SCOOP points —
+// and that pair of path segments is the whole test.
+//
+// Scoop's bare `scoop update fft` skips refreshing the buckets when it last did
+// so recently, and would then report the old fft as current right after fft
+// said otherwise; the `scoop update` before it refreshes them unconditionally.
+// The `;` is PowerShell's, which Scoop requires anyway.
+func upgradeHint(exe string) string {
+	segments := strings.Split(strings.ReplaceAll(exe, `\`, "/"), "/")
+	for i := range len(segments) - 1 {
+		if !strings.EqualFold(segments[i+1], "fft") {
+			continue
+		}
+		switch {
+		case segments[i] == "Caskroom":
+			return "brew upgrade fft"
+		case strings.EqualFold(segments[i], "apps"):
+			return "scoop update; scoop update fft"
+		}
 	}
-	return "brew upgrade fft"
+	return upgradeGuide
+}
+
+// executable is the path of the running binary with symlinks resolved, or ""
+// when it cannot be known. Homebrew puts a symlink on PATH and the Caskroom path
+// is only visible behind it.
+func executable() string {
+	exe, err := os.Executable()
+	if err != nil {
+		return ""
+	}
+	if resolved, err := filepath.EvalSymlinks(exe); err == nil {
+		return resolved
+	}
+	return exe
 }
 
 // Comparable reports whether v has a place in the version ordering at all — that

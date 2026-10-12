@@ -333,7 +333,7 @@ release:
 
     ```powershell
     scoop bucket add joessst https://github.com/Joessst-Dev/scoop-bucket
-    scoop install fft
+    scoop install joessst/fft
     ```
 
     **Full changelog**: https://github.com/Joessst-Dev/fft-cli/compare/{{ .PreviousTag }}...{{ .Tag }}

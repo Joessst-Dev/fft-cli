@@ -25,7 +25,7 @@ brew install Joessst-Dev/tap/fft
 
 ```powershell
 scoop bucket add joessst https://github.com/Joessst-Dev/scoop-bucket
-scoop install fft
+scoop install joessst/fft
 ```
 
 **Go** (any platform, needs Go 1.26+):
