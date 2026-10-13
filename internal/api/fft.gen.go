@@ -23718,9 +23718,48 @@ type RoutingStrategyGlobalConfiguration struct {
 	// StopRoutingAttemptsAfterTime The amount of time, specified in ISO 8601 duration format, after which a routing plan is considered not routable. Note: The duration must be a multiple of 60 seconds.
 	StopRoutingAttemptsAfterTime *string `json:"stopRoutingAttemptsAfterTime,omitempty"`
 
-	// TimeTriggered RoutingStrategyRerouteTimeTriggeredConfig
-	TimeTriggered          *RoutingStrategyRerouteTimeTriggeredConfig `json:"timeTriggered,omitempty"`
-	TimeTriggeredByContext *[]TimeTriggeredConfigurationContext       `json:"timeTriggeredByContext,omitempty"`
+	// TimeTriggered RoutingStrategyGlobalRerouteTimeTriggeredConfig
+	TimeTriggered          *RoutingStrategyGlobalRerouteTimeTriggeredConfig `json:"timeTriggered,omitempty"`
+	TimeTriggeredByContext *[]TimeTriggeredConfigurationContext             `json:"timeTriggeredByContext,omitempty"`
+}
+
+// RoutingStrategyGlobalRerouteConfiguration RoutingStrategyGlobalRerouteConfiguration
+type RoutingStrategyGlobalRerouteConfiguration struct {
+	Active bool `json:"active"`
+
+	// LeadTimeBeforeTimeTriggeredReroute This setting is not supported anymore
+	//
+	// Example: 480
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	LeadTimeBeforeTimeTriggeredReroute *float32 `json:"leadTimeBeforeTimeTriggeredReroute,omitempty"`
+
+	// RerouteAfterMinutes The amount of minutes after which an automated reroute is executed
+	//
+	// Example: 60
+	RerouteAfterMinutes float32 `json:"rerouteAfterMinutes"`
+
+	// RerouteAttemptThreshold The maximum number of attempts made to time-triggered reroute an order or parts of it.
+	RerouteAttemptThreshold *int `json:"rerouteAttemptThreshold,omitempty"`
+
+	// RerouteStartedJobs RerouteStartedJobsConfiguration
+	RerouteStartedJobs *RerouteStartedJobsConfiguration `json:"rerouteStartedJobs,omitempty"`
+
+	// RerouteTargetTimeHours Only pickjobs within the target time window are considered for reroute.
+	//
+	// Example: 48
+	RerouteTargetTimeHours float32 `json:"rerouteTargetTimeHours"`
+}
+
+// RoutingStrategyGlobalRerouteTimeTriggeredConfig RoutingStrategyGlobalRerouteTimeTriggeredConfig
+type RoutingStrategyGlobalRerouteTimeTriggeredConfig struct {
+	// ClickAndCollectReroute RoutingStrategyGlobalRerouteConfiguration
+	ClickAndCollectReroute RoutingStrategyGlobalRerouteConfiguration `json:"clickAndCollectReroute"`
+
+	// ShipFromStoreDeliveryReroute RoutingStrategyGlobalRerouteConfiguration
+	ShipFromStoreDeliveryReroute RoutingStrategyGlobalRerouteConfiguration `json:"shipFromStoreDeliveryReroute"`
+
+	// ShipFromStoreSamedayReroute RoutingStrategyGlobalRerouteConfiguration
+	ShipFromStoreSamedayReroute RoutingStrategyGlobalRerouteConfiguration `json:"shipFromStoreSamedayReroute"`
 }
 
 // RoutingStrategyNode RoutingStrategyNode

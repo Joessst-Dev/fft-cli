@@ -2933,6 +2933,18 @@ var operations = []Operation{
 		SampleResponse: "{\n  \"handoverContainer\": [\n    {\n      \"created\": \"2020-02-03T08:45:51.525Z\",\n      \"descriptionLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"documentsRef\": \"01a05806-7346-73f8-89dd-67d52d2de7cb\",\n      \"facilityRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"handoverJobRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"iconUrl\": \"https://example.com/resource\",\n      \"id\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"lastModified\": \"2020-02-03T09:45:51.525Z\",\n      \"lineItems\": [\n        {\n          \"article\": {\n            \"imageUrl\": \"https://example.com/resource\",\n            \"tenantArticleId\": \"4711\",\n            \"title\": \"Cologne Water\"\n          },\n          \"id\": \"17ebfdfb-e1b4-4913-9962-3aef2b49f16f\",\n          \"measurementUnitKey\": \"pcs\",\n          \"quantity\": 42,\n          \"secondaryMeasurementUnitKey\": \"g\",\n          \"secondaryQuantity\": 42\n        }\n      ],\n      \"nameLocalized\": {\n        \"de_DE\": \"Wert\",\n        \"en_US\": \"Value\",\n        \"ru_RU\": \"значение\"\n      },\n      \"operativeContainerTypeRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"processRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"sequenceNumber\": 42,\n      \"stackRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"storageLocationRef\": \"0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f\",\n      \"type\": \"PHYSICAL\",\n      \"version\": 42,\n      \"weightLimitInG\": 42\n    }\n  ],\n  \"total\": 42\n}\n",
 	},
 	{
+		ID:          "getHandoverJobSignatureDraftPdf",
+		Method:      "GET",
+		Path:        "/api/handoverjobs/{handoverJobId}/signature",
+		Tags:        []string{"Shipments (Operations)"},
+		Summary:     "Get handover job signature draft pdf",
+		Description: "Create a signature draft document for an existing handover job",
+		Permissions: []string{"HANDOVERJOB_READ"},
+		Params: []Param{
+			{Name: "handoverJobId", In: InPath, Type: TypeString, Required: true, Description: "ID of handover job you want to retrieve the signature draft for"},
+		},
+	},
+	{
 		ID:             "getHandoverJobTagConfiguration",
 		Method:         "GET",
 		Path:           "/api/configurations/tags/handoverjob",
