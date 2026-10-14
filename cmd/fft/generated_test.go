@@ -264,6 +264,7 @@ var _ = Describe("the generated commands", func() {
 			Entry("Facilities (Core)", "Facilities (Core)", "facility"),
 			Entry("Picking (Operations)", "Picking (Operations)", "picking"),
 			Entry("Stocks (Inventory)", "Stocks (Inventory)", "stock"),
+			Entry("Stock", "Stock", "stock"),
 			Entry("OrderRecords", "OrderRecords", "order-record"),
 			Entry("ShippingInformation (carrier)", "ShippingInformation (carrier)", "shipping-information"),
 			Entry("an operation with no tag at all", "", "other"),

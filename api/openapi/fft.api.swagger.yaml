@@ -88,7 +88,7 @@ paths:
       x-fft-permissions:
         - LISTING_READ
       tags:
-        - Stocks (Inventory)
+        - Stock
   /api/articles/{tenantArticleId}/forecasts:
     get:
       deprecated: false
@@ -146,7 +146,7 @@ paths:
       x-fft-permissions:
         - LISTING_READ
       tags:
-        - Stocks (Inventory)
+        - Stock
       x-badges:
         - color: red
           label: ALPHA
@@ -265,7 +265,7 @@ paths:
       x-fft-permissions:
         - STOCK_AVAILABILITIES_READ
       tags:
-        - Stocks (Inventory)
+        - Stock
   /api/audits:
     get:
       deprecated: true
@@ -344,7 +344,7 @@ paths:
       x-fft-permissions:
         - AUDIT_READ
       tags:
-        - Audits (Core)
+        - Audits
   /api/audits/search:
     post:
       deprecated: false
@@ -386,7 +386,7 @@ paths:
       x-fft-permissions:
         - AUDIT_READ
       tags:
-        - Audits (Core)
+        - Audits
       x-badges:
         - color: red
           label: ALPHA
@@ -431,7 +431,7 @@ paths:
             endpoint
       summary: List brands
       tags:
-        - Processes (Core)
+        - Processes
   /api/cancelationreasons:
     get:
       description: ''
@@ -481,7 +481,7 @@ paths:
           description: Cancellation reason not found.
       summary: List cancellation reasons
       tags:
-        - Orders Configuration (DOMS)
+        - Orders configuration
     post:
       operationId: postCancelationReason
       requestBody:
@@ -526,7 +526,7 @@ paths:
             endpoint
       summary: Create cancellation reason
       tags:
-        - Orders Configuration (DOMS)
+        - Orders configuration
   /api/cancelationreasons/{cancelationReasonId}:
     delete:
       description: ''
@@ -565,7 +565,7 @@ paths:
           description: Cancellation reason not found
       summary: Delete cancellation reason
       tags:
-        - Orders Configuration (DOMS)
+        - Orders configuration
     get:
       description: ''
       operationId: getCancelationReasonById
@@ -607,7 +607,7 @@ paths:
           description: Cancellation reason not found
       summary: Get cancellation reason
       tags:
-        - Orders Configuration (DOMS)
+        - Orders configuration
     put:
       description: ''
       operationId: putCancelationReason
@@ -654,7 +654,7 @@ paths:
           description: Cancellation reason not found
       summary: Update cancellation reason
       tags:
-        - Orders Configuration (DOMS)
+        - Orders configuration
   /api/carriers:
     get:
       deprecated: false
@@ -696,7 +696,7 @@ paths:
       x-fft-permissions:
         - CARRIER_READ
       tags:
-        - Carriers (Operations)
+        - Carriers
     post:
       deprecated: false
       description: Create carrier
@@ -741,7 +741,7 @@ paths:
       x-fft-permissions:
         - CARRIER_WRITE
       tags:
-        - Carriers (Operations)
+        - Carriers
   /api/carriers/{carrierId}:
     get:
       deprecated: false
@@ -786,7 +786,7 @@ paths:
       x-fft-permissions:
         - CARRIER_READ
       tags:
-        - Carriers (Operations)
+        - Carriers
     patch:
       deprecated: false
       description: Update carrier
@@ -842,7 +842,7 @@ paths:
       x-fft-permissions:
         - CARRIER_WRITE
       tags:
-        - Carriers (Operations)
+        - Carriers
   /api/carriers/{carrierId}/configuration:
     get:
       deprecated: false
@@ -889,7 +889,7 @@ paths:
       x-fft-permissions:
         - CARRIER_READ
       tags:
-        - Carriers Configuration (Operations)
+        - Carriers configuration
     put:
       deprecated: false
       description: >-
@@ -953,7 +953,7 @@ paths:
       x-fft-permissions:
         - CARRIER_WRITE
       tags:
-        - Carriers Configuration (Operations)
+        - Carriers configuration
   /api/carriers/{carrierId}/configuration/countryservicemappings:
     get:
       deprecated: false
@@ -1000,7 +1000,7 @@ paths:
       x-fft-permissions:
         - CARRIER_WRITE
       tags:
-        - Carriers Configuration (Operations)
+        - Carriers configuration
     post:
       deprecated: false
       description: Create country service mapping
@@ -1050,7 +1050,7 @@ paths:
       x-fft-permissions:
         - CARRIER_WRITE
       tags:
-        - Carriers Configuration (Operations)
+        - Carriers configuration
   /api/carriers/{carrierId}/configuration/countryservicemappings/{countryServiceMappingId}:
     delete:
       deprecated: false
@@ -1094,7 +1094,7 @@ paths:
       x-fft-permissions:
         - CARRIER_WRITE
       tags:
-        - Carriers Configuration (Operations)
+        - Carriers configuration
     get:
       deprecated: false
       description: Get country service mapping
@@ -1143,7 +1143,7 @@ paths:
       x-fft-permissions:
         - CARRIER_WRITE
       tags:
-        - Carriers Configuration (Operations)
+        - Carriers configuration
     patch:
       deprecated: false
       description: Update country service mapping
@@ -1198,7 +1198,7 @@ paths:
       x-fft-permissions:
         - CARRIER_WRITE
       tags:
-        - Carriers Configuration (Operations)
+        - Carriers configuration
   /api/categories:
     get:
       deprecated: false
@@ -1246,7 +1246,7 @@ paths:
       x-fft-permissions:
         - CATEGORY_READ
       tags:
-        - Categories (Inventory)
+        - Categories
     post:
       deprecated: false
       description: ''
@@ -1283,7 +1283,7 @@ paths:
       x-fft-permissions:
         - CATEGORY_WRITE
       tags:
-        - Categories (Inventory)
+        - Categories
   /api/categories/{categoryId}:
     delete:
       deprecated: false
@@ -1325,7 +1325,7 @@ paths:
       x-fft-permissions:
         - CATEGORY_WRITE
       tags:
-        - Categories (Inventory)
+        - Categories
     get:
       deprecated: false
       description: ''
@@ -1361,7 +1361,7 @@ paths:
       x-fft-permissions:
         - CATEGORY_READ
       tags:
-        - Categories (Inventory)
+        - Categories
     put:
       deprecated: false
       description: ''
@@ -1403,7 +1403,7 @@ paths:
       x-fft-permissions:
         - CATEGORY_WRITE
       tags:
-        - Categories (Inventory)
+        - Categories
   /api/categories/search:
     post:
       deprecated: false
@@ -1445,7 +1445,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_READ
       tags:
-        - Categories (Inventory)
+        - Categories
       x-badges:
         - color: orange
           label: BETA
@@ -1498,7 +1498,7 @@ paths:
       x-fft-permissions:
         - AVAILABILITY_THRESHOLDS_WRITE
       tags:
-        - Stock Availability Thresholds (Inventory)
+        - Stock availability thresholds
       x-badges:
         - color: red
           label: ALPHA
@@ -1544,7 +1544,7 @@ paths:
       x-fft-permissions:
         - AVAILABILITY_THRESHOLDS_WRITE
       tags:
-        - Stock Availability Thresholds (Inventory)
+        - Stock availability thresholds
       x-badges:
         - color: red
           label: ALPHA
@@ -1593,7 +1593,7 @@ paths:
       x-fft-permissions:
         - AVAILABILITY_THRESHOLDS_READ
       tags:
-        - Stock Availability Thresholds (Inventory)
+        - Stock availability thresholds
       x-badges:
         - color: red
           label: ALPHA
@@ -1662,7 +1662,7 @@ paths:
       x-fft-permissions:
         - AVAILABILITY_THRESHOLDS_WRITE
       tags:
-        - Stock Availability Thresholds (Inventory)
+        - Stock availability thresholds
       x-badges:
         - color: red
           label: ALPHA
@@ -1709,7 +1709,7 @@ paths:
       x-fft-permissions:
         - AVAILABILITY_THRESHOLDS_READ
       tags:
-        - Stock Availability Thresholds (Inventory)
+        - Stock availability thresholds
       x-badges:
         - color: red
           label: ALPHA
@@ -1748,7 +1748,7 @@ paths:
           description: Configuration not found
       summary: Get capacity planning timeframe
       tags:
-        - Routing Plans Configuration (DOMS)
+        - Routing plans configuration
     put:
       description: ''
       operationId: putCapacityPlanningTimeframeConfiguration
@@ -1787,7 +1787,7 @@ paths:
           description: Configuration not found
       summary: Update capacity planning timeframe
       tags:
-        - Routing Plans Configuration (DOMS)
+        - Routing plans configuration
   /api/configurations/cutofftime:
     get:
       description: >-
@@ -1826,7 +1826,7 @@ paths:
           description: Cutoff time configuration not found
       summary: Get cutoff time
       tags:
-        - Picking Configuration (Operations)
+        - Picking configuration
       x-badges:
         - color: orange
           label: BETA
@@ -1871,7 +1871,7 @@ paths:
           description: Cutoff time configuration not found
       summary: Update cutoff time
       tags:
-        - Picking Configuration (Operations)
+        - Picking configuration
       x-badges:
         - color: orange
           label: BETA
@@ -1909,7 +1909,7 @@ paths:
           description: Delivery note configuration not found
       summary: Get delivery note config
       tags:
-        - Shipments Configuration (Operations)
+        - Shipments configuration
     put:
       operationId: putDeliveryNoteConfiguration
       requestBody:
@@ -1947,7 +1947,7 @@ paths:
             endpoint
       summary: Update delivery note config
       tags:
-        - Shipments Configuration (Operations)
+        - Shipments configuration
   /api/configurations/domain:
     get:
       description: Returns the authentication domain.
@@ -1981,7 +1981,7 @@ paths:
           description: Entity not found
       summary: Get domain
       tags:
-        - Artifacts (Infrastructure)
+        - Artifacts
     put:
       description: Updates the authentication domain.
       operationId: putDomainConfiguration
@@ -2027,7 +2027,7 @@ paths:
             endpoint
       summary: Update domain
       tags:
-        - Artifacts (Infrastructure)
+        - Artifacts
   /api/configurations/eventscopes/inventoryarticleavailabilitychanged:
     post:
       deprecated: false
@@ -2072,7 +2072,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Event Scope Configuration (Core)
+        - Event scopes configuration
       x-badges:
         - color: orange
           label: BETA
@@ -2127,7 +2127,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Event Scope Configuration (Core)
+        - Event scopes configuration
       x-badges:
         - color: orange
           label: BETA
@@ -2181,7 +2181,7 @@ paths:
       x-fft-permissions:
         - CONFIG_READ
       tags:
-        - Event Scope Configuration (Core)
+        - Event scopes configuration
       x-badges:
         - color: orange
           label: BETA
@@ -2248,7 +2248,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Event Scope Configuration (Core)
+        - Event scopes configuration
       x-badges:
         - color: orange
           label: BETA
@@ -2293,7 +2293,7 @@ paths:
       x-fft-permissions:
         - CONFIG_READ
       tags:
-        - Event Scope Configuration (Core)
+        - Event scopes configuration
       x-badges:
         - color: red
           label: ALPHA
@@ -2333,7 +2333,7 @@ paths:
           description: Entity not found
       summary: Get expiry config
       tags:
-        - Expiries Configuration (Core)
+        - Expiries configuration
       x-badges:
         - color: orange
           label: BETA
@@ -2391,7 +2391,7 @@ paths:
           description: Entity version conflict
       summary: Update expiry config
       tags:
-        - Expiries Configuration (Core)
+        - Expiries configuration
       x-badges:
         - color: orange
           label: BETA
@@ -2430,7 +2430,7 @@ paths:
           description: Configuration not found
       summary: Get fulfillment process buffer
       tags:
-        - Picking Configuration (Operations)
+        - Picking configuration
     put:
       description: ''
       operationId: putFulfillmentProcessBufferConfiguration
@@ -2469,7 +2469,7 @@ paths:
           description: Configuration not found
       summary: Update fulfillment process buffer
       tags:
-        - Picking Configuration (Operations)
+        - Picking configuration
   /api/configurations/gdpr:
     get:
       description: ''
@@ -2505,7 +2505,7 @@ paths:
           description: Gdpr configuration not found
       summary: Get GDPR config
       tags:
-        - Configurations (Core)
+        - Configurations
     put:
       description: ''
       operationId: putGdprConfiguration
@@ -2544,7 +2544,7 @@ paths:
           description: Gdpr configuration not found
       summary: Update GDPR config
       tags:
-        - Configurations (Core)
+        - Configurations
   /api/configurations/handover:
     get:
       description: >-
@@ -2584,7 +2584,7 @@ paths:
           description: Entity not found
       summary: Get handover config
       tags:
-        - Handovers Configuration (Operations)
+        - Handovers configuration
       x-badges:
         - color: orange
           label: BETA
@@ -2632,7 +2632,7 @@ paths:
             endpoint
       summary: Update handover configuration
       tags:
-        - Handovers Configuration (Operations)
+        - Handovers configuration
       x-badges:
         - color: orange
           label: BETA
@@ -2671,7 +2671,7 @@ paths:
             endpoint
       summary: List refuse reasons
       tags:
-        - Handovers Configuration (Operations)
+        - Handovers configuration
   /api/configurations/inventory:
     get:
       deprecated: false
@@ -2703,7 +2703,7 @@ paths:
       x-fft-permissions:
         - CONFIG_READ
       tags:
-        - Stocks Configuration (Inventory)
+        - Stock configuration
     patch:
       deprecated: false
       description: ''
@@ -2740,7 +2740,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Stocks Configuration (Inventory)
+        - Stock configuration
   /api/configurations/loadunit:
     get:
       operationId: getLoadUnitConfiguration
@@ -2767,7 +2767,7 @@ paths:
             endpoint
       summary: Get load unit config
       tags:
-        - Picking Configuration (Operations)
+        - Picking configuration
     put:
       description: ''
       operationId: putLoadUnitConfiguration
@@ -2813,7 +2813,7 @@ paths:
             endpoint
       summary: Update load unit config
       tags:
-        - Picking Configuration (Operations)
+        - Picking configuration
   /api/configurations/locale:
     get:
       description: ''
@@ -2841,7 +2841,7 @@ paths:
             endpoint
       summary: Get locale config
       tags:
-        - Configurations (Core)
+        - Configurations
     put:
       description: ''
       operationId: putLocaleConfiguration
@@ -2881,7 +2881,7 @@ paths:
             endpoint
       summary: Update locale config
       tags:
-        - Configurations (Core)
+        - Configurations
   /api/configurations/notifications:
     get:
       deprecated: false
@@ -2923,7 +2923,7 @@ paths:
       x-fft-permissions:
         - NOTIFICATION_CENTER_CONFIG_READ
       tags:
-        - Notification Center Configuration (Core)
+        - Notification center configuration
       x-badges:
         - color: orange
           label: BETA
@@ -2992,7 +2992,7 @@ paths:
       x-fft-permissions:
         - NOTIFICATION_CENTER_CONFIG_WRITE
       tags:
-        - Notification Center Configuration (Core)
+        - Notification center configuration
       x-badges:
         - color: orange
           label: BETA
@@ -3052,7 +3052,7 @@ paths:
       x-fft-permissions:
         - NOTIFICATION_CENTER_CONFIG_WRITE
       tags:
-        - Notification Center Configuration (Core)
+        - Notification center configuration
       x-badges:
         - color: orange
           label: BETA
@@ -3115,7 +3115,7 @@ paths:
       x-fft-permissions:
         - NOTIFICATION_CENTER_CONFIG_WRITE
       tags:
-        - Notification Center Configuration (Core)
+        - Notification center configuration
       x-badges:
         - color: orange
           label: BETA
@@ -3150,7 +3150,7 @@ paths:
       x-fft-permissions:
         - OIDC_PROVIDERS_CONFIG_READ
       tags:
-        - OIDC Configuration (Infrastructure)
+        - OIDC configuration
     post:
       deprecated: false
       description: >-
@@ -3195,7 +3195,7 @@ paths:
       x-fft-permissions:
         - OIDC_PROVIDERS_CONFIG_WRITE
       tags:
-        - OIDC Configuration (Infrastructure)
+        - OIDC configuration
   /api/configurations/oidcproviders/{oidcProviderId}:
     delete:
       deprecated: false
@@ -3236,7 +3236,7 @@ paths:
       x-fft-permissions:
         - OIDC_PROVIDERS_CONFIG_WRITE
       tags:
-        - OIDC Configuration (Infrastructure)
+        - OIDC configuration
     get:
       deprecated: false
       description: Get the configuration of a configured OIDC provider.
@@ -3274,7 +3274,7 @@ paths:
       x-fft-permissions:
         - OIDC_PROVIDERS_CONFIG_READ
       tags:
-        - OIDC Configuration (Infrastructure)
+        - OIDC configuration
     patch:
       deprecated: false
       description: >-
@@ -3324,7 +3324,7 @@ paths:
       x-fft-permissions:
         - OIDC_PROVIDERS_CONFIG_WRITE
       tags:
-        - OIDC Configuration (Infrastructure)
+        - OIDC configuration
     put:
       deprecated: false
       description: >-
@@ -3370,7 +3370,7 @@ paths:
       x-fft-permissions:
         - OIDC_PROVIDERS_CONFIG_WRITE
       tags:
-        - OIDC Configuration (Infrastructure)
+        - OIDC configuration
   /api/configurations/operativerestowing:
     get:
       operationId: getOperationalRestowingConfigurations
@@ -3403,7 +3403,7 @@ paths:
           description: Entity not found
       summary: Get restow config
       tags:
-        - Restowing Configuration (Operations)
+        - Restowing configuration
       description: >-
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
@@ -3459,7 +3459,7 @@ paths:
             endpoint
       summary: Update restow config
       tags:
-        - Restowing Configuration (Operations)
+        - Restowing configuration
       x-badges:
         - color: orange
           label: BETA
@@ -3532,7 +3532,7 @@ paths:
       x-fft-permissions:
         - CONFIG_READ
       tags:
-        - Services Configuration (Operations)
+        - Services configuration
       x-badges:
         - color: orange
           label: BETA
@@ -3615,7 +3615,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Services Configuration (Operations)
+        - Services configuration
       x-badges:
         - color: orange
           label: BETA
@@ -3648,7 +3648,7 @@ paths:
       x-fft-permissions:
         - CONFIG_READ
       tags:
-        - Orders Configuration (DOMS)
+        - Orders configuration
     put:
       description: Update the order cancelation configuration.
       operationId: putOrderCancelationConfiguration
@@ -3696,7 +3696,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Orders Configuration (DOMS)
+        - Orders configuration
   /api/configurations/ordermodification:
     get:
       description: Get the order modification configuration.
@@ -3726,7 +3726,7 @@ paths:
       x-fft-permissions:
         - CONFIG_READ
       tags:
-        - Orders Configuration (DOMS)
+        - Orders configuration
     put:
       description: Update the order modification configuration.
       operationId: putOrderModificationConfiguration
@@ -3774,7 +3774,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Orders Configuration (DOMS)
+        - Orders configuration
   /api/configurations/orderrecords:
     get:
       deprecated: false
@@ -3810,7 +3810,7 @@ paths:
       x-fft-permissions:
         - CONFIG_READ
       tags:
-        - Order Records (DOMS)
+        - Order records
       x-badges:
         - color: orange
           label: BETA
@@ -3867,7 +3867,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Order Records (DOMS)
+        - Order records
       x-badges:
         - color: orange
           label: BETA
@@ -3901,7 +3901,7 @@ paths:
             endpoint
       summary: Get order routing config
       tags:
-        - Routing Plans Configuration (DOMS)
+        - Routing plans configuration
       x-badges:
         - color: orange
           label: BETA
@@ -3950,7 +3950,7 @@ paths:
             endpoint
       summary: Update order routing config
       tags:
-        - Routing Plans Configuration (DOMS)
+        - Routing plans configuration
   /api/configurations/ordersources:
     get:
       description: >-
@@ -4000,7 +4000,7 @@ paths:
       x-fft-permissions:
         - CONFIG_READ
       tags:
-        - Orders Source (DOMS)
+        - Orders sources
       x-badges:
         - color: red
           label: ALPHA
@@ -4049,7 +4049,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Orders Source (DOMS)
+        - Orders sources
       x-badges:
         - color: red
           label: ALPHA
@@ -4095,7 +4095,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Orders Source (DOMS)
+        - Orders sources
       x-badges:
         - color: red
           label: ALPHA
@@ -4150,7 +4150,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Orders Source (DOMS)
+        - Orders sources
       x-badges:
         - color: red
           label: ALPHA
@@ -4186,7 +4186,7 @@ paths:
           description: Entity not found
       summary: Get packing config
       tags:
-        - Packing Configuration (Operations)
+        - Packing configuration
     patch:
       description: ''
       operationId: upsertPackingConfigurations
@@ -4232,7 +4232,7 @@ paths:
             endpoint
       summary: Update packing config
       tags:
-        - Packing Configuration (Operations)
+        - Packing configuration
   /api/configurations/packing/containerrequired:
     get:
       deprecated: true
@@ -4271,7 +4271,7 @@ paths:
           description: Entity not found
       summary: Get packing container required config
       tags:
-        - Packing Configuration (Operations)
+        - Packing configuration
     put:
       deprecated: true
       description: >-
@@ -4326,7 +4326,7 @@ paths:
             endpoint
       summary: Update packing container required config
       tags:
-        - Packing Configuration (Operations)
+        - Packing configuration
   /api/configurations/picking:
     get:
       operationId: getPickingConfigurations
@@ -4359,7 +4359,7 @@ paths:
           description: Entity not found
       summary: Get picking config
       tags:
-        - Picking Configuration (Operations)
+        - Picking configuration
     patch:
       description: ''
       operationId: putPickingConfigurations
@@ -4405,7 +4405,7 @@ paths:
             endpoint
       summary: Update picking config
       tags:
-        - Picking Configuration (Operations)
+        - Picking configuration
   /api/configurations/pickingtimes:
     get:
       description: ''
@@ -4439,7 +4439,7 @@ paths:
           description: Entity not found
       summary: Get picking times
       tags:
-        - Picking Configuration (Operations)
+        - Picking configuration
     put:
       description: ''
       operationId: putDefaultPickingTimesConfiguration
@@ -4485,7 +4485,7 @@ paths:
           description: Configuration version conflict
       summary: Update picking times
       tags:
-        - Picking Configuration (Operations)
+        - Picking configuration
   /api/configurations/promises:
     get:
       description: ''
@@ -4521,7 +4521,7 @@ paths:
           description: Promises configuration not found
       summary: List promises
       tags:
-        - Orders Configuration (DOMS)
+        - Orders configuration
     put:
       description: ''
       operationId: putPromisesConfiguration
@@ -4561,7 +4561,7 @@ paths:
             endpoint
       summary: Change promises config
       tags:
-        - Orders Configuration (DOMS)
+        - Orders configuration
   /api/configurations/return:
     get:
       deprecated: false
@@ -4599,7 +4599,7 @@ paths:
       x-fft-permissions:
         - CONFIG_READ
       tags:
-        - Returns Configuration (Operations)
+        - Returns configuration
     put:
       deprecated: false
       description: >-
@@ -4656,7 +4656,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Returns Configuration (Operations)
+        - Returns configuration
   /api/configurations/returnnote:
     get:
       operationId: getReturnNoteConfiguration
@@ -4689,7 +4689,7 @@ paths:
           description: Entity not found
       summary: Get return note config
       tags:
-        - Shipments Configuration (Operations)
+        - Shipments configuration
     put:
       description: ''
       operationId: putReturnNoteConfiguration
@@ -4735,7 +4735,7 @@ paths:
             endpoint
       summary: Update return note config
       tags:
-        - Shipments Configuration (Operations)
+        - Shipments configuration
   /api/configurations/shipping:
     get:
       deprecated: false
@@ -4772,7 +4772,7 @@ paths:
       x-fft-permissions:
         - SHIPMENT_READ
       tags:
-        - ShippingConfiguration (carrier)
+        - Shipping configuration
       x-badges:
         - color: red
           label: ALPHA
@@ -4817,7 +4817,7 @@ paths:
       x-fft-permissions:
         - SHIPMENT_READ
       tags:
-        - ShippingConfiguration (carrier)
+        - Shipping configuration
       x-badges:
         - color: red
           label: ALPHA
@@ -4854,7 +4854,7 @@ paths:
           description: Entity not found
       summary: Get stock config
       tags:
-        - Stocks Configuration (Inventory)
+        - Stock configuration
     put:
       description: Update stock configuration
       operationId: putStockConfiguration
@@ -4894,7 +4894,7 @@ paths:
             endpoint
       summary: Update stock config
       tags:
-        - Stocks Configuration (Inventory)
+        - Stock configuration
   /api/configurations/substitution:
     get:
       description: >-
@@ -4931,7 +4931,7 @@ paths:
           description: Entity not found
       summary: Get substitution config
       tags:
-        - Picking Configuration (Operations)
+        - Picking configuration
       x-badges:
         - color: orange
           label: BETA
@@ -4986,7 +4986,7 @@ paths:
           description: Facility version conflict
       summary: Update substitution config
       tags:
-        - Picking Configuration (Operations)
+        - Picking configuration
   /api/configurations/supportedlocales:
     get:
       description: ''
@@ -5014,7 +5014,7 @@ paths:
             endpoint
       summary: List supported locales
       tags:
-        - Configurations (Core)
+        - Configurations
   /api/configurations/tags/handoverjob:
     get:
       description: ''
@@ -5048,7 +5048,7 @@ paths:
           description: Entity not found
       summary: Get handover jobs tag config
       tags:
-        - Handovers Configuration (Operations)
+        - Handovers configuration
     put:
       description: ''
       operationId: putHandoverTagConfigurations
@@ -5088,7 +5088,7 @@ paths:
             endpoint
       summary: Update handover jobs tag config
       tags:
-        - Handovers Configuration (Operations)
+        - Handovers configuration
   /api/configurations/tags/order:
     get:
       description: Get the order tag configuration.
@@ -5099,7 +5099,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrderTagConfiguration'
-          description: order tag config is in response body.
+          description: Order tag config is in response body.
         '401':
           content:
             application/json:
@@ -5124,7 +5124,7 @@ paths:
       x-fft-permissions:
         - CONFIG_READ
       tags:
-        - Orders Configuration (DOMS)
+        - Orders configuration
     put:
       description: Update the order tag configuration.
       operationId: putOrderTagConfigurations
@@ -5166,7 +5166,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Orders Configuration (DOMS)
+        - Orders configuration
   /api/configurations/tags/packjob:
     get:
       description: ''
@@ -5200,7 +5200,7 @@ paths:
           description: Entity not found
       summary: Get pack jobs tag config
       tags:
-        - Packing Configuration (Operations)
+        - Packing configuration
     put:
       description: ''
       operationId: putPackJobTagConfiguration
@@ -5240,7 +5240,7 @@ paths:
             endpoint
       summary: Update pack jobs tag config
       tags:
-        - Packing Configuration (Operations)
+        - Packing configuration
   /api/configurations/tags/parcel:
     get:
       description: >-
@@ -5278,7 +5278,7 @@ paths:
           description: Entity not found
       summary: Get parcel tag config
       tags:
-        - Shipments Configuration (Operations)
+        - Shipments configuration
       x-badges:
         - color: orange
           label: BETA
@@ -5325,7 +5325,7 @@ paths:
             endpoint
       summary: Update parcel tag config
       tags:
-        - Shipments Configuration (Operations)
+        - Shipments configuration
       x-badges:
         - color: orange
           label: BETA
@@ -5362,7 +5362,7 @@ paths:
           description: Entity not found
       summary: Get pick job tag config
       tags:
-        - Picking Configuration (Operations)
+        - Picking configuration
     put:
       description: ''
       operationId: putPickJobTagConfigurations
@@ -5402,7 +5402,7 @@ paths:
             endpoint
       summary: Update pick job tag config
       tags:
-        - Picking Configuration (Operations)
+        - Picking configuration
   /api/configurations/tenant:
     get:
       description: ''
@@ -5438,7 +5438,7 @@ paths:
           description: Tenant configuration not found
       summary: Get tenant config
       tags:
-        - Configurations (Core)
+        - Configurations
     put:
       description: Upsert tenant configuration
       operationId: putTenantConfiguration
@@ -5477,7 +5477,7 @@ paths:
           description: Tenant configuration not found
       summary: Update tenant config
       tags:
-        - Configurations (Core)
+        - Configurations
   /api/configurations/tenantconnector:
     get:
       deprecated: false
@@ -5490,8 +5490,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/TenantConnectorConfigurations'
           description: >-
-            Configuration was found & you were allowed to access it. The result
-            is in the body.
+            Configuration was found and you were allowed to access it. The
+            result is in the body.
         '401':
           content:
             application/json:
@@ -5514,7 +5514,7 @@ paths:
           description: configuration not found
       summary: Get tenant connector config
       tags:
-        - Artifacts (Infrastructure)
+        - Artifacts
   /api/configurations/transittime:
     get:
       description: >-
@@ -5553,7 +5553,7 @@ paths:
           description: Cutoff time configuration not found
       summary: Get transit time config
       tags:
-        - Carriers Configuration (Operations)
+        - Carriers configuration
       x-badges:
         - color: orange
           label: BETA
@@ -5598,7 +5598,7 @@ paths:
           description: Transit time configuration not found
       summary: Update transit time config
       tags:
-        - Carriers (Operations)
+        - Carriers
       x-badges:
         - color: orange
           label: BETA
@@ -5661,7 +5661,7 @@ paths:
       x-fft-permissions:
         - CUSTOM_SERVICE_READ
       tags:
-        - Custom Services (Core)
+        - Custom services
       x-badges:
         - color: orange
           label: BETA
@@ -5712,7 +5712,7 @@ paths:
       x-fft-permissions:
         - CUSTOM_SERVICE_WRITE
       tags:
-        - Custom Services (Core)
+        - Custom services
       x-badges:
         - color: orange
           label: BETA
@@ -5763,7 +5763,7 @@ paths:
       x-fft-permissions:
         - CUSTOM_SERVICE_READ
       tags:
-        - Custom Services (Core)
+        - Custom services
       x-badges:
         - color: orange
           label: BETA
@@ -5829,7 +5829,7 @@ paths:
       x-fft-permissions:
         - CUSTOM_SERVICE_WRITE
       tags:
-        - Custom Services (Core)
+        - Custom services
       x-badges:
         - color: orange
           label: BETA
@@ -5899,7 +5899,7 @@ paths:
       x-fft-permissions:
         - CUSTOM_SERVICE_WRITE
       tags:
-        - Custom Services (Core)
+        - Custom services
       x-badges:
         - color: orange
           label: BETA
@@ -5958,7 +5958,7 @@ paths:
       x-fft-permissions:
         - CUSTOM_SERVICE_WRITE
       tags:
-        - Custom Services (Core)
+        - Custom services
       x-badges:
         - color: orange
           label: BETA
@@ -6033,7 +6033,7 @@ paths:
       x-fft-permissions:
         - CUSTOM_SERVICE_WRITE
       tags:
-        - Custom Services (Core)
+        - Custom services
       x-badges:
         - color: orange
           label: BETA
@@ -6077,11 +6077,11 @@ paths:
             endpoint
       summary: Create delivery note
       tags:
-        - Shipments (Operations)
+        - Shipments
   /api/documents/{documentId}/file:
     get:
       deprecated: false
-      description: Download a file by its id
+      description: Download a file by its ID
       operationId: downloadProcessDocument
       parameters:
         - in: path
@@ -6091,7 +6091,7 @@ paths:
             type: string
       responses:
         '200':
-          description: The document with given id
+          description: The document with given ID
         '401':
           content:
             application/json:
@@ -6116,7 +6116,7 @@ paths:
       x-fft-permissions:
         - PROCESS_READ
       tags:
-        - Processes (Core)
+        - Processes
   /api/documents/merge:
     post:
       deprecated: false
@@ -6124,8 +6124,8 @@ paths:
         This part of the API is in Alpha status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
-        />Merge and download documents passed by document id and document set
-        into one pdf
+        />Merge and download documents passed by document ID and document set
+        into one PDF.
       operationId: downloadMergedDocuments
       parameters: []
       requestBody:
@@ -6161,7 +6161,7 @@ paths:
       x-fft-permissions:
         - PROCESS_READ
       tags:
-        - Processes (Core)
+        - Processes
       x-badges:
         - color: red
           label: ALPHA
@@ -6212,7 +6212,7 @@ paths:
       x-fft-permissions:
         - DOCUMENT_SET_READ
       tags:
-        - Document Sets (Core)
+        - Document sets
   /api/documentSet/{documentSetRef}/documents:
     post:
       deprecated: true
@@ -6266,7 +6266,7 @@ paths:
       x-fft-permissions:
         - DOCUMENT_SET_WRITE
       tags:
-        - Document Sets (Core)
+        - Document sets
   /api/documentSet/{documentSetRef}/documents/{documentRef}:
     patch:
       deprecated: true
@@ -6327,7 +6327,7 @@ paths:
       x-fft-permissions:
         - DOCUMENT_SET_WRITE
       tags:
-        - Document Sets (Core)
+        - Document sets
   /api/documentSet/{documentSetRef}/documents/{documentRef}/file:
     get:
       deprecated: true
@@ -6376,7 +6376,7 @@ paths:
       x-fft-permissions:
         - DOCUMENT_SET_READ
       tags:
-        - Document Sets (Core)
+        - Document sets
     put:
       deprecated: true
       description: >-
@@ -6436,7 +6436,7 @@ paths:
       x-fft-permissions:
         - DOCUMENT_SET_WRITE
       tags:
-        - Document Sets (Core)
+        - Document sets
   /api/documentsets/{documentSetRef}:
     get:
       deprecated: false
@@ -6479,7 +6479,7 @@ paths:
       x-fft-permissions:
         - DOCUMENT_SET_READ
       tags:
-        - Document Sets (Core)
+        - Document sets
   /api/documentsets/{documentSetRef}/documents:
     post:
       deprecated: false
@@ -6528,7 +6528,7 @@ paths:
       x-fft-permissions:
         - PROCESS_READ
       tags:
-        - Document Sets (Core)
+        - Document sets
   /api/documentsets/{documentSetRef}/documents/{documentRef}:
     patch:
       deprecated: false
@@ -6582,7 +6582,7 @@ paths:
       x-fft-permissions:
         - DOCUMENT_SET_WRITE
       tags:
-        - Document Sets (Core)
+        - Document sets
   /api/documentsets/{documentSetRef}/documents/{documentRef}/file:
     get:
       deprecated: false
@@ -6630,7 +6630,7 @@ paths:
       x-fft-permissions:
         - DOCUMENT_SET_READ
       tags:
-        - Document Sets (Core)
+        - Document sets
     put:
       deprecated: false
       description: Add document content to document set
@@ -6683,7 +6683,7 @@ paths:
       x-fft-permissions:
         - DOCUMENT_SET_WRITE
       tags:
-        - Document Sets (Core)
+        - Document sets
   /api/expiries:
     get:
       description: >-
@@ -6760,7 +6760,7 @@ paths:
             endpoint
       summary: Get expiries
       tags:
-        - Expiries (Core)
+        - Expiries
       x-badges:
         - color: orange
           label: BETA
@@ -6798,7 +6798,7 @@ paths:
             endpoint
       summary: Create expiry
       tags:
-        - Expiries (Core)
+        - Expiries
       x-badges:
         - color: orange
           label: BETA
@@ -6839,7 +6839,7 @@ paths:
             endpoint
       summary: Get expiry
       tags:
-        - Expiries (Core)
+        - Expiries
       x-badges:
         - color: orange
           label: BETA
@@ -6884,7 +6884,7 @@ paths:
             endpoint
       summary: Update expiry
       tags:
-        - Expiries (Core)
+        - Expiries
       x-badges:
         - color: orange
           label: BETA
@@ -6956,7 +6956,7 @@ paths:
           description: External action not found
       summary: List external actions
       tags:
-        - External Actions (Core)
+        - External actions
       x-badges:
         - color: orange
           label: BETA
@@ -6999,7 +6999,7 @@ paths:
           description: External action not found
       summary: Create external action
       tags:
-        - External Actions (Core)
+        - External actions
   /api/externalactions/{externalActionId}:
     delete:
       description: >-
@@ -7039,7 +7039,7 @@ paths:
           description: External action not found
       summary: Delete external action
       tags:
-        - External Actions (Core)
+        - External actions
       x-badges:
         - color: orange
           label: BETA
@@ -7090,7 +7090,7 @@ paths:
           description: External action not found
       summary: Get external action
       tags:
-        - External Actions (Core)
+        - External actions
       x-badges:
         - color: orange
           label: BETA
@@ -7145,7 +7145,7 @@ paths:
           description: Facility not found
       summary: Replace an external action
       tags:
-        - External Actions (Core)
+        - External actions
       x-badges:
         - color: orange
           label: BETA
@@ -7210,7 +7210,7 @@ paths:
           description: External action logs not found
       summary: List external action logs
       tags:
-        - External Actions (Core)
+        - External actions
       x-badges:
         - color: orange
           label: BETA
@@ -7260,7 +7260,7 @@ paths:
           description: External action not found
       summary: Create external action logs
       tags:
-        - External Actions (Core)
+        - External actions
   /api/externalstockchangereasons:
     get:
       deprecated: false
@@ -7296,7 +7296,7 @@ paths:
       x-fft-permissions:
         - EXTERNAL_STOCK_CHANGE_REASONS_READ
       tags:
-        - Stocks Configuration (Inventory)
+        - Stock configuration
       x-badges:
         - color: orange
           label: BETA
@@ -7340,7 +7340,7 @@ paths:
       x-fft-permissions:
         - EXTERNAL_STOCK_CHANGE_REASONS_WRITE
       tags:
-        - Stocks Configuration (Inventory)
+        - Stock configuration
       x-badges:
         - color: orange
           label: BETA
@@ -7384,7 +7384,7 @@ paths:
       x-fft-permissions:
         - EXTERNAL_STOCK_CHANGE_REASONS_READ
       tags:
-        - Stocks Configuration (Inventory)
+        - Stock configuration
       x-badges:
         - color: orange
           label: BETA
@@ -7433,7 +7433,7 @@ paths:
       x-fft-permissions:
         - EXTERNAL_STOCK_CHANGE_REASONS_WRITE
       tags:
-        - Stocks Configuration (Inventory)
+        - Stock configuration
       x-badges:
         - color: orange
           label: BETA
@@ -7508,7 +7508,7 @@ paths:
             endpoint
       summary: List facilities
       tags:
-        - Facilities (Core)
+        - Facilities
     post:
       description: ''
       operationId: addFacility
@@ -7554,7 +7554,7 @@ paths:
             endpoint
       summary: Create facility
       tags:
-        - Facilities (Core)
+        - Facilities
   /api/facilities/{facilityId}:
     delete:
       description: ''
@@ -7601,7 +7601,7 @@ paths:
           description: Facility not found
       summary: Delete facility
       tags:
-        - Facilities (Core)
+        - Facilities
     get:
       description: ''
       operationId: getFacility
@@ -7648,7 +7648,7 @@ paths:
           description: Facility not found
       summary: Get facility
       tags:
-        - Facilities (Core)
+        - Facilities
     patch:
       description: ''
       operationId: patchFacility
@@ -7711,7 +7711,7 @@ paths:
           description: Facility version conflict
       summary: Update facility
       tags:
-        - Facilities (Core)
+        - Facilities
     put:
       operationId: replaceFacility
       parameters:
@@ -7774,7 +7774,7 @@ paths:
           description: Facility version conflict
       summary: Update facility
       tags:
-        - Facilities (Core)
+        - Facilities
   /api/facilities/{facilityId}/actions:
     post:
       operationId: facilityAction
@@ -7816,7 +7816,7 @@ paths:
             endpoint
       summary: Call facility action
       tags:
-        - Facilities (Core)
+        - Facilities
   /api/facilities/{facilityId}/carriers:
     get:
       deprecated: false
@@ -7853,7 +7853,7 @@ paths:
       x-fft-permissions:
         - FACILITY_READ
       tags:
-        - Facilities (Core)
+        - Facilities
   /api/facilities/{facilityId}/carriers/{carrierRef}:
     get:
       deprecated: false
@@ -7903,7 +7903,7 @@ paths:
       x-fft-permissions:
         - FACILITY_READ
       tags:
-        - Facilities (Core)
+        - Facilities
     post:
       deprecated: false
       description: >-
@@ -7964,7 +7964,7 @@ paths:
       x-fft-permissions:
         - FACILITY_WRITE
       tags:
-        - Facilities (Core)
+        - Facilities
     put:
       deprecated: false
       description: Connect a configured carrier to the facility with given ID
@@ -8023,7 +8023,7 @@ paths:
       x-fft-permissions:
         - FACILITY_WRITE
       tags:
-        - Facilities (Core)
+        - Facilities
   /api/facilities/{facilityId}/carriers/prioritization:
     post:
       deprecated: false
@@ -8074,7 +8074,7 @@ paths:
       x-fft-permissions:
         - CARRIER_WRITE
       tags:
-        - Facilities (Core)
+        - Facilities
   /api/facilities/{facilityId}/configurations/inventory:
     get:
       deprecated: false
@@ -8116,7 +8116,7 @@ paths:
       x-fft-permissions:
         - CONFIG_READ
       tags:
-        - Stocks Configuration (Inventory)
+        - Stock configuration
     patch:
       deprecated: false
       description: >-
@@ -8166,7 +8166,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Stocks Configuration (Inventory)
+        - Stock configuration
   /api/facilities/{facilityId}/configurations/stock:
     get:
       deprecated: false
@@ -8209,7 +8209,7 @@ paths:
       x-fft-permissions:
         - CONFIG_READ
       tags:
-        - Stocks Configuration (Inventory)
+        - Stock configuration
     patch:
       deprecated: false
       description: Update the stock configuration for a specific facility.
@@ -8265,7 +8265,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Stocks Configuration (Inventory)
+        - Stock configuration
   /api/facilities/{facilityId}/connections:
     get:
       description: >-
@@ -8333,7 +8333,7 @@ paths:
       x-fft-permissions:
         - FACILITY_READ
       tags:
-        - Facilities (Core)
+        - Facilities
     post:
       description: Create a connections for a supplier facility with given ID.
       operationId: createConnectionToFacility
@@ -8391,7 +8391,7 @@ paths:
       x-fft-permissions:
         - FACILITY_WRITE
       tags:
-        - Facilities (Core)
+        - Facilities
   /api/facilities/{facilityId}/connections/{connectionId}:
     delete:
       description: Delete the connection for facility with the given ID
@@ -8434,7 +8434,7 @@ paths:
           description: There is no connection for the facility and the provided id
       summary: Delete facility connection
       tags:
-        - Facilities (Core)
+        - Facilities
     get:
       description: >-
         Get the details for a facility connection related to the facility with
@@ -8496,7 +8496,7 @@ paths:
             connectionId
       summary: Get facility connection
       tags:
-        - Facilities (Core)
+        - Facilities
     put:
       description: Update the given connection for a facility
       operationId: updateFacilityConnection
@@ -8574,7 +8574,7 @@ paths:
             cnnectionId.
       summary: Update facility connection
       tags:
-        - Facilities (Core)
+        - Facilities
   /api/facilities/{facilityId}/customservices:
     get:
       deprecated: false
@@ -8642,7 +8642,7 @@ paths:
       x-fft-permissions:
         - CUSTOM_SERVICE_READ
       tags:
-        - Custom Services (Core)
+        - Custom services
       x-badges:
         - color: orange
           label: BETA
@@ -8703,7 +8703,7 @@ paths:
       x-fft-permissions:
         - CUSTOM_SERVICE_WRITE
       tags:
-        - Custom Services (Core)
+        - Custom services
       x-badges:
         - color: orange
           label: BETA
@@ -8761,7 +8761,7 @@ paths:
       x-fft-permissions:
         - CUSTOM_SERVICE_READ
       tags:
-        - Custom Services (Core)
+        - Custom services
       x-badges:
         - color: orange
           label: BETA
@@ -8832,7 +8832,7 @@ paths:
       x-fft-permissions:
         - CUSTOM_SERVICE_WRITE
       tags:
-        - Custom Services (Core)
+        - Custom services
       x-badges:
         - color: orange
           label: BETA
@@ -8897,7 +8897,7 @@ paths:
       x-fft-permissions:
         - CUSTOM_SERVICE_WRITE
       tags:
-        - Custom Services (Core)
+        - Custom services
       x-badges:
         - color: orange
           label: BETA
@@ -8940,7 +8940,7 @@ paths:
           description: Facility listing not found
       summary: Delete listings
       tags:
-        - Listings (Core)
+        - Listings
     get:
       description: ''
       operationId: getFacilityListing
@@ -9014,7 +9014,7 @@ paths:
           description: Facility not found
       summary: List listings
       tags:
-        - Listings (Core)
+        - Listings
     put:
       description: >-
         Bulk PUT for Listings. Please note: This endpoint has legacy behaviour,
@@ -9070,7 +9070,7 @@ paths:
           description: Facility listing not found
       summary: Create and update listings per facility
       tags:
-        - Listings (Core)
+        - Listings
   /api/facilities/{facilityId}/listings/{tenantArticleId}:
     delete:
       description: ''
@@ -9116,7 +9116,7 @@ paths:
           description: Facility listing not found
       summary: Delete listing
       tags:
-        - Listings (Core)
+        - Listings
     get:
       description: ''
       operationId: getListing
@@ -9174,7 +9174,7 @@ paths:
           description: Listings not found
       summary: Get listing
       tags:
-        - Listings (Core)
+        - Listings
     patch:
       description: ''
       operationId: patchFacilityListing
@@ -9244,7 +9244,7 @@ paths:
           description: Listing version conflict
       summary: Update listing
       tags:
-        - Listings (Core)
+        - Listings
   /api/facilities/{facilityId}/listings/{tenantArticleId}/partialstocks:
     delete:
       deprecated: true
@@ -9297,7 +9297,7 @@ paths:
           description: Facility listing not found
       summary: Delete listing partial stocks
       tags:
-        - Listings (Core)
+        - Listings
     get:
       deprecated: true
       description: >-
@@ -9355,7 +9355,7 @@ paths:
           description: Facility or Listing not found
       summary: List listing partial stocks
       tags:
-        - Listings (Core)
+        - Listings
     patch:
       deprecated: true
       description: >
@@ -9424,7 +9424,7 @@ paths:
           description: Facility listing not found
       summary: Update listing partial stocks
       tags:
-        - Listings (Core)
+        - Listings
     put:
       deprecated: true
       description: >
@@ -9483,7 +9483,7 @@ paths:
           description: Facility listing not found
       summary: Update listing partial stocks
       tags:
-        - Listings (Core)
+        - Listings
   /api/facilities/{facilityId}/storagelocations:
     get:
       description: ''
@@ -9550,7 +9550,7 @@ paths:
           description: Facility not found
       summary: List facility storage locations
       tags:
-        - Storage Locations (Inventory)
+        - Storage locations
     post:
       description: Creates a new storage location in this facility.
       operationId: postFacilityStorageLocations
@@ -9597,7 +9597,7 @@ paths:
           description: Facility not found
       summary: Create facility storage location
       tags:
-        - Storage Locations (Inventory)
+        - Storage locations
   /api/facilities/{facilityId}/storagelocations/{storageLocationId}:
     delete:
       description: ''
@@ -9640,7 +9640,7 @@ paths:
           description: Facility or storage location not found
       summary: Delete facility storage location
       tags:
-        - Storage Locations (Inventory)
+        - Storage locations
     get:
       description: ''
       operationId: getFacilityStorageLocation
@@ -9693,7 +9693,7 @@ paths:
           description: Facility not found
       summary: Get facility storage location
       tags:
-        - Storage Locations (Inventory)
+        - Storage locations
     patch:
       description: >
         Adds new storage locations, updates existing ones and keeps the
@@ -9758,7 +9758,7 @@ paths:
           description: Facility or Storage location not found
       summary: Update facility storage location
       tags:
-        - Storage Locations (Inventory)
+        - Storage locations
     put:
       description: >-
         Replaces the current storage locations of this Facility with the
@@ -9813,7 +9813,7 @@ paths:
           description: Facility or Storage Location not found
       summary: Update facility storage location
       tags:
-        - Storage Locations (Inventory)
+        - Storage locations
   /api/facilities/{facilityId}/zones:
     get:
       description: ''
@@ -9874,7 +9874,7 @@ paths:
           description: Facility not found
       summary: List facility zones
       tags:
-        - Storage Locations (Inventory)
+        - Storage locations
     post:
       description: Creates a new zone in this facility.
       operationId: postFacilityZone
@@ -9924,7 +9924,7 @@ paths:
           description: Zone not found
       summary: Create facility zone
       tags:
-        - Storage Locations (Inventory)
+        - Storage locations
   /api/facilities/{facilityId}/zones/{zoneId}:
     delete:
       description: ''
@@ -9970,7 +9970,7 @@ paths:
           description: Facility or storage location not found
       summary: Delete facility zone
       tags:
-        - Storage Locations (Inventory)
+        - Storage locations
     get:
       description: ''
       operationId: getFacilityZone
@@ -10023,7 +10023,7 @@ paths:
           description: Facility not found
       summary: Get facility zone
       tags:
-        - Storage Locations (Inventory)
+        - Storage locations
     put:
       description: >-
         Replaces the current zone of this Facility with the provided in the
@@ -10082,7 +10082,7 @@ paths:
           description: Facility not found
       summary: Update facility zone
       tags:
-        - Storage Locations (Inventory)
+        - Storage locations
   /api/facilities/{facilityRef}/configurations/notifications:
     get:
       deprecated: false
@@ -10131,7 +10131,7 @@ paths:
       x-fft-permissions:
         - NOTIFICATION_CENTER_CONFIG_READ
       tags:
-        - Notification Center Configuration (Core)
+        - Notification center configuration
       x-badges:
         - color: orange
           label: BETA
@@ -10211,7 +10211,7 @@ paths:
       x-fft-permissions:
         - NOTIFICATION_CENTER_CONFIG_WRITE
       tags:
-        - Notification Center Configuration (Core)
+        - Notification center configuration
       x-badges:
         - color: orange
           label: BETA
@@ -10284,7 +10284,7 @@ paths:
       x-fft-permissions:
         - NOTIFICATION_CENTER_CONFIG_WRITE
       tags:
-        - Notification Center Configuration (Core)
+        - Notification center configuration
       x-badges:
         - color: orange
           label: BETA
@@ -10354,7 +10354,7 @@ paths:
       x-fft-permissions:
         - NOTIFICATION_CENTER_CONFIG_WRITE
       tags:
-        - Notification Center Configuration (Core)
+        - Notification center configuration
       x-badges:
         - color: orange
           label: BETA
@@ -10417,7 +10417,7 @@ paths:
           description: Facility not found
       summary: List facility discounts
       tags:
-        - Facilities (Core)
+        - Facilities
     post:
       description: ''
       operationId: addDiscountToFacility
@@ -10475,7 +10475,7 @@ paths:
           description: Facility not found
       summary: Create facility discount
       tags:
-        - Facilities (Core)
+        - Facilities
   /api/facilities/{facilityRef}/discounts/{facilityDiscountRef}:
     delete:
       description: ''
@@ -10521,7 +10521,7 @@ paths:
           description: Facility or discount not found
       summary: Delete facility discount
       tags:
-        - Facilities (Core)
+        - Facilities
     get:
       description: ''
       operationId: getDiscountForFacility
@@ -10570,7 +10570,7 @@ paths:
           description: Facility or discount not found
       summary: Get facility discount
       tags:
-        - Facilities (Core)
+        - Facilities
     patch:
       description: ''
       operationId: updateDiscountForFacility
@@ -10632,7 +10632,7 @@ paths:
           description: Facility or discount not found
       summary: Update facility discount
       tags:
-        - Facilities (Core)
+        - Facilities
   /api/facilities/search:
     post:
       deprecated: false
@@ -10674,7 +10674,7 @@ paths:
       x-fft-permissions:
         - FACILITY_READ
       tags:
-        - Facilities (Core)
+        - Facilities
       x-badges:
         - color: orange
           label: BETA
@@ -10719,7 +10719,7 @@ paths:
       x-fft-permissions:
         - FACILITY_GROUP_READ
       tags:
-        - Facility Groups (Core)
+        - Facility groups
     post:
       deprecated: false
       description: Creates a new facility group.
@@ -10762,7 +10762,7 @@ paths:
       x-fft-permissions:
         - FACILITY_GROUP_WRITE
       tags:
-        - Facility Groups (Core)
+        - Facility groups
   /api/facilitygroups/{facilityGroupId}:
     delete:
       deprecated: false
@@ -10801,7 +10801,7 @@ paths:
       x-fft-permissions:
         - FACILITY_GROUP_WRITE
       tags:
-        - Facility Groups (Core)
+        - Facility groups
     get:
       deprecated: false
       description: Get facility group by id.
@@ -10843,7 +10843,7 @@ paths:
       x-fft-permissions:
         - FACILITY_GROUP_READ
       tags:
-        - Facility Groups (Core)
+        - Facility groups
     patch:
       deprecated: false
       description: >-
@@ -10902,7 +10902,7 @@ paths:
       x-fft-permissions:
         - FACILITY_GROUP_WRITE
       tags:
-        - Facility Groups (Core)
+        - Facility groups
   /api/facilitygroups/{facilityGroupId}/actions:
     post:
       deprecated: false
@@ -10954,7 +10954,7 @@ paths:
       x-fft-permissions:
         - FACILITY_GROUP_WRITE
       tags:
-        - Facility Groups (Core)
+        - Facility groups
   /api/facilitygroups/search:
     post:
       deprecated: false
@@ -10992,7 +10992,7 @@ paths:
       x-fft-permissions:
         - FACILITY_GROUP_READ
       tags:
-        - Facility Groups (Core)
+        - Facility groups
   /api/features:
     get:
       description: ''
@@ -11021,7 +11021,7 @@ paths:
             endpoint
       summary: List features
       tags:
-        - Features (Infrastructure)
+        - Features
   /api/features/{featureName}:
     get:
       description: ''
@@ -11062,7 +11062,7 @@ paths:
           description: Entity not found
       summary: Get feature
       tags:
-        - Features (Infrastructure)
+        - Features
     patch:
       description: ''
       operationId: patchFeature
@@ -11117,7 +11117,7 @@ paths:
           description: Entity version conflict
       summary: Update feature
       tags:
-        - Features (Infrastructure)
+        - Features
   /api/handovercontainers:
     get:
       deprecated: false
@@ -11187,7 +11187,7 @@ paths:
       x-fft-permissions:
         - HANDOVER_CONTAINER_READ
       tags:
-        - Handovers (Operations)
+        - Handovers
       x-badges:
         - color: orange
           label: BETA
@@ -11237,7 +11237,7 @@ paths:
       x-fft-permissions:
         - HANDOVER_CONTAINER_WRITE
       tags:
-        - Handovers (Operations)
+        - Handovers
       x-badges:
         - color: orange
           label: BETA
@@ -11284,7 +11284,7 @@ paths:
       x-fft-permissions:
         - HANDOVER_CONTAINER_WRITE
       tags:
-        - Handovers (Operations)
+        - Handovers
       x-badges:
         - color: orange
           label: BETA
@@ -11334,7 +11334,7 @@ paths:
       x-fft-permissions:
         - HANDOVER_CONTAINER_READ
       tags:
-        - Handovers (Operations)
+        - Handovers
       x-badges:
         - color: orange
           label: BETA
@@ -11387,7 +11387,7 @@ paths:
       x-fft-permissions:
         - HANDOVER_CONTAINER_READ
       tags:
-        - Handovers (Operations)
+        - Handovers
       x-badges:
         - color: orange
           label: BETA
@@ -11439,7 +11439,7 @@ paths:
         - HANDOVER_CONTAINER_READ
         - STACKS_READ
       tags:
-        - Handovers (Operations)
+        - Handovers
       x-badges:
         - color: orange
           label: BETA
@@ -11577,7 +11577,7 @@ paths:
             endpoint
       summary: List handover jobs
       tags:
-        - Handovers (Operations)
+        - Handovers
     post:
       operationId: addHandoverjob
       requestBody:
@@ -11617,7 +11617,7 @@ paths:
             endpoint
       summary: Create handover job
       tags:
-        - Handovers (Operations)
+        - Handovers
   /api/handoverjobs/{handoverjobId}:
     get:
       description: ''
@@ -11660,7 +11660,7 @@ paths:
           description: Entity not found
       summary: Get handover job
       tags:
-        - Handovers (Operations)
+        - Handovers
     patch:
       description: ''
       operationId: patchHandoverjob
@@ -11715,7 +11715,7 @@ paths:
           description: Entity version conflict
       summary: Update handover job
       tags:
-        - Handovers (Operations)
+        - Handovers
   /api/handoverjobs/{handoverJobId}/actions:
     post:
       operationId: handoverJobAction
@@ -11754,7 +11754,7 @@ paths:
             endpoint
       summary: Call handover job action
       tags:
-        - Handovers (Operations)
+        - Handovers
   /api/handoverjobs/{handoverjobId}/pickupidentifier:
     get:
       description: Get the pickupIdentifier label PDF for a handover job.
@@ -11795,7 +11795,7 @@ paths:
       x-fft-permissions:
         - HANDOVERJOB_READ
       tags:
-        - Handovers (Operations)
+        - Handovers
   /api/handoverjobs/{handoverJobId}/signature:
     get:
       description: Create a signature draft document for an existing handover job
@@ -11839,7 +11839,7 @@ paths:
       x-fft-permissions:
         - HANDOVERJOB_READ
       tags:
-        - Shipments (Operations)
+        - Shipments
     post:
       description: >-
         Generates a PDF pickup receipt for the handover job, with a blank
@@ -11896,7 +11896,7 @@ paths:
       x-fft-permissions:
         - HANDOVERJOB_READ
       tags:
-        - Handovers (Operations)
+        - Handovers
   /api/handoverjobs/search:
     post:
       deprecated: false
@@ -11934,7 +11934,7 @@ paths:
       x-fft-permissions:
         - HANDOVERJOB_READ
       tags:
-        - Handovers (Operations)
+        - Handovers
   /api/health:
     get:
       description: ''
@@ -11968,7 +11968,7 @@ paths:
           description: Manual reroute configuration not found
       summary: Health check
       tags:
-        - Health (Infrastructure)
+        - Health
   /api/inboundprocesses:
     get:
       deprecated: false
@@ -12113,7 +12113,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_READ
       tags:
-        - Inbound (Inventory)
+        - Inbound
     post:
       deprecated: false
       description: ''
@@ -12150,7 +12150,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_WRITE
       tags:
-        - Inbound (Inventory)
+        - Inbound
   /api/inboundprocesses/{inboundProcessId}:
     delete:
       deprecated: false
@@ -12183,7 +12183,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_WRITE
       tags:
-        - Inbound (Inventory)
+        - Inbound
     get:
       deprecated: false
       description: ''
@@ -12219,7 +12219,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_READ
       tags:
-        - Inbound (Inventory)
+        - Inbound
     patch:
       deprecated: false
       description: >-
@@ -12260,7 +12260,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_WRITE
       tags:
-        - Inbound (Inventory)
+        - Inbound
       x-badges:
         - color: orange
           label: BETA
@@ -12314,7 +12314,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_WRITE
       tags:
-        - Inbound (Inventory)
+        - Inbound
   /api/inboundprocesses/{inboundProcessId}/receipts:
     post:
       deprecated: false
@@ -12357,7 +12357,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_WRITE
       tags:
-        - Inbound (Inventory)
+        - Inbound
   /api/inboundprocesses/attachments:
     post:
       deprecated: false
@@ -12398,7 +12398,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_WRITE
       tags:
-        - Inbound (Inventory)
+        - Inbound
       x-badges:
         - color: red
           label: ALPHA
@@ -12441,7 +12441,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_READ
       tags:
-        - Inbound (Inventory)
+        - Inbound
       x-badges:
         - color: red
           label: ALPHA
@@ -12482,7 +12482,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_READ
       tags:
-        - Inbound (Inventory)
+        - Inbound
   /api/inboundreceiptjobs:
     get:
       deprecated: false
@@ -12577,7 +12577,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_READ
       tags:
-        - Inbound (Inventory)
+        - Inbound
       x-badges:
         - color: orange
           label: BETA
@@ -12620,7 +12620,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_READ
       tags:
-        - Inbound (Inventory)
+        - Inbound
       x-badges:
         - color: orange
           label: BETA
@@ -12817,7 +12817,7 @@ paths:
       x-fft-permissions:
         - RETURN_READ
       tags:
-        - Returns (Operations)
+        - Returns
     post:
       deprecated: false
       description: Creates a new item return job.
@@ -12854,7 +12854,7 @@ paths:
       x-fft-permissions:
         - RETURN_WRITE
       tags:
-        - Returns (Operations)
+        - Returns
   /api/itemreturnjobs/{itemReturnJobId}:
     get:
       deprecated: false
@@ -12897,7 +12897,7 @@ paths:
       x-fft-permissions:
         - RETURN_READ
       tags:
-        - Returns (Operations)
+        - Returns
   /api/itemreturnjobs/{itemReturnJobId}/actions:
     post:
       deprecated: false
@@ -12957,7 +12957,7 @@ paths:
       x-fft-permissions:
         - RETURN_WRITE
       tags:
-        - Returns (Operations)
+        - Returns
   /api/itemreturnjobs/{itemReturnJobId}/itemreturns:
     get:
       deprecated: false
@@ -13002,7 +13002,7 @@ paths:
       x-fft-permissions:
         - RETURN_READ
       tags:
-        - Returns (Operations)
+        - Returns
     post:
       deprecated: false
       description: Create a new item return for an item return job
@@ -13044,7 +13044,7 @@ paths:
       x-fft-permissions:
         - RETURN_WRITE
       tags:
-        - Returns (Operations)
+        - Returns
   /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}:
     delete:
       deprecated: true
@@ -13105,7 +13105,7 @@ paths:
       x-fft-permissions:
         - RETURN_WRITE
       tags:
-        - Returns (Operations)
+        - Returns
     get:
       deprecated: false
       description: Returns a specific item return for a given item return job.
@@ -13153,7 +13153,7 @@ paths:
       x-fft-permissions:
         - RETURN_READ
       tags:
-        - Returns (Operations)
+        - Returns
   /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}/actions:
     post:
       deprecated: false
@@ -13216,7 +13216,7 @@ paths:
       x-fft-permissions:
         - RETURN_WRITE
       tags:
-        - Returns (Operations)
+        - Returns
   /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}/parcels:
     post:
       deprecated: false
@@ -13275,7 +13275,7 @@ paths:
       x-fft-permissions:
         - RETURN_WRITE
       tags:
-        - Returns (Operations)
+        - Returns
       x-badges:
         - color: orange
           label: BETA
@@ -13340,7 +13340,7 @@ paths:
       x-fft-permissions:
         - RETURN_WRITE
       tags:
-        - Returns (Operations)
+        - Returns
   /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}/returnedlineitems/{returnedLineItemId}:
     patch:
       deprecated: false
@@ -13408,7 +13408,7 @@ paths:
       x-fft-permissions:
         - RETURN_WRITE
       tags:
-        - Returns (Operations)
+        - Returns
   /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}/returnednotreturnablelineitems:
     put:
       deprecated: false
@@ -13472,7 +13472,7 @@ paths:
       x-fft-permissions:
         - RETURN_WRITE
       tags:
-        - Returns (Operations)
+        - Returns
   /api/itemreturnjobs/{itemReturnJobId}/itemreturns/{itemReturnId}/returnednotreturnablelineitems/{returnedNotReturnableLineItemId}:
     patch:
       deprecated: false
@@ -13540,7 +13540,7 @@ paths:
       x-fft-permissions:
         - RETURN_WRITE
       tags:
-        - Returns (Operations)
+        - Returns
   /api/itemreturns:
     get:
       deprecated: false
@@ -13631,7 +13631,7 @@ paths:
       x-fft-permissions:
         - RETURN_READ
       tags:
-        - Returns (Operations)
+        - Returns
   /api/labels:
     post:
       deprecated: false
@@ -13675,7 +13675,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_WRITE
       tags:
-        - Label (Operations)
+        - Labels
   /api/labels/{id}:
     get:
       deprecated: false
@@ -13722,7 +13722,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_READ
       tags:
-        - Label (Operations)
+        - Labels
       x-badges:
         - color: red
           label: ALPHA
@@ -13785,7 +13785,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_WRITE
       tags:
-        - Label (Operations)
+        - Labels
       x-badges:
         - color: red
           label: ALPHA
@@ -13850,7 +13850,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_WRITE
       tags:
-        - Label (Operations)
+        - Labels
       x-badges:
         - color: red
           label: ALPHA
@@ -13895,7 +13895,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_READ
       tags:
-        - Label (Operations)
+        - Labels
       x-badges:
         - color: orange
           label: BETA
@@ -14041,7 +14041,7 @@ paths:
       x-fft-permissions:
         - LINKED_SERVICE_JOBS_READ
       tags:
-        - Services (Operations)
+        - Services
       x-badges:
         - color: orange
           label: BETA
@@ -14092,7 +14092,7 @@ paths:
       x-fft-permissions:
         - LINKED_SERVICE_JOBS_READ
       tags:
-        - Services (Operations)
+        - Services
       x-badges:
         - color: orange
           label: BETA
@@ -14150,7 +14150,7 @@ paths:
       x-fft-permissions:
         - LINKED_SERVICE_JOBS_WRITE
       tags:
-        - Services (Operations)
+        - Services
       x-badges:
         - color: orange
           label: BETA
@@ -14218,7 +14218,7 @@ paths:
       x-fft-permissions:
         - LINKED_SERVICE_JOBS_WRITE
       tags:
-        - Services (Operations)
+        - Services
       x-badges:
         - color: orange
           label: BETA
@@ -14259,7 +14259,7 @@ paths:
       x-fft-permissions:
         - LINKED_SERVICE_JOBS_READ
       tags:
-        - Services (Operations)
+        - Services
   /api/listings:
     put:
       deprecated: false
@@ -14315,7 +14315,7 @@ paths:
       x-fft-permissions:
         - LISTING_WRITE
       tags:
-        - Listings (Core)
+        - Listings
   /api/listings/search:
     post:
       deprecated: false
@@ -14353,7 +14353,7 @@ paths:
       x-fft-permissions:
         - LISTING_READ
       tags:
-        - Listings (Core)
+        - Listings
   /api/loadunits:
     delete:
       deprecated: false
@@ -14420,7 +14420,7 @@ paths:
       x-fft-permissions:
         - LOADUNIT_WRITE
       tags:
-        - Picking (Operations)
+        - Picking
     get:
       deprecated: false
       description: List load units
@@ -14496,7 +14496,7 @@ paths:
       x-fft-permissions:
         - LOADUNIT_READ
       tags:
-        - Picking (Operations)
+        - Picking
     post:
       deprecated: false
       description: Create load units
@@ -14541,7 +14541,7 @@ paths:
       x-fft-permissions:
         - LOADUNIT_WRITE
       tags:
-        - Picking (Operations)
+        - Picking
   /api/loadunits/{loadUnitId}:
     delete:
       deprecated: false
@@ -14584,7 +14584,7 @@ paths:
       x-fft-permissions:
         - LOADUNIT_WRITE
       tags:
-        - Picking (Operations)
+        - Picking
     get:
       deprecated: false
       description: Get load unit
@@ -14634,7 +14634,7 @@ paths:
       x-fft-permissions:
         - LOADUNIT_READ
       tags:
-        - Picking (Operations)
+        - Picking
     patch:
       deprecated: false
       description: >-
@@ -14690,7 +14690,7 @@ paths:
       x-fft-permissions:
         - LOADUNIT_WRITE
       tags:
-        - Picking (Operations)
+        - Picking
       x-badges:
         - color: orange
           label: BETA
@@ -14751,7 +14751,7 @@ paths:
       x-fft-permissions:
         - LOADUNIT_WRITE
       tags:
-        - Picking (Operations)
+        - Picking
       x-badges:
         - color: orange
           label: BETA
@@ -14802,7 +14802,7 @@ paths:
         - LOADUNIT_READ
         - STACKS_READ
       tags:
-        - Picking (Operations)
+        - Picking
       x-badges:
         - color: orange
           label: BETA
@@ -14872,7 +14872,7 @@ paths:
       x-fft-permissions:
         - LOADUNITTYPE_READ
       tags:
-        - Picking (Operations)
+        - Picking
     post:
       deprecated: true
       description: >-
@@ -14928,7 +14928,7 @@ paths:
       x-fft-permissions:
         - LOADUNITTYPE_WRITE
       tags:
-        - Picking (Operations)
+        - Picking
   /api/loadunittypes/{loadUnitTypeId}:
     get:
       deprecated: true
@@ -14984,7 +14984,7 @@ paths:
       x-fft-permissions:
         - LOADUNITTYPE_READ
       tags:
-        - Picking (Operations)
+        - Picking
     patch:
       deprecated: true
       description: >-
@@ -15045,7 +15045,7 @@ paths:
       x-fft-permissions:
         - LOADUNITTYPE_WRITE
       tags:
-        - Picking (Operations)
+        - Picking
   /api/loadunittypes/{loadUnitTypeId}/icon:
     put:
       deprecated: true
@@ -15114,7 +15114,7 @@ paths:
       x-fft-permissions:
         - LOADUNITTYPE_WRITE
       tags:
-        - Picking (Operations)
+        - Picking
   /api/lookuprecorditems/search:
     post:
       deprecated: false
@@ -15156,7 +15156,7 @@ paths:
       x-fft-permissions:
         - LOOKUP_RECORD_READ
       tags:
-        - Checkout Options (DOMS)
+        - Checkout options
       x-badges:
         - color: orange
           label: BETA
@@ -15197,7 +15197,7 @@ paths:
       x-fft-permissions:
         - LOOKUP_RECORD_READ
       tags:
-        - Checkout Options (DOMS)
+        - Checkout options
     post:
       deprecated: false
       description: Creates a single lookup record.
@@ -15240,7 +15240,7 @@ paths:
       x-fft-permissions:
         - LOOKUP_RECORD_WRITE
       tags:
-        - Checkout Options (DOMS)
+        - Checkout options
   /api/lookuprecords/{recordId}:
     delete:
       deprecated: false
@@ -15283,7 +15283,7 @@ paths:
       x-fft-permissions:
         - LOOKUP_RECORD_WRITE
       tags:
-        - Checkout Options (DOMS)
+        - Checkout options
     get:
       deprecated: false
       description: Retrieves a single lookup record using its unique identifier.
@@ -15325,7 +15325,7 @@ paths:
       x-fft-permissions:
         - LOOKUP_RECORD_READ
       tags:
-        - Checkout Options (DOMS)
+        - Checkout options
     put:
       deprecated: false
       description: Updates a single lookup record.
@@ -15373,7 +15373,7 @@ paths:
       x-fft-permissions:
         - LOOKUP_RECORD_WRITE
       tags:
-        - Checkout Options (DOMS)
+        - Checkout options
   /api/measurementunits:
     get:
       description: >-
@@ -15437,7 +15437,7 @@ paths:
           description: Entity not found
       summary: List measurement units
       tags:
-        - Measurement Units (Core)
+        - Measurement units
       x-badges:
         - color: orange
           label: BETA
@@ -15481,7 +15481,7 @@ paths:
           description: Entity not found
       summary: Create measurement unit
       tags:
-        - Measurement Units (Core)
+        - Measurement units
       x-badges:
         - color: orange
           label: BETA
@@ -15523,7 +15523,7 @@ paths:
           description: Entity not found
       summary: Delete measurement unit
       tags:
-        - Measurement Units (Core)
+        - Measurement units
       x-badges:
         - color: orange
           label: BETA
@@ -15568,7 +15568,7 @@ paths:
           description: Entity not found
       summary: Get measurement unit
       tags:
-        - Measurement Units (Core)
+        - Measurement units
       x-badges:
         - color: orange
           label: BETA
@@ -15619,7 +15619,7 @@ paths:
           description: Entity not found
       summary: Update measurement unit
       tags:
-        - Measurement Units (Core)
+        - Measurement units
       x-badges:
         - color: orange
           label: BETA
@@ -15664,7 +15664,324 @@ paths:
       x-fft-permissions:
         - NOTIFICATION_READ
       tags:
-        - Notification Center Configuration (Core)
+        - Notification center configuration
+      x-badges:
+        - color: red
+          label: ALPHA
+  /api/operationsvalidations:
+    get:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br />Get
+        all operations validations with pagination.
+      operationId: getAllOperationsValidations
+      parameters:
+        - description: Filter operations validations by tenantArticleId.
+          in: query
+          name: tenantArticleId
+          required: false
+          schema:
+            example: MY_ARTICLE_ID
+            type: string
+        - description: Filter operations validations by key.
+          in: query
+          name: key
+          required: false
+          schema:
+            type: string
+        - description: >-
+            Filter operations validations by tenantArticleIdKey. May match more
+            than one operations validation; filter by tenantArticleId and key
+            for an exact match.
+          in: query
+          name: tenantArticleIdKey
+          required: false
+          schema:
+            type: string
+        - description: The id of the last operations validation of the previous page.
+          in: query
+          name: startAfterId
+          required: false
+          schema:
+            type: string
+        - description: 'Number of items to return. Default: 25, maximum: 500.'
+          in: query
+          name: size
+          required: false
+          schema:
+            default: 25
+            example: 25
+            maximum: 500
+            minimum: 1
+            type: number
+        - description: >-
+            Sort operations validations by created or lastModified, ascending or
+            descending.
+          in: query
+          name: orderBy
+          required: false
+          schema:
+            enum:
+              - OPERATIONS_VALIDATION_CREATED_ASC
+              - OPERATIONS_VALIDATION_CREATED_DESC
+              - OPERATIONS_VALIDATION_LAST_MODIFIED_ASC
+              - OPERATIONS_VALIDATION_LAST_MODIFIED_DESC
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationsValidations'
+          description: >-
+            The operations validations that were found based on the given
+            filters.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Invalid input. See response for details.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+      summary: List operations validations
+      x-fft-permissions:
+        - OPERATIONS_VALIDATION_READ
+      tags:
+        - Operations Validations (Operations)
+      x-badges:
+        - color: red
+          label: ALPHA
+    post:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Creates a new operations validation.
+      operationId: createOperationsValidation
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperationsValidationForCreation'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationsValidation'
+          description: The operations validation was successfully created.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Invalid input. See response for details.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+      summary: Create operations validation
+      x-fft-permissions:
+        - OPERATIONS_VALIDATION_WRITE
+      tags:
+        - Operations Validations (Operations)
+      x-badges:
+        - color: red
+          label: ALPHA
+  /api/operationsvalidations/{operationsValidationId}:
+    get:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br />Get
+        operations validation by id.
+      operationId: getOperationsValidation
+      parameters:
+        - in: path
+          name: operationsValidationId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationsValidation'
+          description: Operations validation was found. The result is in the body.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The requested entity was not found
+      summary: Get operations validation
+      x-fft-permissions:
+        - OPERATIONS_VALIDATION_READ
+      tags:
+        - Operations Validations (Operations)
+      x-badges:
+        - color: red
+          label: ALPHA
+  /api/operationsvalidations/{operationsValidationId}/actions:
+    post:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br />Adds
+        values to or removes values from an operations validation.
+      operationId: operationsValidationAction
+      parameters:
+        - in: path
+          name: operationsValidationId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: >-
+                    #/components/schemas/OperationsValidationAddValuesActionParameter
+                - $ref: >-
+                    #/components/schemas/OperationsValidationRemoveValuesActionParameter
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationsValidation'
+          description: >-
+            The action was successfully applied. The updated operations
+            validation is in the body.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Invalid input. See response for details.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The requested entity was not found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: A version conflict occurred.
+      summary: Apply action to operations validation
+      x-fft-permissions:
+        - OPERATIONS_VALIDATION_WRITE
+      tags:
+        - Operations Validations (Operations)
+      x-badges:
+        - color: red
+          label: ALPHA
+  /api/operationsvalidations/search:
+    post:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Search for OperationsValidation
+      operationId: searchOperationsValidation
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperationsValidationSearchPayload'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationsValidationPaginatedResult'
+          description: Your search result
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+      summary: List operations validations (search)
+      x-fft-permissions:
+        - OPERATIONS_VALIDATION_READ
+      tags:
+        - Operations Validations (Operations)
       x-badges:
         - color: red
           label: ALPHA
@@ -15757,7 +16074,7 @@ paths:
       x-fft-permissions:
         - CONFIG_READ
       tags:
-        - Operative Container (Operations)
+        - Operative containers
     post:
       deprecated: false
       description: Creates a new operativeContainerType.
@@ -15800,7 +16117,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Operative Container (Operations)
+        - Operative containers
   /api/operativecontainertypes/{operativeContainerTypeId}:
     get:
       deprecated: false
@@ -15859,7 +16176,7 @@ paths:
       x-fft-permissions:
         - CONFIG_READ
       tags:
-        - Operative Container (Operations)
+        - Operative containers
     patch:
       deprecated: false
       description: Updates the operativeContainerType with the given ID.
@@ -15913,7 +16230,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Operative Container (Operations)
+        - Operative containers
   /api/operativecontainertypes/{operativeContainerTypeId}/icon:
     put:
       deprecated: false
@@ -15973,7 +16290,7 @@ paths:
       x-fft-permissions:
         - CONFIG_WRITE
       tags:
-        - Operative Container (Operations)
+        - Operative containers
   /api/operativeprocesses:
     get:
       deprecated: false
@@ -16039,7 +16356,7 @@ paths:
       x-fft-permissions:
         - OPERATIVE_PROCESS_READ
       tags:
-        - Operative Process (Operations)
+        - Operative processes
   /api/operativeprocesses/{operativeProcessId}:
     get:
       deprecated: false
@@ -16088,7 +16405,7 @@ paths:
       x-fft-permissions:
         - OPERATIVE_PROCESS_READ
       tags:
-        - Operative Process (Operations)
+        - Operative processes
   /api/operativeprocesses/{operativeProcessId}/actions:
     post:
       deprecated: false
@@ -16156,7 +16473,7 @@ paths:
       x-fft-permissions:
         - OPERATIVE_PROCESS_WRITE
       tags:
-        - Operative Process (Operations)
+        - Operative processes
       x-badges:
         - color: red
           label: ALPHA
@@ -16212,7 +16529,7 @@ paths:
       x-fft-permissions:
         - OPERATIVE_PROCESS_READ
       tags:
-        - Operative Process (Operations)
+        - Operative processes
       x-badges:
         - color: red
           label: ALPHA
@@ -16278,7 +16595,7 @@ paths:
       x-fft-permissions:
         - ORDER_RECORD_READ
       tags:
-        - Order Records (DOMS)
+        - Order records
       x-badges:
         - color: orange
           label: BETA
@@ -16334,7 +16651,7 @@ paths:
       x-fft-permissions:
         - ORDER_RECORD_WRITE
       tags:
-        - Order Records (DOMS)
+        - Order records
       x-badges:
         - color: orange
           label: BETA
@@ -16384,7 +16701,7 @@ paths:
       x-fft-permissions:
         - ORDER_RECORD_READ
       tags:
-        - Order Records (DOMS)
+        - Order records
       x-badges:
         - color: orange
           label: BETA
@@ -16429,7 +16746,7 @@ paths:
       x-fft-permissions:
         - ORDER_RECORD_READ
       tags:
-        - OrderRecords
+        - Order records
       x-badges:
         - color: orange
           label: BETA
@@ -16488,7 +16805,7 @@ paths:
       x-fft-permissions:
         - ORDER_READ
       tags:
-        - Orders (DOMS)
+        - Orders
     post:
       description: Create a new order.
       operationId: addOrder
@@ -16532,7 +16849,7 @@ paths:
       x-fft-permissions:
         - ORDER_WRITE
       tags:
-        - Orders (DOMS)
+        - Orders
   /api/orders/{orderId}:
     get:
       description: Get a specific order by ID.
@@ -16577,7 +16894,7 @@ paths:
       x-fft-permissions:
         - ORDER_READ
       tags:
-        - Orders (DOMS)
+        - Orders
     patch:
       description: Update an existing order.
       operationId: updateOrder
@@ -16628,7 +16945,7 @@ paths:
       x-fft-permissions:
         - ORDER_WRITE
       tags:
-        - Orders (DOMS)
+        - Orders
   /api/orders/{orderId}/actions:
     post:
       operationId: orderAction
@@ -16679,7 +16996,7 @@ paths:
         - ORDER_UNLOCK
         - ORDER_CONSUMER_WRITE
       tags:
-        - Orders (DOMS)
+        - Orders
   /api/orders/{orderId}/orderlineitems/{orderLineItemId}/actions:
     post:
       operationId: orderLineItemAction
@@ -16726,7 +17043,7 @@ paths:
       x-fft-permissions:
         - ORDER_WRITE
       tags:
-        - Orders (DOMS)
+        - Orders
   /api/orders/actions:
     post:
       description: Bulk action of orders
@@ -16773,7 +17090,7 @@ paths:
         - ORDER_UNLOCK
         - ORDER_DELIVERY_PROMISE_WRITE
       tags:
-        - Orders (DOMS)
+        - Orders
   /api/orders/search:
     post:
       deprecated: false
@@ -16811,7 +17128,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_READ
       tags:
-        - Orders (DOMS)
+        - Orders
   /api/packagingunits:
     get:
       deprecated: false
@@ -16849,7 +17166,7 @@ paths:
       x-fft-permissions:
         - PACKAGING_UNITS_READ
       tags:
-        - PackagingUnits (DOMS)
+        - Packaging units
       x-badges:
         - color: orange
           label: BETA
@@ -16895,7 +17212,7 @@ paths:
       x-fft-permissions:
         - PACKAGING_UNITS_WRITE
       tags:
-        - PackagingUnits (DOMS)
+        - Packaging units
       x-badges:
         - color: orange
           label: BETA
@@ -16941,7 +17258,7 @@ paths:
       x-fft-permissions:
         - PACKAGING_UNITS_WRITE
       tags:
-        - PackagingUnits (DOMS)
+        - Packaging units
       x-badges:
         - color: orange
           label: BETA
@@ -16986,7 +17303,7 @@ paths:
       x-fft-permissions:
         - PACKAGING_UNITS_READ
       tags:
-        - PackagingUnits (DOMS)
+        - Packaging units
       x-badges:
         - color: orange
           label: BETA
@@ -17037,7 +17354,7 @@ paths:
       x-fft-permissions:
         - PACKAGING_UNITS_WRITE
       tags:
-        - PackagingUnits (DOMS)
+        - Packaging units
       x-badges:
         - color: orange
           label: BETA
@@ -17102,7 +17419,7 @@ paths:
             endpoint
       summary: List packing container types
       tags:
-        - Packing (Operations)
+        - Packing
     post:
       deprecated: true
       description: >-
@@ -17149,7 +17466,7 @@ paths:
             endpoint
       summary: Create packing container type
       tags:
-        - Packing (Operations)
+        - Packing
   /api/packingcontainertypes/{packingContainerTypeId}:
     get:
       deprecated: true
@@ -17201,7 +17518,7 @@ paths:
             endpoint
       summary: Get packing container type
       tags:
-        - Packing (Operations)
+        - Packing
     patch:
       deprecated: true
       description: >-
@@ -17262,7 +17579,7 @@ paths:
           description: PackingContainerType version conflict
       summary: Update packing container type
       tags:
-        - Packing (Operations)
+        - Packing
   /api/packingsourcecontainers:
     get:
       description: >-
@@ -17344,7 +17661,7 @@ paths:
             endpoint
       summary: List packing source containers
       tags:
-        - Packing (Operations)
+        - Packing
       x-badges:
         - color: orange
           label: BETA
@@ -17393,7 +17710,7 @@ paths:
             endpoint
       summary: Create packing source container
       tags:
-        - Packing (Operations)
+        - Packing
       x-badges:
         - color: orange
           label: BETA
@@ -17456,7 +17773,7 @@ paths:
           description: Entity not found
       summary: Get packing source container
       tags:
-        - Packing (Operations)
+        - Packing
       x-badges:
         - color: orange
           label: BETA
@@ -17655,7 +17972,7 @@ paths:
           description: Entity not found
       summary: List pack jobs
       tags:
-        - Packing (Operations)
+        - Packing
     post:
       description: ''
       operationId: addPackJob
@@ -17697,7 +18014,7 @@ paths:
             endpoint
       summary: Create pack job
       tags:
-        - Packing (Operations)
+        - Packing
   /api/packjobs/{packJobId}:
     get:
       description: ''
@@ -17740,7 +18057,7 @@ paths:
           description: Entity not found
       summary: Get pack job
       tags:
-        - Packing (Operations)
+        - Packing
     patch:
       description: ''
       operationId: patchPackJob
@@ -17795,7 +18112,7 @@ paths:
           description: PackJob version conflict
       summary: Update pack job
       tags:
-        - Packing (Operations)
+        - Packing
   /api/packjobs/{packJobId}/actions:
     post:
       operationId: packJobAction
@@ -17840,7 +18157,7 @@ paths:
           description: Enitity not found
       summary: Call pack job action
       tags:
-        - Packing (Operations)
+        - Packing
   /api/packjobs/{packJobId}/deliverynote:
     get:
       description: ''
@@ -17886,7 +18203,7 @@ paths:
           description: Entity not found
       summary: Get pack job delivery note
       tags:
-        - Packing (Operations)
+        - Packing
   /api/packjobs/{packJobId}/documenthandling:
     get:
       description: ''
@@ -17929,7 +18246,7 @@ paths:
           description: Entity not found
       summary: Get pack job document handling
       tags:
-        - Packing (Operations)
+        - Packing
   /api/packjobs/{packJobId}/returnnote:
     get:
       description: ''
@@ -17975,7 +18292,7 @@ paths:
           description: Entity not found
       summary: Get pack job return note
       tags:
-        - Packing (Operations)
+        - Packing
   /api/packjobs/{packJobId}/targetcontainers:
     get:
       description: >-
@@ -18023,7 +18340,7 @@ paths:
           description: Entity not found
       summary: List pack job target containers
       tags:
-        - Packing (Operations)
+        - Packing
       x-badges:
         - color: orange
           label: BETA
@@ -18077,7 +18394,7 @@ paths:
             endpoint
       summary: Create pack job target container
       tags:
-        - Packing (Operations)
+        - Packing
       x-badges:
         - color: orange
           label: BETA
@@ -18127,7 +18444,7 @@ paths:
           description: Entity not found
       summary: Delete pack job target container
       tags:
-        - Packing (Operations)
+        - Packing
       x-badges:
         - color: orange
           label: BETA
@@ -18189,7 +18506,7 @@ paths:
           description: Entity not found
       summary: Get pack job target container
       tags:
-        - Packing (Operations)
+        - Packing
       x-badges:
         - color: orange
           label: BETA
@@ -18257,7 +18574,7 @@ paths:
           description: Entity version conflict
       summary: Update pack job target container
       tags:
-        - Packing (Operations)
+        - Packing
       x-badges:
         - color: orange
           label: BETA
@@ -18320,7 +18637,7 @@ paths:
             endpoint
       summary: Add pack job target container line item
       tags:
-        - Packing (Operations)
+        - Packing
   /api/packjobs/{packJobId}/targetcontainers/{targetcontainerId}/deliverynote:
     get:
       description: ''
@@ -18374,7 +18691,7 @@ paths:
           description: Entity not found
       summary: Get target container delivery note
       tags:
-        - Packing (Operations)
+        - Packing
   /api/packjobs/{packJobId}/targetcontainers/{targetcontainerId}/identifierdocument:
     get:
       description: Get the identifier document related to this target container
@@ -18425,7 +18742,7 @@ paths:
       x-fft-permissions:
         - PACKJOB_READ
       tags:
-        - Packing (Operations)
+        - Packing
   /api/packjobs/{packJobId}/targetcontainers/{targetcontainerId}/lineitems/{lineItemId}:
     delete:
       deprecated: true
@@ -18481,7 +18798,7 @@ paths:
           description: Facility not found
       summary: Delete target container line item
       tags:
-        - Packing (Operations)
+        - Packing
     patch:
       description: >-
         This part of the API is in Beta status. For details, see the <a
@@ -18552,7 +18869,7 @@ paths:
           description: Entity version conflict
       summary: Update target container line item
       tags:
-        - Packing (Operations)
+        - Packing
       x-badges:
         - color: orange
           label: BETA
@@ -18607,7 +18924,7 @@ paths:
           description: Entity not found
       summary: Get target container return note
       tags:
-        - Packing (Operations)
+        - Packing
   /api/packjobs/{packJobId}/targetcontainers/{targetcontainerId}/transferlabel:
     get:
       description: ''
@@ -18654,7 +18971,7 @@ paths:
           description: Entity not found
       summary: Get target container transfer label
       tags:
-        - Packing (Operations)
+        - Packing
   /api/packjobs/{packJobId}/transferlabel:
     get:
       description: ''
@@ -18693,7 +19010,7 @@ paths:
           description: Entity not found
       summary: Get pack job transfer label
       tags:
-        - Packing (Operations)
+        - Packing
   /api/packjobs/search:
     post:
       deprecated: false
@@ -18731,7 +19048,7 @@ paths:
       x-fft-permissions:
         - PACKJOB_READ
       tags:
-        - Packing (Operations)
+        - Packing
   /api/parcelinformation:
     get:
       deprecated: false
@@ -18817,7 +19134,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_READ
       tags:
-        - Parcel Information (Operations)
+        - Parcel information
       x-badges:
         - color: red
           label: ALPHA
@@ -18861,7 +19178,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_WRITE
       tags:
-        - Parcel Information (Operations)
+        - Parcel information
       x-badges:
         - color: red
           label: ALPHA
@@ -18911,7 +19228,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_READ
       tags:
-        - Parcel Information (Operations)
+        - Parcel information
       x-badges:
         - color: red
           label: ALPHA
@@ -18956,7 +19273,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_READ
       tags:
-        - Parcel Information (Operations)
+        - Parcel information
       x-badges:
         - color: red
           label: ALPHA
@@ -19001,7 +19318,7 @@ paths:
             endpoint
       summary: List parcels
       tags:
-        - Shipments (Operations)
+        - Shipments
   /api/parcels/{parcelId}:
     get:
       description: ''
@@ -19044,7 +19361,7 @@ paths:
           description: Entity not found
       summary: Get parcel
       tags:
-        - Shipments (Operations)
+        - Shipments
     patch:
       description: ''
       operationId: patchParcel
@@ -19091,7 +19408,7 @@ paths:
           description: Entity not found
       summary: Update parcel
       tags:
-        - Shipments (Operations)
+        - Shipments
   /api/parcels/{parcelId}/actions:
     post:
       description: >-
@@ -19133,7 +19450,7 @@ paths:
             endpoint
       summary: Call parcel action
       tags:
-        - Shipments (Operations)
+        - Shipments
   /api/parcels/{parcelId}/deliverynote:
     get:
       operationId: getParcelDeliveryNote
@@ -19180,7 +19497,7 @@ paths:
           description: Parcel not found
       summary: Get parcel delivery note
       tags:
-        - Shipments (Operations)
+        - Shipments
   /api/parcels/{parcelId}/labels/{labelDocument}:
     get:
       description: ''
@@ -19230,7 +19547,7 @@ paths:
           description: Entity not found
       summary: Get parcel label
       tags:
-        - Shipments (Operations)
+        - Shipments
   /api/parcels/{parcelId}/returnnote:
     get:
       operationId: getParcelReturnNote
@@ -19277,7 +19594,7 @@ paths:
           description: Parcel not found
       summary: Get parcel return note
       tags:
-        - Shipments (Operations)
+        - Shipments
   /api/parcels/{parcelId}/transferlabel:
     get:
       description: ''
@@ -19316,7 +19633,7 @@ paths:
           description: Entity not found
       summary: Get parcel transfer label
       tags:
-        - Shipments (Operations)
+        - Shipments
   /api/parcels/search:
     post:
       deprecated: false
@@ -19354,7 +19671,7 @@ paths:
       x-fft-permissions:
         - PARCEL_READ
       tags:
-        - Shipments (Operations)
+        - Shipments
   /api/permissions:
     get:
       deprecated: false
@@ -19464,6 +19781,8 @@ paths:
               - PROCESS_LOG_READ
               - OPERATIVE_PROCESS_READ
               - OPERATIVE_PROCESS_WRITE
+              - OPERATIONS_VALIDATION_READ
+              - OPERATIONS_VALIDATION_WRITE
               - DELIVERYNOTE_WRITE
               - PACKJOB_READ
               - PACKJOB_WRITE
@@ -19586,7 +19905,7 @@ paths:
       x-fft-permissions:
         - PERMISSION_READ
       tags:
-        - User Management (Core)
+        - User management
   /api/pickjobs:
     get:
       operationId: queryPickJobs
@@ -19783,7 +20102,7 @@ paths:
             endpoint
       summary: List pick jobs
       tags:
-        - Picking (Operations)
+        - Picking
     post:
       description: ''
       operationId: addPickJob
@@ -19825,7 +20144,7 @@ paths:
             endpoint
       summary: Create pick job
       tags:
-        - Picking (Operations)
+        - Picking
   /api/pickjobs/{pickJobId}:
     get:
       description: ''
@@ -19868,7 +20187,7 @@ paths:
           description: Entity not found
       summary: Get pick job
       tags:
-        - Picking (Operations)
+        - Picking
     patch:
       deprecated: true
       description: >-
@@ -19928,7 +20247,7 @@ paths:
           description: PickJob version conflict
       summary: Update pick job
       tags:
-        - Picking (Operations)
+        - Picking
   /api/pickjobs/{pickJobId}/actions:
     post:
       operationId: pickJobAction
@@ -19967,7 +20286,7 @@ paths:
             endpoint
       summary: Call pick job action
       tags:
-        - Picking (Operations)
+        - Picking
   /api/pickjobs/{pickJobId}/deliverynote:
     get:
       description: ''
@@ -20013,7 +20332,7 @@ paths:
           description: Entity not found
       summary: Get pick job delivery note
       tags:
-        - Picking (Operations)
+        - Picking
   /api/pickjobs/{pickJobId}/documenthandling:
     get:
       description: ''
@@ -20056,7 +20375,7 @@ paths:
           description: Entity not found
       summary: Get pick job document handling
       tags:
-        - Picking Configuration (Operations)
+        - Picking configuration
   /api/pickjobs/{pickJobId}/loadunits:
     get:
       deprecated: false
@@ -20100,7 +20419,7 @@ paths:
         - PICKJOB_READ
         - LOADUNIT_READ
       tags:
-        - Picking (Operations)
+        - Picking
     post:
       deprecated: false
       description: Create new load units for the given pick job
@@ -20155,7 +20474,7 @@ paths:
         - PICKJOB_WRITE
         - LOADUNIT_WRITE
       tags:
-        - Picking (Operations)
+        - Picking
   /api/pickjobs/{pickJobId}/picklineitems/{pickLineItemId}/availablesubstitutes:
     get:
       description: >-
@@ -20202,7 +20521,7 @@ paths:
             endpoint
       summary: List available line item substitutes
       tags:
-        - Picking (Operations)
+        - Picking
       x-badges:
         - color: orange
           label: BETA
@@ -20244,7 +20563,7 @@ paths:
           description: Entity not found
       summary: Get pick job return note
       tags:
-        - Picking (Operations)
+        - Picking
   /api/pickjobs/{pickJobId}/transferlabel:
     get:
       description: ''
@@ -20283,7 +20602,7 @@ paths:
           description: Entity not found
       summary: Get pick job transfer label
       tags:
-        - Picking (Operations)
+        - Picking
   /api/pickjobs/search:
     post:
       deprecated: false
@@ -20321,7 +20640,7 @@ paths:
       x-fft-permissions:
         - PICKJOB_READ
       tags:
-        - Picking (Operations)
+        - Picking
   /api/pickruns:
     post:
       description: ''
@@ -20355,7 +20674,7 @@ paths:
           description: Your user is not allowed to operate against this API instance
       summary: Create pick run
       tags:
-        - Picking (Operations)
+        - Picking
   /api/pickruns/{pickRunId}:
     get:
       description: ''
@@ -20390,7 +20709,7 @@ paths:
             endpoint
       summary: Get pick run
       tags:
-        - Picking (Operations)
+        - Picking
     patch:
       description: ''
       operationId: patchPickRun
@@ -20436,7 +20755,7 @@ paths:
           description: Version conflict
       summary: Update pick run
       tags:
-        - Picking (Operations)
+        - Picking
   /api/pickruns/{pickRunId}/actions:
     post:
       operationId: pickRunAction
@@ -20475,7 +20794,7 @@ paths:
             endpoint
       summary: Call pick run action
       tags:
-        - Picking (Operations)
+        - Picking
   /api/pickruns/{pickRunId}/pickjobs:
     patch:
       description: ''
@@ -20511,7 +20830,7 @@ paths:
             endpoint
       summary: Update pick run pick jobs
       tags:
-        - Picking (Operations)
+        - Picking
   /api/pickupservices:
     get:
       deprecated: false
@@ -20582,7 +20901,7 @@ paths:
       x-fft-permissions:
         - PICKUP_SERVICE_READ
       tags:
-        - PickupService (operations)
+        - Pickup service
       x-badges:
         - color: red
           label: ALPHA
@@ -20626,7 +20945,7 @@ paths:
       x-fft-permissions:
         - PICKUP_SERVICE_WRITE
       tags:
-        - PickupService (operations)
+        - Pickup service
       x-badges:
         - color: red
           label: ALPHA
@@ -20676,7 +20995,7 @@ paths:
       x-fft-permissions:
         - PICKUP_SERVICE_READ
       tags:
-        - PickupService (operations)
+        - Pickup service
       x-badges:
         - color: red
           label: ALPHA
@@ -20731,7 +21050,7 @@ paths:
       x-fft-permissions:
         - PICKUP_SERVICE_WRITE
       tags:
-        - PickupService (operations)
+        - Pickup service
       x-badges:
         - color: red
           label: ALPHA
@@ -20807,7 +21126,7 @@ paths:
       x-fft-permissions:
         - PROCESS_READ
       tags:
-        - Processes (Core)
+        - Processes
   /api/processes:
     get:
       deprecated: true
@@ -21125,7 +21444,7 @@ paths:
       x-fft-permissions:
         - PROCESS_READ
       tags:
-        - Processes (Core)
+        - Processes
   /api/processes/{processId}:
     get:
       description: Get a specific process by ID.
@@ -21167,7 +21486,7 @@ paths:
       x-fft-permissions:
         - PROCESS_READ
       tags:
-        - Processes (Core)
+        - Processes
     patch:
       deprecated: true
       description: >-
@@ -21229,7 +21548,7 @@ paths:
       x-fft-permissions:
         - PROCESS_WRITE
       tags:
-        - Processes (Core)
+        - Processes
   /api/processes/{processId}/actions:
     post:
       description: >-
@@ -21285,7 +21604,7 @@ paths:
       x-fft-permissions:
         - PROCESS_WRITE
       tags:
-        - Processes (Core)
+        - Processes
   /api/processes/{processId}/documents:
     post:
       description: Add a document to a process.
@@ -21320,7 +21639,7 @@ paths:
       x-fft-permissions:
         - DOCUMENT_SET_WRITE
       tags:
-        - Processes (Core)
+        - Processes
   /api/processes/{processId}/documents/{documentId}:
     get:
       description: >-
@@ -21353,7 +21672,7 @@ paths:
       x-fft-permissions:
         - DOCUMENT_SET_READ
       tags:
-        - Processes (Core)
+        - Processes
       x-badges:
         - color: orange
           label: BETA
@@ -21385,7 +21704,7 @@ paths:
       x-fft-permissions:
         - DOCUMENT_SET_READ
       tags:
-        - Processes (Core)
+        - Processes
       x-badges:
         - color: orange
           label: BETA
@@ -21431,7 +21750,7 @@ paths:
       x-fft-permissions:
         - DOCUMENT_SET_WRITE
       tags:
-        - Processes (Core)
+        - Processes
       x-badges:
         - color: orange
           label: BETA
@@ -21522,7 +21841,7 @@ paths:
       x-fft-permissions:
         - PROCESS_LOG_READ
       tags:
-        - Processes (Core)
+        - Processes
       x-badges:
         - color: orange
           label: BETA
@@ -21588,7 +21907,7 @@ paths:
       x-fft-permissions:
         - PROCESS_REROUTE
       tags:
-        - Processes (Core)
+        - Processes
   /api/processes/retrynotroutable:
     post:
       description: Retry routing for all not-routable processes.
@@ -21622,7 +21941,7 @@ paths:
       x-fft-permissions:
         - PROCESS_REROUTE
       tags:
-        - Processes (Core)
+        - Processes
   /api/processes/search:
     post:
       deprecated: false
@@ -21664,7 +21983,7 @@ paths:
       x-fft-permissions:
         - PROCESS_READ
       tags:
-        - Processes (Core)
+        - Processes
       x-badges:
         - color: orange
           label: BETA
@@ -21727,7 +22046,7 @@ paths:
           description: A version conflict occurred.
       summary: Create checkout options
       tags:
-        - Checkout Options (DOMS)
+        - Checkout options
   /api/promises/checkoutoptions/collect/earliest:
     post:
       deprecated: false
@@ -21781,7 +22100,7 @@ paths:
           description: A version conflict occurred.
       summary: Get earliest collect
       tags:
-        - Checkout Options (DOMS)
+        - Checkout options
   /api/promises/checkoutoptions/delivery/earliest:
     post:
       deprecated: false
@@ -21835,7 +22154,7 @@ paths:
           description: A version conflict occurred.
       summary: Get earliest delivery
       tags:
-        - Checkout Options (DOMS)
+        - Checkout options
   /api/promises/checkoutoptions/delivery/timeperiod:
     post:
       deprecated: false
@@ -21889,7 +22208,7 @@ paths:
           description: A version conflict occurred.
       summary: Get delivery time period
       tags:
-        - Checkout Options (DOMS)
+        - Checkout options
   /api/promises/checkoutoptions/delivery/timepoint:
     post:
       deprecated: false
@@ -21945,7 +22264,7 @@ paths:
           description: A version conflict occurred.
       summary: Get delivery timepoint
       tags:
-        - Checkout Options (DOMS)
+        - Checkout options
   /api/promises/deliverypromise:
     post:
       description: Endpoint to create a promise order.
@@ -21986,7 +22305,7 @@ paths:
             endpoint
       summary: Create promise order
       tags:
-        - Orders (DOMS)
+        - Orders
   /api/purchaseorders:
     post:
       deprecated: false
@@ -22024,7 +22343,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_WRITE
       tags:
-        - Inbound (Inventory)
+        - Inbound
   /api/purchaseorders/{purchaseOrderId}:
     get:
       deprecated: false
@@ -22061,7 +22380,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_READ
       tags:
-        - Inbound (Inventory)
+        - Inbound
     patch:
       deprecated: false
       description: Partially updates a Purchase Order using a selection of fields
@@ -22103,7 +22422,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_WRITE
       tags:
-        - Inbound (Inventory)
+        - Inbound
     put:
       deprecated: false
       description: ''
@@ -22145,7 +22464,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_WRITE
       tags:
-        - Inbound (Inventory)
+        - Inbound
   /api/receipts:
     post:
       deprecated: false
@@ -22183,7 +22502,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_WRITE
       tags:
-        - Inbound (Inventory)
+        - Inbound
   /api/receipts/{receiptId}:
     delete:
       deprecated: false
@@ -22231,7 +22550,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_WRITE
       tags:
-        - Inbound (Inventory)
+        - Inbound
     get:
       deprecated: false
       description: ''
@@ -22273,7 +22592,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_READ
       tags:
-        - Inbound (Inventory)
+        - Inbound
     patch:
       deprecated: false
       description: ''
@@ -22321,7 +22640,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_WRITE
       tags:
-        - Inbound (Inventory)
+        - Inbound
     put:
       deprecated: false
       description: ''
@@ -22369,7 +22688,7 @@ paths:
       x-fft-permissions:
         - INBOUND_PROCESS_WRITE
       tags:
-        - Inbound (Inventory)
+        - Inbound
   /api/remoteconfigs:
     get:
       deprecated: true
@@ -22446,7 +22765,7 @@ paths:
       x-fft-permissions:
         - REMOTE_CONFIG_READ
       tags:
-        - Remote Configs (Core)
+        - Remote configuration
     post:
       deprecated: false
       description: >-
@@ -22485,7 +22804,7 @@ paths:
       x-fft-permissions:
         - REMOTE_CONFIG_WRITE
       tags:
-        - Remote Configs (Core)
+        - Remote configuration
   /api/remoteconfigs/{id}:
     delete:
       deprecated: false
@@ -22527,7 +22846,7 @@ paths:
       x-fft-permissions:
         - REMOTE_CONFIG_WRITE
       tags:
-        - Remote Configs (Core)
+        - Remote configuration
     get:
       deprecated: false
       description: >-
@@ -22571,7 +22890,7 @@ paths:
       x-fft-permissions:
         - REMOTE_CONFIG_READ
       tags:
-        - Remote Configs (Core)
+        - Remote configuration
     patch:
       deprecated: false
       description: >-
@@ -22622,7 +22941,7 @@ paths:
       x-fft-permissions:
         - REMOTE_CONFIG_WRITE
       tags:
-        - Remote Configs (Core)
+        - Remote configuration
     put:
       deprecated: false
       description: >-
@@ -22673,7 +22992,7 @@ paths:
       x-fft-permissions:
         - REMOTE_CONFIG_WRITE
       tags:
-        - Remote Configs (Core)
+        - Remote configuration
   /api/remoteconfigs/{id}/scopes:
     post:
       deprecated: false
@@ -22719,7 +23038,7 @@ paths:
       x-fft-permissions:
         - REMOTE_CONFIG_WRITE
       tags:
-        - Remote Configs (Core)
+        - Remote configuration
   /api/remoteconfigs/{id}/scopes/{scopeId}:
     delete:
       deprecated: false
@@ -22776,7 +23095,7 @@ paths:
       x-fft-permissions:
         - REMOTE_CONFIG_WRITE
       tags:
-        - Remote Configs (Core)
+        - Remote configuration
   /api/remoteconfigurations/search:
     post:
       deprecated: false
@@ -22818,7 +23137,7 @@ paths:
       x-fft-permissions:
         - REMOTE_CONFIG_READ
       tags:
-        - Configurations (Core)
+        - Configurations
       x-badges:
         - color: orange
           label: BETA
@@ -22874,7 +23193,7 @@ paths:
           description: User not found
       summary: List reroute descriptions
       tags:
-        - Routing Plans (DOMS)
+        - Routing plans
       x-badges:
         - color: orange
           label: BETA
@@ -22922,7 +23241,7 @@ paths:
             endpoint
       summary: Create reroute description
       tags:
-        - Routing Plans (DOMS)
+        - Routing plans
       description: >-
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
@@ -22971,7 +23290,7 @@ paths:
           description: RerouteDescription not found
       summary: Delete reroute description
       tags:
-        - Routing Plans Configuration (DOMS)
+        - Routing plans configuration
       x-badges:
         - color: orange
           label: BETA
@@ -23019,7 +23338,7 @@ paths:
           description: User not found
       summary: Get reroute description
       tags:
-        - Routing Plans Configuration (DOMS)
+        - Routing plans configuration
       x-badges:
         - color: orange
           label: BETA
@@ -23072,7 +23391,7 @@ paths:
           description: RerouteDescription not found
       summary: Update reroute description
       tags:
-        - Routing Plans Configuration (DOMS)
+        - Routing plans configuration
       x-badges:
         - color: orange
           label: BETA
@@ -23133,7 +23452,7 @@ paths:
       x-fft-permissions:
         - RESERVATION_READ
       tags:
-        - Reservations (Inventory)
+        - Reservations
       x-badges:
         - color: orange
           label: BETA
@@ -23182,7 +23501,7 @@ paths:
       x-fft-permissions:
         - RESERVATION_READ
       tags:
-        - Reservations (Inventory)
+        - Reservations
       x-badges:
         - color: orange
           label: BETA
@@ -23238,7 +23557,7 @@ paths:
       x-fft-permissions:
         - RESERVATION_WRITE
       tags:
-        - Reservations (Inventory)
+        - Reservations
       x-badges:
         - color: red
           label: ALPHA
@@ -23283,7 +23602,7 @@ paths:
       x-fft-permissions:
         - RESERVATION_READ
       tags:
-        - Reservations (Inventory)
+        - Reservations
       x-badges:
         - color: orange
           label: BETA
@@ -23357,7 +23676,7 @@ paths:
             endpoint
       summary: List restow items
       tags:
-        - Restowing (Operations)
+        - Restowing
       x-badges:
         - color: orange
           label: BETA
@@ -23406,7 +23725,7 @@ paths:
           description: Entity not found
       summary: Get restow item
       tags:
-        - Restowing (Operations)
+        - Restowing
       x-badges:
         - color: orange
           label: BETA
@@ -23468,7 +23787,7 @@ paths:
           description: RestowItem version conflict
       summary: Update restow item
       tags:
-        - Restowing (Operations)
+        - Restowing
       x-badges:
         - color: orange
           label: BETA
@@ -23516,7 +23835,7 @@ paths:
           description: The entity you want to call an action for was not found.
       summary: Call restow item action
       tags:
-        - Restowing (Operations)
+        - Restowing
   /api/returnnotes:
     post:
       operationId: createReturnNote
@@ -23557,7 +23876,7 @@ paths:
             endpoint
       summary: Create return note
       tags:
-        - Shipments (Operations)
+        - Shipments
   /api/roles:
     get:
       deprecated: false
@@ -23593,7 +23912,7 @@ paths:
       x-fft-permissions:
         - ROLE_READ
       tags:
-        - User Management (Core)
+        - User management
     post:
       deprecated: false
       description: Creates a new custom role.
@@ -23630,7 +23949,7 @@ paths:
       x-fft-permissions:
         - ROLE_WRITE
       tags:
-        - User Management (Core)
+        - User management
   /api/roles/{name}:
     delete:
       deprecated: false
@@ -23673,7 +23992,7 @@ paths:
       x-fft-permissions:
         - ROLE_WRITE
       tags:
-        - User Management (Core)
+        - User management
     get:
       deprecated: false
       description: Returns a role requested by its name.
@@ -23715,7 +24034,7 @@ paths:
       x-fft-permissions:
         - ROLE_READ
       tags:
-        - User Management (Core)
+        - User management
     patch:
       deprecated: false
       description: Updates an existing role (partial update).
@@ -23763,7 +24082,7 @@ paths:
       x-fft-permissions:
         - ROLE_WRITE
       tags:
-        - User Management (Core)
+        - User management
     put:
       deprecated: false
       description: Updates an existing role (complete replacement).
@@ -23811,7 +24130,7 @@ paths:
       x-fft-permissions:
         - ROLE_WRITE
       tags:
-        - User Management (Core)
+        - User management
   /api/roles/search:
     post:
       deprecated: false
@@ -23849,7 +24168,7 @@ paths:
       x-fft-permissions:
         - ROLE_READ
       tags:
-        - User Management (Core)
+        - User management
   /api/routing/commands/reroute:
     post:
       description: >-
@@ -23882,7 +24201,7 @@ paths:
             endpoint
       summary: Trigger reroute
       tags:
-        - Routing Plans (DOMS)
+        - Routing plans
       x-badges:
         - color: orange
           label: BETA
@@ -23972,7 +24291,7 @@ paths:
             endpoint
       summary: Get routing decision logs
       tags:
-        - Routing Strategy (DOMS)
+        - Routing strategies
       x-badges:
         - color: red
           label: ALPHA
@@ -24042,7 +24361,7 @@ paths:
       x-fft-permissions:
         - ROUTING_READ
       tags:
-        - RoutingJournal (doms)
+        - Routing journals
       x-badges:
         - color: red
           label: ALPHA
@@ -24092,7 +24411,7 @@ paths:
       x-fft-permissions:
         - ROUTING_READ
       tags:
-        - RoutingJournal (doms)
+        - Routing journals
       x-badges:
         - color: red
           label: ALPHA
@@ -24144,7 +24463,7 @@ paths:
           description: No more elements available
       summary: List category node configuration
       tags:
-        - Routing Strategy (DOMS)
+        - Routing strategies
     post:
       description: Creates a new category for a routing strategies node config.
       operationId: postRoutingStrategyNodeConfigCategory
@@ -24186,7 +24505,7 @@ paths:
             endpoint
       summary: Create category node configuration
       tags:
-        - Routing Strategy (DOMS)
+        - Routing strategies
   /api/routing/nodeconfigcategories/{categoryId}:
     delete:
       description: Deletes the category
@@ -24223,7 +24542,7 @@ paths:
             endpoint
       summary: Delete category node configuration
       tags:
-        - Routing Strategy (DOMS)
+        - Routing strategies
     get:
       description: Returns the category
       operationId: getRoutingStrategyNodeConfigCategory
@@ -24264,7 +24583,7 @@ paths:
             endpoint
       summary: Returns category node configuration
       tags:
-        - Routing Strategy (DOMS)
+        - Routing strategies
     put:
       description: Updates a category
       operationId: putRoutingStrategyNodeConfigCategory
@@ -24313,7 +24632,7 @@ paths:
             endpoint
       summary: Updates category node configuration
       tags:
-        - Routing Strategy (DOMS)
+        - Routing strategies
   /api/routing/sourcingoptions:
     post:
       operationId: createSourcingOptionsRequest
@@ -24351,7 +24670,7 @@ paths:
             endpoint
       summary: Create sourcing option
       tags:
-        - Sourcing Options (DOMS)
+        - Sourcing options
   /api/routing/sourcingoptions/{sourcingOptionsRequestId}:
     get:
       operationId: getSourcingOption
@@ -24388,7 +24707,7 @@ paths:
             endpoint
       summary: Get sourcing option
       tags:
-        - Sourcing Options (DOMS)
+        - Sourcing options
   /api/routing/strategies:
     get:
       description: List all existing routing strategies
@@ -24436,7 +24755,7 @@ paths:
           description: No more elements available
       summary: List routing strategies
       tags:
-        - Routing Strategy (DOMS)
+        - Routing strategies
     post:
       description: Creates a new revision of the routing strategy.
       operationId: postRoutingStrategy
@@ -24476,7 +24795,7 @@ paths:
             endpoint
       summary: Create routing strategy
       tags:
-        - Routing Strategy (DOMS)
+        - Routing strategies
   /api/routing/strategies/{strategyId}:
     get:
       description: Returns the routing strategy.
@@ -24517,7 +24836,7 @@ paths:
             endpoint
       summary: Get routing strategy
       tags:
-        - Routing Strategy (DOMS)
+        - Routing strategies
     put:
       description: Updates a routing strategy
       operationId: putRoutingStrategy
@@ -24564,7 +24883,7 @@ paths:
             endpoint
       summary: Update routing strategy
       tags:
-        - Routing Strategy (DOMS)
+        - Routing strategies
   /api/routing/strategies/{strategyId}/actions:
     post:
       description: Performs an action on a routing strategy.
@@ -24610,7 +24929,7 @@ paths:
             endpoint
       summary: Call routing strategy action
       tags:
-        - Routing Strategy (DOMS)
+        - Routing strategies
   /api/routing/strategies/{strategyId}/evaluation:
     post:
       description: Evaluates a routing strategy against a given order
@@ -24662,7 +24981,7 @@ paths:
           description: The routing strategy does not exist
       summary: Evaluate routing strategy
       tags:
-        - Routing Strategy (DOMS)
+        - Routing strategies
   /api/routing/strategies/{strategyId}/nodes/{nodeId}/evaluation:
     post:
       description: Evaluates a routing strategy node and return the path.
@@ -24715,7 +25034,7 @@ paths:
           description: The routing strategy node does not exist
       summary: Evaluate routing strategy node
       tags:
-        - Routing Strategy (DOMS)
+        - Routing strategies
   /api/routingplans:
     get:
       description: ''
@@ -24759,7 +25078,7 @@ paths:
           description: Entity not found, please look at details.
       summary: List routing plans
       tags:
-        - Routing Plans (DOMS)
+        - Routing plans
   /api/routingplans/{routingplanId}:
     get:
       description: ''
@@ -24802,7 +25121,7 @@ paths:
           description: Not found, please look at details.
       summary: Get routing plan
       tags:
-        - Routing Plans (DOMS)
+        - Routing plans
     patch:
       description: ''
       operationId: patchRoutingPlan
@@ -24857,7 +25176,7 @@ paths:
           description: Entity version conflict
       summary: Update routing plan
       tags:
-        - Routing Plans (DOMS)
+        - Routing plans
   /api/routingplans/{routingplanId}/decisionlogs/{routingRun}:
     get:
       description: Retrieves in-depth information about the standard routing process
@@ -24904,7 +25223,7 @@ paths:
           description: Decision log not found
       summary: List routing plan decision log
       tags:
-        - Routing Plans (DOMS)
+        - Routing plans
   /api/routingplans/search:
     post:
       deprecated: false
@@ -24946,7 +25265,7 @@ paths:
       x-fft-permissions:
         - ROUTING_READ
       tags:
-        - Routing Plans (DOMS)
+        - Routing plans
       x-badges:
         - color: red
           label: ALPHA
@@ -24993,7 +25312,7 @@ paths:
           description: Entity not found, please look at details.
       summary: List routing plans graphs
       tags:
-        - Routing Plans (DOMS)
+        - Routing plans
   /api/safetystocks:
     get:
       deprecated: false
@@ -25049,7 +25368,7 @@ paths:
       x-fft-permissions:
         - SAFETY_STOCK_READ
       tags:
-        - Stocks (Inventory)
+        - Stock
     put:
       deprecated: false
       description: ''
@@ -25086,7 +25405,7 @@ paths:
       x-fft-permissions:
         - SAFETY_STOCK_WRITE
       tags:
-        - Stocks (Inventory)
+        - Stock
   /api/safetystocks/{safetyStockId}:
     delete:
       deprecated: false
@@ -25125,7 +25444,7 @@ paths:
       x-fft-permissions:
         - SAFETY_STOCK_WRITE
       tags:
-        - Stocks (Inventory)
+        - Stock
   /api/scopedcapabilities:
     get:
       description: >-
@@ -25170,7 +25489,7 @@ paths:
           description: Entity not found
       summary: List scoped capabilities
       tags:
-        - Features (Infrastructure)
+        - Features
       x-badges:
         - color: orange
           label: BETA
@@ -25274,7 +25593,7 @@ paths:
       x-fft-permissions:
         - SERVICE_JOB_READ
       tags:
-        - Services (Operations)
+        - Services
       x-badges:
         - color: orange
           label: BETA
@@ -25331,7 +25650,7 @@ paths:
       x-fft-permissions:
         - SERVICE_JOB_WRITE
       tags:
-        - Services (Operations)
+        - Services
       x-badges:
         - color: orange
           label: BETA
@@ -25378,7 +25697,7 @@ paths:
       x-fft-permissions:
         - SERVICE_JOB_WRITE
       tags:
-        - Services (Operations)
+        - Services
       x-badges:
         - color: orange
           label: BETA
@@ -25428,7 +25747,7 @@ paths:
       x-fft-permissions:
         - SERVICE_JOB_READ
       tags:
-        - Services (Operations)
+        - Services
       x-badges:
         - color: orange
           label: BETA
@@ -25570,7 +25889,7 @@ paths:
       x-fft-permissions:
         - SERVICE_JOB_READ
       tags:
-        - Services (Operations)
+        - Services
       x-badges:
         - color: orange
           label: BETA
@@ -25621,7 +25940,7 @@ paths:
       x-fft-permissions:
         - SERVICE_JOB_WRITE
       tags:
-        - Services (Operations)
+        - Services
       x-badges:
         - color: orange
           label: BETA
@@ -25672,7 +25991,7 @@ paths:
       x-fft-permissions:
         - SERVICE_JOB_READ
       tags:
-        - Services (Operations)
+        - Services
       x-badges:
         - color: orange
           label: BETA
@@ -25743,7 +26062,7 @@ paths:
       x-fft-permissions:
         - SERVICE_JOB_WRITE
       tags:
-        - Services (Operations)
+        - Services
       x-badges:
         - color: orange
           label: BETA
@@ -25796,7 +26115,7 @@ paths:
       x-fft-permissions:
         - SERVICE_JOB_READ
       tags:
-        - Services (Operations)
+        - Services
       x-badges:
         - color: orange
           label: BETA
@@ -25847,7 +26166,7 @@ paths:
       x-fft-permissions:
         - SERVICE_JOB_READ
       tags:
-        - Services (Operations)
+        - Services
       x-badges:
         - color: orange
           label: BETA
@@ -25915,7 +26234,7 @@ paths:
       x-fft-permissions:
         - SERVICE_JOB_WRITE
       tags:
-        - Services (Operations)
+        - Services
       x-badges:
         - color: orange
           label: BETA
@@ -26047,7 +26366,7 @@ paths:
             endpoint
       summary: List shipments
       tags:
-        - Shipments (Operations)
+        - Shipments
     post:
       operationId: addShipment
       requestBody:
@@ -26092,7 +26411,7 @@ paths:
             endpoint
       summary: Create shipment
       tags:
-        - Shipments (Operations)
+        - Shipments
   /api/shipments/{shipmentId}:
     get:
       description: ''
@@ -26135,7 +26454,7 @@ paths:
           description: Shipment not found
       summary: Get shipment
       tags:
-        - Shipments (Operations)
+        - Shipments
     patch:
       description: ''
       operationId: patchShipment
@@ -26190,7 +26509,7 @@ paths:
           description: Entity version conflict
       summary: Update shipment
       tags:
-        - Shipments (Operations)
+        - Shipments
   /api/shipments/{shipmentId}/actions:
     post:
       operationId: shipmentActions
@@ -26229,7 +26548,7 @@ paths:
             endpoint
       summary: Call shipment action
       tags:
-        - Shipments (Operations)
+        - Shipments
       description: >-
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
@@ -26283,7 +26602,7 @@ paths:
           description: Shipment not found
       summary: Get shipment delivery note
       tags:
-        - Shipments (Operations)
+        - Shipments
   /api/shipments/{shipmentId}/parcels:
     post:
       description: ''
@@ -26339,7 +26658,7 @@ paths:
           description: Parcel could not be processed due to failing conditions
       summary: Create shipment parcel
       tags:
-        - Shipments (Operations)
+        - Shipments
   /api/shipments/parcels:
     post:
       description: >-
@@ -26376,7 +26695,7 @@ paths:
             endpoint
       summary: Create parcel
       tags:
-        - Shipments (Operations)
+        - Shipments
   /api/shipments/search:
     post:
       deprecated: false
@@ -26414,7 +26733,7 @@ paths:
       x-fft-permissions:
         - SHIPMENT_READ
       tags:
-        - Shipments (Operations)
+        - Shipments
   /api/shippinginformation:
     get:
       deprecated: false
@@ -26501,7 +26820,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_READ
       tags:
-        - ShippingInformation (carrier)
+        - Shipping information
       x-badges:
         - color: red
           label: ALPHA
@@ -26545,7 +26864,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_WRITE
       tags:
-        - ShippingInformation (carrier)
+        - Shipping information
       x-badges:
         - color: red
           label: ALPHA
@@ -26595,7 +26914,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_READ
       tags:
-        - ShippingInformation (carrier)
+        - Shipping information
       x-badges:
         - color: red
           label: ALPHA
@@ -26640,7 +26959,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_READ
       tags:
-        - ShippingInformation (carrier)
+        - Shipping information
       x-badges:
         - color: orange
           label: BETA
@@ -26693,7 +27012,7 @@ paths:
       x-fft-permissions:
         - DOCUMENT_SET_READ
       tags:
-        - Signature (Operations)
+        - Signatures
       x-badges:
         - color: red
           label: ALPHA
@@ -26742,7 +27061,7 @@ paths:
       x-fft-permissions:
         - SIMULATION_ORDER_READ
       tags:
-        - Simulation Orders (DOMS)
+        - Simulation orders
       x-badges:
         - color: red
           label: ALPHA
@@ -26792,7 +27111,7 @@ paths:
       x-fft-permissions:
         - SIMULATION_ORDER_WRITE
       tags:
-        - Simulation Orders (DOMS)
+        - Simulation orders
       x-badges:
         - color: red
           label: ALPHA
@@ -26838,7 +27157,7 @@ paths:
       x-fft-permissions:
         - SIMULATION_ORDER_WRITE
       tags:
-        - Simulation Orders (DOMS)
+        - Simulation orders
       x-badges:
         - color: red
           label: ALPHA
@@ -26887,7 +27206,7 @@ paths:
       x-fft-permissions:
         - SIMULATION_ORDER_READ
       tags:
-        - Simulation Orders (DOMS)
+        - Simulation orders
       x-badges:
         - color: red
           label: ALPHA
@@ -26954,7 +27273,7 @@ paths:
       x-fft-permissions:
         - SIMULATION_ORDER_WRITE
       tags:
-        - Simulation Orders (DOMS)
+        - Simulation orders
       x-badges:
         - color: red
           label: ALPHA
@@ -27021,7 +27340,7 @@ paths:
       x-fft-permissions:
         - SIMULATION_ORDER_WRITE
       tags:
-        - Simulation Orders (DOMS)
+        - Simulation orders
       x-badges:
         - color: red
           label: ALPHA
@@ -27066,7 +27385,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_READ
       tags:
-        - Simulation Orders (DOMS)
+        - Simulation orders
       x-badges:
         - color: red
           label: ALPHA
@@ -27139,7 +27458,7 @@ paths:
       x-fft-permissions:
         - STACKS_READ
       tags:
-        - Stacks (Operations)
+        - Stacks
       x-badges:
         - color: orange
           label: BETA
@@ -27189,7 +27508,7 @@ paths:
       x-fft-permissions:
         - STACKS_WRITE
       tags:
-        - Stacks (Operations)
+        - Stacks
       x-badges:
         - color: orange
           label: BETA
@@ -27241,13 +27560,13 @@ paths:
       x-fft-permissions:
         - STACKS_READ
       tags:
-        - Stacks (Operations)
+        - Stacks
       x-badges:
         - color: orange
           label: BETA
   /api/status:
     get:
-      description: Returns the platform status.
+      description: Returns the fulfillmenttools status.
       operationId: status
       responses:
         '200':
@@ -27258,7 +27577,7 @@ paths:
           description: The status result
       summary: Get status
       tags:
-        - Health (Infrastructure)
+        - Health
   /api/stocks:
     get:
       deprecated: false
@@ -27332,7 +27651,7 @@ paths:
       x-fft-permissions:
         - STOCK_READ
       tags:
-        - Stocks (Inventory)
+        - Stock
     post:
       deprecated: false
       description: ''
@@ -27369,7 +27688,7 @@ paths:
       x-fft-permissions:
         - STOCK_WRITE
       tags:
-        - Stocks (Inventory)
+        - Stock
     put:
       deprecated: false
       description: Update and create many stocks at once
@@ -27408,7 +27727,7 @@ paths:
       x-fft-permissions:
         - STOCK_WRITE
       tags:
-        - Stocks (Inventory)
+        - Stock
   /api/stocks/{stockId}:
     delete:
       deprecated: false
@@ -27441,7 +27760,7 @@ paths:
       x-fft-permissions:
         - STOCK_WRITE
       tags:
-        - Stocks (Inventory)
+        - Stock
     get:
       deprecated: false
       description: ''
@@ -27477,7 +27796,7 @@ paths:
       x-fft-permissions:
         - STOCK_READ
       tags:
-        - Stocks (Inventory)
+        - Stock
     put:
       deprecated: false
       description: ''
@@ -27534,7 +27853,7 @@ paths:
       x-fft-permissions:
         - STOCK_WRITE
       tags:
-        - Stocks (Inventory)
+        - Stock
   /api/stocks/actions:
     post:
       deprecated: false
@@ -27572,7 +27891,7 @@ paths:
       x-fft-permissions:
         - STOCK_WRITE
       tags:
-        - Stocks (Inventory)
+        - Stock
   /api/stocks/search:
     post:
       deprecated: false
@@ -27610,7 +27929,7 @@ paths:
       x-fft-permissions:
         - STOCK_READ
       tags:
-        - Stocks (Inventory)
+        - Stock
   /api/stocks/summaries:
     get:
       deprecated: false
@@ -27745,7 +28064,7 @@ paths:
       x-fft-permissions:
         - STOCK_AVAILABILITIES_READ
       tags:
-        - Stocks (Inventory)
+        - Stock
   /api/storagelocations/search:
     post:
       deprecated: false
@@ -27783,7 +28102,7 @@ paths:
       x-fft-permissions:
         - STORAGE_LOCATION_READ
       tags:
-        - Storage Locations (Inventory)
+        - Storage locations
   /api/stowjobs:
     get:
       deprecated: false
@@ -27896,7 +28215,7 @@ paths:
       x-fft-permissions:
         - STOW_JOB_READ
       tags:
-        - Stowing (Inventory)
+        - Stowing
       x-badges:
         - color: orange
           label: BETA
@@ -27947,7 +28266,7 @@ paths:
       x-fft-permissions:
         - STOW_JOB_FULL_WRITE
       tags:
-        - Stowing (Inventory)
+        - Stowing
       x-badges:
         - color: orange
           label: BETA
@@ -27996,7 +28315,7 @@ paths:
       x-fft-permissions:
         - STOW_JOB_READ
       tags:
-        - Stowing (Inventory)
+        - Stowing
       x-badges:
         - color: orange
           label: BETA
@@ -28054,7 +28373,7 @@ paths:
       x-fft-permissions:
         - STOW_JOB_FULL_WRITE
       tags:
-        - Stowing (Inventory)
+        - Stowing
       x-badges:
         - color: orange
           label: BETA
@@ -28124,7 +28443,7 @@ paths:
             process the contained instructions, possibly due to semantic errors.
       summary: Call stow job action
       tags:
-        - Stowing (Inventory)
+        - Stowing
       x-badges:
         - color: orange
           label: BETA
@@ -28169,7 +28488,7 @@ paths:
       x-fft-permissions:
         - STOW_JOB_READ
       tags:
-        - Stowing (Inventory)
+        - Stowing
       x-badges:
         - color: orange
           label: BETA
@@ -28214,7 +28533,7 @@ paths:
             endpoint
       summary: List subscriptions
       tags:
-        - Eventing (Core)
+        - Eventing
     post:
       description: >-
         Add new Subscription. Please note: Currently it is only possible to add
@@ -28256,7 +28575,7 @@ paths:
             endpoint
       summary: Create subscription
       tags:
-        - Eventing (Core)
+        - Eventing
   /api/subscriptions/{subscriptionId}:
     delete:
       description: ''
@@ -28303,7 +28622,7 @@ paths:
           description: Entity not found
       summary: Delete subscription
       tags:
-        - Eventing (Core)
+        - Eventing
   /api/substitutes:
     get:
       operationId: getResultingSubstitutesForTenantArticleId
@@ -28345,7 +28664,7 @@ paths:
           description: Facility not found
       summary: List substitutes
       tags:
-        - Picking (Operations)
+        - Picking
   /api/substitutes/{tenantArticleId}:
     delete:
       description: ''
@@ -28384,7 +28703,7 @@ paths:
           description: Facility listing not found
       summary: Delete substitutes
       tags:
-        - Picking (Operations)
+        - Picking
     get:
       description: Get the substitutes for a given tenant article id
       operationId: getSubstitutesForTenantArticleId
@@ -28426,7 +28745,7 @@ paths:
           description: Facility not found
       summary: Get substitutes
       tags:
-        - Picking (Operations)
+        - Picking
     put:
       description: ''
       operationId: putSubstitutesForTenantArticleID
@@ -28479,7 +28798,7 @@ paths:
           description: Substitutes version conflict
       summary: Set substitutes
       tags:
-        - Picking (Operations)
+        - Picking
   /api/supportedevents:
     get:
       description: ''
@@ -28507,7 +28826,7 @@ paths:
             endpoint
       summary: List supported events
       tags:
-        - Eventing (Core)
+        - Eventing
   /api/tags:
     get:
       description: ''
@@ -28555,7 +28874,7 @@ paths:
           description: No more elements available
       summary: List tags
       tags:
-        - Tags (Core)
+        - Tags
     post:
       description: ''
       operationId: addTag
@@ -28595,7 +28914,7 @@ paths:
             endpoint
       summary: Create tag
       tags:
-        - Tags (Core)
+        - Tags
   /api/tags/{tagRef}:
     get:
       description: ''
@@ -28638,7 +28957,7 @@ paths:
           description: User not found
       summary: Get tag
       tags:
-        - Tags (Core)
+        - Tags
     patch:
       description: ''
       operationId: putTag
@@ -28687,7 +29006,7 @@ paths:
           description: Tag not found
       summary: Update tag
       tags:
-        - Tags (Core)
+        - Tags
   /api/tags/packing/needspacking:
     post:
       description: ''
@@ -28730,7 +29049,7 @@ paths:
           description: Entity not found
       summary: Get needs packing for tags
       tags:
-        - Packing Configuration (Operations)
+        - Packing configuration
   /api/tags/search:
     post:
       deprecated: false
@@ -28868,7 +29187,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_READ
       tags:
-        - TrackingInformation (Carrier)
+        - Tracking information
       x-badges:
         - color: red
           label: ALPHA
@@ -28918,7 +29237,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_WRITE
       tags:
-        - TrackingInformation (Carrier)
+        - Tracking information
       x-badges:
         - color: red
           label: ALPHA
@@ -28968,7 +29287,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_READ
       tags:
-        - TrackingInformation (Carrier)
+        - Tracking information
       x-badges:
         - color: red
           label: ALPHA
@@ -29028,7 +29347,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_WRITE
       tags:
-        - TrackingInformation (Carrier)
+        - Tracking information
       x-badges:
         - color: red
           label: ALPHA
@@ -29073,7 +29392,7 @@ paths:
       x-fft-permissions:
         - ADMIN_MODULES_READ
       tags:
-        - TrackingInformation (Carrier)
+        - Tracking information
       x-badges:
         - color: red
           label: ALPHA
@@ -29148,7 +29467,7 @@ paths:
       x-fft-permissions:
         - USERS_READ
       tags:
-        - User Management (Core)
+        - User management
     post:
       deprecated: false
       description: ''
@@ -29192,7 +29511,7 @@ paths:
         - USER_READ
         - USER_WRITE
       tags:
-        - User Management (Core)
+        - User management
   /api/users/{userId}:
     delete:
       deprecated: false
@@ -29232,7 +29551,7 @@ paths:
         - USER_READ
         - USER_WRITE
       tags:
-        - User Management (Core)
+        - User management
     get:
       deprecated: false
       description: ''
@@ -29274,7 +29593,7 @@ paths:
       x-fft-permissions:
         - USER_READ
       tags:
-        - User Management (Core)
+        - User management
     patch:
       deprecated: false
       description: ''
@@ -29322,7 +29641,7 @@ paths:
       x-fft-permissions:
         - USER_MODIFY
       tags:
-        - User Management (Core)
+        - User management
   /api/users/{userId}/assignedFacilities:
     post:
       deprecated: false
@@ -29368,7 +29687,7 @@ paths:
         - USER_READ
         - USER_WRITE
       tags:
-        - User Management (Core)
+        - User management
   /api/users/{userId}/permissions:
     get:
       deprecated: false
@@ -29407,7 +29726,7 @@ paths:
       x-fft-permissions:
         - USER_READ
       tags:
-        - User Management (Core)
+        - User management
   /api/users/me:
     patch:
       deprecated: true
@@ -29441,7 +29760,7 @@ paths:
       x-fft-permissions:
         - CURRENT_USER_MODIFY
       tags:
-        - User Management (Core)
+        - User management
   /api/users/me/actions:
     post:
       deprecated: false
@@ -29493,7 +29812,7 @@ paths:
       x-fft-permissions:
         - CURRENT_USER_MODIFY
       tags:
-        - User Management (Core)
+        - User management
   /api/users/me/effectivepermissions:
     get:
       deprecated: false
@@ -29517,7 +29836,7 @@ paths:
       x-fft-permissions:
         - CURRENT_USER_READ
       tags:
-        - User Management (Core)
+        - User management
   /api/users/search:
     post:
       deprecated: false
@@ -29559,7 +29878,7 @@ paths:
       x-fft-permissions:
         - USERS_READ
       tags:
-        - User Management (Core)
+        - User management
       x-badges:
         - color: orange
           label: BETA
@@ -29599,7 +29918,7 @@ paths:
           description: The given country can't be validated
       summary: Validate postal code
       tags:
-        - Validations (Core)
+        - Validations
   /api/workflows/search:
     post:
       deprecated: false
@@ -29641,7 +29960,7 @@ paths:
       x-fft-permissions:
         - WORKFLOW_DEFINITION_READ
       tags:
-        - Workflow Management (Core)
+        - Workflows
       x-badges:
         - color: red
           label: ALPHA
@@ -29682,7 +30001,7 @@ paths:
       x-fft-permissions:
         - ZONE_READ
       tags:
-        - Storage Locations (Inventory)
+        - Storage locations
   /graphql:
     get:
       description: >-
@@ -29696,7 +30015,7 @@ paths:
           description: The GraphQL playground
       summary: Get GraphQL
       tags:
-        - GraphQL (Infrastructure)
+        - GraphQL
       x-badges:
         - color: red
           label: ALPHA
@@ -29713,7 +30032,7 @@ paths:
           description: GraphQL validation error
       summary: Execute GraphQL command
       tags:
-        - GraphQL (Infrastructure)
+        - GraphQL
       x-badges:
         - color: red
           label: ALPHA
@@ -33030,6 +33349,9 @@ components:
           type: number
         maxLength:
           description: The maximum length in millimeters of the packagingUnit.
+          type: number
+        maxVolume:
+          description: The maximum volume in cubic millimeters of the packagingUnit.
           type: number
         maxVolumetricWeight:
           description: >-
@@ -53899,6 +54221,9 @@ components:
         maxLength:
           description: The maximum length in millimeters of the packagingUnit.
           type: number
+        maxVolume:
+          description: The maximum volume in cubic millimeters of the packagingUnit.
+          type: number
         maxVolumetricWeight:
           description: >-
             This part of the API is in Alpha status. For details, see the <a
@@ -57836,6 +58161,453 @@ components:
       type: object
       title: OperationalRestowingConfigurations
       description: OperationalRestowingConfigurations
+    OperationsValidation:
+      properties:
+        created:
+          description: >-
+            The date this entity was created by fulfillmenttools. This value is
+            generated by the service.
+          example: 2020-02-03T08:45:51.525Z
+          format: date-time
+          type: string
+        id:
+          description: Unique ID of this operations validation.
+          example: 9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1
+          minLength: 1
+          type: string
+        key:
+          description: >-
+            The key associated with this operations validation. Together with
+            tenantArticleId it must be unique.
+          example: serialNumber
+          minLength: 1
+          type: string
+        lastModified:
+          description: >-
+            The date this entity was modified last. This value is generated by
+            the service.
+          example: 2020-02-03T09:45:51.525Z
+          format: date-time
+          type: string
+        tenantArticleId:
+          description: The tenant article id associated with this operations validation.
+          example: '4711'
+          minLength: 1
+          type: string
+        tenantArticleIdKey:
+          description: >-
+            Read-only combination of tenantArticleId and key, separated by "_".
+            Generated by the service and intended for display and search. Not
+            guaranteed to be unique, as both tenantArticleId and key may contain
+            "_". Use tenantArticleId and key for an exact match.
+          example: 4711_serialNumber
+          minLength: 1
+          readOnly: true
+          type: string
+        valueEntries:
+          description: >-
+            The values registered for this tenantArticleId and key, each with
+            the operative entity and process it was registered from. A value can
+            only be registered once per tenantArticleId and key.
+          items:
+            $ref: '#/components/schemas/OperationsValidationValueEntry'
+          type: array
+        version:
+          description: >-
+            The version of the document to be used in optimistic locking
+            mechanisms.
+          example: 42
+          format: int64
+          type: integer
+      required:
+        - created
+        - lastModified
+        - version
+        - id
+        - tenantArticleId
+        - valueEntries
+        - key
+        - tenantArticleIdKey
+      title: OperationsValidation
+      type: object
+      description: OperationsValidation
+    OperationsValidationAddValuesActionParameter:
+      properties:
+        name:
+          description: The name of the action.
+          enum:
+            - ADD_VALIDATION_VALUES
+          type: string
+        valueEntries:
+          description: The value entries to be added to the operations validation.
+          items:
+            $ref: '#/components/schemas/OperationsValidationValueEntryForCreation'
+          maxItems: 50
+          minItems: 1
+          type: array
+        version:
+          description: Version of the operations validation to be changed.
+          example: 1
+          minimum: 0
+          type: number
+      required:
+        - name
+        - version
+        - valueEntries
+      title: OperationsValidationAddValuesActionParameter
+      type: object
+      description: OperationsValidationAddValuesActionParameter
+    OperationsValidationForCreation:
+      properties:
+        key:
+          description: >-
+            The key associated with this operations validation. Together with
+            tenantArticleId it must be unique.
+          example: serialNumber
+          minLength: 1
+          type: string
+        tenantArticleId:
+          description: The tenant article id associated with this operations validation.
+          example: '4711'
+          minLength: 1
+          type: string
+        valueEntries:
+          description: >-
+            The values registered for this tenantArticleId and key, each with
+            the operative entity and process it was registered from. A value can
+            only be registered once per tenantArticleId and key.
+          items:
+            $ref: '#/components/schemas/OperationsValidationValueEntryForCreation'
+          maxItems: 50
+          type: array
+      required:
+        - tenantArticleId
+        - valueEntries
+        - key
+      title: OperationsValidationForCreation
+      type: object
+      description: OperationsValidationForCreation
+    OperationsValidationPaginatedResult:
+      properties:
+        operationsValidations:
+          items:
+            $ref: '#/components/schemas/OperationsValidation'
+          type: array
+        pageInfo:
+          allOf:
+            - $ref: '#/components/schemas/PageInfo'
+          description: Pagination information for the search result.
+        total:
+          description: >-
+            The total number of items matching the search criteria. Only filled,
+            if withTotal is set to true in the search options.
+          minimum: 0
+          type: number
+      required:
+        - pageInfo
+        - operationsValidations
+      title: OperationsValidationPaginatedResult
+      type: object
+      description: OperationsValidationPaginatedResult
+    OperationsValidationRemoveValuesActionParameter:
+      properties:
+        name:
+          description: The name of the action.
+          enum:
+            - REMOVE_VALIDATION_VALUES
+          type: string
+        values:
+          description: The values to be removed from the operations validation.
+          example:
+            - value1
+          items:
+            type: string
+          maxItems: 50
+          minItems: 1
+          type: array
+        version:
+          description: Version of the operations validation to be changed.
+          example: 1
+          minimum: 0
+          type: number
+      required:
+        - name
+        - version
+        - values
+      title: OperationsValidationRemoveValuesActionParameter
+      type: object
+      description: OperationsValidationRemoveValuesActionParameter
+    OperationsValidations:
+      properties:
+        operationsValidations:
+          description: List of operations validations.
+          items:
+            $ref: '#/components/schemas/OperationsValidation'
+          type: array
+        total:
+          description: Total number of found entities for this query.
+          example: 42
+          type: number
+      required:
+        - operationsValidations
+        - total
+      title: OperationsValidations
+      type: object
+      description: OperationsValidations
+    OperationsValidationSearchPayload:
+      properties:
+        after:
+          deprecated: false
+          description: >-
+            The cursor to start after for forward pagination. The value is
+            provided in the `pageInfo.endCursor` field of the response. Cannot
+            be used with `before` or `last`.
+          type: string
+        before:
+          description: >-
+            The cursor to start before for backward pagination. The value is
+            provided in the `pageInfo.startCursor` field of the response. Cannot
+            be used with `after` or `size` (first).
+          type: string
+        last:
+          description: >-
+            Number of items to return for backward pagination. Cannot be used
+            with 'size' (first). Default: 20.
+          maximum: 250
+          minimum: 1
+          type: number
+        options:
+          $ref: '#/components/schemas/SearchOptions'
+        query:
+          $ref: '#/components/schemas/OperationsValidationSearchQuery'
+        size:
+          description: >-
+            Number of items to return for forward pagination. Cannot be used
+            with 'last'. Default: 20.
+          example: 10
+          maximum: 250
+          minimum: 1
+          type: number
+        sort:
+          description: Use for sorting the result.
+          items:
+            $ref: '#/components/schemas/OperationsValidationSort'
+          maxItems: 1
+          minItems: 1
+          type: array
+        startAfterId:
+          deprecated: true
+          description: >-
+            The ID to start after. Deprecated, use `after` with the value
+            provided in `pageInfo.endCursor` instead.
+          type: string
+      required:
+        - query
+      title: OperationsValidationSearchPayload
+      type: object
+      description: OperationsValidationSearchPayload
+    OperationsValidationSearchQuery:
+      properties:
+        and:
+          items:
+            $ref: '#/components/schemas/OperationsValidationSearchQuery'
+          maxItems: 500
+          type: array
+        created:
+          allOf:
+            - $ref: '#/components/schemas/DateFilter'
+          description: >-
+            Search entries by created. Applying a narrow and well-considered
+            filter value is strongly recommended, as it can greatly improve
+            response times, especially when working with large datasets.
+        id:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by id
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+        key:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by key
+        lastModified:
+          allOf:
+            - $ref: '#/components/schemas/DateFilter'
+          description: Search by lastModified
+        or:
+          items:
+            $ref: '#/components/schemas/OperationsValidationSearchQuery'
+          maxItems: 500
+          type: array
+        tenantArticleId:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by tenantArticleId
+          example: MY_ARTICLE_ID
+        tenantArticleIdKey:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by tenantArticleIdKey
+        valueEntries:
+          allOf:
+            - $ref: '#/components/schemas/OperationsValidationValueEntriesListFilter'
+          description: Nested list search by valueEntries
+      title: OperationsValidationSearchQuery
+      type: object
+      description: OperationsValidationSearchQuery
+    OperationsValidationSort:
+      properties:
+        created:
+          enum:
+            - ASC
+            - DESC
+          type: string
+        id:
+          enum:
+            - ASC
+            - DESC
+          type: string
+        key:
+          enum:
+            - ASC
+            - DESC
+          type: string
+        lastModified:
+          enum:
+            - ASC
+            - DESC
+          type: string
+        tenantArticleId:
+          enum:
+            - ASC
+            - DESC
+          type: string
+        tenantArticleIdKey:
+          enum:
+            - ASC
+            - DESC
+          type: string
+      title: OperationsValidationSort
+      type: object
+      description: OperationsValidationSort
+    OperationsValidationSourceOperativeEntity:
+      properties:
+        id:
+          description: ID of the operative entity.
+          example: 9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1
+          minLength: 1
+          type: string
+        type:
+          description: Type of the operative entity. Currently only PICK_JOB is supported.
+          enum:
+            - PICK_JOB
+          type: string
+      required:
+        - id
+        - type
+      title: OperationsValidationSourceOperativeEntity
+      type: object
+      description: OperationsValidationSourceOperativeEntity
+    OperationsValidationValueEntriesFilter:
+      properties:
+        processRef:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by processRef
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+        sourceOperativeEntity:
+          allOf:
+            - $ref: >-
+                #/components/schemas/OperationsValidationValueEntriesSourceOperativeEntityFilter
+          description: Nested search by sourceOperativeEntity
+        value:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by value
+      title: OperationsValidationValueEntriesFilter
+      type: object
+      description: OperationsValidationValueEntriesFilter
+    OperationsValidationValueEntriesListFilter:
+      properties:
+        contains:
+          allOf:
+            - $ref: '#/components/schemas/OperationsValidationValueEntriesFilter'
+          description: Contains returns if at least one entry matches
+        exists:
+          description: >-
+            exists:false matches empty or absent lists; exists:true matches
+            non-empty lists
+          type: boolean
+      title: OperationsValidationValueEntriesListFilter
+      type: object
+      description: OperationsValidationValueEntriesListFilter
+    OperationsValidationValueEntriesSourceOperativeEntityFilter:
+      properties:
+        id:
+          allOf:
+            - $ref: '#/components/schemas/StringFilter'
+          description: Search by id
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+      title: OperationsValidationValueEntriesSourceOperativeEntityFilter
+      type: object
+      description: OperationsValidationValueEntriesSourceOperativeEntityFilter
+    OperationsValidationValueEntry:
+      properties:
+        created:
+          description: Timestamp of creation for this entry.
+          example: 2020-02-03T09:45:51.525Z
+          format: date-time
+          type: string
+        deletionDate:
+          description: Times of automatic deletion of this entry.
+          example: 2020-02-03T09:45:51.525Z
+          format: date-time
+          type: string
+        processRef:
+          description: ProcessRef of the referenced entity in sourceOperativeEntity.
+          example: 9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1
+          minLength: 1
+          type: string
+        sourceOperativeEntity:
+          allOf:
+            - $ref: '#/components/schemas/OperationsValidationSourceOperativeEntity'
+          description: The operative entity this value was registered from.
+        value:
+          description: The registered value.
+          example: SN-4711-0001
+          minLength: 1
+          type: string
+      required:
+        - value
+        - processRef
+        - sourceOperativeEntity
+        - created
+        - deletionDate
+      title: OperationsValidationValueEntry
+      type: object
+      description: OperationsValidationValueEntry
+    OperationsValidationValueEntryForCreation:
+      properties:
+        processRef:
+          description: ProcessRef of the referenced entity in sourceOperativeEntity.
+          example: 9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1
+          minLength: 1
+          type: string
+        sourceOperativeEntity:
+          allOf:
+            - $ref: '#/components/schemas/OperationsValidationSourceOperativeEntity'
+          description: The operative entity this value was registered from.
+        value:
+          description: The registered value.
+          example: SN-4711-0001
+          minLength: 1
+          type: string
+      required:
+        - value
+        - processRef
+        - sourceOperativeEntity
+      title: OperationsValidationValueEntryForCreation
+      type: object
+      description: OperationsValidationValueEntryForCreation
     OperativeContainerType:
       properties:
         nameLocalized:
@@ -66044,6 +66816,14 @@ components:
             this resource
           example: '%%HOST%%/api/parcels/{parcelId}/labels/84168117830018.pdf'
           type: string
+        masterTrackingNumber:
+          description: >-
+            The masterTrackingNumber is the first tracking number which was
+            created for a shipment provided by the carrier. Sometimes carriers
+            also have a separated number range for that. If not, it´s the number
+            of the first package.
+          example: '84168117830018'
+          type: string
         proxyId:
           description: The ID of the corresponding job at the CEP proxy (if used)
           example: 3a186c51d4281acbecf5ed38805b1db92a9d668b
@@ -66055,6 +66835,14 @@ components:
         returnLabelUrl:
           description: The original return label URL
           example: someCepProvider.com/pathToReturnLabel.pdf
+          type: string
+        returnMasterTrackingNumber:
+          description: >-
+            The returnMasterTrackingNumber is the first tracking number for the
+            return which was created for a shipment provided by the carrier.
+            Sometimes carriers also have a separated number range for that. If
+            not, it´s the number of the first package.
+          example: '84168117830018'
           type: string
         returnTrackingUrl:
           description: The URL to track the return of this parcel
@@ -66762,6 +67550,8 @@ components:
             - PROCESS_LOG_READ
             - OPERATIVE_PROCESS_READ
             - OPERATIVE_PROCESS_WRITE
+            - OPERATIONS_VALIDATION_READ
+            - OPERATIONS_VALIDATION_WRITE
             - DELIVERYNOTE_WRITE
             - PACKJOB_READ
             - PACKJOB_WRITE
@@ -66941,6 +67731,7 @@ components:
             - PROCESS_LOGS
             - EXTERNAL_ACTIONS
             - OPERATIVE_PROCESS
+            - OPERATIONS_VALIDATION
             - DELIVERYNOTE
             - REMOTE_CONFIG
             - ADMIN_DATA
@@ -70528,6 +71319,8 @@ components:
           allOf:
             - $ref: '#/components/schemas/ProcessStatusDetail'
           description: Return domain status with aggregated sub-statuses from modules.
+        routingEngine:
+          $ref: '#/components/schemas/RoutingEngineEnum'
         routingPlanRefs:
           description: >-
             References the RoutingPlans that were used during this process (if
@@ -73754,6 +74547,12 @@ components:
           maxItems: 60
           minItems: 0
           type: array
+        key:
+          description: Key of this value to validate against operation validations
+          example: Germany
+          minLength: 1
+          nullable: true
+          type: string
         type:
           enum:
             - EXACT_MATCH
@@ -76290,6 +77089,8 @@ components:
               - PROCESS_LOG_READ
               - OPERATIVE_PROCESS_READ
               - OPERATIVE_PROCESS_WRITE
+              - OPERATIONS_VALIDATION_READ
+              - OPERATIONS_VALIDATION_WRITE
               - DELIVERYNOTE_WRITE
               - PACKJOB_READ
               - PACKJOB_WRITE
@@ -76526,6 +77327,8 @@ components:
               - PROCESS_LOG_READ
               - OPERATIVE_PROCESS_READ
               - OPERATIVE_PROCESS_WRITE
+              - OPERATIONS_VALIDATION_READ
+              - OPERATIONS_VALIDATION_WRITE
               - DELIVERYNOTE_WRITE
               - PACKJOB_READ
               - PACKJOB_WRITE
@@ -76753,6 +77556,8 @@ components:
               - PROCESS_LOG_READ
               - OPERATIVE_PROCESS_READ
               - OPERATIVE_PROCESS_WRITE
+              - OPERATIONS_VALIDATION_READ
+              - OPERATIONS_VALIDATION_WRITE
               - DELIVERYNOTE_WRITE
               - PACKJOB_READ
               - PACKJOB_WRITE
@@ -76986,6 +77791,8 @@ components:
               - PROCESS_LOG_READ
               - OPERATIVE_PROCESS_READ
               - OPERATIVE_PROCESS_WRITE
+              - OPERATIONS_VALIDATION_READ
+              - OPERATIONS_VALIDATION_WRITE
               - DELIVERYNOTE_WRITE
               - PACKJOB_READ
               - PACKJOB_WRITE
@@ -77410,6 +78217,13 @@ components:
       type: object
       title: RoutingDecisionLogs
       description: RoutingDecisionLogs
+    RoutingEngineEnum:
+      enum:
+        - ADVANCED_ORDER_ROUTING
+        - STANDARD_ORDER_ROUTING
+      type: string
+      title: RoutingEngineEnum
+      description: RoutingEngineEnum
     RoutingJournal:
       properties:
         blacklistedFacilityData:
@@ -77638,6 +78452,8 @@ components:
           type: string
         reRouteReason:
           $ref: '#/components/schemas/RerouteReason'
+        routingEngine:
+          $ref: '#/components/schemas/RoutingEngineEnum'
         routingRun:
           description: The iteration through the routing process
           type: number
@@ -93165,7 +93981,7 @@ components:
           description: The maximum number of items that can fit in the packagingUnit.
           type: number
         maxVolume:
-          description: The maximum volume in cubicle millimeters of the packagingUnit.
+          description: The maximum volume in cubic millimeters of the packagingUnit.
           type: number
         maxVolumetricWeight:
           description: >-
@@ -94681,6 +95497,8 @@ components:
               - PROCESS_LOG_READ
               - OPERATIVE_PROCESS_READ
               - OPERATIVE_PROCESS_WRITE
+              - OPERATIONS_VALIDATION_READ
+              - OPERATIONS_VALIDATION_WRITE
               - DELIVERYNOTE_WRITE
               - PACKJOB_READ
               - PACKJOB_WRITE
@@ -95925,193 +96743,187 @@ components:
 tags:
   - description: >-
       Endpoints used by shops to get the current available pickup stores and
-      available service levels like Same-Day delivery.
-    name: Checkout Options (DOMS)
-  - description: DOMS endpoints to create, retrieve, update, and manage customer orders.
-    name: Orders (DOMS)
+      available service levels like same-day delivery.
+    name: Checkout options
+  - description: Endpoints to create, retrieve, update, and manage orders.
+    name: Orders
   - description: >-
-      DOMS endpoints to define and manage configuration settings related to
-      order processing, such as defaults, business rules, and operational
-      parameters that influence how orders are handled.
-    name: Orders Configuration (DOMS)
+      Endpoints to define and manage configuration settings related to order
+      processing, such as defaults, business rules, and operational parameters
+      that influence how orders are handled.
+    name: Orders configuration
   - description: >-
       Endpoints for managing orders that have already been completed and do not
       need to participate in the fulfillment lifecycle.
-    name: Order Records (DOMS)
+    name: Order records
   - description: Endpoints for managing packaging units.
-    name: PackagingUnits (DOMS)
-  - description: >-
-      Endpoints to get information out of the brain of our Distributed Order
-      Management System (DOMS).
-    name: Routing Plans (DOMS)
+    name: Packaging units
+  - description: Endpoints to get information about the routing plan and any reroutes.
+    name: Routing plans
   - description: Endpoints for configuring routing plan handling.
-    name: Routing Plans Configuration (DOMS)
-  - description: Endpoints to configure the routing strategy of the DOMS.
-    name: Routing Strategy (DOMS)
+    name: Routing plans configuration
+  - description: Endpoints to configure the routing strategy.
+    name: Routing strategies
   - description: Endpoints for processing the routing decision logs.
-    name: Sourcing Options (DOMS)
+    name: Sourcing options
   - description: Endpoints to analyze the sourcing options a routing request would produce.
-    name: Analyze (DOMS)
-  - description: Search endpoint for order records.
-    name: OrderRecords
+    name: Analyze
   - description: Endpoints to create, update, read, and delete order source configurations.
-    name: Orders Source (DOMS)
+    name: Orders sources
   - description: Endpoints to distribute items across packaging units (bin packing).
-    name: Routing (DOMS)
+    name: Routing
   - description: Endpoints to read the journal entries recorded for a routing process.
-    name: RoutingJournal (doms)
+    name: Routing journals
   - description: >-
       Endpoints to create, update, and read simulation orders used to try out
       routing behavior.
-    name: Simulation Orders (DOMS)
+    name: Simulation orders
   - description: Endpoints to create, update, and read carriers.
-    name: Carriers (Operations)
+    name: Carriers
   - description: Endpoints to create, update, and read carriers configuration.
-    name: Carriers Configuration (Operations)
-  - description: These endpoints manage the handover process.
-    name: Handovers (Operations)
+    name: Carriers configuration
+  - description: Endpoints to manage the handover process.
+    name: Handovers
   - description: Endpoints to create, update, and read handover configuration.
-    name: Handovers Configuration (Operations)
+    name: Handovers configuration
   - description: Endpoints to manipulate operative containers.
-    name: Operative Container (Operations)
-  - description: Get operative processes.
-    name: Operative Process (Operations)
-  - description: These endpoints facilitate the packing process.
-    name: Packing (Operations)
+    name: Operative containers
+  - description: Endpoints to get operative processes.
+    name: Operative processes
+  - description: Endpoints to create, update, and read operations validations.
+    name: Operations Validations (Operations)
+  - description: Endpoints to facilitate the packing process.
+    name: Packing
   - description: Endpoints to create, update, and read packing configuration.
-    name: Packing Configuration (Operations)
-  - description: These endpoints support the management of the picking process.
-    name: Picking (Operations)
+    name: Packing configuration
+  - description: Endpoints to support the management of the picking process.
+    name: Picking
   - description: Endpoints to create, update, and read pick jobs.
-    name: Picking Configuration (Operations)
+    name: Picking configuration
   - description: Endpoints to manipulate restowing items.
-    name: Restowing (Operations)
+    name: Restowing
   - description: Endpoints to manipulate restowing configuration.
-    name: Restowing Configuration (Operations)
+    name: Restowing configuration
   - description: Endpoints to create, update, and read returns.
-    name: Returns (Operations)
+    name: Returns
   - description: Endpoints to create, update, and read returns configuration.
-    name: Returns Configuration (Operations)
+    name: Returns configuration
   - description: Endpoints to create, update, and read operative service jobs.
-    name: Services (Operations)
+    name: Services
   - description: >-
       Endpoints to create, update, and read operative service jobs
       configuration.
-    name: Services Configuration (Operations)
+    name: Services configuration
   - description: Endpoints to create, update, and read shipments and parcels.
-    name: Shipments (Operations)
+    name: Shipments
   - description: Endpoints to create, update, and read shipping configuration.
-    name: Shipments Configuration (Operations)
+    name: Shipments configuration
   - description: Endpoints to operate with stacks.
-    name: Stacks (Operations)
+    name: Stacks
   - description: Endpoints to create, update, and read shipping labels.
-    name: Label (Operations)
+    name: Labels
   - description: Endpoints to create and read the parcel information reported by a carrier.
-    name: Parcel Information (Operations)
+    name: Parcel information
   - description: Endpoints to create, update, and read pickup services.
-    name: PickupService (operations)
-  - description: Endpoints to create a pickup-receipt PDF from a captured signature.
-    name: Signature (Operations)
+    name: Pickup service
+  - description: Endpoints to create a PDF pickup receipt from a captured signature.
+    name: Signatures
   - description: Endpoints to read and update the shipping configuration.
-    name: ShippingConfiguration (carrier)
+    name: Shipping configuration
   - description: Endpoints to create and read the shipping information of a parcel.
-    name: ShippingInformation (carrier)
+    name: Shipping information
   - description: >-
       Endpoints to create, read, and act on the tracking information of a
       parcel.
-    name: TrackingInformation (Carrier)
+    name: Tracking information
   - description: Endpoints to create, update, and read categories.
-    name: Categories (Inventory)
+    name: Categories
   - description: Endpoints to configure and get channel availability.
-    name: Channel Availability (Inventory)
+    name: Channel availabilities
   - description: Endpoints to create, update, and read inbound processes and receipts.
-    name: Inbound (Inventory)
-  - description: These endpoints handle the reservations.
-    name: Reservations (Inventory)
+    name: Inbound
+  - description: Endpoints handle reservations.
+    name: Reservations
   - description: Endpoints to create, update, and read stock availability thresholds.
-    name: Stock Availability Thresholds (Inventory)
+    name: Stock availability thresholds
   - description: Endpoints to create, update, and read stocks.
-    name: Stocks (Inventory)
+    name: Stock
   - description: Endpoints to create, update, and read stocks configuration.
-    name: Stocks Configuration (Inventory)
+    name: Stock configuration
   - description: Endpoints to create, update, and read storage locations and zones.
-    name: Storage Locations (Inventory)
+    name: Storage locations
   - description: Endpoints to create, update, and read stow jobs.
-    name: Stowing (Inventory)
-  - description: Auditing helps determine who did what when.
-    name: Audits (Core)
+    name: Stowing
+  - description: Endpoints to help determine who did what when.
+    name: Audits
   - description: Endpoints to update and read general configuration of fulfillmenttools.
-    name: Configurations (Core)
+    name: Configurations
   - description: Endpoints to create, update, and read custom services.
-    name: Custom Services (Core)
+    name: Custom services
   - description: Endpoints to create, update, and read document sets and files.
-    name: Document Sets (Core)
+    name: Document sets
   - description: Endpoints to create, update, and read subscriptions.
-    name: Eventing (Core)
+    name: Eventing
   - description: Endpoints to create, update, and read event scope configurations.
-    name: Event Scope Configuration (Core)
+    name: Event scopes configuration
   - description: >-
       Endpoints to read and modify expires, for example, by extending the
       provisioning time.
-    name: Expiries (Core)
+    name: Expiries
   - description: Endpoints to read and modify expires configuration.
-    name: Expiries Configuration (Core)
+    name: Expiries configuration
   - description: >-
       Endpoints to attach external actions to processes and append logs to
       external actions.
-    name: External Actions (Core)
+    name: External actions
   - description: >-
       Facilities represent various locations that form part of the fulfillment
       network.
-    name: Facilities (Core)
+    name: Facilities
   - description: Facility groups combine one or multiple facilities into logical groups.
-    name: Facility Groups (Core)
+    name: Facility groups
   - description: Endpoints to create, update, and read facility listings.
-    name: Listings (Core)
+    name: Listings
   - description: Endpoints to create, update and read measurement units.
-    name: Measurement Units (Core)
+    name: Measurement units
   - description: Endpoints to configure the notification center.
-    name: Notification Center Configuration (Core)
+    name: Notification center configuration
   - description: A process groups all entities of an order.
-    name: Processes (Core)
+    name: Processes
   - description: Endpoints to create, update, and read remote configs.
-    name: Remote Configs (Core)
+    name: Remote configuration
   - description: Endpoints to create, update, and read tags.
-    name: Tags (Core)
+    name: Tags
   - description: >-
-      These endpoints enable the administration of user accounts, including
+      Endpoints that enable the administration of user accounts, including
       creation, updating, read, and deletion of user accounts.
-    name: User Management (Core)
-  - description: Validate properties accepted by fulfillmenttools.
-    name: Validations (Core)
+    name: User management
+  - description: Endpoints that validate properties accepted by fulfillmenttools.
+    name: Validations
   - description: >-
       Endpoints to create, update, and read export containers, export requests,
       and export operations.
     name: Export
   - description: Endpoints to read notifications and perform actions on them.
-    name: Notifications (Core)
+    name: Notifications
   - description: Endpoints to calculate the purchase prices of a listing.
-    name: Purchase Prices (Core)
+    name: Purchase prices
   - description: >-
       Endpoints to execute support actions such as activation, status check,
       extension, and deactivation.
-    name: Support (Core)
-  - description: Search endpoint for tags.
-    name: Tags
+    name: Support
   - description: Endpoints to create, update, and read workflow definitions.
-    name: Workflow (Core)
-  - description: Search endpoint for workflows.
-    name: Workflow Management (Core)
-  - description: Obtain artifact information provided by fulfillmenttools.
-    name: Artifacts (Infrastructure)
-  - description: Configure features of fulfillmenttools.
-    name: Features (Infrastructure)
-  - description: Access to the fulfillmenttools GraphQL API.
-    name: GraphQL (Infrastructure)
+    name: Workflows
+  - description: Endpoints to obtain artifact information provided by fulfillmenttools.
+    name: Artifacts
+  - description: Endpoints to configure features of fulfillmenttools.
+    name: Features
+  - description: Endpoints to access to the fulfillmenttools GraphQL API.
+    name: GraphQL
   - description: Endpoints to get health status about fulfillmenttools.
-    name: Health (Infrastructure)
-  - description: Endpoints to configure external IDPs.
-    name: OIDC Configuration (Infrastructure)
+    name: Health
+  - description: Endpoints to configure external identity service providers (IDPs).
+    name: OIDC configuration
   - description: Endpoints serving statically hosted HTML content.
     name: Static
 security:

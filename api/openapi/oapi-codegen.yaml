@@ -19,14 +19,14 @@ output-options:
   # routing engine's answer to "where would this order be fulfilled from"; it
   # drags in the OrderForCreation schema graph, which is why this file is large.
   include-tags:
-    - Facilities (Core)
-    - Listings (Core)
-    - Stocks (Inventory)
-    - Health (Infrastructure)
-    - User Management (Core)
-    - Sourcing Options (DOMS)
-    - Orders (DOMS)
-    - Routing Strategy (DOMS)
+    - Facilities
+    - Listings
+    - Stock
+    - Health
+    - User management
+    - Sourcing options
+    - Orders
+    - Routing strategies
 
   # Drop the schemas the included operations cannot reach. Without this the
   # full component schema set is emitted regardless of the tag filter.
@@ -38,9 +38,9 @@ output-options:
   # operation reaches it. Excluding a schema drops it from the output but does NOT
   # decrement the ref counts it contributed, so its filter children stay above zero and
   # survive too — every schema in the orphaned subgraph must be named here, not just the
-  # recursive root. Neither Audits (Core), Export, nor Stock Availability Thresholds
-  # (Inventory) is an included tag. Extend this list if a future spec sync leaks another
-  # recursive, unreachable schema.
+  # recursive root. Neither Audits, Export, nor Stock availability thresholds is an
+  # included tag. Extend this list if a future spec sync leaks another recursive,
+  # unreachable schema.
   exclude-schemas:
     - AuditSearchQuery
     - AuditedEntityTypeEnumFilter

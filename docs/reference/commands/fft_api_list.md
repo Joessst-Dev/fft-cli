@@ -10,14 +10,14 @@ List the API's operations
 List the operations of the fulfillmenttools API.
 
 The list comes from the spec, not from the network: it works offline and needs no
-project. 569 operations is more than a screen, so filter.
+project. 574 operations is more than a screen, so filter.
 
   fft api list --tag picking
   fft api list --search pickjob
-  fft api list --tag "Stocks (Inventory)" -o json | jq -r '.[].id'
+  fft api list --tag "Facilities" -o json | jq -r '.[].id'
 
 --tag matches a tag by substring, case-insensitively, so "picking" finds
-"Picking (Operations)". --search matches the operationId, the path and the
+"Picking". --search matches the operationId, the path and the
 summary.
 
 ## Usage

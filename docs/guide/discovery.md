@@ -5,7 +5,7 @@ source: internal/skill/assets/references/discovery.md
 
 # Finding the operation you need
 
-569 operations. You are not expected to know them, and you must not guess them. Everything
+574 operations. You are not expected to know them, and you must not guess them. Everything
 here reads the spec compiled into the binary: it works offline, needs no project, sends no
 request, and is free.
 
@@ -17,7 +17,7 @@ fft api list --search pickjob
 
 `--search` matches the operationId, the path and the summary. `--tag` matches the API's own
 grouping, case-insensitively and by substring, so `--tag picking` finds
-`Picking (Operations)`:
+`Picking`:
 
 ```sh
 fft api list --tag picking
@@ -44,7 +44,7 @@ body — a complete sample body, synthesized from the schema. Every required fie
 Every operation that no curated command claims gets its own command, named from its tag and
 its operationId:
 
-- tag `Picking (Operations)` → group `picking`
+- tag `Picking` → group `picking`
 - operationId `getPickJob` → `fft picking get-pick-job`
 
 ```sh

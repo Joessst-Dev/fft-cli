@@ -5140,6 +5140,8 @@ const (
 	PermissionKeyOIDCPROVIDERSCONFIGREAD               PermissionKey = "OIDC_PROVIDERS_CONFIG_READ"
 	PermissionKeyOIDCPROVIDERSCONFIGWRITE              PermissionKey = "OIDC_PROVIDERS_CONFIG_WRITE"
 	PermissionKeyOPERATIONSTATISTICSREAD               PermissionKey = "OPERATION_STATISTICS_READ"
+	PermissionKeyOPERATIONSVALIDATIONREAD              PermissionKey = "OPERATIONS_VALIDATION_READ"
+	PermissionKeyOPERATIONSVALIDATIONWRITE             PermissionKey = "OPERATIONS_VALIDATION_WRITE"
 	PermissionKeyOPERATIVEPROCESSREAD                  PermissionKey = "OPERATIVE_PROCESS_READ"
 	PermissionKeyOPERATIVEPROCESSWRITE                 PermissionKey = "OPERATIVE_PROCESS_WRITE"
 	PermissionKeyORDERCANCEL                           PermissionKey = "ORDER_CANCEL"
@@ -5386,6 +5388,10 @@ func (e PermissionKey) Valid() bool {
 	case PermissionKeyOIDCPROVIDERSCONFIGWRITE:
 		return true
 	case PermissionKeyOPERATIONSTATISTICSREAD:
+		return true
+	case PermissionKeyOPERATIONSVALIDATIONREAD:
+		return true
+	case PermissionKeyOPERATIONSVALIDATIONWRITE:
 		return true
 	case PermissionKeyOPERATIVEPROCESSREAD:
 		return true
@@ -5682,6 +5688,7 @@ const (
 	PermissionSubGroupNOTIFICATIONCENTERCONFIG   PermissionSubGroup = "NOTIFICATION_CENTER_CONFIG"
 	PermissionSubGroupOIDCPROVIDERCONFIG         PermissionSubGroup = "OIDC_PROVIDER_CONFIG"
 	PermissionSubGroupOPERATIONSTATISTICS        PermissionSubGroup = "OPERATION_STATISTICS"
+	PermissionSubGroupOPERATIONSVALIDATION       PermissionSubGroup = "OPERATIONS_VALIDATION"
 	PermissionSubGroupOPERATIVEPROCESS           PermissionSubGroup = "OPERATIVE_PROCESS"
 	PermissionSubGroupORDER                      PermissionSubGroup = "ORDER"
 	PermissionSubGroupORDERRECORD                PermissionSubGroup = "ORDER_RECORD"
@@ -5818,6 +5825,8 @@ func (e PermissionSubGroup) Valid() bool {
 	case PermissionSubGroupOIDCPROVIDERCONFIG:
 		return true
 	case PermissionSubGroupOPERATIONSTATISTICS:
+		return true
+	case PermissionSubGroupOPERATIONSVALIDATION:
 		return true
 	case PermissionSubGroupOPERATIVEPROCESS:
 		return true
@@ -7807,6 +7816,8 @@ const (
 	RolePermissionsOIDCPROVIDERSCONFIGREAD               RolePermissions = "OIDC_PROVIDERS_CONFIG_READ"
 	RolePermissionsOIDCPROVIDERSCONFIGWRITE              RolePermissions = "OIDC_PROVIDERS_CONFIG_WRITE"
 	RolePermissionsOPERATIONSTATISTICSREAD               RolePermissions = "OPERATION_STATISTICS_READ"
+	RolePermissionsOPERATIONSVALIDATIONREAD              RolePermissions = "OPERATIONS_VALIDATION_READ"
+	RolePermissionsOPERATIONSVALIDATIONWRITE             RolePermissions = "OPERATIONS_VALIDATION_WRITE"
 	RolePermissionsOPERATIVEPROCESSREAD                  RolePermissions = "OPERATIVE_PROCESS_READ"
 	RolePermissionsOPERATIVEPROCESSWRITE                 RolePermissions = "OPERATIVE_PROCESS_WRITE"
 	RolePermissionsORDERCANCEL                           RolePermissions = "ORDER_CANCEL"
@@ -8053,6 +8064,10 @@ func (e RolePermissions) Valid() bool {
 	case RolePermissionsOIDCPROVIDERSCONFIGWRITE:
 		return true
 	case RolePermissionsOPERATIONSTATISTICSREAD:
+		return true
+	case RolePermissionsOPERATIONSVALIDATIONREAD:
+		return true
+	case RolePermissionsOPERATIONSVALIDATIONWRITE:
 		return true
 	case RolePermissionsOPERATIVEPROCESSREAD:
 		return true
@@ -8311,6 +8326,8 @@ const (
 	RoleForCreationPermissionsOIDCPROVIDERSCONFIGREAD               RoleForCreationPermissions = "OIDC_PROVIDERS_CONFIG_READ"
 	RoleForCreationPermissionsOIDCPROVIDERSCONFIGWRITE              RoleForCreationPermissions = "OIDC_PROVIDERS_CONFIG_WRITE"
 	RoleForCreationPermissionsOPERATIONSTATISTICSREAD               RoleForCreationPermissions = "OPERATION_STATISTICS_READ"
+	RoleForCreationPermissionsOPERATIONSVALIDATIONREAD              RoleForCreationPermissions = "OPERATIONS_VALIDATION_READ"
+	RoleForCreationPermissionsOPERATIONSVALIDATIONWRITE             RoleForCreationPermissions = "OPERATIONS_VALIDATION_WRITE"
 	RoleForCreationPermissionsOPERATIVEPROCESSREAD                  RoleForCreationPermissions = "OPERATIVE_PROCESS_READ"
 	RoleForCreationPermissionsOPERATIVEPROCESSWRITE                 RoleForCreationPermissions = "OPERATIVE_PROCESS_WRITE"
 	RoleForCreationPermissionsORDERCANCEL                           RoleForCreationPermissions = "ORDER_CANCEL"
@@ -8557,6 +8574,10 @@ func (e RoleForCreationPermissions) Valid() bool {
 	case RoleForCreationPermissionsOIDCPROVIDERSCONFIGWRITE:
 		return true
 	case RoleForCreationPermissionsOPERATIONSTATISTICSREAD:
+		return true
+	case RoleForCreationPermissionsOPERATIONSVALIDATIONREAD:
+		return true
+	case RoleForCreationPermissionsOPERATIONSVALIDATIONWRITE:
 		return true
 	case RoleForCreationPermissionsOPERATIVEPROCESSREAD:
 		return true
@@ -8815,6 +8836,8 @@ const (
 	RoleForPatchPermissionsOIDCPROVIDERSCONFIGREAD               RoleForPatchPermissions = "OIDC_PROVIDERS_CONFIG_READ"
 	RoleForPatchPermissionsOIDCPROVIDERSCONFIGWRITE              RoleForPatchPermissions = "OIDC_PROVIDERS_CONFIG_WRITE"
 	RoleForPatchPermissionsOPERATIONSTATISTICSREAD               RoleForPatchPermissions = "OPERATION_STATISTICS_READ"
+	RoleForPatchPermissionsOPERATIONSVALIDATIONREAD              RoleForPatchPermissions = "OPERATIONS_VALIDATION_READ"
+	RoleForPatchPermissionsOPERATIONSVALIDATIONWRITE             RoleForPatchPermissions = "OPERATIONS_VALIDATION_WRITE"
 	RoleForPatchPermissionsOPERATIVEPROCESSREAD                  RoleForPatchPermissions = "OPERATIVE_PROCESS_READ"
 	RoleForPatchPermissionsOPERATIVEPROCESSWRITE                 RoleForPatchPermissions = "OPERATIVE_PROCESS_WRITE"
 	RoleForPatchPermissionsORDERCANCEL                           RoleForPatchPermissions = "ORDER_CANCEL"
@@ -9061,6 +9084,10 @@ func (e RoleForPatchPermissions) Valid() bool {
 	case RoleForPatchPermissionsOIDCPROVIDERSCONFIGWRITE:
 		return true
 	case RoleForPatchPermissionsOPERATIONSTATISTICSREAD:
+		return true
+	case RoleForPatchPermissionsOPERATIONSVALIDATIONREAD:
+		return true
+	case RoleForPatchPermissionsOPERATIONSVALIDATIONWRITE:
 		return true
 	case RoleForPatchPermissionsOPERATIVEPROCESSREAD:
 		return true
@@ -9319,6 +9346,8 @@ const (
 	RoleForUpdatePermissionsOIDCPROVIDERSCONFIGREAD               RoleForUpdatePermissions = "OIDC_PROVIDERS_CONFIG_READ"
 	RoleForUpdatePermissionsOIDCPROVIDERSCONFIGWRITE              RoleForUpdatePermissions = "OIDC_PROVIDERS_CONFIG_WRITE"
 	RoleForUpdatePermissionsOPERATIONSTATISTICSREAD               RoleForUpdatePermissions = "OPERATION_STATISTICS_READ"
+	RoleForUpdatePermissionsOPERATIONSVALIDATIONREAD              RoleForUpdatePermissions = "OPERATIONS_VALIDATION_READ"
+	RoleForUpdatePermissionsOPERATIONSVALIDATIONWRITE             RoleForUpdatePermissions = "OPERATIONS_VALIDATION_WRITE"
 	RoleForUpdatePermissionsOPERATIVEPROCESSREAD                  RoleForUpdatePermissions = "OPERATIVE_PROCESS_READ"
 	RoleForUpdatePermissionsOPERATIVEPROCESSWRITE                 RoleForUpdatePermissions = "OPERATIVE_PROCESS_WRITE"
 	RoleForUpdatePermissionsORDERCANCEL                           RoleForUpdatePermissions = "ORDER_CANCEL"
@@ -9565,6 +9594,10 @@ func (e RoleForUpdatePermissions) Valid() bool {
 	case RoleForUpdatePermissionsOIDCPROVIDERSCONFIGWRITE:
 		return true
 	case RoleForUpdatePermissionsOPERATIONSTATISTICSREAD:
+		return true
+	case RoleForUpdatePermissionsOPERATIONSVALIDATIONREAD:
+		return true
+	case RoleForUpdatePermissionsOPERATIONSVALIDATIONWRITE:
 		return true
 	case RoleForUpdatePermissionsOPERATIVEPROCESSREAD:
 		return true
@@ -12607,6 +12640,8 @@ const (
 	UserRoleWithPermissionsPermissionsOIDCPROVIDERSCONFIGREAD               UserRoleWithPermissionsPermissions = "OIDC_PROVIDERS_CONFIG_READ"
 	UserRoleWithPermissionsPermissionsOIDCPROVIDERSCONFIGWRITE              UserRoleWithPermissionsPermissions = "OIDC_PROVIDERS_CONFIG_WRITE"
 	UserRoleWithPermissionsPermissionsOPERATIONSTATISTICSREAD               UserRoleWithPermissionsPermissions = "OPERATION_STATISTICS_READ"
+	UserRoleWithPermissionsPermissionsOPERATIONSVALIDATIONREAD              UserRoleWithPermissionsPermissions = "OPERATIONS_VALIDATION_READ"
+	UserRoleWithPermissionsPermissionsOPERATIONSVALIDATIONWRITE             UserRoleWithPermissionsPermissions = "OPERATIONS_VALIDATION_WRITE"
 	UserRoleWithPermissionsPermissionsOPERATIVEPROCESSREAD                  UserRoleWithPermissionsPermissions = "OPERATIVE_PROCESS_READ"
 	UserRoleWithPermissionsPermissionsOPERATIVEPROCESSWRITE                 UserRoleWithPermissionsPermissions = "OPERATIVE_PROCESS_WRITE"
 	UserRoleWithPermissionsPermissionsORDERCANCEL                           UserRoleWithPermissionsPermissions = "ORDER_CANCEL"
@@ -12853,6 +12888,10 @@ func (e UserRoleWithPermissionsPermissions) Valid() bool {
 	case UserRoleWithPermissionsPermissionsOIDCPROVIDERSCONFIGWRITE:
 		return true
 	case UserRoleWithPermissionsPermissionsOPERATIONSTATISTICSREAD:
+		return true
+	case UserRoleWithPermissionsPermissionsOPERATIONSVALIDATIONREAD:
+		return true
+	case UserRoleWithPermissionsPermissionsOPERATIONSVALIDATIONWRITE:
 		return true
 	case UserRoleWithPermissionsPermissionsOPERATIVEPROCESSREAD:
 		return true
@@ -13315,6 +13354,8 @@ const (
 	GetPermissionsParamsKeyOIDCPROVIDERSCONFIGREAD               GetPermissionsParamsKey = "OIDC_PROVIDERS_CONFIG_READ"
 	GetPermissionsParamsKeyOIDCPROVIDERSCONFIGWRITE              GetPermissionsParamsKey = "OIDC_PROVIDERS_CONFIG_WRITE"
 	GetPermissionsParamsKeyOPERATIONSTATISTICSREAD               GetPermissionsParamsKey = "OPERATION_STATISTICS_READ"
+	GetPermissionsParamsKeyOPERATIONSVALIDATIONREAD              GetPermissionsParamsKey = "OPERATIONS_VALIDATION_READ"
+	GetPermissionsParamsKeyOPERATIONSVALIDATIONWRITE             GetPermissionsParamsKey = "OPERATIONS_VALIDATION_WRITE"
 	GetPermissionsParamsKeyOPERATIVEPROCESSREAD                  GetPermissionsParamsKey = "OPERATIVE_PROCESS_READ"
 	GetPermissionsParamsKeyOPERATIVEPROCESSWRITE                 GetPermissionsParamsKey = "OPERATIVE_PROCESS_WRITE"
 	GetPermissionsParamsKeyORDERCANCEL                           GetPermissionsParamsKey = "ORDER_CANCEL"
@@ -13561,6 +13602,10 @@ func (e GetPermissionsParamsKey) Valid() bool {
 	case GetPermissionsParamsKeyOIDCPROVIDERSCONFIGWRITE:
 		return true
 	case GetPermissionsParamsKeyOPERATIONSTATISTICSREAD:
+		return true
+	case GetPermissionsParamsKeyOPERATIONSVALIDATIONREAD:
+		return true
+	case GetPermissionsParamsKeyOPERATIONSVALIDATIONWRITE:
 		return true
 	case GetPermissionsParamsKeyOPERATIVEPROCESSREAD:
 		return true
@@ -19481,6 +19526,68 @@ type NumberFilter struct {
 	NotIn *[]float32 `json:"notIn,omitempty"`
 }
 
+// OperationsValidationSearchQuery OperationsValidationSearchQuery
+type OperationsValidationSearchQuery struct {
+	And *[]OperationsValidationSearchQuery `json:"and,omitempty"`
+
+	// Created Search entries by created. Applying a narrow and well-considered filter value is strongly recommended, as it can greatly improve response times, especially when working with large datasets.
+	Created *DateFilter `json:"created,omitempty"`
+
+	// Id Search by id
+	//
+	// Example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+	Id *StringFilter `json:"id,omitempty"`
+
+	// Key Search by key
+	Key *StringFilter `json:"key,omitempty"`
+
+	// LastModified Search by lastModified
+	LastModified *DateFilter                        `json:"lastModified,omitempty"`
+	Or           *[]OperationsValidationSearchQuery `json:"or,omitempty"`
+
+	// TenantArticleId Search by tenantArticleId
+	//
+	// Example: MY_ARTICLE_ID
+	TenantArticleId *StringFilter `json:"tenantArticleId,omitempty"`
+
+	// TenantArticleIdKey Search by tenantArticleIdKey
+	TenantArticleIdKey *StringFilter `json:"tenantArticleIdKey,omitempty"`
+
+	// ValueEntries Nested list search by valueEntries
+	ValueEntries *OperationsValidationValueEntriesListFilter `json:"valueEntries,omitempty"`
+}
+
+// OperationsValidationValueEntriesFilter OperationsValidationValueEntriesFilter
+type OperationsValidationValueEntriesFilter struct {
+	// ProcessRef Search by processRef
+	//
+	// Example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+	ProcessRef *StringFilter `json:"processRef,omitempty"`
+
+	// SourceOperativeEntity Nested search by sourceOperativeEntity
+	SourceOperativeEntity *OperationsValidationValueEntriesSourceOperativeEntityFilter `json:"sourceOperativeEntity,omitempty"`
+
+	// Value Search by value
+	Value *StringFilter `json:"value,omitempty"`
+}
+
+// OperationsValidationValueEntriesListFilter OperationsValidationValueEntriesListFilter
+type OperationsValidationValueEntriesListFilter struct {
+	// Contains Contains returns if at least one entry matches
+	Contains *OperationsValidationValueEntriesFilter `json:"contains,omitempty"`
+
+	// Exists exists:false matches empty or absent lists; exists:true matches non-empty lists
+	Exists *bool `json:"exists,omitempty"`
+}
+
+// OperationsValidationValueEntriesSourceOperativeEntityFilter OperationsValidationValueEntriesSourceOperativeEntityFilter
+type OperationsValidationValueEntriesSourceOperativeEntityFilter struct {
+	// Id Search by id
+	//
+	// Example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+	Id *StringFilter `json:"id,omitempty"`
+}
+
 // OperativeEntity OperativeEntity
 type OperativeEntity struct {
 	// EntityChildren Tree structure of entities belonging to this entity
@@ -22522,7 +22629,12 @@ type RatingResultType string
 // RecordableAttributeValidation RecordableAttributeValidation
 type RecordableAttributeValidation struct {
 	AllowedValues []RecordableAttributeValidationsAllowedValue `json:"allowedValues"`
-	Type          RecordableAttributeValidationType            `json:"type"`
+
+	// Key Key of this value to validate against operation validations
+	//
+	// Example: Germany
+	Key  *string                           `json:"key,omitempty"`
+	Type RecordableAttributeValidationType `json:"type"`
 }
 
 // RecordableAttributeValidationType defines model for RecordableAttributeValidation.Type.
@@ -38450,7 +38562,7 @@ type ClientInterface interface {
 
 	// Status Get status
 	//
-	// Returns the platform status.
+	// Returns the fulfillmenttools status.
 	//
 	// Corresponds with GET /api/status (the `Status` operationId).
 	Status(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -40669,7 +40781,7 @@ func (c *Client) DeleteSafetyStock(ctx context.Context, safetyStockId string, re
 
 // Status Get status
 //
-// Returns the platform status.
+// Returns the fulfillmenttools status.
 //
 // Corresponds with GET /api/status (the `Status` operationId).
 func (c *Client) Status(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -47189,7 +47301,7 @@ type ClientWithResponsesInterface interface {
 
 	// StatusWithResponse Get status
 	//
-	// Returns the platform status.
+	// Returns the fulfillmenttools status.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
@@ -54694,7 +54806,7 @@ func (c *ClientWithResponses) DeleteSafetyStockWithResponse(ctx context.Context,
 
 // StatusWithResponse Get status
 //
-// Returns the platform status.
+// Returns the fulfillmenttools status.
 //
 // Returns a wrapper object for the known response body format(s).
 //

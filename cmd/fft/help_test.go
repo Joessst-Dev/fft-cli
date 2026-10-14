@@ -64,7 +64,7 @@ var _ = Describe("the spec-aware help", func() {
 			Expect(ok).To(BeTrue())
 			Expect(deprecated.Deprecated).To(BeTrue(), "getArticles is no longer deprecated; pick another")
 
-			// getArticles is tagged Stocks (Inventory), so it lands under the curated
+			// getArticles is tagged Stock, so it lands under the curated
 			// `fft stock` group alongside the hand-written commands.
 			Expect(c.run("stock", "get-articles", "-o", "json")).To(Equal(exitcode.OK))
 
