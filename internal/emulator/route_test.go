@@ -48,6 +48,7 @@ var knownCollections = []string{
 	"loadunittypes",
 	"lookuprecords",
 	"measurementunits",
+	"operationsvalidations",
 	"operativecontainertypes",
 	"operativeprocesses",
 	"orderrecords",

@@ -359,7 +359,7 @@ var _ = Describe("fft api", func() {
 
 	Describe("fft api list", func() {
 		It("enumerates the operations of a tag", func() {
-			Expect(c.run("api", "list", "--tag", "Picking (Operations)")).To(Equal(exitcode.OK))
+			Expect(c.run("api", "list", "--tag", "Picking")).To(Equal(exitcode.OK))
 
 			Expect(c.out()).To(ContainSubstring("getPickJob"))
 			Expect(c.out()).To(ContainSubstring("/api/pickjobs/{pickJobId}"))
