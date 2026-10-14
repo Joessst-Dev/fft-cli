@@ -48,8 +48,8 @@ made the session read-only.
 
 The fulfillmenttools API runs its cursor searches over `POST` — `POST
 /api/facilities/search` is a read — so being read-only is *not* the same as refusing to
-`POST`. Which POST is which cannot be guessed from the path (only 34 of the 46 read-POSTs
-end in `/search`) nor from the status code (43 mutating POSTs answer `200`, not `201`),
+`POST`. Which POST is which cannot be guessed from the path (only 36 of the 48 read-POSTs
+end in `/search`) nor from the status code (44 mutating POSTs answer `200`, not `201`),
 so `fft` carries an explicit, hand-curated allowlist of the POSTs that read, and treats
 every other one as a write. `postDeliveryPromise` sits in the same family as the pure
 delivery calculators and reserves stock, so it is blocked; `evaluateRoutingStrategy` is a

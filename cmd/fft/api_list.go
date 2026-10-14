@@ -16,10 +16,10 @@ project. 574 operations is more than a screen, so filter.
 
   fft api list --tag picking
   fft api list --search pickjob
-  fft api list --tag "Stocks (Inventory)" -o json | jq -r '.[].id'
+  fft api list --tag "Stock" -o json | jq -r '.[].id'
 
 --tag matches a tag by substring, case-insensitively, so "picking" finds
-"Picking (Operations)". --search matches the operationId, the path and the
+"Picking". --search matches the operationId, the path and the
 summary.`
 
 // operationView is one row of `fft api list`, and the whole document of

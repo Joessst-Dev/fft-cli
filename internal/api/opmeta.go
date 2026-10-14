@@ -15,7 +15,7 @@ import (
 // The generated client covers eight tags: facilities, listings, stocks, health,
 // user management, sourcing options, orders and routing strategy. That is 95
 // methods out of the API's 574 operations. Tier-2 and Tier-3 commands have to
-// reach the other 474, and they cannot do it through a typed client that does not
+// reach the other 479, and they cannot do it through a typed client that does not
 // have them.
 //
 // So they build requests from metadata instead: method, path template, parameters,
@@ -170,7 +170,7 @@ func (o Operation) Tag() string {
 func Operations() []Operation { return slices.Clone(operations) }
 
 // index is the operationId lookup, built once on first use rather than in an
-// init() — a `fft version` should not pay for a map of 569 entries it will not
+// init() — a `fft version` should not pay for a map of 574 entries it will not
 // read.
 var index = sync.OnceValue(func() map[string]Operation {
 	m := make(map[string]Operation, len(operations))
@@ -283,7 +283,7 @@ func SuggestOperations(id string) []string {
 }
 
 // distance is the Levenshtein edit distance between a and b, computed with two
-// rows rather than a full matrix: this runs 569 times per suggestion.
+// rows rather than a full matrix: this runs 574 times per suggestion.
 func distance(a, b string) int {
 	ar, br := []rune(a), []rune(b)
 
