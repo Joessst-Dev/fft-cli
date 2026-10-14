@@ -204,7 +204,7 @@ var Tags = sync.OnceValue(func() []string {
 })
 
 // OperationsByTag returns every operation carrying tag, sorted by ID. The match is
-// case-insensitive and by substring, so --tag picking finds "Picking (Operations)"
+// case-insensitive and by substring, so --tag picking finds "Picking"
 // without the user having to reproduce the parentheses.
 func OperationsByTag(tag string) []Operation {
 	needle := strings.ToLower(strings.TrimSpace(tag))

@@ -30,11 +30,11 @@ import (
 //
 // # Grouping
 //
-// The group is the operation's first tag, singularised: "Facilities (Core)" →
-// facility, "Picking (Operations)" → picking. The command within it is the
-// operationId, kebab-cased: getPickJob → `fft picking get-pick-job`. That is
-// verbose, and it is the point — an operationId is unique across the whole spec, so
-// no two generated commands can ever collide, and the short spelling
+// The group is the operation's first tag, singularised: "Facilities" → facility,
+// "Operations Validations (Operations)" → operations-validation. The command within
+// it is the operationId, kebab-cased: getPickJob → `fft picking get-pick-job`. That
+// is verbose, and it is the point — an operationId is unique across the whole spec,
+// so no two generated commands can ever collide, and the short spelling
 // (`fft api getPickJob`) is one command away.
 
 // The cobra groups the root command's help is organised into. Without them, 60
@@ -180,7 +180,8 @@ command that takes a body — --example prints one you can edit and send.
 }
 
 // groupFor is the command group an operation lands in: its first tag, stripped of
-// the parenthetical and singularised. "Facilities (Core)" → facility.
+// the parenthetical and singularised. "Operations Validations (Operations)" →
+// operations-validation.
 func groupFor(op api.Operation) string {
 	tag := op.Tag()
 	if tag == "" {
