@@ -72,10 +72,10 @@ you pass `--force`.
 
 The skill *is* the guide pages you are reading: [Overview](./overview.md) is its
 `SKILL.md`, and [Commands](./commands.md), [Discovery](./discovery.md),
-[Recipes](./recipes.md), [Templates](./templates.md), [Emulator](./emulator.md),
-[Components](./components.md) and [Troubleshooting](./troubleshooting.md) are its
-reference files. They are written for an agent, which makes them unusually direct — worth
-reading yourself.
+[Concepts](./concepts.md), [Recipes](./recipes.md), [Templates](./templates.md),
+[Emulator](./emulator.md), [Components](./components.md) and
+[Troubleshooting](./troubleshooting.md) are its reference files. They are written for an
+agent, which makes them unusually direct — worth reading yourself.
 
 The source lives at
 [`internal/skill/assets/`](https://github.com/Joessst-Dev/fft-cli/tree/main/internal/skill/assets).

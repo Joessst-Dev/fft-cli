@@ -115,6 +115,7 @@ export default defineConfig({
             { text: 'Commands', link: '/guide/commands' },
             { text: 'Interactive mode', link: '/guide/tui' },
             { text: 'Discovery', link: '/guide/discovery' },
+            { text: 'Concepts', link: '/guide/concepts' },
             { text: 'Recipes', link: '/guide/recipes' },
             { text: 'Templates', link: '/guide/templates' },
             { text: 'Read-only projects', link: '/guide/read-only' },

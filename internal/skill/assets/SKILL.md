@@ -1,6 +1,6 @@
 ---
 name: fft
-description: Drive the fft CLI against a fulfillmenttools tenant - read and change orders, facilities, interfacility connections, listings, stock, pick jobs, pack jobs and handovers, manage and activate routing strategies, simulate how an order would be routed, and reach any of the API's 574 operations. Use whenever the user mentions fulfillmenttools, fft, an order, a pickjob or packjob, a handover, a listing, stock levels, a routing strategy, or a facility or warehouse in that system - and whenever they ask why an order was routed or sourced the way it was, or where an order would be fulfilled from.
+description: Drive the fft CLI against a fulfillmenttools tenant - read and change orders, facilities, interfacility connections, listings, stock, pick jobs, pack jobs and handovers, manage and activate routing strategies, simulate how an order would be routed, and reach any of the API's 574 operations. Use whenever the user mentions fulfillmenttools, fft, an order, a pickjob or packjob, a handover, a listing, stock levels, a routing strategy, or a facility or warehouse in that system - and whenever they ask why an order was routed or sourced the way it was, where an order would be fulfilled from, or how a fulfillmenttools concept works (a handover or pick job lifecycle, routing fences and ratings).
 ---
 
 # Driving fft
@@ -80,6 +80,14 @@ used most in the current project, with the `command` behind each.
 Every command's `--help` carries the endpoint's summary, the permission it requires, and a
 sample body. Read it. Do not guess a flag name — a guessed flag is a usage error at best,
 and at worst it is a real flag that means something else.
+
+## Understanding the domain
+
+fft says what the API can do; it cannot say why the product behaves as it does — what a
+handover job's states mean, why routing passed over the nearest facility. The
+fulfillmenttools docs answer that, through an interface built for agents. The question you
+send them leaves the machine, so it never names the tenant or its data. See
+[references/concepts.md](references/concepts.md).
 
 ## Writing
 
@@ -216,6 +224,8 @@ Node) that installs and runs straight away. See
   addressing rules that will otherwise bite you (a listing has no id of its own).
 - [references/discovery.md](references/discovery.md) — getting from a word the user said to
   a command, across all 574 operations.
+- [references/concepts.md](references/concepts.md) — asking the fulfillmenttools docs how
+  the product works, and what must never go into the question.
 - [references/recipes.md](references/recipes.md) — whole tasks: set up a project, bulk
   upsert, page a large result, run in CI.
 - [references/troubleshooting.md](references/troubleshooting.md) — every exit code, and what

@@ -81,6 +81,14 @@ Every command's `--help` carries the endpoint's summary, the permission it requi
 sample body. Read it. Do not guess a flag name — a guessed flag is a usage error at best,
 and at worst it is a real flag that means something else.
 
+## Understanding the domain
+
+fft says what the API can do; it cannot say why the product behaves as it does — what a
+handover job's states mean, why routing passed over the nearest facility. The
+fulfillmenttools docs answer that, through an interface built for agents. The question you
+send them leaves the machine, so it never names the tenant or its data. See
+[references/concepts.md](./concepts.md).
+
 ## Writing
 
 The workflow is the same for all three tiers: print the sample body, edit it, send it.
@@ -216,6 +224,8 @@ Node) that installs and runs straight away. See
   addressing rules that will otherwise bite you (a listing has no id of its own).
 - [references/discovery.md](./discovery.md) — getting from a word the user said to
   a command, across all 574 operations.
+- [references/concepts.md](./concepts.md) — asking the fulfillmenttools docs how
+  the product works, and what must never go into the question.
 - [references/recipes.md](./recipes.md) — whole tasks: set up a project, bulk
   upsert, page a large result, run in CI.
 - [references/troubleshooting.md](./troubleshooting.md) — every exit code, and what
