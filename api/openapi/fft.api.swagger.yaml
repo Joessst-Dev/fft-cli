@@ -24690,7 +24690,7 @@ paths:
             application/xml:
               schema:
                 $ref: '#/components/schemas/SourcingOptionsResponse'
-          description: Sourcing options successfully created
+          description: Get single Sourcing Options Response
         '401':
           content:
             application/json:
