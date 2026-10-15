@@ -72,9 +72,9 @@ you pass `--force`.
 
 The skill *is* the guide pages you are reading: [Overview](./overview.md) is its
 `SKILL.md`, and [Commands](./commands.md), [Discovery](./discovery.md),
-[Recipes](./recipes.md), [Templates](./templates.md), [Emulator](./emulator.md),
-[Components](./components.md) and [Troubleshooting](./troubleshooting.md) are its
-reference files. They are written for an agent, which makes them unusually direct — worth
+[Concepts](./concepts.md), [Recipes](./recipes.md), [Templates](./templates.md),
+[Emulator](./emulator.md), [Components](./components.md) and
+[Troubleshooting](./troubleshooting.md) are its reference files. They are written for an agent, which makes them unusually direct — worth
 reading yourself.
 
 The source lives at
