@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"maps"
+	"slices"
 	"sync"
 )
 
@@ -205,9 +207,7 @@ func (s *Store) Update(name, id string, doc entityDoc, patch bool) (map[string]a
 	var result entityDoc
 	if patch {
 		result = cloneDoc(existing)
-		for k, v := range doc {
-			result[k] = v
-		}
+		maps.Copy(result, doc)
 	} else {
 		result = cloneDoc(doc)
 	}
@@ -229,11 +229,8 @@ func (s *Store) Delete(name, id string) bool {
 	}
 
 	delete(c.byID, id)
-	for i, existing := range c.order {
-		if existing == id {
-			c.order = append(c.order[:i], c.order[i+1:]...)
-			break
-		}
+	if i := slices.Index(c.order, id); i >= 0 {
+		c.order = slices.Delete(c.order, i, i+1)
 	}
 	return true
 }

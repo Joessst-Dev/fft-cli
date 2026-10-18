@@ -56,9 +56,7 @@ func paginateCursor(all []entityDoc, after string, size int, withTotal bool) (cu
 		return cursorPage{}, err
 	}
 
-	if offset > len(all) {
-		offset = len(all)
-	}
+	offset = min(offset, len(all))
 	end := min(offset+size, len(all))
 
 	page := cursorPage{items: all[offset:end], hasNext: end < len(all)}

@@ -27,6 +27,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -58,18 +59,16 @@ var skillPages = []skillPage{
 }
 
 // skillLinks maps a skill file's basename to the guide slug it becomes, so an
-// intra-skill link resolves to the right page on the site.
-var skillLinks = map[string]string{
-	"SKILL.md":           "overview",
-	"commands.md":        "commands",
-	"discovery.md":       "discovery",
-	"concepts.md":        "concepts",
-	"recipes.md":         "recipes",
-	"troubleshooting.md": "troubleshooting",
-	"emulator.md":        "emulator",
-	"components.md":      "components",
-	"templates.md":       "templates",
-}
+// intra-skill link resolves to the right page on the site. It is derived from
+// skillPages so that a page cannot be listed there and still be unreachable by
+// link.
+var skillLinks = func() map[string]string {
+	links := make(map[string]string, len(skillPages))
+	for _, p := range skillPages {
+		links[path.Base(p.src)] = strings.TrimSuffix(p.out, ".md")
+	}
+	return links
+}()
 
 func run(args []string) error {
 	fs := flag.NewFlagSet("docsgen", flag.ContinueOnError)

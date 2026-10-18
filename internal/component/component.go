@@ -99,8 +99,8 @@ type Component struct {
 	Dir string
 
 	// FirstParty marks a component fft ships and knows about at compile time. Its
-	// command tree comes from [FirstParty], not from the manifest on disk — see that
-	// function for why.
+	// command tree comes from the compiled-in first-party table, not from the
+	// manifest on disk — see the firstParty table in firstparty.go for why.
 	FirstParty bool
 
 	// Installed reports whether the executable is actually there. A first-party
@@ -116,18 +116,22 @@ type Component struct {
 // that name on the embedding struct would shadow the embedded field, and the field
 // is the one an installer has to be able to write.
 func (c Component) ExecPath() string {
-	if c.Dir == "" || c.Exec == "" {
+	return execPath(c.Dir, c.Exec)
+}
+
+// execPath is the executable exec names inside dir: as spelled if that is a
+// regular file, else with the platform's suffix if that is, else "".
+func execPath(dir, exec string) string {
+	if dir == "" || exec == "" {
 		return ""
 	}
 
-	path := filepath.Join(c.Dir, filepath.FromSlash(c.Exec))
+	path := filepath.Join(dir, filepath.FromSlash(exec))
 	if isRegularFile(path) {
 		return path
 	}
-	if suffixed := execName(path); suffixed != path {
-		if isRegularFile(suffixed) {
-			return suffixed
-		}
+	if suffixed := execName(path); suffixed != path && isRegularFile(suffixed) {
+		return suffixed
 	}
 	// Neither candidate is a regular file — it is missing, or a symlink planted in
 	// the data dir. Return "" rather than the path so a caller that execs the result

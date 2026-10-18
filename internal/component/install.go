@@ -226,12 +226,16 @@ func short(digest string) string {
 	return digest[:16]
 }
 
+// errDisabled is what installing or removing answers when [EnvRoot] has turned
+// components off.
+var errDisabled = errors.New("components are disabled: " + EnvRoot + " is set to the empty string")
+
 // Prepare downloads and verifies a component, and stages it, without touching the
 // installed tree. Call [Installer.Commit] to finish, or [Installer.Discard] to
 // abandon it.
 func (i *Installer) Prepare(ctx context.Context, src Source) (Plan, error) {
 	if i.root == "" {
-		return Plan{}, errors.New("components are disabled: " + EnvRoot + " is set to the empty string")
+		return Plan{}, errDisabled
 	}
 	if err := os.MkdirAll(i.root, dirMode); err != nil {
 		return Plan{}, fmt.Errorf("create %s: %w", i.root, err)
@@ -372,7 +376,7 @@ func (i *Installer) Discard(p Plan) {
 // a directory it cannot prove it put there.
 func (i *Installer) Remove(name string) error {
 	if i.root == "" {
-		return errors.New("components are disabled: " + EnvRoot + " is set to the empty string")
+		return errDisabled
 	}
 	if !nameRE.MatchString(name) {
 		return fmt.Errorf("%q is not a component name", name)
@@ -663,12 +667,12 @@ func writeManifest(dir string, m Manifest) error {
 // chosen by whoever published it. The checksum proves the archive is the one the
 // release names; it proves nothing about what is inside.
 func safeJoin(dir, name string) (string, error) {
-	if name == "" || path.IsAbs(name) || strings.HasPrefix(name, "/") || strings.Contains(name, `\`) {
+	if name == "" || path.IsAbs(name) || strings.Contains(name, `\`) {
 		return "", fmt.Errorf("the archive contains %q, which is not a relative path", name)
 	}
 
 	clean := path.Clean(name)
-	if clean == ".." || strings.HasPrefix(clean, "../") {
+	if escapes(clean) {
 		return "", fmt.Errorf("the archive contains %q, which would be written outside the component", name)
 	}
 

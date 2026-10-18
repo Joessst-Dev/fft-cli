@@ -1,14 +1,16 @@
 package component
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"slices"
-	"sort"
 	"strings"
+
+	"github.com/Joessst-Dev/fft-cli/internal/xdg"
 )
 
 // EnvRoot overrides where components are installed and looked for.
@@ -55,15 +57,11 @@ func Root(lookup func(string) (string, bool)) (string, bool, error) {
 		return abs, true, nil
 	}
 
-	if dir, _ := lookup("XDG_DATA_HOME"); strings.TrimSpace(dir) != "" {
-		return filepath.Join(strings.TrimSpace(dir), "fft", "components"), true, nil
-	}
-
-	home, err := os.UserHomeDir()
+	dir, err := xdg.Data.LookupPath(lookup, "components")
 	if err != nil {
-		return "", false, fmt.Errorf("locate the home directory: %w", err)
+		return "", false, err
 	}
-	return filepath.Join(home, ".local", "share", "fft", "components"), true, nil
+	return dir, true, nil
 }
 
 // Registry is the set of components this fft can see.
@@ -155,14 +153,14 @@ func Open(root string, opts ...Option) *Registry {
 		if known[m.Name] {
 			// A first-party component that is installed: the on-disk manifest supplies the
 			// physical facts (which version, which binary) and the compiled-in table keeps
-			// the command tree — see [FirstParty].
+			// the command tree — see the firstParty table.
 			r.hydrate(m, dir)
 			continue
 		}
 		r.components = append(r.components, newComponent(m, dir, false))
 	}
 
-	sort.Slice(r.components, func(i, j int) bool { return r.components[i].Name < r.components[j].Name })
+	slices.SortFunc(r.components, func(a, b Component) int { return cmp.Compare(a.Name, b.Name) })
 	return r
 }
 
@@ -197,15 +195,11 @@ func newComponent(m Manifest, dir string, firstParty bool) Component {
 // manifest saying `bin/fft-emulator` is correct on Windows too — the release
 // archive for that platform carries fft-emulator.exe, and requiring a per-platform
 // manifest to say so would be a difference with no meaning behind it.
+//
+// isRegularFile Lstats, not Stats: a symlink standing in for the executable is
+// refused, the same rule ExecPath applies when it spawns it.
 func installed(dir, exec string) bool {
-	if dir == "" || exec == "" {
-		return false
-	}
-
-	// isRegularFile Lstats, not Stats: a symlink standing in for the executable is
-	// refused, the same rule ExecPath applies when it spawns it.
-	path := filepath.Join(dir, filepath.FromSlash(exec))
-	return slices.ContainsFunc([]string{path, execName(path)}, isRegularFile)
+	return execPath(dir, exec) != ""
 }
 
 // readManifest reads and validates one component's manifest.

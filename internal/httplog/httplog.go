@@ -19,10 +19,10 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"regexp"
 	"slices"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -219,14 +219,8 @@ func (b *joinedBody) Read(p []byte) (int, error) {
 func (b *joinedBody) Close() error { return b.rest.Close() }
 
 func writeHeaders(b *strings.Builder, prefix string, h http.Header) {
-	names := make([]string, 0, len(h))
-	for name := range h {
-		names = append(names, name)
-	}
 	// Sorted, so that two runs of the same command produce a diffable dump.
-	sort.Strings(names)
-
-	for _, name := range names {
+	for _, name := range slices.Sorted(maps.Keys(h)) {
 		value := strings.Join(h.Values(name), ", ")
 		if sensitiveHeaders[strings.ToLower(name)] {
 			value = Redacted

@@ -97,11 +97,11 @@ func (h *handlers) get(coll, idParam string) fiber.Handler {
 		raw := c.Params(idParam)
 		id, ok := h.resolve(coll, raw)
 		if !ok {
-			return writeError(c, fiber.StatusNotFound, fmt.Sprintf("no %s with id %q", coll, raw))
+			return notFound(c, coll, raw)
 		}
 		doc, ok := h.store.Get(coll, id)
 		if !ok {
-			return writeError(c, fiber.StatusNotFound, fmt.Sprintf("no %s with id %q", coll, raw))
+			return notFound(c, coll, raw)
 		}
 		return writeJSON(c, fiber.StatusOK, doc)
 	}
@@ -119,7 +119,7 @@ func (h *handlers) update(coll, idParam string, patch bool) fiber.Handler {
 
 		id, ok := h.resolve(coll, raw)
 		if !ok {
-			return writeError(c, fiber.StatusNotFound, fmt.Sprintf("no %s with id %q", coll, raw))
+			return notFound(c, coll, raw)
 		}
 
 		updated, err := h.store.Update(coll, id, doc, patch)
@@ -128,8 +128,8 @@ func (h *handlers) update(coll, idParam string, patch bool) fiber.Handler {
 			if errors.As(err, &conflict) {
 				return writeConflict(c, conflict.requestVersion, conflict.version)
 			}
-			var notFound *notFoundError
-			if errors.As(err, &notFound) {
+			var missing *notFoundError
+			if errors.As(err, &missing) {
 				return writeError(c, fiber.StatusNotFound, err.Error())
 			}
 			return writeError(c, fiber.StatusInternalServerError, err.Error())
@@ -145,13 +145,13 @@ func (h *handlers) remove(coll, idParam string) fiber.Handler {
 		raw := c.Params(idParam)
 		id, ok := h.resolve(coll, raw)
 		if !ok {
-			return writeError(c, fiber.StatusNotFound, fmt.Sprintf("no %s with id %q", coll, raw))
+			return notFound(c, coll, raw)
 		}
 		// Read the entity before removing it: the deleted event carries the entity that
 		// was deleted, which the store no longer holds once Delete returns.
 		doc, _ := h.store.Get(coll, id)
 		if !h.store.Delete(coll, id) {
-			return writeError(c, fiber.StatusNotFound, fmt.Sprintf("no %s with id %q", coll, raw))
+			return notFound(c, coll, raw)
 		}
 		h.events.onRemove(coll, doc)
 		return c.SendStatus(fiber.StatusNoContent)

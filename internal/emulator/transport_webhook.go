@@ -76,7 +76,7 @@ func (t *webhookTransport) allowDial(address string) error {
 	if t.allowRemote {
 		return nil
 	}
-	if addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() || addr.IsUnspecified() {
+	if isLocalAddr(addr) {
 		return nil
 	}
 	return fmt.Errorf("refusing to dial non-local address %s (--webhook-allow-remote to allow)", addr)
@@ -235,7 +235,7 @@ func isLocalHost(host string) bool {
 		if slices.Contains(metadataAddrs, addr.Unmap()) {
 			return false
 		}
-		return addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() || addr.IsUnspecified()
+		return isLocalAddr(addr)
 	}
 	if localOnlyHosts[host] {
 		return true
@@ -243,10 +243,13 @@ func isLocalHost(host string) bool {
 	if !strings.Contains(host, ".") {
 		return true
 	}
-	for _, suffix := range localOnlySuffixes {
-		if strings.HasSuffix(host, suffix) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(localOnlySuffixes, func(suffix string) bool {
+		return strings.HasSuffix(host, suffix)
+	})
+}
+
+// isLocalAddr reports whether addr is one local mode may call: loopback, a
+// private range, link-local, or unspecified.
+func isLocalAddr(addr netip.Addr) bool {
+	return addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() || addr.IsUnspecified()
 }

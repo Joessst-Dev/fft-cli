@@ -87,18 +87,11 @@ func Orders(tenantOrderID, consumerID string) ListOp[json.RawMessage] {
 		Items: "orders",
 		ID:    RawID,
 		Do: func(ctx context.Context, raw api.ClientInterface, after string, size int) (*http.Response, error) {
-			params := &api.GetAllOrdersParams{}
-			if tenantOrderID != "" {
-				params.TenantOrderId = &tenantOrderID
-			}
-			if consumerID != "" {
-				params.ConsumerId = &consumerID
-			}
-			if after != "" {
-				params.StartAfterId = &after
-			}
-			if size != 0 {
-				params.Size = &size
+			params := &api.GetAllOrdersParams{
+				TenantOrderId: nonZero(tenantOrderID),
+				ConsumerId:    nonZero(consumerID),
+				StartAfterId:  nonZero(after),
+				Size:          nonZero(size),
 			}
 			return raw.GetAllOrders(ctx, params)
 		},
@@ -121,15 +114,10 @@ func FacilityConnections(facilityID, target string) ListOp[json.RawMessage] {
 		Items: "interFacilityConnections",
 		ID:    RawID,
 		Do: func(ctx context.Context, raw api.ClientInterface, after string, size int) (*http.Response, error) {
-			params := &api.GetFacilityConnectionsParams{}
-			if target != "" {
-				params.TargetFacilityRef = &target
-			}
-			if after != "" {
-				params.StartAfterId = &after
-			}
-			if size != 0 {
-				params.Size = &size
+			params := &api.GetFacilityConnectionsParams{
+				TargetFacilityRef: nonZero(target),
+				StartAfterId:      nonZero(after),
+				Size:              nonZero(size),
 			}
 			return raw.GetFacilityConnections(ctx, facilityID, params)
 		},
@@ -148,12 +136,9 @@ func RoutingStrategies() ListOp[json.RawMessage] {
 		Items: "routingStrategies",
 		ID:    RawID,
 		Do: func(ctx context.Context, raw api.ClientInterface, after string, size int) (*http.Response, error) {
-			params := &api.GetRoutingStrategiesParams{}
-			if after != "" {
-				params.StartAfterId = &after
-			}
-			if size != 0 {
-				params.Size = &size
+			params := &api.GetRoutingStrategiesParams{
+				StartAfterId: nonZero(after),
+				Size:         nonZero(size),
 			}
 			return raw.GetRoutingStrategies(ctx, params)
 		},
@@ -169,12 +154,9 @@ func RoutingCategories() ListOp[json.RawMessage] {
 		Items: "routingStrategyNodeConfigCategories",
 		ID:    RawID,
 		Do: func(ctx context.Context, raw api.ClientInterface, after string, size int) (*http.Response, error) {
-			params := &api.GetRoutingStrategyNodeConfigCategoriesParams{}
-			if after != "" {
-				params.StartAfterId = &after
-			}
-			if size != 0 {
-				params.Size = &size
+			params := &api.GetRoutingStrategyNodeConfigCategoriesParams{
+				StartAfterId: nonZero(after),
+				Size:         nonZero(size),
 			}
 			return raw.GetRoutingStrategyNodeConfigCategories(ctx, params)
 		},
@@ -204,32 +186,27 @@ func RoutingDecisionLogs(filter RoutingDecisionLogsFilter) ListOp[json.RawMessag
 		Items: "decisionLogs",
 		ID:    RawID,
 		Do: func(ctx context.Context, raw api.ClientInterface, after string, size int) (*http.Response, error) {
-			params := &api.GetRoutingDecisionLogsParams{}
-			if filter.OrderRef != "" {
-				params.OrderRef = &filter.OrderRef
-			}
-			if filter.RoutingPlanRef != "" {
-				params.RoutingPlanRef = &filter.RoutingPlanRef
-			}
-			if filter.ProcessRef != "" {
-				params.ProcessRef = &filter.ProcessRef
-			}
-			if filter.TenantOrderID != "" {
-				params.TenantOrderId = &filter.TenantOrderID
-			}
-			if filter.SourcingOptionRef != "" {
-				params.SourcingOptionRef = &filter.SourcingOptionRef
-			}
-			if filter.SourcingOptionsRef != "" {
-				params.SourcingOptionsRef = &filter.SourcingOptionsRef
-			}
-			if after != "" {
-				params.StartAfterId = &after
-			}
-			if size != 0 {
-				params.Size = &size
+			params := &api.GetRoutingDecisionLogsParams{
+				OrderRef:           nonZero(filter.OrderRef),
+				RoutingPlanRef:     nonZero(filter.RoutingPlanRef),
+				ProcessRef:         nonZero(filter.ProcessRef),
+				TenantOrderId:      nonZero(filter.TenantOrderID),
+				SourcingOptionRef:  nonZero(filter.SourcingOptionRef),
+				SourcingOptionsRef: nonZero(filter.SourcingOptionsRef),
+				StartAfterId:       nonZero(after),
+				Size:               nonZero(size),
 			}
 			return raw.GetRoutingDecisionLogs(ctx, params)
 		},
 	}
+}
+
+// nonZero is a pointer to v, or nil when v is its type's zero value: the shape of
+// an optional query param, which the generated client omits when nil.
+func nonZero[T comparable](v T) *T {
+	var zero T
+	if v == zero {
+		return nil
+	}
+	return &v
 }

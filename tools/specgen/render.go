@@ -99,14 +99,8 @@ func renderParam(b *bytes.Buffer, p param) {
 		fmt.Fprintf(b, ", Explode: true")
 	}
 	if len(p.Enum) > 0 {
-		fmt.Fprintf(b, ", Enum: []string{")
-		for i, v := range p.Enum {
-			if i > 0 {
-				fmt.Fprintf(b, ", ")
-			}
-			fmt.Fprintf(b, "%s", quote(v))
-		}
-		fmt.Fprintf(b, "}")
+		fmt.Fprintf(b, ", Enum: ")
+		renderStringSlice(b, p.Enum)
 	}
 	if p.Description != "" {
 		fmt.Fprintf(b, ", Description: %s", quote(p.Description))
@@ -120,14 +114,21 @@ func renderStrings(b *bytes.Buffer, field string, values []string) {
 		return
 	}
 
-	fmt.Fprintf(b, "\t\t%s: []string{", field)
+	fmt.Fprintf(b, "\t\t%s: ", field)
+	renderStringSlice(b, values)
+	fmt.Fprintf(b, ",\n")
+}
+
+// renderStringSlice writes values as a one-line []string literal.
+func renderStringSlice(b *bytes.Buffer, values []string) {
+	fmt.Fprintf(b, "[]string{")
 	for i, v := range values {
 		if i > 0 {
 			fmt.Fprintf(b, ", ")
 		}
 		fmt.Fprintf(b, "%s", quote(v))
 	}
-	fmt.Fprintf(b, "},\n")
+	fmt.Fprintf(b, "}")
 }
 
 // The generated names of the api package's parameter constants. They are spelled

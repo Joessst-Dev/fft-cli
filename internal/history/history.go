@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/Joessst-Dev/fft-cli/internal/atomicfile"
+	"github.com/Joessst-Dev/fft-cli/internal/xdg"
 )
 
 // Version is the entry format this package writes.
@@ -72,15 +73,7 @@ type Entry struct {
 // Path is the default history file: $XDG_STATE_HOME/fft/history.jsonl, or
 // ~/.local/state/fft/history.jsonl when XDG_STATE_HOME is unset.
 func Path() (string, error) {
-	if dir := os.Getenv("XDG_STATE_HOME"); dir != "" {
-		return filepath.Join(dir, "fft", "history.jsonl"), nil
-	}
-
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", fmt.Errorf("locate the home directory: %w", err)
-	}
-	return filepath.Join(home, ".local", "state", "fft", "history.jsonl"), nil
+	return xdg.State.Path("history.jsonl")
 }
 
 // Log is a history file.

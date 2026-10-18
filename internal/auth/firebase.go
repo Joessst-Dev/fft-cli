@@ -8,13 +8,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/Joessst-Dev/fft-cli/internal/config"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/httplog"
 )
@@ -142,17 +142,6 @@ type allowlistTransport struct {
 	base    http.RoundTripper
 }
 
-// isLoopbackHost reports whether host is this machine, the only host the API key
-// may travel to over plain http. Google's real endpoints are not loopback, so this
-// exception cannot fire against them.
-func isLoopbackHost(host string) bool {
-	if host == "localhost" {
-		return true
-	}
-	ip := net.ParseIP(host)
-	return ip != nil && ip.IsLoopback()
-}
-
 func (t *allowlistTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	host := strings.ToLower(req.URL.Hostname())
 
@@ -161,9 +150,10 @@ func (t *allowlistTransport) RoundTrip(req *http.Request) (*http.Response, error
 	// wire in the clear. Google's identity endpoints are https, so http to them is
 	// refused. The one http exception is a loopback host, which is the fake identity
 	// server the specs point withEndpoints at — the same bargain NormalizeBaseURL
-	// strikes for the tenant base URL.
+	// strikes for the tenant base URL. Google's real endpoints are not loopback, so
+	// this exception cannot fire against them.
 	overTLS := req.URL.Scheme == "https"
-	overLoopback := req.URL.Scheme == "http" && isLoopbackHost(host)
+	overLoopback := req.URL.Scheme == "http" && config.IsLoopbackHost(host)
 	if !overTLS && !overLoopback {
 		return nil, fmt.Errorf("auth: refusing to send the Firebase API key over %q", req.URL.Scheme)
 	}

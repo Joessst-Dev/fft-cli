@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"path/filepath"
 	"slices"
 	"strings"
 
@@ -28,6 +27,7 @@ import (
 
 	"github.com/Joessst-Dev/fft-cli/internal/atomicfile"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
+	"github.com/Joessst-Dev/fft-cli/internal/xdg"
 )
 
 // Version is the schema version written to new config files. It exists so that
@@ -281,15 +281,7 @@ func (s *Store) Path() string { return s.path }
 // DefaultPath is $XDG_CONFIG_HOME/fft/config.yaml, falling back to
 // ~/.config/fft/config.yaml.
 func DefaultPath() (string, error) {
-	if dir := os.Getenv("XDG_CONFIG_HOME"); dir != "" {
-		return filepath.Join(dir, "fft", "config.yaml"), nil
-	}
-
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", fmt.Errorf("locate the home directory: %w", err)
-	}
-	return filepath.Join(home, ".config", "fft", "config.yaml"), nil
+	return xdg.Config.Path("config.yaml")
 }
 
 // Load reads the config file. A missing file is not an error: a first run has
