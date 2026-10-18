@@ -1,12 +1,12 @@
 ---
 name: golang-dependency-injection
-description: "Comprehensive guide for dependency injection (DI) in Golang. Covers why DI matters (testability, loose coupling, separation of concerns, lifecycle management), manual constructor injection, and DI library comparison (google/wire, uber-go/dig, uber-go/fx, samber/do). Use this skill when designing service architecture, setting up dependency injection, refactoring tightly coupled code, managing singletons or service factories, or when the user asks about inversion of control, service containers, or wiring dependencies in Go."
+description: "Comprehensive guide for dependency injection (DI) in Golang. Covers why DI matters (testability, loose coupling, separation of concerns, lifecycle management), manual constructor injection, and DI library comparison (google/wire, uber-go/dig, uber-go/fx, samber/do). Use this skill when designing service architecture, setting up dependency injection, refactoring tightly coupled code, managing singletons or service factories, or when the user asks about inversion of control, service containers, or wiring dependencies in Go. For a specific DI library, → See `samber/cc-skills-golang@golang-google-wire`, `samber/cc-skills-golang@golang-uber-dig`, `samber/cc-skills-golang@golang-uber-fx`, or `samber/cc-skills-golang@golang-samber-do` skills."
 user-invocable: true
 license: MIT
-compatibility: Designed for Claude Code or similar AI coding agents, and for projects using Golang.
+compatibility: Designed for Claude Code, Codex or similar harness, and for projects using Golang.
 metadata:
   author: samber
-  version: "1.1.2"
+  version: "1.3.1"
   openclaw:
     emoji: "🔌"
     homepage: https://github.com/samber/cc-skills-golang
@@ -15,9 +15,13 @@ metadata:
         - go
     install: []
 allowed-tools: Read Edit Write Glob Grep Bash(go:*) Bash(golangci-lint:*) Bash(git:*) Agent WebFetch mcp__context7__resolve-library-id mcp__context7__query-docs AskUserQuestion
+paths:
+  - "**/*.go"
 ---
 
 **Persona:** You are a Go software architect. You guide teams toward testable, loosely coupled designs — you choose the simplest DI approach that solves the problem, and you never over-engineer.
+
+**Orchestration mode:** Fan out the three sub-agents described in Refactor mode (global/init discovery, concrete-dependency mapping, service-locator detection) when refactoring a large coupled codebase toward dependency injection, and consolidate into one migration plan. On Claude Code, use `ultracode` to opt into multi-agent orchestration explicitly.
 
 **Modes:**
 
@@ -135,55 +139,32 @@ Go has three main approaches to DI libraries:
 | **Go version** | Any | Any | Any | 1.18+ (generics) |
 | **Learning curve** | None | Medium | High | Low |
 
-### Quick Comparison: Same App, Four Ways
+### Quick Comparison: Wiring Style
 
-The dependency graph: `Config -> Database -> UserStore -> UserService -> API`
-
-**Manual**:
+The same graph — `Config -> Database -> UserStore -> UserService -> API` — wired by hand and by a container. The contrast is what the wiring code encodes: an ordered call sequence you maintain, versus a set of providers the container orders for you.
 
 ```go
+// Manual — you own the order; adding a dependency means editing every call site downstream
 cfg := NewConfig()
 db := NewDatabase(cfg)
 store := NewUserStore(db)
 svc := NewUserService(store)
 api := NewAPI(svc)
 api.Run()
-// No automatic shutdown, health checks, or lazy loading
-```
+// No shutdown hooks, health checks, or lazy loading — add them yourself
 
-**google/wire**:
-
-```go
-// wire.go — then run: wire ./...
-func InitializeAPI() (*API, error) {
-    wire.Build(NewConfig, NewDatabase, NewUserStore, NewUserService, NewAPI)
-    return nil, nil
-}
-// No shutdown or health check support
-```
-
-**uber-go/fx**:
-
-```go
-app := fx.New(
-    fx.Provide(NewConfig, NewDatabase, NewUserStore, NewUserService),
-    fx.Invoke(func(api *API) { api.Run() }),
-)
-app.Run() // manages lifecycle, but reflection-based
-```
-
-**samber/do**:
-
-```go
+// Container (samber/do) — order is derived from the constructor signatures
 i := do.New()
 do.Provide(i, NewConfig)
-do.Provide(i, NewDatabase)    // auto shutdown + health check
+do.Provide(i, NewDatabase)
 do.Provide(i, NewUserStore)
 do.Provide(i, NewUserService)
 api := do.MustInvoke[*API](i)
 api.Run()
-// defer i.Shutdown() — handles all cleanup automatically
+defer i.Shutdown() // shutdown and health checks come from the container
 ```
+
+google/wire and uber-go/fx express the same graph differently: wire generates the manual sequence above at build time from a `wire.Build` provider list (cleanup via `func()` returned by providers, no lifecycle hooks), while fx registers providers with `fx.Provide` and resolves them by reflection at runtime with `OnStart`/`OnStop` hooks. Full wiring examples for each: [google/wire](./references/google-wire.md), [uber-go/dig + fx](./references/uber-dig-fx.md), [samber/do](./references/samber-do.md).
 
 ## Testing with DI
 
@@ -230,7 +211,7 @@ func TestUserService_WithDo(t *testing.T) {
     testInjector := do.New()
 
     // Provide the mock UserStore interface
-    do.Override[UserStore](testInjector, &MockUserStore{
+    do.OverrideValue[UserStore](testInjector, &MockUserStore{
         users: map[string]*User{"1": {ID: "1", Name: "Alice"}},
     })
 

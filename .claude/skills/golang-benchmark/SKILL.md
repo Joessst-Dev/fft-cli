@@ -1,12 +1,12 @@
 ---
 name: golang-benchmark
-description: "Golang benchmarking, profiling, and performance measurement. Use when writing, running, or comparing Go benchmarks, profiling hot paths with pprof, interpreting CPU/memory/trace profiles, analyzing results with benchstat, setting up CI benchmark regression detection, or investigating production performance with Prometheus runtime metrics. Also use when the developer needs deep analysis on a specific performance indicator - this skill provides the measurement methodology, while golang-performance provides the optimization patterns."
+description: "Golang benchmarking, profiling, and performance measurement. Use when writing, running, or comparing Go benchmarks, profiling hot paths with pprof, interpreting CPU/memory/trace profiles, analyzing results with benchstat, setting up CI benchmark regression detection, or investigating production performance with Prometheus runtime metrics. Also use when the developer needs deep analysis on a specific performance indicator - this skill provides the measurement methodology, while `samber/cc-skills-golang@golang-performance` provides the optimization patterns."
 user-invocable: true
 license: MIT
-compatibility: Designed for Claude Code or similar AI coding agents, and for projects using Golang.
+compatibility: Designed for Claude Code, Codex or similar harness, and for projects using Golang.
 metadata:
   author: samber
-  version: "1.1.3"
+  version: "1.3.2"
   openclaw:
     emoji: "📊"
     homepage: https://github.com/samber/cc-skills-golang
@@ -18,12 +18,18 @@ metadata:
       - kind: go
         package: golang.org/x/perf/cmd/benchstat@latest
         bins: [benchstat]
-allowed-tools: Read Edit Write Glob Grep Bash(go:*) Bash(golangci-lint:*) Bash(git:*) Agent WebFetch Bash(benchstat:*) Bash(benchdiff:*) Bash(cob:*) Bash(gobenchdata:*) Bash(curl:*) mcp__context7__resolve-library-id mcp__context7__query-docs WebSearch AskUserQuestion
+allowed-tools: Read Edit Write Glob Grep Bash(go:*) Bash(golangci-lint:*) Bash(git:*) Agent WebFetch Bash(benchstat:*) Bash(benchdiff:*) Bash(cob:*) Bash(gobenchdata:*) Bash(curl:*) mcp__context7__resolve-library-id mcp__context7__query-docs WebSearch AskUserQuestion EnterWorktree ExitWorktree
+paths:
+  - "**/*.go"
 ---
 
 **Persona:** You are a Go performance measurement engineer. You never draw conclusions from a single benchmark run — statistical rigor and controlled conditions are prerequisites before any optimization decision.
 
-**Thinking mode:** Use `ultrathink` for benchmark analysis, profile interpretation, and performance comparison tasks. Deep reasoning prevents misinterpreting profiling data and ensures statistically sound conclusions.
+**Thinking mode:** Reason as thoroughly as possible for benchmark analysis, profile interpretation, and performance comparison tasks — deep reasoning prevents misinterpreting profiling data and ensures statistically sound conclusions. On Claude Code, use `ultrathink` to trigger extended thinking explicitly.
+
+**Dependencies:**
+
+- benchstat: `go install golang.org/x/perf/cmd/benchstat@latest`
 
 # Go Benchmarking & Performance Measurement
 
@@ -33,9 +39,19 @@ This skill covers the full measurement workflow: write a benchmark, run it, prof
 
 ## Writing Benchmarks
 
+### File and Ordering Conventions
+
+Benchmark functions live in a `_bench_test.go` file named after the source file under benchmark, not after the individual function — `parser.go` -> `parser_bench_test.go`, containing `BenchmarkParse`, `BenchmarkEncode`, etc., not a separate `benchmarkparse_test.go` per function.
+
+- Keeping benchmarks in their own file (instead of mixed into `parser_test.go`) keeps `go test -bench=. ./pkg/parser` output free of unrelated `Test*` noise.
+- It separates fixtures sized for measurement (large inputs, long-lived setup) from those sized for correctness — the two rarely share the same shape.
+- The file still follows Go's one-test-file-per-source-file convention (→ See `samber/cc-skills-golang@golang-testing` skill), just with the `_bench` suffix marking its narrower purpose.
+
+Order `Benchmark*` functions inside `parser_bench_test.go` to mirror the order of the functions/methods they measure in `parser.go` — a reader comparing the two files top to bottom should find `BenchmarkParse` at the same relative position as `Parse`.
+
 ### `b.Loop()` (Go 1.24+) — preferred
 
-`b.Loop()` prevents the compiler from optimizing away the code under test — without it, the compiler can detect dead results and eliminate them, producing misleadingly fast numbers. It also excludes setup code before the loop from timing automatically.
+For Go 1.24+, prefer `b.Loop()` for new benchmarks. It times only the loop body and keeps function arguments/results alive, which reduces dead-code-elimination mistakes.
 
 ```go
 func BenchmarkParse(b *testing.B) {
@@ -46,23 +62,27 @@ func BenchmarkParse(b *testing.B) {
 }
 ```
 
-Existing `for range b.N` benchmarks still work but should migrate to `b.Loop()` — the old pattern requires manual `b.ResetTimer()` and a package-level sink variable to prevent dead code elimination.
+Legacy `b.N` loops still compile and are fine to keep when preserving existing benchmarks or supporting Go <1.24. They are easier to get wrong: setup may need `b.ResetTimer()`, and results may need a sink if the compiler can eliminate the work. Go 1.26 fixed an earlier `b.Loop()` inlining limitation — benchmarks on 1.24–1.25 already benefit from `b.Loop()` but may miss inlining optimizations that 1.26 delivers.
+
+Go 1.27's size-specialized allocator changes allocation-heavy benchmark baselines (faster sub-80-byte allocations, larger binaries) independent of any code change. Treat a `benchstat` comparison that straddles the Go 1.26→1.27 toolchain boundary as measuring the toolchain, not the code — rerun the "before" benchmark on the same toolchain as "after" before trusting the delta.
 
 ### Memory tracking
 
 ```go
 func BenchmarkAlloc(b *testing.B) {
     b.ReportAllocs() // or run with -benchmem flag
+    var sink []byte
     for b.Loop() {
-        _ = make([]byte, 1024)
+        sink = make([]byte, 1024)
     }
+    _ = sink
 }
 ```
 
 `b.ReportMetric()` adds custom metrics (e.g., throughput):
 
 ```go
-b.ReportMetric(float64(totalBytes)/b.Elapsed().Seconds(), "bytes/s")
+b.ReportMetric(float64(totalBytes)/b.Elapsed().Seconds(), "bytes/s") // b.Elapsed() is only valid inside b.Loop()
 ```
 
 ### Sub-benchmarks and table-driven
@@ -99,6 +119,46 @@ go test -bench=BenchmarkEncode -benchmem -count=10 ./pkg/... | tee bench.txt
 
 **Output format:** `BenchmarkEncode/size=64-8  5000000  230.5 ns/op  128 B/op  2 allocs/op` — the `-8` suffix is GOMAXPROCS, `ns/op` is time per operation, `B/op` is bytes allocated per op, `allocs/op` is heap allocation count per op.
 
+## Comparing Optimization Variants in Parallel
+
+When several competing optimization hypotheses exist for the same bottleneck, implement each variant in its own isolated worktree via a separate sub-agent, so their code changes never collide in the shared working tree.
+
+**Run the benchmarks serially, not concurrently.** Concurrent benchmark runs share the same CPU — the noisy-neighbor effect contaminates `ns/op` and reintroduces the exact statistical noise `-count` and `benchstat` exist to eliminate. Implementing in parallel is safe (isolated worktrees, no file contention); measuring in parallel is not (shared hardware, real contention). Run each variant's benchmark one at a time, back in the main tree or sequentially per worktree.
+
+Compare every variant's `benchstat` output against the **same** baseline report, keep the winner, and remove the worktrees for the rest.
+
+## Documenting Results in Commits
+
+Paste benchstat output in the commit body when the change has a measurable performance impact. This documents _why_ an optimization was made, prevents future readers from reverting it, and lets reviewers verify the claim without re-running benchmarks.
+
+Commit format:
+
+```
+perf(parser): reduce Parse allocations 50% with sync.Pool
+
+Replace per-call []byte allocation with a pooled buffer.
+
+goos: linux / goarch: amd64 / cpu: AMD Ryzen 9 5950X
+          │    old     │              new               │
+          │  sec/op    │  sec/op     vs base            │
+Parse-32    4.592µ ± 2%  3.041µ ± 1%  -33.78% (p=0.000 n=10)
+
+          │   old    │             new              │
+          │   B/op   │   B/op     vs base           │
+Parse-32   1.024Ki ± 0%  0.512Ki ± 0%  -50.00% (p=0.000 n=10)
+
+          │ old  │            new             │
+          │ allocs/op │ allocs/op  vs base    │
+Parse-32   12.00 ± 0%   6.000 ± 0%  -50.00% (p=0.000 n=10)
+```
+
+**Rules:**
+
+- Only include benchmarks directly affected by the change — strip unrelated rows
+- Never paste results with `~` (no statistical significance) — the improvement cannot be claimed
+- Include the hardware context line (`goos/goarch/cpu`) so results are reproducible
+- Use `perf(scope):` commit type for performance-only changes
+
 ## Profiling from Benchmarks
 
 Generate profiles directly from benchmark runs — no HTTP server needed:
@@ -125,7 +185,7 @@ For full pprof CLI reference (all commands, non-interactive mode, profile interp
 
 - **[benchstat Reference](./references/benchstat.md)** — Statistical comparison of benchmark runs with rigorous confidence intervals and p-value tests. Covers output reading, filtering old benchmarks, interleaving results for visual clarity, and regression detection. Use this when you need to prove a change made a meaningful performance difference, not just a lucky run.
 
-- **[Trace Reference](./references/trace.md)** — Execution tracer for understanding *when* and *why* code runs. Visualizes goroutine scheduling, garbage collection phases, network blocking, and custom span annotations. Use this when pprof (which shows *where* CPU goes) isn't enough — you need to see the timeline of what happened.
+- **[Trace Reference](./references/trace.md)** — Execution tracer for understanding _when_ and _why_ code runs. Visualizes goroutine scheduling, garbage collection phases, network blocking, and custom span annotations. Use this when pprof (which shows _where_ CPU goes) isn't enough — you need to see the timeline of what happened.
 
 - **[Diagnostic Tools](./references/tools.md)** — Quick reference for ancillary tools: fieldalignment (struct padding waste), GODEBUG (runtime logging flags), fgprof (frame graph profiles), race detector (concurrency bugs), and others. Use this when you have a specific symptom and need a focused diagnostic — don't reach for pprof if a simpler tool already answers your question.
 

@@ -2,6 +2,17 @@
 
 → See `samber/cc-skills-golang@golang-cli` skill for CLI application patterns and frameworks.
 
+## Table of Contents
+
+- [CLI Help Text](#cli-help-text)
+- [Configuration Documentation](#configuration-documentation)
+- [Architecture & design decisions](#architecture--design-decisions)
+- [API Documentation](#api-documentation)
+  - [REST APIs — OpenAPI / Swagger](#rest-apis--openapi--swagger)
+  - [Event-Driven — AsyncAPI](#event-driven--asyncapi)
+  - [gRPC — Protobuf](#grpc--protobuf)
+  - [When to Use Each Format](#when-to-use-each-format)
+
 ## CLI Help Text
 
 For CLI applications, `--help` output is the primary documentation. CLI tools MUST have comprehensive `--help` text:
@@ -132,8 +143,8 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 Generate the spec:
 
 ```bash
-go install github.com/swaggo/swag/cmd/swag@latest
-swag init -g cmd/server/main.go -o docs/swagger
+go get -tool github.com/swaggo/swag/cmd/swag@latest
+go tool swag init -g cmd/server/main.go -o docs/swagger
 ```
 
 This produces `docs/swagger/swagger.json` and `docs/swagger/swagger.yaml`. Serve with Swagger UI or Redoc.

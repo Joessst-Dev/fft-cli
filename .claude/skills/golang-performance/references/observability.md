@@ -2,6 +2,17 @@
 
 Third-party monitoring tools complement local profiling (pprof, benchmarks) by providing continuous monitoring, historical trends, and regression detection in production.
 
+## Table of Contents
+
+- [Prometheus Metrics for Go](#prometheus-metrics-for-go)
+  - [PromQL Queries for Performance Diagnosis](#promql-queries-for-performance-diagnosis)
+  - [Alerting rules (examples)](#alerting-rules-examples)
+  - [Grafana Dashboards](#grafana-dashboards)
+- [Continuous Profiling](#continuous-profiling)
+  - [Pyroscope push mode](#pyroscope-push-mode)
+  - [Pyroscope pull mode (via Grafana Alloy)](#pyroscope-pull-mode-via-grafana-alloy)
+- [Real-Time Visualization (Development)](#real-time-visualization-development)
+
 ## Prometheus Metrics for Go
 
 **Setup:** `github.com/prometheus/client_golang` — expose `/metrics` endpoint with `promhttp.Handler()`. Default collectors automatically export Go runtime metrics (`go_goroutines`, `go_memstats_*`, `go_gc_duration_seconds`, `process_cpu_seconds_total`, etc.).
@@ -49,7 +60,7 @@ Third-party monitoring tools complement local profiling (pprof, benchmarks) by p
 
 ### Alerting rules (examples)
 
-[Example alerting rules](assets/prometheus-alerts.yml) — adjust thresholds to your application; a high-throughput data pipeline will have different baselines than a lightweight API server.
+[Example alerting rules](../assets/prometheus-alerts.yml) — adjust thresholds to your application; a high-throughput data pipeline will have different baselines than a lightweight API server.
 
 → See `samber/cc-skills@promql-cli` skill for interactively testing these PromQL expressions against your Prometheus instance from the CLI.
 

@@ -1,5 +1,15 @@
 # Channels and Select Patterns
 
+## Table of Contents
+
+- [Goroutine Lifecycle](#goroutine-lifecycle)
+  - [Panic Recovery at Goroutine Boundaries](#panic-recovery-at-goroutine-boundaries)
+- [Channel Direction](#channel-direction)
+- [Channel Closing](#channel-closing)
+- [Buffer Size](#buffer-size)
+- [Select for Non-Blocking Communication](#select-for-non-blocking-communication)
+- [Avoid Repeated `time.After` in Hot Loops](#avoid-repeated-timeafter-in-hot-loops)
+
 ## Goroutine Lifecycle
 
 NEVER start a goroutine without knowing how it stops. Every goroutine MUST answer: **how will it stop?**
@@ -128,28 +138,26 @@ func process(ctx context.Context, in <-chan Task, out chan<- Result) {
 }
 ```
 
-## NEVER Use `time.After` in Loops
+## Avoid Repeated `time.After` in Hot Loops
 
 ```go
-// ✗ Bad — leaks a timer on every iteration until it fires
+// ✗ Bad — creates a new timer on every iteration
 for {
     select {
     case msg := <-ch:
         handle(msg)
-    case <-time.After(5 * time.Second): // new timer every loop — leak
+    case <-time.After(5 * time.Second): // repeated allocation/churn
         handleTimeout()
     }
 }
 
-// ✓ Good — reuse the timer
+// ✓ Good (Go 1.23+) — reuse the timer
 timer := time.NewTimer(5 * time.Second)
 defer timer.Stop()
 for {
     select {
     case msg := <-ch:
-        if !timer.Stop() {
-            <-timer.C
-        }
+        timer.Stop()
         timer.Reset(5 * time.Second)
         handle(msg)
     case <-timer.C:
@@ -158,3 +166,5 @@ for {
     }
 }
 ```
+
+For Go <1.23, if `timer.Stop()` returns false, drain a possible stale value before `Reset`. In Go 1.23+, receiving from `timer.C` after `Stop` returns is guaranteed to block rather than receive a stale value.

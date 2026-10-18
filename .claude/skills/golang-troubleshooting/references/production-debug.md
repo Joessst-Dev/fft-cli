@@ -1,12 +1,25 @@
 # Production Debugging
 
+## Table of Contents
+
+- [Production Debugging Checklist](#production-debugging-checklist)
+  - [Step 1: Capture Immediately (don't restart!)](#step-1-capture-immediately-dont-restart)
+  - [Step 2: System Metrics](#step-2-system-metrics)
+  - [Step 3: Analyze Locally](#step-3-analyze-locally)
+- [Logging & Observability](#logging--observability)
+  - [Strategic Log Placement](#strategic-log-placement)
+  - [Structured Logging (Go 1.21+)](#structured-logging-go-121)
+  - [Request ID Tracing](#request-id-tracing)
+- [Network & HTTP Debugging](#network--http-debugging)
+  - [HTTP Client Issues](#http-client-issues)
+
 ## Production Debugging Checklist
 
 When paged for a production issue:
 
 ### Step 1: Capture Immediately (don't restart!)
 
-Capture all profiles before restarting the process. Use the curl commands from [pprof.md](./pprof.md), targeting your production server address. At minimum, capture: goroutine dump (`?debug=2`), heap, CPU (30s), and mutex profiles.
+Capture all profiles before restarting the process. The curl commands in [pprof.md](./pprof.md) can be used targeting your production server address. At minimum, capture: goroutine dump (`?debug=2`), heap, CPU (30s), and mutex profiles.
 
 ### Step 2: System Metrics
 
@@ -40,7 +53,11 @@ func ProcessOrder(ctx context.Context, orderID string) error {
 // 2. Before and after external calls
 log.Printf("calling payment API for order %s", orderID)
 resp, err := paymentClient.Charge(ctx, req)
-log.Printf("payment API: status=%d err=%v", resp.StatusCode, err)
+if err != nil {
+    log.Printf("payment API: err=%v", err)
+} else {
+    log.Printf("payment API: status=%d", resp.StatusCode)
+}
 
 // 3. At decision points
 if user.IsAdmin {
@@ -88,7 +105,7 @@ func RequestID(ctx context.Context) string {
 ### HTTP Client Issues
 
 ```go
-// 1. Always set timeouts — default http.Client has NO timeout
+// 1. HTTP clients MUST set timeouts — default http.Client has NO timeout
 client := &http.Client{
     Timeout: 30 * time.Second,
     Transport: &http.Transport{
@@ -100,7 +117,7 @@ client := &http.Client{
     },
 }
 
-// 2. Always close response body
+// 2. Response body MUST be closed
 resp, err := client.Do(req)
 if err != nil {
     return err

@@ -1,5 +1,17 @@
 # Pipelines and Worker Pools
 
+## Table of Contents
+
+- [Pipeline Pattern](#pipeline-pattern)
+- [Fan-Out / Fan-In](#fan-out--fan-in)
+- [Worker Pool with errgroup](#worker-pool-with-errgroup)
+- [Bounded Concurrency with Semaphore](#bounded-concurrency-with-semaphore)
+- [Pipeline Alternatives](#pipeline-alternatives)
+  - [Go 1.23+ Iterators (range-over-func)](#go-123-iterators-range-over-func)
+  - [samber/ro](#samberro)
+- [Goroutine Leak Detection](#goroutine-leak-detection)
+- [Common Pipeline Mistakes](#common-pipeline-mistakes)
+
 ## Pipeline Pattern
 
 A pipeline is a series of stages connected by channels, where each stage is a goroutine (or group of goroutines) that:
@@ -76,9 +88,17 @@ func fanOut(ctx context.Context, in <-chan Task, workers int) <-chan Result {
         wg.Add(1)
         go func() {
             defer wg.Done()
-            for task := range in {
+            for {
                 select {
-                case out <- process(ctx, task):
+                case task, ok := <-in:
+                    if !ok {
+                        return
+                    }
+                    select {
+                    case out <- process(ctx, task):
+                    case <-ctx.Done():
+                        return
+                    }
                 case <-ctx.Done():
                     return
                 }

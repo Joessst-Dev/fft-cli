@@ -2,6 +2,57 @@
 
 `go tool pprof` is the primary tool for understanding where CPU time, memory, and contention go in Go programs. This file covers how to **use** the CLI and **interpret** the output. For enabling pprof endpoints on running services (net/http/pprof import, authentication, security), → See `samber/cc-skills-golang@golang-troubleshooting` skill.
 
+## Table of Contents
+
+- [Profile Types](#profile-types)
+  - [Choosing between alloc_objects and alloc_space](#choosing-between-alloc_objects-and-alloc_space)
+  - [Choosing between inuse_space and alloc_space](#choosing-between-inuse_space-and-alloc_space)
+  - [Enabling mutex and block profiles](#enabling-mutex-and-block-profiles)
+- [Generating Profiles](#generating-profiles)
+  - [From benchmarks (no HTTP server needed)](#from-benchmarks-no-http-server-needed)
+  - [From running service](#from-running-service)
+  - [From code (programmatic)](#from-code-programmatic)
+- [Interactive CLI Commands](#interactive-cli-commands)
+  - [`top` — self time ranking (start here)](#top--self-time-ranking-start-here)
+  - [`top -cum` — cumulative time ranking](#top--cum--cumulative-time-ranking)
+  - [`list funcName` — annotated source](#list-funcname--annotated-source)
+  - [`peek funcName` — callers and callees](#peek-funcname--callers-and-callees)
+  - [`tree` — hierarchical call tree](#tree--hierarchical-call-tree)
+  - [`traces` — raw stack traces](#traces--raw-stack-traces)
+  - [`web` / `svg` — graphical call graph](#web--svg--graphical-call-graph)
+  - [`disasm funcName` — assembly-level](#disasm-funcname--assembly-level)
+  - [`weblist funcName` — annotated source in browser](#weblist-funcname--annotated-source-in-browser)
+  - [`tags` — profile label breakdown](#tags--profile-label-breakdown)
+  - [`tagroot` and `tagleaf` — group by labels](#tagroot-and-tagleaf--group-by-labels)
+  - [`granularity` — control grouping level](#granularity--control-grouping-level)
+  - [`sort` — change sort order](#sort--change-sort-order)
+  - [`source` — show source for matching regex](#source--show-source-for-matching-regex)
+  - [`focus`, `ignore`, `hide`, `show` — filtering](#focus-ignore-hide-show--filtering)
+  - [`normalize` — normalize against a base profile](#normalize--normalize-against-a-base-profile)
+  - [`sample_index` — switch metric in multi-metric profiles](#sample_index--switch-metric-in-multi-metric-profiles)
+  - [`unit` — change display units](#unit--change-display-units)
+  - [`callgrind` — export for KCachegrind](#callgrind--export-for-kcachegrind)
+  - [`proto` — save processed profile](#proto--save-processed-profile)
+  - [`help` — list all commands](#help--list-all-commands)
+  - [`show_from=regex` — trim callers above match](#show_fromregex--trim-callers-above-match)
+  - [`noinlines` — flatten inlined functions](#noinlines--flatten-inlined-functions)
+  - [Full command reference](#full-command-reference)
+- [Graphical / Web UI](#graphical--web-ui)
+- [Comparing Profiles](#comparing-profiles)
+  - [Memory leak detection with `-base`](#memory-leak-detection-with--base)
+  - [Comparing CPU profiles across code versions](#comparing-cpu-profiles-across-code-versions)
+- [Common Patterns](#common-patterns)
+  - [Flat high + cum high](#flat-high--cum-high)
+  - [Flat low + cum high](#flat-low--cum-high)
+  - [`alloc_objects` high, `inuse_space` low](#alloc_objects-high-inuse_space-low)
+  - [`inuse_space` growing over time](#inuse_space-growing-over-time)
+  - [Mutex/block profile hot](#mutexblock-profile-hot)
+  - [Many goroutines blocked on same channel/mutex](#many-goroutines-blocked-on-same-channelmutex)
+  - [`runtime.mallocgc` dominates CPU profile](#runtimemallocgc-dominates-cpu-profile)
+  - [`runtime.memmove` high in CPU profile](#runtimememmove-high-in-cpu-profile)
+  - [`runtime.scanobject` high in CPU profile](#runtimescanobject-high-in-cpu-profile)
+- [Which Profile for Which Symptom?](#which-profile-for-which-symptom)
+
 ## Profile Types
 
 Each profile type answers a different performance question. Choosing the wrong profile type wastes investigation time — match the symptom to the profile before capturing.
@@ -9,7 +60,7 @@ Each profile type answers a different performance question. Choosing the wrong p
 | Profile | Flag / Endpoint | Use when | Why this profile and not another |
 | --- | --- | --- | --- |
 | **CPU** | `-cpuprofile` or `/debug/pprof/profile?seconds=30` | High CPU usage, slow functions | Samples which functions are on-CPU at 100Hz; misses off-CPU time (I/O, sleep) |
-| **Heap (alloc_objects)** | `-memprofile` then `pprof -alloc_objects` | GC pressure, too many allocations | Counts allocation events regardless of size — a 1-byte alloc counts the same as 1MB; reveals GC churn sources |
+| **Heap (alloc_objects)** | `-memprofile` then `pprof -alloc_objects` | GC pressure, too many allocations | Counts allocation events regardless of size; useful when allocation frequency and object churn dominate |
 | **Heap (alloc_space)** | `pprof -alloc_space` | Finding largest allocation sites by volume | Measures total bytes allocated; use when you need to reduce peak memory, not just GC frequency |
 | **Heap (inuse_space)** | `pprof -inuse_space` | Memory growing over time, suspected leaks | Shows currently live heap objects; compare two snapshots to isolate leak sources |
 | **Heap (inuse_objects)** | `pprof -inuse_objects` | Object count growth, suspected leak of small objects | Counts live objects regardless of size; useful when leak is many small objects not visible in inuse_space |
@@ -20,7 +71,7 @@ Each profile type answers a different performance question. Choosing the wrong p
 
 ### Choosing between alloc_objects and alloc_space
 
-- **alloc_objects** — "where do I allocate the most often?" — use for reducing GC frequency (GC cares about object count, not size)
+- **alloc_objects** — "where do I allocate the most often?" — use when allocation frequency and object churn are driving GC work
 - **alloc_space** — "where do I allocate the most bytes?" — use for reducing peak memory usage and RSS
 - In practice, start with `alloc_objects` because GC churn is the most common allocation-related bottleneck in Go.
 
@@ -41,8 +92,8 @@ import "runtime"
 // 5 means 1 out of 5 events is recorded. Higher = less overhead but less detail.
 runtime.SetMutexProfileFraction(5)
 
-// Block profiling: nanosecond threshold.
-// 1 = record all blocking events. Higher values filter short blocks.
+// Block profiling: time-based sampling rate.
+// 1 = record all blocking events. Higher values sample about one event per rate nanoseconds blocked.
 // Use 1 for debugging, higher values (e.g. 1000000 = 1ms) for production.
 runtime.SetBlockProfileRate(1)
 ```
@@ -621,7 +672,7 @@ go tool pprof http://localhost:6060/debug/pprof/profile?seconds=30
 go tool pprof -svg http://localhost:6060/debug/pprof/profile?seconds=10 > cpu.svg
 
 # CPU profile — fetch with a timeout
-go tool pprof -seconds=30 -timeout=60 http://localhost:6060/debug/pprof/profile
+go tool pprof -timeout=60 "http://localhost:6060/debug/pprof/profile?seconds=30"
 
 # Heap profile — fetch and show top allocation sites
 go tool pprof -top -alloc_objects http://localhost:6060/debug/pprof/heap
@@ -799,23 +850,23 @@ The function itself is the bottleneck. It does expensive work directly (tight lo
 
 ### Flat low + cum high
 
-The function calls slow things but does little work itself. It's a coordinator or dispatcher. Drill into callees with `list` or `peek`. The fix is usually in the called functions, or reducing how often they're called.
+The function calls slow things but does little work itself — it's a coordinator or dispatcher. Drill into callees with `list` or `peek`. The fix is usually in the called functions, or reducing how often they're called.
 
 ### `alloc_objects` high, `inuse_space` low
 
-Short-lived allocations creating GC churn. Objects are allocated and freed rapidly — each one is cheap individually but the aggregate volume triggers frequent GC cycles. Common sources: `fmt.Errorf` in hot paths (allocates every call), interface boxing (`any` arguments), string-to-byte conversions, slice growth without preallocation. → See `samber/cc-skills-golang@golang-performance` skill for allocation reduction patterns.
+Short-lived allocations creating GC churn — objects are allocated and freed rapidly, each cheap individually but the aggregate volume triggers frequent GC cycles. Common sources: `fmt.Errorf` in hot paths (allocates every call), interface boxing (`any` arguments), string-to-byte conversions, slice growth without preallocation. → See `samber/cc-skills-golang@golang-performance` skill for allocation reduction patterns.
 
 ### `inuse_space` growing over time
 
-Memory leak. Take two heap snapshots minutes apart and compare with `-base` (see Comparing Profiles above). Growing types reveal the leak source. Common causes: unbounded caches, maps that never shrink (Go maps don't release bucket memory on delete), goroutine leaks holding references.
+Memory leak. Take two heap snapshots minutes apart and compare with `-base` (see Comparing Profiles above) — growing types reveal the leak source. Common causes: unbounded caches, maps that never shrink (Go maps don't release bucket memory on delete), goroutine leaks holding references.
 
 ### Mutex/block profile hot
 
-Contention, not CPU. The CPU is waiting, not working. The goroutines are all trying to acquire the same lock or read from the same channel. Reduce critical section scope, shard locks across multiple mutexes, or use lock-free structures (`sync/atomic`, `sync.Map` for read-heavy workloads). → See `samber/cc-skills-golang@golang-concurrency` skill.
+Contention, not CPU — the goroutines are all waiting to acquire the same lock or read from the same channel instead of working. Reduce critical section scope, shard locks across multiple mutexes, or use lock-free structures (`sync/atomic`, `sync.Map` for read-heavy workloads). → See `samber/cc-skills-golang@golang-concurrency` skill.
 
 ### Many goroutines blocked on same channel/mutex
 
-Serialization bottleneck. All work funnels through a single point. The throughput ceiling is the speed of that single point. Consider worker pools with multiple independent queues, sharding the work, or buffered channels to smooth bursts.
+Serialization bottleneck — all work funnels through a single point, so the throughput ceiling is the speed of that single point. Consider worker pools with multiple independent queues, sharding the work, or buffered channels to smooth bursts.
 
 ### `runtime.mallocgc` dominates CPU profile
 

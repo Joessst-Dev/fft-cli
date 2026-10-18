@@ -1,12 +1,12 @@
 ---
 name: golang-continuous-integration
-description: "Provides CI/CD pipeline configuration using GitHub Actions for Golang projects. Covers testing, linting, SAST, security scanning, code coverage, Dependabot, Renovate, GoReleaser, code review automation, and release pipelines. Use this whenever setting up CI for a Go project, configuring workflows, adding linters or security scanners, setting up Dependabot or Renovate, automating releases, or improving an existing CI pipeline. Also use when the user wants to add quality gates to their Go project."
+description: "GitHub Actions CI/CD pipeline configuration for Golang projects — workflow files for test, lint, SAST, coverage and vulnerability-scan jobs, Dependabot and Renovate config files, GoReleaser release pipelines, Docker build/push, repository security settings, and AI-driven PR review. Use when setting up or improving Go project CI, writing or fixing `.github/workflows/*.yml`, adding a linter or security scanner as a pipeline job, wiring automated dependency-update bots, or adding quality gates. Covers wiring tools into a pipeline, not the analysis they perform: do NOT use for choosing or interpreting security findings (→ See `samber/cc-skills-golang@golang-security` skill) or for choosing, upgrading, or auditing dependency versions (→ See `samber/cc-skills-golang@golang-dependency-management` skill)."
 user-invocable: true
 license: MIT
-compatibility: Designed for Claude Code or similar AI coding agents, and for projects using Golang.
+compatibility: Designed for Claude Code, Codex or similar harness, and for projects using Golang.
 metadata:
   author: samber
-  version: "1.1.2"
+  version: "1.4.2"
   openclaw:
     emoji: "🚀"
     homepage: https://github.com/samber/cc-skills-golang
@@ -22,6 +22,9 @@ metadata:
       - kind: brew
         formula: gh
         bins: [gh]
+      - kind: npm
+        package: skills
+        bins: [skills]
 allowed-tools: Read Edit Write Glob Grep Bash(go:*) Bash(golangci-lint:*) Bash(git:*) Agent WebFetch Bash(goreleaser:*) Bash(gh:*) AskUserQuestion
 ---
 
@@ -31,6 +34,11 @@ allowed-tools: Read Edit Write Glob Grep Bash(go:*) Bash(golangci-lint:*) Bash(g
 
 - **Setup** — adding CI to a project for the first time: start with the Quick Reference table, then generate workflows in this order: test → lint → security → release. Prefer the latest stable major version for each GitHub Action.
 - **Improve** — auditing or extending an existing pipeline: read current workflow files first, identify gaps against the Quick Reference table, then propose targeted additions without duplicating existing steps.
+
+**Dependencies:**
+
+- goreleaser: `go install github.com/goreleaser/goreleaser/v2@latest`
+- gh: `brew install gh`
 
 # Go Continuous Integration
 
@@ -53,6 +61,7 @@ The versions in the examples below are reference versions that may be outdated. 
 | **Docker**    | `docker/build-push-action`  | Multi-platform image builds   |
 | **Deps**      | Dependabot / Renovate       | Automated dependency updates  |
 | **Release**   | GoReleaser                  | Automated binary releases     |
+| **AI Review** | Claude Code / Copilot       | AI-powered PR review          |
 
 ---
 
@@ -63,13 +72,16 @@ The versions in the examples below are reference versions that may be outdated. 
 Adapt the Go version matrix to match `go.mod`:
 
 ```
-go 1.23   → matrix: ["1.23", "1.24", "1.25", "1.26", "stable"]
-go 1.24   → matrix: ["1.24", "1.25", "1.26", "stable"]
-go 1.25   → matrix: ["1.25", "1.26", "stable"]
-go 1.26   → matrix: ["1.26", "stable"]
+go 1.23   → matrix: ["1.23", "1.24", "1.25", "1.26", "1.27", "stable"]
+go 1.24   → matrix: ["1.24", "1.25", "1.26", "1.27", "stable"]
+go 1.25   → matrix: ["1.25", "1.26", "1.27", "stable"]
+go 1.26   → matrix: ["1.26", "1.27", "stable"]
+go 1.27   → matrix: ["1.27", "stable"]
 ```
 
 Use `fail-fast: false` so a failure on one Go version doesn't cancel the others.
+
+Go 1.27 raises the Darwin floor to macOS 13 (Ventura). `macos-latest`/`macos-14`+ runners are unaffected; only pin an older `macos-12` runner if a project still needs it, and note it can no longer build with a Go 1.27 toolchain.
 
 Test flags:
 
@@ -106,7 +118,10 @@ Create `.golangci.yml` at the root of the project. See the `samber/cc-skills-gol
 
 `.github/workflows/security.yml` — see [security.yml](./assets/security.yml)
 
-CI MUST run `govulncheck`. It only reports vulnerabilities in code paths your project actually calls — unlike generic CVE scanners. CodeQL results appear in the repository's Security tab. Bearer is good at detecting sensitive data flow issues.
+CI MUST run `govulncheck` — it only reports vulnerabilities in code paths your project actually calls, unlike generic CVE scanners.
+
+- CodeQL results appear in the repository's Security tab.
+- Bearer is good at detecting sensitive data flow issues.
 
 ### CodeQL Configuration
 
@@ -206,7 +221,43 @@ Key details:
 
 ## Repository Security Settings
 
-After creating workflow files, ALWAYS tell the developer to configure GitHub repository settings (branch protection, workflow permissions, secrets, environments) — see [repo-security.md](./references/repo-security.md)
+Repository security settings (branch protection, workflow permissions, secrets, environments) form the security foundation for the CI pipeline — these are documented in [repo-security.md](./references/repo-security.md).
+
+---
+
+## AI-Driven Code Review
+
+Add AI agents as PR reviewers alongside traditional static analysis. When loaded with this skill plugin, the agent applies the relevant Go skills per review area — catching architectural drift, logic bugs, missing error context, and concurrency hazards that linters cannot detect.
+
+> **Cost note:** AI review agents run concurrently per PR. For cost control, remove jobs you don't need or raise the PR trigger filter to specific branches only.
+
+Each subsection below is a generated artifact targeting one specific reviewer — the linked asset file runs on a CI runner, not the developer's local harness, so its tool names and permission flags are deliberately literal rather than capability prose.
+
+### Claude Code
+
+`.github/workflows/ai-review.yml` — see [claude-code-review.yml](./assets/claude-code-review.yml)
+
+The workflow runs parallel jobs, each scoped to a set of review areas and priority level:
+
+| Job | Areas | Priority |
+| --- | --- | --- |
+| `quality` | Code style, Naming, Documentation, Design patterns | Suggestion-first |
+| `correctness` | Error handling, Code safety, Concurrency | Blocking-first |
+| `security` | Security, Dependencies | Blocking-first |
+| `quality-depth` | Tests, Performance, Observability, Modernize | Mixed |
+
+Additional skills that may be relevant depending on the project: `golang-cli`, `golang-context`, `golang-data-structures`, `golang-database`, `golang-dependency-injection`, or any library-specific skill.
+
+The Claude Code GitHub App integration is configured via the `/install-github-app` command, which sets up the required API secrets.
+
+### GitHub Copilot
+
+Copy skills into your repo, then append [copilot-review-instructions.md](./assets/copilot-review-instructions.md) to `.github/copilot-instructions.md`:
+
+```bash
+npx skills add https://github.com/samber/cc-skills-golang --agent github-copilot --skill '*' -y --copy
+ln -s .agents .copilot
+```
 
 ---
 
@@ -222,7 +273,8 @@ After creating workflow files, ALWAYS tell the developer to configure GitHub rep
 | Not pinning action versions | GitHub Actions MUST use pinned major versions (e.g. `@vN`, not `@master`) |
 | No `permissions` block | Follow least-privilege per job |
 | Ignoring govulncheck findings | Fix or suppress with justification |
+| No AI review in CI | Add Claude Code or Copilot review — catches logic, security, and architectural issues that static analysis misses |
 
 ## Related Skills
 
-See `samber/cc-skills-golang@golang-lint`, `samber/cc-skills-golang@golang-security`, `samber/cc-skills-golang@golang-testing`, `samber/cc-skills-golang@golang-dependency-management` skills.
+See `samber/cc-skills-golang@golang-lint`, `samber/cc-skills-golang@golang-security`, `samber/cc-skills-golang@golang-testing`, `samber/cc-skills-golang@golang-dependency-management`, `samber/cc-skills-golang@golang-modernize` skills.

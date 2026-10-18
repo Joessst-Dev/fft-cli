@@ -1,20 +1,22 @@
 ---
 name: golang-safety
-description: "Defensive Golang coding to prevent panics, silent data corruption, and subtle runtime bugs. Use whenever writing or reviewing Go code that involves nil-prone types (pointers, interfaces, maps, slices, channels), numeric conversions, resource lifecycle (defer in loops), or defensive copying. Also triggers on questions about nil panics, append aliasing, map concurrent access, float comparison, or zero-value design."
+description: "Defensive Golang coding against accidental bugs — nil panics, typed-nil interfaces, `append` backing-array aliasing, silent int64-to-int32 truncation, float `==` comparison, `defer` inside loops, defensive copies of slices and maps, and usable zero values. Use when a Go program panics on a nil map write or nil pointer dereference, when reviewing code for nil-safety, numeric conversion overflow, or resource lifecycle, or when designing a type whose zero value must be safe. Not for designing concurrent access with goroutines, channels, or sync primitives (→ See `samber/cc-skills-golang@golang-concurrency` skill), not for exploitable vulnerabilities such as injection, weak crypto, or leaked secrets (→ See `samber/cc-skills-golang@golang-security` skill), and not for debugging an already-failing program (→ See `samber/cc-skills-golang@golang-troubleshooting` skill)."
 user-invocable: true
 license: MIT
-compatibility: Designed for Claude Code or similar AI coding agents, and for projects using Golang.
+compatibility: Designed for Claude Code, Codex or similar harness, and for projects using Golang.
 metadata:
   author: samber
-  version: "1.1.1"
+  version: "1.3.2"
   openclaw:
-    emoji: "🛡️"
+    emoji: "🛡"
     homepage: https://github.com/samber/cc-skills-golang
     requires:
       bins:
         - go
     install: []
 allowed-tools: Read Edit Write Glob Grep Bash(go:*) Bash(golangci-lint:*) Bash(git:*) Agent
+paths:
+  - "**/*.go"
 ---
 
 **Persona:** You are a defensive Go engineer. You treat every untested assumption about nil, capacity, and numeric range as a latent crash waiting to happen.
@@ -26,7 +28,7 @@ Prevents programmer mistakes — bugs, panics, and silent data corruption in nor
 ## Best Practices Summary
 
 1. **Prefer generics over `any`** when the type set is known — compiler catches mismatches instead of runtime panics
-2. **Always use comma-ok for type assertions** — bare assertions panic on mismatch
+2. **Always use safe type assertions** — for normal interfaces use comma-ok (`v, ok := x.(T)`); for reflection in Go 1.25+ prefer `reflect.TypeAssert[T](value)` over `value.Interface().(T)`.
 3. **Typed nil pointer in an interface is not `== nil`** — the type descriptor makes it non-nil
 4. **Writing to a nil map panics** — always initialize before use
 5. **`append` may reuse the backing array** — both slices share memory if capacity allows, silently corrupting each other
@@ -66,11 +68,11 @@ func getHandler() http.Handler {
 
 ### Nil map, slice, and channel behavior
 
-| Type | Read from nil | Write to nil | Len/Cap of nil | Range over nil |
-| --- | --- | --- | --- | --- |
-| Map | Zero value | **panic** | 0 | 0 iterations |
-| Slice | **panic** (index) | **panic** (index) | 0 | 0 iterations |
-| Channel | Blocks forever | Blocks forever | 0 | Blocks forever |
+| Type    | Index into nil | Write to nil   | Len/Cap of nil | Range over nil |
+| ------- | -------------- | -------------- | -------------- | -------------- |
+| Map     | Zero value     | **panic**      | 0              | 0 iterations   |
+| Slice   | **panic**      | **panic**      | 0              | 0 iterations   |
+| Channel | Blocks forever | Blocks forever | 0              | Blocks forever |
 
 ```go
 // ✗ Bad — nil map panics on write
@@ -130,11 +132,12 @@ i32 := int32(val)
 
 ```go
 // ✗ Bad — floating point arithmetic is not exact
-0.1+0.2 == 0.3 // false
+var a, b, c float64 = 0.1, 0.2, 0.3
+a+b == c // false
 
 // ✓ Good — use epsilon comparison
 const epsilon = 1e-9
-math.Abs((0.1+0.2)-0.3) < epsilon // true
+math.Abs((a+b)-c) < epsilon // true
 ```
 
 ### Division by zero
@@ -242,13 +245,16 @@ func (db *DB) connection() *sql.DB {
 
 Many safety pitfalls are caught automatically by linters: `errcheck`, `forcetypeassert`, `nilerr`, `govet`, `staticcheck`. See the `samber/cc-skills-golang@golang-lint` skill for configuration and usage.
 
-## Cross-References
+### Go 1.25+ reflection type assertions
 
-- → See `samber/cc-skills-golang@golang-concurrency` skill for concurrent access patterns and sync primitives
-- → See `samber/cc-skills-golang@golang-data-structures` skill for slice/map internals, capacity growth, and container/ packages
-- → See `samber/cc-skills-golang@golang-error-handling` skill for nil error interface trap
-- → See `samber/cc-skills-golang@golang-security` skill for security-relevant safety issues (memory safety, integer overflow)
-- → See `samber/cc-skills-golang@golang-troubleshooting` skill for debugging panics and race conditions
+For reflection code, prefer `reflect.TypeAssert[T]` over `value.Interface().(T)`.
+
+```go
+v := reflect.ValueOf(x)
+if s, ok := reflect.TypeAssert[string](v); ok {
+    use(s)
+}
+```
 
 ## Common Mistakes
 
@@ -265,3 +271,12 @@ Many safety pitfalls are caught automatically by linters: `errcheck`, `forcetype
 | Returning internal slice/map reference | Callers can mutate your struct's internals through the shared backing array. Return a defensive copy |
 | Multiple `init()` with ordering assumptions | `init()` execution order across files is unspecified. → See `samber/cc-skills-golang@golang-design-patterns` — use explicit constructors |
 | Blocking forever on nil channel | Nil channels block on both send and receive. Always initialize before use |
+
+## Cross-References
+
+- → See `samber/cc-skills-golang@golang-concurrency` skill for concurrent access patterns and sync primitives
+- → See `samber/cc-skills-golang@golang-data-structures` skill for slice/map internals, capacity growth, and container/ packages
+- → See `samber/cc-skills-golang@golang-error-handling` skill for nil error interface trap
+- → See `samber/cc-skills-golang@golang-security` skill for security-relevant safety issues (memory safety, integer overflow)
+- → See `samber/cc-skills-golang@golang-troubleshooting` skill for debugging panics and race conditions
+- → See `samber/cc-skills-golang@golang-continuous-integration` skill for automated AI-driven code review in CI using these guidelines

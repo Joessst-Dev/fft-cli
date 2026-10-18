@@ -2,6 +2,20 @@
 
 For any bug, follow this systematic process:
 
+## Table of Contents
+
+- [Step 1: Understand Expected vs Actual](#step-1-understand-expected-vs-actual)
+- [Step 2: Get the Full Error](#step-2-get-the-full-error)
+- [Step 3: Isolate the Problem](#step-3-isolate-the-problem)
+- [Step 4: Check External Dependencies](#step-4-check-external-dependencies)
+- [Step 5: Check Observability Tools](#step-5-check-observability-tools)
+- [Step 6: Compare with Working Code](#step-6-compare-with-working-code)
+- [Step 7: Form a Hypothesis and Test It](#step-7-form-a-hypothesis-and-test-it)
+- [Step 8: Trace to Root Cause](#step-8-trace-to-root-cause)
+- [Step 9: Fix and Verify](#step-9-fix-and-verify)
+- [Step 10: Defense-in-Depth](#step-10-defense-in-depth)
+- [When You're Stuck: Escalation Protocol](#when-youre-stuck-escalation-protocol)
+
 ## Step 1: Understand Expected vs Actual
 
 Before touching code, articulate clearly:
@@ -120,11 +134,11 @@ env | grep API_KEY
 
 ## Step 5: Check Observability Tools
 
-Production debugging MUST start with observability data. Before diving into code, check if the project uses observability tools — they often have the answer already. Look for imports or dependencies like `prometheus`, `opentelemetry`, `datadog`, `sentry`, `elastic/apm` in the codebase. Even if you don't see them in code, the developer may have them deployed separately.
+Production debugging MUST start with observability data. The project may already use observability tools that have the answer — look for imports or dependencies like `prometheus`, `opentelemetry`, `datadog`, `sentry`, `elastic/apm` in the codebase. Even if you don't see them in code, the developer may have them deployed separately.
 
 If the information is missing, **ask the user** what monitoring and observability tools they use. Common stacks:
 
-- **Prometheus + Grafana** — Check dashboards for error rate spikes, latency changes, resource saturation. Query examples:
+- **Prometheus + Grafana** — Dashboards may show error rate spikes, latency changes, resource saturation. Query examples:
 
   ```promql
   rate(http_requests_total{status=~"5.."}[5m])           # error rate
@@ -134,7 +148,7 @@ If the information is missing, **ask the user** what monitoring and observabilit
   rate(go_gc_duration_seconds_sum[5m])                    # GC pressure
   ```
 
-- **Datadog** — Check APM traces, error tracking, and infrastructure metrics. Query examples:
+- **Datadog** — APM traces, error tracking, and infrastructure metrics are available. Query examples:
 
   ```
   avg:trace.http.request.duration{service:myapp} by {resource_name}
@@ -142,16 +156,16 @@ If the information is missing, **ask the user** what monitoring and observabilit
   avg:runtime.go.num_goroutine{service:myapp}
   ```
 
-- **Sentry** — Check for captured exceptions, breadcrumbs, and error grouping. Sentry often captures the full stack trace and context of the first occurrence.
-- **ELK (Elasticsearch + Logstash + Kibana)** — Search structured logs for error patterns:
+- **Sentry** — Captured exceptions, breadcrumbs, and error grouping are available. Sentry often captures the full stack trace and context of the first occurrence.
+- **ELK (Elasticsearch + Logstash + Kibana)** — Structured logs can be searched for error patterns:
 
   ```
   level:error AND service:myapp AND @timestamp:[now-1h TO now]
   ```
 
-- **OpenTelemetry / Jaeger / Zipkin** — Check distributed traces for latency breakdowns across services, failed spans, and propagation issues.
+- **OpenTelemetry / Jaeger / Zipkin** — Distributed traces show latency breakdowns across services, failed spans, and propagation issues.
 
-If the user has an MCP server for any of these tools (Datadog MCP, Grafana MCP, etc.), suggest using it for interactive queries. Otherwise, suggest manual checks via their web UI or CLI.
+If the user has an MCP server for any of these tools (Datadog MCP, Grafana MCP, etc.), interactive queries may be available through it.
 
 ## Step 6: Compare with Working Code
 

@@ -1,12 +1,12 @@
 ---
 name: golang-dependency-management
-description: "Provides dependency management strategies for Golang projects including go.mod management, installing/upgrading packages, semantic versioning, Minimal Version Selection, vulnerability scanning, outdated dependency tracking, dependency size analysis, automated updates with Dependabot/Renovate, conflict resolution, and dependency graph visualization. Use this skill whenever adding, removing, updating, or auditing Go dependencies, resolving version conflicts, setting up automated dependency updates, analyzing binary size, or working with go.work workspaces."
+description: "Dependency management for Golang projects — go.mod and go.sum, `go get` install and upgrade flows, Minimal Version Selection, conflict resolution with replace/exclude/retract, `govulncheck` scanning of the module tree, outdated dependency and binary size auditing, vendoring, `tool` directives, and go.work workspaces. Use when adding, removing, or upgrading Go dependencies, deciding whether to take on a package, resolving version conflicts, or auditing what a module pulls in. Covers choosing and upgrading dependency versions, not the surrounding tooling: do NOT use for fixing an exploitable vulnerability in code (→ See `samber/cc-skills-golang@golang-security` skill) or for wiring Dependabot/Renovate update bots into CI workflows (→ See `samber/cc-skills-golang@golang-continuous-integration` skill)."
 user-invocable: true
 license: MIT
-compatibility: Designed for Claude Code or similar AI coding agents, and for projects using Golang.
+compatibility: Designed for Claude Code, Codex or similar harness, and for projects using Golang.
 metadata:
   author: samber
-  version: "1.1.3"
+  version: "1.3.1"
   openclaw:
     emoji: "📦"
     homepage: https://github.com/samber/cc-skills-golang
@@ -22,6 +22,10 @@ allowed-tools: Read Edit Write Glob Grep Bash(go:*) Bash(golangci-lint:*) Bash(g
 ---
 
 **Persona:** You are a Go dependency steward. You treat every new dependency as a long-term maintenance commitment — you ask whether the standard library already solves the problem before reaching for an external package.
+
+**Dependencies:**
+
+- govulncheck: `go install golang.org/x/vuln/cmd/govulncheck@latest`
 
 # Go Dependency Management
 
@@ -41,8 +45,8 @@ The `samber/cc-skills-golang@golang-popular-libraries` skill contains a curated 
 ## Key Rules
 
 - `go.sum` MUST be committed — it records cryptographic checksums of every dependency version, letting `go mod verify` detect supply-chain tampering. Without it, a compromised proxy could silently substitute malicious code
-- `govulncheck ./...` before every release — catches known CVEs in your dependency tree before they reach production
-- Check maintenance status, license, and stdlib alternatives before adding a dependency — every dependency increases attack surface, maintenance burden, and binary size
+- `govulncheck ./...` or `go tool govulncheck ./...` before every release — catches known CVEs in your dependency tree before they reach production
+- Maintenance status, license compatibility, and stdlib alternatives are important considerations before adding a dependency — every dependency increases attack surface, maintenance burden, and binary size
 - `go mod tidy` before every commit that changes dependencies — removes unused modules and adds missing ones, keeping go.mod honest
 
 ## go.mod & go.sum
@@ -68,11 +72,13 @@ Use `go mod vendor` when you need hermetic builds (no network access), reproduci
 ### Adding a Dependency
 
 ```bash
-go get github.com/pkg/errors           # Latest version
-go get github.com/pkg/errors@v0.9.1    # Specific version
-go get github.com/pkg/errors@latest    # Explicitly latest
-go get github.com/pkg/errors@master    # Specific branch (pseudo-version)
+go get github.com/google/uuid          # Latest version
+go get github.com/google/uuid@v1.6.0   # Specific version
+go get github.com/google/uuid@latest   # Explicitly latest
+go get github.com/google/uuid@<commit> # Specific commit (pseudo-version)
 ```
+
+Before pinning a version, inspect the module's available versions, importers, and known vulnerabilities on pkg.go.dev → See `samber/cc-skills-golang@golang-pkg-go-dev` skill.
 
 ### Upgrading
 
@@ -82,26 +88,65 @@ go get -u=patch ./...      # Upgrade to latest patch only (safer)
 go get github.com/pkg@v1.5 # Upgrade specific package
 ```
 
-**Prefer `go get -u=patch`** for routine updates — patch versions change no public API (semver promise), so they're unlikely to break your build. Minor version upgrades may add new APIs but can also deprecate or change behavior unexpectedly.
+**Prefer `go get -u=patch`** for routine updates. Patch and minor updates are usually lower risk than major upgrades, but still require review. For dependency updates, run:
+
+```bash
+go get -u=patch ./...
+go mod tidy
+go test ./...
+go vet ./...
+govulncheck ./...   # or: go tool govulncheck ./...
+```
+
+Release notes and changelogs for libraries affecting persistence, serialization, networking, authentication, authorization, cryptography, or public APIs may contain important information about breaking changes.
 
 ### Removing a Dependency
 
 ```bash
-go get github.com/pkg/errors@none   # Mark for removal
+go get github.com/google/uuid@none  # Mark for removal
 go mod tidy                          # Clean up go.mod and go.sum
 ```
 
 ### Installing CLI Tools
 
+For Go 1.24+ modules, pin executable tools in `go.mod` with `tool` directives. Do not create a new `tools.go` blank-import file unless the module must support Go <1.24.
+
 ```bash
-go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+# Add tools to the current module.
+go get -tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+go get -tool golang.org/x/vuln/cmd/govulncheck@latest
+go get -tool golang.org/x/perf/cmd/benchstat@latest
+
+# Run pinned tools reproducibly.
+go tool golangci-lint run ./...
+go tool govulncheck ./...
+go tool benchstat old.txt new.txt
+
+# Install all module-pinned tools into GOBIN/PATH when needed.
+go install tool
+
+# Update pinned tools deliberately, then review go.mod/go.sum.
+go get -u tool
+go mod tidy
 ```
 
-`go install` builds and installs a binary to `$GOPATH/bin`. Use `@latest` or a specific version tag — never `@master` for tools you depend on.
+`go.mod` shape for a module targeting Go 1.27 or newer. This is an example target, not a cap; keep the project's actual `go` directive and do not change it just to add tools.
 
-### The tools.go Pattern
+```go.mod
+module example.com/project
 
-Pin tool versions in your module without importing them in production code:
+go 1.27
+
+tool (
+    github.com/golangci/golangci-lint/v2/cmd/golangci-lint
+    golang.org/x/vuln/cmd/govulncheck
+    golang.org/x/perf/cmd/benchstat
+)
+```
+
+For `go 1.27` or newer, `go mod tidy` auto-merges duplicate `require` blocks and enforces a two-block layout (direct dependencies, then indirect), preserving existing comments — no manual cleanup needed after a merge that introduces a second `require` block.
+
+For Go <1.24 only, use the legacy `tools.go` blank-import workaround:
 
 ```go
 //go:build tools
@@ -109,12 +154,23 @@ Pin tool versions in your module without importing them in production code:
 package tools
 
 import (
-    _ "github.com/golangci/golangci-lint/cmd/golangci-lint"
+    _ "github.com/golangci/golangci-lint/v2/cmd/golangci-lint"
     _ "golang.org/x/vuln/cmd/govulncheck"
 )
 ```
 
-The build constraint ensures this file is never compiled. The blank imports keep the tools in `go.mod` so `go install` uses the pinned version. Run `go mod tidy` after creating this file.
+Rule: Go 1.24+ = `tool` directives. Go <1.24 = `tools.go` fallback.
+
+### Module target note
+
+When using a newer toolchain, `go mod init` may create a module with an older default `go` directive. If the project intentionally targets the newer toolchain's APIs, update the directive deliberately:
+
+```bash
+go mod edit -go=1.27
+go mod tidy
+```
+
+For future Go versions, use the project's intended target version. Do not use APIs newer than the module's `go` directive until the project explicitly agrees to upgrade it.
 
 ## Deep Dives
 
@@ -143,7 +199,7 @@ The build constraint ensures this file is never compiled. The blank imports keep
 go mod init github.com/user/project
 
 # Add a dependency
-go get github.com/pkg/errors@v0.9.1
+go get github.com/google/uuid@v1.6.0
 
 # Upgrade all deps (patch only, safer)
 go get -u=patch ./...
@@ -152,7 +208,7 @@ go get -u=patch ./...
 go mod tidy
 
 # Check for vulnerabilities
-govulncheck ./...
+govulncheck ./...   # or: go tool govulncheck ./...
 
 # Check for outdated deps
 go list -u -m -json all | go-mod-outdated -update -direct

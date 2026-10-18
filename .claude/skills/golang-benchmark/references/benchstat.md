@@ -2,6 +2,47 @@
 
 `benchstat` computes statistical summaries and A/B comparisons of Go benchmark results. A single benchmark run tells you nothing about variance — `benchstat` tells you whether the difference between two runs is real or noise.
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Basic Workflow](#basic-workflow)
+  - [Step 0: Write benchmarks](#step-0-write-benchmarks)
+  - [Step 1: Measure baseline](#step-1-measure-baseline)
+  - [Step 2: Make your change](#step-2-make-your-change)
+  - [Step 3: Measure again](#step-3-measure-again)
+  - [Step 4: Compare](#step-4-compare)
+- [Reading the Output](#reading-the-output)
+  - [Unit normalization](#unit-normalization)
+  - [When the `~` symbol appears](#when-the--symbol-appears)
+- [Flags Reference](#flags-reference)
+  - [Projection flags](#projection-flags)
+  - [Filter flag](#filter-flag)
+  - [Input labeling](#input-labeling)
+- [Filter Expression Syntax](#filter-expression-syntax)
+  - [Matching operators](#matching-operators)
+  - [Logical operators](#logical-operators)
+  - [Filter key types](#filter-key-types)
+  - [Filter examples](#filter-examples)
+- [Projection Examples](#projection-examples)
+  - [Default: before/after file comparison](#default-beforeafter-file-comparison)
+  - [Compare sub-benchmark parameters within a single file](#compare-sub-benchmark-parameters-within-a-single-file)
+  - [Simplify rows to base name only](#simplify-rows-to-base-name-only)
+  - [Control column order](#control-column-order)
+  - [Group by GOMAXPROCS](#group-by-gomaxprocs)
+  - [Separate tables per package](#separate-tables-per-package)
+  - [Ignore a dimension](#ignore-a-dimension)
+  - [Compare three versions](#compare-three-versions)
+  - [Cross-dimensional comparison](#cross-dimensional-comparison)
+- [Unit Metadata](#unit-metadata)
+  - [`assume=exact`](#assumeexact)
+  - [`assume=nothing` (default)](#assumenothing-default)
+- [Interleaving Runs](#interleaving-runs)
+- [How Many Runs?](#how-many-runs)
+- [Single-File Summary](#single-file-summary)
+- [Common Pitfalls](#common-pitfalls)
+- [benchstat in CI](#benchstat-in-ci)
+
 ## Installation
 
 ```bash
@@ -78,7 +119,7 @@ Parse-32    12.00 ± 0%   6.000 ± 0%  -50.00% (p=0.000 n=10)
 | **± N%** (e.g., `± 2%`) | Half-width of the 95% confidence interval as a percentage of the median | Low (≤2%) = stable measurement. High (>5%) = noisy — investigate noise sources before trusting results |
 | **vs base** (e.g., `-33.78%`) | Percentage change from the first input (base) to subsequent inputs | Negative = faster/smaller. Positive = slower/larger |
 | **p=N** (e.g., `p=0.000`) | p-value from Mann-Whitney U-test (non-parametric) | <0.05 = statistically significant. ≥0.05 = difference could be noise |
-| **n=N** (e.g., `n=10`) | Number of samples used in the comparison | Should match your `-count`. Lower means some samples were filtered as outliers |
+| **n=N** (e.g., `n=10`) | Number of samples used in the comparison | Should usually match your `-count`; if it does not, check that each input file contains the same benchmark rows and units |
 | **`~`** | No statistically significant difference detected | Do NOT claim improvement — the change might be zero |
 | **geomean** row | Geometric mean of changes across all benchmarks in the table | Overall proportional change; useful when comparing many benchmarks at once |
 

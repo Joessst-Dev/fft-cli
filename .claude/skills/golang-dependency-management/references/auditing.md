@@ -32,6 +32,8 @@ To check whether a large dependency is actually linked into your binary (vs. onl
 ```bash
 # Scan source code (most common)
 govulncheck ./...
+# Or, when govulncheck is pinned with a Go 1.24+ tool directive:
+go tool govulncheck ./...
 
 # Scan a compiled binary
 govulncheck -mode=binary ./bin/myapp
@@ -49,7 +51,7 @@ For CI pipeline integration, see the `samber/cc-skills-golang@golang-continuous-
 
 ## Tracking Outdated Dependencies with go-mod-outdated
 
-Use `psampaz/go-mod-outdated`.
+`psampaz/go-mod-outdated` lists outdated direct dependencies with available updates.
 
 ```bash
 # Show outdated direct dependencies with available updates
@@ -66,9 +68,7 @@ Output columns: MODULE, CURRENT version, WANTED (latest minor/patch), LATEST (la
 
 ## Analyzing Dependency Size with goweight
 
-Use `jondot/goweight`.
-
-`goweight` lists every package linked into the binary sorted by size contribution. Use it to identify bloated dependencies and evaluate whether a lighter alternative exists.
+`jondot/goweight` lists every package linked into the binary sorted by size contribution. It helps identify bloated dependencies and evaluate whether a lighter alternative exists.
 
 ```bash
 goweight          # Sort by size
@@ -78,7 +78,7 @@ goweight --json   # JSON output for CI tracking
 **Modern alternative**: [go-size-analyzer](https://github.com/Zxilly/go-size-analyzer) (`gsa`) supports ELF, Mach-O, PE, and WebAssembly formats with interactive HTML/SVG visualization:
 
 ```bash
-go install github.com/nicholasgasior/gsa@latest
+go get -tool github.com/Zxilly/go-size-analyzer/cmd/gsa@latest
 go build -o ./myapp ./cmd/myapp
-gsa -f html -o size-report.html ./myapp
+go tool gsa -f html -o size-report.html ./myapp
 ```
