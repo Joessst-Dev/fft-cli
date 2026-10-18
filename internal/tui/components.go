@@ -6,7 +6,6 @@ import (
 
 	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
-	"github.com/charmbracelet/x/ansi"
 
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/output"
@@ -227,12 +226,6 @@ func suggestedSource(row componentRow, ok bool) string {
 	return ""
 }
 
-// componentArgs is `fft component <verb> <name>`. A component name comes out of a
-// manifest rather than user typing.
-func componentArgs(verb, name string) []string {
-	return nounArgs("component", verb, name)
-}
-
 // lifecycle runs upgrade or remove on row. The command asks its own question
 // first, which the UI puts to the user; no --yes is added here.
 func (c *componentsScreen) lifecycle(verb string, row componentRow) tea.Cmd {
@@ -240,7 +233,7 @@ func (c *componentsScreen) lifecycle(verb string, row componentRow) tea.Cmd {
 		c.succeed(row.Name + " is not installed, so there is nothing to " + verb + ". Press a to install it.")
 		return nil
 	}
-	args := componentArgs(verb, row.Name)
+	args := nounArgs("component", verb, row.Name)
 	a := action{inv: Invocation{Args: args}, display: commandLine(args)}
 	c.succeed(gerund(verb) + " " + row.Name + "…")
 
@@ -384,7 +377,7 @@ func (c *componentsScreen) equivalent() shellCommand {
 	}
 	if row, ok := c.selected(); ok {
 		if c.detail {
-			return commandLine(componentArgs("info", row.Name))
+			return commandLine(nounArgs("component", "info", row.Name))
 		}
 		if !row.installed() {
 			return commandLine([]string{"component", "install", row.Name})
@@ -443,40 +436,6 @@ func (c *componentsScreen) table(width int) []string {
 		})
 	}
 	return tableRows(c.st, cells, c.cursor, width)
-}
-
-// tableRows lays cells out in aligned columns under the header in cells[0],
-// marking the row at cursor (an index into the rows after the header) as selected.
-// The last column is never padded, so its width does not matter.
-func tableRows(st styles, cells [][]string, cursor, width int) []string {
-	widths := make([]int, len(cells[0]))
-	for _, row := range cells {
-		for i, cell := range row {
-			widths[i] = max(widths[i], ansi.StringWidth(cell))
-		}
-	}
-
-	lines := make([]string, 0, len(cells))
-	for i, row := range cells {
-		var b strings.Builder
-		for j, cell := range row {
-			b.WriteString(cell)
-			if j < len(row)-1 {
-				b.WriteString(strings.Repeat(" ", widths[j]-ansi.StringWidth(cell)+2))
-			}
-		}
-		line := b.String()
-		switch {
-		case i == 0:
-			line = st.dim.Render("  " + line)
-		case i-1 == cursor:
-			line = st.selected.Render("> " + line)
-		default:
-			line = "  " + line
-		}
-		lines = append(lines, clip(line, width))
-	}
-	return lines
 }
 
 // detailView is everything the manifest says about row. It is the document

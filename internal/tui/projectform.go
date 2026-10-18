@@ -25,16 +25,6 @@ func formInput(st styles) textinput.Model {
 	return in
 }
 
-// trimPaste is msg with the line breaks a paste ends in cut off, and any other
-// msg as it is.
-func trimPaste(msg tea.Msg) tea.Msg {
-	if paste, isPaste := msg.(tea.PasteMsg); isPaste {
-		paste.Content = strings.TrimRight(paste.Content, "\r\n")
-		return paste
-	}
-	return msg
-}
-
 // formField is one row of the add form.
 type formField struct {
 	label string
@@ -169,9 +159,8 @@ func (f *addForm) paste(msg tea.PasteMsg) tea.Cmd {
 	if field.kind != fieldText && field.kind != fieldSecret {
 		return nil
 	}
-	msg.Content = strings.TrimRight(msg.Content, "\r\n")
 	var cmd tea.Cmd
-	field.input, cmd = field.input.Update(msg)
+	field.input, cmd = field.input.Update(trimPaste(msg))
 	return cmd
 }
 

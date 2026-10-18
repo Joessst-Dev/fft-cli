@@ -281,7 +281,7 @@ func (s *Store) Path() string { return s.path }
 // DefaultPath is $XDG_CONFIG_HOME/fft/config.yaml, falling back to
 // ~/.config/fft/config.yaml.
 func DefaultPath() (string, error) {
-	return xdg.Config.Path("config.yaml")
+	return xdg.Config().Path("config.yaml")
 }
 
 // Load reads the config file. A missing file is not an error: a first run has

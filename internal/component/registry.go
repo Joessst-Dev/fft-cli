@@ -57,7 +57,7 @@ func Root(lookup func(string) (string, bool)) (string, bool, error) {
 		return abs, true, nil
 	}
 
-	dir, err := xdg.Data.LookupPath(lookup, "components")
+	dir, err := xdg.Data().LookupPath(lookup, "components")
 	if err != nil {
 		return "", false, err
 	}

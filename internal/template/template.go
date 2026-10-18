@@ -319,7 +319,8 @@ func (t *Template) resolve(key string) (Path, error) {
 	return ParsePath(key)
 }
 
-// paramPath parses the path a declared parameter writes to.
+// paramPath is the path parameter name writes to. A path that does not parse is a
+// fault in the template file, so the error names the parameter to look for there.
 func paramPath(name string, p Param) (Path, error) {
 	path, err := ParsePath(p.Path)
 	if err != nil {

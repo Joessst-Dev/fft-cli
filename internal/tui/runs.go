@@ -8,7 +8,6 @@ import (
 
 	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
-	"github.com/charmbracelet/x/ansi"
 
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/output"
@@ -295,33 +294,4 @@ func elapsed(d time.Duration) string {
 	default:
 		return d.Round(time.Second).String()
 	}
-}
-
-// window is at most room of lines, starting scroll lines in, and where it starts.
-// That is less than scroll when the lines have grown fewer or the terminal taller
-// since, so that the window never ends in empty rows a scroll back would fill.
-func window(lines []string, scroll, room int) (shown []string, first int) {
-	first = min(scroll, max(len(lines)-room, 0))
-	return lines[first:min(first+room, len(lines))], first
-}
-
-// pick is the item at *cursor, after moving the cursor back onto items if they
-// have shrunk under it. It is false, and leaves the cursor alone, when there are
-// no items.
-func pick[T any](items []T, cursor *int) (T, bool) {
-	if len(items) == 0 {
-		var zero T
-		return zero, false
-	}
-	*cursor = min(max(*cursor, 0), len(items)-1)
-	return items[*cursor], true
-}
-
-// clip cuts s to width terminal cells. A width of zero or less means the width is
-// not known yet, and s is left alone.
-func clip(s string, width int) string {
-	if width <= 0 {
-		return s
-	}
-	return ansi.Truncate(s, width, "…")
 }

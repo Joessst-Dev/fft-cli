@@ -36,6 +36,11 @@ func (c shellCommand) empty() bool { return c.line == "" }
 
 // nounArgs is `fft <noun> <verb> <name> <flags>`. A name starting with a dash
 // goes last, after "--", where it is only a name and never a flag.
+//
+// fft refuses to create a project or template whose name starts with a dash, but
+// the names reach the UI from places that rule does not guard: the config file
+// (an older fft, or a hand edit), the template directory listing, a component
+// manifest, or what the user typed as a component source.
 func nounArgs(noun, verb, name string, flags ...string) []string {
 	args := []string{noun, verb}
 	if strings.HasPrefix(name, "-") {

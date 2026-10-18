@@ -71,7 +71,7 @@ func NewFile(path string, opts ...Option) Store {
 // unavailable: $XDG_STATE_HOME/fft/credentials.json, or ~/.local/state/fft/
 // credentials.json when XDG_STATE_HOME is unset.
 func DefaultFilePath() (string, error) {
-	return xdg.State.Path("credentials.json")
+	return xdg.State().Path("credentials.json")
 }
 
 func (*fileStore) Kind() string { return "file" }

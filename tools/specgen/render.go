@@ -119,7 +119,8 @@ func renderStrings(b *bytes.Buffer, field string, values []string) {
 	fmt.Fprintf(b, ",\n")
 }
 
-// renderStringSlice writes values as a one-line []string literal.
+// renderStringSlice is the one writer for a []string literal, so that an enum and
+// any other list of strings in the generated file are quoted alike.
 func renderStringSlice(b *bytes.Buffer, values []string) {
 	fmt.Fprintf(b, "[]string{")
 	for i, v := range values {

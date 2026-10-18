@@ -73,7 +73,7 @@ type Entry struct {
 // Path is the default history file: $XDG_STATE_HOME/fft/history.jsonl, or
 // ~/.local/state/fft/history.jsonl when XDG_STATE_HOME is unset.
 func Path() (string, error) {
-	return xdg.State.Path("history.jsonl")
+	return xdg.State().Path("history.jsonl")
 }
 
 // Log is a history file.

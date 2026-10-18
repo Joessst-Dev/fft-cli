@@ -511,5 +511,5 @@ func canonical(v string) string {
 // DefaultCachePath is $XDG_CACHE_HOME/fft/update.json, falling back to
 // ~/.cache/fft/update.json.
 func DefaultCachePath() (string, error) {
-	return xdg.Cache.Path("update.json")
+	return xdg.Cache().Path("update.json")
 }

@@ -156,9 +156,9 @@ func orderStatusCell(style output.Style, status string) string {
 // the same read-then-write shape as an update — [client.UpdateVersioned] reads the
 // order to learn its version, POSTs the action, and retries once on conflict.
 //
-// The action carries no entity of its own to mutate, so the mutate step is a
-// no-op: put ignores the read doc and assembles {name, version, ...extra} itself.
-// With --if-version the read is skipped and the named version is used directly.
+// The action carries no entity of its own, so whatever was read is replaced by
+// {name, ...extra}, and the read only supplies the version stamped onto it. With
+// --if-version the read is skipped and the named version is used directly.
 func runOrderAction(cmd *cobra.Command, deps *Deps, id, name string, extra entityDoc, version *int, notice string) error {
 	c, err := tenantClient(deps)
 	if err != nil {
@@ -168,30 +168,19 @@ func runOrderAction(cmd *cobra.Command, deps *Deps, id, name string, extra entit
 	ctx, cancel := deps.Context(cmd)
 	defer cancel()
 
-	var raw []byte
-
 	get := func(ctx context.Context) (entityDoc, int, error) {
 		return getOrderDoc(ctx, c, id)
 	}
 
-	put := func(ctx context.Context, _ entityDoc, v int) (entityDoc, error) {
-		body := entityDoc{"name": name, "version": v}
-		maps.Copy(body, extra)
+	body := entityDoc{"name": name}
+	maps.Copy(body, extra)
 
-		answer, err := sendEntity(ctx, c, fmt.Sprintf("%s order %s", strings.ToLower(name), id), body,
-			func(ctx context.Context, body io.Reader) (*http.Response, error) {
-				return c.API().OrderActionWithBody(ctx, id, contentTypeJSON, body)
-			})
-		if err != nil {
-			return nil, err
-		}
-		raw = answer
-		return nil, nil
-	}
-
-	noop := func(*entityDoc) error { return nil }
-
-	if _, err := client.UpdateVersioned(ctx, get, put, noop, version); err != nil {
+	raw, err := putVersioned(ctx, c, fmt.Sprintf("%s order %s", strings.ToLower(name), id), get,
+		replaceWith(body), version,
+		func(ctx context.Context, body io.Reader) (*http.Response, error) {
+			return c.API().OrderActionWithBody(ctx, id, contentTypeJSON, body)
+		})
+	if err != nil {
 		return err
 	}
 

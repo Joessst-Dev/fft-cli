@@ -17,18 +17,26 @@ import (
 
 // Base is one XDG base directory: the variable that overrides it and the
 // directory under the home it falls back to.
+//
+// The bases fft uses are handed out by functions rather than kept in exported
+// variables, so that no importer can reassign one and move, say, the credentials
+// file for the whole process.
 type Base struct {
 	env  string
 	home []string
 }
 
-// The XDG base directories fft uses.
-var (
-	Config = Base{env: "XDG_CONFIG_HOME", home: []string{".config"}}
-	State  = Base{env: "XDG_STATE_HOME", home: []string{".local", "state"}}
-	Data   = Base{env: "XDG_DATA_HOME", home: []string{".local", "share"}}
-	Cache  = Base{env: "XDG_CACHE_HOME", home: []string{".cache"}}
-)
+// Config is $XDG_CONFIG_HOME, else ~/.config.
+func Config() Base { return Base{env: "XDG_CONFIG_HOME", home: []string{".config"}} }
+
+// State is $XDG_STATE_HOME, else ~/.local/state.
+func State() Base { return Base{env: "XDG_STATE_HOME", home: []string{".local", "state"}} }
+
+// Data is $XDG_DATA_HOME, else ~/.local/share.
+func Data() Base { return Base{env: "XDG_DATA_HOME", home: []string{".local", "share"}} }
+
+// Cache is $XDG_CACHE_HOME, else ~/.cache.
+func Cache() Base { return Base{env: "XDG_CACHE_HOME", home: []string{".cache"}} }
 
 // Path is name inside fft's directory under b, reading b's variable from the
 // environment. A variable set to the empty string counts as unset.
@@ -46,8 +54,9 @@ func (b Base) LookupPath(lookup func(string) (string, bool), name string) (strin
 	if lookup == nil {
 		lookup = os.LookupEnv
 	}
-	if dir, _ := lookup(b.env); strings.TrimSpace(dir) != "" {
-		return filepath.Join(strings.TrimSpace(dir), "fft", name), nil
+	dir, _ := lookup(b.env)
+	if dir = strings.TrimSpace(dir); dir != "" {
+		return filepath.Join(dir, "fft", name), nil
 	}
 	return b.homePath(name)
 }

@@ -496,7 +496,7 @@ func (t *templatesScreen) openRow(row templateRow, next func(*openTemplate) tea.
 	o := &openTemplate{row: row}
 	t.open = o
 	t.say("")
-	args := templateArgs("show", row.Name)
+	args := nounArgs("template", "show", row.Name)
 	return t.s.start(action{inv: Invocation{Args: args}, display: commandLine(args)}, func(r Result) tea.Cmd {
 		if gen != t.openGen {
 			return nil
@@ -608,14 +608,7 @@ func (o *openTemplate) renderArgs(digest string) []string {
 	if digest != "" {
 		flags = append(flags, "--if-digest", digest)
 	}
-	return templateArgs("render", o.row.Name, flags...)
-}
-
-// templateArgs is `fft template <verb> <name> <flags>`. fft refuses a template
-// name that starts with a dash, but the name comes out of a directory listing, so
-// one may have slipped past that rule.
-func templateArgs(verb, name string, flags ...string) []string {
-	return nounArgs("template", verb, name, flags...)
+	return nounArgs("template", "render", o.row.Name, flags...)
 }
 
 // ready says whether o can be rendered, and opens its parameters when it cannot.
@@ -793,7 +786,7 @@ func (t *templatesScreen) remove(row templateRow) tea.Cmd {
 	if row.Scope == projectScope {
 		flags = append(flags, "--local")
 	}
-	args := templateArgs("remove", row.Name, flags...)
+	args := nounArgs("template", "remove", row.Name, flags...)
 	t.say("Removing " + row.Name + "…")
 	var id RunID
 	id, cmd := t.s.launch(action{inv: Invocation{Args: args}, display: commandLine(args)}, func(r Result) tea.Cmd {
@@ -893,7 +886,7 @@ func (t *templatesScreen) equivalent() shellCommand {
 	o := t.open
 	if o == nil {
 		if row, ok := t.selected(); ok {
-			return commandLine(templateArgs("show", row.Name))
+			return commandLine(nounArgs("template", "show", row.Name))
 		}
 		return commandLine([]string{"template", "list"})
 	}

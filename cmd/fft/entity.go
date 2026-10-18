@@ -67,8 +67,8 @@ func docVersion(doc entityDoc, what string) (int, error) {
 	return int(v), nil
 }
 
-// decodeVersioned decodes an entity the API answered and reads its version off it,
-// which is the tail of every get*Doc.
+// decodeVersioned is an entity read ahead of a write. It fails when the version
+// is missing, because a write needs one to send back and there is no safe default.
 func decodeVersioned(raw []byte, noun string) (entityDoc, int, error) {
 	doc, err := decodeDoc(raw, "the "+noun)
 	if err != nil {

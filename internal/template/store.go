@@ -127,7 +127,7 @@ func ValidateName(name string) error {
 // neither something fft can regenerate by asking again nor something it manages
 // on the user's behalf.
 func UserDir(lookup func(string) (string, bool)) (string, error) {
-	return xdg.Data.LookupPath(lookup, "templates")
+	return xdg.Data().LookupPath(lookup, "templates")
 }
 
 // ProjectDir is ./.fft/templates: the templates for one repository, which the
