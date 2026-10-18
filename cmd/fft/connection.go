@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -70,9 +69,9 @@ func connectionTypes() []string {
 	return []string{typeSupplier, typeManagedFacility, typeCustomer}
 }
 
-// connectionFlag is --facility, which every connection command needs: a connection
-// has no tenant-wide address. There is no GET /api/connections — the only way to
-// reach one is through the facility it leaves.
+// registerFacilityFlag adds --facility, which every connection command needs: a
+// connection has no tenant-wide address. There is no GET /api/connections — the
+// only way to reach one is through the facility it leaves.
 func registerFacilityFlag(cmd *cobra.Command, target *string) {
 	cmd.Flags().StringVar(target, "facility", "",
 		"The facility the connection leaves, by tenantFacilityId or platform UUID (required)")
@@ -97,17 +96,7 @@ func getConnectionDoc(ctx context.Context, c *client.Client, facility, id string
 	if err != nil {
 		return nil, 0, err
 	}
-
-	doc, err := decodeDoc(raw, "the connection")
-	if err != nil {
-		return nil, 0, err
-	}
-
-	version, err := docVersion(doc, "connection")
-	if err != nil {
-		return nil, 0, err
-	}
-	return doc, version, nil
+	return decodeVersioned(raw, "connection")
 }
 
 // connectionBody reads a connection request body and makes it something the API can
@@ -130,14 +119,9 @@ func getConnectionDoc(ctx context.Context, c *client.Client, facility, id string
 // value they could take. It is the round trip working the way the user already
 // believes it does.
 func connectionBody(deps *Deps, path string) (entityDoc, error) {
-	raw, err := readBody(deps, path)
+	doc, err := readDoc(deps, path)
 	if err != nil {
 		return nil, err
-	}
-
-	doc, err := decodeDoc(raw, path)
-	if err != nil {
-		return nil, exitcode.UsageError{Err: err}
 	}
 
 	if err := normaliseConnectionType(doc); err != nil {
@@ -311,29 +295,14 @@ func connectionList() listView {
 // renderConnection renders one connection: the API's own JSON under -o json, a
 // one-row table otherwise.
 func renderConnection(deps *Deps, raw []byte) error {
-	if len(bytes.TrimSpace(raw)) == 0 {
-		return nil
-	}
-
-	rows, err := connectionRows(deps.Printer.Style(), []json.RawMessage{raw})
-	if err != nil {
-		return err
-	}
-	return deps.Printer.RenderRaw(rows, raw)
+	return renderEntity(deps, raw, connectionRows)
 }
 
 var connectionHeaders = []string{"ID", "TYPE", "TARGET", "CARRIER", "TRANSIT", "CONTEXT", "VERSION"}
 
 func connectionRows(style output.Style, items []json.RawMessage) (output.Rows, error) {
-	rows := make([][]string, 0, len(items))
-
-	for i, item := range items {
-		var v connectionView
-		if err := json.Unmarshal(item, &v); err != nil {
-			return output.Rows{}, fmt.Errorf("decode connection %d of %d: %w", i+1, len(items), err)
-		}
-
-		rows = append(rows, []string{
+	return viewRows(items, "connection", connectionHeaders, func(v connectionView) []string {
+		return []string{
 			field(style, v.ID),
 			field(style, v.Target.Type),
 			connectionTargetCell(style, v.Target.Type, v.Target.FacilityRef),
@@ -341,9 +310,8 @@ func connectionRows(style output.Style, items []json.RawMessage) (output.Rows, e
 			field(style, transitCell(v.FallbackTransitTime)),
 			field(style, contextCell(v.Context)),
 			fmt.Sprintf("%d", v.Version),
-		})
-	}
-	return output.Rows{Headers: connectionHeaders, Rows: rows}, nil
+		}
+	})
 }
 
 // connectionTargetCell names where the edge goes.
@@ -379,8 +347,5 @@ func contextCell(rules []json.RawMessage) string {
 	if len(rules) == 0 {
 		return ""
 	}
-	if len(rules) == 1 {
-		return "1 rule"
-	}
-	return fmt.Sprintf("%d rules", len(rules))
+	return count(len(rules), "rule")
 }

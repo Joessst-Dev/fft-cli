@@ -157,7 +157,7 @@ func reportProblems(deps *Deps, reg *component.Registry) {
 	}
 }
 
-// componentNames completes an installed component's name.
+// completeComponentNames completes an installed component's name.
 func completeComponentNames(deps *Deps) func(*cobra.Command, []string, string) ([]string, cobra.ShellCompDirective) {
 	return func(_ *cobra.Command, _ []string, prefix string) ([]string, cobra.ShellCompDirective) {
 		var names []string

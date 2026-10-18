@@ -151,7 +151,6 @@ func runFacilityAction(cmd *cobra.Command, deps *Deps, id string, body entityDoc
 	defer cancel()
 
 	ref := client.FacilityRef(id)
-	var raw []byte
 
 	// Only the version is wanted from the facility; the action body replaces it
 	// entirely, so an empty document is the honest thing to carry forward.
@@ -163,26 +162,11 @@ func runFacilityAction(cmd *cobra.Command, deps *Deps, id string, body entityDoc
 		return entityDoc{}, v, nil
 	}
 
-	post := func(ctx context.Context, doc entityDoc, v int) (entityDoc, error) {
-		doc["version"] = v
-
-		answer, err := sendEntity(ctx, c, "run the action on facility "+ref, doc,
-			func(ctx context.Context, body io.Reader) (*http.Response, error) {
-				return c.API().FacilityActionWithBody(ctx, ref, contentTypeJSON, body)
-			})
-		if err != nil {
-			return nil, err
-		}
-		raw = answer
-		return nil, nil
-	}
-
-	action := func(doc *entityDoc) error {
-		*doc = body
-		return nil
-	}
-
-	if _, err := client.UpdateVersioned(ctx, get, post, action, version.value()); err != nil {
+	raw, err := putVersioned(ctx, c, "run the action on facility "+ref, get, replaceWith(body), version.value(),
+		func(ctx context.Context, body io.Reader) (*http.Response, error) {
+			return c.API().FacilityActionWithBody(ctx, ref, contentTypeJSON, body)
+		})
+	if err != nil {
 		return err
 	}
 

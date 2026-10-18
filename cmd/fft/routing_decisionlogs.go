@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"github.com/spf13/cobra"
 
@@ -82,21 +81,13 @@ func routingDecisionLogsView() listView {
 var routingDecisionLogHeaders = []string{"ID", "TENANT ORDER", "ORDER", "PROCESS", "CREATED"}
 
 func routingDecisionLogRows(style output.Style, items []json.RawMessage) (output.Rows, error) {
-	rows := make([][]string, 0, len(items))
-
-	for i, item := range items {
-		var v routingDecisionLogView
-		if err := json.Unmarshal(item, &v); err != nil {
-			return output.Rows{}, fmt.Errorf("decode decision log %d of %d: %w", i+1, len(items), err)
-		}
-
-		rows = append(rows, []string{
+	return viewRows(items, "decision log", routingDecisionLogHeaders, func(v routingDecisionLogView) []string {
+		return []string{
 			field(style, v.ID),
 			field(style, v.RelatedRefs.TenantOrderID),
 			field(style, v.RelatedRefs.OrderRef),
 			field(style, v.RelatedRefs.ProcessRef),
 			field(style, v.Created),
-		})
-	}
-	return output.Rows{Headers: routingDecisionLogHeaders, Rows: rows}, nil
+		}
+	})
 }

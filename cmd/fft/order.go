@@ -1,11 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"strings"
 
@@ -74,17 +74,7 @@ func getOrderDoc(ctx context.Context, c *client.Client, id string) (entityDoc, i
 	if err != nil {
 		return nil, 0, err
 	}
-
-	doc, err := decodeDoc(raw, "the order")
-	if err != nil {
-		return nil, 0, err
-	}
-
-	version, err := docVersion(doc, "order")
-	if err != nil {
-		return nil, 0, err
-	}
-	return doc, version, nil
+	return decodeVersioned(raw, "order")
 }
 
 // The order states. An order starts OPEN and moves through the rest as it is
@@ -125,17 +115,7 @@ func orderList() listView {
 // one-row table otherwise. Like renderFacility it is deliberately not a slice of
 // one, so `fft order get x -o json | jq .status` sees the object, not a list.
 func renderOrder(deps *Deps, raw []byte) error {
-	// A 2xx with no body is a legitimate answer to a mutation; there is nothing to
-	// render and the notice on stderr has already said what happened.
-	if len(bytes.TrimSpace(raw)) == 0 {
-		return nil
-	}
-
-	rows, err := orderRows(deps.Printer.Style(), []json.RawMessage{raw})
-	if err != nil {
-		return err
-	}
-	return deps.Printer.RenderRaw(rows, raw)
+	return renderEntity(deps, raw, orderRows)
 }
 
 var orderHeaders = []string{"ID", "TENANT ID", "STATUS", "ORDER DATE", "LINES", "VERSION"}
@@ -143,24 +123,16 @@ var orderHeaders = []string{"ID", "TENANT ID", "STATUS", "ORDER DATE", "LINES", 
 // orderRows builds the order table. An order fft cannot parse is a bug worth
 // reporting, not a row worth skipping, so a decode failure is a hard error.
 func orderRows(style output.Style, items []json.RawMessage) (output.Rows, error) {
-	rows := make([][]string, 0, len(items))
-
-	for i, item := range items {
-		var v orderView
-		if err := json.Unmarshal(item, &v); err != nil {
-			return output.Rows{}, fmt.Errorf("decode order %d of %d: %w", i+1, len(items), err)
-		}
-
-		rows = append(rows, []string{
+	return viewRows(items, "order", orderHeaders, func(v orderView) []string {
+		return []string{
 			field(style, v.ID),
 			field(style, v.TenantOrderID),
 			orderStatusCell(style, v.Status),
 			field(style, v.OrderDate),
 			fmt.Sprintf("%d", len(v.OrderLineItems)),
 			fmt.Sprintf("%d", v.Version),
-		})
-	}
-	return output.Rows{Headers: orderHeaders, Rows: rows}, nil
+		}
+	})
 }
 
 // orderStatusCell colours the column a reader scans: an OPEN order is live work,
@@ -204,9 +176,7 @@ func runOrderAction(cmd *cobra.Command, deps *Deps, id, name string, extra entit
 
 	put := func(ctx context.Context, _ entityDoc, v int) (entityDoc, error) {
 		body := entityDoc{"name": name, "version": v}
-		for k, val := range extra {
-			body[k] = val
-		}
+		maps.Copy(body, extra)
 
 		answer, err := sendEntity(ctx, c, fmt.Sprintf("%s order %s", strings.ToLower(name), id), body,
 			func(ctx context.Context, body io.Reader) (*http.Response, error) {

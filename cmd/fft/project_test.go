@@ -314,9 +314,9 @@ var _ = Describe("fft project add", func() {
 	})
 
 	When("credential verification is wired in", func() {
-		// M3 replaces the nil VerifyFunc with the real Firebase sign-in. These two
-		// specs pin the contract it must honour: nothing is persisted unless
-		// verification passes, and the email that actually worked is the one stored.
+		// These two specs pin the contract the credential check must honour: nothing
+		// is persisted unless verification passes, and the email that actually
+		// worked is the one stored.
 		It("persists nothing when the credentials do not authenticate", func() {
 			c.deps.Verify = func(_ context.Context, _ config.Project, _ string, _ io.Writer) (string, error) {
 				return "", errors.New("wrong password")

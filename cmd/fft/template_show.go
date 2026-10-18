@@ -153,8 +153,8 @@ func writeTemplate(out io.Writer, saved template.Saved, style output.Style) {
 	}
 }
 
-// describeParam is one line of the PARAMETERS block: what to call it, where it
-// goes, and whether the template will refuse to render without it.
+// describeTemplateParam is one line of the PARAMETERS block: what to call it,
+// where it goes, and whether the template will refuse to render without it.
 func describeTemplateParam(name string, p template.Param, width int, style output.Style) string {
 	var b strings.Builder
 

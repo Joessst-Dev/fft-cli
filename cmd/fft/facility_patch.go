@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"strings"
 
@@ -90,7 +91,6 @@ func newFacilityPatchCmd(deps *Deps) *cobra.Command {
 			defer cancel()
 
 			ref := client.FacilityRef(args[0])
-			var raw []byte
 
 			// The read fetches the whole facility, but only the discriminator survives
 			// into the request: a PATCH body carries the type, the version and the
@@ -116,33 +116,21 @@ func newFacilityPatchCmd(deps *Deps) *cobra.Command {
 				return entityDoc{"type": actual}, v, nil
 			}
 
-			put := func(ctx context.Context, doc entityDoc, v int) (entityDoc, error) {
-				doc["version"] = v
-
-				answer, err := sendEntity(ctx, c, "patch facility "+ref, doc,
-					func(ctx context.Context, body io.Reader) (*http.Response, error) {
-						return c.API().PatchFacilityWithBody(ctx, ref, contentTypeJSON, body)
-					})
-				if err != nil {
-					return nil, err
-				}
-				raw = answer
-				return nil, nil
-			}
-
 			// Re-applied to the *fresh* facility after a 409, which is the whole point
 			// of expressing the change as a function rather than as a prebuilt body.
 			apply := func(doc *entityDoc) error {
 				if *doc == nil {
 					*doc = entityDoc{}
 				}
-				for k, v := range changes {
-					(*doc)[k] = v
-				}
+				maps.Copy(*doc, changes)
 				return nil
 			}
 
-			if _, err := client.UpdateVersioned(ctx, get, put, apply, version.value()); err != nil {
+			raw, err := putVersioned(ctx, c, "patch facility "+ref, get, apply, version.value(),
+				func(ctx context.Context, body io.Reader) (*http.Response, error) {
+					return c.API().PatchFacilityWithBody(ctx, ref, contentTypeJSON, body)
+				})
+			if err != nil {
 				return err
 			}
 

@@ -215,14 +215,9 @@ func sourcingRequest(deps *Deps, path string, cmd *cobra.Command, results int, i
 // sourcingBody reads the order and checks the one thing the API requires and its 400
 // does not name.
 func sourcingBody(deps *Deps, path string) (entityDoc, error) {
-	raw, err := readBody(deps, path)
+	doc, err := readDoc(deps, path)
 	if err != nil {
 		return nil, err
-	}
-
-	doc, err := decodeDoc(raw, path)
-	if err != nil {
-		return nil, exitcode.UsageError{Err: err}
 	}
 
 	order, ok := doc["order"].(map[string]any)

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"iter"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -152,7 +153,7 @@ func runSearch[Q, S any](cmd *cobra.Command, deps *Deps, op client.Op[json.RawMe
 	payload = applyPage(page, payload, cmd.Flags().Changed("size"))
 
 	if page.all {
-		return renderAll(ctx, deps, c, op, payload, page, view)
+		return renderSeq(deps, client.SearchAll(ctx, c, op, payload, client.MaxItems(page.maxItems)), page, view)
 	}
 	return renderPage(ctx, deps, c, op, payload, view)
 }
@@ -197,7 +198,7 @@ func runList(cmd *cobra.Command, deps *Deps, build listOpFn, page pageFlags, vie
 	}
 
 	if page.all {
-		return renderListAll(ctx, deps, c, op, size, page, view)
+		return renderSeq(deps, client.ListAll(ctx, c, op, size, client.MaxItems(page.maxItems)), page, view)
 	}
 
 	result, err := client.List(ctx, c, op, "", size)
@@ -221,41 +222,6 @@ func runList(cmd *cobra.Command, deps *Deps, build listOpFn, page pageFlags, vie
 	return renderList(deps, view, result.Items)
 }
 
-func renderListAll(ctx context.Context, deps *Deps, c *client.Client, op client.ListOp[json.RawMessage],
-	size int, page pageFlags, view listView,
-) error {
-	var (
-		items     []json.RawMessage
-		truncated *client.TruncatedError
-	)
-
-	for item, err := range client.ListAll(ctx, c, op, size, client.MaxItems(page.maxItems)) {
-		switch {
-		case errors.As(err, &truncated):
-		case err != nil:
-			return err
-		default:
-			items = append(items, item)
-		}
-		if truncated != nil {
-			break
-		}
-	}
-
-	if truncated != nil {
-		deps.Printer.Warnf("%s. %s", truncated, truncated.Hint())
-	}
-
-	// As with --all over a cursor: the count is the total only if the walk reached the
-	// end. A truncated run knows how many it fetched and nothing about how many it did
-	// not.
-	if page.total && truncated == nil {
-		deps.Printer.Notef("Total: %d", len(items))
-	}
-
-	return renderList(deps, view, items)
-}
-
 func renderPage[Q, S any](ctx context.Context, deps *Deps, c *client.Client, op client.Op[json.RawMessage],
 	payload client.SearchPayload[Q, S], view listView,
 ) error {
@@ -277,15 +243,15 @@ func renderPage[Q, S any](ctx context.Context, deps *Deps, c *client.Client, op 
 	return renderList(deps, view, result.Items)
 }
 
-func renderAll[Q, S any](ctx context.Context, deps *Deps, c *client.Client, op client.Op[json.RawMessage],
-	payload client.SearchPayload[Q, S], page pageFlags, view listView,
-) error {
+// renderSeq is --all, over either pagination model: it drains the walk, which
+// pages a cursor or startAfterId and is bounded by --max-items either way.
+func renderSeq(deps *Deps, seq iter.Seq2[json.RawMessage, error], page pageFlags, view listView) error {
 	var (
 		items     []json.RawMessage
 		truncated *client.TruncatedError
 	)
 
-	for item, err := range client.SearchAll(ctx, c, op, payload, client.MaxItems(page.maxItems)) {
+	for item, err := range seq {
 		switch {
 		// A truncation is not a failure: every entity already yielded is real. It
 		// ends the iteration and is reported — loudly, and on stderr — because a

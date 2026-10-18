@@ -78,40 +78,21 @@ func newConnectionUpdateCmd(deps *Deps) *cobra.Command {
 			var (
 				source = client.FacilityRef(facility)
 				id     = args[0]
-				raw    []byte
 			)
 
 			get := func(ctx context.Context) (entityDoc, int, error) {
 				return getConnectionDoc(ctx, c, source, id)
 			}
 
-			put := func(ctx context.Context, doc entityDoc, v int) (entityDoc, error) {
-				doc["version"] = v
-
-				answer, err := sendEntity(ctx, c, "update connection "+id, doc,
-					func(ctx context.Context, body io.Reader) (*http.Response, error) {
-						return c.API().UpdateFacilityConnectionWithBody(ctx, source, id,
-							&api.UpdateFacilityConnectionParams{}, contentTypeJSON, body)
-					})
-				if err != nil {
-					return nil, err
-				}
-				// Captured on the way past: UpdateVersioned is generic over the decoded
-				// entity, and -o json must print the bytes the API sent rather than fft's
-				// re-encoding of them.
-				raw = answer
-				return nil, nil
-			}
-
 			// A PUT: whatever was read, the file wins. Which is also why --if-version
 			// demands the *whole* connection in the file — there is no read for a partial
 			// one to be merged into.
-			replace := func(doc *entityDoc) error {
-				*doc = body
-				return nil
-			}
-
-			if _, err := client.UpdateVersioned(ctx, get, put, replace, version.value()); err != nil {
+			raw, err := putVersioned(ctx, c, "update connection "+id, get, replaceWith(body), version.value(),
+				func(ctx context.Context, body io.Reader) (*http.Response, error) {
+					return c.API().UpdateFacilityConnectionWithBody(ctx, source, id,
+						&api.UpdateFacilityConnectionParams{}, contentTypeJSON, body)
+				})
+			if err != nil {
 				return err
 			}
 

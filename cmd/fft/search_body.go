@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/spf13/cobra"
+
 	"github.com/Joessst-Dev/fft-cli/internal/client"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 )
@@ -59,6 +61,67 @@ func searchPayload[Q, S any](deps *Deps, path, entity string) (rawSearch, error)
 		payload.Query = json.RawMessage(`{}`)
 	}
 	return payload, nil
+}
+
+// fileSearch is what tells one `search --file` command from another. The flags,
+// the --example handling and the run are the same for every entity.
+type fileSearch struct {
+	short       string
+	long        string
+	operationID string
+	// entity names one of them, singular, in what searchPayload reports.
+	entity string
+	op     client.Op[json.RawMessage]
+	view   listView
+}
+
+// newFileSearchCmd builds a `search --file` command, checking the body against the
+// query and sort schemas Q and S.
+func newFileSearchCmd[Q, S any](deps *Deps, s fileSearch) *cobra.Command {
+	var (
+		file    string
+		example bool
+		page    pageFlags
+	)
+
+	cmd := &cobra.Command{
+		Use:   "search --file <file>",
+		Short: s.short,
+		Long:  s.long,
+		Args:  usageArgs(cobra.NoArgs),
+
+		Annotations: map[string]string{
+			annotationOperationID:      s.operationID,
+			annotationSharedReadSender: "true",
+		},
+
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			// --example needs no project, no credentials and no network, so it is
+			// answered before anything that does.
+			if example {
+				return printCommandExample(cmd)
+			}
+			if err := requireFlag(cmd, "file"); err != nil {
+				return err
+			}
+
+			payload, err := searchPayload[Q, S](deps, file, s.entity)
+			if err != nil {
+				return err
+			}
+
+			return runSearch(cmd, deps, s.op, staticQuery(payload), page, s.view)
+		},
+	}
+
+	f := cmd.Flags()
+	f.StringVar(&file, "file", "", "JSON file holding the search payload ('-' for stdin)")
+	f.BoolVar(&example, "example", false, "Print a sample request body and exit")
+	page.registerWithFile(f, s.view.Noun, client.DefaultSize)
+
+	cmd.MarkFlagsMutuallyExclusive("file", "example")
+
+	return cmd
 }
 
 var jsonUnmarshaler = reflect.TypeFor[json.Unmarshaler]()

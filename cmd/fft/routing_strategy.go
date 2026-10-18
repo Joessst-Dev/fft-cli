@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -71,17 +70,7 @@ func getStrategyDoc(ctx context.Context, c *client.Client, id string) (entityDoc
 	if err != nil {
 		return nil, 0, err
 	}
-
-	doc, err := decodeDoc(raw, "the routing strategy")
-	if err != nil {
-		return nil, 0, err
-	}
-
-	version, err := docVersion(doc, "routing strategy")
-	if err != nil {
-		return nil, 0, err
-	}
-	return doc, version, nil
+	return decodeVersioned(raw, "routing strategy")
 }
 
 // routingStrategyView is the table's model of a strategy: the handful of fields a
@@ -117,37 +106,21 @@ func routingStrategyList() listView {
 // renderStrategy renders one strategy: the API's own JSON under -o json, a one-row
 // table otherwise.
 func renderStrategy(deps *Deps, raw []byte) error {
-	if len(bytes.TrimSpace(raw)) == 0 {
-		return nil
-	}
-
-	rows, err := routingStrategyRows(deps.Printer.Style(), []json.RawMessage{raw})
-	if err != nil {
-		return err
-	}
-	return deps.Printer.RenderRaw(rows, raw)
+	return renderEntity(deps, raw, routingStrategyRows)
 }
 
 var routingStrategyHeaders = []string{"ID", "NAME", "REVISION", "IN USE", "VERSION"}
 
 func routingStrategyRows(style output.Style, items []json.RawMessage) (output.Rows, error) {
-	rows := make([][]string, 0, len(items))
-
-	for i, item := range items {
-		var v routingStrategyView
-		if err := json.Unmarshal(item, &v); err != nil {
-			return output.Rows{}, fmt.Errorf("decode routing strategy %d of %d: %w", i+1, len(items), err)
-		}
-
-		rows = append(rows, []string{
+	return viewRows(items, "routing strategy", routingStrategyHeaders, func(v routingStrategyView) []string {
+		return []string{
 			field(style, v.ID),
 			field(style, v.displayName()),
 			fmt.Sprintf("%d", v.Revision),
 			inUseCell(style, v.InUse),
 			fmt.Sprintf("%d", v.Version),
-		})
-	}
-	return output.Rows{Headers: routingStrategyHeaders, Rows: rows}, nil
+		}
+	})
 }
 
 // inUseCell marks the one live strategy. Only the live one is worth calling out, so

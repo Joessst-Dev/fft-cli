@@ -94,13 +94,9 @@ func newOrderCreateCmd(deps *Deps) *cobra.Command {
 					"--file is required: run 'fft order create --example' for a body to start from")}
 			}
 
-			raw, err := readBody(deps, file)
+			doc, err := readDoc(deps, file)
 			if err != nil {
 				return err
-			}
-			doc, err := decodeDoc(raw, file)
-			if err != nil {
-				return exitcode.UsageError{Err: err}
 			}
 
 			c, err := tenantClient(deps)

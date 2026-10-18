@@ -148,14 +148,9 @@ func stockCreateBody(cmd *cobra.Command, deps *Deps, file, article, facility str
 	// and it deserves "read : no such file" rather than a message about the three
 	// flags they did not pass.
 	if cmd.Flags().Changed("file") {
-		raw, err := readBody(deps, file)
+		doc, err := readDoc(deps, file)
 		if err != nil {
 			return nil, err
-		}
-
-		doc, err := decodeDoc(raw, file)
-		if err != nil {
-			return nil, exitcode.UsageError{Err: err}
 		}
 		if err := checkStockFacility(doc, file); err != nil {
 			return nil, err

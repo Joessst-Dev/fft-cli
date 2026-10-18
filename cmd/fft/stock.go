@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -79,17 +78,7 @@ func getStockDoc(ctx context.Context, c *client.Client, id string) (entityDoc, i
 	if err != nil {
 		return nil, 0, err
 	}
-
-	doc, err := decodeDoc(raw, "the stock")
-	if err != nil {
-		return nil, 0, err
-	}
-
-	version, err := docVersion(doc, "stock")
-	if err != nil {
-		return nil, 0, err
-	}
-	return doc, version, nil
+	return decodeVersioned(raw, "stock")
 }
 
 // stockView is the table's model of a stock: the quantities a human is actually
@@ -117,15 +106,8 @@ var stockHeaders = []string{"ID", "TENANT ARTICLE ID", "FACILITY", "LOCATION", "
 // difference the API computed — all three are shown, because a user who sees only
 // one of them will draw the wrong conclusion from it.
 func stockRows(style output.Style, items []json.RawMessage) (output.Rows, error) {
-	rows := make([][]string, 0, len(items))
-
-	for i, item := range items {
-		var v stockView
-		if err := json.Unmarshal(item, &v); err != nil {
-			return output.Rows{}, fmt.Errorf("decode stock %d of %d: %w", i+1, len(items), err)
-		}
-
-		rows = append(rows, []string{
+	return viewRows(items, "stock", stockHeaders, func(v stockView) []string {
+		return []string{
 			field(style, v.ID),
 			field(style, v.TenantArticleID),
 			field(style, v.FacilityRef),
@@ -134,9 +116,8 @@ func stockRows(style output.Style, items []json.RawMessage) (output.Rows, error)
 			quantity(v.Reserved),
 			availableCell(style, v.Available),
 			fmt.Sprintf("%d", v.Version),
-		})
-	}
-	return output.Rows{Headers: stockHeaders, Rows: rows}, nil
+		}
+	})
 }
 
 // availableCell colours the number the reader came for: nothing available means
@@ -161,13 +142,5 @@ func quantity(v float64) string {
 // renderStock renders one stock: the API's own JSON object under -o json, a
 // one-row table otherwise. A 2xx with no body renders nothing.
 func renderStock(deps *Deps, raw []byte) error {
-	if len(bytes.TrimSpace(raw)) == 0 {
-		return nil
-	}
-
-	rows, err := stockRows(deps.Printer.Style(), []json.RawMessage{raw})
-	if err != nil {
-		return err
-	}
-	return deps.Printer.RenderRaw(rows, raw)
+	return renderEntity(deps, raw, stockRows)
 }

@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
+	"slices"
 	"sort"
 	"strings"
 	"unicode"
@@ -150,11 +152,7 @@ func buildRequest(op api.Operation, in opInput, warn func(format string, args ..
 // their filter matched nothing, which is a sentence they will believe.
 func buildQuery(op api.Operation, values map[string][]string, warn func(string, ...any)) ([]client.QueryParam, error) {
 	// Sorted so that --debug's dump and a spec's assertion see a stable request.
-	names := make([]string, 0, len(values))
-	for name := range values {
-		names = append(names, name)
-	}
-	sort.Strings(names)
+	names := slices.Sorted(maps.Keys(values))
 
 	out := make([]client.QueryParam, 0, len(names))
 

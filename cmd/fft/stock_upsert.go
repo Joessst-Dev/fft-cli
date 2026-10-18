@@ -101,7 +101,9 @@ func newStockUpsertCmd(deps *Deps) *cobra.Command {
 			ctx, cancel := deps.Context(cmd)
 			defer cancel()
 
-			chunks := chunkStocks(entries, maxStockUpsert)
+			// The budget is a plain count here — unlike the listing upsert, where an
+			// entry can target many facilities and so costs more than one.
+			chunks := slices.Collect(slices.Chunk(entries, maxStockUpsert))
 			if len(chunks) > 1 {
 				deps.Printer.Notef("Sending %d stocks in %d requests (the API accepts %d per request).",
 					len(entries), len(chunks), maxStockUpsert)
@@ -202,13 +204,6 @@ func parseStockEntries(raw []byte, path string) ([]stockEntry, error) {
 	}
 
 	return entries, nil
-}
-
-// chunkStocks splits the entries into requests the API will accept. The budget is
-// a plain count here — unlike the listing upsert, where an entry can target many
-// facilities and so costs more than one.
-func chunkStocks(entries []stockEntry, size int) [][]stockEntry {
-	return slices.Collect(slices.Chunk(entries, size))
 }
 
 // sendStockChunks sends each chunk and collects what became of every entry.

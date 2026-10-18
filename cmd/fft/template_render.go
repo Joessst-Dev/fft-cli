@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
 	"strings"
@@ -231,7 +232,7 @@ func templateName(deps *Deps, store *template.Store, args []string) (string, err
 	deps.Printer.Notef("Templates:")
 	for i, saved := range listing.Found {
 		deps.Printer.Notef("  %d) %s  %s", i+1, saved.Name,
-			field(deps.Printer.Style(), firstNonEmpty(
+			field(deps.Printer.Style(), cmp.Or(
 				output.SanitizeCell(saved.Description), output.SanitizeCell(saved.OperationID))))
 	}
 
@@ -258,13 +259,4 @@ func validChoice(s string, n int) error {
 		return fmt.Errorf("there is no template %d: pick one from 1 to %d", i, n)
 	}
 	return nil
-}
-
-func firstNonEmpty(values ...string) string {
-	for _, v := range values {
-		if v != "" {
-			return v
-		}
-	}
-	return ""
 }
