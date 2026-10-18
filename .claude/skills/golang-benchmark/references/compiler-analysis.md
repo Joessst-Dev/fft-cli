@@ -4,6 +4,24 @@ The Go compiler provides diagnostic flags that reveal optimization decisions —
 
 Use compiler diagnostics when pprof shows a hot function and you need to understand the compiler's decisions about that function. These tools are free (no runtime overhead) — they analyze at compile time.
 
+## Table of Contents
+
+- [Escape Analysis](#escape-analysis)
+  - [Commands](#commands)
+  - [Reading the output](#reading-the-output)
+  - [Common escape causes](#common-escape-causes)
+- [Inlining Decisions](#inlining-decisions)
+  - [Commands](#commands-1)
+  - [Reading the output](#reading-the-output-1)
+  - [Common inlining blockers](#common-inlining-blockers)
+- [SSA Dump](#ssa-dump)
+  - [Commands](#commands-2)
+  - [Reading ssa.html](#reading-ssahtml)
+- [Assembly Output](#assembly-output)
+  - [Commands](#commands-3)
+  - [Reading assembly output](#reading-assembly-output)
+  - [Comparing assembly before/after optimization](#comparing-assembly-beforeafter-optimization)
+
 ## Escape Analysis
 
 Escape analysis determines whether a variable can live on the stack (cheap — freed when the function returns) or must be allocated on the heap (expensive — requires GC). "Moved to heap" means the compiler decided the variable might outlive the function.
@@ -98,7 +116,7 @@ go build -gcflags="-m" ./pkg/handler 2>&1 | grep -E "(inline|escape|moved to hea
 ./pkg/handler/handler.go:42:19: inlining call to validateInput
 ```
 
-The inline cost budget is 80 (as of Go 1.22+). Functions with higher cost (more AST nodes, complex control flow) are not inlined.
+The inline cost budget is approximately 80–82 AST nodes (as of Go 1.22+; has increased in later releases). Functions with higher cost (more AST nodes, complex control flow) are not inlined. Check the actual threshold with `-gcflags="-m -m"`.
 
 ### Common inlining blockers
 
@@ -112,7 +130,7 @@ The inline cost budget is 80 (as of Go 1.22+). Functions with higher cost (more 
 | **`select` statement** | Complex runtime interaction | Simplify channel patterns in hot functions |
 | **Large function body** | Many statements add up in cost | Break into smaller functions — the hot inner function may inline |
 
-**Value receivers vs pointer receivers:** Value receivers enable full inlining of method chains. Pointer receivers add indirection that can block inlining for fluent APIs. Check with `-gcflags="-m"`.
+**Value receivers vs pointer receivers:** Receiver choice can affect copying, aliasing, escape analysis, and inlining, but pointer receiver methods can inline too and value receivers do not guarantee inlining. Check real compiler decisions with `-gcflags="-m -m"`.
 
 ## SSA Dump
 

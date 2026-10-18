@@ -10,6 +10,17 @@ Hardcoded secrets, credentials, and sensitive data in source code is a major sec
 
 ---
 
+## Table of Contents
+
+- [Hardcoded Secrets and Credentials — Critical](#hardcoded-secrets-and-credentials--critical)
+- [Hardcoded Database Passwords — Critical](#hardcoded-database-passwords--critical)
+- [Secrets Storage Best Practices](#secrets-storage-best-practices)
+  - [Environment Variables](#environment-variables)
+  - [Secret Managers](#secret-managers)
+  - [.gitignore Patterns](#gitignore-patterns)
+- [Secret Detection Patterns](#secret-detection-patterns)
+- [CWE References](#cwe-references)
+
 ## Hardcoded Secrets and Credentials — Critical
 
 **Bad:**
@@ -80,11 +91,11 @@ func connectMySQL() (*sql.DB, error) {
     if password == "" {
         return nil, errors.New("DB_PASSWORD required")
     }
-    dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
-        user, password,
-        getEnvWithDefault("DB_HOST", "localhost"),
-        getEnvWithDefault("DB_PORT", "3306"),
-        getEnvWithDefault("DB_NAME", "mydb"))
+    host := getEnvWithDefault("DB_HOST", "localhost")
+    port := getEnvWithDefault("DB_PORT", "3306")
+    addr := net.JoinHostPort(host, port)
+    dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s",
+        user, password, addr, getEnvWithDefault("DB_NAME", "mydb"))
     return sql.Open("mysql", dsn)
 }
 

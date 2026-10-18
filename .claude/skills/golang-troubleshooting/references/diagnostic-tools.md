@@ -1,6 +1,24 @@
 # Diagnostic Tools
 
+## Table of Contents
+
+- [Runtime Diagnostics (GODEBUG)](#runtime-diagnostics-godebug)
+  - [Go documentation command](#go-documentation-command)
+  - [GC Tracing](#gc-tracing)
+  - [Scheduler Tracing](#scheduler-tracing)
+  - [GOTRACEBACK](#gotraceback)
+- [Delve Debugger](#delve-debugger)
+  - [Installation](#installation)
+  - [Basic Usage](#basic-usage)
+  - [Common Commands](#common-commands)
+  - [IDE Integration](#ide-integration)
+- [Advanced Analysis](#advanced-analysis)
+
 ## Runtime Diagnostics (GODEBUG)
+
+### Go documentation command
+
+Use `go doc`, not `go tool doc`. Go 1.26 removed the old `cmd/doc` / `go tool doc` path. Go 1.27 added `package@version` lookups (`go doc golang.org/x/tools/cmd/stringer@v0.30.0`) and an `-ex` flag that lists executable examples.
 
 ### GC Tracing
 
@@ -14,11 +32,11 @@ GODEBUG=gctrace=1 ./app
 gc 123 @45.67s 4%: 0.8+10+0.3 ms clock, 6+5/10/0 ms cpu, 512->300->150 MB
 ```
 
-| Field            | Meaning                                    |
-| ---------------- | ------------------------------------------ |
-| 4%               | GC CPU overhead (if >10%, over-allocating) |
-| 512->300->150 MB | Heap before -> after mark -> after sweep   |
-| Large pause      | Allocation storm                           |
+| Field            | Meaning                                         |
+| ---------------- | ----------------------------------------------- |
+| 4%               | GC CPU overhead (if >10%, over-allocating)      |
+| 512->300->150 MB | Heap at GC start -> heap at GC end -> live heap |
+| Large pause      | Allocation storm                                |
 
 ### Scheduler Tracing
 

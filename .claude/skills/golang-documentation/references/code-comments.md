@@ -2,6 +2,26 @@
 
 → See `samber/cc-skills-golang@golang-naming` skill for naming conventions that reduce the need for comments.
 
+## Table of Contents
+
+- [Function & Method Doc Comments](#function--method-doc-comments)
+  - [Why, Not What](#why-not-what)
+  - [Anti-Patterns to Remove on Sight](#anti-patterns-to-remove-on-sight)
+  - [Format](#format)
+  - [Full Comment Template](#full-comment-template)
+  - [What to Document](#what-to-document)
+  - [Error Cases and Limitations](#error-cases-and-limitations)
+  - [Deprecated Functions](#deprecated-functions)
+  - [Interface Documentation](#interface-documentation)
+  - [Method Comments on Structs](#method-comments-on-structs)
+  - [Inline Code Examples in Comments](#inline-code-examples-in-comments)
+  - [Playground Links](#playground-links)
+- [File & Package Comments](#file--package-comments)
+  - [Package Comment](#package-comment)
+  - [File-Level Description](#file-level-description)
+  - [When to Add File Descriptions](#when-to-add-file-descriptions)
+  - [Godoc Headings in Comments](#godoc-headings-in-comments)
+
 ## Function & Method Doc Comments
 
 ### Why, Not What
@@ -31,6 +51,17 @@ Good — explains why, when, and what can go wrong:
 // Returns ErrDatabaseUnavailable if the connection pool is exhausted.
 func GetUser(id string) (*User, error) {
 ```
+
+### Anti-Patterns to Remove on Sight
+
+| Anti-pattern | Example | Fix |
+| --- | --- | --- |
+| Pure paraphrase | `// GetUser gets a user` on `func GetUser()` — starts with the name (required by godoc) but adds nothing | After the name, add _when_ to use it, constraints, and what can go wrong |
+| Signature restatement | `// Returns a string and an error` | Document _which_ error and _why_ — the signature already shows types |
+| Marketing vocabulary | `seamlessly`, `powerful`, `robust`, `enterprise-grade` | Remove — state facts instead |
+| Invented rationale | `// designed to improve scalability` | Only document what the code actually does |
+| Groundless future claims | `// supports future extensibility` | Remove or back it with an interface or configuration |
+| Hollow filler | `// It's worth noting that...`, `// As mentioned above` | Cut — restate the fact directly if it matters |
 
 ### Format
 
@@ -178,7 +209,7 @@ func Transform[T any, U any](slice []T, fn func(T) U) []U {
 
 ### Playground Links
 
-Add a `Play:` line linking to a runnable Go Playground example of a public library. Use the samber/go-playground-mcp tool to create and share playground URLs when available:
+Add a `Play:` line linking to a runnable Go Playground example of a public library. Use a Go Playground integration to create and share playground URLs when one is available:
 
 ```go
 // Map applies a function to each element of a slice.

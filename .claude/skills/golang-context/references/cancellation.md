@@ -1,5 +1,19 @@
 # Cancellation, Timeouts & Deadlines
 
+## Table of Contents
+
+- [Cancellation](#cancellation)
+  - [Why `defer cancel()` matters](#why-defer-cancel-matters)
+- [Timeouts and Deadlines](#timeouts-and-deadlines)
+  - [`context.WithTimeout` — relative duration](#contextwithtimeout--relative-duration)
+  - [`context.WithDeadline` — absolute point in time](#contextwithdeadline--absolute-point-in-time)
+  - [Nested timeouts take the shorter deadline](#nested-timeouts-take-the-shorter-deadline)
+- [Listening for Cancellation](#listening-for-cancellation)
+  - [The `select` pattern](#the-select-pattern)
+  - [Checking cancellation in loops](#checking-cancellation-in-loops)
+- [`context.AfterFunc` (Go 1.21+)](#contextafterfunc-go-121)
+- [`context.WithoutCancel` (Go 1.21+)](#contextwithoutcancel-go-121)
+
 ## Cancellation
 
 `context.WithCancel` returns a derived context and a `cancel` function. When `cancel()` is called, the context's `Done()` channel is closed, signaling all listeners to stop.
@@ -28,7 +42,7 @@ func processItems(ctx context.Context, items []Item) error {
 
 ### Why `defer cancel()` matters
 
-Every `WithCancel`, `WithTimeout`, and `WithDeadline` allocates internal resources (timers, goroutines). cancel() MUST be called (via defer) to prevent resource leaks. Even if the context will expire on its own, always defer cancel.
+Every `WithCancel`, `WithTimeout`, and `WithDeadline` creates cancellation state; timeout/deadline contexts also use timer resources. `cancel()` MUST be called on all control-flow paths unless the function explicitly returns or transfers ownership of both the context and cancel function. In ordinary scoped work, defer cancel immediately.
 
 ```go
 // ✗ Bad — cancel is never called, resources leak
@@ -37,7 +51,7 @@ func fetch(ctx context.Context) error {
     return doWork(ctx)
 }
 
-// ✓ Good — defer cancel immediately
+// ✓ Good — scoped work, defer cancel immediately
 func fetch(ctx context.Context) error {
     ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
     defer cancel()

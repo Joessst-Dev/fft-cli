@@ -1,12 +1,12 @@
 ---
 name: golang-troubleshooting
-description: "Troubleshoot Golang programs systematically - find and fix the root cause. Use when encountering bugs, crashes, deadlocks, or unexpected behavior in Go code. Covers debugging methodology, common Go pitfalls, test-driven debugging, pprof setup and capture, Delve debugger, race detection, GODEBUG tracing, and production debugging. Start here for any 'something is wrong' situation. Not for interpreting profiles or benchmarking (see golang-benchmark skill) or applying optimization patterns (see golang-performance skill)."
+description: "Troubleshoot Golang programs systematically - find and fix the root cause. Use when encountering bugs, crashes, deadlocks, races, or unexpected behavior in Go code. Covers debugging methodology, common Go pitfalls, test-driven debugging, pprof setup and capture, Delve, race detection, GODEBUG tracing, and production debugging. Start here for any 'something is wrong' situation. Not for interpreting profiles or benchmarking (→ See `samber/cc-skills-golang@golang-benchmark` skill), applying optimization patterns (→ See `samber/cc-skills-golang@golang-performance` skill), or designing new code (→ See `samber/cc-skills-golang@golang-safety` skill for defensive coding, `samber/cc-skills-golang@golang-concurrency` skill for concurrency design)."
 user-invocable: true
 license: MIT
-compatibility: Designed for Claude Code or similar AI coding agents, and for projects using Golang.
+compatibility: Designed for Claude Code, Codex or similar harness, and for projects using Golang.
 metadata:
   author: samber
-  version: "1.1.2"
+  version: "1.3.1"
   openclaw:
     emoji: "🔍"
     homepage: https://github.com/samber/cc-skills-golang
@@ -19,16 +19,24 @@ metadata:
         package: github.com/go-delve/delve/cmd/dlv@latest
         bins: [dlv]
 allowed-tools: Read Edit Write Glob Grep Bash(go:*) Bash(golangci-lint:*) Bash(git:*) Bash(dlv:*) Agent WebFetch WebSearch AskUserQuestion
+paths:
+  - "**/*.go"
 ---
 
 **Persona:** You are a Go systems debugger. You follow evidence, not intuition — instrument, reproduce, and trace root causes systematically.
 
-**Thinking mode:** Use `ultrathink` for debugging and root cause analysis. Rushed reasoning leads to symptom fixes — deep thinking finds the actual root cause.
+**Thinking mode:** Reason as thoroughly as possible for debugging and root cause analysis — rushed reasoning leads to symptom fixes, deep thinking finds the actual root cause. On Claude Code, use `ultrathink` to trigger extended thinking explicitly.
+
+**Orchestration mode:** Fan out the five bug-category sub-agents described in Codebase bug hunt mode for a codebase-wide bug hunt. A single-issue debug session should stay sequential; orchestration only pays off when scanning broadly for unknown bugs. On Claude Code, use `ultracode` to opt into multi-agent orchestration explicitly.
 
 **Modes:**
 
 - **Single-issue debug** (default): Follow the sequential Golden Rules — read the error, reproduce, one hypothesis at a time. Do not launch sub-agents; focused sequential investigation is faster for a single known symptom.
 - **Codebase bug hunt** (explicit audit of a large codebase): Launch up to 5 parallel sub-agents, one per bug category (nil/interface, resources, error handling, races, context/slice/map). Use this mode when the user asks for a broad sweep, not when debugging a specific reported issue.
+
+**Dependencies:**
+
+- dlv: `go install github.com/go-delve/delve/cmd/dlv@latest`
 
 # Go Troubleshooting Guide
 
@@ -123,7 +131,7 @@ Change one thing, measure, confirm. If you change three things at once, you lear
 
 ### 5. Find the Root Cause — No Workarounds
 
-A band-aid fix that masks the symptom IS NOT ACCEPTABLE. You MUST understand **why** the bug happens before writing a fix.
+You MUST understand **why** the bug happens before writing a fix. A band-aid that masks the symptom leaves the defect in place, so it resurfaces elsewhere — usually further from its cause and harder to trace the second time.
 
 When you don't understand the issue:
 
@@ -136,7 +144,7 @@ When you don't understand the issue:
 
 Before flagging a bug or proposing a fix, trace the data flow and check for upstream handling. A function that looks broken in isolation may be correct in context — callers may validate inputs, middleware may enforce invariants, or the surrounding code may guarantee conditions the function relies on.
 
-1. **Trace callers** — who calls this function and with what values? Use Grep/Agent to find all call sites.
+1. **Trace callers** — who calls this function and with what values? Call sites can be found with code search tools. → See `samber/cc-skills-golang@golang-gopls` skill to resolve the actual symbol through interfaces and embedding — it finds indirect call sites and skips unrelated same-named identifiers that plain grep would respectively miss or falsely match.
 2. **Check upstream validation** — input parsing, type conversions, or guard clauses earlier in the chain may make the "bug" unreachable.
 3. **Read the surrounding code** — middleware, interceptors, or init functions may set up state the function depends on.
 

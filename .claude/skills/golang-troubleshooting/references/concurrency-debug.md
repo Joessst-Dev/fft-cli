@@ -1,5 +1,11 @@
 # Concurrency Debugging
 
+## Table of Contents
+
+- [Goroutine Leaks](#goroutine-leaks)
+- [Race Conditions](#race-conditions)
+- [Deadlocks](#deadlocks)
+
 ## Goroutine Leaks
 
 **Symptoms:** Memory slowly increasing, goroutine count growing, no obvious CPU spike.
@@ -7,6 +13,15 @@
 **Diagnosis:**
 
 Use pprof goroutine profile (see [pprof.md](./pprof.md)) with `?debug=2` for human-readable output, then look for goroutines stuck in `chan receive`.
+
+The goroutine leak profile (experimental behind `GOEXPERIMENT=goroutineleakprofile` in Go 1.26) is generally available since Go 1.27 — no build flag needed, and it is served at `/debug/pprof/goroutineleak` like any other standard profile.
+
+```bash
+curl http://localhost:6060/debug/pprof/goroutineleak?debug=2
+go tool pprof http://localhost:6060/debug/pprof/goroutineleak
+```
+
+Keep existing tools: `go.uber.org/goleak` in tests, `runtime.NumGoroutine()` for coarse monitoring, `/debug/pprof/goroutine?debug=2` for stack dumps, and `go test -race ./...` for race checks.
 
 ```go
 // Programmatic monitoring — log goroutine count to detect leaks
@@ -46,7 +61,7 @@ for {
 // Always defer resp.Body.Close() after HTTP calls.
 // See production-debug.md for the correct pattern.
 
-// 3. time.After in loop — allocates a new timer each iteration
+// 3. time.After in hot loop — allocates a new timer each iteration
 // BAD
 for {
     select {
@@ -54,7 +69,7 @@ for {
         do()
     }
 }
-// GOOD
+// GOOD — reuse a ticker for repeated intervals
 ticker := time.NewTicker(time.Second)
 defer ticker.Stop()
 for {
