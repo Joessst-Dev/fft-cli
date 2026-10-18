@@ -32,48 +32,12 @@ filter.
 --size, --total and --all override whatever the file said.`
 
 func newStockSearchCmd(deps *Deps) *cobra.Command {
-	var (
-		file    string
-		example bool
-		page    pageFlags
-	)
-
-	cmd := &cobra.Command{
-		Use:   "search --file <file>",
-		Short: "Search stocks with a JSON query",
-		Long:  stockSearchLong,
-		Args:  usageArgs(cobra.NoArgs),
-
-		Annotations: map[string]string{
-			annotationOperationID:      "searchStock",
-			annotationSharedReadSender: "true",
-		},
-
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			// --example needs no project, no credentials and no network, so it is
-			// answered before anything that does.
-			if example {
-				return printCommandExample(cmd)
-			}
-			if err := requireFlag(cmd, "file"); err != nil {
-				return err
-			}
-
-			payload, err := searchPayload[api.StockSearchQuery, api.StockSort](deps, file, "stock")
-			if err != nil {
-				return err
-			}
-
-			return runSearch(cmd, deps, client.StockSearch[json.RawMessage](), staticQuery(payload), page, stockList())
-		},
-	}
-
-	f := cmd.Flags()
-	f.StringVar(&file, "file", "", "JSON file holding the search payload ('-' for stdin)")
-	f.BoolVar(&example, "example", false, "Print a sample request body and exit")
-	page.registerWithFile(f, "stocks", client.DefaultSize)
-
-	cmd.MarkFlagsMutuallyExclusive("file", "example")
-
-	return cmd
+	return newFileSearchCmd[api.StockSearchQuery, api.StockSort](deps, fileSearch{
+		short:       "Search stocks with a JSON query",
+		long:        stockSearchLong,
+		operationID: "searchStock",
+		entity:      "stock",
+		op:          client.StockSearch[json.RawMessage](),
+		view:        stockList(),
+	})
 }

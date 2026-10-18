@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"slices"
 	"sync"
 	"time"
 
@@ -96,12 +97,12 @@ func (e *eventEmitter) emit(event string, payload map[string]any) (result emitRe
 
 	raw, err := json.Marshal(payload)
 	if err != nil {
-		e.logf("emulator: encode %s payload: %v", event, err)
+		logf(e.log, "emulator: encode %s payload: %v", event, err)
 		return result
 	}
 	data, err := json.Marshal(webHookEvent{Event: event, EventID: uuid.NewString(), Payload: raw})
 	if err != nil {
-		e.logf("emulator: encode %s event: %v", event, err)
+		logf(e.log, "emulator: encode %s event: %v", event, err)
 		return result
 	}
 
@@ -127,12 +128,12 @@ func (e *eventEmitter) emit(event string, payload map[string]any) (result emitRe
 			// emulator process out from under every in-flight request.
 			defer func() {
 				if r := recover(); r != nil {
-					e.logf("emulator: deliver %s to %s panicked: %v", event, d.label, r)
+					logf(e.log, "emulator: deliver %s to %s panicked: %v", event, d.label, r)
 				}
 			}()
 
 			if err := d.send(ctx, event, data); err != nil {
-				e.logf("emulator: deliver %s to %s: %v", event, d.label, err)
+				logf(e.log, "emulator: deliver %s to %s: %v", event, d.label, err)
 				return
 			}
 			mu.Lock()
@@ -167,13 +168,13 @@ func (e *eventEmitter) plan(event string, payload map[string]any) []delivery {
 		targetType := mapString(target, "type")
 		t, ok := e.transports[targetType]
 		if !ok {
-			e.logf("emulator: skip %s subscription %q: %s", event, mapString(sub, "name"), e.noTransport(targetType))
+			logf(e.log, "emulator: skip %s subscription %q: %s", event, mapString(sub, "name"), e.noTransport(targetType))
 			continue
 		}
 
 		d, err := t.plan(target)
 		if err != nil {
-			e.logf("emulator: skip %s subscription %q: %v", event, mapString(sub, "name"), err)
+			logf(e.log, "emulator: skip %s subscription %q: %v", event, mapString(sub, "name"), err)
 			continue
 		}
 		out = append(out, d)
@@ -258,13 +259,6 @@ func (e *eventEmitter) Close() error {
 	return closeTransports(e.transports)
 }
 
-func (e *eventEmitter) logf(format string, args ...any) {
-	if e.log == nil {
-		return
-	}
-	fmt.Fprintf(e.log, format+"\n", args...)
-}
-
 // lifecycleEvents is the event a collection emits on create, update and delete. An
 // empty field means the collection has no clean single event for that transition —
 // e.g. an order has no delete event, and a pickjob's many state changes do not map to
@@ -347,15 +341,12 @@ func payloadMatchesContexts(payload map[string]any, contexts []subscriptionConte
 	refs := map[string]struct{}{}
 	collectLocationRefs(payload, refs)
 
+	referenced := func(v string) bool {
+		_, ok := refs[v]
+		return ok
+	}
 	for _, ctx := range contexts {
-		matched := false
-		for _, v := range ctx.values {
-			if _, ok := refs[v]; ok {
-				matched = true
-				break
-			}
-		}
-		if !matched {
+		if !slices.ContainsFunc(ctx.values, referenced) {
 			return false
 		}
 	}

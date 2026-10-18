@@ -78,10 +78,7 @@ func (c *cachingTokenSource) Token(ctx context.Context) (string, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	if !c.loaded {
-		c.token = loadToken(c.store, c.project)
-		c.loaded = true
-	}
+	c.ensureLoaded()
 	if c.token.Fresh(c.now(), Leeway) {
 		return c.token.ID, nil
 	}
@@ -100,11 +97,17 @@ func (c *cachingTokenSource) Renew(ctx context.Context) (Token, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
+	c.ensureLoaded()
+	return c.renew(ctx)
+}
+
+// ensureLoaded reads the stored token the first time it is needed. The caller
+// holds the mutex.
+func (c *cachingTokenSource) ensureLoaded() {
 	if !c.loaded {
 		c.token = loadToken(c.store, c.project)
 		c.loaded = true
 	}
-	return c.renew(ctx)
 }
 
 // renew mints and caches a token. The caller holds the mutex.
@@ -129,10 +132,8 @@ func (c *cachingTokenSource) renew(ctx context.Context) (Token, error) {
 type FirebaseTokenSource struct {
 	*cachingTokenSource
 
-	client  *Client
-	project string
-	email   string
-	store   secrets.Store
+	client *Client
+	email  string
 }
 
 var _ TokenSource = (*FirebaseTokenSource)(nil)
@@ -142,12 +143,7 @@ var _ Renewer = (*FirebaseTokenSource)(nil)
 // read from store at the moment it is needed, rather than held in this struct for
 // the lifetime of the process.
 func NewFirebaseTokenSource(client *Client, p config.Project, store secrets.Store, now func() time.Time) *FirebaseTokenSource {
-	s := &FirebaseTokenSource{
-		client:  client,
-		project: p.Name,
-		email:   p.Email,
-		store:   store,
-	}
+	s := &FirebaseTokenSource{client: client, email: p.Email}
 	s.cachingTokenSource = newCachingTokenSource(s.mint, store, p.Name, now)
 	return s
 }

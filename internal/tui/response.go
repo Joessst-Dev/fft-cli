@@ -2,6 +2,7 @@ package tui
 
 import (
 	"bytes"
+	"cmp"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -158,23 +159,14 @@ func (p *responseScreen) observe(ev RunEvent) {
 
 func (p *responseScreen) moveTab(by int) {
 	tabs := p.tabs()
-	i := 0
-	for j, t := range tabs {
-		if t == p.current() {
-			i = j
-		}
-	}
+	i := slices.Index(tabs, p.current())
 	p.tab = tabs[(i+by+len(tabs))%len(tabs)]
 	p.vp.GotoTop()
 }
 
 func (p *responseScreen) update(msg tea.Msg) tea.Cmd {
-	if d := p.dialog; d != nil {
-		finished, cmd := d.update(msg)
-		if finished && p.dialog == d {
-			p.dialog = nil
-		}
-		return cmd
+	if p.dialog != nil {
+		return updateDialog(&p.dialog, msg)
 	}
 	keyMsg, isKey := msg.(tea.KeyPressMsg)
 	e := p.entry()
@@ -213,7 +205,7 @@ func (p *responseScreen) say(notice string) {
 
 func (p *responseScreen) fail(what string, err error) {
 	p.notice = ""
-	p.failure = &failure{what: what, result: Result{ExitCode: exitcode.General, Stderr: []byte(err.Error())}}
+	p.failure = &failure{what: what, result: errorResult(err)}
 }
 
 // rerun sends the request again, to the project it went to the first time, and
@@ -248,7 +240,7 @@ func (p *responseScreen) rerun(e *runEntry) tea.Cmd {
 		project = "the active project"
 	}
 	p.dialog = armed(&confirmDialog{
-		question: fmt.Sprintf("Send %s to %s again?", firstNonEmpty(req.op.Summary, req.op.ID), project),
+		question: fmt.Sprintf("Send %s to %s again?", cmp.Or(req.op.Summary, req.op.ID), project),
 		notes:    p.s.lackingNotes(req.op, again.project),
 		detail:   writeDetail(req.op, false),
 		command:  a.display,
@@ -625,11 +617,8 @@ func (d *inputDialog) update(msg tea.Msg) (bool, tea.Cmd) {
 			return true, d.onSubmit(d.input.Value())
 		}
 	}
-	if paste, isPaste := msg.(tea.PasteMsg); isPaste {
-		// Typed, not submitted: enter is still the user's to press.
-		paste.Content = strings.TrimRight(paste.Content, "\r\n")
-		msg = paste
-	}
+	// Typed, not submitted: enter is still the user's to press.
+	msg = trimPaste(msg)
 	var cmd tea.Cmd
 	d.input, cmd = d.input.Update(msg)
 	return false, cmd

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -76,17 +75,7 @@ func getFacilityDoc(ctx context.Context, c *client.Client, ref string) (entityDo
 	if err != nil {
 		return nil, 0, err
 	}
-
-	doc, err := decodeDoc(raw, "the facility")
-	if err != nil {
-		return nil, 0, err
-	}
-
-	version, err := docVersion(doc, "facility")
-	if err != nil {
-		return nil, 0, err
-	}
-	return doc, version, nil
+	return decodeVersioned(raw, "facility")
 }
 
 // resolveFacilityID turns whatever the user typed into the facility's *platform
@@ -180,14 +169,9 @@ func lookupFacility(ctx context.Context, c *client.Client, value string) (facili
 // cannot forgive: the `type` discriminator. Without it the server answers with a
 // 400 that does not say which of the two shapes it failed to match.
 func facilityBody(deps *Deps, path string) (entityDoc, error) {
-	raw, err := readBody(deps, path)
+	doc, err := readDoc(deps, path)
 	if err != nil {
 		return nil, err
-	}
-
-	doc, err := decodeDoc(raw, path)
-	if err != nil {
-		return nil, exitcode.UsageError{Err: err}
 	}
 
 	if err := checkFacilityType(docString(doc, "type")); err != nil {
@@ -269,18 +253,7 @@ func facilityList() listView {
 // would force every script to index into a list that can only ever hold one
 // thing.
 func renderFacility(deps *Deps, raw []byte) error {
-	// A 2xx with no body is a legitimate answer to a mutation. There is nothing to
-	// render, the notice on stderr has already said what happened, and inventing a
-	// row for it would be worse than printing none.
-	if len(bytes.TrimSpace(raw)) == 0 {
-		return nil
-	}
-
-	rows, err := facilityRows(deps.Printer.Style(), []json.RawMessage{raw})
-	if err != nil {
-		return err
-	}
-	return deps.Printer.RenderRaw(rows, raw)
+	return renderEntity(deps, raw, facilityRows)
 }
 
 var facilityHeaders = []string{"ID", "TENANT ID", "NAME", "TYPE", "STATUS", "LOCATION", "CITY", "VERSION"}
@@ -292,15 +265,8 @@ var facilityHeaders = []string{"ID", "TENANT ID", "NAME", "TYPE", "STATUS", "LOC
 //
 // A facility fft cannot parse is a bug worth reporting, not a row worth skipping.
 func facilityRows(style output.Style, items []json.RawMessage) (output.Rows, error) {
-	rows := make([][]string, 0, len(items))
-
-	for i, item := range items {
-		var v facilityView
-		if err := json.Unmarshal(item, &v); err != nil {
-			return output.Rows{}, fmt.Errorf("decode facility %d of %d: %w", i+1, len(items), err)
-		}
-
-		rows = append(rows, []string{
+	return viewRows(items, "facility", facilityHeaders, func(v facilityView) []string {
+		return []string{
 			field(style, v.ID),
 			field(style, v.TenantFacilityID),
 			field(style, v.Name),
@@ -309,9 +275,8 @@ func facilityRows(style output.Style, items []json.RawMessage) (output.Rows, err
 			field(style, v.LocationType),
 			field(style, v.Address.City),
 			fmt.Sprintf("%d", v.Version),
-		})
-	}
-	return output.Rows{Headers: facilityHeaders, Rows: rows}, nil
+		}
+	})
 }
 
 // facilityStatusCell colours the one column a reader scans for: a facility that

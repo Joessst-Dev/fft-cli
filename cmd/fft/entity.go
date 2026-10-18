@@ -67,6 +67,37 @@ func docVersion(doc entityDoc, what string) (int, error) {
 	return int(v), nil
 }
 
+// decodeVersioned is an entity read ahead of a write. It fails when the version
+// is missing, because a write needs one to send back and there is no safe default.
+func decodeVersioned(raw []byte, noun string) (entityDoc, int, error) {
+	doc, err := decodeDoc(raw, "the "+noun)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	version, err := docVersion(doc, noun)
+	if err != nil {
+		return nil, 0, err
+	}
+	return doc, version, nil
+}
+
+// readDoc reads a request body from a file (or stdin, for "-") as a document. A
+// body that is not a JSON object is the user's file at fault, so it is a usage
+// error and not a failure.
+func readDoc(deps *Deps, path string) (entityDoc, error) {
+	raw, err := readBody(deps, path)
+	if err != nil {
+		return nil, err
+	}
+
+	doc, err := decodeDoc(raw, path)
+	if err != nil {
+		return nil, exitcode.UsageError{Err: err}
+	}
+	return doc, nil
+}
+
 // docString reads a string field, or "" when it is absent or is not one.
 func docString(doc entityDoc, key string) string {
 	s, _ := doc[key].(string)
@@ -116,6 +147,80 @@ func sendEntity(ctx context.Context, c *client.Client, op string, doc entityDoc,
 		return nil, fmt.Errorf("%s: encode the request: %w", op, err)
 	}
 	return sendDoc(ctx, c, op, body, send)
+}
+
+// putVersioned writes doc back through [client.UpdateVersioned], stamping the
+// version on the way out, and returns the API's answer verbatim.
+//
+// The answer is captured on the way past, because UpdateVersioned is generic over
+// the decoded entity and -o json must print the bytes the API sent, not fft's
+// re-encoding of them.
+func putVersioned(ctx context.Context, c *client.Client, op string,
+	get client.GetFn[entityDoc], mutate func(*entityDoc) error, expected *int,
+	send func(ctx context.Context, body io.Reader) (*http.Response, error),
+) ([]byte, error) {
+	var raw []byte
+
+	put := func(ctx context.Context, doc entityDoc, v int) (entityDoc, error) {
+		doc["version"] = v
+
+		answer, err := sendEntity(ctx, c, op, doc, send)
+		if err != nil {
+			return nil, err
+		}
+		raw = answer
+		return nil, nil
+	}
+
+	if _, err := client.UpdateVersioned(ctx, get, put, mutate, expected); err != nil {
+		return nil, err
+	}
+	return raw, nil
+}
+
+// replaceWith is the mutation of a write whose body is decided up front: whatever
+// was read, d is what gets sent.
+func replaceWith(d entityDoc) func(*entityDoc) error {
+	return func(doc *entityDoc) error {
+		*doc = d
+		return nil
+	}
+}
+
+// renderEntity renders one entity: the API's own JSON under -o json, a one-row
+// table otherwise.
+//
+// A 2xx with no body is a legitimate answer to a mutation. There is nothing to
+// render, the notice on stderr has already said what happened, and inventing a row
+// for it would be worse than printing none.
+func renderEntity(deps *Deps, raw []byte,
+	rows func(style output.Style, items []json.RawMessage) (output.Rows, error),
+) error {
+	if len(bytes.TrimSpace(raw)) == 0 {
+		return nil
+	}
+
+	table, err := rows(deps.Printer.Style(), []json.RawMessage{raw})
+	if err != nil {
+		return err
+	}
+	return deps.Printer.RenderRaw(table, raw)
+}
+
+// viewRows builds a table by decoding each item into the view V and rendering it
+// with row. An entity fft cannot parse is a bug worth reporting, not a row worth
+// skipping, so a decode failure fails the whole table.
+func viewRows[V any](items []json.RawMessage, noun string, headers []string, row func(V) []string) (output.Rows, error) {
+	rows := make([][]string, 0, len(items))
+
+	for i, item := range items {
+		var v V
+		if err := json.Unmarshal(item, &v); err != nil {
+			return output.Rows{}, fmt.Errorf("decode %s %d of %d: %w", noun, i+1, len(items), err)
+		}
+		rows = append(rows, row(v))
+	}
+	return output.Rows{Headers: headers, Rows: rows}, nil
 }
 
 // readBody reads a request body from a file, or from stdin when path is "-".

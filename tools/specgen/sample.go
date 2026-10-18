@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"maps"
 	"regexp"
 	"slices"
 	"strconv"
@@ -65,22 +66,7 @@ func (s *synthesizer) body(ref *openapi3.RequestBodyRef) (string, error) {
 	if ref == nil || ref.Value == nil {
 		return "", nil
 	}
-
-	media := ref.Value.Content.Get(contentTypeJSON)
-	if media == nil || media.Schema == nil {
-		return "", nil
-	}
-
-	value := s.value(media.Schema, nil, 0)
-	if value == nil {
-		return "", nil
-	}
-
-	out, err := json.MarshalIndent(value, "", "  ")
-	if err != nil {
-		return "", err
-	}
-	return string(out) + "\n", nil
+	return s.sample(ref.Value.Content)
 }
 
 // response returns the sample body for an operation's success response, built from
@@ -110,7 +96,13 @@ func (s *synthesizer) response(responses *openapi3.Responses) (string, error) {
 		return "", nil
 	}
 
-	media := chosen.Value.Content.Get(contentTypeJSON)
+	return s.sample(chosen.Value.Content)
+}
+
+// sample renders the sample for content's JSON schema, indented and with a
+// trailing newline, or "" when there is no JSON schema or nothing to build from it.
+func (s *synthesizer) sample(content openapi3.Content) (string, error) {
+	media := content.Get(contentTypeJSON)
 	if media == nil || media.Schema == nil {
 		return "", nil
 	}
@@ -255,17 +247,13 @@ func flatten(schema *openapi3.Schema, seen []string, depth int) (map[string]*ope
 		}
 
 		inherited, inheritedRequired := flatten(ref.Value, branchSeen, depth+1)
-		for name, p := range inherited {
-			props[name] = p
-		}
+		maps.Copy(props, inherited)
 		for name := range inheritedRequired {
 			required[name] = true
 		}
 	}
 
-	for name, p := range schema.Properties {
-		props[name] = p
-	}
+	maps.Copy(props, schema.Properties)
 	for _, name := range schema.Required {
 		required[name] = true
 	}
@@ -433,9 +421,7 @@ func coerce(v any, schema *openapi3.Schema) (any, bool) {
 // not a sample body.
 func placeholder(schema *openapi3.Schema) any {
 	switch kind(schema) {
-	case "integer":
-		return 1
-	case "number":
+	case "integer", "number":
 		return 1
 	case "boolean":
 		return false

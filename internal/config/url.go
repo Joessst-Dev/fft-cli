@@ -51,7 +51,7 @@ func NormalizeBaseURL(raw string) (string, error) {
 	switch u.Scheme {
 	case "https":
 	case "http":
-		if !isLoopback(u.Hostname()) {
+		if !IsLoopbackHost(u.Hostname()) {
 			return "", fmt.Errorf("the base URL %q uses http: fft would send your bearer token in the clear (http is allowed only for localhost)", raw)
 		}
 	default:
@@ -72,7 +72,10 @@ func NormalizeBaseURL(raw string) (string, error) {
 	return u.String(), nil
 }
 
-func isLoopback(host string) bool {
+// IsLoopbackHost reports whether host is this machine: "localhost" or a loopback
+// IP. It is the one host a credential may be sent to over plain http, since the
+// traffic never leaves the machine.
+func IsLoopbackHost(host string) bool {
 	if host == "localhost" {
 		return true
 	}

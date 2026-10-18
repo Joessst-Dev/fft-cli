@@ -15,6 +15,16 @@ import (
 // formInputWidth is how many cells a text row scrolls within: a base URL fits.
 const formInputWidth = 60
 
+// formInput is an empty text row of a form, formInputWidth cells wide.
+func formInput(st styles) textinput.Model {
+	in := textinput.New()
+	in.Prompt = ""
+	// Without a width, bubbles shows only a placeholder's first character.
+	in.SetWidth(formInputWidth)
+	in.SetStyles(st.input)
+	return in
+}
+
 // formField is one row of the add form.
 type formField struct {
 	label string
@@ -99,12 +109,8 @@ func newAddForm(st styles) *addForm {
 
 	f.fields = make([]*formField, rowCount)
 	text := func(label, placeholder string, kind fieldKind) *formField {
-		in := textinput.New()
-		in.Prompt = ""
+		in := formInput(st)
 		in.Placeholder = placeholder
-		// Without a width, bubbles shows only a placeholder's first character.
-		in.SetWidth(formInputWidth)
-		in.SetStyles(st.input)
 		if kind == fieldSecret {
 			in.EchoMode = textinput.EchoPassword
 			in.EchoCharacter = '•'
@@ -153,9 +159,8 @@ func (f *addForm) paste(msg tea.PasteMsg) tea.Cmd {
 	if field.kind != fieldText && field.kind != fieldSecret {
 		return nil
 	}
-	msg.Content = strings.TrimRight(msg.Content, "\r\n")
 	var cmd tea.Cmd
-	field.input, cmd = field.input.Update(msg)
+	field.input, cmd = field.input.Update(trimPaste(msg))
 	return cmd
 }
 

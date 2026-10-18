@@ -1,11 +1,13 @@
 package emulator
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"io"
+	"maps"
 	"net"
-	"sort"
+	"slices"
 	"strconv"
 	"time"
 
@@ -99,11 +101,7 @@ func New(cfg Config) (*Server, error) {
 		}
 	}
 
-	host := cfg.Host
-	if host == "" {
-		host = defaultHost
-	}
-
+	host := cmp.Or(cfg.Host, defaultHost)
 	return &Server{app: app, addr: net.JoinHostPort(host, strconv.Itoa(cfg.Port)), events: events}, nil
 }
 
@@ -135,19 +133,12 @@ type TargetStatus struct {
 func (s *Server) Eventing() []TargetStatus {
 	// The known three first, in their canonical order, then any target a transport
 	// registered that is not one of them — sorted, so the notice reads the same twice.
-	targets := append([]string(nil), knownTargets...)
-	seen := make(map[string]bool, len(targets))
-	for _, t := range targets {
-		seen[t] = true
-	}
-	extra := make([]string, 0)
-	for target := range s.events.transports {
-		if !seen[target] {
-			extra = append(extra, target)
+	targets := slices.Clone(knownTargets)
+	for _, target := range slices.Sorted(maps.Keys(s.events.transports)) {
+		if !slices.Contains(knownTargets, target) {
+			targets = append(targets, target)
 		}
 	}
-	sort.Strings(extra)
-	targets = append(targets, extra...)
 
 	out := make([]TargetStatus, 0, len(targets))
 	for _, target := range targets {

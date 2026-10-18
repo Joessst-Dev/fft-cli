@@ -37,11 +37,8 @@ type installPrompt struct {
 }
 
 func newInstallPrompt(st styles, initial string) *installPrompt {
-	in := textinput.New()
-	in.Prompt = ""
+	in := formInput(st)
 	in.Placeholder = "emulator, owner/repo@v1.2.3, or ./my-component"
-	in.SetWidth(formInputWidth)
-	in.SetStyles(st.input)
 	in.SetValue(initial)
 	in.Focus()
 	return &installPrompt{

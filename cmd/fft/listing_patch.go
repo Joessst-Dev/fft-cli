@@ -10,7 +10,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/Joessst-Dev/fft-cli/internal/client"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 )
 
@@ -87,8 +86,6 @@ func newListingPatchCmd(deps *Deps) *cobra.Command {
 			ctx, cancel := deps.Context(cmd)
 			defer cancel()
 
-			var raw []byte
-
 			// Only the version is wanted from the listing. The PATCH body carries the
 			// version and the actions, and nothing else — sending back the fields fft did
 			// not touch would turn a patch into a replace.
@@ -100,21 +97,6 @@ func newListingPatchCmd(deps *Deps) *cobra.Command {
 				return entityDoc{}, v, nil
 			}
 
-			put := func(ctx context.Context, doc entityDoc, v int) (entityDoc, error) {
-				doc["version"] = v
-
-				op := fmt.Sprintf("patch listing %s of facility %s", article, ref)
-				answer, err := sendEntity(ctx, c, op, doc,
-					func(ctx context.Context, body io.Reader) (*http.Response, error) {
-						return c.API().PatchFacilityListingWithBody(ctx, ref, article, contentTypeJSON, body)
-					})
-				if err != nil {
-					return nil, err
-				}
-				raw = answer
-				return nil, nil
-			}
-
 			// Re-applied to the *fresh* listing after a 409, which is the whole point of
 			// expressing the change as a function rather than as a prebuilt body.
 			apply := func(doc *entityDoc) error {
@@ -122,7 +104,12 @@ func newListingPatchCmd(deps *Deps) *cobra.Command {
 				return nil
 			}
 
-			if _, err := client.UpdateVersioned(ctx, get, put, apply, version.value()); err != nil {
+			op := fmt.Sprintf("patch listing %s of facility %s", article, ref)
+			raw, err := putVersioned(ctx, c, op, get, apply, version.value(),
+				func(ctx context.Context, body io.Reader) (*http.Response, error) {
+					return c.API().PatchFacilityListingWithBody(ctx, ref, article, contentTypeJSON, body)
+				})
+			if err != nil {
 				return err
 			}
 

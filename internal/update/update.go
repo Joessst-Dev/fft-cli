@@ -22,6 +22,7 @@ import (
 
 	"github.com/Joessst-Dev/fft-cli/internal/atomicfile"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
+	"github.com/Joessst-Dev/fft-cli/internal/xdg"
 )
 
 const (
@@ -156,7 +157,13 @@ func (c *Checker) Cached() (State, bool) {
 // asked, not what we learned.
 func (c *Checker) Claim() error {
 	prev, _ := c.Cached()
-	return c.save(State{CheckedAt: c.now(), LatestVersion: prev.LatestVersion, URL: prev.URL})
+	return c.save(c.restamp(prev))
+}
+
+// restamp is prev dated now: when fft last asked changes, what it last learned
+// does not.
+func (c *Checker) restamp(prev State) State {
+	return State{CheckedAt: c.now(), LatestVersion: prev.LatestVersion, URL: prev.URL}
 }
 
 // Refresh asks GitHub for the latest release, ignoring the cache's age, and
@@ -171,7 +178,7 @@ func (c *Checker) Refresh(ctx context.Context) (State, error) {
 
 	latest, err := c.fetch(ctx)
 	if err != nil {
-		stamped := State{CheckedAt: c.now(), LatestVersion: prev.LatestVersion, URL: prev.URL}
+		stamped := c.restamp(prev)
 		// The write's own error is beneath mention: the caller is already being told
 		// the check failed, and which of the two reasons it failed for changes
 		// nothing it could do.
@@ -179,10 +186,7 @@ func (c *Checker) Refresh(ctx context.Context) (State, error) {
 		return stamped, err
 	}
 
-	if err := c.save(latest); err != nil {
-		return latest, err
-	}
-	return latest, nil
+	return latest, c.save(latest)
 }
 
 // askOp names the thing that failed, in the words the user typed it: they asked
@@ -507,13 +511,5 @@ func canonical(v string) string {
 // DefaultCachePath is $XDG_CACHE_HOME/fft/update.json, falling back to
 // ~/.cache/fft/update.json.
 func DefaultCachePath() (string, error) {
-	if dir := os.Getenv("XDG_CACHE_HOME"); dir != "" {
-		return filepath.Join(dir, "fft", "update.json"), nil
-	}
-
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", fmt.Errorf("locate the home directory: %w", err)
-	}
-	return filepath.Join(home, ".cache", "fft", "update.json"), nil
+	return xdg.Cache().Path("update.json")
 }

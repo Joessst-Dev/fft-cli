@@ -178,18 +178,7 @@ func (e *componentReadOnlyError) Error() string {
 
 func (e *componentReadOnlyError) ExitCode() int { return exitcode.ReadOnly }
 
-func (e *componentReadOnlyError) Hint() string {
-	switch e.source {
-	case sourceEnv:
-		return fmt.Sprintf("Unset %s to allow writes.", config.EnvReadOnly)
-	case sourceFlag:
-		return "Drop --read-only to allow writes."
-	case sourceSession:
-		return "Restart fft tui without --read-only to allow writes."
-	default:
-		return fmt.Sprintf("Run 'fft project read-only %s --off' to allow writes.", e.project)
-	}
-}
+func (e *componentReadOnlyError) Hint() string { return readOnlyHint(e.source, e.project) }
 
 // guardOperation refuses op when the project, the environment or the session is
 // read-only.
@@ -316,8 +305,12 @@ func (e *readOnlyError) Error() string {
 
 func (e *readOnlyError) ExitCode() int { return exitcode.ReadOnly }
 
-func (e *readOnlyError) Hint() string {
-	switch e.source {
+func (e *readOnlyError) Hint() string { return readOnlyHint(e.source, e.project) }
+
+// readOnlyHint is the remedy for a refusal, which depends on what made the project
+// read-only rather than on what was refused.
+func readOnlyHint(source readOnlySource, project string) string {
+	switch source {
 	case sourceEnv:
 		return fmt.Sprintf("Unset %s to allow writes.", config.EnvReadOnly)
 	case sourceFlag:
@@ -325,6 +318,6 @@ func (e *readOnlyError) Hint() string {
 	case sourceSession:
 		return "Restart fft tui without --read-only to allow writes."
 	default:
-		return fmt.Sprintf("Run 'fft project read-only %s --off' to allow writes.", e.project)
+		return fmt.Sprintf("Run 'fft project read-only %s --off' to allow writes.", project)
 	}
 }

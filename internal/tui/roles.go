@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"cmp"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -163,12 +164,12 @@ func (r *rolesScreen) load(background bool) tea.Cmd {
 		if err := json.Unmarshal(res.Stdout, &me); err != nil {
 			r.failure = &failure{
 				what:   "reading your roles",
-				result: Result{ExitCode: exitcode.General, Stderr: []byte(err.Error())},
+				result: errorResult(err),
 			}
 			return nil
 		}
 		r.me = &me
-		r.project = firstNonEmpty(res.Project, target, asked.project)
+		r.project = cmp.Or(res.Project, target, asked.project)
 		r.s.grants = newGrants(r.project, me.Roles)
 		for _, op := range r.ops {
 			if r.s.grants.check(op) == accessLacking {
@@ -250,8 +251,8 @@ func (r *rolesScreen) view(width, height int) string {
 
 	top := strings.Join(head, "\n")
 	room := max(height-lipgloss.Height(top), 1)
-	r.scroll = min(r.scroll, max(len(body)-room, 0))
-	shown := body[r.scroll:min(r.scroll+room, len(body))]
+	shown, scroll := window(body, r.scroll, room)
+	r.scroll = scroll
 	return strings.Join(append([]string{top}, shown...), "\n")
 }
 

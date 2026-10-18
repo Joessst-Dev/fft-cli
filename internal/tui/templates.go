@@ -166,11 +166,8 @@ func (o *openTemplate) moved() bool {
 }
 
 func (o *openTemplate) selected() *paramField {
-	if len(o.params) == 0 {
-		return nil
-	}
-	o.cursor = min(max(o.cursor, 0), len(o.params)-1)
-	return o.params[o.cursor]
+	f, _ := pick(o.params, &o.cursor)
+	return f
 }
 
 type templateKeys struct {
@@ -259,19 +256,11 @@ type templatesScreen struct {
 }
 
 func newTemplatesScreen(s *session, st styles, nav navigator, cat Catalog) *templatesScreen {
-	t := &templatesScreen{
+	return &templatesScreen{
 		s: s, st: st, nav: nav, keys: newTemplateKeys(),
-		ops:    make(map[string]Operation),
+		ops:    operationsByID(cat),
 		values: make(map[templateKey]map[string]string),
 	}
-	if cat != nil {
-		for _, g := range cat.Groups() {
-			for _, op := range g.Operations {
-				t.ops[op.ID] = op
-			}
-		}
-	}
-	return t
 }
 
 func (t *templatesScreen) focused() bool {
@@ -294,11 +283,7 @@ func (t *templatesScreen) changed() {
 }
 
 func (t *templatesScreen) selected() (templateRow, bool) {
-	if len(t.rows) == 0 {
-		return templateRow{}, false
-	}
-	t.cursor = min(max(t.cursor, 0), len(t.rows)-1)
-	return t.rows[t.cursor], true
+	return pick(t.rows, &t.cursor)
 }
 
 func (t *templatesScreen) say(notice string) {
@@ -325,7 +310,7 @@ func (t *templatesScreen) reload() tea.Cmd {
 		}
 		var rows []templateRow
 		if err := json.Unmarshal(r.Stdout, &rows); err != nil {
-			t.fail("reading the template list", Result{ExitCode: exitcode.General, Stderr: []byte(err.Error())})
+			t.fail("reading the template list", errorResult(err))
 			return nil
 		}
 		// The selection follows the template, not the row: a template saved since
@@ -349,12 +334,8 @@ func (t *templatesScreen) reload() tea.Cmd {
 }
 
 func (t *templatesScreen) update(msg tea.Msg) tea.Cmd {
-	if d := t.dialog; d != nil {
-		finished, cmd := d.update(msg)
-		if finished && t.dialog == d {
-			t.dialog = nil
-		}
-		return cmd
+	if t.dialog != nil {
+		return updateDialog(&t.dialog, msg)
 	}
 	if o := t.open; o != nil && o.editing {
 		return t.editKey(o, msg)
@@ -473,11 +454,8 @@ func (t *templatesScreen) editKey(o *openTemplate, msg tea.Msg) tea.Cmd {
 			return next.input.Focus()
 		}
 	}
-	if paste, isPaste := msg.(tea.PasteMsg); isPaste {
-		// A copied value brings its line break along, which no parameter wants.
-		paste.Content = strings.TrimRight(paste.Content, "\r\n")
-		msg = paste
-	}
+	// A copied value brings its line break along, which no parameter wants.
+	msg = trimPaste(msg)
 	var cmd tea.Cmd
 	f.input, cmd = f.input.Update(msg)
 	return cmd
@@ -518,7 +496,7 @@ func (t *templatesScreen) openRow(row templateRow, next func(*openTemplate) tea.
 	o := &openTemplate{row: row}
 	t.open = o
 	t.say("")
-	args := templateArgs("show", row.Name)
+	args := nounArgs("template", "show", row.Name)
 	return t.s.start(action{inv: Invocation{Args: args}, display: commandLine(args)}, func(r Result) tea.Cmd {
 		if gen != t.openGen {
 			return nil
@@ -533,7 +511,7 @@ func (t *templatesScreen) openRow(row templateRow, next func(*openTemplate) tea.
 			err = json.Unmarshal(r.Stdout, &doc)
 		}
 		if err != nil {
-			t.fail("reading "+row.Name, Result{ExitCode: exitcode.General, Stderr: []byte(err.Error())})
+			t.fail("reading "+row.Name, errorResult(err))
 			return nil
 		}
 		o.digest = digest
@@ -579,10 +557,7 @@ func (t *templatesScreen) setDoc(o *openTemplate, doc *templateDoc) {
 	o.params = make([]*paramField, 0, len(names))
 	for _, name := range names {
 		spec := doc.Params[name]
-		in := textinput.New()
-		in.Prompt = ""
-		in.SetWidth(formInputWidth)
-		in.SetStyles(t.st.input)
+		in := formInput(t.st)
 		in.Placeholder = paramPlaceholder(spec)
 		in.SetValue(kept[name])
 		o.params = append(o.params, &paramField{name: name, spec: spec, input: in, asString: takesString(spec, body)})
@@ -633,19 +608,7 @@ func (o *openTemplate) renderArgs(digest string) []string {
 	if digest != "" {
 		flags = append(flags, "--if-digest", digest)
 	}
-	return templateArgs("render", o.row.Name, flags...)
-}
-
-// templateArgs is `fft template <verb> <name> <flags>`. fft refuses a template
-// name that starts with a dash, but the name comes out of a directory listing,
-// so one that slipped past that rule goes last, after "--", where it is only a
-// name and never a flag.
-func templateArgs(verb, name string, flags ...string) []string {
-	args := []string{"template", verb}
-	if strings.HasPrefix(name, "-") {
-		return append(append(append(args, flags...), "--"), name)
-	}
-	return append(append(args, name), flags...)
+	return nounArgs("template", "render", o.row.Name, flags...)
 }
 
 // ready says whether o can be rendered, and opens its parameters when it cannot.
@@ -655,10 +618,8 @@ func (t *templatesScreen) ready(o *openTemplate) bool {
 		return true
 	}
 	o.form = true
-	for i, f := range o.params {
-		if f.name == missing[0] {
-			o.cursor = i
-		}
+	if i := slices.IndexFunc(o.params, func(f *paramField) bool { return f.name == missing[0] }); i >= 0 {
+		o.cursor = i
 	}
 	t.say("Give a value for " + strings.Join(missing, ", ") + " first: the template requires it.")
 	return false
@@ -825,7 +786,7 @@ func (t *templatesScreen) remove(row templateRow) tea.Cmd {
 	if row.Scope == projectScope {
 		flags = append(flags, "--local")
 	}
-	args := templateArgs("remove", row.Name, flags...)
+	args := nounArgs("template", "remove", row.Name, flags...)
 	t.say("Removing " + row.Name + "…")
 	var id RunID
 	id, cmd := t.s.launch(action{inv: Invocation{Args: args}, display: commandLine(args)}, func(r Result) tea.Cmd {
@@ -925,7 +886,7 @@ func (t *templatesScreen) equivalent() shellCommand {
 	o := t.open
 	if o == nil {
 		if row, ok := t.selected(); ok {
-			return commandLine(templateArgs("show", row.Name))
+			return commandLine(nounArgs("template", "show", row.Name))
 		}
 		return commandLine([]string{"template", "list"})
 	}
@@ -992,34 +953,7 @@ func (t *templatesScreen) table(width int) []string {
 		})
 	}
 
-	widths := make([]int, len(templateColumns))
-	for _, row := range cells {
-		for i, c := range row {
-			widths[i] = max(widths[i], ansi.StringWidth(c))
-		}
-	}
-
-	lines := make([]string, 0, len(cells))
-	for i, row := range cells {
-		var b strings.Builder
-		for j, c := range row {
-			b.WriteString(c)
-			if j < len(row)-1 {
-				b.WriteString(strings.Repeat(" ", widths[j]-ansi.StringWidth(c)+2))
-			}
-		}
-		line := b.String()
-		switch {
-		case i == 0:
-			line = t.st.dim.Render("  " + line)
-		case i-1 == t.cursor:
-			line = t.st.selected.Render("> " + line)
-		default:
-			line = "  " + line
-		}
-		lines = append(lines, clip(line, width))
-	}
-	return lines
+	return tableRows(t.st, cells, t.cursor, width)
 }
 
 // detail is o as the screen shows it: what the template is for, what it sends, its
@@ -1087,10 +1021,9 @@ func (t *templatesScreen) detail(o *openTemplate, width, height int) string {
 	// Counted as drawn: a wrapped description or notice is several rows.
 	top := strings.Join(head, "\n")
 	room := max(height-lipgloss.Height(top), 1)
-	lines := o.lines
-	first := min(o.scroll, max(len(lines)-room, 0))
+	visible, _ := window(o.lines, o.scroll, room)
 	shown := make([]string, 0, room)
-	for _, line := range lines[first:min(first+room, len(lines))] {
+	for _, line := range visible {
 		shown = append(shown, clip(line, width))
 	}
 	return strings.Join(append([]string{top}, shown...), "\n")

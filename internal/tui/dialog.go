@@ -28,6 +28,17 @@ type dialog interface {
 	equivalent() shellCommand
 }
 
+// updateDialog hands msg to the dialog in slot and closes it once it is answered.
+// An answer may have opened the next question; only this one is closed.
+func updateDialog(slot *dialog, msg tea.Msg) tea.Cmd {
+	d := *slot
+	finished, cmd := d.update(msg)
+	if finished && *slot == d {
+		*slot = nil
+	}
+	return cmd
+}
+
 var (
 	yesKey    = key.NewBinding(key.WithKeys("y", "Y"), key.WithHelp("y", "yes"))
 	noKey     = key.NewBinding(key.WithKeys("n", "N", "esc", "enter"), key.WithHelp("n/esc", "no"))
@@ -122,13 +133,7 @@ func (d *confirmDialog) update(msg tea.Msg) (bool, tea.Cmd) {
 }
 
 func (d *confirmDialog) view(st styles, width, height int) string {
-	top := []string{st.title.Render(output.SanitizeCell(d.question))}
-	for _, note := range d.notes {
-		top = append(top, st.warnText.Render(output.SanitizeCell(note)))
-	}
-	if d.detail != "" {
-		top = append(top, output.SanitizeCell(d.detail))
-	}
+	top := dialogTop(st, d.question, d.notes, d.detail)
 	var bottom []string
 	if !d.command.empty() {
 		bottom = append(bottom, "", st.dim.Render("runs: "+output.SanitizeCell(d.command.String())))
@@ -200,14 +205,7 @@ func (d *typeNameDialog) update(msg tea.Msg) (bool, tea.Cmd) {
 }
 
 func (d *typeNameDialog) view(st styles, width, height int) string {
-	// A project name comes from the config file, which may have been edited by hand.
-	top := []string{st.title.Render(output.SanitizeCell(d.question))}
-	for _, note := range d.notes {
-		top = append(top, st.warnText.Render(output.SanitizeCell(note)))
-	}
-	if d.detail != "" {
-		top = append(top, output.SanitizeCell(d.detail))
-	}
+	top := dialogTop(st, d.question, d.notes, d.detail)
 	bottom := []string{"", "Type " + output.SanitizeCell(d.name) + " to confirm.", d.input.View()}
 	if d.mismatch {
 		what := d.what
@@ -223,6 +221,20 @@ func (d *typeNameDialog) view(st styles, width, height int) string {
 func (d *typeNameDialog) bindings() []key.Binding { return []key.Binding{submitKey, cancelKey} }
 
 func (d *typeNameDialog) equivalent() shellCommand { return d.command }
+
+// dialogTop is the lines a question opens with: the question, the notes it is
+// about, and its detail. A question can name a project, and a project name comes
+// from the config file, which may have been edited by hand.
+func dialogTop(st styles, question string, notes []string, detail string) []string {
+	top := []string{st.title.Render(output.SanitizeCell(question))}
+	for _, note := range notes {
+		top = append(top, st.warnText.Render(output.SanitizeCell(note)))
+	}
+	if detail != "" {
+		top = append(top, output.SanitizeCell(detail))
+	}
+	return top
+}
 
 // framed draws a dialog's lines in its box, with the start of the body it is
 // about between top and bottom: as many lines of it as keep the whole dialog

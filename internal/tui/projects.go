@@ -134,21 +134,12 @@ func (p *projectsScreen) init() tea.Cmd {
 func (p *projectsScreen) focused() bool { return p.dialog != nil || p.form != nil }
 
 func (p *projectsScreen) selected() (projectRow, bool) {
-	if len(p.rows) == 0 {
-		return projectRow{}, false
-	}
-	p.cursor = min(max(p.cursor, 0), len(p.rows)-1)
-	return p.rows[p.cursor], true
+	return pick(p.rows, &p.cursor)
 }
 
 func (p *projectsScreen) update(msg tea.Msg) tea.Cmd {
-	if d := p.dialog; d != nil {
-		finished, cmd := d.update(msg)
-		// An answer may have opened the next question; only this one is closed.
-		if finished && p.dialog == d {
-			p.dialog = nil
-		}
-		return cmd
+	if p.dialog != nil {
+		return updateDialog(&p.dialog, msg)
 	}
 	if p.form != nil {
 		switch ev, cmd := p.form.update(msg); ev {
@@ -295,7 +286,7 @@ func (p *projectsScreen) reload() tea.Cmd {
 		}
 		var rows []projectRow
 		if err := json.Unmarshal(r.Stdout, &rows); err != nil {
-			p.fail("reading the project list", Result{ExitCode: exitcode.General, Stderr: []byte(err.Error())})
+			p.fail("reading the project list", errorResult(err))
 			return nil
 		}
 		p.setRows(rows)
@@ -398,7 +389,7 @@ func (p *projectsScreen) refreshStatus(startup bool) tea.Cmd {
 		}
 		var st authStatus
 		if err := json.Unmarshal(r.Stdout, &st); err != nil {
-			p.fail("reading the credential state", Result{ExitCode: exitcode.General, Stderr: []byte(err.Error())})
+			p.fail("reading the credential state", errorResult(err))
 			return nil
 		}
 		if cur := p.s.currentProject(); cur != "" && st.Project != cur {
@@ -448,21 +439,8 @@ func (p *projectsScreen) warmUp() tea.Cmd {
 	})
 }
 
-// projectArgs is `fft project <verb> <name> <flags>`. A project name comes out
-// of the config file, not user typing, so one starting with a dash (fft refuses
-// to create such a project, but an older fft or a hand-edited config may have
-// one) goes last, after "--", where it is only a name and never a flag — the
-// same guard templateArgs uses for template names.
-func projectArgs(verb, name string, flags ...string) []string {
-	args := []string{"project", verb}
-	if strings.HasPrefix(name, "-") {
-		return append(append(append(args, flags...), "--"), name)
-	}
-	return append(append(args, name), flags...)
-}
-
 func (p *projectsScreen) useAction(name string) action {
-	args := projectArgs("use", name)
+	args := nounArgs("project", "use", name)
 	return action{inv: Invocation{Args: args, Exclusive: true}, display: commandLine(args)}
 }
 
@@ -498,7 +476,7 @@ func (p *projectsScreen) readOnlyDialog(row projectRow) dialog {
 	if row.ReadOnly {
 		return p.allowWritesDialog(row)
 	}
-	args := projectArgs("read-only", row.Name)
+	args := nounArgs("project", "read-only", row.Name)
 	a := action{inv: Invocation{Args: args, Exclusive: true}, display: commandLine(args)}
 	return &confirmDialog{
 		question: fmt.Sprintf("Make %s read-only?", row.Name),
@@ -515,7 +493,7 @@ func (p *projectsScreen) readOnlyDialog(row projectRow) dialog {
 func (p *projectsScreen) allowWritesDialog(row projectRow) dialog {
 	// The command asks before re-arming writes, and a run has no terminal to ask
 	// on. This dialog is that question, so its answer is the --yes.
-	args := projectArgs("read-only", row.Name, "--off", "--yes")
+	args := nounArgs("project", "read-only", row.Name, "--off", "--yes")
 	a := action{inv: Invocation{Args: args, Exclusive: true}, display: commandLine(args)}
 	question := fmt.Sprintf("Allow writes to %s again?", row.Name)
 	detail := "fft will send creates, updates and deletes to it again."
@@ -544,7 +522,7 @@ func (p *projectsScreen) startReadOnly(a action, name, done string) tea.Cmd {
 }
 
 func (p *projectsScreen) removeDialog(row projectRow) dialog {
-	args := projectArgs("remove", row.Name, "--yes")
+	args := nounArgs("project", "remove", row.Name, "--yes")
 	a := action{inv: Invocation{Args: args, Exclusive: true}, display: commandLine(args)}
 	question := fmt.Sprintf("Remove %s and its stored credentials?", row.Name)
 	return newTypeNameDialog(p.st, question, "", row.Name, a.display, func() tea.Cmd {
@@ -595,74 +573,81 @@ func (p *projectsScreen) submitForm() tea.Cmd {
 	// it is in flight.
 	asked := p.s.selections
 	return p.s.start(a, func(r Result) tea.Cmd {
-		form.submitting = false
-		if r.ExitCode != exitcode.OK {
-			form.failure = &failure{what: "adding " + name, result: r}
-			return nil
-		}
-		// Only the form that was submitted may be answered with a question. One the
-		// user has since closed, or replaced with another, has left the screen, and a
-		// question asked in its place would take the keys of whatever came next.
-		stillOpen := p.form == form
-		if stillOpen {
-			p.form = nil
-		}
+		return p.addFinished(form, name, asked, r)
+	})
+}
 
-		var added projectRow
-		// The table's summary is enough if the document cannot be read: the command
-		// has already succeeded, and the list is about to be reloaded.
-		_ = json.Unmarshal(r.Stdout, &added)
+// addFinished takes r, the result of adding name from form. asked is how many
+// choices of a project the user had made when it was submitted: one made since
+// wins over the active project fft chose.
+func (p *projectsScreen) addFinished(form *addForm, name string, asked uint64, r Result) tea.Cmd {
+	form.submitting = false
+	if r.ExitCode != exitcode.OK {
+		form.failure = &failure{what: "adding " + name, result: r}
+		return nil
+	}
+	// Only the form that was submitted may be answered with a question. One the
+	// user has since closed, or replaced with another, has left the screen, and a
+	// question asked in its place would take the keys of whatever came next.
+	stillOpen := p.form == form
+	if stillOpen {
+		p.form = nil
+	}
 
-		if added.Active && p.s.project == "" && p.s.selections == asked && !p.s.usingEmulator() {
-			// fft made it the active project, and the UI follows fft's choice — unless
-			// the user has since chosen something else, or is working against the
-			// emulator, in which case following it now would silently move the session
-			// onto a tenant. Adding a project is not a request to leave the emulator,
-			// and a first run with nothing configured is exactly when both happen at
-			// once; the switch is offered below instead of made here.
-			p.succeed("Added " + name + "; it is now the active project.")
-			p.selectProject(name)
-			return tea.Batch(p.reload(), p.warmUp())
-		}
+	var added projectRow
+	// The table's summary is enough if the document cannot be read: the command
+	// has already succeeded, and the list is about to be reloaded.
+	_ = json.Unmarshal(r.Stdout, &added)
 
-		if name == p.s.currentProject() {
-			// A --force add under the name in use: the UI stays on it, but it may now
-			// sign in as someone else, whose roles and token are not the old ones.
-			p.s.forgetCurrent()
-			p.succeed("Replaced " + name + ".")
-			return tea.Batch(p.reload(), p.warmUp())
-		}
+	if added.Active && p.s.project == "" && p.s.selections == asked && !p.s.usingEmulator() {
+		// fft made it the active project, and the UI follows fft's choice — unless
+		// the user has since chosen something else, or is working against the
+		// emulator, in which case following it now would silently move the session
+		// onto a tenant. Adding a project is not a request to leave the emulator,
+		// and a first run with nothing configured is exactly when both happen at
+		// once; the switch is offered below instead of made here.
+		p.succeed("Added " + name + "; it is now the active project.")
+		p.selectProject(name)
+		return tea.Batch(p.reload(), p.warmUp())
+	}
 
-		if p.s.usingEmulator() {
-			// Said plainly, because fft may well have made it active and the table is
-			// about to mark it so while the session goes on reaching the emulator.
-			p.succeed("Added " + name + ", but this session is still using the emulator.")
-			if !stillOpen {
-				return p.reload()
-			}
-			p.dialog = armed(&confirmDialog{
-				question: fmt.Sprintf("Switch to %s now?", name),
-				detail:   "This session stops using the emulator, which goes on running.",
-				command:  p.useAction(name).display,
-				onYes:    func() tea.Cmd { return p.use(name) },
-			}, p.s.now, true)
-			return p.reload()
-		}
+	if name == p.s.currentProject() {
+		// A --force add under the name in use: the UI stays on it, but it may now
+		// sign in as someone else, whose roles and token are not the old ones.
+		p.s.forgetCurrent()
+		p.succeed("Replaced " + name + ".")
+		return tea.Batch(p.reload(), p.warmUp())
+	}
 
+	if p.s.usingEmulator() {
+		// Said plainly, because fft may well have made it active and the table is
+		// about to mark it so while the session goes on reaching the emulator.
+		p.succeed("Added " + name + ", but this session is still using the emulator.")
 		if !stillOpen {
-			p.succeed("Added " + name + ". Select it and press enter to switch to it.")
 			return p.reload()
 		}
-		p.succeed("Added " + name + ".")
-		// The form was still open, so the question is in front of the user now, and
-		// may meet a key meant for the form.
 		p.dialog = armed(&confirmDialog{
 			question: fmt.Sprintf("Switch to %s now?", name),
+			detail:   "This session stops using the emulator, which goes on running.",
 			command:  p.useAction(name).display,
 			onYes:    func() tea.Cmd { return p.use(name) },
 		}, p.s.now, true)
 		return p.reload()
-	})
+	}
+
+	if !stillOpen {
+		p.succeed("Added " + name + ". Select it and press enter to switch to it.")
+		return p.reload()
+	}
+	p.succeed("Added " + name + ".")
+	// The form was still open, so the question is in front of the user now, and
+	// may meet a key meant for the form.
+	p.dialog = armed(&confirmDialog{
+		question: fmt.Sprintf("Switch to %s now?", name),
+		command:  p.useAction(name).display,
+		onYes:    func() tea.Cmd { return p.use(name) },
+	}, p.s.now, true)
+	return p.reload()
 }
 
 func (p *projectsScreen) bindings() []key.Binding {
@@ -857,12 +842,4 @@ func (p *projectsScreen) table(width int) []string {
 		lines = append(lines, clip(line, width))
 	}
 	return lines
-}
-
-// wrap breaks s to width cells, and leaves it alone while the width is unknown.
-func wrap(s string, width int) string {
-	if width <= 0 {
-		return s
-	}
-	return ansi.Wrap(s, width, "")
 }

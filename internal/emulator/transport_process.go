@@ -220,7 +220,8 @@ func (t *processTransport) plan(target map[string]any) (delivery, error) {
 	}, nil
 }
 
-// status reports where this transport delivers, for the startup notice.
+// describe reports where this transport delivers, for the startup notice: the
+// status the child gave at the handshake.
 func (t *processTransport) describe() string { return t.status }
 
 // do sends one request and reads its response, bounded by the transport's own
@@ -299,7 +300,7 @@ func (t *processTransport) fail(cause error) {
 	if t.closed.Swap(true) {
 		return
 	}
-	fmt.Fprintf(orDiscard(t.log), "emulator: the %s transport stopped speaking the protocol (%v); it will deliver nothing more\n",
+	logf(t.log, "emulator: the %s transport stopped speaking the protocol (%v); it will deliver nothing more",
 		t.name, cause)
 	t.kill()
 	_ = t.in.Close()
@@ -395,11 +396,4 @@ func (p *linePrefixer) flush() {
 		fmt.Fprintf(p.w, "%s%s\n", p.prefix, p.buf)
 		p.buf = p.buf[:0]
 	}
-}
-
-func orDiscard(w io.Writer) io.Writer {
-	if w == nil {
-		return io.Discard
-	}
-	return w
 }

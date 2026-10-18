@@ -84,7 +84,8 @@ func newListingCmd(deps *Deps) *cobra.Command {
 	return cmd
 }
 
-// facilityFlag is --facility, which every per-facility listing command needs.
+// requireFacility checks --facility, which every per-facility listing command
+// needs.
 //
 // The value is passed through [client.FacilityRef], so a tenantFacilityId is
 // wrapped as urn:fft:facility:tenantFacilityId:<id> — the form every facility
@@ -126,17 +127,7 @@ func getListingDoc(ctx context.Context, c *client.Client, facility, tenantArticl
 	if err != nil {
 		return nil, 0, err
 	}
-
-	doc, err := decodeDoc(raw, "the listing")
-	if err != nil {
-		return nil, 0, err
-	}
-
-	version, err := docVersion(doc, "listing")
-	if err != nil {
-		return nil, 0, err
-	}
-	return doc, version, nil
+	return decodeVersioned(raw, "listing")
 }
 
 // listingView is the table's model of a listing: what a human scanning a catalog
@@ -160,24 +151,16 @@ var listingHeaders = []string{"TENANT ARTICLE ID", "FACILITY", "TITLE", "STATUS"
 // listingRows renders the catalog table. A listing fft cannot parse is a bug
 // worth reporting, not a row worth skipping.
 func listingRows(style output.Style, items []json.RawMessage) (output.Rows, error) {
-	rows := make([][]string, 0, len(items))
-
-	for i, item := range items {
-		var v listingView
-		if err := json.Unmarshal(item, &v); err != nil {
-			return output.Rows{}, fmt.Errorf("decode listing %d of %d: %w", i+1, len(items), err)
-		}
-
-		rows = append(rows, []string{
+	return viewRows(items, "listing", listingHeaders, func(v listingView) []string {
+		return []string{
 			field(style, v.TenantArticleID),
 			field(style, v.FacilityID),
 			field(style, v.Title),
 			listingStatusCell(style, v.Status),
 			priceCell(style, v.Price),
 			fmt.Sprintf("%d", v.Version),
-		})
-	}
-	return output.Rows{Headers: listingHeaders, Rows: rows}, nil
+		}
+	})
 }
 
 // listingStatusCell colours the column a reader scans for: an INACTIVE listing is

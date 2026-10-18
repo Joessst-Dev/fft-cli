@@ -8,7 +8,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/Joessst-Dev/fft-cli/internal/client"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 )
 
@@ -70,14 +69,9 @@ func newStockUpdateCmd(deps *Deps) *cobra.Command {
 				return err
 			}
 
-			raw, err := readBody(deps, file)
+			body, err := readDoc(deps, file)
 			if err != nil {
 				return err
-			}
-
-			body, err := decodeDoc(raw, file)
-			if err != nil {
-				return exitcode.UsageError{Err: err}
 			}
 
 			id := args[0]
@@ -104,38 +98,18 @@ func newStockUpdateCmd(deps *Deps) *cobra.Command {
 			ctx, cancel := deps.Context(cmd)
 			defer cancel()
 
-			// The raw answer is captured on the way past, because UpdateVersioned is
-			// generic over the decoded entity and -o json must print the bytes the API
-			// sent, not fft's re-encoding of them.
-			var answer []byte
-
 			get := func(ctx context.Context) (entityDoc, int, error) {
 				return getStockDoc(ctx, c, id)
-			}
-
-			put := func(ctx context.Context, doc entityDoc, v int) (entityDoc, error) {
-				doc["version"] = v
-
-				sent, err := sendEntity(ctx, c, "update stock "+id, doc,
-					func(ctx context.Context, body io.Reader) (*http.Response, error) {
-						return c.API().UpdateStockWithBody(ctx, id, contentTypeJSON, body)
-					})
-				if err != nil {
-					return nil, err
-				}
-				answer = sent
-				return nil, nil
 			}
 
 			// The mutation is a replacement: whatever was read, the file wins. That is
 			// what makes this a PUT — and it is why, with --if-version, the file has to be
 			// the *whole* stock: there is no read for it to be merged into.
-			replace := func(doc *entityDoc) error {
-				*doc = body
-				return nil
-			}
-
-			if _, err := client.UpdateVersioned(ctx, get, put, replace, version.value()); err != nil {
+			answer, err := putVersioned(ctx, c, "update stock "+id, get, replaceWith(body), version.value(),
+				func(ctx context.Context, body io.Reader) (*http.Response, error) {
+					return c.API().UpdateStockWithBody(ctx, id, contentTypeJSON, body)
+				})
+			if err != nil {
 				return err
 			}
 

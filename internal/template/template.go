@@ -17,6 +17,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 
@@ -278,9 +279,9 @@ func Render(t *Template, sets []Set) ([]byte, error) {
 		if p.Default == nil {
 			continue
 		}
-		path, err := ParsePath(p.Path)
+		path, err := paramPath(name, p)
 		if err != nil {
-			return nil, fmt.Errorf("parameter %q declares an unusable path: %w", name, err)
+			return nil, err
 		}
 		if given[path.String()] {
 			continue
@@ -313,13 +314,19 @@ func Render(t *Template, sets []Set) ([]byte, error) {
 // exactly one answer and needs no precedence rule at the point of use.
 func (t *Template) resolve(key string) (Path, error) {
 	if p, ok := t.Params[key]; ok {
-		path, err := ParsePath(p.Path)
-		if err != nil {
-			return nil, fmt.Errorf("parameter %q declares an unusable path: %w", key, err)
-		}
-		return path, nil
+		return paramPath(key, p)
 	}
 	return ParsePath(key)
+}
+
+// paramPath is the path parameter name writes to. A path that does not parse is a
+// fault in the template file, so the error names the parameter to look for there.
+func paramPath(name string, p Param) (Path, error) {
+	path, err := ParsePath(p.Path)
+	if err != nil {
+		return nil, fmt.Errorf("parameter %q declares an unusable path: %w", name, err)
+	}
+	return path, nil
 }
 
 // Missing lists the required parameters nobody supplied.
@@ -338,9 +345,9 @@ func Missing(t *Template, given map[string]bool) ([]string, error) {
 		if !p.Required || p.Default != nil {
 			continue
 		}
-		path, err := ParsePath(p.Path)
+		path, err := paramPath(name, p)
 		if err != nil {
-			return nil, fmt.Errorf("parameter %q declares an unusable path: %w", name, err)
+			return nil, err
 		}
 		if !given[path.String()] {
 			out = append(out, name)
@@ -352,12 +359,7 @@ func Missing(t *Template, given map[string]bool) ([]string, error) {
 // sortedParams names the declared parameters in a stable order, so that two runs
 // of the same command produce the same output and the same error message.
 func sortedParams(t *Template) []string {
-	names := make([]string, 0, len(t.Params))
-	for name := range t.Params {
-		names = append(names, name)
-	}
-	slices.Sort(names)
-	return names
+	return slices.Sorted(maps.Keys(t.Params))
 }
 
 // MissingParamsError is a template that cannot be rendered until the user says

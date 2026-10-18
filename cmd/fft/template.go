@@ -242,9 +242,5 @@ func templateScopeHint(store *template.Store, name string, want template.Scope) 
 
 // quotedNames renders a list of names for a message.
 func quotedNames(names []string) string {
-	out := make([]string, len(names))
-	for i, n := range names {
-		out[i] = fmt.Sprintf("%q", n)
-	}
-	return strings.Join(out, ", ")
+	return strings.Join(quoted(names), ", ")
 }

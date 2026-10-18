@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/Joessst-Dev/fft-cli/internal/atomicfile"
+	"github.com/Joessst-Dev/fft-cli/internal/xdg"
 )
 
 // fileStore keeps secrets in a 0600 JSON file. It is the fallback for machines
@@ -70,15 +71,7 @@ func NewFile(path string, opts ...Option) Store {
 // unavailable: $XDG_STATE_HOME/fft/credentials.json, or ~/.local/state/fft/
 // credentials.json when XDG_STATE_HOME is unset.
 func DefaultFilePath() (string, error) {
-	if dir := os.Getenv("XDG_STATE_HOME"); dir != "" {
-		return filepath.Join(dir, "fft", "credentials.json"), nil
-	}
-
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", fmt.Errorf("locate the home directory: %w", err)
-	}
-	return filepath.Join(home, ".local", "state", "fft", "credentials.json"), nil
+	return xdg.State().Path("credentials.json")
 }
 
 func (*fileStore) Kind() string { return "file" }

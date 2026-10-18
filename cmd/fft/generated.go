@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"sort"
+	"maps"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -80,16 +81,11 @@ func addGeneratedCommands(deps *Deps, root *cobra.Command) {
 		if claimed[op.ID] {
 			continue
 		}
-		byGroup[groupFor(op)] = append(byGroup[groupFor(op)], op)
+		group := groupFor(op)
+		byGroup[group] = append(byGroup[group], op)
 	}
 
-	groups := make([]string, 0, len(byGroup))
-	for name := range byGroup {
-		groups = append(groups, name)
-	}
-	sort.Strings(groups)
-
-	for _, name := range groups {
+	for _, name := range slices.Sorted(maps.Keys(byGroup)) {
 		parent := resourceGroup(root, name)
 
 		for _, op := range byGroup[name] {
@@ -188,9 +184,7 @@ func groupFor(op api.Operation) string {
 		return "other"
 	}
 
-	if i := strings.Index(tag, "("); i >= 0 {
-		tag = tag[:i]
-	}
+	tag, _, _ = strings.Cut(tag, "(")
 
 	name := kebab(strings.TrimSpace(tag))
 	if name == "" {
@@ -421,9 +415,7 @@ func (f *opFlag) values(fs *pflag.FlagSet) []string {
 // set of names something else already owns; see [reservedFlags].
 func registerParamFlags(cmd *cobra.Command, op api.Operation, reserved map[string]bool) []*opFlag {
 	taken := make(map[string]bool, len(reserved)+len(op.Params))
-	for name := range reserved {
-		taken[name] = true
-	}
+	maps.Copy(taken, reserved)
 
 	out := make([]*opFlag, 0, len(op.Params))
 	fs := cmd.Flags()

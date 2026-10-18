@@ -6,9 +6,6 @@ import (
 	"net/http"
 
 	"github.com/spf13/cobra"
-
-	"github.com/Joessst-Dev/fft-cli/internal/client"
-	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 )
 
 const routingStrategyUpdateLong = `Replace a routing strategy with the contents of a JSON file.
@@ -53,13 +50,9 @@ func newRoutingStrategyUpdateCmd(deps *Deps) *cobra.Command {
 				return err
 			}
 
-			raw, err := readBody(deps, file)
+			body, err := readDoc(deps, file)
 			if err != nil {
 				return err
-			}
-			body, err := decodeDoc(raw, file)
-			if err != nil {
-				return exitcode.UsageError{Err: err}
 			}
 
 			c, err := tenantClient(deps)
@@ -71,35 +64,19 @@ func newRoutingStrategyUpdateCmd(deps *Deps) *cobra.Command {
 			defer cancel()
 
 			id := args[0]
-			var answer []byte
 
 			get := func(ctx context.Context) (entityDoc, int, error) {
 				return getStrategyDoc(ctx, c, id)
 			}
 
-			put := func(ctx context.Context, doc entityDoc, v int) (entityDoc, error) {
-				doc["version"] = v
-
-				sent, err := sendEntity(ctx, c, "update routing strategy "+id, doc,
-					func(ctx context.Context, body io.Reader) (*http.Response, error) {
-						return c.API().PutRoutingStrategyWithBody(ctx, id, contentTypeJSON, body)
-					})
-				if err != nil {
-					return nil, err
-				}
-				answer = sent
-				return nil, nil
-			}
-
 			// A PUT: whatever was read, the file wins. Which is why --if-version demands
 			// the whole strategy in the file — there is no read for a partial one to be
 			// merged into.
-			replace := func(doc *entityDoc) error {
-				*doc = body
-				return nil
-			}
-
-			if _, err := client.UpdateVersioned(ctx, get, put, replace, version.value()); err != nil {
+			answer, err := putVersioned(ctx, c, "update routing strategy "+id, get, replaceWith(body), version.value(),
+				func(ctx context.Context, body io.Reader) (*http.Response, error) {
+					return c.API().PutRoutingStrategyWithBody(ctx, id, contentTypeJSON, body)
+				})
+			if err != nil {
 				return err
 			}
 

@@ -2,6 +2,7 @@ package emulator
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -16,6 +17,12 @@ import (
 // writeError answers with a single-summary error envelope at the given status.
 func writeError(c *fiber.Ctx, status int, summary string) error {
 	return writeErrors(c, status, []api.ErrorInner{{Summary: summary}})
+}
+
+// notFound answers the 404 for an id, as the caller spelled it, that coll does
+// not hold.
+func notFound(c *fiber.Ctx, coll, id string) error {
+	return writeError(c, fiber.StatusNotFound, fmt.Sprintf("no %s with id %q", coll, id))
 }
 
 // writeConflict answers with the 409 the client's optimistic locking reads: an

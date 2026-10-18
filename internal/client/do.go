@@ -128,7 +128,7 @@ func (c *Client) Do(ctx context.Context, op string, do Doer) (*Result, error) {
 				return nil, ctx.Err()
 			}
 			if sent < policy.MaxAttempts && retryable(err) && idempotent(methodOf(err)) {
-				if err := policy.wait(ctx, policy.backoff(sent)); err != nil {
+				if err := policy.Sleep(ctx, policy.backoff(sent)); err != nil {
 					return nil, err
 				}
 				continue
@@ -155,7 +155,7 @@ func (c *Client) Do(ctx context.Context, op string, do Doer) (*Result, error) {
 			if !ok {
 				break
 			}
-			if err := policy.wait(ctx, wait); err != nil {
+			if err := policy.Sleep(ctx, wait); err != nil {
 				return nil, err
 			}
 			continue
@@ -163,7 +163,7 @@ func (c *Client) Do(ctx context.Context, op string, do Doer) (*Result, error) {
 		case result.Status >= http.StatusInternalServerError &&
 			sent < policy.MaxAttempts &&
 			idempotent(res.Request.Method):
-			if err := policy.wait(ctx, policy.backoff(sent)); err != nil {
+			if err := policy.Sleep(ctx, policy.backoff(sent)); err != nil {
 				return nil, err
 			}
 			continue
@@ -200,20 +200,15 @@ func Fetch[T any](ctx context.Context, c *Client, op string, do Doer) (T, error)
 // token. A static FFT_ID_TOKEN is not: there is nothing behind it to renew from,
 // so a 401 on it is final and retrying would only send the same dead token twice.
 func (c *Client) renewer() auth.Renewer {
-	r, ok := c.source.(auth.Renewer)
-	if !ok {
-		return nil
-	}
+	r, _ := c.source.(auth.Renewer)
 	return r
 }
 
 // refresh forces a new token after a 401. The next attempt picks it up through the
 // bearer transport, which asks the source for a token on every request.
 func (c *Client) refresh(ctx context.Context) error {
-	if _, err := c.renewer().Renew(ctx); err != nil {
-		return err
-	}
-	return nil
+	_, err := c.renewer().Renew(ctx)
+	return err
 }
 
 // read consumes and closes the response body, which is what returns the connection
@@ -295,32 +290,19 @@ func (r Retry) throttle(h http.Header, attempt int) (time.Duration, bool) {
 	}
 
 	var wait time.Duration
-	switch seconds, err := strconv.Atoi(value); {
-	case err == nil:
+	if seconds, err := strconv.Atoi(value); err == nil {
 		wait = time.Duration(seconds) * time.Second
-	default:
-		at, err := http.ParseTime(value)
-		if err != nil {
-			return r.backoff(attempt), true
-		}
+	} else if at, err := http.ParseTime(value); err == nil {
 		wait = time.Until(at)
+	} else {
+		return r.backoff(attempt), true
 	}
 
-	if wait < 0 {
-		wait = 0
-	}
+	wait = max(wait, 0)
 	if wait > r.MaxWait {
 		return 0, false
 	}
 	return wait, true
-}
-
-// wait sleeps, unless the context is cancelled first.
-func (r Retry) wait(ctx context.Context, d time.Duration) error {
-	if err := r.Sleep(ctx, d); err != nil {
-		return err
-	}
-	return nil
 }
 
 func sleep(ctx context.Context, d time.Duration) error {

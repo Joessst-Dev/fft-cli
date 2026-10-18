@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -64,17 +63,7 @@ func getCategoryDoc(ctx context.Context, c *client.Client, id string) (entityDoc
 	if err != nil {
 		return nil, 0, err
 	}
-
-	doc, err := decodeDoc(raw, "the routing category")
-	if err != nil {
-		return nil, 0, err
-	}
-
-	version, err := docVersion(doc, "routing category")
-	if err != nil {
-		return nil, 0, err
-	}
-	return doc, version, nil
+	return decodeVersioned(raw, "routing category")
 }
 
 // routingCategoryView is the table's model of a category. Like the strategy, the
@@ -102,34 +91,18 @@ func routingCategoryList() listView {
 // renderCategory renders one category: the API's own JSON under -o json, a one-row
 // table otherwise.
 func renderCategory(deps *Deps, raw []byte) error {
-	if len(bytes.TrimSpace(raw)) == 0 {
-		return nil
-	}
-
-	rows, err := routingCategoryRows(deps.Printer.Style(), []json.RawMessage{raw})
-	if err != nil {
-		return err
-	}
-	return deps.Printer.RenderRaw(rows, raw)
+	return renderEntity(deps, raw, routingCategoryRows)
 }
 
 var routingCategoryHeaders = []string{"ID", "NAME", "COLOR", "VERSION"}
 
 func routingCategoryRows(style output.Style, items []json.RawMessage) (output.Rows, error) {
-	rows := make([][]string, 0, len(items))
-
-	for i, item := range items {
-		var v routingCategoryView
-		if err := json.Unmarshal(item, &v); err != nil {
-			return output.Rows{}, fmt.Errorf("decode routing category %d of %d: %w", i+1, len(items), err)
-		}
-
-		rows = append(rows, []string{
+	return viewRows(items, "routing category", routingCategoryHeaders, func(v routingCategoryView) []string {
+		return []string{
 			field(style, v.ID),
 			field(style, v.displayName()),
 			field(style, v.Color),
 			fmt.Sprintf("%d", v.Version),
-		})
-	}
-	return output.Rows{Headers: routingCategoryHeaders, Rows: rows}, nil
+		}
+	})
 }

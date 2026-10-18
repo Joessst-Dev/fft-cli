@@ -206,15 +206,8 @@ func renderStockSummaries(deps *Deps, raw []byte) error {
 }
 
 func summaryRows(style output.Style, items []json.RawMessage) (output.Rows, error) {
-	rows := make([][]string, 0, len(items))
-
-	for i, item := range items {
-		var v stockSummaryView
-		if err := json.Unmarshal(item, &v); err != nil {
-			return output.Rows{}, fmt.Errorf("decode stock summary %d of %d: %w", i+1, len(items), err)
-		}
-
-		rows = append(rows, []string{
+	return viewRows(items, "stock summary", summaryHeaders, func(v stockSummaryView) []string {
+		return []string{
 			field(style, v.Article.TenantArticleID),
 			field(style, v.Article.Title),
 			quantity(v.Details.StockOnHand),
@@ -223,7 +216,6 @@ func summaryRows(style output.Style, items []json.RawMessage) (output.Rows, erro
 			quantity(v.Details.AvailableForPicking),
 			quantity(v.Details.SafetyStock),
 			fmt.Sprintf("%d", len(v.IncludedFacilityRefs)),
-		})
-	}
-	return output.Rows{Headers: summaryHeaders, Rows: rows}, nil
+		}
+	})
 }

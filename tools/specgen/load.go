@@ -1,8 +1,11 @@
 package main
 
 import (
+	"cmp"
 	"encoding/json"
 	"fmt"
+	"maps"
+	"slices"
 	"sort"
 	"strings"
 
@@ -114,7 +117,7 @@ func load(path string) ([]operation, error) {
 		}
 	}
 
-	sort.Slice(ops, func(i, j int) bool { return ops[i].ID < ops[j].ID })
+	slices.SortFunc(ops, func(a, b operation) int { return cmp.Compare(a.ID, b.ID) })
 	return ops, nil
 }
 
@@ -288,12 +291,7 @@ func permissions(ext map[string]any) []string {
 // program goes through it, because Go randomises map order and CI fails the build
 // on a diff.
 func sortedKeys[V any](m map[string]V) []string {
-	out := make([]string, 0, len(m))
-	for k := range m {
-		out = append(out, k)
-	}
-	sort.Strings(out)
-	return out
+	return slices.Sorted(maps.Keys(m))
 }
 
 // prose turns the spec's HTML into something a terminal can print: the descriptions

@@ -2,10 +2,11 @@ package component
 
 import (
 	"fmt"
+	"maps"
 	"net/url"
 	"path"
 	"regexp"
-	"sort"
+	"slices"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -198,12 +199,7 @@ func (m Manifest) Validate() error {
 var forwardable = map[string]bool{config.EnvBaseURL: true}
 
 func forwardableNames() []string {
-	names := make([]string, 0, len(forwardable))
-	for name := range forwardable {
-		names = append(names, name)
-	}
-	sort.Strings(names)
-	return names
+	return slices.Sorted(maps.Keys(forwardable))
 }
 
 // withoutUserinfo strips any embedded userinfo from a forwarded URL.
@@ -266,13 +262,18 @@ func validExec(exec string) error {
 	switch {
 	case exec == "":
 		return fmt.Errorf("exec is empty: a component must say which binary to run")
-	case path.IsAbs(exec) || strings.HasPrefix(exec, "/") || strings.Contains(exec, `\`):
+	case path.IsAbs(exec) || strings.Contains(exec, `\`):
 		return fmt.Errorf("exec %q must be a relative, slash-separated path inside the component's directory", exec)
 	}
 
-	clean := path.Clean(exec)
-	if clean == ".." || strings.HasPrefix(clean, "../") {
+	if escapes(path.Clean(exec)) {
 		return fmt.Errorf("exec %q leaves the component's directory", exec)
 	}
 	return nil
+}
+
+// escapes reports whether a cleaned, slash-separated relative path climbs out of
+// the directory it is relative to.
+func escapes(clean string) bool {
+	return clean == ".." || strings.HasPrefix(clean, "../")
 }

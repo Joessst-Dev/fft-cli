@@ -172,20 +172,17 @@ func runProjectAdd(cmd *cobra.Command, deps *Deps, flags *addFlags, name string)
 		}
 	}
 
-	// M3 replaces this nil with the real Firebase sign-in. Verification runs
-	// before anything is written, so a project that cannot authenticate is never
-	// persisted — and the email that actually worked is what gets stored, rather
-	// than the one we guessed at.
-	if deps.Verify != nil {
-		ctx, cancel := deps.Context(cmd)
-		defer cancel()
+	// Verification runs before anything is written, so a project that cannot
+	// authenticate is never persisted — and the email that actually worked is what
+	// gets stored, rather than the one we guessed at.
+	ctx, cancel := deps.Context(cmd)
+	defer cancel()
 
-		email, err := deps.Verify(ctx, project, password, deps.Debug)
-		if err != nil {
-			return fmt.Errorf("verify the credentials for %q: %w", project.Name, err)
-		}
-		project.Email = email
+	email, err := deps.Verify(ctx, project, password, deps.Debug)
+	if err != nil {
+		return fmt.Errorf("verify the credentials for %q: %w", project.Name, err)
 	}
+	project.Email = email
 
 	if err := persistProject(deps, cfg, project, password); err != nil {
 		if err := retryWithoutKeyring(deps, cfg, project, password, interactive, err); err != nil {
@@ -435,10 +432,11 @@ func persistProject(deps *Deps, cfg *config.Config, project config.Project, pass
 		return fmt.Errorf("store the password for %q: %w", project.Name, err)
 	}
 	if err := deps.Secrets.Set(secrets.Key(project.Name, secrets.KindAPIKey), project.FirebaseAPIKey); err != nil {
+		storeErr := fmt.Errorf("store the API key for %q: %w", project.Name, err)
 		if delErr := secrets.DeleteAll(deps.Secrets, project.Name); delErr != nil {
-			return errors.Join(fmt.Errorf("store the API key for %q: %w", project.Name, err), delErr)
+			return errors.Join(storeErr, delErr)
 		}
-		return fmt.Errorf("store the API key for %q: %w", project.Name, err)
+		return storeErr
 	}
 
 	cfg.Upsert(project)

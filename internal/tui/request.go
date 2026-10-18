@@ -2,6 +2,7 @@ package tui
 
 import (
 	"bytes"
+	"cmp"
 	"encoding/json"
 	"fmt"
 	"slices"
@@ -179,10 +180,7 @@ func (r *requestScreen) open(op Operation) {
 }
 
 func (r *requestScreen) newField(arg *Arg, flag *Flag) *requestField {
-	in := textinput.New()
-	in.Prompt = ""
-	in.SetWidth(formInputWidth)
-	in.SetStyles(r.st.input)
+	in := formInput(r.st)
 	if flag != nil {
 		in.Placeholder = placeholderFor(*flag)
 	} else {
@@ -214,20 +212,13 @@ func placeholderFor(f Flag) string {
 func (r *requestScreen) focused() bool { return r.editing || r.dialog != nil }
 
 func (r *requestScreen) selected() *requestField {
-	if len(r.fields) == 0 {
-		return nil
-	}
-	r.cursor = min(max(r.cursor, 0), len(r.fields)-1)
-	return r.fields[r.cursor]
+	f, _ := pick(r.fields, &r.cursor)
+	return f
 }
 
 func (r *requestScreen) update(msg tea.Msg) tea.Cmd {
-	if d := r.dialog; d != nil {
-		finished, cmd := d.update(msg)
-		if finished && r.dialog == d {
-			r.dialog = nil
-		}
-		return cmd
+	if r.dialog != nil {
+		return updateDialog(&r.dialog, msg)
 	}
 	if r.op == nil {
 		return nil
@@ -308,11 +299,8 @@ func (r *requestScreen) editKey(msg tea.Msg) tea.Cmd {
 			return nil
 		}
 	}
-	if paste, isPaste := msg.(tea.PasteMsg); isPaste {
-		// A copied value brings its line break along, which no argument wants.
-		paste.Content = strings.TrimRight(paste.Content, "\r\n")
-		msg = paste
-	}
+	// A copied value brings its line break along, which no argument wants.
+	msg = trimPaste(msg)
 	var cmd tea.Cmd
 	f.input, cmd = f.input.Update(msg)
 	return cmd
@@ -448,7 +436,7 @@ func (r *requestScreen) say(notice string) {
 
 func (r *requestScreen) fail(what string, err error) {
 	r.notice = ""
-	r.failure = &failure{what: what, result: Result{ExitCode: exitcode.General, Stderr: []byte(err.Error())}}
+	r.failure = &failure{what: what, result: errorResult(err)}
 }
 
 // validate finds what the command would refuse, so that the form can say so before
@@ -639,7 +627,7 @@ func (r *requestScreen) send() tea.Cmd {
 	}
 
 	r.dialog = armed(&confirmDialog{
-		question: fmt.Sprintf("Send %s to %s?", firstNonEmpty(r.op.Summary, r.op.ID), r.s.named()),
+		question: fmt.Sprintf("Send %s to %s?", cmp.Or(r.op.Summary, r.op.ID), r.s.named()),
 		notes:    r.s.lackingNotes(*r.op, project),
 		detail:   writeDetail(*r.op, r.s.readOnly()),
 		command:  r.display(project),
@@ -652,10 +640,7 @@ func (r *requestScreen) send() tea.Cmd {
 // preview is the body the form sends, as a question about sending it shows it;
 // nil when there is none.
 func (r *requestScreen) preview() *bodyPreview {
-	if r.body == nil {
-		return nil
-	}
-	return newBodyPreview(r.body, r.from)
+	return previewOf(r.body, r.from)
 }
 
 // asksFirst reports whether the UI asks before sending op. A write is asked about,
@@ -705,7 +690,7 @@ func (r *requestScreen) unsent(body []byte) (form, lost string) {
 	if r.op == nil {
 		return "", ""
 	}
-	form = firstNonEmpty(r.op.Summary, r.op.ID)
+	form = cmp.Or(r.op.Summary, r.op.ID)
 	if r.sent != nil && slices.Equal(r.sent.args, r.args()) && bytes.Equal(r.sent.body, r.body) {
 		return form, ""
 	}
@@ -809,7 +794,7 @@ func (r *requestScreen) askTemplateName() {
 // saveTemplate runs `template save` with the body on stdin. The command refuses a
 // name that is taken, and the form says so.
 func (r *requestScreen) saveTemplate(name string, op Operation, body []byte, project string) tea.Cmd {
-	args := templateArgs("save", name, "--operation", op.ID, "--file", "-")
+	args := nounArgs("template", "save", name, "--operation", op.ID, "--file", "-")
 	a := action{inv: Invocation{Args: args, Stdin: body, Project: project}, display: r.s.displayFor(args, project)}
 	gen := r.gen
 	r.say("Saving the template " + name + "…")
@@ -931,7 +916,7 @@ func (r *requestScreen) view(width, height int) string {
 	}
 	op := *r.op
 	header := []string{
-		st.title.Render(output.SanitizeCell(firstNonEmpty(op.Summary, op.ID))),
+		st.title.Render(output.SanitizeCell(cmp.Or(op.Summary, op.ID))),
 		st.dim.Render(output.SanitizeCell(op.Method + " " + op.Path + " · " + op.ID)),
 	}
 	if r.dialog != nil {

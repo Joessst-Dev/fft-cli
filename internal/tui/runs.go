@@ -2,12 +2,12 @@ package tui
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
 	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
-	"github.com/charmbracelet/x/ansi"
 
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/output"
@@ -31,7 +31,6 @@ type runEntry struct {
 	state   RunState
 	queued  time.Time
 	started time.Time
-	ended   time.Time
 	result  Result
 
 	// asking is set while the run waits for the user to answer its question.
@@ -82,7 +81,6 @@ func (l *runList) update(ev RunEvent) {
 		e.started = ev.At
 	case RunDone:
 		e.asking = false
-		e.ended = ev.At
 		e.result = ev.Result
 		l.shed(keptOutputBytes)
 	}
@@ -167,21 +165,14 @@ func newRunsPanel(s *session) *runsPanel {
 // newestFirst is the order the panel lists runs in: what just happened is what
 // the user opened the panel to see.
 func (p *runsPanel) newestFirst() []*runEntry {
-	all := p.s.runs.entries
-	out := make([]*runEntry, len(all))
-	for i, e := range all {
-		out[len(all)-1-i] = e
-	}
-	return out
+	runs := slices.Clone(p.s.runs.entries)
+	slices.Reverse(runs)
+	return runs
 }
 
 func (p *runsPanel) selected() *runEntry {
-	runs := p.newestFirst()
-	if len(runs) == 0 {
-		return nil
-	}
-	p.cursor = min(max(p.cursor, 0), len(runs)-1)
-	return runs[p.cursor]
+	e, _ := pick(p.newestFirst(), &p.cursor)
+	return e
 }
 
 // panelAction is what a key on the panel asks of the UI around it.
@@ -303,13 +294,4 @@ func elapsed(d time.Duration) string {
 	default:
 		return d.Round(time.Second).String()
 	}
-}
-
-// clip cuts s to width terminal cells. A width of zero or less means the width is
-// not known yet, and s is left alone.
-func clip(s string, width int) string {
-	if width <= 0 {
-		return s
-	}
-	return ansi.Truncate(s, width, "…")
 }

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"maps"
 	"slices"
 	"sort"
 	"strings"
@@ -190,17 +191,12 @@ func LookupOperation(id string) (Operation, bool) {
 // Tags returns every tag in the spec, sorted.
 var Tags = sync.OnceValue(func() []string {
 	seen := make(map[string]bool)
-	var out []string
 	for _, op := range operations {
 		for _, tag := range op.Tags {
-			if !seen[tag] {
-				seen[tag] = true
-				out = append(out, tag)
-			}
+			seen[tag] = true
 		}
 	}
-	sort.Strings(out)
-	return out
+	return slices.Sorted(maps.Keys(seen))
 })
 
 // OperationsByTag returns every operation carrying tag, sorted by ID. The match is

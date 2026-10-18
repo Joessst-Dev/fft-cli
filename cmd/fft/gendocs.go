@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -178,6 +178,6 @@ func documentedChildren(cmd *cobra.Command) []*cobra.Command {
 		}
 		out = append(out, child)
 	}
-	sort.Slice(out, func(i, j int) bool { return out[i].Name() < out[j].Name() })
+	slices.SortFunc(out, func(a, b *cobra.Command) int { return strings.Compare(a.Name(), b.Name()) })
 	return out
 }

@@ -77,7 +77,7 @@ func ReadOnlyFromEnv(lookup func(string) (string, bool)) bool {
 		lookup = os.LookupEnv
 	}
 	v, _ := lookup(EnvReadOnly)
-	return !denials[strings.ToLower(strings.TrimSpace(v))]
+	return !ReadOnlyDenied(v)
 }
 
 // HistoryFromEnv reads FFT_HISTORY: whether it records, and whether it was set at

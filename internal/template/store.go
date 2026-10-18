@@ -11,6 +11,7 @@ import (
 
 	"github.com/Joessst-Dev/fft-cli/internal/atomicfile"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
+	"github.com/Joessst-Dev/fft-cli/internal/xdg"
 )
 
 // Scope is where a template lives.
@@ -126,18 +127,7 @@ func ValidateName(name string) error {
 // neither something fft can regenerate by asking again nor something it manages
 // on the user's behalf.
 func UserDir(lookup func(string) (string, bool)) (string, error) {
-	if lookup == nil {
-		lookup = os.LookupEnv
-	}
-	if dir, _ := lookup("XDG_DATA_HOME"); strings.TrimSpace(dir) != "" {
-		return filepath.Join(strings.TrimSpace(dir), "fft", "templates"), nil
-	}
-
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", fmt.Errorf("locate the home directory: %w", err)
-	}
-	return filepath.Join(home, ".local", "share", "fft", "templates"), nil
+	return xdg.Data().LookupPath(lookup, "templates")
 }
 
 // ProjectDir is ./.fft/templates: the templates for one repository, which the

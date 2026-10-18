@@ -6,9 +6,6 @@ import (
 	"net/http"
 
 	"github.com/spf13/cobra"
-
-	"github.com/Joessst-Dev/fft-cli/internal/client"
-	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 )
 
 const orderUpdateLong = `Update an order from a JSON file.
@@ -54,13 +51,9 @@ func newOrderUpdateCmd(deps *Deps) *cobra.Command {
 				return err
 			}
 
-			raw, err := readBody(deps, file)
+			body, err := readDoc(deps, file)
 			if err != nil {
 				return err
-			}
-			body, err := decodeDoc(raw, file)
-			if err != nil {
-				return exitcode.UsageError{Err: err}
 			}
 
 			c, err := tenantClient(deps)
@@ -73,39 +66,19 @@ func newOrderUpdateCmd(deps *Deps) *cobra.Command {
 
 			id := args[0]
 
-			// The raw answer is captured on the way past, because UpdateVersioned is
-			// generic over the decoded entity and -o json must print the bytes the API
-			// sent, not fft's re-encoding of them.
-			var answer []byte
-
 			get := func(ctx context.Context) (entityDoc, int, error) {
 				return getOrderDoc(ctx, c, id)
-			}
-
-			put := func(ctx context.Context, doc entityDoc, v int) (entityDoc, error) {
-				doc["version"] = v
-
-				out, err := sendEntity(ctx, c, "update order "+id, doc,
-					func(ctx context.Context, body io.Reader) (*http.Response, error) {
-						return c.API().UpdateOrderWithBody(ctx, id, contentTypeJSON, body)
-					})
-				if err != nil {
-					return nil, err
-				}
-				answer = out
-				return nil, nil
 			}
 
 			// The mutation is the file: whatever was read, the file's fields are what
 			// gets sent. fft adds only the version. This is why, with --if-version, the
 			// file has to carry everything the update should change — there is no read
 			// for it to be merged into.
-			apply := func(doc *entityDoc) error {
-				*doc = body
-				return nil
-			}
-
-			if _, err := client.UpdateVersioned(ctx, get, put, apply, version.value()); err != nil {
+			answer, err := putVersioned(ctx, c, "update order "+id, get, replaceWith(body), version.value(),
+				func(ctx context.Context, body io.Reader) (*http.Response, error) {
+					return c.API().UpdateOrderWithBody(ctx, id, contentTypeJSON, body)
+				})
+			if err != nil {
 				return err
 			}
 

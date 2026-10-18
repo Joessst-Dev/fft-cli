@@ -89,13 +89,16 @@ func ParsePath(raw string) (Path, error) {
 	return append(out, seg.String()), nil
 }
 
+// segmentEscaper escapes a segment's backslashes and dots, the inverse of what
+// ParsePath unescapes.
+var segmentEscaper = strings.NewReplacer(`\`, `\\`, `.`, `\.`)
+
 // String renders the path back into the grammar, escapes and all, so that an
 // error message quotes something the user could paste.
 func (p Path) String() string {
 	parts := make([]string, len(p))
 	for i, seg := range p {
-		r := strings.NewReplacer(`\`, `\\`, `.`, `\.`)
-		parts[i] = r.Replace(seg)
+		parts[i] = segmentEscaper.Replace(seg)
 	}
 	return strings.Join(parts, ".")
 }

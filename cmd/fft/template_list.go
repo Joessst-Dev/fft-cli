@@ -1,6 +1,7 @@
 package main
 
 import (
+	"maps"
 	"slices"
 
 	"github.com/spf13/cobra"
@@ -104,13 +105,5 @@ func templateTable(deps *Deps, rows []templateRow) output.Rows {
 // paramNames lists a template's declared parameters, sorted, for the machine
 // formats — it is the one thing a caller needs before it can render anything.
 func paramNames(saved template.Saved) []string {
-	if len(saved.Params) == 0 {
-		return nil
-	}
-	names := make([]string, 0, len(saved.Params))
-	for name := range saved.Params {
-		names = append(names, name)
-	}
-	slices.Sort(names)
-	return names
+	return slices.Sorted(maps.Keys(saved.Params))
 }

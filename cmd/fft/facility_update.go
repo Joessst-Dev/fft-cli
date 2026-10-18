@@ -83,38 +83,18 @@ func newFacilityUpdateCmd(deps *Deps) *cobra.Command {
 
 			ref := client.FacilityRef(args[0])
 
-			// The raw answer is captured on the way past, because UpdateVersioned is
-			// generic over the decoded entity and -o json must print the bytes the API
-			// sent, not fft's re-encoding of them.
-			var raw []byte
-
 			get := func(ctx context.Context) (entityDoc, int, error) {
 				return getFacilityDoc(ctx, c, ref)
-			}
-
-			put := func(ctx context.Context, doc entityDoc, v int) (entityDoc, error) {
-				doc["version"] = v
-
-				answer, err := sendEntity(ctx, c, "update facility "+ref, doc,
-					func(ctx context.Context, body io.Reader) (*http.Response, error) {
-						return c.API().ReplaceFacilityWithBody(ctx, ref, contentTypeJSON, body)
-					})
-				if err != nil {
-					return nil, err
-				}
-				raw = answer
-				return nil, nil
 			}
 
 			// The mutation is a replacement: whatever was read, the file wins. That is
 			// what makes this a PUT — and it is why, with --if-version, the file has to
 			// be the *whole* facility: there is no read for it to be merged into.
-			replace := func(doc *entityDoc) error {
-				*doc = body
-				return nil
-			}
-
-			if _, err := client.UpdateVersioned(ctx, get, put, replace, version.value()); err != nil {
+			raw, err := putVersioned(ctx, c, "update facility "+ref, get, replaceWith(body), version.value(),
+				func(ctx context.Context, body io.Reader) (*http.Response, error) {
+					return c.API().ReplaceFacilityWithBody(ctx, ref, contentTypeJSON, body)
+				})
+			if err != nil {
 				return err
 			}
 

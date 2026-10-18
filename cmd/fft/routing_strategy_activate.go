@@ -6,8 +6,6 @@ import (
 	"net/http"
 
 	"github.com/spf13/cobra"
-
-	"github.com/Joessst-Dev/fft-cli/internal/client"
 )
 
 const routingStrategyActivateLong = `Make a routing strategy live.
@@ -47,24 +45,9 @@ func newRoutingStrategyActivateCmd(deps *Deps) *cobra.Command {
 			defer cancel()
 
 			id := args[0]
-			var answer []byte
 
 			get := func(ctx context.Context) (entityDoc, int, error) {
 				return getStrategyDoc(ctx, c, id)
-			}
-
-			put := func(ctx context.Context, doc entityDoc, v int) (entityDoc, error) {
-				doc["version"] = v
-
-				sent, err := sendEntity(ctx, c, "activate routing strategy "+id, doc,
-					func(ctx context.Context, body io.Reader) (*http.Response, error) {
-						return c.API().ActionsRoutingStrategyWithBody(ctx, id, contentTypeJSON, body)
-					})
-				if err != nil {
-					return nil, err
-				}
-				answer = sent
-				return nil, nil
 			}
 
 			// The body sent to /actions is the action, not the strategy: {name, version}.
@@ -76,7 +59,11 @@ func newRoutingStrategyActivateCmd(deps *Deps) *cobra.Command {
 				return nil
 			}
 
-			if _, err := client.UpdateVersioned(ctx, get, put, activate, version.value()); err != nil {
+			answer, err := putVersioned(ctx, c, "activate routing strategy "+id, get, activate, version.value(),
+				func(ctx context.Context, body io.Reader) (*http.Response, error) {
+					return c.API().ActionsRoutingStrategyWithBody(ctx, id, contentTypeJSON, body)
+				})
+			if err != nil {
 				return err
 			}
 
