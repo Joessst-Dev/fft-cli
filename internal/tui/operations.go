@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"cmp"
 	"fmt"
 	"io"
 	"strconv"
@@ -334,7 +335,7 @@ func (o *operationsScreen) describe(op Operation, width int) string {
 	st := o.st
 	clean := output.SanitizeCell
 	lines := []string{
-		st.title.Render(clean(firstNonEmpty(op.Summary, op.ID))),
+		st.title.Render(clean(cmp.Or(op.Summary, op.ID))),
 		"",
 		clean(op.Method + " " + op.Path),
 		"operation  " + clean(op.ID),
@@ -447,15 +448,6 @@ func kindName(k FlagKind) string {
 	default:
 		return "text"
 	}
-}
-
-func firstNonEmpty(values ...string) string {
-	for _, v := range values {
-		if v != "" {
-			return v
-		}
-	}
-	return ""
 }
 
 // opDelegate draws one operation per line.

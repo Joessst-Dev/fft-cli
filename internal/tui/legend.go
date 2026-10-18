@@ -201,8 +201,7 @@ func (m *app) legendView(height int) string {
 	}
 
 	// A terminal that grew since the last scroll has less to scroll through.
-	scroll := min(m.legendScroll, max(len(lines)-room, 0))
-	shown := lines[scroll:min(scroll+room, len(lines))]
+	shown, scroll := window(lines, m.legendScroll, room)
 	if scroll+room < len(lines) {
 		shown[len(shown)-1] = legendIndent + m.st.dim.Render("↓ more")
 	}

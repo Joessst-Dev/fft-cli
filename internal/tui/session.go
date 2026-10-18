@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"maps"
 	"os"
 	"os/exec"
 	"slices"
@@ -374,16 +375,15 @@ func (s *session) launch(a action, done func(Result) tea.Cmd) (RunID, tea.Cmd) {
 	if err != nil {
 		// Nothing ran. The caller hears about it the way it hears about any other
 		// failure, so that no screen needs a second error path.
-		return 0, done(Result{ExitCode: exitcode.General, Stderr: []byte(err.Error())})
+		return 0, done(errorResult(err))
 	}
 	s.runs.add(id, a.display, s.now())
 	s.done[id] = done
 	// A request is kept only as long as its run is.
-	for kept := range s.requests {
-		if _, ok := s.runs.byID[kept]; !ok {
-			delete(s.requests, kept)
-		}
-	}
+	maps.DeleteFunc(s.requests, func(kept RunID, _ *sentRequest) bool {
+		_, ok := s.runs.byID[kept]
+		return !ok
+	})
 	return id, nil
 }
 
@@ -467,12 +467,9 @@ func (s *session) ask(ev RunEvent) {
 	// The command's question is about what it looked up, in its own words; the
 	// body it acts with is shown under it, because the question may not say.
 	var preview *bodyPreview
-	if sent := s.requests[ev.ID]; sent != nil && sent.inv.Stdin != nil {
-		preview = newBodyPreview(sent.inv.Stdin, sent.from)
-	}
-
 	var notes []string
 	if sent := s.requests[ev.ID]; sent != nil {
+		preview = previewOf(sent.inv.Stdin, sent.from)
 		notes = s.lackingNotes(sent.op, sent.project)
 	}
 
@@ -532,6 +529,12 @@ func (s *session) answerWith(msg tea.Msg) tea.Cmd {
 type failure struct {
 	what   string
 	result Result
+}
+
+// errorResult is an error the TUI met itself, rather than one a command reported,
+// as the Result of a failed command, so that a screen shows both the same way.
+func errorResult(err error) Result {
+	return Result{ExitCode: exitcode.General, Stderr: []byte(err.Error())}
 }
 
 // view renders the failure: what was being done, the exit code and what it means,

@@ -15,6 +15,21 @@ type Catalog interface {
 	Table(cmd Command, stdout []byte) (string, error)
 }
 
+// operationsByID indexes every operation cat lists by its id. A nil cat lists
+// none, and the map is still one a caller may write to.
+func operationsByID(cat Catalog) map[string]Operation {
+	ops := make(map[string]Operation)
+	if cat == nil {
+		return ops
+	}
+	for _, g := range cat.Groups() {
+		for _, op := range g.Operations {
+			ops[op.ID] = op
+		}
+	}
+	return ops
+}
+
 // OperationGroup is the operations under one tag.
 type OperationGroup struct {
 	Tag        string

@@ -30,8 +30,6 @@ type grants struct {
 	// project is the project whoami answered for.
 	project string
 
-	roles []roleGrant
-
 	// held is every permission any role carries.
 	held map[string]bool
 }
@@ -43,7 +41,7 @@ type roleGrant struct {
 }
 
 func newGrants(project string, roles []roleGrant) *grants {
-	g := &grants{project: project, roles: roles, held: make(map[string]bool)}
+	g := &grants{project: project, held: make(map[string]bool)}
 	for _, r := range roles {
 		for _, p := range r.Permissions {
 			g.held[p] = true

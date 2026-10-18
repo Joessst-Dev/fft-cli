@@ -12,11 +12,9 @@ import (
 	"github.com/Joessst-Dev/fft-cli/internal/output"
 )
 
-// The statuses `fft component list` reports.
-const (
-	statusInstalled = "installed"
-	statusAvailable = "available"
-)
+// statusInstalled is the status `fft component list` reports for an installed
+// component; the only other is "available".
+const statusInstalled = "installed"
 
 // emulatorComponent is the component that serves the offline API. The Projects
 // screen's emulator pane asks this screen about it by name.
@@ -150,7 +148,7 @@ func (c *componentsScreen) load(background bool) tea.Cmd {
 		}
 		var rows []componentRow
 		if err := json.Unmarshal(r.Stdout, &rows); err != nil {
-			c.fail("reading the component list", Result{ExitCode: exitcode.General, Stderr: []byte(err.Error())})
+			c.fail("reading the component list", errorResult(err))
 			return nil
 		}
 		c.rows, c.loaded, c.failure = rows, true, nil
@@ -160,11 +158,7 @@ func (c *componentsScreen) load(background bool) tea.Cmd {
 }
 
 func (c *componentsScreen) selected() (componentRow, bool) {
-	if len(c.rows) == 0 {
-		return componentRow{}, false
-	}
-	c.cursor = min(max(c.cursor, 0), len(c.rows)-1)
-	return c.rows[c.cursor], true
+	return pick(c.rows, &c.cursor)
 }
 
 func (c *componentsScreen) succeed(notice string) {
@@ -234,14 +228,9 @@ func suggestedSource(row componentRow, ok bool) string {
 }
 
 // componentArgs is `fft component <verb> <name>`. A component name comes out of a
-// manifest rather than user typing, so one starting with a dash goes after "--",
-// where it is only a name and never a flag — the guard projectArgs uses.
+// manifest rather than user typing.
 func componentArgs(verb, name string) []string {
-	args := []string{"component", verb}
-	if strings.HasPrefix(name, "-") {
-		return append(args, "--", name)
-	}
-	return append(args, name)
+	return nounArgs("component", verb, name)
 }
 
 // lifecycle runs upgrade or remove on row. The command asks its own question
@@ -319,10 +308,7 @@ func installArgs(src string) []string {
 	if isLocalPath(src) {
 		return []string{"component", "install", "--path", src}
 	}
-	if strings.HasPrefix(src, "-") {
-		return []string{"component", "install", "--", src}
-	}
-	return []string{"component", "install", src}
+	return nounArgs("component", "install", src)
 }
 
 func isLocalPath(src string) bool {
@@ -456,11 +442,13 @@ func (c *componentsScreen) table(width int) []string {
 			output.SanitizeCell(r.Source),
 		})
 	}
-	return c.rowsOf(cells, width)
+	return tableRows(c.st, cells, c.cursor, width)
 }
 
-// rowsOf lays cells out in aligned columns, marking the selected row.
-func (c *componentsScreen) rowsOf(cells [][]string, width int) []string {
+// tableRows lays cells out in aligned columns under the header in cells[0],
+// marking the row at cursor (an index into the rows after the header) as selected.
+// The last column is never padded, so its width does not matter.
+func tableRows(st styles, cells [][]string, cursor, width int) []string {
 	widths := make([]int, len(cells[0]))
 	for _, row := range cells {
 		for i, cell := range row {
@@ -480,9 +468,9 @@ func (c *componentsScreen) rowsOf(cells [][]string, width int) []string {
 		line := b.String()
 		switch {
 		case i == 0:
-			line = c.st.dim.Render("  " + line)
-		case i-1 == c.cursor:
-			line = c.st.selected.Render("> " + line)
+			line = st.dim.Render("  " + line)
+		case i-1 == cursor:
+			line = st.selected.Render("> " + line)
 		default:
 			line = "  " + line
 		}

@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -31,7 +32,6 @@ type runEntry struct {
 	state   RunState
 	queued  time.Time
 	started time.Time
-	ended   time.Time
 	result  Result
 
 	// asking is set while the run waits for the user to answer its question.
@@ -82,7 +82,6 @@ func (l *runList) update(ev RunEvent) {
 		e.started = ev.At
 	case RunDone:
 		e.asking = false
-		e.ended = ev.At
 		e.result = ev.Result
 		l.shed(keptOutputBytes)
 	}
@@ -167,21 +166,14 @@ func newRunsPanel(s *session) *runsPanel {
 // newestFirst is the order the panel lists runs in: what just happened is what
 // the user opened the panel to see.
 func (p *runsPanel) newestFirst() []*runEntry {
-	all := p.s.runs.entries
-	out := make([]*runEntry, len(all))
-	for i, e := range all {
-		out[len(all)-1-i] = e
-	}
-	return out
+	runs := slices.Clone(p.s.runs.entries)
+	slices.Reverse(runs)
+	return runs
 }
 
 func (p *runsPanel) selected() *runEntry {
-	runs := p.newestFirst()
-	if len(runs) == 0 {
-		return nil
-	}
-	p.cursor = min(max(p.cursor, 0), len(runs)-1)
-	return runs[p.cursor]
+	e, _ := pick(p.newestFirst(), &p.cursor)
+	return e
 }
 
 // panelAction is what a key on the panel asks of the UI around it.
@@ -303,6 +295,26 @@ func elapsed(d time.Duration) string {
 	default:
 		return d.Round(time.Second).String()
 	}
+}
+
+// window is at most room of lines, starting scroll lines in, and where it starts.
+// That is less than scroll when the lines have grown fewer or the terminal taller
+// since, so that the window never ends in empty rows a scroll back would fill.
+func window(lines []string, scroll, room int) (shown []string, first int) {
+	first = min(scroll, max(len(lines)-room, 0))
+	return lines[first:min(first+room, len(lines))], first
+}
+
+// pick is the item at *cursor, after moving the cursor back onto items if they
+// have shrunk under it. It is false, and leaves the cursor alone, when there are
+// no items.
+func pick[T any](items []T, cursor *int) (T, bool) {
+	if len(items) == 0 {
+		var zero T
+		return zero, false
+	}
+	*cursor = min(max(*cursor, 0), len(items)-1)
+	return items[*cursor], true
 }
 
 // clip cuts s to width terminal cells. A width of zero or less means the width is

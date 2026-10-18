@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"cmp"
 	"fmt"
 	"slices"
 	"strconv"
@@ -9,7 +10,6 @@ import (
 
 	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
-	"github.com/charmbracelet/x/ansi"
 
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/history"
@@ -103,19 +103,11 @@ type derivedFor struct {
 }
 
 func newHistoryScreen(s *session, st styles, nav navigator, cat Catalog, src History) *historyScreen {
-	h := &historyScreen{
+	return &historyScreen{
 		s: s, st: st, nav: nav, keys: newHistoryKeys(), src: src,
-		ops:   make(map[string]Operation),
+		ops:   operationsByID(cat),
 		stale: true,
 	}
-	if cat != nil {
-		for _, g := range cat.Groups() {
-			for _, op := range g.Operations {
-				h.ops[op.ID] = op
-			}
-		}
-	}
-	return h
 }
 
 func (h *historyScreen) focused() bool { return h.dialog != nil }
@@ -291,12 +283,8 @@ func (h *historyScreen) say(notice string) {
 }
 
 func (h *historyScreen) update(msg tea.Msg) tea.Cmd {
-	if d := h.dialog; d != nil {
-		finished, cmd := d.update(msg)
-		if finished && h.dialog == d {
-			h.dialog = nil
-		}
-		return cmd
+	if h.dialog != nil {
+		return updateDialog(&h.dialog, msg)
 	}
 	keyMsg, isKey := msg.(tea.KeyPressMsg)
 	if !isKey {
@@ -356,7 +344,7 @@ func (h *historyScreen) clear() tea.Cmd {
 	id, cmd := h.s.launch(action{inv: Invocation{Args: args}, display: commandLine(args)}, func(r Result) tea.Cmd {
 		switch {
 		case r.ExitCode == exitcode.OK:
-			h.say(firstNonEmpty(strings.Join(stderrTail(r.Stderr, 1), ""), "Cleared the history."))
+			h.say(cmp.Or(strings.Join(stderrTail(r.Stderr, 1), ""), "Cleared the history."))
 		case id != 0 && h.s.wasDeclined(id):
 			h.say("Nothing was cleared.")
 		default:
@@ -429,9 +417,7 @@ func (h *historyScreen) view(width, height int) string {
 	case h.src == nil:
 		lines = append(lines, "The request history is not available here.")
 	case h.err != nil:
-		lines = append(lines, (&failure{what: "reading the history", result: Result{
-			ExitCode: exitcode.General, Stderr: []byte(h.err.Error()),
-		}}).view(st, width))
+		lines = append(lines, (&failure{what: "reading the history", result: errorResult(h.err)}).view(st, width))
 	case !h.read:
 		lines = append(lines, st.dim.Render("Reading the history…"))
 	case h.rowCount() == 0 && h.off != "":
@@ -504,33 +490,7 @@ func (h *historyScreen) table(width, room int) []string {
 	// Widths are measured on the rows on screen only: a history can be thousands of
 	// requests long.
 	visible := append([][]string{cells[0]}, cells[first+1:last+1]...)
-	widths := make([]int, len(cells[0]))
-	for _, row := range visible {
-		for i, c := range row[:len(row)-1] {
-			widths[i] = max(widths[i], ansi.StringWidth(c))
-		}
-	}
-
-	lines := make([]string, 0, len(visible))
-	for i, row := range visible {
-		var b strings.Builder
-		for j, c := range row {
-			b.WriteString(c)
-			if j < len(row)-1 {
-				b.WriteString(strings.Repeat(" ", widths[j]-ansi.StringWidth(c)+2))
-			}
-		}
-		line := b.String()
-		switch {
-		case i == 0:
-			line = h.st.dim.Render("  " + line)
-		case first+i-1 == h.cursor:
-			line = h.st.selected.Render("> " + line)
-		default:
-			line = "  " + line
-		}
-		lines = append(lines, clip(line, width))
-	}
+	lines := tableRows(h.st, visible, h.cursor-first, width)
 	if rows > shown {
 		lines = append(lines, h.st.dim.Render(fmt.Sprintf("  %d–%d of %d", first+1, last, rows)))
 	}

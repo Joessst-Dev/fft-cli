@@ -34,6 +34,16 @@ func (c shellCommand) String() string {
 
 func (c shellCommand) empty() bool { return c.line == "" }
 
+// nounArgs is `fft <noun> <verb> <name> <flags>`. A name starting with a dash
+// goes last, after "--", where it is only a name and never a flag.
+func nounArgs(noun, verb, name string, flags ...string) []string {
+	args := []string{noun, verb}
+	if strings.HasPrefix(name, "-") {
+		return append(append(append(args, flags...), "--"), name)
+	}
+	return append(append(args, name), flags...)
+}
+
 // commandLine renders args as the fft command a user would type.
 func commandLine(args []string) shellCommand {
 	var b strings.Builder
