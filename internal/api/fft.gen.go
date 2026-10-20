@@ -15206,7 +15206,8 @@ type DeliveryPreferences struct {
 	// Shipping DeliveryPreferencesShipping
 	Shipping *DeliveryPreferencesShipping `json:"shipping,omitempty"`
 
-	// SourcingOptionRefs Id of the SourcingOptions
+	// SourcingOptionRefs @deprecated this property has been deprecated and has no effect on the routing.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	SourcingOptionRefs *[]string `json:"sourcingOptionRefs,omitempty"`
 
 	// SupplyingFacilities @deprecated Use supplyingFacilities under collect
