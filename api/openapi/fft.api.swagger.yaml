@@ -37541,7 +37541,10 @@ components:
         shipping:
           $ref: '#/components/schemas/DeliveryPreferencesShipping'
         sourcingOptionRefs:
-          description: Id of the SourcingOptions
+          deprecated: true
+          description: >-
+            @deprecated this property has been deprecated and has no effect on
+            the routing.
           items:
             description: Reference of a SourcingOptions
             example: 928f3730-bc48-4d85-b83f-3fd86b776178
