@@ -1,6 +1,6 @@
 ---
 name: fft
-description: Drive the fft CLI against a fulfillmenttools tenant - read and change orders, facilities, interfacility connections, listings, stock, pick jobs, pack jobs and handovers, manage and activate routing strategies, simulate how an order would be routed, and reach any of the API's 574 operations. Use whenever the user mentions fulfillmenttools, fft, an order, a pickjob or packjob, a handover, a listing, stock levels, a routing strategy, or a facility or warehouse in that system - and whenever they ask why an order was routed or sourced the way it was, where an order would be fulfilled from, or how a fulfillmenttools concept works (a handover or pick job lifecycle, routing fences and ratings).
+description: Drive the fft CLI against a fulfillmenttools tenant - read and change orders, facilities, interfacility connections, listings, stock, pick jobs, pack jobs and handovers, manage and activate routing strategies, simulate how an order would be routed, and reach any of the API's 575 operations. Use whenever the user mentions fulfillmenttools, fft, an order, a pickjob or packjob, a handover, a listing, stock levels, a routing strategy, or a facility or warehouse in that system - and whenever they ask why an order was routed or sourced the way it was, where an order would be fulfilled from, or how a fulfillmenttools concept works (a handover or pick job lifecycle, routing fences and ratings).
 ---
 
 # Driving fft
@@ -223,7 +223,7 @@ Node) that installs and runs straight away. See
 - [references/commands.md](references/commands.md) — the curated commands, and the
   addressing rules that will otherwise bite you (a listing has no id of its own).
 - [references/discovery.md](references/discovery.md) — getting from a word the user said to
-  a command, across all 574 operations.
+  a command, across all 575 operations.
 - [references/concepts.md](references/concepts.md) — asking the fulfillmenttools docs how
   the product works, and what must never go into the question.
 - [references/recipes.md](references/recipes.md) — whole tasks: set up a project, bulk
