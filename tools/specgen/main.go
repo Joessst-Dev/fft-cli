@@ -1,7 +1,7 @@
 // Command specgen turns the fulfillmenttools OpenAPI spec into opmeta.gen.go: the
 // metadata table that lets fft reach every operation the typed client does not have.
 //
-// oapi-codegen generates a typed client for eight tags — 95 methods of the API's
+// oapi-codegen generates a typed client for eight tags — 96 methods of the API's
 // 575 operations. The other 479 have no Go method to call, so a command that wants
 // to reach them has to build the request itself: method, path template, parameters
 // and body. That is what this table carries.
