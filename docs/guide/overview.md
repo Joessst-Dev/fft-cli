@@ -223,7 +223,7 @@ Node) that installs and runs straight away. See
 - [references/commands.md](./commands.md) — the curated commands, and the
   addressing rules that will otherwise bite you (a listing has no id of its own).
 - [references/discovery.md](./discovery.md) — getting from a word the user said to
-  a command, across all 574 operations.
+  a command, across all 575 operations.
 - [references/concepts.md](./concepts.md) — asking the fulfillmenttools docs how
   the product works, and what must never go into the question.
 - [references/recipes.md](./recipes.md) — whole tasks: set up a project, bulk

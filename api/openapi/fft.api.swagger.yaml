@@ -10633,6 +10633,111 @@ paths:
       summary: Update facility discount
       tags:
         - Facilities
+  /api/facilities/capacities:
+    get:
+      deprecated: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Returns the picking slots of the given facilities within the requested
+        period with configured, booked and remaining capacity. The result is
+        paginated over the requested facilities in the order of the
+        facilityRefs.
+      operationId: getFacilitiesCapacity
+      parameters:
+        - description: >-
+            Start of the requested period (inclusive), in the time zone of the
+            facility. Format: YYYY-MM-DD.
+          in: query
+          name: from
+          required: true
+          schema:
+            example: 2026-10-15T00:00:00.000Z
+            format: date
+            type: string
+        - description: >-
+            End of the requested period (inclusive), in the time zone of the
+            facility. Format: YYYY-MM-DD.
+          in: query
+          name: to
+          required: true
+          schema:
+            example: 2026-10-22T00:00:00.000Z
+            format: date
+            type: string
+        - description: References of the facilities to return the capacity utilization for.
+          in: query
+          name: facilityRefs
+          required: true
+          schema:
+            example:
+              - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+              - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+            items:
+              type: string
+            maxItems: 100
+            minItems: 1
+            type: array
+        - description: Maximum number of facilities to return.
+          in: query
+          name: size
+          required: false
+          schema:
+            default: 25
+            example: 25
+            maximum: 100
+            minimum: 1
+            type: integer
+        - description: >-
+            Reference of the facility after which the page starts. Must be one
+            of the requested facilityRefs, whose order defines the page order.
+          in: query
+          name: startAfterId
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacilitiesCapacity'
+          description: Successfully retrieved the capacity utilization.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Invalid input. See response for details.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The requested entity was not found
+      summary: Get the capacity utilization of multiple facilities
+      x-fft-permissions:
+        - FACILITY_READ
+      tags:
+        - Facilities
+      x-badges:
+        - color: red
+          label: ALPHA
   /api/facilities/search:
     post:
       deprecated: false
@@ -15762,7 +15867,7 @@ paths:
       x-fft-permissions:
         - OPERATIONS_VALIDATION_READ
       tags:
-        - Operations Validations (Operations)
+        - Operations validations
       x-badges:
         - color: red
           label: ALPHA
@@ -15812,7 +15917,7 @@ paths:
       x-fft-permissions:
         - OPERATIONS_VALIDATION_WRITE
       tags:
-        - Operations Validations (Operations)
+        - Operations validations
       x-badges:
         - color: red
           label: ALPHA
@@ -15862,7 +15967,7 @@ paths:
       x-fft-permissions:
         - OPERATIONS_VALIDATION_READ
       tags:
-        - Operations Validations (Operations)
+        - Operations validations
       x-badges:
         - color: red
           label: ALPHA
@@ -15936,7 +16041,7 @@ paths:
       x-fft-permissions:
         - OPERATIONS_VALIDATION_WRITE
       tags:
-        - Operations Validations (Operations)
+        - Operations validations
       x-badges:
         - color: red
           label: ALPHA
@@ -15981,7 +16086,7 @@ paths:
       x-fft-permissions:
         - OPERATIONS_VALIDATION_READ
       tags:
-        - Operations Validations (Operations)
+        - Operations validations
       x-badges:
         - color: red
           label: ALPHA
@@ -40541,6 +40646,23 @@ components:
       title: ExternalStockChangeReasonOutput
       type: object
       description: ExternalStockChangeReasonOutput
+    FacilitiesCapacity:
+      properties:
+        facilities:
+          description: Capacity utilization per facility.
+          items:
+            $ref: '#/components/schemas/FacilityCapacity'
+          maxItems: 100
+          type: array
+        total:
+          description: Total number of distinct requested facilities.
+          type: number
+      required:
+        - facilities
+        - total
+      title: FacilitiesCapacity
+      type: object
+      description: FacilitiesCapacity
     Facility:
       allOf:
         - $ref: '#/components/schemas/VersionedResource'
@@ -40728,6 +40850,75 @@ components:
       title: FacilityAddressSort
       type: object
       description: FacilityAddressSort
+    FacilityCapacity:
+      properties:
+        capacityEnabled:
+          description: Whether capacity planning is enabled for the facility.
+          type: boolean
+        facilityRef:
+          description: Reference of the facility.
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        slots:
+          description: >-
+            Picking slots in the requested period. Slots of the same day are not
+            aggregated.
+          items:
+            $ref: '#/components/schemas/FacilityCapacitySlot'
+          type: array
+        unlimited:
+          description: >-
+            True if the facility has no capacity limit at all, i.e. every
+            returned slot is unlimited.
+          type: boolean
+      required:
+        - facilityRef
+        - capacityEnabled
+        - unlimited
+        - slots
+      title: FacilityCapacity
+      type: object
+      description: FacilityCapacity
+    FacilityCapacitySlot:
+      properties:
+        bookedCapacity:
+          description: >-
+            Booked capacity of the slot. Not set if the slot is unlimited (no
+            capacity configured) or capacity is disabled for the facility.
+          type: number
+        capacity:
+          description: Configured capacity of the slot. Not set if the slot is unlimited.
+          type: number
+        end:
+          description: End of the picking slot.
+          example: 2026-06-17T12:00:00.000Z
+          format: date-time
+          type: string
+        facilityRef:
+          description: Reference of the facility the slot belongs to.
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        remainingCapacity:
+          description: Remaining capacity of the slot. Not set if the slot is unlimited.
+          type: number
+        start:
+          description: Start of the picking slot.
+          example: 2026-06-17T12:00:00.000Z
+          format: date-time
+          type: string
+        unlimited:
+          description: >-
+            True if no capacity limit applies to this slot (capacity is disabled
+            for the facility or no capacity is configured for the slot).
+          type: boolean
+      required:
+        - facilityRef
+        - start
+        - end
+        - unlimited
+      title: FacilityCapacitySlot
+      type: object
+      description: FacilityCapacitySlot
     FacilityCarrierConnection:
       properties:
         carrierRef:
@@ -96744,121 +96935,22 @@ components:
       scheme: bearer
       bearerFormat: JWT
 tags:
-  - description: >-
-      Endpoints used by shops to get the current available pickup stores and
-      available service levels like same-day delivery.
-    name: Checkout options
-  - description: Endpoints to create, retrieve, update, and manage orders.
-    name: Orders
-  - description: >-
-      Endpoints to define and manage configuration settings related to order
-      processing, such as defaults, business rules, and operational parameters
-      that influence how orders are handled.
-    name: Orders configuration
-  - description: >-
-      Endpoints for managing orders that have already been completed and do not
-      need to participate in the fulfillment lifecycle.
-    name: Order records
-  - description: Endpoints for managing packaging units.
-    name: Packaging units
-  - description: Endpoints to get information about the routing plan and any reroutes.
-    name: Routing plans
-  - description: Endpoints for configuring routing plan handling.
-    name: Routing plans configuration
-  - description: Endpoints to configure the routing strategy.
-    name: Routing strategies
-  - description: Endpoints for processing the routing decision logs.
-    name: Sourcing options
   - description: Endpoints to analyze the sourcing options a routing request would produce.
     name: Analyze
-  - description: Endpoints to create, update, read, and delete order source configurations.
-    name: Orders sources
-  - description: Endpoints to distribute items across packaging units (bin packing).
-    name: Routing
-  - description: Endpoints to read the journal entries recorded for a routing process.
-    name: Routing journals
-  - description: >-
-      Endpoints to create, update, and read simulation orders used to try out
-      routing behavior.
-    name: Simulation orders
+  - description: Endpoints to help determine who did what when.
+    name: Audits
   - description: Endpoints to create, update, and read carriers.
     name: Carriers
   - description: Endpoints to create, update, and read carriers configuration.
     name: Carriers configuration
-  - description: Endpoints to manage the handover process.
-    name: Handovers
-  - description: Endpoints to create, update, and read handover configuration.
-    name: Handovers configuration
-  - description: Endpoints to manipulate operative containers.
-    name: Operative containers
-  - description: Endpoints to get operative processes.
-    name: Operative processes
-  - description: Endpoints to create, update, and read operations validations.
-    name: Operations Validations (Operations)
-  - description: Endpoints to facilitate the packing process.
-    name: Packing
-  - description: Endpoints to create, update, and read packing configuration.
-    name: Packing configuration
-  - description: Endpoints to support the management of the picking process.
-    name: Picking
-  - description: Endpoints to create, update, and read pick jobs.
-    name: Picking configuration
-  - description: Endpoints to manipulate restowing items.
-    name: Restowing
-  - description: Endpoints to manipulate restowing configuration.
-    name: Restowing configuration
-  - description: Endpoints to create, update, and read returns.
-    name: Returns
-  - description: Endpoints to create, update, and read returns configuration.
-    name: Returns configuration
-  - description: Endpoints to create, update, and read operative service jobs.
-    name: Services
-  - description: >-
-      Endpoints to create, update, and read operative service jobs
-      configuration.
-    name: Services configuration
-  - description: Endpoints to create, update, and read shipments and parcels.
-    name: Shipments
-  - description: Endpoints to create, update, and read shipping configuration.
-    name: Shipments configuration
-  - description: Endpoints to operate with stacks.
-    name: Stacks
-  - description: Endpoints to create, update, and read shipping labels.
-    name: Labels
-  - description: Endpoints to create and read the parcel information reported by a carrier.
-    name: Parcel information
-  - description: Endpoints to create, update, and read pickup services.
-    name: Pickup service
-  - description: Endpoints to create a PDF pickup receipt from a captured signature.
-    name: Signatures
-  - description: Endpoints to read and update the shipping configuration.
-    name: Shipping configuration
-  - description: Endpoints to create and read the shipping information of a parcel.
-    name: Shipping information
-  - description: >-
-      Endpoints to create, read, and act on the tracking information of a
-      parcel.
-    name: Tracking information
   - description: Endpoints to create, update, and read categories.
     name: Categories
   - description: Endpoints to configure and get channel availability.
     name: Channel availabilities
-  - description: Endpoints to create, update, and read inbound processes and receipts.
-    name: Inbound
-  - description: Endpoints handle reservations.
-    name: Reservations
-  - description: Endpoints to create, update, and read stock availability thresholds.
-    name: Stock availability thresholds
-  - description: Endpoints to create, update, and read stocks.
-    name: Stock
-  - description: Endpoints to create, update, and read stocks configuration.
-    name: Stock configuration
-  - description: Endpoints to create, update, and read storage locations and zones.
-    name: Storage locations
-  - description: Endpoints to create, update, and read stow jobs.
-    name: Stowing
-  - description: Endpoints to help determine who did what when.
-    name: Audits
+  - description: >-
+      Endpoints used by shops to get the current available pickup stores and
+      available service levels like same-day delivery.
+    name: Checkout options
   - description: Endpoints to update and read general configuration of fulfillmenttools.
     name: Configurations
   - description: Endpoints to create, update, and read custom services.
@@ -96885,24 +96977,137 @@ tags:
     name: Facilities
   - description: Facility groups combine one or multiple facilities into logical groups.
     name: Facility groups
+  - description: Endpoints to manage the handover process.
+    name: Handovers
+  - description: Endpoints to create, update, and read handover configuration.
+    name: Handovers configuration
+  - description: Endpoints to get health status about fulfillmenttools.
+    name: Health
+  - description: Endpoints to create, update, and read inbound processes and receipts.
+    name: Inbound
+  - description: Endpoints to create, update, and read shipping labels.
+    name: Labels
   - description: Endpoints to create, update, and read facility listings.
     name: Listings
   - description: Endpoints to create, update and read measurement units.
     name: Measurement units
   - description: Endpoints to configure the notification center.
     name: Notification center configuration
+  - description: Endpoints to configure external identity service providers (IDPs).
+    name: OIDC configuration
+  - description: Endpoints to manipulate operative containers.
+    name: Operative containers
+  - description: Endpoints to get operative processes.
+    name: Operative processes
+  - description: Endpoints to create, update, and read operations validations.
+    name: Operations validations
+  - description: Endpoints to create, retrieve, update, and manage orders.
+    name: Orders
+  - description: >-
+      Endpoints to define and manage configuration settings related to order
+      processing, such as defaults, business rules, and operational parameters
+      that influence how orders are handled.
+    name: Orders configuration
+  - description: >-
+      Endpoints for managing orders that have already been completed and do not
+      need to participate in the fulfillment lifecycle.
+    name: Order records
+  - description: Endpoints to create, update, read, and delete order source configurations.
+    name: Orders sources
+  - description: Endpoints to facilitate the packing process.
+    name: Packing
+  - description: Endpoints to create, update, and read packing configuration.
+    name: Packing configuration
+  - description: Endpoints for managing packaging units.
+    name: Packaging units
+  - description: Endpoints to create and read the parcel information reported by a carrier.
+    name: Parcel information
+  - description: Endpoints to support the management of the picking process.
+    name: Picking
+  - description: Endpoints to create, update, and read pick jobs.
+    name: Picking configuration
+  - description: Endpoints to create, update, and read pickup services.
+    name: Pickup service
   - description: A process groups all entities of an order.
     name: Processes
   - description: Endpoints to create, update, and read remote configs.
     name: Remote configuration
+  - description: Endpoints to manipulate restowing items.
+    name: Restowing
+  - description: Endpoints to manipulate restowing configuration.
+    name: Restowing configuration
+  - description: Endpoints handle reservations.
+    name: Reservations
+  - description: Endpoints to create, update, and read returns.
+    name: Returns
+  - description: Endpoints to create, update, and read returns configuration.
+    name: Returns configuration
+  - description: Endpoints to distribute items across packaging units (bin packing).
+    name: Routing
+  - description: Endpoints to read the journal entries recorded for a routing process.
+    name: Routing journals
+  - description: Endpoints to get information about the routing plan and any reroutes.
+    name: Routing plans
+  - description: Endpoints for configuring routing plan handling.
+    name: Routing plans configuration
+  - description: Endpoints to configure the routing strategy.
+    name: Routing strategies
+  - description: Endpoints to create, update, and read operative service jobs.
+    name: Services
+  - description: >-
+      Endpoints to create, update, and read operative service jobs
+      configuration.
+    name: Services configuration
+  - description: Endpoints to read and update the shipping configuration.
+    name: Shipping configuration
+  - description: Endpoints to create and read the shipping information of a parcel.
+    name: Shipping information
+  - description: Endpoints to create, update, and read shipments and parcels.
+    name: Shipments
+  - description: Endpoints to create, update, and read shipping configuration.
+    name: Shipments configuration
+  - description: Endpoints to create a PDF pickup receipt from a captured signature.
+    name: Signatures
+  - description: >-
+      Endpoints to create, update, and read simulation orders used to try out
+      routing behavior.
+    name: Simulation orders
+  - description: Endpoints for processing the routing decision logs.
+    name: Sourcing options
+  - description: Endpoints to operate with stacks.
+    name: Stacks
+  - description: Endpoints to create, update, and read stocks.
+    name: Stock
+  - description: Endpoints to create, update, and read stock availability thresholds.
+    name: Stock availability thresholds
+  - description: Endpoints to create, update, and read stocks configuration.
+    name: Stock configuration
+  - description: Endpoints to create, update, and read storage locations and zones.
+    name: Storage locations
+  - description: Endpoints to create, update, and read stow jobs.
+    name: Stowing
   - description: Endpoints to create, update, and read tags.
     name: Tags
+  - description: >-
+      Endpoints to create, read, and act on the tracking information of a
+      parcel.
+    name: Tracking information
   - description: >-
       Endpoints that enable the administration of user accounts, including
       creation, updating, read, and deletion of user accounts.
     name: User management
   - description: Endpoints that validate properties accepted by fulfillmenttools.
     name: Validations
+  - description: Endpoints to create, update, and read workflow definitions.
+    name: Workflows
+  - description: Endpoints to obtain artifact information provided by fulfillmenttools.
+    name: Artifacts
+  - description: Endpoints to configure features of fulfillmenttools.
+    name: Features
+  - description: Endpoints to access to the fulfillmenttools GraphQL API.
+    name: GraphQL
+  - description: Endpoints serving statically hosted HTML content.
+    name: Static
   - description: >-
       Endpoints to create, update, and read export containers, export requests,
       and export operations.
@@ -96915,19 +97120,5 @@ tags:
       Endpoints to execute support actions such as activation, status check,
       extension, and deactivation.
     name: Support
-  - description: Endpoints to create, update, and read workflow definitions.
-    name: Workflows
-  - description: Endpoints to obtain artifact information provided by fulfillmenttools.
-    name: Artifacts
-  - description: Endpoints to configure features of fulfillmenttools.
-    name: Features
-  - description: Endpoints to access to the fulfillmenttools GraphQL API.
-    name: GraphQL
-  - description: Endpoints to get health status about fulfillmenttools.
-    name: Health
-  - description: Endpoints to configure external identity service providers (IDPs).
-    name: OIDC configuration
-  - description: Endpoints serving statically hosted HTML content.
-    name: Static
 security:
   - BearerToken: []
