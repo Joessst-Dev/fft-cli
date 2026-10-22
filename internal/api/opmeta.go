@@ -14,7 +14,7 @@ import (
 // # Why this exists at all
 //
 // The generated client covers eight tags: facilities, listings, stocks, health,
-// user management, sourcing options, orders and routing strategy. That is 95
+// user management, sourcing options, orders and routing strategy. That is 96
 // methods out of the API's 575 operations. Tier-2 and Tier-3 commands have to
 // reach the other 479, and they cannot do it through a typed client that does not
 // have them.
