@@ -5697,7 +5697,7 @@ var operations = []Operation{
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"target\": {\n    \"context\": [\n      {\n        \"type\": \"FACILITY\",\n        \"values\": [\n          \"facilityRef1\"\n        ]\n      }\n    ]\n  },\n  \"tenantThresholdId\": \"LOW_STOCK_ARTICLE_ABC123\",\n  \"thresholds\": [\n    {\n      \"levels\": [\n        {\n          \"key\": \"LOW_STOCK\",\n          \"limit\": 100\n        }\n      ],\n      \"thresholdOnValue\": \"AVAILABLE_FOR_PICKING\"\n    }\n  ]\n}\n",
-		SampleResponse: "{\n  \"success\": false\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"5aa18b4d-45de-4e9e-92db-936288040272\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"target\": {\n    \"context\": [\n      {\n        \"type\": \"FACILITY\",\n        \"values\": [\n          \"facilityRef1\"\n        ]\n      }\n    ]\n  },\n  \"tenantThresholdId\": \"LOW_STOCK_ARTICLE_ABC123\",\n  \"thresholds\": [\n    {\n      \"levels\": [\n        {\n          \"key\": \"LOW_STOCK\",\n          \"limit\": 100\n        }\n      ],\n      \"thresholdOnValue\": \"AVAILABLE_FOR_PICKING\"\n    }\n  ],\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:          "processAction",
@@ -6226,8 +6226,8 @@ var operations = []Operation{
 		},
 		HasBody:        true,
 		BodyRequired:   true,
-		SampleBody:     "{\n  \"version\": 1\n}\n",
-		SampleResponse: "{\n  \"success\": false\n}\n",
+		SampleBody:     "{\n  \"id\": \"5aa18b4d-45de-4e9e-92db-936288040272\",\n  \"version\": 1\n}\n",
+		SampleResponse: "{\n  \"created\": \"2026-01-01T00:00:00Z\",\n  \"id\": \"5aa18b4d-45de-4e9e-92db-936288040272\",\n  \"lastModified\": \"2026-01-01T00:00:00Z\",\n  \"target\": {\n    \"context\": [\n      {\n        \"type\": \"FACILITY\",\n        \"values\": [\n          \"facilityRef1\"\n        ]\n      }\n    ]\n  },\n  \"tenantThresholdId\": \"LOW_STOCK_ARTICLE_ABC123\",\n  \"thresholds\": [\n    {\n      \"levels\": [\n        {\n          \"key\": \"LOW_STOCK\",\n          \"limit\": 100\n        }\n      ],\n      \"thresholdOnValue\": \"AVAILABLE_FOR_PICKING\"\n    }\n  ],\n  \"version\": 1\n}\n",
 	},
 	{
 		ID:             "putStockConfiguration",
