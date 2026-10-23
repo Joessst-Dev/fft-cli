@@ -1470,16 +1470,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/StockAvailabilityThresholdConfigValidationOutcome
+                $ref: '#/components/schemas/StockAvailabilityThresholdConfig'
           description: The created stock availability threshold configuration
         '400':
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/StockAvailabilityThresholdConfigValidationOutcome
-          description: The provided threshold configuration failed validation
+                items:
+                  $ref: >-
+                    #/components/schemas/StockAvailabilityThresholdConfigValidationError
+                type: array
+          description: Invalid input. See response for details.
         '401':
           content:
             application/json:
@@ -1518,7 +1519,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        '204':
           description: The stock availability threshold configuration was found & deleted.
         '401':
           content:
@@ -1622,16 +1623,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/StockAvailabilityThresholdConfigValidationOutcome
+                $ref: '#/components/schemas/StockAvailabilityThresholdConfig'
           description: The updated stock availability threshold configuration
         '400':
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/StockAvailabilityThresholdConfigValidationOutcome
-          description: The provided threshold configuration failed validation
+                items:
+                  $ref: >-
+                    #/components/schemas/StockAvailabilityThresholdConfigValidationError
+                type: array
+          description: Invalid input. See response for details.
         '401':
           content:
             application/json:
@@ -87300,6 +87302,10 @@ components:
       description: StockAvailabilityThresholdConfigForCreation
     StockAvailabilityThresholdConfigForUpdate:
       properties:
+        id:
+          description: Unique identifier of this stockAvailabilityThresholdConfig
+          example: 5aa18b4d-45de-4e9e-92db-936288040272
+          type: string
         target:
           allOf:
             - $ref: '#/components/schemas/StockAvailabilityThresholdConfigTarget'
@@ -87489,6 +87495,37 @@ components:
       title: StockAvailabilityThresholdConfigTarget
       type: object
       description: StockAvailabilityThresholdConfigTarget
+    StockAvailabilityThresholdConfigValidationError:
+      properties:
+        description:
+          description: The version provided within an invalid request.
+          type: string
+        requestVersion:
+          description: The version provided within an invalid request.
+          example: 41
+          format: int64
+          type: integer
+        summary:
+          description: One or more mandatory attributes were not provided.
+          type: string
+        validations:
+          description: >-
+            The business validation issues that prevented the threshold
+            configuration from being saved.
+          items:
+            $ref: >-
+              #/components/schemas/StockAvailabilityThresholdConfigValidationIssue
+          type: array
+        version:
+          example: 42
+          format: int64
+          type: integer
+      required:
+        - summary
+        - validations
+      title: StockAvailabilityThresholdConfigValidationError
+      type: object
+      description: StockAvailabilityThresholdConfigValidationError
     StockAvailabilityThresholdConfigValidationIssue:
       properties:
         field:
@@ -87504,28 +87541,6 @@ components:
       title: StockAvailabilityThresholdConfigValidationIssue
       type: object
       description: StockAvailabilityThresholdConfigValidationIssue
-    StockAvailabilityThresholdConfigValidationOutcome:
-      properties:
-        result:
-          allOf:
-            - $ref: '#/components/schemas/StockAvailabilityThresholdConfig'
-          description: Created/updated threshold configuration on success.
-        success:
-          description: Whether the threshold configuration passed business validation.
-          type: boolean
-        validations:
-          description: >-
-            The business validation issues that prevented the threshold
-            configuration from being saved.
-          items:
-            $ref: >-
-              #/components/schemas/StockAvailabilityThresholdConfigValidationIssue
-          type: array
-      required:
-        - success
-      title: StockAvailabilityThresholdConfigValidationOutcome
-      type: object
-      description: StockAvailabilityThresholdConfigValidationOutcome
     StockAvailabilityThresholdTransition:
       properties:
         config:
