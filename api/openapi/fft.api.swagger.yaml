@@ -40881,6 +40881,43 @@ components:
       title: FacilityCapacity
       type: object
       description: FacilityCapacity
+    FacilityCapacityFullyBookedWebHookEvent:
+      allOf:
+        - $ref: '#/components/schemas/WebHookEvent'
+      properties:
+        payload:
+          $ref: '#/components/schemas/FacilityCapacityFullyBookedWebHookEventPayload'
+      required:
+        - payload
+      type: object
+      title: FacilityCapacityFullyBookedWebHookEvent
+      description: FacilityCapacityFullyBookedWebHookEvent
+    FacilityCapacityFullyBookedWebHookEventPayload:
+      properties:
+        facilityRef:
+          description: The id of the facility whose picking slots are fully booked
+          type: string
+        timeframeEnd:
+          description: >-
+            The end (23:59:59) of the last day of the capacity planning
+            timeframe in the time zone of the facility
+          example: 2020-02-05T23:59:59.999Z
+          format: date-time
+          type: string
+        timeframeStart:
+          description: >-
+            The first day of the capacity planning timeframe in the time zone of
+            the facility
+          example: 2020-02-03T00:00:00.000Z
+          format: date-time
+          type: string
+      required:
+        - facilityRef
+        - timeframeStart
+        - timeframeEnd
+      type: object
+      title: FacilityCapacityFullyBookedWebHookEventPayload
+      description: FacilityCapacityFullyBookedWebHookEventPayload
     FacilityCapacitySlot:
       properties:
         bookedCapacity:
@@ -87557,6 +87594,13 @@ components:
             - TO_ON
             - TO_OFF
             - NONE
+          type: string
+        triggerTimestamp:
+          description: >-
+            When the threshold evaluation was triggered. Only set for TO_ON and
+            TO_OFF transitions, as the previous state is unknown for NONE.
+          example: 2026-06-17T12:00:00.000Z
+          format: date-time
           type: string
       required:
         - config
