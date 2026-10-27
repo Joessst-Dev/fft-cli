@@ -68485,6 +68485,8 @@ components:
               default: false
               description: Indicates if pickJob can still be resetted or restarted
               type: boolean
+            sentNotifications:
+              $ref: '#/components/schemas/PickJobSentNotifications'
             shortId:
               description: >-
                 A short identifier that helps assigning a pickJob to a customer.
@@ -69306,6 +69308,26 @@ components:
       title: PickJobSearchQuery
       type: object
       description: PickJobSearchQuery
+    PickJobSentNotifications:
+      additionalProperties: false
+      description: >-
+        Markers whether the respective notification was already sent for this
+        pickJob. Maintained by the system.
+      properties:
+        overdueDetected:
+          default: false
+          description: >-
+            Indicates if the overdue (targetTime is in the past) notification
+            was already sent.
+          type: boolean
+        urgentDetected:
+          default: false
+          description: >-
+            Indicates if the urgent (targetTime is in the near future (inside
+            fulfillmentProcessBuffer)) notification was already sent.
+          type: boolean
+      type: object
+      title: PickJobSentNotifications
     PickJobSort:
       properties:
         created:
