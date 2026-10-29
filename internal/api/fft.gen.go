@@ -12125,6 +12125,27 @@ func (e ToolkitPredicateConnector) Valid() bool {
 	}
 }
 
+// Defines values for ToolkitRatingOptionAggregation.
+const (
+	ToolkitRatingOptionAggregationMAX ToolkitRatingOptionAggregation = "MAX"
+	ToolkitRatingOptionAggregationMIN ToolkitRatingOptionAggregation = "MIN"
+	ToolkitRatingOptionAggregationSUM ToolkitRatingOptionAggregation = "SUM"
+)
+
+// Valid indicates whether the value is a known member of the ToolkitRatingOptionAggregation enum.
+func (e ToolkitRatingOptionAggregation) Valid() bool {
+	switch e {
+	case ToolkitRatingOptionAggregationMAX:
+		return true
+	case ToolkitRatingOptionAggregationMIN:
+		return true
+	case ToolkitRatingOptionAggregationSUM:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ToolkitRuleComparisonOperatorType.
 const (
 	ALLMATCHES        ToolkitRuleComparisonOperatorType = "ALL_MATCHES"
@@ -12184,22 +12205,22 @@ func (e ToolkitRuleScope) Valid() bool {
 
 // Defines values for ToolkitTransformationType.
 const (
-	COUNT     ToolkitTransformationType = "COUNT"
-	LAST      ToolkitTransformationType = "LAST"
-	SUBSTRING ToolkitTransformationType = "SUBSTRING"
-	SUM       ToolkitTransformationType = "SUM"
+	ToolkitTransformationTypeCOUNT     ToolkitTransformationType = "COUNT"
+	ToolkitTransformationTypeLAST      ToolkitTransformationType = "LAST"
+	ToolkitTransformationTypeSUBSTRING ToolkitTransformationType = "SUBSTRING"
+	ToolkitTransformationTypeSUM       ToolkitTransformationType = "SUM"
 )
 
 // Valid indicates whether the value is a known member of the ToolkitTransformationType enum.
 func (e ToolkitTransformationType) Valid() bool {
 	switch e {
-	case COUNT:
+	case ToolkitTransformationTypeCOUNT:
 		return true
-	case LAST:
+	case ToolkitTransformationTypeLAST:
 		return true
-	case SUBSTRING:
+	case ToolkitTransformationTypeSUBSTRING:
 		return true
-	case SUM:
+	case ToolkitTransformationTypeSUM:
 		return true
 	default:
 		return false
@@ -19639,10 +19660,8 @@ type OperationsValidationValueEntriesListFilter struct {
 
 // OperationsValidationValueEntriesSourceOperativeEntityFilter OperationsValidationValueEntriesSourceOperativeEntityFilter
 type OperationsValidationValueEntriesSourceOperativeEntityFilter struct {
-	// Id Search by id
-	//
-	// Example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
-	Id *StringFilter `json:"id,omitempty"`
+	// EntityId Search by entityId
+	EntityId *StringFilter `json:"entityId,omitempty"`
 }
 
 // OperativeEntity OperativeEntity
@@ -22671,10 +22690,13 @@ type RatingImplementation string
 
 // RatingResult RatingResult
 type RatingResult struct {
-	Id                    string  `json:"id"`
-	Name                  string  `json:"name"`
-	Penalty               float32 `json:"penalty"`
-	RoutingStrategyNodeId string  `json:"routingStrategyNodeId"`
+	Id   string `json:"id"`
+	Name string `json:"name"`
+
+	// OptionAggregation Defines how the penalties of the facilities within one sourcing option are aggregated into the option penalty. MIN: at least one facility must satisfy the rating, otherwise maxPenalty is applied once. MAX: all facilities must satisfy the rating, otherwise maxPenalty is applied once. SUM: every facility not satisfying the rating is charged maxPenalty individually.
+	OptionAggregation     *ToolkitRatingOptionAggregation `json:"optionAggregation,omitempty"`
+	Penalty               float32                         `json:"penalty"`
+	RoutingStrategyNodeId string                          `json:"routingStrategyNodeId"`
 
 	// Type The type of the rating, e.g. 'StandardRating' or 'ToolkitRating'
 	Type string `json:"type"`
@@ -24481,6 +24503,9 @@ type RoutingStrategyToolkitPriorityRating struct {
 	// Example: {"de_DE":"Wert","en_US":"Value","ru_RU":"значение"}
 	NameLocalized LocaleString `json:"nameLocalized"`
 
+	// OptionAggregation Defines how the facility penalties of a sourcing option are aggregated into the option penalty. Defaults to SUM.
+	OptionAggregation *ToolkitRatingOptionAggregation `json:"optionAggregation,omitempty"`
+
 	// Priority The priority of this rating
 	//
 	// Example: 100
@@ -24537,7 +24562,10 @@ type RoutingStrategyToolkitRating struct {
 	//
 	// Example: {"de_DE":"Wert","en_US":"Value","ru_RU":"значение"}
 	NameLocalized LocaleString `json:"nameLocalized"`
-	ReferenceId   string       `json:"referenceId"`
+
+	// OptionAggregation Defines how the facility penalties of a sourcing option are aggregated into the option penalty. Defaults to SUM.
+	OptionAggregation *ToolkitRatingOptionAggregation `json:"optionAggregation,omitempty"`
+	ReferenceId       string                          `json:"referenceId"`
 
 	// Rule The rule, containing the left predicates and the right predicates, that will be evaluated applying a RuleOperator
 	Rule *ToolkitRule `json:"rule,omitempty"`
@@ -27457,6 +27485,9 @@ type ToolkitPredicate_TransformationArgs_Item struct {
 
 // ToolkitPredicateConnector The allowed operators for connecting multiple predicates
 type ToolkitPredicateConnector string
+
+// ToolkitRatingOptionAggregation Defines how the penalties of the facilities within one sourcing option are aggregated into the option penalty. MIN: at least one facility must satisfy the rating, otherwise maxPenalty is applied once. MAX: all facilities must satisfy the rating, otherwise maxPenalty is applied once. SUM: every facility not satisfying the rating is charged maxPenalty individually.
+type ToolkitRatingOptionAggregation string
 
 // ToolkitRule The rule, containing the left predicates and the right predicates, that will be evaluated applying a RuleOperator
 type ToolkitRule struct {
