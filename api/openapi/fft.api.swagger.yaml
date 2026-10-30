@@ -11500,12 +11500,13 @@ paths:
           label: BETA
   /api/handovercontainers/{handoverContainerId}/stack:
     get:
-      deprecated: false
+      deprecated: true
       description: >-
-        This part of the API is in Beta status. For details, see the <a
+        This part of the API is deprecated. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
-        />Return the stack of a given handover container if found
+        />Return the stack of a given handover container if found. Deprecated:
+        stacks will be removed in a future release.
       operationId: getStackForHandoverContainer
       parameters:
         - description: id of the handover container
@@ -11547,9 +11548,6 @@ paths:
         - STACKS_READ
       tags:
         - Handovers
-      x-badges:
-        - color: orange
-          label: BETA
   /api/handoverjobs:
     get:
       description: ''
@@ -14864,12 +14862,12 @@ paths:
           label: BETA
   /api/loadunits/{loadUnitId}/stack:
     get:
-      deprecated: false
+      deprecated: true
       description: >-
-        This part of the API is in Beta status. For details, see the <a
+        This part of the API is deprecated. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br />Get
-        load unit stack
+        load unit stack. Deprecated: stacks will be removed in a future release.
       operationId: getStackForLoadUnit
       parameters:
         - in: path
@@ -14910,9 +14908,6 @@ paths:
         - STACKS_READ
       tags:
         - Picking
-      x-badges:
-        - color: orange
-          label: BETA
   /api/loadunittypes:
     get:
       deprecated: true
@@ -27490,7 +27485,7 @@ paths:
             endpoint
       summary: Search simulation orders
       x-fft-permissions:
-        - ADMIN_MODULES_READ
+        - SIMULATION_ORDER_READ
       tags:
         - Simulation orders
       x-badges:
@@ -27498,12 +27493,13 @@ paths:
           label: ALPHA
   /api/stacks:
     get:
-      deprecated: false
+      deprecated: true
       description: >-
-        This part of the API is in Beta status. For details, see the <a
+        This part of the API is deprecated. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br />Get
-        all Stacks respecting the given filter
+        all Stacks respecting the given filter. Deprecated: stacks will be
+        removed in a future release.
       operationId: getStacks
       parameters:
         - description: entity to start after
@@ -27566,16 +27562,13 @@ paths:
         - STACKS_READ
       tags:
         - Stacks
-      x-badges:
-        - color: orange
-          label: BETA
     post:
-      deprecated: false
+      deprecated: true
       description: >-
-        This part of the API is in Beta status. For details, see the <a
+        This part of the API is deprecated. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
-        />Create stack
+        />Create stack. Deprecated: stacks will be removed in a future release.
       operationId: createStack
       parameters: []
       requestBody:
@@ -27616,17 +27609,15 @@ paths:
         - STACKS_WRITE
       tags:
         - Stacks
-      x-badges:
-        - color: orange
-          label: BETA
   /api/stacks/{stackId}:
     get:
-      deprecated: false
+      deprecated: true
       description: >-
-        This part of the API is in Beta status. For details, see the <a
+        This part of the API is deprecated. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br />Get
-        Stack respecting the given id
+        Stack respecting the given id. Deprecated: stacks will be removed in a
+        future release.
       operationId: getStackById
       parameters:
         - in: path
@@ -27668,9 +27659,6 @@ paths:
         - STACKS_READ
       tags:
         - Stacks
-      x-badges:
-        - color: orange
-          label: BETA
   /api/status:
     get:
       description: Returns the fulfillmenttools status.
@@ -44124,7 +44112,10 @@ components:
           minimum: 0
           type: integer
         stackRef:
-          description: Linked stack through reference
+          deprecated: true
+          description: >-
+            Linked stack through reference. Deprecated: stacks will be removed
+            in a future release.
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
         storageLocationRef:
@@ -44204,7 +44195,10 @@ components:
           minimum: 0
           type: integer
         stackRef:
-          description: Linked Stack through reference
+          deprecated: true
+          description: >-
+            Linked Stack through reference. Deprecated: stacks will be removed
+            in a future release.
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
         storageLocationRef:
@@ -50662,6 +50656,10 @@ components:
             type: string
           maxItems: 50
           type: array
+        pricing:
+          allOf:
+            - $ref: '#/components/schemas/OrderPricing'
+          description: Contains pricing information regarding the whole item return job
         processRef:
           type: string
         returnableLineItems:
@@ -50737,6 +50735,10 @@ components:
             type: string
           maxItems: 50
           type: array
+        pricing:
+          allOf:
+            - $ref: '#/components/schemas/PricingForCreation'
+          description: Contains pricing information regarding the whole item return job
         processRef:
           type: string
         returnableLineItems:
@@ -50959,6 +50961,42 @@ components:
       title: ItemReturnJobLineItemForCreation
       type: object
       description: ItemReturnJobLineItemForCreation
+    ItemReturnJobPricingFee:
+      properties:
+        name:
+          description: Name of the fee
+          type: string
+        value:
+          allOf:
+            - $ref: '#/components/schemas/PricingMonetaryValue'
+          description: Fee value
+      title: ItemReturnJobPricingFee
+      type: object
+      description: ItemReturnJobPricingFee
+    ItemReturnJobPricingTax:
+      properties:
+        ratePercent:
+          description: Tax rate as percentage
+          type: number
+        scope:
+          description: Scope of the tax
+          type: string
+        taxableValue:
+          allOf:
+            - $ref: '#/components/schemas/PricingMonetaryValue'
+          description: Taxable base value
+        type:
+          description: Tax type identifier
+          type: string
+        value:
+          allOf:
+            - $ref: '#/components/schemas/PricingMonetaryValue'
+          description: Tax value
+      required:
+        - value
+      title: ItemReturnJobPricingTax
+      type: object
+      description: ItemReturnJobPricingTax
     ItemReturnJobs:
       properties:
         itemReturnJobsWithSearchPaths:
@@ -51033,6 +51071,10 @@ components:
             type: string
           maxItems: 50
           type: array
+        pricing:
+          allOf:
+            - $ref: '#/components/schemas/OrderPricing'
+          description: Contains pricing information regarding the whole item return job
         processRef:
           type: string
         returnableLineItems:
@@ -53747,7 +53789,10 @@ components:
           type: array
           uniqueItems: true
         stackRef:
-          description: the reference to the stackRef this loadUnit is part of
+          deprecated: true
+          description: >-
+            the reference to the stackRef this loadUnit is part of. Deprecated:
+            stacks will be removed in a future release.
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
         status:
@@ -53885,7 +53930,10 @@ components:
           minItems: 1
           type: array
         stackRef:
-          description: the reference to the stackRef this loadUnit is part of
+          deprecated: true
+          description: >-
+            the reference to the stackRef this loadUnit is part of. Deprecated:
+            stacks will be removed in a future release.
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
         storageLocationRef:
@@ -68121,7 +68169,10 @@ components:
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
         stackRef:
-          description: the reference to the stackRef this loadUnit is part of
+          deprecated: true
+          description: >-
+            the reference to the stackRef this loadUnit is part of. Deprecated:
+            stacks will be removed in a future release.
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
         storageLocationRef:
@@ -71311,6 +71362,267 @@ components:
       title: PriceRange
       type: object
       description: PriceRange
+    PricingDiscount:
+      properties:
+        nameLocalized:
+          $ref: '#/components/schemas/LocaleString'
+        code:
+          description: Discount code
+          type: string
+        context:
+          description: Context of the discount
+          type: string
+        name:
+          description: Name of the discount
+          type: string
+        percentage:
+          description: >-
+            Discount percentage (0 to 100). Required when type is PERCENTAGE.
+            Must be positive or zero (e.g. 10 for 10% off).
+          type: number
+        tenantDiscountId:
+          description: Tenant-specific discount identifier
+          example: MY_DISCOUNT_ID
+          type: string
+        type:
+          description: >-
+            Type of the discount. ABSOLUTE requires value, PERCENTAGE requires
+            percentage.
+          enum:
+            - ABSOLUTE
+            - PERCENTAGE
+          type: string
+        value:
+          allOf:
+            - $ref: '#/components/schemas/PricingMonetaryValue'
+          description: Discount value
+      title: PricingDiscount
+      type: object
+      description: PricingDiscount
+    PricingForCreation:
+      properties:
+        discounts:
+          description: Discounts applied to the order
+          items:
+            $ref: '#/components/schemas/PricingDiscount'
+          maxItems: 100
+          type: array
+        fees:
+          description: Fees applied to the order
+          items:
+            $ref: '#/components/schemas/ItemReturnJobPricingFee'
+          maxItems: 100
+          type: array
+        taxes:
+          description: Tax breakdown
+          items:
+            $ref: '#/components/schemas/ItemReturnJobPricingTax'
+          maxItems: 100
+          type: array
+      title: PricingForCreation
+      type: object
+      description: PricingForCreation
+    PricingMonetaryValue:
+      properties:
+        currency:
+          description: ISO 4217 currency code
+          enum:
+            - AED
+            - AFN
+            - ALL
+            - AMD
+            - ANG
+            - AOA
+            - ARS
+            - AUD
+            - AWG
+            - AZN
+            - BAM
+            - BBD
+            - BDT
+            - BGN
+            - BHD
+            - BIF
+            - BMD
+            - BND
+            - BOB
+            - BOV
+            - BRL
+            - BSD
+            - BTN
+            - BWP
+            - BYN
+            - BZD
+            - CAD
+            - CDF
+            - CHE
+            - CHF
+            - CHW
+            - CLF
+            - CLP
+            - CNY
+            - COP
+            - COU
+            - CRC
+            - CUC
+            - CUP
+            - CVE
+            - CZK
+            - DJF
+            - DKK
+            - DOP
+            - DZD
+            - EGP
+            - ERN
+            - ETB
+            - EUR
+            - FJD
+            - FKP
+            - GBP
+            - GEL
+            - GHS
+            - GIP
+            - GMD
+            - GNF
+            - GTQ
+            - GYD
+            - HKD
+            - HNL
+            - HTG
+            - HUF
+            - IDR
+            - ILS
+            - INR
+            - IQD
+            - IRR
+            - ISK
+            - JMD
+            - JOD
+            - JPY
+            - KES
+            - KGS
+            - KHR
+            - KMF
+            - KPW
+            - KRW
+            - KWD
+            - KYD
+            - KZT
+            - LAK
+            - LBP
+            - LKR
+            - LRD
+            - LSL
+            - LYD
+            - MAD
+            - MDL
+            - MGA
+            - MKD
+            - MMK
+            - MNT
+            - MOP
+            - MRU
+            - MUR
+            - MVR
+            - MWK
+            - MXN
+            - MXV
+            - MYR
+            - MZN
+            - NAD
+            - NGN
+            - NIO
+            - NOK
+            - NPR
+            - NZD
+            - OMR
+            - PAB
+            - PEN
+            - PGK
+            - PHP
+            - PKR
+            - PLN
+            - PYG
+            - QAR
+            - RON
+            - RSD
+            - RUB
+            - RWF
+            - SAR
+            - SBD
+            - SCR
+            - SDG
+            - SEK
+            - SGD
+            - SHP
+            - SLE
+            - SOS
+            - SRD
+            - SSP
+            - STN
+            - SVC
+            - SYP
+            - SZL
+            - THB
+            - TJS
+            - TMT
+            - TND
+            - TOP
+            - TRY
+            - TTD
+            - TWD
+            - TZS
+            - UAH
+            - UGX
+            - USD
+            - USN
+            - UYI
+            - UYU
+            - UYW
+            - UZS
+            - VED
+            - VES
+            - VND
+            - VUV
+            - WST
+            - XAF
+            - XAG
+            - XAU
+            - XBA
+            - XBB
+            - XBC
+            - XBD
+            - XCD
+            - XDR
+            - XOF
+            - XPD
+            - XPF
+            - XPT
+            - XSU
+            - XTS
+            - XUA
+            - XXX
+            - YER
+            - ZAR
+            - ZMW
+            - ZWL
+          type: string
+        decimalPlaces:
+          description: >-
+            Number of decimal places. If omitted, the default for the currency
+            applies.
+          example: 42
+          type: integer
+        value:
+          description: Monetary value as integer (no decimals)
+          example: 42
+          type: integer
+      required:
+        - value
+        - currency
+      title: PricingMonetaryValue
+      type: object
+      description: PricingMonetaryValue
     PrintableDocument:
       properties:
         customAttributes:
@@ -73730,6 +74042,7 @@ components:
           type: array
         carrierCountryServiceMappingRef:
           description: Id of the used CarrierCountryServiceMapping
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
         mandatoryShippingArticleAttributes:
           items:
@@ -73740,19 +74053,16 @@ components:
             $ref: '#/components/schemas/MandatoryShippingAttribute'
           type: array
         mandatoryShippingItemAttributes:
+          deprecated: true
           items:
             $ref: '#/components/schemas/MandatoryShippingItemAttribute'
           type: array
-          description: >-
-            This part of the API is deprecated. For details, see the <a
-            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-            target="_blank">API release lifecycle documentation</a>.<br /><br />
-          deprecated: true
         productName:
           description: The name of the product used by the carrier
           example: Express
           type: string
       title: ProductInformation
+      type: object
       description: ProductInformation
     ProductValueCurrency:
       additionalProperties: false
@@ -81752,7 +82062,10 @@ components:
           maxItems: 50
           type: array
         stackRef:
-          description: Reference to related stack
+          deprecated: true
+          description: >-
+            Reference to related stack. Deprecated: stacks will be removed in a
+            future release.
           example: 9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1
           minLength: 1
           type: string
@@ -81864,7 +82177,10 @@ components:
           maxItems: 50
           type: array
         stackRef:
-          description: Reference to related stack
+          deprecated: true
+          description: >-
+            Reference to related stack. Deprecated: stacks will be removed in a
+            future release.
           example: 9a14e183-ff86-4b6e-a2dc-eb4c7e312ab1
           minLength: 1
           type: string
