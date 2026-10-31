@@ -1612,6 +1612,14 @@ paths:
           required: true
           schema:
             type: string
+        - description: >-
+            If true, all stock availabilities affected by the change are
+            re-evaluated asynchronously against the updated configuration.
+          in: query
+          name: enforceFullReevaluation
+          required: false
+          schema:
+            type: boolean
       requestBody:
         content:
           application/json:
@@ -80704,6 +80712,32 @@ components:
       type: object
       title: RoutingStrategyGlobalRerouteTimeTriggeredConfig
       description: RoutingStrategyGlobalRerouteTimeTriggeredConfig
+    RoutingStrategyLastMileTransferLimitConfig:
+      additionalProperties: false
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br />Only
+        evaluated by optimization routing. When active, a sourcing option
+        contains at most maxTransfersPerFacility last-mile transfers (target is
+        the customer or the ordering facility) per source facility, regardless
+        of carrier, target node or transfer group. Multiple packaging units
+        within one transfer are not affected.
+      properties:
+        active:
+          type: boolean
+        maxTransfersPerFacility:
+          example: 1
+          minimum: 1
+          type: integer
+      required:
+        - active
+        - maxTransfersPerFacility
+      type: object
+      title: RoutingStrategyLastMileTransferLimitConfig
+      x-badges:
+        - color: red
+          label: ALPHA
     RoutingStrategyNode:
       additionalProperties: false
       properties:
@@ -80754,6 +80788,8 @@ components:
                 StandardFence: '#/components/schemas/RoutingStrategyStandardFence'
                 ToolkitFence: '#/components/schemas/RoutingStrategyToolkitFence'
           type: array
+        lastMileTransferLimit:
+          $ref: '#/components/schemas/RoutingStrategyLastMileTransferLimitConfig'
         orderSplit:
           $ref: '#/components/schemas/RoutingStrategyOrderSplitConfig'
         priorityRatings:
@@ -80876,6 +80912,8 @@ components:
                 ToolkitFence: '#/components/schemas/RoutingStrategyToolkitFence'
           maxItems: 100
           type: array
+        lastMileTransferLimit:
+          $ref: '#/components/schemas/RoutingStrategyLastMileTransferLimitConfig'
         orderSplit:
           $ref: '#/components/schemas/RoutingStrategyOrderSplitConfig'
         priorityRatings:
@@ -88017,6 +88055,20 @@ components:
       title: StockAvailabilityThresholdTransitionConfig
       type: object
       description: StockAvailabilityThresholdTransitionConfig
+    StockAvailabilityThresholdTransitionedBulkWebHookEvent:
+      allOf:
+        - $ref: '#/components/schemas/WebHookEvent'
+      properties:
+        payload:
+          items:
+            $ref: >-
+              #/components/schemas/StockAvailabilityThresholdTransitionedEventPayload
+          type: array
+      required:
+        - payload
+      title: StockAvailabilityThresholdTransitionedBulkWebHookEvent
+      type: object
+      description: StockAvailabilityThresholdTransitionedBulkWebHookEvent
     StockAvailabilityThresholdTransitionedEventPayload:
       properties:
         facility:
