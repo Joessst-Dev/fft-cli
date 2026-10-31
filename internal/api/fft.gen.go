@@ -23953,6 +23953,14 @@ type RoutingStrategyGlobalRerouteTimeTriggeredConfig struct {
 	ShipFromStoreSamedayReroute RoutingStrategyGlobalRerouteConfiguration `json:"shipFromStoreSamedayReroute"`
 }
 
+// RoutingStrategyLastMileTransferLimitConfig This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Only evaluated by optimization routing. When active, a sourcing option contains at most maxTransfersPerFacility last-mile transfers (target is the customer or the ordering facility) per source facility, regardless of carrier, target node or transfer group. Multiple packaging units within one transfer are not affected.
+type RoutingStrategyLastMileTransferLimitConfig struct {
+	Active bool `json:"active"`
+
+	// MaxTransfersPerFacility Example: 1
+	MaxTransfersPerFacility int `json:"maxTransfersPerFacility"`
+}
+
 // RoutingStrategyNode RoutingStrategyNode
 type RoutingStrategyNode struct {
 	ActivationTimeFrames *[]ActivationTimeFrame `json:"activationTimeFrames,omitempty"`
@@ -23984,6 +23992,9 @@ type RoutingStrategyNodeConfig struct {
 	// FallbackFacility RoutingStrategyFallbackFacilityConfig
 	FallbackFacility *RoutingStrategyFallbackFacilityConfig  `json:"fallbackFacility,omitempty"`
 	Fences           []RoutingStrategyNodeConfig_Fences_Item `json:"fences"`
+
+	// LastMileTransferLimit This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Only evaluated by optimization routing. When active, a sourcing option contains at most maxTransfersPerFacility last-mile transfers (target is the customer or the ordering facility) per source facility, regardless of carrier, target node or transfer group. Multiple packaging units within one transfer are not affected.
+	LastMileTransferLimit *RoutingStrategyLastMileTransferLimitConfig `json:"lastMileTransferLimit,omitempty"`
 
 	// OrderSplit RoutingStrategyOrderSplitConfig
 	OrderSplit *RoutingStrategyOrderSplitConfig `json:"orderSplit,omitempty"`
@@ -24099,6 +24110,9 @@ type RoutingStrategyNodeConfigForUpsert struct {
 	// FallbackFacility RoutingStrategyFallbackFacilityConfig
 	FallbackFacility *RoutingStrategyFallbackFacilityConfig           `json:"fallbackFacility,omitempty"`
 	Fences           []RoutingStrategyNodeConfigForUpsert_Fences_Item `json:"fences"`
+
+	// LastMileTransferLimit This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Only evaluated by optimization routing. When active, a sourcing option contains at most maxTransfersPerFacility last-mile transfers (target is the customer or the ordering facility) per source facility, regardless of carrier, target node or transfer group. Multiple packaging units within one transfer are not affected.
+	LastMileTransferLimit *RoutingStrategyLastMileTransferLimitConfig `json:"lastMileTransferLimit,omitempty"`
 
 	// OrderSplit RoutingStrategyOrderSplitConfig
 	OrderSplit *RoutingStrategyOrderSplitConfig `json:"orderSplit,omitempty"`
