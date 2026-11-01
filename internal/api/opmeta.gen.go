@@ -6228,6 +6228,7 @@ var operations = []Operation{
 		Permissions: []string{"AVAILABILITY_THRESHOLDS_WRITE"},
 		Params: []Param{
 			{Name: "thresholdId", In: InPath, Type: TypeString, Required: true},
+			{Name: "enforceFullReevaluation", In: InQuery, Type: TypeBoolean, Description: "If true, all stock availabilities affected by the change are re-evaluated asynchronously against the updated configuration."},
 		},
 		HasBody:        true,
 		BodyRequired:   true,
