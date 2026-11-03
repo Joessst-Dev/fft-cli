@@ -188,7 +188,7 @@ var _ = Describe("fft order search", func() {
 	// searchOrder takes a body, but the curated command builds it from typed flags
 	// and has no --file; an example borrowed from the generated twin's flag set
 	// would fail with "unknown flag".
-	It("offers only examples whose flags the command has", func() {
+	It("offers an example in the command's own usage, not its generated twin's", func() {
 		Expect(c.run("order", "search", "--help")).To(Equal(exitcode.OK))
 
 		Expect(c.out()).To(ContainSubstring("fft api searchOrder --file body.json"))

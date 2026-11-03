@@ -168,9 +168,9 @@ func examplesFor(root *cobra.Command, op api.Operation) string {
 	var lines []string
 
 	if cmd := commandFor(root, op); cmd != nil {
-		lines = append(lines, cmd.CommandPath()+exampleFlags(op, cmd))
+		lines = append(lines, commandExample(cmd, op))
 	}
-	lines = append(lines, "fft api "+op.ID+exampleFlags(op, nil))
+	lines = append(lines, "fft api "+op.ID+exampleFlags(op, false))
 
 	if op.SampleBody != "" {
 		lines = append(lines,
@@ -179,18 +179,22 @@ func examplesFor(root *cobra.Command, op api.Operation) string {
 	return strings.Join(lines, "\n")
 }
 
-// exampleFlags is the required parameters, spelled the way the tier in question
-// spells them: --pick-job-id X for a command (cmd non-nil), --param pickJobId=X for
-// the escape hatch.
-//
-// A command only gets the flags it actually has. A curated command shadows its
-// generated twin but not its flag set — it may take the id as an argument, or build
-// the body from typed flags and have no --file at all — so an example that assumed
-// the generated spelling would be one that fails with "unknown flag".
-func exampleFlags(op api.Operation, cmd *cobra.Command) string {
-	typed := cmd != nil
-	hasFlag := func(name string) bool { return !typed || cmd.Flags().Lookup(name) != nil }
+// commandExample is how to invoke the command that reaches op. A curated command
+// shadows its generated twin but not its flag set — it may take the id as an
+// argument, or build the body from typed flags and have no --file at all — so its
+// example is its own usage line, which its author wrote to show exactly that. Only
+// a generated command's flags follow mechanically from the spec.
+func commandExample(cmd *cobra.Command, op api.Operation) string {
+	if cmd.Annotations[annotationGenerated] == "true" || !cmd.HasParent() {
+		return cmd.CommandPath() + exampleFlags(op, true)
+	}
+	return cmd.Parent().CommandPath() + " " + cmd.Use
+}
 
+// exampleFlags is the required parameters, spelled the way the tier in question
+// spells them: --pick-job-id X for a generated command, --param pickJobId=X for the
+// escape hatch.
+func exampleFlags(op api.Operation, typed bool) string {
 	var b strings.Builder
 
 	for _, p := range op.Params {
@@ -205,9 +209,7 @@ func exampleFlags(op api.Operation, cmd *cobra.Command) string {
 
 		switch {
 		case typed:
-			if hasFlag(kebab(p.Name)) {
-				fmt.Fprintf(&b, " --%s %s", kebab(p.Name), value)
-			}
+			fmt.Fprintf(&b, " --%s %s", kebab(p.Name), value)
 		case p.In == api.InQuery:
 			fmt.Fprintf(&b, " --query %s=%s", p.Name, value)
 		case p.In == api.InHeader:
@@ -217,7 +219,7 @@ func exampleFlags(op api.Operation, cmd *cobra.Command) string {
 		}
 	}
 
-	if op.BodyRequired && hasFlag("file") {
+	if op.BodyRequired {
 		b.WriteString(" --file body.json")
 	}
 	return b.String()
