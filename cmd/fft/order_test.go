@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/Joessst-Dev/fft-cli/internal/api"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 )
 
@@ -179,6 +180,28 @@ var _ = Describe("fft order search", func() {
 		Expect(c.run("order", "search", "--since", "last tuesday")).To(Equal(exitcode.Usage))
 		Expect(c.errOut()).To(ContainSubstring("--since"))
 		Expect(api.calls).To(BeEmpty())
+	})
+
+	// The help prose names the permission by hand, and the spec moves it without
+	// notice — it was ADMIN_MODULES_READ until a sync quietly made it ORDER_READ. Pin
+	// the prose to the spec so the next move fails here instead of misleading a user.
+	// searchOrder takes a body, but the curated command builds it from typed flags
+	// and has no --file; an example borrowed from the generated twin's flag set
+	// would fail with "unknown flag".
+	It("offers only examples whose flags the command has", func() {
+		Expect(c.run("order", "search", "--help")).To(Equal(exitcode.OK))
+
+		Expect(c.out()).To(ContainSubstring("fft api searchOrder --file body.json"))
+		Expect(c.out()).NotTo(ContainSubstring("fft order search --file"))
+	})
+
+	It("names the permission the spec declares", func() {
+		op, ok := api.LookupOperation("searchOrder")
+		Expect(ok).To(BeTrue())
+		Expect(op.Permissions).NotTo(BeEmpty())
+		for _, perm := range op.Permissions {
+			Expect(orderSearchLong).To(ContainSubstring(perm))
+		}
 	})
 })
 

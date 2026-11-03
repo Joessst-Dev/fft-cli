@@ -167,10 +167,10 @@ func describeSpecParam(p api.Param, style output.Style) string {
 func examplesFor(root *cobra.Command, op api.Operation) string {
 	var lines []string
 
-	if cmd := commandPath(root, op); cmd != "" {
-		lines = append(lines, cmd+exampleFlags(op, true))
+	if cmd := commandFor(root, op); cmd != nil {
+		lines = append(lines, cmd.CommandPath()+exampleFlags(op, cmd))
 	}
-	lines = append(lines, "fft api "+op.ID+exampleFlags(op, false))
+	lines = append(lines, "fft api "+op.ID+exampleFlags(op, nil))
 
 	if op.SampleBody != "" {
 		lines = append(lines,
@@ -180,9 +180,17 @@ func examplesFor(root *cobra.Command, op api.Operation) string {
 }
 
 // exampleFlags is the required parameters, spelled the way the tier in question
-// spells them: --pick-job-id X for a generated command, --param pickJobId=X for the
-// escape hatch.
-func exampleFlags(op api.Operation, typed bool) string {
+// spells them: --pick-job-id X for a command (cmd non-nil), --param pickJobId=X for
+// the escape hatch.
+//
+// A command only gets the flags it actually has. A curated command shadows its
+// generated twin but not its flag set — it may take the id as an argument, or build
+// the body from typed flags and have no --file at all — so an example that assumed
+// the generated spelling would be one that fails with "unknown flag".
+func exampleFlags(op api.Operation, cmd *cobra.Command) string {
+	typed := cmd != nil
+	hasFlag := func(name string) bool { return !typed || cmd.Flags().Lookup(name) != nil }
+
 	var b strings.Builder
 
 	for _, p := range op.Params {
@@ -197,7 +205,9 @@ func exampleFlags(op api.Operation, typed bool) string {
 
 		switch {
 		case typed:
-			fmt.Fprintf(&b, " --%s %s", kebab(p.Name), value)
+			if hasFlag(kebab(p.Name)) {
+				fmt.Fprintf(&b, " --%s %s", kebab(p.Name), value)
+			}
 		case p.In == api.InQuery:
 			fmt.Fprintf(&b, " --query %s=%s", p.Name, value)
 		case p.In == api.InHeader:
@@ -207,7 +217,7 @@ func exampleFlags(op api.Operation, typed bool) string {
 		}
 	}
 
-	if op.BodyRequired {
+	if op.BodyRequired && hasFlag("file") {
 		b.WriteString(" --file body.json")
 	}
 	return b.String()

@@ -203,19 +203,28 @@ func commandName(op api.Operation) string { return kebab(op.ID) }
 // is actually registered. "" means the operation has no command at all, which
 // should not happen and is not worth crashing over.
 func commandPath(root *cobra.Command, op api.Operation) string {
+	if cmd := commandFor(root, op); cmd != nil {
+		return cmd.CommandPath()
+	}
+	return ""
+}
+
+// commandFor is the command behind commandPath, for a caller that needs its flags
+// and not just its name.
+func commandFor(root *cobra.Command, op api.Operation) *cobra.Command {
 	if root == nil {
-		return ""
+		return nil
 	}
 
-	var found string
+	var found *cobra.Command
 
 	var walk func(*cobra.Command)
 	walk = func(cmd *cobra.Command) {
-		if found != "" {
+		if found != nil {
 			return
 		}
 		if cmd.Annotations[annotationOperationID] == op.ID {
-			found = cmd.CommandPath()
+			found = cmd
 			return
 		}
 		for _, child := range cmd.Commands() {
