@@ -35,7 +35,7 @@ fft order [flags]
 - [fft order create](./fft_order_create.md) — Create an order
 - [fft order get](./fft_order_get.md) — Show one order
 - [fft order list](./fft_order_list.md) — List orders
-- [fft order search](./fft_order_search.md) — Search orders (BETA)
+- [fft order search](./fft_order_search.md) — Search orders
 - [fft order unlock](./fft_order_unlock.md) — Unlock a locked order
 - [fft order update](./fft_order_update.md) — Update an order (PATCH)
 
