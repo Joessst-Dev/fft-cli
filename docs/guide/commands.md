@@ -32,9 +32,8 @@ fft order unlock 7f3ce2a4-1f00-4c6a-9a2b-5d1f0b7a1c33
 - `list` is the plain GET: it returns a *stripped* order (id, status, orderDate, line
   count, version) and filters only on `--tenant-order-id` and `--consumer-id`. For status,
   a date range or a sort, use `search`.
-- `search` is a **BETA** endpoint guarded by `ADMIN_MODULES_READ`, not `ORDER_READ` — a
-  token that lists orders fine may be refused here. Give it a narrow `--since`/`--until`; it
-  pages far faster when the date range is bounded.
+- `search` is a **BETA** endpoint guarded by `ORDER_READ`, the same permission `list` needs.
+  Give it a narrow `--since`/`--until`; it pages far faster when the date range is bounded.
 - Neither `list` nor `search` filters by facility. An order routes to a facility through its
   pickjobs, so filter pickjobs by facility instead.
 - `update` is a PATCH, but `orderLineItems` is a **full replacement**: send them all or the
