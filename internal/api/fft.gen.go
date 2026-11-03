@@ -6269,6 +6269,60 @@ func (e ProcessDomainStatusesDomainStatusEnumFilterNotEq) Valid() bool {
 	}
 }
 
+// Defines values for ProcessReferencedHandoverJobHandoverjobChannelEnumFilterEq.
+const (
+	ProcessReferencedHandoverJobHandoverjobChannelEnumFilterEqCOLLECT  ProcessReferencedHandoverJobHandoverjobChannelEnumFilterEq = "COLLECT"
+	ProcessReferencedHandoverJobHandoverjobChannelEnumFilterEqDELIVERY ProcessReferencedHandoverJobHandoverjobChannelEnumFilterEq = "DELIVERY"
+)
+
+// Valid indicates whether the value is a known member of the ProcessReferencedHandoverJobHandoverjobChannelEnumFilterEq enum.
+func (e ProcessReferencedHandoverJobHandoverjobChannelEnumFilterEq) Valid() bool {
+	switch e {
+	case ProcessReferencedHandoverJobHandoverjobChannelEnumFilterEqCOLLECT:
+		return true
+	case ProcessReferencedHandoverJobHandoverjobChannelEnumFilterEqDELIVERY:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessReferencedHandoverJobHandoverjobChannelEnumFilterIn.
+const (
+	ProcessReferencedHandoverJobHandoverjobChannelEnumFilterInCOLLECT  ProcessReferencedHandoverJobHandoverjobChannelEnumFilterIn = "COLLECT"
+	ProcessReferencedHandoverJobHandoverjobChannelEnumFilterInDELIVERY ProcessReferencedHandoverJobHandoverjobChannelEnumFilterIn = "DELIVERY"
+)
+
+// Valid indicates whether the value is a known member of the ProcessReferencedHandoverJobHandoverjobChannelEnumFilterIn enum.
+func (e ProcessReferencedHandoverJobHandoverjobChannelEnumFilterIn) Valid() bool {
+	switch e {
+	case ProcessReferencedHandoverJobHandoverjobChannelEnumFilterInCOLLECT:
+		return true
+	case ProcessReferencedHandoverJobHandoverjobChannelEnumFilterInDELIVERY:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessReferencedHandoverJobHandoverjobChannelEnumFilterNotEq.
+const (
+	ProcessReferencedHandoverJobHandoverjobChannelEnumFilterNotEqCOLLECT  ProcessReferencedHandoverJobHandoverjobChannelEnumFilterNotEq = "COLLECT"
+	ProcessReferencedHandoverJobHandoverjobChannelEnumFilterNotEqDELIVERY ProcessReferencedHandoverJobHandoverjobChannelEnumFilterNotEq = "DELIVERY"
+)
+
+// Valid indicates whether the value is a known member of the ProcessReferencedHandoverJobHandoverjobChannelEnumFilterNotEq enum.
+func (e ProcessReferencedHandoverJobHandoverjobChannelEnumFilterNotEq) Valid() bool {
+	switch e {
+	case ProcessReferencedHandoverJobHandoverjobChannelEnumFilterNotEqCOLLECT:
+		return true
+	case ProcessReferencedHandoverJobHandoverjobChannelEnumFilterNotEqDELIVERY:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ProcessReferencedHandoverJobHandoverjobStatusEnumFilterEq.
 const (
 	ProcessReferencedHandoverJobHandoverjobStatusEnumFilterEqCANCELED        ProcessReferencedHandoverJobHandoverjobStatusEnumFilterEq = "CANCELED"
@@ -6425,6 +6479,60 @@ func (e ProcessReferencedOrderOrderStatusEnumFilterNotEq) Valid() bool {
 	case ProcessReferencedOrderOrderStatusEnumFilterNotEqOPEN:
 		return true
 	case ProcessReferencedOrderOrderStatusEnumFilterNotEqPROMISED:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessReferencedPackJobDeliveryChannelEnumFilterEq.
+const (
+	ProcessReferencedPackJobDeliveryChannelEnumFilterEqCOLLECT  ProcessReferencedPackJobDeliveryChannelEnumFilterEq = "COLLECT"
+	ProcessReferencedPackJobDeliveryChannelEnumFilterEqSHIPPING ProcessReferencedPackJobDeliveryChannelEnumFilterEq = "SHIPPING"
+)
+
+// Valid indicates whether the value is a known member of the ProcessReferencedPackJobDeliveryChannelEnumFilterEq enum.
+func (e ProcessReferencedPackJobDeliveryChannelEnumFilterEq) Valid() bool {
+	switch e {
+	case ProcessReferencedPackJobDeliveryChannelEnumFilterEqCOLLECT:
+		return true
+	case ProcessReferencedPackJobDeliveryChannelEnumFilterEqSHIPPING:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessReferencedPackJobDeliveryChannelEnumFilterIn.
+const (
+	ProcessReferencedPackJobDeliveryChannelEnumFilterInCOLLECT  ProcessReferencedPackJobDeliveryChannelEnumFilterIn = "COLLECT"
+	ProcessReferencedPackJobDeliveryChannelEnumFilterInSHIPPING ProcessReferencedPackJobDeliveryChannelEnumFilterIn = "SHIPPING"
+)
+
+// Valid indicates whether the value is a known member of the ProcessReferencedPackJobDeliveryChannelEnumFilterIn enum.
+func (e ProcessReferencedPackJobDeliveryChannelEnumFilterIn) Valid() bool {
+	switch e {
+	case ProcessReferencedPackJobDeliveryChannelEnumFilterInCOLLECT:
+		return true
+	case ProcessReferencedPackJobDeliveryChannelEnumFilterInSHIPPING:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessReferencedPackJobDeliveryChannelEnumFilterNotEq.
+const (
+	ProcessReferencedPackJobDeliveryChannelEnumFilterNotEqCOLLECT  ProcessReferencedPackJobDeliveryChannelEnumFilterNotEq = "COLLECT"
+	ProcessReferencedPackJobDeliveryChannelEnumFilterNotEqSHIPPING ProcessReferencedPackJobDeliveryChannelEnumFilterNotEq = "SHIPPING"
+)
+
+// Valid indicates whether the value is a known member of the ProcessReferencedPackJobDeliveryChannelEnumFilterNotEq enum.
+func (e ProcessReferencedPackJobDeliveryChannelEnumFilterNotEq) Valid() bool {
+	switch e {
+	case ProcessReferencedPackJobDeliveryChannelEnumFilterNotEqCOLLECT:
+		return true
+	case ProcessReferencedPackJobDeliveryChannelEnumFilterNotEqSHIPPING:
 		return true
 	default:
 		return false
@@ -6767,6 +6875,60 @@ func (e ProcessReferencedParcelTrackingStatusEnumFilterNotEq) Valid() bool {
 	case ProcessReferencedParcelTrackingStatusEnumFilterNotEqTRANSIT:
 		return true
 	case ProcessReferencedParcelTrackingStatusEnumFilterNotEqUNKNOWN:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterEq.
+const (
+	ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterEqCOLLECT  ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterEq = "COLLECT"
+	ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterEqSHIPPING ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterEq = "SHIPPING"
+)
+
+// Valid indicates whether the value is a known member of the ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterEq enum.
+func (e ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterEq) Valid() bool {
+	switch e {
+	case ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterEqCOLLECT:
+		return true
+	case ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterEqSHIPPING:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterIn.
+const (
+	ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterInCOLLECT  ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterIn = "COLLECT"
+	ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterInSHIPPING ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterIn = "SHIPPING"
+)
+
+// Valid indicates whether the value is a known member of the ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterIn enum.
+func (e ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterIn) Valid() bool {
+	switch e {
+	case ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterInCOLLECT:
+		return true
+	case ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterInSHIPPING:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterNotEq.
+const (
+	ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterNotEqCOLLECT  ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterNotEq = "COLLECT"
+	ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterNotEqSHIPPING ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterNotEq = "SHIPPING"
+)
+
+// Valid indicates whether the value is a known member of the ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterNotEq enum.
+func (e ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterNotEq) Valid() bool {
+	switch e {
+	case ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterNotEqCOLLECT:
+		return true
+	case ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterNotEqSHIPPING:
 		return true
 	default:
 		return false
@@ -17210,7 +17372,7 @@ type InterFacilityConnectionPricingByZone struct {
 	// Prices The prices of this zone, by upper threshold.
 	Prices []InterFacilityConnectionPricesByTier `json:"prices"`
 
-	// Zone The shipping zone for which the pricing applies. Please provide the ISO 3166-2 country code, followed by a dash and the first digits of the postal code, e.g. DE-50 for Cologne, Germany.
+	// Zone The shipping zone for which the pricing applies. Please provide the ISO 3166-2 country code, followed by a dash and the first digits of the postal code, e.g. DE-50 for Cologne, Germany. For Great Britain, use the outward code or its leading part, e.g. GB-SW1A or GB-M.
 	//
 	// Example: IT-20
 	Zone *string `json:"zone,omitempty"`
@@ -21932,8 +22094,23 @@ type ProcessReferencedFilter struct {
 	TenantArticleId *StringSearchFilter `json:"tenantArticleId,omitempty"`
 }
 
+// ProcessReferencedHandoverJobAssignedUsersFilter ProcessReferencedHandoverJobAssignedUsersFilter
+type ProcessReferencedHandoverJobAssignedUsersFilter struct {
+	// UserId Search by userId
+	UserId *StringFilter `json:"userId,omitempty"`
+
+	// Username Search by username
+	Username *StringFilter `json:"username,omitempty"`
+}
+
 // ProcessReferencedHandoverJobFilter ProcessReferencedHandoverJobFilter
 type ProcessReferencedHandoverJobFilter struct {
+	// AssignedUsers Nested search by assignedUsers
+	AssignedUsers *ProcessReferencedHandoverJobAssignedUsersFilter `json:"assignedUsers,omitempty"`
+
+	// Channel Search by channel
+	Channel *ProcessReferencedHandoverJobHandoverjobChannelEnumListFilter `json:"channel,omitempty"`
+
 	// FacilityRefs Search by facilityRefs
 	//
 	// Example: ["0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f","0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f"]
@@ -21955,6 +22132,33 @@ type ProcessReferencedHandoverJobGlobalActorFilter struct {
 	//
 	// Example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
 	Id *StringSearchFilter `json:"id,omitempty"`
+}
+
+// ProcessReferencedHandoverJobHandoverjobChannelEnumFilter ProcessReferencedHandoverJobHandoverjobChannelEnumFilter
+type ProcessReferencedHandoverJobHandoverjobChannelEnumFilter struct {
+	// Eq Search by channel
+	Eq *ProcessReferencedHandoverJobHandoverjobChannelEnumFilterEq `json:"eq,omitempty"`
+
+	// In Search by channel
+	In *[]ProcessReferencedHandoverJobHandoverjobChannelEnumFilterIn `json:"in,omitempty"`
+
+	// NotEq Search by channel
+	NotEq *ProcessReferencedHandoverJobHandoverjobChannelEnumFilterNotEq `json:"notEq,omitempty"`
+}
+
+// ProcessReferencedHandoverJobHandoverjobChannelEnumFilterEq Search by channel
+type ProcessReferencedHandoverJobHandoverjobChannelEnumFilterEq string
+
+// ProcessReferencedHandoverJobHandoverjobChannelEnumFilterIn defines model for ProcessReferencedHandoverJobHandoverjobChannelEnumFilter.In.
+type ProcessReferencedHandoverJobHandoverjobChannelEnumFilterIn string
+
+// ProcessReferencedHandoverJobHandoverjobChannelEnumFilterNotEq Search by channel
+type ProcessReferencedHandoverJobHandoverjobChannelEnumFilterNotEq string
+
+// ProcessReferencedHandoverJobHandoverjobChannelEnumListFilter ProcessReferencedHandoverJobHandoverjobChannelEnumListFilter
+type ProcessReferencedHandoverJobHandoverjobChannelEnumListFilter struct {
+	// Contains Search by channel
+	Contains *ProcessReferencedHandoverJobHandoverjobChannelEnumFilter `json:"contains,omitempty"`
 }
 
 // ProcessReferencedHandoverJobHandoverjobStatusEnumFilter ProcessReferencedHandoverJobHandoverjobStatusEnumFilter
@@ -22059,8 +22263,62 @@ type ProcessReferencedOrderOrderStatusEnumListFilter struct {
 	Contains *ProcessReferencedOrderOrderStatusEnumFilter `json:"contains,omitempty"`
 }
 
+// ProcessReferencedPackJobAssignedUsersFilter ProcessReferencedPackJobAssignedUsersFilter
+type ProcessReferencedPackJobAssignedUsersFilter struct {
+	// UserId Search by userId
+	UserId *StringFilter `json:"userId,omitempty"`
+
+	// Username Search by username
+	Username *StringFilter `json:"username,omitempty"`
+}
+
+// ProcessReferencedPackJobDeliveryChannelEnumFilter ProcessReferencedPackJobDeliveryChannelEnumFilter
+type ProcessReferencedPackJobDeliveryChannelEnumFilter struct {
+	// Eq Search by deliveryChannel
+	Eq *ProcessReferencedPackJobDeliveryChannelEnumFilterEq `json:"eq,omitempty"`
+
+	// In Search by deliveryChannel
+	In *[]ProcessReferencedPackJobDeliveryChannelEnumFilterIn `json:"in,omitempty"`
+
+	// NotEq Search by deliveryChannel
+	NotEq *ProcessReferencedPackJobDeliveryChannelEnumFilterNotEq `json:"notEq,omitempty"`
+}
+
+// ProcessReferencedPackJobDeliveryChannelEnumFilterEq Search by deliveryChannel
+type ProcessReferencedPackJobDeliveryChannelEnumFilterEq string
+
+// ProcessReferencedPackJobDeliveryChannelEnumFilterIn defines model for ProcessReferencedPackJobDeliveryChannelEnumFilter.In.
+type ProcessReferencedPackJobDeliveryChannelEnumFilterIn string
+
+// ProcessReferencedPackJobDeliveryChannelEnumFilterNotEq Search by deliveryChannel
+type ProcessReferencedPackJobDeliveryChannelEnumFilterNotEq string
+
+// ProcessReferencedPackJobDeliveryChannelEnumListFilter ProcessReferencedPackJobDeliveryChannelEnumListFilter
+type ProcessReferencedPackJobDeliveryChannelEnumListFilter struct {
+	// Contains Search by deliveryChannel
+	Contains *ProcessReferencedPackJobDeliveryChannelEnumFilter `json:"contains,omitempty"`
+}
+
+// ProcessReferencedPackJobEditorFilter ProcessReferencedPackJobEditorFilter
+type ProcessReferencedPackJobEditorFilter struct {
+	// UserId Search by userId
+	UserId *StringFilter `json:"userId,omitempty"`
+
+	// Username Search by username
+	Username *StringFilter `json:"username,omitempty"`
+}
+
 // ProcessReferencedPackJobFilter ProcessReferencedPackJobFilter
 type ProcessReferencedPackJobFilter struct {
+	// AssignedUsers Nested search by assignedUsers
+	AssignedUsers *ProcessReferencedPackJobAssignedUsersFilter `json:"assignedUsers,omitempty"`
+
+	// DeliveryChannel Search by deliveryChannel
+	DeliveryChannel *ProcessReferencedPackJobDeliveryChannelEnumListFilter `json:"deliveryChannel,omitempty"`
+
+	// Editor Nested search by editor
+	Editor *ProcessReferencedPackJobEditorFilter `json:"editor,omitempty"`
+
 	// FacilityRefs Search by facilityRefs
 	//
 	// Example: ["0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f","0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f"]
@@ -22168,8 +22426,68 @@ type ProcessReferencedParcelTrackingStatusEnumListFilter struct {
 	Contains *ProcessReferencedParcelTrackingStatusEnumFilter `json:"contains,omitempty"`
 }
 
+// ProcessReferencedPickJobAssignedUsersFilter ProcessReferencedPickJobAssignedUsersFilter
+type ProcessReferencedPickJobAssignedUsersFilter struct {
+	// UserId Search by userId
+	UserId *StringFilter `json:"userId,omitempty"`
+
+	// Username Search by username
+	Username *StringFilter `json:"username,omitempty"`
+}
+
+// ProcessReferencedPickJobDeliveryInformationFilter ProcessReferencedPickJobDeliveryInformationFilter
+type ProcessReferencedPickJobDeliveryInformationFilter struct {
+	// Channel Search by channel
+	Channel *ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumListFilter `json:"channel,omitempty"`
+}
+
+// ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilter ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilter
+type ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilter struct {
+	// Eq Search by channel
+	Eq *ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterEq `json:"eq,omitempty"`
+
+	// In Search by channel
+	In *[]ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterIn `json:"in,omitempty"`
+
+	// NotEq Search by channel
+	NotEq *ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterNotEq `json:"notEq,omitempty"`
+}
+
+// ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterEq Search by channel
+type ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterEq string
+
+// ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterIn defines model for ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilter.In.
+type ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterIn string
+
+// ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterNotEq Search by channel
+type ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilterNotEq string
+
+// ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumListFilter ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumListFilter
+type ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumListFilter struct {
+	// Contains Search by channel
+	Contains *ProcessReferencedPickJobDeliveryInformationPickJobDeliveryInformationChannelEnumFilter `json:"contains,omitempty"`
+}
+
+// ProcessReferencedPickJobEditorFilter ProcessReferencedPickJobEditorFilter
+type ProcessReferencedPickJobEditorFilter struct {
+	// UserId Search by userId
+	UserId *StringFilter `json:"userId,omitempty"`
+
+	// Username Search by username
+	Username *StringFilter `json:"username,omitempty"`
+}
+
 // ProcessReferencedPickJobFilter ProcessReferencedPickJobFilter
 type ProcessReferencedPickJobFilter struct {
+	// AssignedUsers Nested search by assignedUsers
+	AssignedUsers *ProcessReferencedPickJobAssignedUsersFilter `json:"assignedUsers,omitempty"`
+
+	// DeliveryInformation Nested search by deliveryInformation
+	DeliveryInformation *ProcessReferencedPickJobDeliveryInformationFilter `json:"deliveryInformation,omitempty"`
+
+	// Editor Nested search by editor
+	Editor *ProcessReferencedPickJobEditorFilter `json:"editor,omitempty"`
+
 	// FacilityRefs Search by facilityRefs
 	//
 	// Example: ["0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f","0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f"]
@@ -22318,8 +22636,32 @@ type ProcessReferencedRoutingPlanRoutingPlanStatusEnumListFilter struct {
 	Contains *ProcessReferencedRoutingPlanRoutingPlanStatusEnumFilter `json:"contains,omitempty"`
 }
 
+// ProcessReferencedServiceJobAssignedUsersFilter ProcessReferencedServiceJobAssignedUsersFilter
+type ProcessReferencedServiceJobAssignedUsersFilter struct {
+	// UserId Search by userId
+	UserId *StringFilter `json:"userId,omitempty"`
+
+	// Username Search by username
+	Username *StringFilter `json:"username,omitempty"`
+}
+
+// ProcessReferencedServiceJobEditorFilter ProcessReferencedServiceJobEditorFilter
+type ProcessReferencedServiceJobEditorFilter struct {
+	// UserId Search by userId
+	UserId *StringFilter `json:"userId,omitempty"`
+
+	// Username Search by username
+	Username *StringFilter `json:"username,omitempty"`
+}
+
 // ProcessReferencedServiceJobFilter ProcessReferencedServiceJobFilter
 type ProcessReferencedServiceJobFilter struct {
+	// AssignedUsers Nested search by assignedUsers
+	AssignedUsers *ProcessReferencedServiceJobAssignedUsersFilter `json:"assignedUsers,omitempty"`
+
+	// Editor Nested search by editor
+	Editor *ProcessReferencedServiceJobEditorFilter `json:"editor,omitempty"`
+
 	// FacilityRefs Search by facilityRefs
 	//
 	// Example: ["0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f","0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f"]
