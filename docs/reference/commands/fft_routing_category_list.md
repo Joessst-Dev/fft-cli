@@ -24,10 +24,10 @@ fft routing category list [flags]
 ## Flags
 
 ```
-      --all             Page to the end and return every match, not just the first page
-      --max-items int   With --all, stop after this many categories (default 10000)
-      --size int        Categories per page, 1–250 (default 25)
-      --total           Also count the matches, and report the total on stderr
+      --all[=true|false]     Page to the end and return every match, not just the first page
+      --max-items int        With --all, stop after this many categories (default 10000)
+      --size int             Categories per page, 1–250 (default 25)
+      --total[=true|false]   Also count the matches, and report the total on stderr
 ```
 
 ## See also

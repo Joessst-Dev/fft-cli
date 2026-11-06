@@ -38,12 +38,12 @@ fft stock search --file <file> [flags]
 ## Flags
 
 ```
-      --all             Page to the end and return every match, not just the first page
-      --example         Print a sample request body and exit
-      --file string     JSON file holding the search payload ('-' for stdin)
-      --max-items int   With --all, stop after this many stocks (default 10000)
-      --size int        Stocks per page, 1–250, in place of the file's size (default: the file's, else 20)
-      --total           Also count the matches, and report the total on stderr
+      --all[=true|false]       Page to the end and return every match, not just the first page
+      --example[=true|false]   Print a sample request body and exit
+      --file string            JSON file holding the search payload ('-' for stdin)
+      --max-items int          With --all, stop after this many stocks (default 10000)
+      --size int               Stocks per page, 1–250, in place of the file's size (default: the file's, else 20)
+      --total[=true|false]     Also count the matches, and report the total on stderr
 ```
 
 ## See also

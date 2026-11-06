@@ -32,12 +32,12 @@ fft connection list --facility <id> [flags]
 ## Flags
 
 ```
-      --all               Page to the end and return every match, not just the first page
-      --facility string   The facility the connection leaves, by tenantFacilityId or platform UUID (required)
-      --max-items int     With --all, stop after this many connections (default 10000)
-      --size int          Connections per page, 1–250 (default 25)
-      --target string     Only connections that go to this facility, by tenantFacilityId or platform UUID
-      --total             Also count the matches, and report the total on stderr
+      --all[=true|false]     Page to the end and return every match, not just the first page
+      --facility string      The facility the connection leaves, by tenantFacilityId or platform UUID (required)
+      --max-items int        With --all, stop after this many connections (default 10000)
+      --size int             Connections per page, 1–250 (default 25)
+      --target string        Only connections that go to this facility, by tenantFacilityId or platform UUID
+      --total[=true|false]   Also count the matches, and report the total on stderr
 ```
 
 ## See also

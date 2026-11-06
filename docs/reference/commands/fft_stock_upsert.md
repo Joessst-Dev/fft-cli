@@ -38,8 +38,8 @@ fft stock upsert --file <file> [flags]
 ## Flags
 
 ```
-      --example       Print a sample request body and exit
-      --file string   JSON file holding {"stocks": [...]} ('-' for stdin)
+      --example[=true|false]   Print a sample request body and exit
+      --file string            JSON file holding {"stocks": [...]} ('-' for stdin)
 ```
 
 ## See also

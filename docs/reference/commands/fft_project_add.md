@@ -53,17 +53,17 @@ fft project add [name] [flags]
 ## Flags
 
 ```
-      --api-key string      fulfillmenttools API key
-      --api-key-stdin       Read the API key from the first line of stdin, and the password from the rest; requires --password-stdin
-      --base-url string     API root, e.g. https://acme.api.fulfillmenttools.com
-      --email string        Email address to sign in with (use instead of --username)
-      --env string          Environment, e.g. pre or prd
-      --force               Overwrite an existing project of the same name
-      --password-stdin      Read the password from stdin
-      --project-id string   fulfillmenttools project id
-      --read-only           Refuse every request that would change this project
-      --tenant string       Tenant name (informational)
-      --username string     Login name; the email is derived from it
+      --api-key string                fulfillmenttools API key
+      --api-key-stdin[=true|false]    Read the API key from the first line of stdin, and the password from the rest; requires --password-stdin
+      --base-url string               API root, e.g. https://acme.api.fulfillmenttools.com
+      --email string                  Email address to sign in with (use instead of --username)
+      --env string                    Environment, e.g. pre or prd
+      --force[=true|false]            Overwrite an existing project of the same name
+      --password-stdin[=true|false]   Read the password from stdin
+      --project-id string             fulfillmenttools project id
+      --read-only[=true|false]        Refuse every request that would change this project
+      --tenant string                 Tenant name (informational)
+      --username string               Login name; the email is derived from it
 ```
 
 ## See also

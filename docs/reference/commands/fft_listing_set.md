@@ -38,9 +38,9 @@ fft listing set --facility <id> --file <file> [flags]
 ## Flags
 
 ```
-      --example           Print a sample request body and exit
-      --facility string   The facility, by tenantFacilityId or platform UUID (required)
-      --file string       JSON file holding {"listings": [...]} ('-' for stdin)
+      --example[=true|false]   Print a sample request body and exit
+      --facility string        The facility, by tenantFacilityId or platform UUID (required)
+      --file string            JSON file holding {"listings": [...]} ('-' for stdin)
 ```
 
 ## See also

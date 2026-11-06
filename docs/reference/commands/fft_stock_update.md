@@ -38,9 +38,9 @@ fft stock update <stockId> --file <file> [flags]
 ## Flags
 
 ```
-      --example          Print a sample request body and exit
-      --file string      JSON file holding the whole stock ('-' for stdin)
-      --if-version int   Send this version instead of reading the current one (fails with 409 if it is stale)
+      --example[=true|false]   Print a sample request body and exit
+      --file string            JSON file holding the whole stock ('-' for stdin)
+      --if-version int         Send this version instead of reading the current one (fails with 409 if it is stale)
 ```
 
 ## See also

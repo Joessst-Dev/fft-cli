@@ -32,13 +32,13 @@ fft facility list [flags]
 ## Flags
 
 ```
-      --all                         Page to the end and return every match, not just the first page
+      --all[=true|false]            Page to the end and return every match, not just the first page
       --max-items int               With --all, stop after this many facilities (default 10000)
       --size int                    Facilities per page, 1–250 (default 20)
       --sort string                 Sort by one field, as field:asc or field:desc (id, name, status, type, tenantFacilityId, locationType, lastModified)
       --status strings              Only facilities in these states: ONLINE, SUSPENDED, OFFLINE
       --tenant-facility-id string   Only the facility with this tenantFacilityId
-      --total                       Also count the matches, and report the total on stderr
+      --total[=true|false]          Also count the matches, and report the total on stderr
       --type string                 Only facilities of this type: MANAGED_FACILITY or SUPPLIER
 ```
 

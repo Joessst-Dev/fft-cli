@@ -34,7 +34,7 @@ fft stock summary [flags]
 ## Flags
 
 ```
-      --allow-stale                 Let the API answer from a cache: faster, and possibly out of date
+      --allow-stale[=true|false]    Let the API answer from a cache: faster, and possibly out of date
       --facility strings            Only these facilities, by tenantFacilityId or platform UUID (repeatable)
       --size int                    Articles per page, 1–100 (default 25)
       --tenant-article-id strings   Only these articles (repeatable)

@@ -41,8 +41,8 @@ fft stock actions --file <file> [flags]
 ## Flags
 
 ```
-      --example       Print a sample request body and exit
-      --file string   JSON file holding {"action": {...}} ('-' for stdin)
+      --example[=true|false]   Print a sample request body and exit
+      --file string            JSON file holding {"action": {...}} ('-' for stdin)
 ```
 
 ## See also

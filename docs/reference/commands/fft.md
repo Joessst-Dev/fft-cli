@@ -32,14 +32,14 @@ fft [flags]
 ## Flags
 
 ```
-      --debug              Log requests and responses to stderr
-      --no-color           Disable coloured output
-      --no-keyring         Store credentials in a 0600 file instead of the OS keychain (settings.noKeyring makes it permanent)
-  -o, --output string      Output format: table, json, yaml (default "table")
-      --project string     Project to act on (default: the active project)
-      --read-only          Refuse any request that would change data (can only tighten, never loosen)
-      --timeout duration   Timeout for a single command (default 30s)
-  -y, --yes                Assume yes for every confirmation prompt
+      --debug[=true|false]        Log requests and responses to stderr
+      --no-color[=true|false]     Disable coloured output
+      --no-keyring[=true|false]   Store credentials in a 0600 file instead of the OS keychain (settings.noKeyring makes it permanent)
+  -o, --output string             Output format: table, json, yaml (default "table")
+      --project string            Project to act on (default: the active project)
+      --read-only[=true|false]    Refuse any request that would change data (can only tighten, never loosen)
+      --timeout duration          Timeout for a single command (default 30s)
+  -y, --yes[=true|false]          Assume yes for every confirmation prompt
 ```
 
 ## Subcommands
