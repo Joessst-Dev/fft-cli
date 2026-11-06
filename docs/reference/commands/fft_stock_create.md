@@ -42,7 +42,7 @@ fft stock create [flags]
 ## Flags
 
 ```
-      --example                    Print a sample request body and exit
+      --example[=true|false]       Print a sample request body and exit
       --facility string            The facility, by tenantFacilityId or platform UUID
       --file string                JSON file holding the stock ('-' for stdin)
       --tenant-article-id string   The article this is stock of

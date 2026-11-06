@@ -28,7 +28,7 @@ fft auth token [flags]
 ## Flags
 
 ```
-      --raw   Print the token even when stdout is a terminal
+      --raw[=true|false]   Print the token even when stdout is a terminal
 ```
 
 ## See also

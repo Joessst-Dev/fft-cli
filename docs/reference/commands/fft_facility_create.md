@@ -35,8 +35,8 @@ fft facility create [flags]
 ## Flags
 
 ```
-      --example       Print a sample request body and exit
-      --file string   JSON file holding the facility ('-' for stdin)
+      --example[=true|false]   Print a sample request body and exit
+      --file string            JSON file holding the facility ('-' for stdin)
 ```
 
 ## See also

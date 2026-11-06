@@ -37,10 +37,10 @@ fft connection create --facility <id> --file <file> [flags]
 ## Flags
 
 ```
-      --example           Print a sample request body and exit
-      --facility string   The facility the connection leaves, by tenantFacilityId or platform UUID (required)
-      --file string       JSON file holding the connection ('-' for stdin)
-      --type string       With --example, the kind of connection to print: SUPPLIER, MANAGED_FACILITY, CUSTOMER (default "SUPPLIER")
+      --example[=true|false]   Print a sample request body and exit
+      --facility string        The facility the connection leaves, by tenantFacilityId or platform UUID (required)
+      --file string            JSON file holding the connection ('-' for stdin)
+      --type string            With --example, the kind of connection to print: SUPPLIER, MANAGED_FACILITY, CUSTOMER (default "SUPPLIER")
 ```
 
 ## See also

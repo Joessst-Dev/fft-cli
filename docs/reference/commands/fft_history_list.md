@@ -21,8 +21,8 @@ fft history list [flags]
 ## Flags
 
 ```
-      --all-projects   List every project's requests
-      --limit int      Show at most this many requests (0 for all) (default 20)
+      --all-projects[=true|false]   List every project's requests
+      --limit int                   Show at most this many requests (0 for all) (default 20)
 ```
 
 ## See also

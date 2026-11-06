@@ -26,8 +26,8 @@ fft routing category create --file <file> [flags]
 ## Flags
 
 ```
-      --example       Print a sample request body and exit
-      --file string   JSON file holding the category ('-' for stdin)
+      --example[=true|false]   Print a sample request body and exit
+      --file string            JSON file holding the category ('-' for stdin)
 ```
 
 ## See also

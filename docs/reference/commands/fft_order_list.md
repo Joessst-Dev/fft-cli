@@ -33,12 +33,12 @@ fft order list [flags]
 ## Flags
 
 ```
-      --all                      Page to the end and return every match, not just the first page
+      --all[=true|false]         Page to the end and return every match, not just the first page
       --consumer-id string       Only orders for this consumerId
       --max-items int            With --all, stop after this many orders (default 10000)
       --size int                 Orders per page, 1–250 (default 25)
       --tenant-order-id string   Only the order with this tenantOrderId
-      --total                    Also count the matches, and report the total on stderr
+      --total[=true|false]       Also count the matches, and report the total on stderr
 ```
 
 ## See also

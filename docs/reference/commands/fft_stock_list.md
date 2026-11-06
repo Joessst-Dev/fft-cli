@@ -32,13 +32,13 @@ fft stock list [flags]
 ## Flags
 
 ```
-      --all                         Page to the end and return every match, not just the first page
+      --all[=true|false]            Page to the end and return every match, not just the first page
       --facility string             Only the stocks of this facility, by tenantFacilityId or platform UUID
       --max-items int               With --all, stop after this many stocks (default 10000)
       --size int                    Stocks per page, 1–250 (default 20)
       --sort string                 Sort by one field, as field:asc or field:desc (tenantArticleId, value, locationName, lastModified)
       --tenant-article-id strings   Only the stocks of these articles
-      --total                       Also count the matches, and report the total on stderr
+      --total[=true|false]          Also count the matches, and report the total on stderr
 ```
 
 ## See also

@@ -33,9 +33,9 @@ fft order cancel <id> [flags]
 ## Flags
 
 ```
-      --force              Force-cancel past the point normal cancellation allows (needs the tenant to permit it)
-      --if-version int     Send this version instead of reading the current one (fails with 409 if it is stale)
-      --reason-id string   The id of a configured cancelation reason
+      --force[=true|false]   Force-cancel past the point normal cancellation allows (needs the tenant to permit it)
+      --if-version int       Send this version instead of reading the current one (fails with 409 if it is stale)
+      --reason-id string     The id of a configured cancelation reason
 ```
 
 ## See also

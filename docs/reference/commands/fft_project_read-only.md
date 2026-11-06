@@ -34,7 +34,7 @@ fft project read-only <name> [flags]
 ## Flags
 
 ```
-      --off   Allow writes to the project again
+      --off[=true|false]   Allow writes to the project again
 ```
 
 ## See also

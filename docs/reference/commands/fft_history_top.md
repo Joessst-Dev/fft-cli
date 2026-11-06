@@ -22,8 +22,8 @@ fft history top [flags]
 ## Flags
 
 ```
-      --all-projects   Count every project's requests, each project separately
-      --limit int      Show at most this many operations (0 for all) (default 10)
+      --all-projects[=true|false]   Count every project's requests, each project separately
+      --limit int                   Show at most this many operations (0 for all) (default 10)
 ```
 
 ## See also

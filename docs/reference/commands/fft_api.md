@@ -40,12 +40,12 @@ fft api <operationId> [flags]
 ## Flags
 
 ```
-      --data string          Request body: inline JSON, @file, or '-' for stdin
-      --example              Print a sample request body and exit
-      --file string          JSON file holding the request body ('-' for stdin)
-      --header stringArray   Request header, as name=value (repeatable)
-      --param stringArray    Path parameter, as name=value (repeatable)
-      --query stringArray    Query parameter, as name=value (repeatable; name=a,b for a list)
+      --data string            Request body: inline JSON, @file, or '-' for stdin
+      --example[=true|false]   Print a sample request body and exit
+      --file string            JSON file holding the request body ('-' for stdin)
+      --header stringArray     Request header, as name=value (repeatable)
+      --param stringArray      Path parameter, as name=value (repeatable)
+      --query stringArray      Query parameter, as name=value (repeatable; name=a,b for a list)
 ```
 
 ## Subcommands

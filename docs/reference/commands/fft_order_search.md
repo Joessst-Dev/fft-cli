@@ -33,14 +33,14 @@ fft order search [flags]
 ## Flags
 
 ```
-      --all                      Page to the end and return every match, not just the first page
+      --all[=true|false]         Page to the end and return every match, not just the first page
       --max-items int            With --all, stop after this many orders (default 10000)
       --since string             Only orders whose orderDate is on or after this date
       --size int                 Orders per page, 1–250 (default 20)
       --sort string              Sort by one field, as field:asc or field:desc (orderDate, status)
       --status strings           Only orders in these states: OPEN, PROMISED, LOCKED, CANCELLED, OBSOLETE
       --tenant-order-id string   Only the order with this tenantOrderId
-      --total                    Also count the matches, and report the total on stderr
+      --total[=true|false]       Also count the matches, and report the total on stderr
       --until string             Only orders whose orderDate is on or before this date
 ```
 
