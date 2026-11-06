@@ -39,9 +39,9 @@ fft skill install [flags]
 ## Flags
 
 ```
-      --dir string   Install into this directory instead (the skill lands in DIR/fft)
-      --force        Replace files that differ from the ones fft ships
-      --local        Install into ./.claude/skills instead of ~/.claude/skills
+      --dir string           Install into this directory instead (the skill lands in DIR/fft)
+      --force[=true|false]   Replace files that differ from the ones fft ships
+      --local[=true|false]   Install into ./.claude/skills instead of ~/.claude/skills
 ```
 
 ## See also

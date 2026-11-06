@@ -31,14 +31,14 @@ fft listing list --facility <id> [flags]
 ## Flags
 
 ```
-      --all                         Page to the end and return every match, not just the first page
+      --all[=true|false]            Page to the end and return every match, not just the first page
       --facility string             The facility, by tenantFacilityId or platform UUID (required)
       --max-items int               With --all, stop after this many listings (default 10000)
       --size int                    Listings per page, 1–250 (default 20)
       --sort string                 Sort by one field, as field:asc or field:desc (tenantArticleId, lastModified)
       --status strings              Only listings in these states: ACTIVE, INACTIVE
       --tenant-article-id strings   Only the listings of these articles
-      --total                       Also count the matches, and report the total on stderr
+      --total[=true|false]          Also count the matches, and report the total on stderr
 ```
 
 ## See also

@@ -31,8 +31,8 @@ fft routing strategy create --file <file> [flags]
 ## Flags
 
 ```
-      --example       Print a sample request body and exit
-      --file string   JSON file holding the strategy ('-' for stdin)
+      --example[=true|false]   Print a sample request body and exit
+      --file string            JSON file holding the strategy ('-' for stdin)
 ```
 
 ## See also

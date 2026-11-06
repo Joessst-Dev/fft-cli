@@ -38,8 +38,8 @@ fft routing strategy actions <id> --file <file> [flags]
 ## Flags
 
 ```
-      --example       Print a sample request body and exit
-      --file string   JSON file holding the action ('-' for stdin)
+      --example[=true|false]   Print a sample request body and exit
+      --file string            JSON file holding the action ('-' for stdin)
 ```
 
 ## See also

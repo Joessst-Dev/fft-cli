@@ -37,8 +37,8 @@ fft skill status [flags]
 ## Flags
 
 ```
-      --dir string   Look only in this directory (the skill is DIR/fft)
-      --local        Look only in ./.claude/skills
+      --dir string           Look only in this directory (the skill is DIR/fft)
+      --local[=true|false]   Look only in ./.claude/skills
 ```
 
 ## See also

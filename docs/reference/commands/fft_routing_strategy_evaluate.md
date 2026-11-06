@@ -30,8 +30,8 @@ fft routing strategy evaluate <id> --file <order.json> [flags]
 ## Flags
 
 ```
-      --example       Print a sample order body and exit
-      --file string   JSON file holding the order to evaluate ('-' for stdin)
+      --example[=true|false]   Print a sample order body and exit
+      --file string            JSON file holding the order to evaluate ('-' for stdin)
 ```
 
 ## See also

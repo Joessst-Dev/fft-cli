@@ -39,11 +39,11 @@ fft sourcing simulate --file <file> [flags]
 ## Flags
 
 ```
-      --example              Print a sample order and exit
-      --file string          JSON file holding the order ('-' for stdin)
-      --investment float     How hard the router should look, above 0 and up to 1. Higher is better and slower
-      --listing-attributes   Include each listing's custom attributes in the answer (for debugging)
-      --results int          How many alternative options to ask for, 1–20 (default 3)
+      --example[=true|false]              Print a sample order and exit
+      --file string                       JSON file holding the order ('-' for stdin)
+      --investment float                  How hard the router should look, above 0 and up to 1. Higher is better and slower
+      --listing-attributes[=true|false]   Include each listing's custom attributes in the answer (for debugging)
+      --results int                       How many alternative options to ask for, 1–20 (default 3)
 ```
 
 ## See also

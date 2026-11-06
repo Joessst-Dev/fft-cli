@@ -50,9 +50,9 @@ fft template save <name> [flags]
       --data string           Request body: inline JSON, @file, or '-' for stdin
       --description string    What this template is for
       --file string           JSON file holding the request body ('-' for stdin)
-      --force                 Replace a template of the same name
+      --force[=true|false]    Replace a template of the same name
       --from string           Seed the body from this operation's example
-      --local                 Write to ./.fft/templates, the directory this repository commits
+      --local[=true|false]    Write to ./.fft/templates, the directory this repository commits
       --operation string      Record the operation (an operationId) the body is sent with
       --param stringArray     Declare a parameter: --param name=path[=default] (repeatable)
       --require stringArray   Declare a required parameter: --require name=path (repeatable)

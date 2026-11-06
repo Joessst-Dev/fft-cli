@@ -42,8 +42,8 @@ fft listing upsert --file <file> [flags]
 ## Flags
 
 ```
-      --example       Print a sample request body and exit
-      --file string   JSON file holding {"listings": [...]} ('-' for stdin)
+      --example[=true|false]   Print a sample request body and exit
+      --file string            JSON file holding {"listings": [...]} ('-' for stdin)
 ```
 
 ## See also

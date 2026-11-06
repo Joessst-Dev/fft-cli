@@ -294,7 +294,9 @@ var _ = Describe("fft project add", func() {
 
 		It("says so in its help", func() {
 			Expect(c.run("project", "add", "--help")).To(Equal(exitcode.OK))
-			Expect(c.out()).To(MatchRegexp(`--api-key-stdin\s+Read the API key from the first line of stdin.*requires --password-stdin`))
+			// \S* rather than a literal: pflag decorates a bool flag's name in help
+			// (1.1 prints --api-key-stdin[=true|false]), and that is not what this asserts.
+			Expect(c.out()).To(MatchRegexp(`--api-key-stdin\S*\s+Read the API key from the first line of stdin.*requires --password-stdin`))
 		})
 	})
 

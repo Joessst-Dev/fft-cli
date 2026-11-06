@@ -24,7 +24,7 @@ fft template remove <name> [flags]
 ## Flags
 
 ```
-      --local   Remove from ./.fft/templates, the directory this repository commits
+      --local[=true|false]   Remove from ./.fft/templates, the directory this repository commits
 ```
 
 ## See also

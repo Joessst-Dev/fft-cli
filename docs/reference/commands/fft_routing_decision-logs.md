@@ -32,7 +32,7 @@ fft routing decision-logs [flags]
 ## Flags
 
 ```
-      --all                       Page to the end and return every match, not just the first page
+      --all[=true|false]          Page to the end and return every match, not just the first page
       --max-items int             With --all, stop after this many decision logs (default 10000)
       --order string              Only logs for this orderRef
       --process string            Only logs for this processRef
@@ -41,7 +41,7 @@ fft routing decision-logs [flags]
       --sourcing-option string    Only logs for this sourcingOptionRef
       --sourcing-options string   Only logs for this sourcingOptionsRef (the spec marks this filter deprecated; prefer --sourcing-option)
       --tenant-order-id string    Only logs for this tenantOrderId
-      --total                     Also count the matches, and report the total on stderr
+      --total[=true|false]        Also count the matches, and report the total on stderr
 ```
 
 ## See also
