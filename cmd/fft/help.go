@@ -167,8 +167,8 @@ func describeSpecParam(p api.Param, style output.Style) string {
 func examplesFor(root *cobra.Command, op api.Operation) string {
 	var lines []string
 
-	if cmd := commandPath(root, op); cmd != "" {
-		lines = append(lines, cmd+exampleFlags(op, true))
+	if cmd := commandFor(root, op); cmd != nil {
+		lines = append(lines, commandExample(cmd, op))
 	}
 	lines = append(lines, "fft api "+op.ID+exampleFlags(op, false))
 
@@ -177,6 +177,18 @@ func examplesFor(root *cobra.Command, op api.Operation) string {
 			fmt.Sprintf("fft api %s --example > body.json && fft api %s --file body.json", op.ID, op.ID))
 	}
 	return strings.Join(lines, "\n")
+}
+
+// commandExample is how to invoke the command that reaches op. A curated command
+// shadows its generated twin but not its flag set — it may take the id as an
+// argument, or build the body from typed flags and have no --file at all — so its
+// example is its own usage line, which its author wrote to show exactly that. Only
+// a generated command's flags follow mechanically from the spec.
+func commandExample(cmd *cobra.Command, op api.Operation) string {
+	if cmd.Annotations[annotationGenerated] == "true" || !cmd.HasParent() {
+		return cmd.CommandPath() + exampleFlags(op, true)
+	}
+	return cmd.Parent().CommandPath() + " " + cmd.Use
 }
 
 // exampleFlags is the required parameters, spelled the way the tier in question

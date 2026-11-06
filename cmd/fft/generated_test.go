@@ -290,6 +290,18 @@ var _ = Describe("the generated commands", func() {
 		})
 	})
 
+	// A curated command's flag set is its own: the generated twin's spelling would
+	// either name a flag it lacks or, where the id is an argument, drop the id and
+	// pass the bare command off as complete.
+	Describe("--help on a curated command", func() {
+		It("shows the id it takes as an argument", func() {
+			Expect(c.run("facility", "get", "--help")).To(Equal(exitcode.OK))
+
+			Expect(c.out()).To(ContainSubstring("  fft facility get <id>\n"))
+			Expect(c.out()).NotTo(ContainSubstring("fft facility get --facility-id"))
+		})
+	})
+
 	Describe("--help on a generated command", func() {
 		It("explains the endpoint, its permissions and how to call it", func() {
 			Expect(c.run("stowing", "get-stow-jobs", "--help")).To(Equal(exitcode.OK))

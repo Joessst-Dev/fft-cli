@@ -6696,7 +6696,7 @@ var operations = []Operation{
 		Tags:           []string{"Orders"},
 		Summary:        "List orders (search)",
 		Description:    "Search for Order",
-		Permissions:    []string{"ADMIN_MODULES_READ"},
+		Permissions:    []string{"ORDER_READ"},
 		HasBody:        true,
 		BodyRequired:   true,
 		SampleBody:     "{\n  \"query\": {\n    \"orderDate\": {},\n    \"tenantOrderId\": {}\n  },\n  \"size\": 10\n}\n",

@@ -5,14 +5,13 @@ editLink: false
 
 # fft order search
 
-Search orders (BETA)
+Search orders
 
 Search the orders of your tenant.
 
 This is POST /api/orders/search: unlike 'fft order list' it returns whole orders
-and filters on status, a date range and a sort. It is BETA, and it is guarded by
-the ADMIN_MODULES_READ permission — not ORDER_READ — so a token that lists orders
-fine may be refused here.
+and filters on status, a date range and a sort. It is guarded by the ORDER_READ
+permission — the same permission 'fft order list' needs.
 
 A narrow --since/--until is strongly recommended: the API pages far faster when
 the orderDate range is bounded.
