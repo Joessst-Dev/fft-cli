@@ -16887,18 +16887,14 @@ type HealthDependencyStatus struct {
 	// Name Name of the component that is checked to be healthy
 	//
 	// Example: database
-	Name string `json:"name"`
-
-	// Status HealthStatus
+	Name   string       `json:"name"`
 	Status HealthStatus `json:"status"`
 }
 
 // HealthResult HealthResult
 type HealthResult struct {
 	Dependencies []HealthDependencyStatus `json:"dependencies"`
-
-	// Status HealthStatus
-	Status HealthStatus `json:"status"`
+	Status       HealthStatus             `json:"status"`
 }
 
 // HealthStatus HealthStatus
