@@ -1453,7 +1453,7 @@ paths:
     post:
       deprecated: false
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />Creates a new stock availability threshold configuration.
@@ -1501,13 +1501,13 @@ paths:
       tags:
         - Stock availability thresholds
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
   /api/configurations/availability/thresholds/{thresholdId}:
     delete:
       deprecated: false
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />Deletes a stock availability threshold configuration.
@@ -1547,12 +1547,12 @@ paths:
       tags:
         - Stock availability thresholds
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
     get:
       deprecated: false
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />Returns a single stock availability threshold configuration by id.
@@ -1596,12 +1596,12 @@ paths:
       tags:
         - Stock availability thresholds
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
     put:
       deprecated: false
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />Updates an existing stock availability threshold configuration.
@@ -1674,8 +1674,8 @@ paths:
       tags:
         - Stock availability thresholds
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
   /api/configurations/availability/thresholds/search:
     post:
       deprecated: false
@@ -9826,31 +9826,32 @@ paths:
         - Storage locations
   /api/facilities/{facilityId}/zones:
     get:
+      deprecated: false
       description: ''
       operationId: getFacilityZones
       parameters:
         - description: >-
-            ID of facility from which you want to get the zones. Also accepts
-            tenantFacilityId in urn format (e.g.
-            urn:fft:facility:tenantFacilityId:{your-tenant-facility-id})
+            ID of facility. Also accepts tenantFacilityId in urn format (e.g.
+            urn:fft:facility:tenantFacilityId:{tenant-facility-id}).
           in: path
           name: facilityId
           required: true
           schema:
             type: string
-        - description: all entities after given Id
-          in: query
-          name: startAfterId
-          required: false
-          schema:
-            type: string
-        - description: number of entities to show
-          in: query
+        - in: query
           name: size
           required: false
           schema:
             default: 25
-            type: integer
+            example: 25
+            maximum: 100
+            minimum: 1
+            type: number
+        - in: query
+          name: startAfterId
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           content:
@@ -9883,16 +9884,18 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: Facility not found
       summary: List facility zones
+      x-fft-permissions:
+        - ZONE_READ
       tags:
         - Storage locations
     post:
+      deprecated: false
       description: Creates a new zone in this facility.
       operationId: postFacilityZone
       parameters:
         - description: >-
-            ID of facility at which you want to create the zones. Also accepts
-            tenantFacilityId in urn format (e.g.
-            urn:fft:facility:tenantFacilityId:{your-tenant-facility-id})
+            ID of facility. Also accepts tenantFacilityId in urn format (e.g.
+            urn:fft:facility:tenantFacilityId:{tenant-facility-id}).
           in: path
           name: facilityId
           required: true
@@ -9903,7 +9906,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ZoneForCreation'
-        description: The zone to be created
         required: true
       responses:
         '201':
@@ -9933,23 +9935,25 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: Zone not found
       summary: Create facility zone
+      x-fft-permissions:
+        - ZONE_WRITE
       tags:
         - Storage locations
   /api/facilities/{facilityId}/zones/{zoneId}:
     delete:
+      deprecated: false
       description: ''
       operationId: deleteFacilityZone
       parameters:
         - description: >-
-            ID of facility from which you want to delete the zone. Also accepts
-            tenantFacilityId in urn format (e.g.
-            urn:fft:facility:tenantFacilityId:{your-tenant-facility-id})
+            ID of facility. Also accepts tenantFacilityId in urn format (e.g.
+            urn:fft:facility:tenantFacilityId:{tenant-facility-id}).
           in: path
           name: facilityId
           required: true
           schema:
             type: string
-        - description: ID of the zone you want to delete
+        - description: ID of the zone
           in: path
           name: zoneId
           required: true
@@ -9979,22 +9983,24 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: Facility or storage location not found
       summary: Delete facility zone
+      x-fft-permissions:
+        - ZONE_WRITE
       tags:
         - Storage locations
     get:
+      deprecated: false
       description: ''
       operationId: getFacilityZone
       parameters:
         - description: >-
-            ID of facility from which you want to get the zone. Also accepts
-            tenantFacilityId in urn format (e.g.
-            urn:fft:facility:tenantFacilityId:{your-tenant-facility-id})
+            ID of facility. Also accepts tenantFacilityId in urn format (e.g.
+            urn:fft:facility:tenantFacilityId:{tenant-facility-id}).
           in: path
           name: facilityId
           required: true
           schema:
             type: string
-        - description: the ID of the zone
+        - description: ID of the zone
           in: path
           name: zoneId
           required: true
@@ -10005,9 +10011,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/Zone'
-                type: array
+                $ref: '#/components/schemas/Zone'
           description: >-
             Zone was found & you are allowed to get it. The result is in the
             body.
@@ -10032,24 +10036,26 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: Facility not found
       summary: Get facility zone
+      x-fft-permissions:
+        - ZONE_READ
       tags:
         - Storage locations
     put:
+      deprecated: false
       description: >-
         Replaces the current zone of this Facility with the provided in the
         body.
       operationId: putFacilityZone
       parameters:
         - description: >-
-            ID of facility from which you want to put the zone. Also accepts
-            tenantFacilityId in urn format (e.g.
-            urn:fft:facility:tenantFacilityId:{your-tenant-facility-id})
+            ID of facility. Also accepts tenantFacilityId in urn format (e.g.
+            urn:fft:facility:tenantFacilityId:{tenant-facility-id}).
           in: path
           name: facilityId
           required: true
           schema:
             type: string
-        - description: the ID of the zone
+        - description: ID of the zone
           in: path
           name: zoneId
           required: true
@@ -10060,15 +10066,13 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ZoneForReplacement'
-        description: Patch set
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/Zone'
+                $ref: '#/components/schemas/Zone'
           description: Zone was found & you are allowed to update it.
         '401':
           content:
@@ -10091,6 +10095,8 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: Facility not found
       summary: Update facility zone
+      x-fft-permissions:
+        - ZONE_WRITE
       tags:
         - Storage locations
   /api/facilities/{facilityRef}/configurations/notifications:
@@ -12050,8 +12056,10 @@ paths:
         - Handovers
   /api/health:
     get:
+      deprecated: false
       description: ''
       operationId: healthCheck
+      parameters: []
       responses:
         '200':
           content:
@@ -12078,7 +12086,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Manual reroute configuration not found
+          description: The requested entity was not found
       summary: Health check
       tags:
         - Health
@@ -46036,12 +46044,13 @@ components:
           example: database
           type: string
         status:
-          $ref: '#/components/schemas/HealthStatus'
+          allOf:
+            - $ref: '#/components/schemas/HealthStatus'
       required:
         - name
         - status
-      type: object
       title: HealthDependencyStatus
+      type: object
       description: HealthDependencyStatus
     HealthResult:
       properties:
@@ -46051,19 +46060,20 @@ components:
           minItems: 1
           type: array
         status:
-          $ref: '#/components/schemas/HealthStatus'
+          allOf:
+            - $ref: '#/components/schemas/HealthStatus'
       required:
         - status
         - dependencies
-      type: object
       title: HealthResult
+      type: object
       description: HealthResult
     HealthStatus:
       enum:
         - UP
         - DOWN
-      type: string
       title: HealthStatus
+      type: string
       description: HealthStatus
     InboundAttachment:
       properties:
@@ -65263,16 +65273,21 @@ components:
             lineItemStickerConfiguration:
               $ref: '#/components/schemas/StickerConfiguration'
             packJobCreationPerTag:
+              deprecated: true
               description: >-
-                All entries with a match in their matchingValues will be
-                combined when determining what documents belong to an entity
+                This part of the API is deprecated. For details, see the <a
+                href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+                target="_blank">API release lifecycle documentation</a>.<br
+                /><br />Deprecated: This field will be removed in a future
+                release. There is currently no replacement. All entries with a
+                match in their matchingValues will be combined when determining
+                what documents belong to an entity
               items:
                 $ref: '#/components/schemas/PackJobCreationPerTag'
               type: array
             stickerConfiguration:
               $ref: '#/components/schemas/StickerConfiguration'
       required:
-        - packJobCreationPerTag
         - version
       type: object
       title: PackJobTagConfiguration
@@ -68113,7 +68128,17 @@ components:
         domainStatusConfiguration:
           $ref: '#/components/schemas/PickingDomainStatusConfiguration'
         loadUnitAssignmentConfiguration:
-          $ref: '#/components/schemas/LoadUnitAssignmentConfiguration'
+          allOf:
+            - $ref: '#/components/schemas/LoadUnitAssignmentConfiguration'
+          deprecated: true
+          description: >-
+            This part of the API is deprecated. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />Deprecated: Not supported by the new picking flow. Load units are
+            always assigned per item during picking (DURING_PICKING), and only
+            if operative container types are configured. AT_START, AT_END and
+            INACTIVE are ignored. There is no replacement remote config.
         multiOrderPickingConfiguration:
           $ref: '#/components/schemas/MultiOrderPickingConfiguration'
         pickingMethodsConfiguration:
@@ -68126,9 +68151,29 @@ components:
         restartPickJobConfiguration:
           $ref: '#/components/schemas/RestartPickJobConfiguration'
         scanCodeValidationConfiguration:
-          $ref: '#/components/schemas/PickingScanCodeValidationConfiguration'
+          allOf:
+            - $ref: '#/components/schemas/PickingScanCodeValidationConfiguration'
+          deprecated: true
+          description: >-
+            This part of the API is deprecated. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />Deprecated: Not supported by the new picking flow. Item and
+            location scans are always validated against the known scannable
+            codes (same as CODE_MUST_BE_KNOWN; NO_VALIDATION is not possible).
+            Load unit scans accept any code and derive the container type from
+            the operative container types. There is no replacement remote
+            config.
         scanningConfiguration:
-          $ref: '#/components/schemas/PickingScanningConfiguration'
+          allOf:
+            - $ref: '#/components/schemas/PickingScanningConfiguration'
+          deprecated: true
+          description: >-
+            This part of the API is deprecated. For details, see the <a
+            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+            target="_blank">API release lifecycle documentation</a>.<br /><br
+            />Deprecated: Use the remote configs PICKING_SCANNING_TYPE and
+            PICKING_SCANNING_RULE (group OPERATIONS_MOBILE) instead.
         scheduledPickJobReleaseConfiguration:
           $ref: '#/components/schemas/ScheduledPickJobReleaseConfiguration'
         stockUpdateConfiguration:
@@ -70231,6 +70276,8 @@ components:
         - $ref: '#/components/schemas/PickRunRemovePickJobActionParameter'
         - $ref: '#/components/schemas/PickRunSplitLineItemsActionParameter'
         - $ref: '#/components/schemas/TakeOverPickRunActionParameter'
+        - $ref: >-
+            #/components/schemas/PickRunUpdateRecordableAttributesActionParameter
       title: PickRunActionsParameter
       description: PickRunActionsParameter
     PickRunCancelActionEnum:
@@ -70669,6 +70716,24 @@ components:
         name: PickRunPickJobsPatchAction
       title: PickRunPickJobsPatchAction
       description: PickRunPickJobsPatchAction
+    PickRunRecordableAttributeForUpdate:
+      additionalProperties: false
+      properties:
+        recordableAttributeId:
+          description: ID of the recordable attribute to update
+          example: 17ebfdfb-e1b4-4913-9962-3aef2b49f16f
+          type: string
+        value:
+          description: The value of the attribute to set
+          example: L-123
+          minLength: 1
+          nullable: true
+          type: string
+      required:
+        - recordableAttributeId
+      title: PickRunRecordableAttributeForUpdate
+      type: object
+      description: PickRunRecordableAttributeForUpdate
     PickRunRemovePickJobActionEnum:
       enum:
         - REMOVE_PICK_JOB
@@ -70816,6 +70881,42 @@ components:
         - batch
       type: string
       title: PickRunType
+    PickRunUpdateRecordableAttributesActionEnum:
+      enum:
+        - UPDATE_PICK_RUN_LINE_ITEM_RECORDABLE_ATTRIBUTES
+      type: string
+      title: PickRunUpdateRecordableAttributesActionEnum
+      description: PickRunUpdateRecordableAttributesActionEnum
+    PickRunUpdateRecordableAttributesActionParameter:
+      additionalProperties: false
+      description: >-
+        Action to record recordable attribute values on an IN_PROGRESS multi
+        order pick run. The values are written to the pick jobs right away.
+        Batch pick runs are rejected. Unique values are checked one pick job at
+        a time, so swapping values between two pick jobs in one call fails as
+        not unique. Clear one of the values in a separate call first. Canceling
+        the run restores the values from before the run the same way, so after
+        such a swap, clear the swapped values before canceling.
+      properties:
+        name:
+          $ref: '#/components/schemas/PickRunUpdateRecordableAttributesActionEnum'
+        recordableAttributeUpdates:
+          items:
+            $ref: '#/components/schemas/PickRunRecordableAttributeForUpdate'
+          maxItems: 50
+          type: array
+        version:
+          description: >-
+            The version of the document to be used in optimistic locking
+            mechanisms.
+          example: 42
+          type: integer
+      required:
+        - name
+        - version
+        - recordableAttributeUpdates
+      title: PickRunUpdateRecordableAttributesActionParameter
+      type: object
     PickupService:
       properties:
         nameLocalized:
@@ -86983,6 +87084,16 @@ components:
           items:
             $ref: '#/components/schemas/FenceAnalysis'
           type: array
+        layers:
+          description: >-
+            The search graph layers the facility is part of. Empty when it is
+            not in the graph.
+          example:
+            - 0
+            - 1
+          items:
+            type: integer
+          type: array
         listingAvailability:
           description: List of listing availability analyses.
           items:
@@ -86993,6 +87104,7 @@ components:
           type: string
       required:
         - lookupFacilityId
+        - layers
         - listingAvailability
         - fenceAnalysis
       title: SourcingOptionAnalyzeActionFacilityResult
@@ -89586,6 +89698,7 @@ components:
       additionalProperties: false
       properties:
         storageLocationRequired:
+          description: 'Deprecated: SOME, behaves like NONE. Use NONE instead.'
           enum:
             - ALL
             - SOME
@@ -97495,10 +97608,21 @@ components:
       type: object
       description: WorkflowUnavailable
     Zone:
-      allOf:
-        - $ref: '#/components/schemas/ZoneForReplacement'
-        - $ref: '#/components/schemas/VersionedResource'
       properties:
+        created:
+          description: >-
+            The date this entity was created by fulfillmenttools. This value is
+            generated by the service.
+          example: 2020-02-03T08:45:51.525Z
+          format: date-time
+          type: string
+        customAttributes:
+          description: >-
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
+          type: object
         facilityRef:
           description: >-
             The id of the facility reference. The given ID has to be present in
@@ -97507,47 +97631,89 @@ components:
           type: string
         id:
           description: The id of this zone
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
-      required:
-        - id
-        - facilityRef
-      type: object
-      xml:
-        name: Zone
-      title: Zone
-      description: Zone
-    ZoneForCreation:
-      allOf:
-        - $ref: '#/components/schemas/CustomAttributesResource'
-      properties:
+        lastModified:
+          description: >-
+            The date this entity was modified last. This value is generated by
+            the service.
+          example: 2020-02-03T09:45:51.525Z
+          format: date-time
+          type: string
         name:
           description: The name of this zone
           type: string
         score:
           description: The score of this zone
+          example: 42
           type: number
-      required:
-        - name
-        - score
-      type: object
-      xml:
-        name: ZoneForCreation
-      title: ZoneForCreation
-      description: ZoneForCreation
-    ZoneForReplacement:
-      allOf:
-        - $ref: '#/components/schemas/ZoneForCreation'
-      properties:
         version:
+          description: >-
+            The version of the document to be used in optimistic locking
+            mechanisms.
           example: 42
           format: int64
           type: integer
       required:
+        - name
+        - score
         - version
+        - id
+        - facilityRef
+      title: Zone
       type: object
-      xml:
-        name: ZoneForReplacement
+      description: Zone
+    ZoneForCreation:
+      properties:
+        customAttributes:
+          description: >-
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
+          type: object
+        name:
+          description: The name of this zone
+          type: string
+        score:
+          description: The score of this zone
+          example: 42
+          type: number
+      required:
+        - name
+        - score
+      title: ZoneForCreation
+      type: object
+      description: ZoneForCreation
+    ZoneForReplacement:
+      properties:
+        customAttributes:
+          description: >-
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
+          type: object
+        name:
+          description: The name of this zone
+          type: string
+        score:
+          description: The score of this zone
+          example: 42
+          type: number
+        version:
+          description: >-
+            The version of the document to be used in optimistic locking
+            mechanisms.
+          example: 42
+          format: int64
+          type: integer
+      required:
+        - name
+        - score
+        - version
       title: ZoneForReplacement
+      type: object
       description: ZoneForReplacement
     ZonePaginatedResult:
       properties:
