@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-// knownMutatingPOSTs is the other half of the POST census: the 115 POST operations
+// knownMutatingPOSTs is the other half of the POST census: the 116 POST operations
 // that write. It is a fixture, not production code, and it exists so that the two
 // lists together must account for every POST in the spec.
 //
@@ -50,6 +50,7 @@ var knownMutatingPOSTs = []string{
 	"applyOperativeProcessAction",
 	"assignFacility",
 	"bulkOrdersAction",
+	"bulkProcessesAction",
 	"calculateBestCarrier",
 	"createAttachment",
 	"createCarrierCountryServiceMapping",
@@ -235,7 +236,7 @@ var _ = Describe("Mutates", func() {
 			}
 		})
 
-		It("accounts for all 163 of the spec's POSTs", func() {
+		It("accounts for all 164 of the spec's POSTs", func() {
 			var posts int
 			for _, op := range Operations() {
 				if op.Method == http.MethodPost {
@@ -245,7 +246,7 @@ var _ = Describe("Mutates", func() {
 			Expect(posts).To(Equal(len(readPOSTs) + len(knownMutatingPOSTs)))
 			// Pin the literal in the spec's own name too: the check above is purely
 			// relational and would stay green even if this description's number drifted.
-			Expect(posts).To(Equal(163))
+			Expect(posts).To(Equal(164))
 		})
 	})
 

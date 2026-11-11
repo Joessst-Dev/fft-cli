@@ -11,7 +11,6 @@ var operations = []Operation{
 		Path:        "/api/inboundprocesses/{inboundProcessId}",
 		Tags:        []string{"Inbound"},
 		Summary:     "Update inbound process",
-		Description: "This part of the API is in Beta status. For details, see the API release lifecycle documentation.",
 		Permissions: []string{"INBOUND_PROCESS_WRITE"},
 		Params: []Param{
 			{Name: "inboundProcessId", In: InPath, Type: TypeString, Required: true},
@@ -520,6 +519,19 @@ var operations = []Operation{
 		HasBody:        true,
 		SampleBody:     "{\n  \"name\": \"BULK_FORCE_CANCEL\",\n  \"orders\": [\n    {\n      \"orderId\": \"string\",\n      \"version\": 1\n    }\n  ]\n}\n",
 		SampleResponse: "[\n  {\n    \"orderId\": \"string\",\n    \"status\": \"UPDATED\"\n  }\n]\n",
+	},
+	{
+		ID:             "bulkProcessesAction",
+		Method:         "POST",
+		Path:           "/api/processes/actions",
+		Tags:           []string{"Processes"},
+		Summary:        "Call bulk processes action",
+		Description:    "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Apply a bulk action to multiple processes, such as reroute.",
+		Permissions:    []string{"PROCESS_REROUTE"},
+		HasBody:        true,
+		BodyRequired:   true,
+		SampleBody:     "{\n  \"name\": \"BULK_REROUTE\",\n  \"processes\": [\n    {\n      \"processId\": \"string\",\n      \"version\": 1\n    }\n  ]\n}\n",
+		SampleResponse: "[\n  {\n    \"processId\": \"string\",\n    \"status\": \"UPDATED\"\n  }\n]\n",
 	},
 	{
 		ID:             "bulkUpdateSafetyStock",

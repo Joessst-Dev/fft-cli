@@ -15,8 +15,8 @@ import (
 //
 // The generated client covers eight tags: facilities, listings, stocks, health,
 // user management, sourcing options, orders and routing strategy. That is 96
-// methods out of the API's 575 operations. Tier-2 and Tier-3 commands have to
-// reach the other 479, and they cannot do it through a typed client that does not
+// methods out of the API's 576 operations. Tier-2 and Tier-3 commands have to
+// reach the other 480, and they cannot do it through a typed client that does not
 // have them.
 //
 // So they build requests from metadata instead: method, path template, parameters,
@@ -105,7 +105,7 @@ type Operation struct {
 	Description string
 
 	// Permissions are the operation's x-fft-permissions, empty when it declares
-	// none. 343 of the 575 operations declare them.
+	// none. 344 of the 576 operations declare them.
 	Permissions []string
 
 	// Params are the operation's parameters, sorted: path first, then query, then
