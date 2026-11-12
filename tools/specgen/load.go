@@ -12,7 +12,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-// The extension the API declares its required permissions in. 343 of the 575
+// The extension the API declares its required permissions in. 344 of the 576
 // operations carry one; it is a plain array of strings at operation level.
 const permissionsExtension = "x-fft-permissions"
 

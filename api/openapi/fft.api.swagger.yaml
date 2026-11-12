@@ -12343,10 +12343,7 @@ paths:
         - Inbound
     patch:
       deprecated: false
-      description: >-
-        This part of the API is in Beta status. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
+      description: ''
       operationId: Patch InboundProcess
       parameters:
         - in: path
@@ -12382,9 +12379,6 @@ paths:
         - INBOUND_PROCESS_WRITE
       tags:
         - Inbound
-      x-badges:
-        - color: orange
-          label: BETA
   /api/inboundprocesses/{inboundProcessId}/purchaseorder:
     put:
       deprecated: false
@@ -22026,6 +22020,66 @@ paths:
         - PROCESS_REROUTE
       tags:
         - Processes
+  /api/processes/actions:
+    post:
+      description: >-
+        This part of the API is in Alpha status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Apply a bulk action to multiple processes, such as reroute.
+      operationId: bulkProcessesAction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkProcessActionsParameter'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/BulkProcessActionResult'
+                type: array
+          description: >-
+            Result per process. UPDATED means the reroute has been triggered,
+            UNCHANGED that a reroute is already in progress for the process,
+            FAILED that the process could not be rerouted (see summary).
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Invalid request, e.g. no or too many processes
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Your user is not allowed to operate against this API instance
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: >-
+            Your user, although recognized, is not authorized to use this
+            endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Reroute description not found
+      summary: Call bulk processes action
+      x-fft-permissions:
+        - PROCESS_REROUTE
+      tags:
+        - Processes
+      x-badges:
+        - color: red
+          label: ALPHA
   /api/processes/retrynotroutable:
     post:
       description: Retry routing for all not-routable processes.
@@ -33100,6 +33154,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         trackAndTraceUrl:
           description: Track and trace URL
           example: https://example.com/resource
@@ -33218,6 +33276,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         trackAndTraceUrl:
           description: Track and trace URL
           example: https://example.com/resource
@@ -33387,6 +33449,46 @@ components:
         - name
         - orders
       title: BulkOrderUnlockActionParameter
+    BulkProcessActionResult:
+      properties:
+        processId:
+          type: string
+        status:
+          $ref: '#/components/schemas/BulkOperationResultStatus'
+        summary:
+          type: string
+      required:
+        - processId
+        - status
+      type: object
+      title: BulkProcessActionResult
+      description: BulkProcessActionResult
+    BulkProcessActionsParameter:
+      oneOf:
+        - $ref: '#/components/schemas/BulkProcessRerouteActionParameter'
+      title: BulkProcessActionsParameter
+      description: BulkProcessActionsParameter
+    BulkProcessRerouteActionParameter:
+      description: Action to reroute processes.
+      properties:
+        name:
+          enum:
+            - BULK_REROUTE
+          type: string
+        processes:
+          items:
+            $ref: '#/components/schemas/BulkRerouteProcessParameter'
+          maxItems: 15
+          minItems: 1
+          type: array
+        rerouteDescriptionId:
+          description: The id of the rerouteDescription, applied to all processes
+          type: string
+      required:
+        - name
+        - processes
+      title: BulkProcessRerouteActionParameter
+      type: object
     BulkPromiseOrderParameter:
       properties:
         orderId:
@@ -33401,6 +33503,20 @@ components:
       type: object
       title: BulkPromiseOrderParameter
       description: BulkPromiseOrderParameter
+    BulkRerouteProcessParameter:
+      properties:
+        processId:
+          type: string
+        version:
+          description: Version of the entity to be changed
+          minimum: 0
+          type: integer
+      required:
+        - processId
+        - version
+      type: object
+      title: BulkRerouteProcessParameter
+      description: BulkRerouteProcessParameter
     BulkUnlockOrderParameter:
       properties:
         orderId:
@@ -33990,6 +34106,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         version:
           description: >-
             The version of the document to be used in optimistic locking
@@ -34087,6 +34207,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         version:
           description: >-
             The version of the document to be used in optimistic locking
@@ -34735,6 +34859,20 @@ components:
         - INACTIVE
       type: string
       title: CarrierStatus
+    CarrierTrackAndTraceThresholdConfiguration:
+      properties:
+        daysUntilRemovingOfRegisteredTracker:
+          description: >-
+            Days until a just registered label that has never been marked as
+            picked up by the carrier continues in the track and trace lookup.
+          example: 60
+          minimum: 30
+          type: integer
+      required:
+        - daysUntilRemovingOfRegisteredTracker
+      title: CarrierTrackAndTraceThresholdConfiguration
+      type: object
+      description: CarrierTrackAndTraceThresholdConfiguration
     CarrierTrackingStatus:
       additionalProperties: false
       description: Native trackingStatus provided by carrier
@@ -37931,6 +38069,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         trackAndTraceUrl:
           description: Track and trace URL
           example: https://example.com/resource
@@ -38049,6 +38191,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         trackAndTraceUrl:
           description: Track and trace URL
           example: https://example.com/resource
@@ -38389,6 +38535,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         trackAndTraceUrl:
           description: Track and trace URL
           example: https://example.com/resource
@@ -38490,6 +38640,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         trackAndTraceUrl:
           description: Track and trace URL
           example: https://example.com/resource
@@ -43031,6 +43185,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         trackAndTraceUrl:
           description: Track and trace URL
           example: https://example.com/resource
@@ -43154,6 +43312,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         trackAndTraceUrl:
           description: Track and trace URL
           example: https://example.com/resource
@@ -43795,6 +43957,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         trackAndTraceUrl:
           description: Track and trace URL
           example: https://example.com/resource
@@ -43906,6 +44072,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         trackAndTraceUrl:
           description: Track and trace URL
           example: https://example.com/resource
@@ -65767,6 +65937,7 @@ components:
         - $ref: '#/components/schemas/ParcelUpdateTrackingDataActionParameter'
         - $ref: >-
             #/components/schemas/UpdateParcelItemRecordableAttributesActionParameter
+        - $ref: '#/components/schemas/RemoveParcelFromTrackingActionParameter'
         - $ref: '#/components/schemas/AddLabelsToParcelActionParameter'
       type: object
       title: ParcelActionsParameter
@@ -71219,6 +71390,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         trackAndTraceUrl:
           description: Track and trace URL
           example: https://example.com/resource
@@ -71320,6 +71495,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         trackAndTraceUrl:
           description: Track and trace URL
           example: https://example.com/resource
@@ -76200,6 +76379,29 @@ components:
       type: object
       xml:
         name: RemoveLineItemFromPackingTargetContainer
+    RemoveParcelFromTrackingActionEnum:
+      enum:
+        - REMOVE_PARCEL_FROM_TRACKING
+      type: string
+      title: RemoveParcelFromTrackingActionEnum
+      description: RemoveParcelFromTrackingActionEnum
+    RemoveParcelFromTrackingActionParameter:
+      additionalProperties: false
+      properties:
+        name:
+          $ref: '#/components/schemas/RemoveParcelFromTrackingActionEnum'
+        version:
+          description: >-
+            The version of the document to be used in optimistic locking
+            mechanisms.
+          example: 42
+          type: integer
+      required:
+        - name
+        - version
+      title: RemoveParcelFromTrackingActionParameter
+      type: object
+      description: RemoveParcelFromTrackingActionParameter
     RemovePickJobFromPickRun:
       allOf:
         - additionalProperties: false
@@ -84491,6 +84693,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         trackAndTraceUrl:
           description: Track and trace URL
           example: https://example.com/resource
@@ -84595,6 +84801,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         trackAndTraceUrl:
           description: Track and trace URL
           example: https://example.com/resource
@@ -95251,6 +95461,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         version:
           description: >-
             The version of the document to be used in optimistic locking
@@ -95348,6 +95562,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         version:
           description: >-
             The version of the document to be used in optimistic locking
@@ -96934,6 +97152,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         version:
           description: >-
             The version of the document to be used in optimistic locking
@@ -97031,6 +97253,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/ThresholdPriceValue'
           description: Threshold price value for carrier selection
+        trackAndTraceConfiguration:
+          allOf:
+            - $ref: '#/components/schemas/CarrierTrackAndTraceThresholdConfiguration'
+          description: Configuration for carrier related track and trace functions.
         version:
           description: >-
             The version of the document to be used in optimistic locking
