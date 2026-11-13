@@ -26,7 +26,8 @@ paths:
         />Search articles tenant-wide based on title or tenantArticleId
       operationId: getArticles
       parameters:
-        - in: query
+        - description: The number of items to return.
+          in: query
           name: size
           required: false
           schema:
@@ -35,7 +36,10 @@ paths:
             maximum: 100
             minimum: 1
             type: number
-        - in: query
+        - description: >-
+            The ID of the last item from the previous page. The next page will
+            start after this ID.
+          in: query
           name: startAfterId
           required: false
           schema:
@@ -313,6 +317,7 @@ paths:
               - FACILITY_CUSTOM_SERVICE
               - ROUTING_STRATEGY
               - STOW_JOB
+              - EXPORT
             type: string
         - in: query
           name: trace
@@ -1205,7 +1210,8 @@ paths:
       description: ''
       operationId: getCategories
       parameters:
-        - in: query
+        - description: The number of items to return.
+          in: query
           name: size
           required: false
           schema:
@@ -1214,7 +1220,10 @@ paths:
             maximum: 100
             minimum: 1
             type: number
-        - in: query
+        - description: >-
+            The ID of the last item from the previous page. The next page will
+            start after this ID.
+          in: query
           name: startAfterId
           required: false
           schema:
@@ -3383,7 +3392,14 @@ paths:
         - OIDC configuration
   /api/configurations/operativerestowing:
     get:
+      deprecated: false
+      description: >-
+        This part of the API is in Beta status. For details, see the <a
+        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
+        target="_blank">API release lifecycle documentation</a>.<br /><br />Get
+        restow configuration of operational restow items
       operationId: getOperationalRestowingConfigurations
+      parameters: []
       responses:
         '200':
           content:
@@ -3410,29 +3426,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
+          description: The requested entity was not found
       summary: Get restow config
+      x-fft-permissions:
+        - CONFIG_READ
       tags:
         - Restowing configuration
-      description: >-
-        This part of the API is in Beta status. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
       x-badges:
         - color: orange
           label: BETA
     patch:
+      deprecated: false
       description: >-
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Update restow configuration of operational restow items
       operationId: putOperationalRestowingConfigurations
+      parameters: []
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/OperationalRestowingConfigurations'
-        description: create/update operational restowing configurations
         required: true
       responses:
         '200':
@@ -3440,19 +3456,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OperationalRestowingConfigurations'
-          description: The restowing configurations were successfully updated.
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OperationalRestowingConfigurations'
-          description: The restowing configurations were successfully created.
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Invalid input. See response for details
+          description: Updated configuration of all restow item related things
         '401':
           content:
             application/json:
@@ -3468,6 +3472,8 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Update restow config
+      x-fft-permissions:
+        - CONFIG_WRITE
       tags:
         - Restowing configuration
       x-badges:
@@ -9838,7 +9844,8 @@ paths:
           required: true
           schema:
             type: string
-        - in: query
+        - description: The number of items to return.
+          in: query
           name: size
           required: false
           schema:
@@ -9847,7 +9854,10 @@ paths:
             maximum: 100
             minimum: 1
             type: number
-        - in: query
+        - description: >-
+            The ID of the last item from the previous page. The next page will
+            start after this ID.
+          in: query
           name: startAfterId
           required: false
           schema:
@@ -12096,7 +12106,8 @@ paths:
       description: ''
       operationId: getInboundProcesses
       parameters:
-        - in: query
+        - description: The number of items to return.
+          in: query
           name: size
           required: false
           schema:
@@ -12105,7 +12116,10 @@ paths:
             maximum: 100
             minimum: 1
             type: number
-        - in: query
+        - description: >-
+            The ID of the last item from the previous page. The next page will
+            start after this ID.
+          in: query
           name: startAfterId
           required: false
           schema:
@@ -12607,7 +12621,8 @@ paths:
         target="_blank">API release lifecycle documentation</a>.<br /><br />
       operationId: getInboundReceiptJobs
       parameters:
-        - in: query
+        - description: The number of items to return.
+          in: query
           name: size
           required: false
           schema:
@@ -12616,7 +12631,10 @@ paths:
             maximum: 100
             minimum: 1
             type: number
-        - in: query
+        - description: >-
+            The ID of the last item from the previous page. The next page will
+            start after this ID.
+          in: query
           name: startAfterId
           required: false
           schema:
@@ -19790,7 +19808,8 @@ paths:
       description: This endpoint returns all available permissions in the FFT platform.
       operationId: getPermissions
       parameters:
-        - in: query
+        - description: The number of items to return.
+          in: query
           name: size
           required: false
           schema:
@@ -19799,7 +19818,10 @@ paths:
             maximum: 100
             minimum: 1
             type: number
-        - in: query
+        - description: >-
+            The ID of the last item from the previous page. The next page will
+            start after this ID.
+          in: query
           name: startAfterId
           required: false
           schema:
@@ -23576,7 +23598,8 @@ paths:
         target="_blank">API release lifecycle documentation</a>.<br /><br />
       operationId: getPaginatedReservations
       parameters:
-        - in: query
+        - description: The number of items to return.
+          in: query
           name: size
           required: false
           schema:
@@ -23780,10 +23803,12 @@ paths:
           label: BETA
   /api/restowitems:
     get:
+      deprecated: false
       description: >-
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
+        target="_blank">API release lifecycle documentation</a>.<br /><br />Get
+        all restow items
       operationId: queryRestowItems
       parameters:
         - description: Reference to the facility you want to get the corresponding restows
@@ -23791,6 +23816,7 @@ paths:
           name: facilityRef
           required: false
           schema:
+            example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
             type: string
         - description: Reference restowed status of the restow items
           in: query
@@ -23804,6 +23830,10 @@ paths:
           required: false
           schema:
             items:
+              enum:
+                - CANCELED
+                - CLOSED
+                - OPEN
               type: string
             type: array
         - description: all entities after given Id
@@ -23818,13 +23848,21 @@ paths:
           required: false
           schema:
             default: 25
+            example: 25
+            maximum: 500
+            minimum: 1
             type: integer
         - description: query orderBy
           in: query
           name: orderBy
           required: false
           schema:
-            $ref: '#/components/schemas/RestowItemsSortOptionsEnum'
+            enum:
+              - CREATED_DESC
+              - CREATED_ASC
+              - LAST_MODIFIED_DESC
+              - LAST_MODIFIED_ASC
+            type: string
       responses:
         '200':
           content:
@@ -23847,6 +23885,8 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: List restow items
+      x-fft-permissions:
+        - RESTOWITEM_READ
       tags:
         - Restowing
       x-badges:
@@ -23854,14 +23894,15 @@ paths:
           label: BETA
   /api/restowitems/{restowItemId}:
     get:
+      deprecated: false
       description: >-
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
+        target="_blank">API release lifecycle documentation</a>.<br /><br />Get
+        restow item by id
       operationId: getRestowItem
       parameters:
-        - description: ID of the restow item you want to get
-          in: path
+        - in: path
           name: restowItemId
           required: true
           schema:
@@ -23894,23 +23935,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
+          description: The requested entity was not found
       summary: Get restow item
+      x-fft-permissions:
+        - RESTOWITEM_READ
       tags:
         - Restowing
       x-badges:
         - color: orange
           label: BETA
     patch:
+      deprecated: true
       description: >-
-        This part of the API is in Beta status. For details, see the <a
+        This part of the API is deprecated. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />Deprecated, please use /api/restowitems/{restowItemId}/actions
       operationId: patchRestowItem
       parameters:
-        - description: ID of the restow item you want to update
-          in: path
+        - in: path
           name: restowItemId
           required: true
           schema:
@@ -23920,7 +23963,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/RestowItemPatchActions'
-        description: Patch set
         required: true
       responses:
         '200':
@@ -23950,25 +23992,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: RestowItem not found
+          description: The requested entity was not found
         '409':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: RestowItem version conflict
+          description: A version conflict occurred.
       summary: Update restow item
+      x-fft-permissions:
+        - RESTOWITEM_WRITE
       tags:
         - Restowing
-      x-badges:
-        - color: orange
-          label: BETA
   /api/restowitems/{restowItemId}/actions:
     post:
+      deprecated: false
+      description: Call available actions on restow item
       operationId: restowItemAction
       parameters:
-        - description: Reference to the restow item you want to call an action for
-          in: path
+        - in: path
           name: restowItemId
           required: true
           schema:
@@ -23977,7 +24019,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RestowItemActionsParameter'
+              anyOf:
+                - $ref: '#/components/schemas/RestowItemRestowActionParameter'
+                - $ref: '#/components/schemas/RestowItemCancelActionParameter'
+        required: true
       responses:
         '200':
           content:
@@ -24004,8 +24049,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: The entity you want to call an action for was not found.
+          description: The requested entity was not found
       summary: Call restow item action
+      x-fft-permissions:
+        - RESTOWITEM_WRITE
       tags:
         - Restowing
   /api/returnnotes:
@@ -24488,7 +24535,8 @@ paths:
           required: false
           schema:
             type: string
-        - in: query
+        - description: The number of items to return.
+          in: query
           name: size
           required: false
           schema:
@@ -24497,7 +24545,10 @@ paths:
             maximum: 100
             minimum: 1
             type: number
-        - in: query
+        - description: >-
+            The ID of the last item from the previous page. The next page will
+            start after this ID.
+          in: query
           name: startAfterId
           required: false
           schema:
@@ -25491,7 +25542,8 @@ paths:
       description: ''
       operationId: getSafetyStocks
       parameters:
-        - in: query
+        - description: The number of items to return.
+          in: query
           name: size
           required: false
           schema:
@@ -25500,7 +25552,10 @@ paths:
             maximum: 100
             minimum: 1
             type: number
-        - in: query
+        - description: >-
+            The ID of the last item from the previous page. The next page will
+            start after this ID.
+          in: query
           name: startAfterId
           required: false
           schema:
@@ -27777,7 +27832,8 @@ paths:
               type: string
             maxItems: 500
             type: array
-        - in: query
+        - description: The number of items to return.
+          in: query
           name: size
           required: false
           schema:
@@ -27786,7 +27842,10 @@ paths:
             maximum: 100
             minimum: 1
             type: number
-        - in: query
+        - description: >-
+            The ID of the last item from the previous page. The next page will
+            start after this ID.
+          in: query
           name: startAfterId
           required: false
           schema:
@@ -28101,7 +28160,8 @@ paths:
       description: Get the accumulated Stock for each Article
       operationId: getStockSummaries
       parameters:
-        - in: query
+        - description: The number of items to return.
+          in: query
           name: size
           required: false
           schema:
@@ -28277,7 +28337,8 @@ paths:
         target="_blank">API release lifecycle documentation</a>.<br /><br />
       operationId: getStowJobs
       parameters:
-        - in: query
+        - description: The number of items to return.
+          in: query
           name: size
           required: false
           schema:
@@ -28286,7 +28347,10 @@ paths:
             maximum: 100
             minimum: 1
             type: number
-        - in: query
+        - description: >-
+            The ID of the last item from the previous page. The next page will
+            start after this ID.
+          in: query
           name: startAfterId
           required: false
           schema:
@@ -29567,7 +29631,8 @@ paths:
       description: ''
       operationId: getAllUsers
       parameters:
-        - in: query
+        - description: The number of items to return.
+          in: query
           name: size
           required: false
           schema:
@@ -29576,7 +29641,10 @@ paths:
             maximum: 100
             minimum: 1
             type: number
-        - in: query
+        - description: >-
+            The ID of the last item from the previous page. The next page will
+            start after this ID.
+          in: query
           name: startAfterId
           required: false
           schema:
@@ -31959,6 +32027,10 @@ components:
       properties:
         actor:
           $ref: '#/components/schemas/AuditActor'
+        additionalInfo:
+          allOf:
+            - $ref: '#/components/schemas/AuditAdditionalInfo'
+          description: Additional information about the audited operation
         anonymizationDate:
           format: date-time
           type: string
@@ -31995,6 +32067,7 @@ components:
             - FACILITY_CUSTOM_SERVICE
             - ROUTING_STRATEGY
             - STOW_JOB
+            - EXPORT
           type: string
         entityVersion:
           type: number
@@ -32061,6 +32134,15 @@ components:
       title: AuditActorDetails
       type: object
       description: AuditActorDetails
+    AuditAdditionalInfo:
+      properties:
+        export:
+          allOf:
+            - $ref: '#/components/schemas/AuditExportInfo'
+          description: Only present for audits of entity type EXPORT
+      title: AuditAdditionalInfo
+      type: object
+      description: AuditAdditionalInfo
     AuditClient:
       properties:
         api:
@@ -32095,6 +32177,7 @@ components:
             - FACILITY_CUSTOM_SERVICE
             - ROUTING_STRATEGY
             - STOW_JOB
+            - EXPORT
           type: string
         in:
           description: Search by entityType
@@ -32117,6 +32200,7 @@ components:
               - FACILITY_CUSTOM_SERVICE
               - ROUTING_STRATEGY
               - STOW_JOB
+              - EXPORT
             type: string
           maxItems: 500
           type: array
@@ -32140,10 +32224,34 @@ components:
             - FACILITY_CUSTOM_SERVICE
             - ROUTING_STRATEGY
             - STOW_JOB
+            - EXPORT
           type: string
       title: AuditedEntityTypeEnumFilter
       type: object
       description: AuditedEntityTypeEnumFilter
+    AuditExportInfo:
+      properties:
+        rowCount:
+          description: The number of exported rows
+          minimum: 0
+          type: number
+        type:
+          description: The query the export is derived from
+          enum:
+            - PROCESS_AGGREGATE
+          type: string
+        usedConfiguration:
+          additionalProperties: true
+          description: >-
+            The configuration the export was created with. Removed when the
+            audit is anonymized
+          type: object
+      required:
+        - type
+        - rowCount
+      title: AuditExportInfo
+      type: object
+      description: AuditExportInfo
     AuditOperation:
       properties:
         name:
@@ -32202,7 +32310,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/AuditSearchQuery'
         size:
@@ -32234,6 +32344,9 @@ components:
     AuditSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/AuditSearchQuery'
           maxItems: 500
@@ -32248,6 +32361,9 @@ components:
             - $ref: '#/components/schemas/AuditedEntityTypeEnumFilter'
           description: Search by entityType
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/AuditSearchQuery'
           maxItems: 500
@@ -33021,6 +33137,9 @@ components:
         eq:
           type: boolean
         notEq:
+          description: >-
+            Matches all values not equal to the given value, including entities
+            where the field is not set
           type: boolean
       title: BooleanFilter
       type: object
@@ -35046,7 +35165,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/CategorySearchQuery'
         size:
@@ -35085,6 +35206,9 @@ components:
           description: Search by nameLocalized
           type: object
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/CategorySearchQuery'
           maxItems: 500
@@ -35108,6 +35232,9 @@ components:
             - $ref: '#/components/schemas/LocalizedStringSearchFilter'
           description: Search by name
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/CategorySearchQuery'
           maxItems: 500
@@ -37329,6 +37456,9 @@ components:
           format: date-time
           type: string
         notEq:
+          description: >-
+            Matches all values not equal to the given value, including entities
+            where the field is not set
           format: date-time
           type: string
       title: DateEqFilter
@@ -37366,6 +37496,9 @@ components:
           format: date-time
           type: string
         notEq:
+          description: >-
+            Matches all values not equal to the given value, including entities
+            where the field is not set
           format: date-time
           type: string
       title: DateFilter
@@ -39332,7 +39465,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/ExportContainerSearchQuery'
         size:
@@ -39357,6 +39492,9 @@ components:
     ExportContainerSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ExportContainerSearchQuery'
           maxItems: 500
@@ -39379,6 +39517,9 @@ components:
             - $ref: '#/components/schemas/StringFilter'
           description: Search by name
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ExportContainerSearchQuery'
           maxItems: 500
@@ -39585,7 +39726,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/ExportOperationSearchQuery'
         size:
@@ -39617,6 +39760,9 @@ components:
     ExportOperationSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ExportOperationSearchQuery'
           maxItems: 500
@@ -39641,6 +39787,9 @@ components:
           description: Search by finishedAt
           example: 2026-06-17T12:00:00.000Z
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ExportOperationSearchQuery'
           maxItems: 500
@@ -39935,7 +40084,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/ExportRequestSearchQuery'
         size:
@@ -39960,6 +40111,9 @@ components:
     ExportRequestSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ExportRequestSearchQuery'
           maxItems: 500
@@ -39984,6 +40138,9 @@ components:
           description: Search by exportContainerRef
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ExportRequestSearchQuery'
           maxItems: 500
@@ -42036,7 +42193,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/FacilityGroupSearchQuery'
         size:
@@ -42068,6 +42227,9 @@ components:
     FacilityGroupSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/FacilityGroupSearchQuery'
           maxItems: 500
@@ -42089,6 +42251,9 @@ components:
             - $ref: '#/components/schemas/LocalizedStringSearchFilter'
           description: Search by name
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/FacilityGroupSearchQuery'
           maxItems: 500
@@ -42366,7 +42531,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/FacilitySearchQuery'
         size:
@@ -42402,6 +42569,9 @@ components:
             - $ref: '#/components/schemas/FacilityAddressFilter'
           description: Nested search by address
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/FacilitySearchQuery'
           maxItems: 500
@@ -42437,6 +42607,9 @@ components:
             - $ref: '#/components/schemas/StringSearchFilter'
           description: Search by name
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/FacilitySearchQuery'
           maxItems: 500
@@ -44742,6 +44915,8 @@ components:
                 type: string
               maxItems: 20
               type: array
+            sentNotifications:
+              $ref: '#/components/schemas/HandoverJobSentNotifications'
             shipmentRef:
               description: >-
                 This part of the API is deprecated. For details, see the <a
@@ -45678,7 +45853,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/HandoverJobSearchQuery'
         size:
@@ -45715,6 +45892,9 @@ components:
                 #/components/schemas/HandoverJobAdditionalHandoverJobLineItemsListFilter
           description: Nested list search by additionalHandoverJobLineItems
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/HandoverJobSearchQuery'
           maxItems: 500
@@ -45758,6 +45938,9 @@ components:
             - $ref: '#/components/schemas/HandoverJobInvoiceAddressFilter'
           description: Nested search by invoiceAddress
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/HandoverJobSearchQuery'
           maxItems: 500
@@ -45796,6 +45979,20 @@ components:
       title: HandoverJobSearchQuery
       type: object
       description: HandoverJobSearchQuery
+    HandoverJobSentNotifications:
+      additionalProperties: false
+      description: >-
+        Markers whether the respective notification was already sent for this
+        handover job. Maintained by the system.
+      properties:
+        overdueDetected:
+          default: false
+          description: >-
+            Indicates if the overdue (targetTime is in the past) notification
+            was already sent.
+          type: boolean
+      type: object
+      title: HandoverJobSentNotifications
     HandoverjobSignatureForCreation:
       additionalProperties: false
       properties:
@@ -47266,7 +47463,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/InboundProcessSearchQuery'
         size:
@@ -47298,6 +47497,9 @@ components:
     InboundProcessSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/InboundProcessSearchQuery'
           maxItems: 500
@@ -47327,6 +47529,9 @@ components:
           description: Search by inboundDate
           example: 2026-06-17T12:00:00.000Z
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/InboundProcessSearchQuery'
           maxItems: 500
@@ -48589,7 +48794,10 @@ components:
       title: InterFacilityConnectionPricingQuantity
       type: string
     InterFacilityConnectionPricingUnit:
-      description: The unit the pricing quantities are converted to and priced in.
+      description: >-
+        The unit the pricing quantities are converted to and priced in.
+        LOADING_METER is not supported yet, use GRAM with the
+        LOADING_METER_EQUIVALENT quantity and ldmToWeightFactor instead.
       enum:
         - GRAM
         - CUBIC_METER
@@ -49375,7 +49583,10 @@ components:
         ldmToWeightFactor:
           description: >-
             The grams equivalent to 1 loading meter, converting between weight
-            and loading meters.
+            and loading meters. Required when pricingQuantities contains
+            LOADING_METER_EQUIVALENT. The loading meters of a transfer are the
+            summed floor area of its packaging units divided by
+            transportDetails.vehicleWidthInMeters, which must be set as well.
           example: 1850
           format: float
           minimum: 0
@@ -52021,7 +52232,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/LabelSearchQuery'
         size:
@@ -52053,6 +52266,9 @@ components:
     LabelSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/LabelSearchQuery'
           maxItems: 500
@@ -52079,6 +52295,9 @@ components:
             - $ref: '#/components/schemas/DateFilter'
           description: Search by lastModified
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/LabelSearchQuery'
           maxItems: 500
@@ -52545,7 +52764,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/LinkedServiceJobsSearchQuery'
         size:
@@ -52581,6 +52802,9 @@ components:
             - $ref: '#/components/schemas/StringListFilter'
           description: Search by additionalInformation
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/LinkedServiceJobsSearchQuery'
           maxItems: 500
@@ -52621,6 +52845,9 @@ components:
           description: Search by linkedServiceJobRef
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/LinkedServiceJobsSearchQuery'
           maxItems: 500
@@ -53671,7 +53898,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/ListingSearchQuery'
         size:
@@ -53703,6 +53932,9 @@ components:
     ListingSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ListingSearchQuery'
           maxItems: 500
@@ -53750,6 +53982,9 @@ components:
             - $ref: '#/components/schemas/StringFilter'
           description: Search by measurementUnitKey
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ListingSearchQuery'
           maxItems: 500
@@ -54630,9 +54865,15 @@ components:
           maxLength: 256
           type: string
         notEq:
+          description: >-
+            Matches all values not equal to the given value, including entities
+            where the field is not set
           maxLength: 256
           type: string
         notIn:
+          description: >-
+            Matches all values not contained in the given list, including
+            entities where the field is not set
           items:
             maxLength: 256
             type: string
@@ -54650,6 +54891,7 @@ components:
           description: Represents barcodes that may be scanned at this location
           items:
             type: string
+          maxItems: 50
           type: array
       xml:
         name: Location
@@ -54946,7 +55188,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/LookupRecordItemSearchQuery'
         size:
@@ -54971,6 +55215,9 @@ components:
     LookupRecordItemSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/LookupRecordItemSearchQuery'
           maxItems: 500
@@ -54981,6 +55228,9 @@ components:
           description: Search by id
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/LookupRecordItemSearchQuery'
           maxItems: 500
@@ -57004,20 +57254,14 @@ components:
       xml:
         name: ModifyRatingAction
     ModifyRestowItemAction:
-      additionalProperties: false
-      description: Action to modify a restow item.
       properties:
         action:
-          description: >-
-            Use value 'ModifyRestowItem', because you want to modify a restow
-            item
           enum:
             - ModifyRestowItem
           type: string
         location:
           $ref: '#/components/schemas/Location'
         restowed:
-          default: false
           description: Indicates if the restowItem has been restowed
           example: true
           type: boolean
@@ -57026,6 +57270,7 @@ components:
         - restowed
       title: ModifyRestowItemAction
       type: object
+      description: ModifyRestowItemAction
     ModifyRetainedOfflineStock:
       allOf:
         - $ref: '#/components/schemas/AbstractModificationAction'
@@ -58210,7 +58455,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/NotificationSearchQuery'
         size:
@@ -58242,6 +58489,9 @@ components:
     NotificationSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/NotificationSearchQuery'
           maxItems: 500
@@ -58263,6 +58513,9 @@ components:
           description: Search by facilityRef
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/NotificationSearchQuery'
           maxItems: 500
@@ -58306,6 +58559,9 @@ components:
         lte:
           type: number
         notEq:
+          description: >-
+            Matches all values not equal to the given value, including entities
+            where the field is not set
           type: number
       title: NumberEqFilter
       type: object
@@ -58328,8 +58584,14 @@ components:
         lte:
           type: number
         notEq:
+          description: >-
+            Matches all values not equal to the given value, including entities
+            where the field is not set
           type: number
         notIn:
+          description: >-
+            Matches all values not contained in the given list, including
+            entities where the field is not set
           items:
             type: number
           maxItems: 25
@@ -58614,9 +58876,21 @@ components:
       type: object
       description: OpenItemReturnActionParameter
     OperationalRestowingConfigurations:
-      allOf:
-        - $ref: '#/components/schemas/VersionedResource'
       properties:
+        created:
+          description: >-
+            The date this entity was created by fulfillmenttools. This value is
+            generated by the service.
+          example: 2020-02-03T08:45:51.525Z
+          format: date-time
+          type: string
+        lastModified:
+          description: >-
+            The date this entity was modified last. This value is generated by
+            the service.
+          example: 2020-02-03T09:45:51.525Z
+          format: date-time
+          type: string
         restowingProcessConfiguration:
           $ref: '#/components/schemas/RestowingProcessConfiguration'
         version:
@@ -58628,8 +58902,8 @@ components:
           type: integer
       required:
         - version
-      type: object
       title: OperationalRestowingConfigurations
+      type: object
       description: OperationalRestowingConfigurations
     OperationsValidation:
       properties:
@@ -58847,7 +59121,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/OperationsValidationSearchQuery'
         size:
@@ -58879,6 +59155,9 @@ components:
     OperationsValidationSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/OperationsValidationSearchQuery'
           maxItems: 500
@@ -58904,6 +59183,9 @@ components:
             - $ref: '#/components/schemas/DateFilter'
           description: Search by lastModified
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/OperationsValidationSearchQuery'
           maxItems: 500
@@ -62237,7 +62519,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/OrderRecordSearchQuery'
         size:
@@ -62269,6 +62553,9 @@ components:
     OrderRecordSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/OrderRecordSearchQuery'
           maxItems: 500
@@ -62286,6 +62573,9 @@ components:
             - $ref: '#/components/schemas/OrderRecordLineItemsListFilter'
           description: Nested list search by lineItems
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/OrderRecordSearchQuery'
           maxItems: 500
@@ -62483,7 +62773,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/OrderSearchQuery'
         size:
@@ -62515,6 +62807,9 @@ components:
     OrderSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/OrderSearchQuery'
           maxItems: 500
@@ -62537,6 +62832,9 @@ components:
             - $ref: '#/components/schemas/OrderDeliveryPreferencesFilter'
           description: Nested search by deliveryPreferences
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/OrderSearchQuery'
           maxItems: 500
@@ -65210,7 +65508,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/PackJobSearchQuery'
         size:
@@ -65242,6 +65542,9 @@ components:
     PackJobSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/PackJobSearchQuery'
           maxItems: 500
@@ -65269,6 +65572,9 @@ components:
             - $ref: '#/components/schemas/PackJobLineItemsListFilter'
           description: Nested list search by lineItems
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/PackJobSearchQuery'
           maxItems: 500
@@ -66653,7 +66959,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/ParcelInformationSearchQuery'
         size:
@@ -66685,6 +66993,9 @@ components:
     ParcelInformationSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ParcelInformationSearchQuery'
           maxItems: 500
@@ -66711,6 +67022,9 @@ components:
             - $ref: '#/components/schemas/DateFilter'
           description: Search by lastModified
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ParcelInformationSearchQuery'
           maxItems: 500
@@ -67411,7 +67725,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/ParcelSearchQuery'
         size:
@@ -67443,6 +67759,9 @@ components:
     ParcelSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ParcelSearchQuery'
           maxItems: 500
@@ -67482,6 +67801,9 @@ components:
             - $ref: '#/components/schemas/DateFilter'
           description: Search by lastModified
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ParcelSearchQuery'
           maxItems: 500
@@ -69532,7 +69854,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/PickJobSearchQuery'
         size:
@@ -69564,6 +69888,9 @@ components:
     PickJobSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/PickJobSearchQuery'
           maxItems: 500
@@ -69594,6 +69921,9 @@ components:
             - $ref: '#/components/schemas/DateFilter'
           description: Search by lastModified
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/PickJobSearchQuery'
           maxItems: 500
@@ -74183,7 +74513,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/ProcessSearchQuery'
         size:
@@ -74215,6 +74547,9 @@ components:
     ProcessSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ProcessSearchQuery'
           maxItems: 500
@@ -74288,6 +74623,9 @@ components:
             - $ref: '#/components/schemas/ProcessStatusEnumFilter'
           description: Search by operativeStatus
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ProcessSearchQuery'
           maxItems: 500
@@ -75346,6 +75684,7 @@ components:
         - DELIVERY-TIME
         - COST-COMPONENTS
         - NUMBER-OF-DELIVERIES
+        - STOCK-RELIABILITY
       type: string
       xml:
         name: RatingImplementation
@@ -76239,7 +76578,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/RemoteConfigurationSearchQuery'
         size:
@@ -76264,6 +76605,9 @@ components:
     RemoteConfigurationSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/RemoteConfigurationSearchQuery'
           maxItems: 500
@@ -76277,6 +76621,9 @@ components:
             - $ref: '#/components/schemas/StringFilter'
           description: Search by key
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/RemoteConfigurationSearchQuery'
           maxItems: 500
@@ -77286,7 +77633,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/ReservationSearchQuery'
         size:
@@ -77318,6 +77667,9 @@ components:
     ReservationSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ReservationSearchQuery'
           maxItems: 500
@@ -77333,6 +77685,9 @@ components:
           description: Search by id
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ReservationSearchQuery'
           maxItems: 500
@@ -77560,11 +77915,6 @@ components:
       type: object
       title: RestartPickJobConfiguration
       description: RestartPickJobConfiguration
-    RestowAttributeItem:
-      allOf:
-        - $ref: '#/components/schemas/ArticleAttributeItem'
-      title: RestowAttributeItem
-      description: RestowAttributeItem
     RestowedItems:
       properties:
         restowedItems:
@@ -77575,126 +77925,201 @@ components:
           description: Total number of found entities for this query
           example: 42
           type: integer
-      type: object
       title: RestowedItems
+      type: object
       description: RestowedItems
     RestowingProcessConfiguration:
       properties:
         restowingProcessTypes:
           items:
-            $ref: '#/components/schemas/RestowingProcessTypeEnum'
-          minItems: 0
+            enum:
+              - PICKING
+              - PACKING
+              - HANDOVER
+            type: string
           type: array
       required:
         - restowingProcessTypes
-      type: object
       title: RestowingProcessConfiguration
+      type: object
       description: RestowingProcessConfiguration
-    RestowingProcessTypeEnum:
-      description: Where restow items should be created during the operational process
-      enum:
-        - PICKING
-        - PACKING
-        - HANDOVER
-      type: string
-      title: RestowingProcessTypeEnum
     RestowItem:
-      allOf:
-        - $ref: '#/components/schemas/MandatoryLineItem'
-        - $ref: '#/components/schemas/VersionedResource'
       properties:
         article:
-          $ref: '#/components/schemas/RestowItemArticle'
+          allOf:
+            - $ref: '#/components/schemas/RestowItemArticle'
+          description: Information about the lineItem
+        created:
+          description: >-
+            The date this entity was created by fulfillmenttools. This value is
+            generated by the service.
+          example: 2020-02-03T08:45:51.525Z
+          format: date-time
+          type: string
+        customAttributes:
+          description: >-
+            Attributes that can be added to the lineItem. These attributes
+            cannot be used within fulfillment processes, but it could be useful
+            to have the information carried here.
+          type: object
         facilityRef:
           description: >-
             The id of the facility reference. The given ID has to be present in
             the system.
-          example: Esb20gpHBL94X5NdMp3C
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        globalLineItemId:
+          description: >-
+            This ID is used to identify if this line item is related to the line
+            item of other operational entities.
           type: string
         id:
-          example: LGMl2DuvPnfPoSHhYFOm
+          description: ID of the recordable attribute
+          example: 17ebfdfb-e1b4-4913-9962-3aef2b49f16f
+          type: string
+        lastModified:
+          description: >-
+            The date this entity was modified last. This value is generated by
+            the service.
+          example: 2020-02-03T09:45:51.525Z
+          format: date-time
           type: string
         location:
           $ref: '#/components/schemas/Location'
         measurementUnitKey:
-          description: Identifier for items unit of measurement.
-          example: liter
+          description: Measurement unit key of the item, for example "pcs" or "kg"
+          example: pcs
+          minLength: 1
           type: string
         operativeProcessRef:
           description: id of the connected operative process if available
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
         processRef:
           description: id of the connected process if available
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
         quantity:
-          default: 1
-          example: 1
-          format: int64
-          minimum: 1
-          type: integer
+          description: The quantity of the lineItem
+          type: number
+        recordableAttributes:
+          description: >-
+            Customizable information about the lineItem that can be set during
+            the process.
+          items:
+            $ref: '#/components/schemas/RecordableAttribute'
+          type: array
         restowed:
-          default: false
           description: Indicates if the restowItem has been restowed
           example: true
           type: boolean
+        scannableCodes:
+          description: Codes that can be used for scanning this lineItem
+          items:
+            type: string
+          type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 42
+          minimum: 0
+          type: number
         status:
-          $ref: '#/components/schemas/RestowItemStatus'
+          description: Status of the restow item
+          enum:
+            - CANCELED
+            - CLOSED
+            - OPEN
+          type: string
         stockRef:
           description: id of the stock entity for this line item
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
+        version:
+          description: >-
+            The version of the document to be used in optimistic locking
+            mechanisms.
+          example: 42
+          format: int64
+          type: integer
       required:
         - id
         - article
+        - quantity
+        - version
         - restowed
         - facilityRef
-        - quantity
         - status
-      type: object
       title: RestowItem
+      type: object
       description: RestowItem
-    RestowItemActionsParameter:
-      anyOf:
-        - $ref: '#/components/schemas/RestowItemRestowActionParameter'
-        - $ref: '#/components/schemas/RestowItemCancelActionParameter'
-      title: RestowItemActionsParameter
-      description: RestowItemActionsParameter
     RestowItemArticle:
-      allOf:
-        - $ref: '#/components/schemas/AbstractArticle'
-        - properties:
-            attributes:
-              items:
-                $ref: '#/components/schemas/RestowAttributeItem'
-              type: array
+      properties:
+        titleLocalized:
+          allOf:
+            - $ref: '#/components/schemas/LocaleString'
+          description: The translations for the title of the product
+        attributes:
+          items:
+            $ref: '#/components/schemas/ArticleAttributeItem'
+          type: array
+        customAttributes:
+          description: >-
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
           type: object
-      xml:
-        name: RestowItemArticle
+        imageUrl:
+          description: >-
+            A web link to a picture of this article. Ensure that no
+            authentication is needed to fetch the image.
+          example: https://example.com/resource
+          type: string
+        tenantArticleId:
+          description: This is a reference to an article number
+          example: '4711'
+          type: string
+        title:
+          description: The title of the product
+          example: Cologne Water
+          type: string
+        weight:
+          description: Weight value is in gram
+          minimum: 0
+          type: number
+      required:
+        - tenantArticleId
+        - title
       title: RestowItemArticle
+      type: object
       description: RestowItemArticle
-    RestowItemCancelActionEnum:
-      enum:
-        - CANCEL
-      type: string
-      title: RestowItemCancelActionEnum
-      description: RestowItemCancelActionEnum
     RestowItemCancelActionParameter:
-      additionalProperties: false
-      description: Action to cancel a RestowItem.
       properties:
         name:
-          $ref: '#/components/schemas/RestowItemCancelActionEnum'
+          enum:
+            - CANCEL
+          type: string
         version:
           description: Version of the entity to be changed
+          example: 1
           minimum: 0
           type: integer
       required:
         - name
         - version
       title: RestowItemCancelActionParameter
+      type: object
+      description: RestowItemCancelActionParameter
     RestowItemForCreation:
-      additionalProperties: false
-      allOf:
-        - $ref: '#/components/schemas/MandatoryLineItemForCreation'
       properties:
         article:
           $ref: '#/components/schemas/RestowItemArticle'
@@ -77708,57 +78133,70 @@ components:
           description: >-
             The id of the facility reference. The given ID has to be present in
             the system.
-          example: Esb20gpHBL94X5NdMp3C
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
         globalLineItemId:
           description: >-
-            This id is used to identify if this line item is related to the line
+            This ID is used to identify if this line item is related to the line
             item of other operational entities.
           type: string
         location:
           $ref: '#/components/schemas/Location'
         measurementUnitKey:
-          description: Identifier for items unit of measurement.
-          example: liter
+          description: Measurement unit key of the item, for example "pcs" or "kg"
+          example: pcs
+          minLength: 1
           type: string
         quantity:
-          default: 1
-          example: 1
-          format: int64
-          minimum: 1
-          type: integer
+          description: The quantity of the lineItem
+          type: number
         recordableAttributes:
+          description: >-
+            Customizable information about the lineItem that can be set during
+            the process.
           items:
             $ref: '#/components/schemas/RecordableAttributeForCreation'
-          nullable: true
+          maxItems: 50
           type: array
         restowed:
-          default: false
           description: Indicates if the restowItem has been restowed
           example: true
           type: boolean
         scannableCodes:
+          description: Codes that can be used for scanning this lineItem
           items:
-            description: Codes, that identify the article
             type: string
+          maxItems: 50
           type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 42
+          minimum: 0
+          type: number
+        substituteForOrderedItem:
+          $ref: '#/components/schemas/SubstituteForOrderedItem'
       required:
-        - facilityRef
         - article
         - quantity
-      type: object
+        - facilityRef
       title: RestowItemForCreation
+      type: object
       description: RestowItemForCreation
     RestowItemPatchActions:
-      description: >-
-        Deprecated Actions to modify restow items - please use
-        /api/restowitem/{id}/actions
       properties:
         actions:
           items:
-            anyOf:
-              - $ref: '#/components/schemas/ModifyRestowItemAction'
-          minItems: 1
+            $ref: '#/components/schemas/ModifyRestowItemAction'
+          maxItems: 10
           type: array
         version:
           description: >-
@@ -77768,51 +78206,30 @@ components:
           format: int64
           type: integer
       required:
-        - version
         - actions
+        - version
       title: RestowItemPatchActions
       type: object
-      xml:
-        name: RestowItemPatchActions
-    RestowItemRestowActionEnum:
-      enum:
-        - RESTOW
-      type: string
-      title: RestowItemRestowActionEnum
-      description: RestowItemRestowActionEnum
+      description: RestowItemPatchActions
     RestowItemRestowActionParameter:
-      additionalProperties: false
-      description: Action to restow a RestowItem.
       properties:
         location:
           $ref: '#/components/schemas/Location'
         name:
-          $ref: '#/components/schemas/RestowItemRestowActionEnum'
+          enum:
+            - RESTOW
+          type: string
         version:
           description: Version of the entity to be changed
+          example: 1
           minimum: 0
           type: integer
       required:
         - name
         - version
       title: RestowItemRestowActionParameter
-    RestowItemsSortOptionsEnum:
-      enum:
-        - CREATED_DESC
-        - CREATED_ASC
-        - LAST_MODIFIED_DESC
-        - LAST_MODIFIED_ASC
-      type: string
-      title: RestowItemsSortOptionsEnum
-      description: RestowItemsSortOptionsEnum
-    RestowItemStatus:
-      description: Status of the restow item
-      enum:
-        - CANCELED
-        - CLOSED
-        - OPEN
-      type: string
-      title: RestowItemStatus
+      type: object
+      description: RestowItemRestowActionParameter
     ReturnConfiguration:
       properties:
         active:
@@ -79118,7 +79535,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/RoleSearchQuery'
         size:
@@ -79150,6 +79569,9 @@ components:
     RoleSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/RoleSearchQuery'
           maxItems: 500
@@ -79167,6 +79589,9 @@ components:
             - $ref: '#/components/schemas/StringFilter'
           description: Search by name
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/RoleSearchQuery'
           maxItems: 500
@@ -80344,7 +80769,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/RoutingPlanSearchQuery'
         size:
@@ -80376,6 +80803,9 @@ components:
     RoutingPlanSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/RoutingPlanSearchQuery'
           maxItems: 500
@@ -80405,6 +80835,9 @@ components:
             - $ref: '#/components/schemas/RoutingPlanLatestPickingStartFilter'
           description: Nested search by latestPickingStart
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/RoutingPlanSearchQuery'
           maxItems: 500
@@ -82365,7 +82798,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/ScopedAvailabilityConfigSearchQuery'
         size:
@@ -82397,6 +82832,9 @@ components:
     ScopedAvailabilityConfigSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ScopedAvailabilityConfigSearchQuery'
           maxItems: 500
@@ -82425,6 +82863,9 @@ components:
             - $ref: '#/components/schemas/StringSearchFilter'
           description: Search by key
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ScopedAvailabilityConfigSearchQuery'
           maxItems: 500
@@ -85247,7 +85688,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/ShipmentSearchQueryWrapper'
         size:
@@ -85279,6 +85722,9 @@ components:
     ShipmentSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ShipmentSearchQuery'
           maxItems: 500
@@ -85314,6 +85760,9 @@ components:
           description: Search by id
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ShipmentSearchQuery'
           maxItems: 500
@@ -85347,6 +85796,9 @@ components:
     ShipmentSearchQueryWrapper:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ShipmentSearchQuery'
           maxItems: 500
@@ -85379,6 +85831,9 @@ components:
           description: Search by id
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ShipmentSearchQuery'
           maxItems: 500
@@ -86029,7 +86484,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/ShippingInformationSearchQuery'
         size:
@@ -86061,6 +86518,9 @@ components:
     ShippingInformationSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ShippingInformationSearchQuery'
           maxItems: 500
@@ -86092,6 +86552,9 @@ components:
             - $ref: '#/components/schemas/DateFilter'
           description: Search by lastModified
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ShippingInformationSearchQuery'
           maxItems: 500
@@ -87034,7 +87497,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/SimulationOrderSearchQuery'
         size:
@@ -87066,6 +87531,9 @@ components:
     SimulationOrderSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/SimulationOrderSearchQuery'
           maxItems: 500
@@ -87099,6 +87567,9 @@ components:
             - $ref: '#/components/schemas/DateFilter'
           description: Search by lastModified
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/SimulationOrderSearchQuery'
           maxItems: 500
@@ -88472,7 +88943,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/StockAvailabilityThresholdConfigSearchQuery'
         size:
@@ -88504,6 +88977,9 @@ components:
     StockAvailabilityThresholdConfigSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/StockAvailabilityThresholdConfigSearchQuery'
           maxItems: 500
@@ -88514,6 +88990,9 @@ components:
           description: Search by id
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/StockAvailabilityThresholdConfigSearchQuery'
           maxItems: 500
@@ -89490,7 +89969,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/StockSearchQuery'
         size:
@@ -89522,6 +90003,9 @@ components:
     StockSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/StockSearchQuery'
           maxItems: 500
@@ -89559,6 +90043,9 @@ components:
           description: Search by locationRef
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/StockSearchQuery'
           maxItems: 500
@@ -90216,7 +90703,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/StorageLocationSearchQuery'
         size:
@@ -90248,6 +90737,9 @@ components:
     StorageLocationSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/StorageLocationSearchQuery'
           maxItems: 500
@@ -90283,6 +90775,9 @@ components:
             - $ref: '#/components/schemas/StringFilter'
           description: Search by name
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/StorageLocationSearchQuery'
           maxItems: 500
@@ -90833,7 +91328,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/StowJobSearchQuery'
         size:
@@ -90865,6 +91362,9 @@ components:
     StowJobSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/StowJobSearchQuery'
           maxItems: 500
@@ -90900,6 +91400,9 @@ components:
           description: Search by id
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/StowJobSearchQuery'
           maxItems: 500
@@ -91644,6 +92147,9 @@ components:
           maxLength: 256
           type: string
         notEq:
+          description: >-
+            Matches all values not equal to the given value, including entities
+            where the field is not set
           maxLength: 256
           type: string
       title: StringEqFilter
@@ -91661,9 +92167,15 @@ components:
           maxItems: 25
           type: array
         notEq:
+          description: >-
+            Matches all values not equal to the given value, including entities
+            where the field is not set
           maxLength: 256
           type: string
         notIn:
+          description: >-
+            Matches all values not contained in the given list, including
+            entities where the field is not set
           items:
             maxLength: 256
             type: string
@@ -91705,9 +92217,15 @@ components:
           maxLength: 256
           type: string
         notEq:
+          description: >-
+            Matches all values not equal to the given value, including entities
+            where the field is not set
           maxLength: 256
           type: string
         notIn:
+          description: >-
+            Matches all values not contained in the given list, including
+            entities where the field is not set
           items:
             maxLength: 256
             type: string
@@ -93482,7 +94000,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/TagSearchQuery'
         size:
@@ -93518,6 +94038,9 @@ components:
             - $ref: '#/components/schemas/StringSearchFilter'
           description: Search by allowedValues
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/TagSearchQuery'
           maxItems: 500
@@ -93528,6 +94051,9 @@ components:
           description: Search by id
           example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/TagSearchQuery'
           maxItems: 500
@@ -94593,6 +95119,7 @@ components:
       enum:
         - WHOLE_ENTITY
         - LINE_ITEM
+        - ASSIGNED_TRANSFER
       type: string
       xml:
         name: ToolkitRuleScope
@@ -94946,7 +95473,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/TrackingInformationSearchQuery'
         size:
@@ -94978,6 +95507,9 @@ components:
     TrackingInformationSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/TrackingInformationSearchQuery'
           maxItems: 500
@@ -95009,6 +95541,9 @@ components:
             - $ref: '#/components/schemas/DateFilter'
           description: Search by lastModified
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/TrackingInformationSearchQuery'
           maxItems: 500
@@ -96932,7 +97467,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/UserSearchQuery'
         size:
@@ -96964,6 +97501,9 @@ components:
     UserSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/UserSearchQuery'
           maxItems: 500
@@ -97012,6 +97552,9 @@ components:
           description: Search by lastname
           example: Bison
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/UserSearchQuery'
           maxItems: 500
@@ -97750,7 +98293,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/WorkflowSearchQuery'
         size:
@@ -97782,6 +98327,9 @@ components:
     WorkflowSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/WorkflowSearchQuery'
           maxItems: 500
@@ -97800,6 +98348,9 @@ components:
             - $ref: '#/components/schemas/LocalizedStringSearchFilter'
           description: Search by name
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/WorkflowSearchQuery'
           maxItems: 500
@@ -97986,7 +98537,9 @@ components:
           minimum: 1
           type: number
         options:
-          $ref: '#/components/schemas/SearchOptions'
+          allOf:
+            - $ref: '#/components/schemas/SearchOptions'
+          description: Additional options for the search request.
         query:
           $ref: '#/components/schemas/ZoneSearchQuery'
         size:
@@ -98018,6 +98571,9 @@ components:
     ZoneSearchQuery:
       properties:
         and:
+          description: >-
+            Matches if all of the given queries match. Combined with the other
+            filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ZoneSearchQuery'
           maxItems: 500
@@ -98046,6 +98602,9 @@ components:
             - $ref: '#/components/schemas/StringFilter'
           description: Search by name
         or:
+          description: >-
+            Matches if at least one of the given queries matches. Combined with
+            the other filters on the same level by AND. Can be nested.
           items:
             $ref: '#/components/schemas/ZoneSearchQuery'
           maxItems: 500

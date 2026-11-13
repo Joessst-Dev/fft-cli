@@ -7777,6 +7777,7 @@ const (
 	RatingImplementationPREFERWAREHOUSE      RatingImplementation = "PREFER-WAREHOUSE"
 	RatingImplementationSTOCKAVAILABILITY    RatingImplementation = "STOCK-AVAILABILITY"
 	RatingImplementationSTOCKBALANCING       RatingImplementation = "STOCK-BALANCING"
+	RatingImplementationSTOCKRELIABILITY     RatingImplementation = "STOCK-RELIABILITY"
 	RatingImplementationTURNOVER             RatingImplementation = "TURNOVER"
 	RatingImplementationWORKLOADBALANCING    RatingImplementation = "WORKLOAD-BALANCING"
 	RatingImplementationZONE                 RatingImplementation = "ZONE"
@@ -7808,6 +7809,8 @@ func (e RatingImplementation) Valid() bool {
 	case RatingImplementationSTOCKAVAILABILITY:
 		return true
 	case RatingImplementationSTOCKBALANCING:
+		return true
+	case RatingImplementationSTOCKRELIABILITY:
 		return true
 	case RatingImplementationTURNOVER:
 		return true
@@ -12349,13 +12352,16 @@ func (e ToolkitRuleOperatorType) Valid() bool {
 
 // Defines values for ToolkitRuleScope.
 const (
-	ToolkitRuleScopeLINEITEM    ToolkitRuleScope = "LINE_ITEM"
-	ToolkitRuleScopeWHOLEENTITY ToolkitRuleScope = "WHOLE_ENTITY"
+	ToolkitRuleScopeASSIGNEDTRANSFER ToolkitRuleScope = "ASSIGNED_TRANSFER"
+	ToolkitRuleScopeLINEITEM         ToolkitRuleScope = "LINE_ITEM"
+	ToolkitRuleScopeWHOLEENTITY      ToolkitRuleScope = "WHOLE_ENTITY"
 )
 
 // Valid indicates whether the value is a known member of the ToolkitRuleScope enum.
 func (e ToolkitRuleScope) Valid() bool {
 	switch e {
+	case ToolkitRuleScopeASSIGNEDTRANSFER:
+		return true
 	case ToolkitRuleScopeLINEITEM:
 		return true
 	case ToolkitRuleScopeWHOLEENTITY:
@@ -14570,7 +14576,9 @@ type BasicDeliveryPromiseShipmentFacility struct {
 
 // BooleanFilter BooleanFilter
 type BooleanFilter struct {
-	Eq    *bool `json:"eq,omitempty"`
+	Eq *bool `json:"eq,omitempty"`
+
+	// NotEq Matches all values not equal to the given value, including entities where the field is not set
 	NotEq *bool `json:"notEq,omitempty"`
 }
 
@@ -14893,6 +14901,7 @@ type CarrierTransitTime struct {
 
 // CategorySearchQuery CategorySearchQuery
 type CategorySearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]CategorySearchQuery `json:"and,omitempty"`
 
 	// CustomAttributes Search by custom attributes
@@ -14908,7 +14917,9 @@ type CategorySearchQuery struct {
 
 	// NameLocalized Search by nameLocalized
 	NameLocalized *map[string]CategorySearchQuery_NameLocalized_AdditionalProperties `json:"nameLocalized,omitempty"`
-	Or            *[]CategorySearchQuery                                             `json:"or,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]CategorySearchQuery `json:"or,omitempty"`
 
 	// TenantCategoryId Search by tenantCategoryId
 	//
@@ -15304,7 +15315,9 @@ type CutoffTime struct {
 
 // DateEqFilter DateEqFilter
 type DateEqFilter struct {
-	Eq    *time.Time `json:"eq,omitempty"`
+	Eq *time.Time `json:"eq,omitempty"`
+
+	// NotEq Matches all values not equal to the given value, including entities where the field is not set
 	NotEq *time.Time `json:"notEq,omitempty"`
 }
 
@@ -15320,7 +15333,9 @@ type DateFilter struct {
 	Gte    *time.Time `json:"gte,omitempty"`
 	Lt     *time.Time `json:"lt,omitempty"`
 	Lte    *time.Time `json:"lte,omitempty"`
-	NotEq  *time.Time `json:"notEq,omitempty"`
+
+	// NotEq Matches all values not equal to the given value, including entities where the field is not set
+	NotEq *time.Time `json:"notEq,omitempty"`
 }
 
 // DateListFilter DateListFilter
@@ -15507,6 +15522,7 @@ type EstimatedDeliveryTime struct {
 
 // ExportContainerSearchQuery ExportContainerSearchQuery
 type ExportContainerSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]ExportContainerSearchQuery `json:"and,omitempty"`
 
 	// CustomAttributes Search by custom attributes
@@ -15516,8 +15532,10 @@ type ExportContainerSearchQuery struct {
 	Description *StringFilter `json:"description,omitempty"`
 
 	// Name Search by name
-	Name *StringFilter                 `json:"name,omitempty"`
-	Or   *[]ExportContainerSearchQuery `json:"or,omitempty"`
+	Name *StringFilter `json:"name,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]ExportContainerSearchQuery `json:"or,omitempty"`
 
 	// TenantExportContainerId Search by tenantExportContainerId
 	//
@@ -16202,6 +16220,7 @@ type FacilityForCreation struct {
 
 // FacilityGroupSearchQuery FacilityGroupSearchQuery
 type FacilityGroupSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]FacilityGroupSearchQuery `json:"and,omitempty"`
 
 	// FacilityRefs Search by facilityRefs
@@ -16216,7 +16235,9 @@ type FacilityGroupSearchQuery struct {
 
 	// Name Search by name
 	Name *LocalizedStringSearchFilter `json:"name,omitempty"`
-	Or   *[]FacilityGroupSearchQuery  `json:"or,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]FacilityGroupSearchQuery `json:"or,omitempty"`
 
 	// TenantFacilityGroupId Search by tenantFacilityGroupId
 	//
@@ -16340,7 +16361,7 @@ type FacilitySearchPayload struct {
 	// Last Number of items to return for backward pagination. Cannot be used with 'size' (first). Default: 20.
 	Last *float32 `json:"last,omitempty"`
 
-	// Options SearchOptions
+	// Options Additional options for the search request.
 	Options *SearchOptions `json:"options,omitempty"`
 
 	// Query FacilitySearchQuery
@@ -16363,7 +16384,9 @@ type FacilitySearchPayload struct {
 type FacilitySearchQuery struct {
 	// Address Nested search by address
 	Address *FacilityAddressFilter `json:"address,omitempty"`
-	And     *[]FacilitySearchQuery `json:"and,omitempty"`
+
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
+	And *[]FacilitySearchQuery `json:"and,omitempty"`
 
 	// Contact Nested search by contact
 	Contact *FacilityContactFilter `json:"contact,omitempty"`
@@ -16383,8 +16406,10 @@ type FacilitySearchQuery struct {
 	LocationType *FacilityLocationTypeEnumFilter `json:"locationType,omitempty"`
 
 	// Name Search by name
-	Name *StringSearchFilter    `json:"name,omitempty"`
-	Or   *[]FacilitySearchQuery `json:"or,omitempty"`
+	Name *StringSearchFilter `json:"name,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]FacilitySearchQuery `json:"or,omitempty"`
 
 	// Referenced References to other entities
 	Referenced *FacilityReferenceFilter `json:"referenced,omitempty"`
@@ -16820,7 +16845,9 @@ type HandoverJobRecipientAddressFilter struct {
 type HandoverJobSearchQuery struct {
 	// AdditionalHandoverJobLineItems Nested list search by additionalHandoverJobLineItems
 	AdditionalHandoverJobLineItems *HandoverJobAdditionalHandoverJobLineItemsListFilter `json:"additionalHandoverJobLineItems,omitempty"`
-	And                            *[]HandoverJobSearchQuery                            `json:"and,omitempty"`
+
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
+	And *[]HandoverJobSearchQuery `json:"and,omitempty"`
 
 	// Anonymized Search by anonymized
 	Anonymized *BooleanFilter `json:"anonymized,omitempty"`
@@ -16852,7 +16879,9 @@ type HandoverJobSearchQuery struct {
 
 	// InvoiceAddress Nested search by invoiceAddress
 	InvoiceAddress *HandoverJobInvoiceAddressFilter `json:"invoiceAddress,omitempty"`
-	Or             *[]HandoverJobSearchQuery        `json:"or,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]HandoverJobSearchQuery `json:"or,omitempty"`
 
 	// PickJobRef Search by pickJobRef
 	//
@@ -17120,6 +17149,7 @@ type InboundProcessReceiptsReceivedItemsListFilter struct {
 
 // InboundProcessSearchQuery InboundProcessSearchQuery
 type InboundProcessSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]InboundProcessSearchQuery `json:"and,omitempty"`
 
 	// CustomAttributes Search by custom attributes
@@ -17138,8 +17168,10 @@ type InboundProcessSearchQuery struct {
 	// InboundDate Search by inboundDate
 	//
 	// Example: 2026-06-17T12:00:00.000Z
-	InboundDate *DateListFilter              `json:"inboundDate,omitempty"`
-	Or          *[]InboundProcessSearchQuery `json:"or,omitempty"`
+	InboundDate *DateListFilter `json:"inboundDate,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]InboundProcessSearchQuery `json:"or,omitempty"`
 
 	// PurchaseOrder Nested search by purchaseOrder
 	PurchaseOrder *InboundProcessPurchaseOrderFilter `json:"purchaseOrder,omitempty"`
@@ -17356,7 +17388,7 @@ type InterFacilityConnectionPricingBasis struct {
 	// PricingQuantities The quantities compared, each converted to pricingUnit; the highest one determines the chargeable amount.
 	PricingQuantities []InterFacilityConnectionPricingQuantity `json:"pricingQuantities"`
 
-	// PricingUnit The unit the pricing quantities are converted to and priced in.
+	// PricingUnit The unit the pricing quantities are converted to and priced in. LOADING_METER is not supported yet, use GRAM with the LOADING_METER_EQUIVALENT quantity and ldmToWeightFactor instead.
 	PricingUnit InterFacilityConnectionPricingUnit `json:"pricingUnit"`
 }
 
@@ -17391,7 +17423,7 @@ type InterFacilityConnectionPricingOverflowFactor struct {
 // InterFacilityConnectionPricingQuantity A quantity of the transfer that can determine the chargeable amount.
 type InterFacilityConnectionPricingQuantity string
 
-// InterFacilityConnectionPricingUnit The unit the pricing quantities are converted to and priced in.
+// InterFacilityConnectionPricingUnit The unit the pricing quantities are converted to and priced in. LOADING_METER is not supported yet, use GRAM with the LOADING_METER_EQUIVALENT quantity and ldmToWeightFactor instead.
 type InterFacilityConnectionPricingUnit string
 
 // InterFacilityConnectionSupplierTarget InterFacilityConnectionSupplierTarget
@@ -17741,7 +17773,7 @@ type InterFacilityConnectionTransferPricing struct {
 	// CostCoefficient The configured rate charged per measurement unit, applied to the measured value.
 	CostCoefficient *InterFacilityConnectionCostCoefficient `json:"costCoefficient,omitempty"`
 
-	// LdmToWeightFactor The grams equivalent to 1 loading meter, converting between weight and loading meters.
+	// LdmToWeightFactor The grams equivalent to 1 loading meter, converting between weight and loading meters. Required when pricingQuantities contains LOADING_METER_EQUIVALENT. The loading meters of a transfer are the summed floor area of its packaging units divided by transportDetails.vehicleWidthInMeters, which must be set as well.
 	//
 	// Example: 1850
 	LdmToWeightFactor *float32 `json:"ldmToWeightFactor,omitempty"`
@@ -17870,6 +17902,7 @@ type KeyExistsFilter struct {
 
 // LabelSearchQuery LabelSearchQuery
 type LabelSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]LabelSearchQuery `json:"and,omitempty"`
 
 	// Created Search entries by created. Applying a narrow and well-considered filter value is strongly recommended, as it can greatly improve response times, especially when working with large datasets.
@@ -17886,8 +17919,10 @@ type LabelSearchQuery struct {
 	Id *StringFilter `json:"id,omitempty"`
 
 	// LastModified Search by lastModified
-	LastModified *DateFilter         `json:"lastModified,omitempty"`
-	Or           *[]LabelSearchQuery `json:"or,omitempty"`
+	LastModified *DateFilter `json:"lastModified,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]LabelSearchQuery `json:"or,omitempty"`
 
 	// ProcessRef Search by processRef
 	//
@@ -17914,8 +17949,10 @@ type LinkedConfiguration struct {
 // LinkedServiceJobsSearchQuery LinkedServiceJobsSearchQuery
 type LinkedServiceJobsSearchQuery struct {
 	// AdditionalInformation Search by additionalInformation
-	AdditionalInformation *StringListFilter               `json:"additionalInformation,omitempty"`
-	And                   *[]LinkedServiceJobsSearchQuery `json:"and,omitempty"`
+	AdditionalInformation *StringListFilter `json:"additionalInformation,omitempty"`
+
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
+	And *[]LinkedServiceJobsSearchQuery `json:"and,omitempty"`
 
 	// ArticleTitles Search by articleTitles
 	ArticleTitles *StringListFilter `json:"articleTitles,omitempty"`
@@ -17945,8 +17982,10 @@ type LinkedServiceJobsSearchQuery struct {
 	// LinkedServiceJobRef Search by linkedServiceJobRef
 	//
 	// Example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
-	LinkedServiceJobRef *StringFilter                   `json:"linkedServiceJobRef,omitempty"`
-	Or                  *[]LinkedServiceJobsSearchQuery `json:"or,omitempty"`
+	LinkedServiceJobRef *StringFilter `json:"linkedServiceJobRef,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]LinkedServiceJobsSearchQuery `json:"or,omitempty"`
 
 	// ServiceName Search by serviceName
 	ServiceName *StringListFilter `json:"serviceName,omitempty"`
@@ -18738,7 +18777,7 @@ type ListingSearchPayload struct {
 	// Last Number of items to return for backward pagination. Cannot be used with 'size' (first). Default: 20.
 	Last *float32 `json:"last,omitempty"`
 
-	// Options SearchOptions
+	// Options Additional options for the search request.
 	Options *SearchOptions `json:"options,omitempty"`
 
 	// Query ListingSearchQuery
@@ -18759,6 +18798,7 @@ type ListingSearchPayload struct {
 
 // ListingSearchQuery ListingSearchQuery
 type ListingSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]ListingSearchQuery `json:"and,omitempty"`
 
 	// AvailabilityTimeframe Nested search by availabilityTimeframe
@@ -18788,8 +18828,10 @@ type ListingSearchQuery struct {
 	Id *StringFilter `json:"id,omitempty"`
 
 	// MeasurementUnitKey Search by measurementUnitKey
-	MeasurementUnitKey *StringFilter         `json:"measurementUnitKey,omitempty"`
-	Or                 *[]ListingSearchQuery `json:"or,omitempty"`
+	MeasurementUnitKey *StringFilter `json:"measurementUnitKey,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]ListingSearchQuery `json:"or,omitempty"`
 
 	// OutOfStockBehaviour Search by outOfStockBehaviour
 	OutOfStockBehaviour *ListingOutOfStockBehaviourEnumFilter `json:"outOfStockBehaviour,omitempty"`
@@ -18890,8 +18932,12 @@ type LocalizedStringSearchFilter struct {
 	In *[]string `json:"in,omitempty"`
 
 	// Like Search by regex pattern
-	Like  *string   `json:"like,omitempty"`
-	NotEq *string   `json:"notEq,omitempty"`
+	Like *string `json:"like,omitempty"`
+
+	// NotEq Matches all values not equal to the given value, including entities where the field is not set
+	NotEq *string `json:"notEq,omitempty"`
+
+	// NotIn Matches all values not contained in the given list, including entities where the field is not set
 	NotIn *[]string `json:"notIn,omitempty"`
 }
 
@@ -18906,12 +18952,15 @@ type Location struct {
 
 // LookupRecordItemSearchQuery LookupRecordItemSearchQuery
 type LookupRecordItemSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]LookupRecordItemSearchQuery `json:"and,omitempty"`
 
 	// Id Search by id
 	//
 	// Example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
-	Id *StringFilter                  `json:"id,omitempty"`
+	Id *StringFilter `json:"id,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
 	Or *[]LookupRecordItemSearchQuery `json:"or,omitempty"`
 
 	// RecordRef Search by recordRef
@@ -19719,6 +19768,7 @@ type NotificationPriorityPriorityLabelEnumFilterNotEq string
 
 // NotificationSearchQuery NotificationSearchQuery
 type NotificationSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]NotificationSearchQuery `json:"and,omitempty"`
 
 	// Category Search by category
@@ -19730,8 +19780,10 @@ type NotificationSearchQuery struct {
 	// FacilityRef Search by facilityRef
 	//
 	// Example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
-	FacilityRef *StringFilter              `json:"facilityRef,omitempty"`
-	Or          *[]NotificationSearchQuery `json:"or,omitempty"`
+	FacilityRef *StringFilter `json:"facilityRef,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]NotificationSearchQuery `json:"or,omitempty"`
 
 	// Priority Nested search by priority
 	Priority *NotificationPriorityFilter `json:"priority,omitempty"`
@@ -19742,28 +19794,35 @@ type NotificationSearchQuery struct {
 
 // NumberEqFilter NumberEqFilter
 type NumberEqFilter struct {
-	Eq    *float32 `json:"eq,omitempty"`
-	Gt    *float32 `json:"gt,omitempty"`
-	Gte   *float32 `json:"gte,omitempty"`
-	Lt    *float32 `json:"lt,omitempty"`
-	Lte   *float32 `json:"lte,omitempty"`
+	Eq  *float32 `json:"eq,omitempty"`
+	Gt  *float32 `json:"gt,omitempty"`
+	Gte *float32 `json:"gte,omitempty"`
+	Lt  *float32 `json:"lt,omitempty"`
+	Lte *float32 `json:"lte,omitempty"`
+
+	// NotEq Matches all values not equal to the given value, including entities where the field is not set
 	NotEq *float32 `json:"notEq,omitempty"`
 }
 
 // NumberFilter NumberFilter
 type NumberFilter struct {
-	Eq    *float32   `json:"eq,omitempty"`
-	Gt    *float32   `json:"gt,omitempty"`
-	Gte   *float32   `json:"gte,omitempty"`
-	In    *[]float32 `json:"in,omitempty"`
-	Lt    *float32   `json:"lt,omitempty"`
-	Lte   *float32   `json:"lte,omitempty"`
-	NotEq *float32   `json:"notEq,omitempty"`
+	Eq  *float32   `json:"eq,omitempty"`
+	Gt  *float32   `json:"gt,omitempty"`
+	Gte *float32   `json:"gte,omitempty"`
+	In  *[]float32 `json:"in,omitempty"`
+	Lt  *float32   `json:"lt,omitempty"`
+	Lte *float32   `json:"lte,omitempty"`
+
+	// NotEq Matches all values not equal to the given value, including entities where the field is not set
+	NotEq *float32 `json:"notEq,omitempty"`
+
+	// NotIn Matches all values not contained in the given list, including entities where the field is not set
 	NotIn *[]float32 `json:"notIn,omitempty"`
 }
 
 // OperationsValidationSearchQuery OperationsValidationSearchQuery
 type OperationsValidationSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]OperationsValidationSearchQuery `json:"and,omitempty"`
 
 	// Created Search entries by created. Applying a narrow and well-considered filter value is strongly recommended, as it can greatly improve response times, especially when working with large datasets.
@@ -19778,8 +19837,10 @@ type OperationsValidationSearchQuery struct {
 	Key *StringFilter `json:"key,omitempty"`
 
 	// LastModified Search by lastModified
-	LastModified *DateFilter                        `json:"lastModified,omitempty"`
-	Or           *[]OperationsValidationSearchQuery `json:"or,omitempty"`
+	LastModified *DateFilter `json:"lastModified,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]OperationsValidationSearchQuery `json:"or,omitempty"`
 
 	// TenantArticleId Search by tenantArticleId
 	//
@@ -20809,6 +20870,7 @@ type OrderRecordPaymentsListFilter struct {
 
 // OrderRecordSearchQuery OrderRecordSearchQuery
 type OrderRecordSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]OrderRecordSearchQuery `json:"and,omitempty"`
 
 	// Consumer Nested search by consumer
@@ -20819,7 +20881,9 @@ type OrderRecordSearchQuery struct {
 
 	// LineItems Nested list search by lineItems
 	LineItems *OrderRecordLineItemsListFilter `json:"lineItems,omitempty"`
-	Or        *[]OrderRecordSearchQuery       `json:"or,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]OrderRecordSearchQuery `json:"or,omitempty"`
 
 	// OrderRecordDate Search by orderRecordDate
 	//
@@ -20849,7 +20913,7 @@ type OrderSearchPayload struct {
 	// Last Number of items to return for backward pagination. Cannot be used with 'size' (first). Default: 20.
 	Last *float32 `json:"last,omitempty"`
 
-	// Options SearchOptions
+	// Options Additional options for the search request.
 	Options *SearchOptions `json:"options,omitempty"`
 
 	// Query OrderSearchQuery
@@ -20870,6 +20934,7 @@ type OrderSearchPayload struct {
 
 // OrderSearchQuery OrderSearchQuery
 type OrderSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]OrderSearchQuery `json:"and,omitempty"`
 
 	// Consumer Nested search by consumer
@@ -20880,7 +20945,9 @@ type OrderSearchQuery struct {
 
 	// DeliveryPreferences Nested search by deliveryPreferences
 	DeliveryPreferences *OrderDeliveryPreferencesFilter `json:"deliveryPreferences,omitempty"`
-	Or                  *[]OrderSearchQuery             `json:"or,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]OrderSearchQuery `json:"or,omitempty"`
 
 	// OrderDate Search entries by orderDate. Applying a narrow and well-considered filter value is strongly recommended, as it can greatly improve response times, especially when working with large datasets.
 	//
@@ -21195,6 +21262,7 @@ type PackJobRecipientFilter struct {
 
 // PackJobSearchQuery PackJobSearchQuery
 type PackJobSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]PackJobSearchQuery `json:"and,omitempty"`
 
 	// FacilityRef Search by facilityRef
@@ -21215,7 +21283,9 @@ type PackJobSearchQuery struct {
 
 	// LineItems Nested list search by lineItems
 	LineItems *PackJobLineItemsListFilter `json:"lineItems,omitempty"`
-	Or        *[]PackJobSearchQuery       `json:"or,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]PackJobSearchQuery `json:"or,omitempty"`
 
 	// OrderDate Search entries by orderDate. Applying a narrow and well-considered filter value is strongly recommended, as it can greatly improve response times, especially when working with large datasets.
 	//
@@ -21412,6 +21482,7 @@ type ParcelInformationParcelInformationLineItemsListFilter struct {
 
 // ParcelInformationSearchQuery ParcelInformationSearchQuery
 type ParcelInformationSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]ParcelInformationSearchQuery `json:"and,omitempty"`
 
 	// Created Search entries by created. Applying a narrow and well-considered filter value is strongly recommended, as it can greatly improve response times, especially when working with large datasets.
@@ -21428,8 +21499,10 @@ type ParcelInformationSearchQuery struct {
 	Id *StringFilter `json:"id,omitempty"`
 
 	// LastModified Search by lastModified
-	LastModified *DateFilter                     `json:"lastModified,omitempty"`
-	Or           *[]ParcelInformationSearchQuery `json:"or,omitempty"`
+	LastModified *DateFilter `json:"lastModified,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]ParcelInformationSearchQuery `json:"or,omitempty"`
 
 	// ParcelInformationLineItems Nested list search by parcelInformationLineItems
 	ParcelInformationLineItems *ParcelInformationParcelInformationLineItemsListFilter `json:"parcelInformationLineItems,omitempty"`
@@ -21568,6 +21641,7 @@ type ParcelResultFilter struct {
 
 // ParcelSearchQuery ParcelSearchQuery
 type ParcelSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]ParcelSearchQuery `json:"and,omitempty"`
 
 	// CarrierRef Search by carrierRef
@@ -21595,8 +21669,10 @@ type ParcelSearchQuery struct {
 	Items *ParcelItemsListFilter `json:"items,omitempty"`
 
 	// LastModified Search by lastModified
-	LastModified *DateFilter          `json:"lastModified,omitempty"`
-	Or           *[]ParcelSearchQuery `json:"or,omitempty"`
+	LastModified *DateFilter `json:"lastModified,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]ParcelSearchQuery `json:"or,omitempty"`
 
 	// Recipient Nested search by recipient
 	Recipient *ParcelRecipientFilter `json:"recipient,omitempty"`
@@ -21762,6 +21838,7 @@ type PickJobPickingMethodEnumEnumListFilter struct {
 
 // PickJobSearchQuery PickJobSearchQuery
 type PickJobSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]PickJobSearchQuery `json:"and,omitempty"`
 
 	// ConsumerName Search by consumerName
@@ -21781,8 +21858,10 @@ type PickJobSearchQuery struct {
 	Id *StringFilter `json:"id,omitempty"`
 
 	// LastModified Search by lastModified
-	LastModified *DateFilter           `json:"lastModified,omitempty"`
-	Or           *[]PickJobSearchQuery `json:"or,omitempty"`
+	LastModified *DateFilter `json:"lastModified,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]PickJobSearchQuery `json:"or,omitempty"`
 
 	// OrderRef Search by orderRef
 	//
@@ -22773,6 +22852,7 @@ type ProcessReferencedStickerFilter struct {
 
 // ProcessSearchQuery ProcessSearchQuery
 type ProcessSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]ProcessSearchQuery `json:"and,omitempty"`
 
 	// CarrierManagementStatuses Search by carrierManagementStatuses
@@ -22825,7 +22905,9 @@ type ProcessSearchQuery struct {
 
 	// OperativeStatus Search by operativeStatus
 	OperativeStatus *ProcessStatusEnumFilter `json:"operativeStatus,omitempty"`
-	Or              *[]ProcessSearchQuery    `json:"or,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]ProcessSearchQuery `json:"or,omitempty"`
 
 	// OrderRef Search by orderRef
 	//
@@ -23120,14 +23202,17 @@ type RemoteConfigurationScopesListFilter struct {
 
 // RemoteConfigurationSearchQuery RemoteConfigurationSearchQuery
 type RemoteConfigurationSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]RemoteConfigurationSearchQuery `json:"and,omitempty"`
 
 	// Groups Search by groups
 	Groups *StringListFilter `json:"groups,omitempty"`
 
 	// Key Search by key
-	Key *StringFilter                     `json:"key,omitempty"`
-	Or  *[]RemoteConfigurationSearchQuery `json:"or,omitempty"`
+	Key *StringFilter `json:"key,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]RemoteConfigurationSearchQuery `json:"or,omitempty"`
 
 	// Scopes Nested list search by scopes
 	Scopes *RemoteConfigurationScopesListFilter `json:"scopes,omitempty"`
@@ -23206,6 +23291,7 @@ type ReservationRelatedRefsFilter struct {
 
 // ReservationSearchQuery ReservationSearchQuery
 type ReservationSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]ReservationSearchQuery `json:"and,omitempty"`
 
 	// FacilityRef Search by facilityRef
@@ -23216,7 +23302,9 @@ type ReservationSearchQuery struct {
 	// Id Search by id
 	//
 	// Example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
-	Id *StringFilter             `json:"id,omitempty"`
+	Id *StringFilter `json:"id,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
 	Or *[]ReservationSearchQuery `json:"or,omitempty"`
 
 	// RelatedRefs Nested search by relatedRefs
@@ -23430,7 +23518,7 @@ type RoleSearchPayload struct {
 	// Last Number of items to return for backward pagination. Cannot be used with 'size' (first). Default: 20.
 	Last *float32 `json:"last,omitempty"`
 
-	// Options SearchOptions
+	// Options Additional options for the search request.
 	Options *SearchOptions `json:"options,omitempty"`
 
 	// Query RoleSearchQuery
@@ -23451,6 +23539,7 @@ type RoleSearchPayload struct {
 
 // RoleSearchQuery RoleSearchQuery
 type RoleSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]RoleSearchQuery `json:"and,omitempty"`
 
 	// Description Search by description
@@ -23460,8 +23549,10 @@ type RoleSearchQuery struct {
 	DisplayName *StringSearchFilter `json:"displayName,omitempty"`
 
 	// Name Search by name
-	Name *StringFilter      `json:"name,omitempty"`
-	Or   *[]RoleSearchQuery `json:"or,omitempty"`
+	Name *StringFilter `json:"name,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]RoleSearchQuery `json:"or,omitempty"`
 }
 
 // RoleSort RoleSort
@@ -23787,6 +23878,7 @@ type RoutingPlanOrderLineItemsListFilter struct {
 
 // RoutingPlanSearchQuery RoutingPlanSearchQuery
 type RoutingPlanSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]RoutingPlanSearchQuery `json:"and,omitempty"`
 
 	// Anonymized Search by anonymized
@@ -23806,7 +23898,9 @@ type RoutingPlanSearchQuery struct {
 
 	// LatestPickingStart Nested search by latestPickingStart
 	LatestPickingStart *RoutingPlanLatestPickingStartFilter `json:"latestPickingStart,omitempty"`
-	Or                 *[]RoutingPlanSearchQuery            `json:"or,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]RoutingPlanSearchQuery `json:"or,omitempty"`
 
 	// OrderDate Search entries by orderDate. Applying a narrow and well-considered filter value is strongly recommended, as it can greatly improve response times, especially when working with large datasets.
 	//
@@ -25025,6 +25119,7 @@ type ScopedAvailabilityConfigEventScopeConfigStatusEnumFilterNotEq string
 
 // ScopedAvailabilityConfigSearchQuery ScopedAvailabilityConfigSearchQuery
 type ScopedAvailabilityConfigSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]ScopedAvailabilityConfigSearchQuery `json:"and,omitempty"`
 
 	// FacilityGroupRefs Search by facilityGroupRefs
@@ -25043,8 +25138,10 @@ type ScopedAvailabilityConfigSearchQuery struct {
 	Id *StringFilter `json:"id,omitempty"`
 
 	// Key Search by key
-	Key *StringSearchFilter                    `json:"key,omitempty"`
-	Or  *[]ScopedAvailabilityConfigSearchQuery `json:"or,omitempty"`
+	Key *StringSearchFilter `json:"key,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]ScopedAvailabilityConfigSearchQuery `json:"or,omitempty"`
 
 	// Status Search by status
 	Status *ScopedAvailabilityConfigEventScopeConfigStatusEnumFilter `json:"status,omitempty"`
@@ -25144,6 +25241,7 @@ type ShipmentParcelsParcelStatusEnumFilterNotEq string
 
 // ShipmentSearchQuery ShipmentSearchQuery
 type ShipmentSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]ShipmentSearchQuery `json:"and,omitempty"`
 
 	// Anonymized Search by anonymized
@@ -25168,7 +25266,9 @@ type ShipmentSearchQuery struct {
 	// Id Search by id
 	//
 	// Example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
-	Id *StringFilter          `json:"id,omitempty"`
+	Id *StringFilter `json:"id,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
 	Or *[]ShipmentSearchQuery `json:"or,omitempty"`
 
 	// Parcels Nested list search by parcels
@@ -25266,6 +25366,7 @@ type ShippingInformationCarrierRecipientInformationListFilter struct {
 
 // ShippingInformationSearchQuery ShippingInformationSearchQuery
 type ShippingInformationSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]ShippingInformationSearchQuery `json:"and,omitempty"`
 
 	// CarrierRecipientInformation Nested list search by carrierRecipientInformation
@@ -25285,8 +25386,10 @@ type ShippingInformationSearchQuery struct {
 	Id *StringFilter `json:"id,omitempty"`
 
 	// LastModified Search by lastModified
-	LastModified *DateFilter                       `json:"lastModified,omitempty"`
-	Or           *[]ShippingInformationSearchQuery `json:"or,omitempty"`
+	LastModified *DateFilter `json:"lastModified,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]ShippingInformationSearchQuery `json:"or,omitempty"`
 
 	// ShippingInformationLineItems Nested list search by shippingInformationLineItems
 	ShippingInformationLineItems *ShippingInformationShippingInformationLineItemsListFilter `json:"shippingInformationLineItems,omitempty"`
@@ -25539,6 +25642,7 @@ type SimulationOrderPaymentInfoMethodLocalizedFilter struct {
 
 // SimulationOrderSearchQuery SimulationOrderSearchQuery
 type SimulationOrderSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]SimulationOrderSearchQuery `json:"and,omitempty"`
 
 	// Consumer Nested search by consumer
@@ -25554,8 +25658,10 @@ type SimulationOrderSearchQuery struct {
 	DeliveryPreferences *SimulationOrderDeliveryPreferencesFilter `json:"deliveryPreferences,omitempty"`
 
 	// LastModified Search by lastModified
-	LastModified *DateFilter                   `json:"lastModified,omitempty"`
-	Or           *[]SimulationOrderSearchQuery `json:"or,omitempty"`
+	LastModified *DateFilter `json:"lastModified,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]SimulationOrderSearchQuery `json:"or,omitempty"`
 
 	// OrderDate Search entries by orderDate. Applying a narrow and well-considered filter value is strongly recommended, as it can greatly improve response times, especially when working with large datasets.
 	//
@@ -26495,7 +26601,7 @@ type StockSearchPayload struct {
 	// Last Number of items to return for backward pagination. Cannot be used with 'size' (first). Default: 20.
 	Last *float32 `json:"last,omitempty"`
 
-	// Options SearchOptions
+	// Options Additional options for the search request.
 	Options *SearchOptions `json:"options,omitempty"`
 
 	// Query StockSearchQuery
@@ -26516,6 +26622,7 @@ type StockSearchPayload struct {
 
 // StockSearchQuery StockSearchQuery
 type StockSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]StockSearchQuery `json:"and,omitempty"`
 
 	// AvailableUntil Search by availableUntil
@@ -26540,8 +26647,10 @@ type StockSearchQuery struct {
 	// LocationRef Search by locationRef
 	//
 	// Example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
-	LocationRef *StringFilter       `json:"locationRef,omitempty"`
-	Or          *[]StockSearchQuery `json:"or,omitempty"`
+	LocationRef *StringFilter `json:"locationRef,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]StockSearchQuery `json:"or,omitempty"`
 
 	// Properties Search by properties
 	Properties *map[string]StockSearchQuery_Properties_AdditionalProperties `json:"properties,omitempty"`
@@ -26738,6 +26847,7 @@ type StorageLocationReferencedStockFilter struct {
 
 // StorageLocationSearchQuery StorageLocationSearchQuery
 type StorageLocationSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]StorageLocationSearchQuery `json:"and,omitempty"`
 
 	// Created Search entries by created. Applying a narrow and well-considered filter value is strongly recommended, as it can greatly improve response times, especially when working with large datasets.
@@ -26757,8 +26867,10 @@ type StorageLocationSearchQuery struct {
 	Id *StringFilter `json:"id,omitempty"`
 
 	// Name Search by name
-	Name *StringFilter                 `json:"name,omitempty"`
-	Or   *[]StorageLocationSearchQuery `json:"or,omitempty"`
+	Name *StringFilter `json:"name,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]StorageLocationSearchQuery `json:"or,omitempty"`
 
 	// Referenced Nested search by referenced
 	Referenced *StorageLocationReferencedFilter `json:"referenced,omitempty"`
@@ -26851,6 +26963,7 @@ type StorageLocationTypeEnumFilterNotEq string
 
 // StowJobSearchQuery StowJobSearchQuery
 type StowJobSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]StowJobSearchQuery `json:"and,omitempty"`
 
 	// Created Search entries by created. Applying a narrow and well-considered filter value is strongly recommended, as it can greatly improve response times, especially when working with large datasets.
@@ -26869,7 +26982,9 @@ type StowJobSearchQuery struct {
 	// Id Search by id
 	//
 	// Example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
-	Id *StringFilter         `json:"id,omitempty"`
+	Id *StringFilter `json:"id,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
 	Or *[]StowJobSearchQuery `json:"or,omitempty"`
 
 	// Priority Search by priority
@@ -27015,15 +27130,21 @@ type StowJobStowLineItemsTakeFromTakenFilter struct {
 
 // StringEqFilter StringEqFilter
 type StringEqFilter struct {
-	Eq    *string `json:"eq,omitempty"`
+	Eq *string `json:"eq,omitempty"`
+
+	// NotEq Matches all values not equal to the given value, including entities where the field is not set
 	NotEq *string `json:"notEq,omitempty"`
 }
 
 // StringFilter StringFilter
 type StringFilter struct {
-	Eq    *string   `json:"eq,omitempty"`
-	In    *[]string `json:"in,omitempty"`
-	NotEq *string   `json:"notEq,omitempty"`
+	Eq *string   `json:"eq,omitempty"`
+	In *[]string `json:"in,omitempty"`
+
+	// NotEq Matches all values not equal to the given value, including entities where the field is not set
+	NotEq *string `json:"notEq,omitempty"`
+
+	// NotIn Matches all values not contained in the given list, including entities where the field is not set
 	NotIn *[]string `json:"notIn,omitempty"`
 }
 
@@ -27048,8 +27169,12 @@ type StringSearchFilter struct {
 	In *[]string `json:"in,omitempty"`
 
 	// Like Search by regex pattern
-	Like  *string   `json:"like,omitempty"`
-	NotEq *string   `json:"notEq,omitempty"`
+	Like *string `json:"like,omitempty"`
+
+	// NotEq Matches all values not equal to the given value, including entities where the field is not set
+	NotEq *string `json:"notEq,omitempty"`
+
+	// NotIn Matches all values not contained in the given list, including entities where the field is not set
 	NotIn *[]string `json:"notIn,omitempty"`
 }
 
@@ -27581,13 +27706,17 @@ type TagReference struct {
 type TagSearchQuery struct {
 	// AllowedValues Search by allowedValues
 	AllowedValues *StringSearchFilter `json:"allowedValues,omitempty"`
-	And           *[]TagSearchQuery   `json:"and,omitempty"`
+
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
+	And *[]TagSearchQuery `json:"and,omitempty"`
 
 	// Id Search by id
 	//
 	// Example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
 	Id *StringSearchFilter `json:"id,omitempty"`
-	Or *[]TagSearchQuery   `json:"or,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]TagSearchQuery `json:"or,omitempty"`
 }
 
 // TenantFacilityIdSelector TenantFacilityIdSelector
@@ -27877,6 +28006,7 @@ type ToolkitTransformationType string
 
 // TrackingInformationSearchQuery TrackingInformationSearchQuery
 type TrackingInformationSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]TrackingInformationSearchQuery `json:"and,omitempty"`
 
 	// CarrierRef Search by carrierRef
@@ -27898,8 +28028,10 @@ type TrackingInformationSearchQuery struct {
 	LabelRef *StringFilter `json:"labelRef,omitempty"`
 
 	// LastModified Search by lastModified
-	LastModified *DateFilter                       `json:"lastModified,omitempty"`
-	Or           *[]TrackingInformationSearchQuery `json:"or,omitempty"`
+	LastModified *DateFilter `json:"lastModified,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]TrackingInformationSearchQuery `json:"or,omitempty"`
 
 	// ShippingInformationRef Search by shippingInformationRef
 	//
@@ -28401,7 +28533,7 @@ type UserSearchPayload struct {
 	// Last Number of items to return for backward pagination. Cannot be used with 'size' (first). Default: 20.
 	Last *float32 `json:"last,omitempty"`
 
-	// Options SearchOptions
+	// Options Additional options for the search request.
 	Options *SearchOptions `json:"options,omitempty"`
 
 	// Query UserSearchQuery
@@ -28422,6 +28554,7 @@ type UserSearchPayload struct {
 
 // UserSearchQuery UserSearchQuery
 type UserSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]UserSearchQuery `json:"and,omitempty"`
 
 	// AssignedFacilities Nested list search by assignedFacilities
@@ -28454,7 +28587,9 @@ type UserSearchQuery struct {
 	//
 	// Example: Bison
 	Lastname *StringSearchFilter `json:"lastname,omitempty"`
-	Or       *[]UserSearchQuery  `json:"or,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]UserSearchQuery `json:"or,omitempty"`
 
 	// Username Search by username
 	Username *StringSearchFilter `json:"username,omitempty"`
@@ -28547,6 +28682,7 @@ type WorkflowInformationIsAvailable bool
 
 // WorkflowSearchQuery WorkflowSearchQuery
 type WorkflowSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]WorkflowSearchQuery `json:"and,omitempty"`
 
 	// Id Search by id
@@ -28559,7 +28695,9 @@ type WorkflowSearchQuery struct {
 
 	// Name Search by name
 	Name *LocalizedStringSearchFilter `json:"name,omitempty"`
-	Or   *[]WorkflowSearchQuery       `json:"or,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]WorkflowSearchQuery `json:"or,omitempty"`
 
 	// TenantWorkflowId Search by tenantWorkflowId
 	//
@@ -28578,6 +28716,7 @@ type WorkflowUnavailableIsAvailable bool
 
 // ZoneSearchQuery ZoneSearchQuery
 type ZoneSearchQuery struct {
+	// And Matches if all of the given queries match. Combined with the other filters on the same level by AND. Can be nested.
 	And *[]ZoneSearchQuery `json:"and,omitempty"`
 
 	// CustomAttributes Search by custom attributes
@@ -28594,8 +28733,10 @@ type ZoneSearchQuery struct {
 	Id *StringFilter `json:"id,omitempty"`
 
 	// Name Search by name
-	Name *StringFilter      `json:"name,omitempty"`
-	Or   *[]ZoneSearchQuery `json:"or,omitempty"`
+	Name *StringFilter `json:"name,omitempty"`
+
+	// Or Matches if at least one of the given queries matches. Combined with the other filters on the same level by AND. Can be nested.
+	Or *[]ZoneSearchQuery `json:"or,omitempty"`
 }
 
 // ZoneSearchQuery_CustomAttributes_AdditionalProperties defines model for ZoneSearchQuery.customAttributes.AdditionalProperties.
@@ -28605,7 +28746,10 @@ type ZoneSearchQuery_CustomAttributes_AdditionalProperties struct {
 
 // GetArticlesParams defines parameters for GetArticles.
 type GetArticlesParams struct {
-	Size            *float32         `form:"size,omitempty" json:"size,omitempty"`
+	// Size The number of items to return.
+	Size *float32 `form:"size,omitempty" json:"size,omitempty"`
+
+	// StartAfterId The ID of the last item from the previous page. The next page will start after this ID.
 	StartAfterId    *string          `form:"startAfterId,omitempty" json:"startAfterId,omitempty"`
 	FacilityRef     *string          `form:"facilityRef,omitempty" json:"facilityRef,omitempty"`
 	SearchTerm      *string          `form:"searchTerm,omitempty" json:"searchTerm,omitempty"`
@@ -28806,8 +28950,11 @@ type GetAllOrdersParams struct {
 
 // GetPermissionsParams defines parameters for GetPermissions.
 type GetPermissionsParams struct {
-	Size         *float32 `form:"size,omitempty" json:"size,omitempty"`
-	StartAfterId *string  `form:"startAfterId,omitempty" json:"startAfterId,omitempty"`
+	// Size The number of items to return.
+	Size *float32 `form:"size,omitempty" json:"size,omitempty"`
+
+	// StartAfterId The ID of the last item from the previous page. The next page will start after this ID.
+	StartAfterId *string `form:"startAfterId,omitempty" json:"startAfterId,omitempty"`
 
 	// Key The key of the permission to filter by
 	Key *GetPermissionsParamsKey `form:"key,omitempty" json:"key,omitempty"`
@@ -28869,10 +29016,13 @@ type GetRoutingStrategiesParams struct {
 
 // GetSafetyStocksParams defines parameters for GetSafetyStocks.
 type GetSafetyStocksParams struct {
-	Size            *float32 `form:"size,omitempty" json:"size,omitempty"`
-	StartAfterId    *string  `form:"startAfterId,omitempty" json:"startAfterId,omitempty"`
-	TenantArticleId *string  `form:"tenantArticleId,omitempty" json:"tenantArticleId,omitempty"`
-	FacilityRef     *string  `form:"facilityRef,omitempty" json:"facilityRef,omitempty"`
+	// Size The number of items to return.
+	Size *float32 `form:"size,omitempty" json:"size,omitempty"`
+
+	// StartAfterId The ID of the last item from the previous page. The next page will start after this ID.
+	StartAfterId    *string `form:"startAfterId,omitempty" json:"startAfterId,omitempty"`
+	TenantArticleId *string `form:"tenantArticleId,omitempty" json:"tenantArticleId,omitempty"`
+	FacilityRef     *string `form:"facilityRef,omitempty" json:"facilityRef,omitempty"`
 }
 
 // GetStocksParams defines parameters for GetStocks.
@@ -28881,12 +29031,17 @@ type GetStocksParams struct {
 	TenantFacilityId *string   `form:"tenantFacilityId,omitempty" json:"tenantFacilityId,omitempty"`
 	TenantArticleId  *[]string `form:"tenantArticleId,omitempty" json:"tenantArticleId,omitempty"`
 	LocationRef      *[]string `form:"locationRef,omitempty" json:"locationRef,omitempty"`
-	Size             *float32  `form:"size,omitempty" json:"size,omitempty"`
-	StartAfterId     *string   `form:"startAfterId,omitempty" json:"startAfterId,omitempty"`
+
+	// Size The number of items to return.
+	Size *float32 `form:"size,omitempty" json:"size,omitempty"`
+
+	// StartAfterId The ID of the last item from the previous page. The next page will start after this ID.
+	StartAfterId *string `form:"startAfterId,omitempty" json:"startAfterId,omitempty"`
 }
 
 // GetStockSummariesParams defines parameters for GetStockSummaries.
 type GetStockSummariesParams struct {
+	// Size The number of items to return.
 	Size *float32 `form:"size,omitempty" json:"size,omitempty"`
 
 	// StartAfterId The stockSummaries.article.tenantArticleId value should be used for pagination.
@@ -28924,8 +29079,11 @@ type UpdateStockJSONBody1 struct {
 
 // GetAllUsersParams defines parameters for GetAllUsers.
 type GetAllUsersParams struct {
-	Size         *float32 `form:"size,omitempty" json:"size,omitempty"`
-	StartAfterId *string  `form:"startAfterId,omitempty" json:"startAfterId,omitempty"`
+	// Size The number of items to return.
+	Size *float32 `form:"size,omitempty" json:"size,omitempty"`
+
+	// StartAfterId The ID of the last item from the previous page. The next page will start after this ID.
+	StartAfterId *string `form:"startAfterId,omitempty" json:"startAfterId,omitempty"`
 
 	// OrderBy Order the users by this field
 	OrderBy *string `form:"orderBy,omitempty" json:"orderBy,omitempty"`
