@@ -25849,7 +25849,12 @@ type SourcingOptionTransfer struct {
 	FacilityConnectionRef *string `json:"facilityConnectionRef,omitempty"`
 
 	// FallbackCosts Money
-	FallbackCosts        *Money                                        `json:"fallbackCosts,omitempty"`
+	FallbackCosts *Money `json:"fallbackCosts,omitempty"`
+
+	// Id The id of the sourcing option transfer.
+	//
+	// Example: b7d3c1e2-5f4a-4c9b-8e2d-1a6f0c3b9d47
+	Id                   *string                                       `json:"id,omitempty"`
 	LineItems            []HandledItem                                 `json:"lineItems"`
 	PackagingInformation []SourcingOptionsTransferPackagingInformation `json:"packagingInformation"`
 

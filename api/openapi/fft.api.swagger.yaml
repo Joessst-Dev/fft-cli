@@ -354,7 +354,7 @@ paths:
     post:
       deprecated: false
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
+        This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />Search for Audit
@@ -393,8 +393,8 @@ paths:
       tags:
         - Audits
       x-badges:
-        - color: red
-          label: ALPHA
+        - color: orange
+          label: BETA
   /api/brands:
     get:
       description: ''
@@ -2318,11 +2318,15 @@ paths:
           label: ALPHA
   /api/configurations/expiry:
     get:
+      deprecated: false
       description: >-
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
+        target="_blank">API release lifecycle documentation</a>.<br /><br />Get
+        the current expiry configuration. If no configuration exists, a default
+        configuration will be returned.
       operationId: getExpiryConfiguration
+      parameters: []
       responses:
         '200':
           content:
@@ -2349,25 +2353,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
+          description: The requested entity was not found
       summary: Get expiry config
+      x-fft-permissions:
+        - CONFIG_READ
       tags:
         - Expiries configuration
       x-badges:
         - color: orange
           label: BETA
     put:
+      deprecated: false
       description: >-
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Update the current expiry configuration.
       operationId: upsertExpiryConfiguration
+      parameters: []
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ExpiryConfiguration'
-        description: Desired configuration to create/update
         required: true
       responses:
         '200':
@@ -2387,7 +2395,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Invalid input. See response for details
+          description: Invalid input. See response for details.
         '401':
           content:
             application/json:
@@ -2407,8 +2415,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity version conflict
+          description: A version conflict occurred.
       summary: Update expiry config
+      x-fft-permissions:
+        - CONFIG_WRITE
       tags:
         - Expiries configuration
       x-badges:
@@ -6702,23 +6712,49 @@ paths:
         - Document sets
   /api/expiries:
     get:
+      deprecated: false
       description: >-
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
+        target="_blank">API release lifecycle documentation</a>.<br /><br />Get
+        all expiries with optional filtering by status, startDate, endDate and
+        processRef
       operationId: getExpiries
       parameters:
+        - description: The number of items to return.
+          in: query
+          name: size
+          required: false
+          schema:
+            default: 25
+            example: 25
+            maximum: 500
+            minimum: 1
+            type: integer
+        - description: >-
+            The ID of the last item from the previous page. The next page will
+            start after this ID.
+          in: query
+          name: startAfterId
+          required: false
+          schema:
+            type: string
         - description: Status to filter the results
+          explode: false
           in: query
           name: status
           required: false
           schema:
-            $ref: '#/components/schemas/ExpiryEntityStatus'
+            enum:
+              - ACTIVE
+              - INACTIVE
+            type: string
         - description: ProcessRef to filter the results
           in: query
           name: processRef
           required: false
           schema:
+            example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
             type: string
         - description: >-
             StartDate to filter the results. Expiry Date of results is after or
@@ -6737,20 +6773,8 @@ paths:
           name: endDate
           required: false
           schema:
+            example: 2026-06-17T12:00:00.000Z
             type: string
-        - description: entity to start after
-          in: query
-          name: startAfterId
-          required: false
-          schema:
-            type: string
-        - description: number of entities to show
-          in: query
-          name: size
-          required: false
-          schema:
-            default: 25
-            type: integer
       responses:
         '200':
           content:
@@ -6775,24 +6799,30 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Get expiries
+      x-fft-permissions:
+        - EXPIRIES_READ
       tags:
         - Expiries
       x-badges:
         - color: orange
           label: BETA
     post:
+      deprecated: false
       description: >-
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Create a new expiry entity with the provided data
       operationId: createExpiry
+      parameters: []
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ExpiryEntityForCreation'
+        required: true
       responses:
-        '200':
+        '201':
           content:
             application/json:
               schema:
@@ -6813,6 +6843,8 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Create expiry
+      x-fft-permissions:
+        - EXPIRIES_WRITE
       tags:
         - Expiries
       x-badges:
@@ -6820,13 +6852,15 @@ paths:
           label: BETA
   /api/expiries/{expiryId}:
     get:
+      deprecated: false
       description: >-
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
+        target="_blank">API release lifecycle documentation</a>.<br /><br />Get
+        a single expiry by its ID
       operationId: getExpiry
       parameters:
-        - description: id for the searched entity
+        - description: ID of the expiry entity
           in: path
           name: expiryId
           required: true
@@ -6854,19 +6888,23 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Get expiry
+      x-fft-permissions:
+        - EXPIRIES_READ
       tags:
         - Expiries
       x-badges:
         - color: orange
           label: BETA
     patch:
+      deprecated: false
       description: >-
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />
+        target="_blank">API release lifecycle documentation</a>.<br /><br
+        />Update an existing expiry entity with the provided data
       operationId: updateExpiry
       parameters:
-        - description: id of the entity to be changed
+        - description: ID of the expiry entity
           in: path
           name: expiryId
           required: true
@@ -6877,6 +6915,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ExpiryEntityForUpdate'
+        required: true
       responses:
         '200':
           content:
@@ -6899,6 +6938,8 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Update expiry
+      x-fft-permissions:
+        - EXPIRIES_WRITE
       tags:
         - Expiries
       x-badges:
@@ -39164,19 +39205,39 @@ components:
       title: ExpectedPickLineItemForCreation
       description: ExpectedPickLineItemForCreation
     ExpiryConfiguration:
-      allOf:
-        - $ref: '#/components/schemas/VersionedResource'
       properties:
+        created:
+          description: >-
+            The date this entity was created by fulfillmenttools. This value is
+            generated by the service.
+          example: 2020-02-03T08:45:51.525Z
+          format: date-time
+          type: string
+        lastModified:
+          description: >-
+            The date this entity was modified last. This value is generated by
+            the service.
+          example: 2020-02-03T09:45:51.525Z
+          format: date-time
+          type: string
         provisioningTimeOffsetInMinutes:
+          example: 60
           minimum: 0
           type: integer
+        version:
+          description: >-
+            The version of the document to be used in optimistic locking
+            mechanisms.
+          example: 42
+          format: int64
+          type: integer
       required:
+        - version
         - provisioningTimeOffsetInMinutes
-      type: object
       title: ExpiryConfiguration
+      type: object
       description: ExpiryConfiguration
     ExpiryEntity:
-      additionalProperties: false
       properties:
         created:
           description: >-
@@ -39238,27 +39299,9 @@ components:
         - expiryTime
         - status
       title: ExpiryEntity
+      type: object
       description: ExpiryEntity
-    ExpiryEntityFilter:
-      additionalProperties: false
-      properties:
-        endDate:
-          description: end date range for expiryTime
-          example: 2020-02-03T08:45:51.525Z
-          format: date-time
-        processRef:
-          description: process of the entity you want to load
-          type: string
-        startDate:
-          description: start date range for expiryTime
-          example: 2020-02-03T08:45:51.525Z
-          format: date-time
-        status:
-          $ref: '#/components/schemas/ExpiryEntityStatus'
-      title: ExpiryEntityFilter
-      description: ExpiryEntityFilter
     ExpiryEntityForCreation:
-      additionalProperties: false
       properties:
         processRef:
           description: >-
@@ -39280,9 +39323,9 @@ components:
         - provisioningTime
         - status
       title: ExpiryEntityForCreation
+      type: object
       description: ExpiryEntityForCreation
     ExpiryEntityForUpdate:
-      additionalProperties: false
       properties:
         provisioningTime:
           description: >-
@@ -39295,18 +39338,22 @@ components:
           $ref: '#/components/schemas/ExpiryEntityStatus'
         version:
           description: version of the entity you want to alter
+          example: 1
           type: integer
       required:
         - version
       title: ExpiryEntityForUpdate
+      type: object
       description: ExpiryEntityForUpdate
     ExpiryEntityStatus:
+      description: Status of the expiry entity
       enum:
         - ACTIVE
         - INACTIVE
       type: string
+      xml:
+        name: ExpiryEntityStatus
       title: ExpiryEntityStatus
-      description: ExpiryEntityStatus
     ExpiryWebHookEvent:
       allOf:
         - $ref: '#/components/schemas/WebHookEvent'
@@ -51583,9 +51630,19 @@ components:
             - ACCEPTED
             - CANCELED
           type: string
+        stickers:
+          items:
+            $ref: '#/components/schemas/Sticker'
+          maxItems: 50
+          type: array
         tenantArticleId:
           example: a69006ba-7100-4b4d-a610-1ca28016a4eb
           type: string
+        tags:
+          items:
+            $ref: '#/components/schemas/TagReference'
+          maxItems: 50
+          type: array
       required:
         - id
         - itemReturnJobLineItemRefs
@@ -51757,9 +51814,19 @@ components:
             - ACCEPTED
             - CANCELED
           type: string
+        stickers:
+          items:
+            $ref: '#/components/schemas/Sticker'
+          maxItems: 50
+          type: array
         tenantArticleId:
           example: a69006ba-7100-4b4d-a610-1ca28016a4eb
           type: string
+        tags:
+          items:
+            $ref: '#/components/schemas/TagReference'
+          maxItems: 50
+          type: array
       required:
         - id
         - itemReturnJobLineItemRefs
@@ -79951,6 +80018,9 @@ components:
           type: boolean
         childRoutingPlanRef:
           type: string
+        connectionRef:
+          description: The id of the inter-facility connection this plan sends on.
+          type: string
         consolidatedStatus:
           $ref: '#/components/schemas/ConsolidatedRoutingPlanStatus'
         customServices:
@@ -80079,6 +80149,9 @@ components:
             - MANUAL_ASSIGNMENT
             - PROCESS_MANUALASSIGNMENT
             - REACTIVATION
+          type: string
+        sourcingOptionTransferRef:
+          description: The id of the sourcing option transfer this plan sends on.
           type: string
         splitCount:
           default: 0
@@ -88187,6 +88260,10 @@ components:
           type: string
         fallbackCosts:
           $ref: '#/components/schemas/Money'
+        id:
+          description: The id of the sourcing option transfer.
+          example: b7d3c1e2-5f4a-4c9b-8e2d-1a6f0c3b9d47
+          type: string
         lineItems:
           items:
             $ref: '#/components/schemas/HandledItem'
