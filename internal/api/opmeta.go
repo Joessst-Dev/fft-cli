@@ -105,7 +105,7 @@ type Operation struct {
 	Description string
 
 	// Permissions are the operation's x-fft-permissions, empty when it declares
-	// none. 350 of the 576 operations declare them.
+	// none. 356 of the 576 operations declare them.
 	Permissions []string
 
 	// Params are the operation's parameters, sorted: path first, then query, then
