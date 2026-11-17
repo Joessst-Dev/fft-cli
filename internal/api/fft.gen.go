@@ -7766,6 +7766,7 @@ func (e RatingConfigurationType) Valid() bool {
 // Defines values for RatingImplementation.
 const (
 	RatingImplementationCAPACITY             RatingImplementation = "CAPACITY"
+	RatingImplementationCAPACITYUTILIZATION  RatingImplementation = "CAPACITY-UTILIZATION"
 	RatingImplementationCOSTCOMPONENTS       RatingImplementation = "COST-COMPONENTS"
 	RatingImplementationDELIVERYCOSTS        RatingImplementation = "DELIVERY-COSTS"
 	RatingImplementationDELIVERYTIME         RatingImplementation = "DELIVERY-TIME"
@@ -7787,6 +7788,8 @@ const (
 func (e RatingImplementation) Valid() bool {
 	switch e {
 	case RatingImplementationCAPACITY:
+		return true
+	case RatingImplementationCAPACITYUTILIZATION:
 		return true
 	case RatingImplementationCOSTCOMPONENTS:
 		return true
