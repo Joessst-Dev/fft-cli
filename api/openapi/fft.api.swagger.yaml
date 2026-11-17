@@ -75751,6 +75751,7 @@ components:
         - DELIVERY-TIME
         - COST-COMPONENTS
         - NUMBER-OF-DELIVERIES
+        - CAPACITY-UTILIZATION
         - STOCK-RELIABILITY
       type: string
       xml:
