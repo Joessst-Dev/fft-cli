@@ -8,7 +8,7 @@
 # Pinned by digest, not just the :nonroot tag, so the signed release image is
 # reproducible — whatever :nonroot pointed at on build day cannot drift underneath
 # it. Dependabot's docker ecosystem bumps this pin the same as any dependency.
-FROM gcr.io/distroless/static:nonroot@sha256:25ac8f0c3b2334a9eb05452266bd4697864a8c8ef0ef71e5e6480d7f92868329
+FROM gcr.io/distroless/static:nonroot@sha256:aafe993665bf6200db38a02c11a9351e782a84b6a45e7f33b6695638c88e3931
 
 # dockers_v2 stages every platform's build under <os>/<arch>/ in one build context, so
 # select this platform's with the TARGETOS/TARGETARCH that buildx sets per target. fft
