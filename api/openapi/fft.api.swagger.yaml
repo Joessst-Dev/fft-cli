@@ -17307,11 +17307,36 @@ paths:
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
-        />Retrieves all PackagingUnits details
+        />Retrieves a page of PackagingUnits details, newest first. The response
+        contains `packagingUnits` and the `total` number of PackagingUnits. Use
+        `startAfterId` with the ID of the last returned PackagingUnit to
+        retrieve the next page.
       operationId: getAllPackagingUnitDetails
-      parameters: []
+      parameters:
+        - description: The number of items to return.
+          in: query
+          name: size
+          required: false
+          schema:
+            default: 10
+            example: 10
+            maximum: 25
+            minimum: 1
+            type: number
+        - description: >-
+            The ID of the last item from the previous page. The next page will
+            start after this ID.
+          in: query
+          name: startAfterId
+          required: false
+          schema:
+            type: string
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackagingUnits'
           description: Successfully retrieved the PackagingUnits.
         '401':
           content:
@@ -17357,7 +17382,11 @@ paths:
               $ref: '#/components/schemas/PackagingUnitDetailForCreation'
         required: true
       responses:
-        '200':
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackagingUnitDetail'
           description: Successfully created the PackagingUnitDetail.
         '401':
           content:
@@ -17449,6 +17478,10 @@ paths:
             type: string
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackagingUnitDetail'
           description: Successfully retrieved the PackagingUnit.
         '401':
           content:
@@ -17500,6 +17533,10 @@ paths:
         required: true
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackagingUnitDetail'
           description: Successfully updated the packagingUnitDetail.
         '401':
           content:
@@ -63666,6 +63703,54 @@ components:
       title: PackagingUnitCostCoefficient
       type: object
       description: PackagingUnitCostCoefficient
+    PackagingUnitDetail:
+      properties:
+        nameLocalized:
+          $ref: '#/components/schemas/LocaleStringConstrained'
+        carrierRef:
+          description: The reference to the carrier associated with the packagingUnit.
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        created:
+          description: The date when the packagingUnit was created.
+          format: date-time
+          type: string
+        details:
+          anyOf:
+            - $ref: '#/components/schemas/PalletDetails'
+            - $ref: '#/components/schemas/ParcelDetails'
+            - $ref: '#/components/schemas/BulkyGoodsDetails'
+            - $ref: '#/components/schemas/TwoManHandlingDetails'
+            - $ref: '#/components/schemas/LongGoodsDetails'
+        id:
+          description: The unique identifier of the packagingUnit.
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        lastModified:
+          description: The date when the packagingUnit was last modified.
+          format: date-time
+          type: string
+        name:
+          description: The name of the packagingUnit.
+          type: string
+        tenantPackagingUnitId:
+          description: The tenant specific identifier for the packagingUnit.
+          example: MY_PACKAGINGUNIT_ID
+          type: string
+        version:
+          description: The version of the packagingUnit.
+          example: 1
+          type: number
+      required:
+        - id
+        - nameLocalized
+        - tenantPackagingUnitId
+        - carrierRef
+        - details
+        - version
+      title: PackagingUnitDetail
+      type: object
+      description: PackagingUnitDetail
     PackagingUnitDetailAbsoluteSurcharge:
       properties:
         amount:
@@ -64015,6 +64100,21 @@ components:
         - LOADING_METER
       title: PackagingUnitPricingUnit
       type: string
+    PackagingUnits:
+      properties:
+        packagingUnits:
+          items:
+            $ref: '#/components/schemas/PackagingUnitDetail'
+          type: array
+        total:
+          minimum: 0
+          type: number
+      required:
+        - packagingUnits
+        - total
+      title: PackagingUnits
+      type: object
+      description: PackagingUnits
     PackagingUnitsByContext:
       additionalProperties: false
       properties:
