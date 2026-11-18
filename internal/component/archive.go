@@ -22,17 +22,37 @@ import (
 // asset's name rather than by GOOS: a user who downloaded the wrong archive should
 // be told that it is the wrong archive, not that the file is corrupt.
 func unpack(name string, archive []byte, dir string) error {
+	var extract func([]byte, *os.Root) error
 	switch {
 	case strings.HasSuffix(name, ".tar.gz") || strings.HasSuffix(name, ".tgz"):
-		return unpackTarGz(archive, dir)
+		extract = unpackTarGz
 	case strings.HasSuffix(name, ".zip"):
-		return unpackZip(archive, dir)
+		extract = unpackZip
 	default:
 		return fmt.Errorf("%s is neither a .tar.gz nor a .zip", name)
 	}
+
+	root, err := openRoot(dir)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = root.Close() }()
+	return extract(archive, root)
 }
 
-func unpackTarGz(archive []byte, dir string) error {
+// openRoot opens the directory an archive is unpacked into as an os.Root, so that
+// containment is the kernel's to enforce rather than a property of the path strings
+// alone: a write that would resolve outside dir — through "..", or through a symlink
+// that is already there — fails, whatever localPath made of its name.
+func openRoot(dir string) (*os.Root, error) {
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		return nil, fmt.Errorf("open %s: %w", dir, err)
+	}
+	return root, nil
+}
+
+func unpackTarGz(archive []byte, root *os.Root) error {
 	gz, err := gzip.NewReader(bytes.NewReader(archive))
 	if err != nil {
 		return fmt.Errorf("read the archive: %w", err)
@@ -62,30 +82,30 @@ func unpackTarGz(archive []byte, dir string) error {
 			continue
 		}
 
-		target, err := safeJoin(dir, header.Name)
+		name, err := localPath(header.Name)
 		if err != nil {
 			return err
 		}
 
 		switch header.Typeflag {
 		case tar.TypeDir:
-			if err := os.MkdirAll(target, dirMode); err != nil {
-				return fmt.Errorf("create %s: %w", target, err)
+			if err := mkdirAll(root, name); err != nil {
+				return err
 			}
 		case tar.TypeReg:
-			if err := writeFile(target, tr, modeFor(header.FileInfo().Mode()), budget); err != nil {
+			if err := writeFile(root, name, tr, modeFor(header.FileInfo().Mode()), budget); err != nil {
 				return err
 			}
 		default:
 			// Symlinks especially: a link is a second way to name a file, and every
-			// argument safeJoin makes about paths would have to be made again about where
+			// argument localPath makes about paths would have to be made again about where
 			// the link points. A component has no need of one.
 			return fmt.Errorf("the archive contains %q, which is not a regular file or a directory", header.Name)
 		}
 	}
 }
 
-func unpackZip(archive []byte, dir string) error {
+func unpackZip(archive []byte, root *os.Root) error {
 	zr, err := zip.NewReader(bytes.NewReader(archive), int64(len(archive)))
 	if err != nil {
 		return fmt.Errorf("read the archive: %w", err)
@@ -96,14 +116,14 @@ func unpackZip(archive []byte, dir string) error {
 
 	budget := &writeBudget{}
 	for _, entry := range zr.File {
-		target, err := safeJoin(dir, entry.Name)
+		name, err := localPath(entry.Name)
 		if err != nil {
 			return err
 		}
 
 		if entry.FileInfo().IsDir() {
-			if err := os.MkdirAll(target, dirMode); err != nil {
-				return fmt.Errorf("create %s: %w", target, err)
+			if err := mkdirAll(root, name); err != nil {
+				return err
 			}
 			continue
 		}
@@ -115,7 +135,7 @@ func unpackZip(archive []byte, dir string) error {
 		if err != nil {
 			return fmt.Errorf("read %s from the archive: %w", entry.Name, err)
 		}
-		err = writeFile(target, rc, modeFor(entry.FileInfo().Mode()), budget)
+		err = writeFile(root, name, rc, modeFor(entry.FileInfo().Mode()), budget)
 		_ = rc.Close()
 		if err != nil {
 			return err
@@ -157,15 +177,24 @@ func (b *writeBudget) add(n int64) error {
 	return nil
 }
 
+// mkdirAll creates a directory, and its parents, inside root.
+func mkdirAll(root *os.Root, name string) error {
+	if err := root.MkdirAll(name, dirMode); err != nil {
+		return fmt.Errorf("create %s: %w", filepath.Join(root.Name(), name), err)
+	}
+	return nil
+}
+
 // writeFile creates one file of an unpacked archive, capped per file and against the
 // archive's running total, so that a small archive cannot decompress into a large
 // disk.
-func writeFile(target string, r io.Reader, mode fs.FileMode, budget *writeBudget) error {
-	if err := os.MkdirAll(filepath.Dir(target), dirMode); err != nil {
-		return fmt.Errorf("create %s: %w", filepath.Dir(target), err)
+func writeFile(root *os.Root, name string, r io.Reader, mode fs.FileMode, budget *writeBudget) error {
+	if err := mkdirAll(root, filepath.Dir(name)); err != nil {
+		return err
 	}
 
-	f, err := os.OpenFile(target, os.O_WRONLY|os.O_CREATE|os.O_EXCL, mode)
+	target := filepath.Join(root.Name(), name)
+	f, err := root.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_EXCL, mode)
 	if err != nil {
 		return fmt.Errorf("create %s: %w", target, err)
 	}
@@ -199,6 +228,12 @@ func copyTree(src, dst string) error {
 		return fmt.Errorf("%s is not a directory: --path takes an unpacked component", src)
 	}
 
+	root, err := openRoot(dst)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = root.Close() }()
+
 	files := 0
 	budget := &writeBudget{}
 	return filepath.WalkDir(src, func(p string, d fs.DirEntry, err error) error {
@@ -214,13 +249,13 @@ func copyTree(src, dst string) error {
 			return nil
 		}
 
-		target, err := safeJoin(dst, filepath.ToSlash(rel))
+		name, err := localPath(filepath.ToSlash(rel))
 		if err != nil {
 			return err
 		}
 
 		if d.IsDir() {
-			return os.MkdirAll(target, dirMode)
+			return mkdirAll(root, name)
 		}
 		if files++; files > maxFiles {
 			return fmt.Errorf("%s holds more than %d files", src, maxFiles)
@@ -240,7 +275,7 @@ func copyTree(src, dst string) error {
 		}
 		defer func() { _ = f.Close() }()
 
-		return writeFile(target, f, modeFor(entry.Mode()), budget)
+		return writeFile(root, name, f, modeFor(entry.Mode()), budget)
 	})
 }
 

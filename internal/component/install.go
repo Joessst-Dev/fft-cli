@@ -659,14 +659,18 @@ func writeManifest(dir string, m Manifest) error {
 	return nil
 }
 
-// safeJoin resolves a path from inside an archive against the directory it is being
-// unpacked into, refusing anything that would land outside it.
+// localPath turns a slash-separated path from inside an archive into an OS path
+// relative to the component directory, refusing anything that would land outside it.
 //
 // This is the zip-slip check, and it is not a formality: an archive is data fetched
 // off the internet, and an entry called ../../.ssh/authorized_keys is a file write
 // chosen by whoever published it. The checksum proves the archive is the one the
 // release names; it proves nothing about what is inside.
-func safeJoin(dir, name string) (string, error) {
+//
+// It is not the only check: every write goes through an os.Root, which the kernel
+// holds to the directory. This one exists to refuse the archive by name, with an
+// error that says which entry was hostile, before a single file is written.
+func localPath(name string) (string, error) {
 	if name == "" || path.IsAbs(name) || strings.Contains(name, `\`) {
 		return "", fmt.Errorf("the archive contains %q, which is not a relative path", name)
 	}
@@ -676,11 +680,11 @@ func safeJoin(dir, name string) (string, error) {
 		return "", fmt.Errorf("the archive contains %q, which would be written outside the component", name)
 	}
 
-	target := filepath.Join(dir, filepath.FromSlash(clean))
-	// Belt and braces against a case the string check above misses on some platform:
-	// ask the filesystem's own answer whether the result is still inside.
-	if rel, err := filepath.Rel(dir, target); err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
-		return "", fmt.Errorf("the archive contains %q, which would be written outside the component", name)
+	rel := filepath.FromSlash(clean)
+	// The platform's own answer, for the cases a slash-path check cannot see: a
+	// Windows volume name ("C:x") or a reserved device name ("NUL").
+	if !filepath.IsLocal(rel) {
+		return "", fmt.Errorf("the archive contains %q, which is not a relative path", name)
 	}
-	return target, nil
+	return rel, nil
 }
