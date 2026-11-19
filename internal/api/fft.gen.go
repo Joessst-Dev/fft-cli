@@ -5177,6 +5177,8 @@ const (
 	PermissionKeyPROCESSREAD                           PermissionKey = "PROCESS_READ"
 	PermissionKeyPROCESSREROUTE                        PermissionKey = "PROCESS_REROUTE"
 	PermissionKeyPROCESSWRITE                          PermissionKey = "PROCESS_WRITE"
+	PermissionKeyPRODUCTREAD                           PermissionKey = "PRODUCT_READ"
+	PermissionKeyPRODUCTWRITE                          PermissionKey = "PRODUCT_WRITE"
 	PermissionKeyPROMISESCONFIGREAD                    PermissionKey = "PROMISES_CONFIG_READ"
 	PermissionKeyPROMISESCONFIGWRITE                   PermissionKey = "PROMISES_CONFIG_WRITE"
 	PermissionKeyPURCHASEPRICEREAD                     PermissionKey = "PURCHASE_PRICE_READ"
@@ -5463,6 +5465,10 @@ func (e PermissionKey) Valid() bool {
 		return true
 	case PermissionKeyPROCESSWRITE:
 		return true
+	case PermissionKeyPRODUCTREAD:
+		return true
+	case PermissionKeyPRODUCTWRITE:
+		return true
 	case PermissionKeyPROMISESCONFIGREAD:
 		return true
 	case PermissionKeyPROMISESCONFIGWRITE:
@@ -5707,6 +5713,7 @@ const (
 	PermissionSubGroupPICKUPSERVICE              PermissionSubGroup = "PICKUP_SERVICE"
 	PermissionSubGroupPROCESS                    PermissionSubGroup = "PROCESS"
 	PermissionSubGroupPROCESSLOGS                PermissionSubGroup = "PROCESS_LOGS"
+	PermissionSubGroupPRODUCT                    PermissionSubGroup = "PRODUCT"
 	PermissionSubGroupPROMISESCONFIG             PermissionSubGroup = "PROMISES_CONFIG"
 	PermissionSubGroupPURCHASEPRICE              PermissionSubGroup = "PURCHASE_PRICE"
 	PermissionSubGroupREMOTECONFIG               PermissionSubGroup = "REMOTE_CONFIG"
@@ -5863,6 +5870,8 @@ func (e PermissionSubGroup) Valid() bool {
 	case PermissionSubGroupPROCESS:
 		return true
 	case PermissionSubGroupPROCESSLOGS:
+		return true
+	case PermissionSubGroupPRODUCT:
 		return true
 	case PermissionSubGroupPROMISESCONFIG:
 		return true
@@ -8021,6 +8030,8 @@ const (
 	RolePermissionsPROCESSREAD                           RolePermissions = "PROCESS_READ"
 	RolePermissionsPROCESSREROUTE                        RolePermissions = "PROCESS_REROUTE"
 	RolePermissionsPROCESSWRITE                          RolePermissions = "PROCESS_WRITE"
+	RolePermissionsPRODUCTREAD                           RolePermissions = "PRODUCT_READ"
+	RolePermissionsPRODUCTWRITE                          RolePermissions = "PRODUCT_WRITE"
 	RolePermissionsPROMISESCONFIGREAD                    RolePermissions = "PROMISES_CONFIG_READ"
 	RolePermissionsPROMISESCONFIGWRITE                   RolePermissions = "PROMISES_CONFIG_WRITE"
 	RolePermissionsPURCHASEPRICEREAD                     RolePermissions = "PURCHASE_PRICE_READ"
@@ -8307,6 +8318,10 @@ func (e RolePermissions) Valid() bool {
 		return true
 	case RolePermissionsPROCESSWRITE:
 		return true
+	case RolePermissionsPRODUCTREAD:
+		return true
+	case RolePermissionsPRODUCTWRITE:
+		return true
 	case RolePermissionsPROMISESCONFIGREAD:
 		return true
 	case RolePermissionsPROMISESCONFIGWRITE:
@@ -8531,6 +8546,8 @@ const (
 	RoleForCreationPermissionsPROCESSREAD                           RoleForCreationPermissions = "PROCESS_READ"
 	RoleForCreationPermissionsPROCESSREROUTE                        RoleForCreationPermissions = "PROCESS_REROUTE"
 	RoleForCreationPermissionsPROCESSWRITE                          RoleForCreationPermissions = "PROCESS_WRITE"
+	RoleForCreationPermissionsPRODUCTREAD                           RoleForCreationPermissions = "PRODUCT_READ"
+	RoleForCreationPermissionsPRODUCTWRITE                          RoleForCreationPermissions = "PRODUCT_WRITE"
 	RoleForCreationPermissionsPROMISESCONFIGREAD                    RoleForCreationPermissions = "PROMISES_CONFIG_READ"
 	RoleForCreationPermissionsPROMISESCONFIGWRITE                   RoleForCreationPermissions = "PROMISES_CONFIG_WRITE"
 	RoleForCreationPermissionsPURCHASEPRICEREAD                     RoleForCreationPermissions = "PURCHASE_PRICE_READ"
@@ -8817,6 +8834,10 @@ func (e RoleForCreationPermissions) Valid() bool {
 		return true
 	case RoleForCreationPermissionsPROCESSWRITE:
 		return true
+	case RoleForCreationPermissionsPRODUCTREAD:
+		return true
+	case RoleForCreationPermissionsPRODUCTWRITE:
+		return true
 	case RoleForCreationPermissionsPROMISESCONFIGREAD:
 		return true
 	case RoleForCreationPermissionsPROMISESCONFIGWRITE:
@@ -9041,6 +9062,8 @@ const (
 	RoleForPatchPermissionsPROCESSREAD                           RoleForPatchPermissions = "PROCESS_READ"
 	RoleForPatchPermissionsPROCESSREROUTE                        RoleForPatchPermissions = "PROCESS_REROUTE"
 	RoleForPatchPermissionsPROCESSWRITE                          RoleForPatchPermissions = "PROCESS_WRITE"
+	RoleForPatchPermissionsPRODUCTREAD                           RoleForPatchPermissions = "PRODUCT_READ"
+	RoleForPatchPermissionsPRODUCTWRITE                          RoleForPatchPermissions = "PRODUCT_WRITE"
 	RoleForPatchPermissionsPROMISESCONFIGREAD                    RoleForPatchPermissions = "PROMISES_CONFIG_READ"
 	RoleForPatchPermissionsPROMISESCONFIGWRITE                   RoleForPatchPermissions = "PROMISES_CONFIG_WRITE"
 	RoleForPatchPermissionsPURCHASEPRICEREAD                     RoleForPatchPermissions = "PURCHASE_PRICE_READ"
@@ -9327,6 +9350,10 @@ func (e RoleForPatchPermissions) Valid() bool {
 		return true
 	case RoleForPatchPermissionsPROCESSWRITE:
 		return true
+	case RoleForPatchPermissionsPRODUCTREAD:
+		return true
+	case RoleForPatchPermissionsPRODUCTWRITE:
+		return true
 	case RoleForPatchPermissionsPROMISESCONFIGREAD:
 		return true
 	case RoleForPatchPermissionsPROMISESCONFIGWRITE:
@@ -9551,6 +9578,8 @@ const (
 	RoleForUpdatePermissionsPROCESSREAD                           RoleForUpdatePermissions = "PROCESS_READ"
 	RoleForUpdatePermissionsPROCESSREROUTE                        RoleForUpdatePermissions = "PROCESS_REROUTE"
 	RoleForUpdatePermissionsPROCESSWRITE                          RoleForUpdatePermissions = "PROCESS_WRITE"
+	RoleForUpdatePermissionsPRODUCTREAD                           RoleForUpdatePermissions = "PRODUCT_READ"
+	RoleForUpdatePermissionsPRODUCTWRITE                          RoleForUpdatePermissions = "PRODUCT_WRITE"
 	RoleForUpdatePermissionsPROMISESCONFIGREAD                    RoleForUpdatePermissions = "PROMISES_CONFIG_READ"
 	RoleForUpdatePermissionsPROMISESCONFIGWRITE                   RoleForUpdatePermissions = "PROMISES_CONFIG_WRITE"
 	RoleForUpdatePermissionsPURCHASEPRICEREAD                     RoleForUpdatePermissions = "PURCHASE_PRICE_READ"
@@ -9836,6 +9865,10 @@ func (e RoleForUpdatePermissions) Valid() bool {
 	case RoleForUpdatePermissionsPROCESSREROUTE:
 		return true
 	case RoleForUpdatePermissionsPROCESSWRITE:
+		return true
+	case RoleForUpdatePermissionsPRODUCTREAD:
+		return true
+	case RoleForUpdatePermissionsPRODUCTWRITE:
 		return true
 	case RoleForUpdatePermissionsPROMISESCONFIGREAD:
 		return true
@@ -12869,6 +12902,8 @@ const (
 	UserRoleWithPermissionsPermissionsPROCESSREAD                           UserRoleWithPermissionsPermissions = "PROCESS_READ"
 	UserRoleWithPermissionsPermissionsPROCESSREROUTE                        UserRoleWithPermissionsPermissions = "PROCESS_REROUTE"
 	UserRoleWithPermissionsPermissionsPROCESSWRITE                          UserRoleWithPermissionsPermissions = "PROCESS_WRITE"
+	UserRoleWithPermissionsPermissionsPRODUCTREAD                           UserRoleWithPermissionsPermissions = "PRODUCT_READ"
+	UserRoleWithPermissionsPermissionsPRODUCTWRITE                          UserRoleWithPermissionsPermissions = "PRODUCT_WRITE"
 	UserRoleWithPermissionsPermissionsPROMISESCONFIGREAD                    UserRoleWithPermissionsPermissions = "PROMISES_CONFIG_READ"
 	UserRoleWithPermissionsPermissionsPROMISESCONFIGWRITE                   UserRoleWithPermissionsPermissions = "PROMISES_CONFIG_WRITE"
 	UserRoleWithPermissionsPermissionsPURCHASEPRICEREAD                     UserRoleWithPermissionsPermissions = "PURCHASE_PRICE_READ"
@@ -13154,6 +13189,10 @@ func (e UserRoleWithPermissionsPermissions) Valid() bool {
 	case UserRoleWithPermissionsPermissionsPROCESSREROUTE:
 		return true
 	case UserRoleWithPermissionsPermissionsPROCESSWRITE:
+		return true
+	case UserRoleWithPermissionsPermissionsPRODUCTREAD:
+		return true
+	case UserRoleWithPermissionsPermissionsPRODUCTWRITE:
 		return true
 	case UserRoleWithPermissionsPermissionsPROMISESCONFIGREAD:
 		return true
@@ -13583,6 +13622,8 @@ const (
 	GetPermissionsParamsKeyPROCESSREAD                           GetPermissionsParamsKey = "PROCESS_READ"
 	GetPermissionsParamsKeyPROCESSREROUTE                        GetPermissionsParamsKey = "PROCESS_REROUTE"
 	GetPermissionsParamsKeyPROCESSWRITE                          GetPermissionsParamsKey = "PROCESS_WRITE"
+	GetPermissionsParamsKeyPRODUCTREAD                           GetPermissionsParamsKey = "PRODUCT_READ"
+	GetPermissionsParamsKeyPRODUCTWRITE                          GetPermissionsParamsKey = "PRODUCT_WRITE"
 	GetPermissionsParamsKeyPROMISESCONFIGREAD                    GetPermissionsParamsKey = "PROMISES_CONFIG_READ"
 	GetPermissionsParamsKeyPROMISESCONFIGWRITE                   GetPermissionsParamsKey = "PROMISES_CONFIG_WRITE"
 	GetPermissionsParamsKeyPURCHASEPRICEREAD                     GetPermissionsParamsKey = "PURCHASE_PRICE_READ"
@@ -13868,6 +13909,10 @@ func (e GetPermissionsParamsKey) Valid() bool {
 	case GetPermissionsParamsKeyPROCESSREROUTE:
 		return true
 	case GetPermissionsParamsKeyPROCESSWRITE:
+		return true
+	case GetPermissionsParamsKeyPRODUCTREAD:
+		return true
+	case GetPermissionsParamsKeyPRODUCTWRITE:
 		return true
 	case GetPermissionsParamsKeyPROMISESCONFIGREAD:
 		return true

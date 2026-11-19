@@ -20076,6 +20076,8 @@ paths:
               - AVAILABILITY_THRESHOLDS_WRITE
               - PICKUP_SERVICE_READ
               - PICKUP_SERVICE_WRITE
+              - PRODUCT_READ
+              - PRODUCT_WRITE
             type: string
         - description: The group of the permission to filter by
           in: query
@@ -21705,7 +21707,8 @@ paths:
         This part of the API is deprecated. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
-        />Deprecated, replaced with /api/processes/{processId}/actions
+        />Deprecated, replaced with /api/processes/{processId}/actions. The
+        AssignFacilityToProcess action additionally requires PROCESS_REROUTE.
       operationId: patchProcess
       parameters:
         - description: ID of process you want to patch
@@ -21759,13 +21762,15 @@ paths:
       summary: Update process
       x-fft-permissions:
         - PROCESS_WRITE
+        - PROCESS_REROUTE
       tags:
         - Processes
   /api/processes/{processId}/actions:
     post:
       description: >-
         Update Process by calling an action. This can be used to trigger state
-        transitions or other operations on the process.
+        transitions or other operations on the process. The
+        ASSIGN_FACILITY_TO_PROCESS action additionally requires PROCESS_REROUTE.
       operationId: processAction
       parameters:
         - description: ID of process you want to call the action for
@@ -21815,6 +21820,7 @@ paths:
       summary: Call process action
       x-fft-permissions:
         - PROCESS_WRITE
+        - PROCESS_REROUTE
       tags:
         - Processes
   /api/processes/{processId}/documents:
@@ -22126,7 +22132,9 @@ paths:
         This part of the API is in Alpha status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
-        />Apply a bulk action to multiple processes, such as reroute.
+        />Apply a bulk action to multiple processes, such as reroute or
+        assigning a facility. BULK_REROUTE requires PROCESS_REROUTE,
+        BULK_ASSIGN_FACILITY requires PROCESS_REROUTE and PROCESS_WRITE.
       operationId: bulkProcessesAction
       requestBody:
         content:
@@ -22143,9 +22151,10 @@ paths:
                   $ref: '#/components/schemas/BulkProcessActionResult'
                 type: array
           description: >-
-            Result per process. UPDATED means the reroute has been triggered,
-            UNCHANGED that a reroute is already in progress for the process,
-            FAILED that the process could not be rerouted (see summary).
+            Result per process. UPDATED means the action has been triggered for
+            the process, UNCHANGED that nothing had to be done (e.g. a reroute
+            is already in progress), FAILED that the action could not be applied
+            to the process (see summary).
         '400':
           content:
             application/json:
@@ -22171,10 +22180,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Reroute description not found
+          description: Reroute description or facility not found
       summary: Call bulk processes action
       x-fft-permissions:
         - PROCESS_REROUTE
+        - PROCESS_WRITE
       tags:
         - Processes
       x-badges:
@@ -33496,6 +33506,20 @@ components:
       title: BringCarrierConfigurationForUpdate
       type: object
       description: BringCarrierConfigurationForUpdate
+    BulkAssignFacilityProcessParameter:
+      properties:
+        processId:
+          type: string
+        version:
+          description: Version of the entity to be changed
+          minimum: 0
+          type: integer
+      required:
+        - processId
+        - version
+      type: object
+      title: BulkAssignFacilityProcessParameter
+      description: BulkAssignFacilityProcessParameter
     BulkCancelOrderParameter:
       properties:
         cancelationReasonId:
@@ -33663,8 +33687,34 @@ components:
     BulkProcessActionsParameter:
       oneOf:
         - $ref: '#/components/schemas/BulkProcessRerouteActionParameter'
+        - $ref: '#/components/schemas/BulkProcessAssignFacilityActionParameter'
       title: BulkProcessActionsParameter
       description: BulkProcessActionsParameter
+    BulkProcessAssignFacilityActionParameter:
+      description: Action to assign processes to a facility.
+      properties:
+        facilityRef:
+          description: The id of the facility all processes are assigned to
+          type: string
+        name:
+          enum:
+            - BULK_ASSIGN_FACILITY
+          type: string
+        processes:
+          items:
+            $ref: '#/components/schemas/BulkAssignFacilityProcessParameter'
+          maxItems: 15
+          minItems: 1
+          type: array
+        rerouteDescriptionId:
+          description: The id of the rerouteDescription, applied to all processes
+          type: string
+      required:
+        - name
+        - processes
+        - facilityRef
+      title: BulkProcessAssignFacilityActionParameter
+      type: object
     BulkProcessRerouteActionParameter:
       description: Action to reroute processes.
       properties:
@@ -47708,6 +47758,97 @@ components:
       title: InboundProcessSupplierSort
       type: object
       description: InboundProcessSupplierSort
+    InboundRebalancingMoveReport:
+      properties:
+        availableFrom:
+          format: date-time
+          type: string
+        fromExpectedDate:
+          example: 2026-06-17T12:00:00.000Z
+          format: date-time
+          type: string
+        fromHostRef:
+          type: string
+        outcome:
+          description: Only set in MOVE mode.
+          enum:
+            - MOVED
+            - SOURCE_CHANGED
+            - TARGET_CHANGED
+            - TARGET_FULL
+          type: string
+        relatedRefs:
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+          items:
+            type: string
+          type: array
+        reservationId:
+          type: string
+        toExpectedStockRef:
+          type: string
+        value:
+          type: number
+      required:
+        - reservationId
+        - value
+        - relatedRefs
+        - fromHostRef
+        - toExpectedStockRef
+      title: InboundRebalancingMoveReport
+      type: object
+      description: InboundRebalancingMoveReport
+    InboundRebalancingRequest:
+      properties:
+        expectedStockRef:
+          description: >-
+            Reservations are moved from stock and earlier expected stocks onto
+            this expected stock.
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        facilityRef:
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        mode:
+          description: DRY_RUN only plans the moves, MOVE also applies them.
+          enum:
+            - DRY_RUN
+            - MOVE
+          type: string
+      required:
+        - facilityRef
+        - expectedStockRef
+        - mode
+      title: InboundRebalancingRequest
+      type: object
+      description: InboundRebalancingRequest
+    InboundRebalancingResult:
+      properties:
+        expectedStockRef:
+          type: string
+        facilityRef:
+          type: string
+        mode:
+          enum:
+            - DRY_RUN
+            - MOVE
+          type: string
+        moves:
+          items:
+            $ref: '#/components/schemas/InboundRebalancingMoveReport'
+          type: array
+        tenantArticleId:
+          type: string
+      required:
+        - facilityRef
+        - expectedStockRef
+        - tenantArticleId
+        - mode
+        - moves
+      title: InboundRebalancingResult
+      type: object
+      description: InboundRebalancingResult
     InboundReceipt:
       properties:
         asnRef:
@@ -68635,6 +68776,8 @@ components:
             - AVAILABILITY_THRESHOLDS_WRITE
             - PICKUP_SERVICE_READ
             - PICKUP_SERVICE_WRITE
+            - PRODUCT_READ
+            - PRODUCT_WRITE
           type: string
         operation:
           description: The operation of the permission
@@ -68752,6 +68895,7 @@ components:
             - SAFETY_STOCK
             - AVAILABILITY_THRESHOLDS
             - PICKUP_SERVICE
+            - PRODUCT
           type: string
       required:
         - operation
@@ -75089,6 +75233,279 @@ components:
       type: object
       title: ProcessWebHookEvent
       description: ProcessWebHookEvent
+    Product:
+      properties:
+        titleLocalized:
+          allOf:
+            - $ref: '#/components/schemas/LocaleString'
+          description: >-
+            The translations for the title of the product. At least one
+            translation is required.
+        attributes:
+          description: Attributes of this product
+          items:
+            $ref: '#/components/schemas/ArticleAttributeItem'
+          maxItems: 500
+          type: array
+        categoryRefs:
+          description: References to the categories this product belongs to
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+          items:
+            type: string
+          maxItems: 500
+          type: array
+        created:
+          description: Creation date of this product
+          format: date-time
+          type: string
+        customAttributes:
+          description: >-
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
+          type: object
+        id:
+          description: Unique identifier of this product
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        imageUrl:
+          description: >-
+            A web link to a picture of this product. Ensure that no
+            authentication is needed to fetch the image.
+          example: https://example.com/resource
+          type: string
+        lastModified:
+          description: Last modification date of this product
+          format: date-time
+          type: string
+        measurementUnitKey:
+          description: Key of the measurement unit in which this product is measured
+          type: string
+        recordableAttributes:
+          description: >-
+            Attributes that have to or can be recorded for this product during
+            fulfillment processes
+          items:
+            $ref: '#/components/schemas/RecordableAttribute'
+          type: array
+        scannableCodes:
+          description: Codes (e.g. EAN, GTIN) under which this product can be scanned
+          items:
+            type: string
+          maxItems: 500
+          type: array
+        tenantArticleId:
+          description: >-
+            Tenant-specific product identifier. Unique across all products.
+            Cannot be changed after creation.
+          example: zelt_a
+          type: string
+        title:
+          description: >-
+            The title of the product, derived from titleLocalized in the
+            requested language
+          example: 3x6m Partyzelt, PE-Plane, weiß
+          type: string
+        traits:
+          description: Traits describing which processes the product takes part in
+          items:
+            enum:
+              - ROUTABLE
+              - PICKABLE
+              - RETURNABLE
+              - CUSTOMER_VISIBLE
+            type: string
+          maxItems: 10
+          type: array
+        version:
+          description: Version number of this product
+          example: 1
+          type: number
+        tags:
+          description: Tags of this product
+          items:
+            type: string
+          maxItems: 500
+          type: array
+      required:
+        - id
+        - version
+        - created
+        - lastModified
+        - tenantArticleId
+        - title
+        - titleLocalized
+        - traits
+      title: Product
+      type: object
+      description: Product
+    ProductForCreation:
+      properties:
+        titleLocalized:
+          allOf:
+            - $ref: '#/components/schemas/LocaleString'
+          description: >-
+            The translations for the title of the product. At least one
+            translation is required.
+        attributes:
+          description: Attributes of this product
+          items:
+            $ref: '#/components/schemas/ArticleAttributeItem'
+          maxItems: 500
+          type: array
+        categoryRefs:
+          description: References to the categories this product belongs to
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+          items:
+            type: string
+          maxItems: 500
+          type: array
+        customAttributes:
+          description: >-
+            Custom attributes of this product. Not used within fulfillment
+            processes.
+          nullable: true
+          type: object
+        imageUrl:
+          description: >-
+            A web link to a picture of this product. Ensure that no
+            authentication is needed to fetch the image.
+          example: https://example.com/resource
+          type: string
+        measurementUnitKey:
+          description: Key of the measurement unit in which this product is measured
+          minLength: 1
+          type: string
+        recordableAttributes:
+          description: >-
+            Attributes that have to or can be recorded for this product during
+            fulfillment processes
+          items:
+            $ref: '#/components/schemas/RecordableAttributeForCreation'
+          maxItems: 50
+          type: array
+        scannableCodes:
+          description: Codes (e.g. EAN, GTIN) under which this product can be scanned
+          items:
+            type: string
+          maxItems: 500
+          type: array
+        tenantArticleId:
+          description: >-
+            Tenant-specific product identifier. Unique across all products.
+            Cannot be changed after creation.
+          example: zelt_a
+          minLength: 1
+          type: string
+        traits:
+          description: Traits describing which processes the product takes part in
+          items:
+            enum:
+              - ROUTABLE
+              - PICKABLE
+              - RETURNABLE
+              - CUSTOMER_VISIBLE
+            type: string
+          maxItems: 10
+          type: array
+        tags:
+          description: Tags of this product
+          items:
+            type: string
+          maxItems: 500
+          type: array
+      required:
+        - tenantArticleId
+        - titleLocalized
+        - traits
+      title: ProductForCreation
+      type: object
+      description: ProductForCreation
+    ProductForUpdate:
+      properties:
+        titleLocalized:
+          allOf:
+            - $ref: '#/components/schemas/LocaleString'
+          description: >-
+            The translations for the title of the product. At least one
+            translation is required.
+        attributes:
+          description: Attributes of this product
+          items:
+            $ref: '#/components/schemas/ArticleAttributeItem'
+          maxItems: 500
+          type: array
+        categoryRefs:
+          description: References to the categories this product belongs to
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+          items:
+            type: string
+          maxItems: 500
+          type: array
+        customAttributes:
+          description: >-
+            Custom attributes of this product. Not used within fulfillment
+            processes.
+          nullable: true
+          type: object
+        imageUrl:
+          description: >-
+            A web link to a picture of this product. Ensure that no
+            authentication is needed to fetch the image.
+          example: https://example.com/resource
+          type: string
+        measurementUnitKey:
+          description: Key of the measurement unit in which this product is measured
+          minLength: 1
+          type: string
+        recordableAttributes:
+          description: >-
+            Updates of existing recordable attributes of this product,
+            identified by recordableAttributeId. Attributes not listed stay
+            unchanged.
+          items:
+            $ref: '#/components/schemas/RecordableAttributeForUpdate'
+          maxItems: 100
+          type: array
+        scannableCodes:
+          description: Codes (e.g. EAN, GTIN) under which this product can be scanned
+          items:
+            type: string
+          maxItems: 500
+          type: array
+        traits:
+          description: Traits describing which processes the product takes part in
+          items:
+            enum:
+              - ROUTABLE
+              - PICKABLE
+              - RETURNABLE
+              - CUSTOMER_VISIBLE
+            type: string
+          maxItems: 10
+          type: array
+        version:
+          description: Version number of this product
+          example: 1
+          type: number
+        tags:
+          description: Tags of this product
+          items:
+            type: string
+          maxItems: 500
+          type: array
+      required:
+        - version
+      title: ProductForUpdate
+      type: object
+      description: ProductForUpdate
     ProductInformation:
       properties:
         additionalShippingArticleAttributes:
@@ -75123,6 +75540,21 @@ components:
       title: ProductInformation
       type: object
       description: ProductInformation
+    Products:
+      properties:
+        products:
+          description: List of products matching the query
+          items:
+            $ref: '#/components/schemas/Product'
+          maxItems: 500
+          type: array
+        total:
+          description: Total number of found entities for this query
+          example: 42
+          type: integer
+      title: Products
+      type: object
+      description: Products
     ProductValueCurrency:
       additionalProperties: false
       properties:
@@ -78942,6 +79374,8 @@ components:
               - AVAILABILITY_THRESHOLDS_WRITE
               - PICKUP_SERVICE_READ
               - PICKUP_SERVICE_WRITE
+              - PRODUCT_READ
+              - PRODUCT_WRITE
             type: string
           maxItems: 500
           type: array
@@ -79180,6 +79614,8 @@ components:
               - AVAILABILITY_THRESHOLDS_WRITE
               - PICKUP_SERVICE_READ
               - PICKUP_SERVICE_WRITE
+              - PRODUCT_READ
+              - PRODUCT_WRITE
             type: string
           maxItems: 500
           type: array
@@ -79409,6 +79845,8 @@ components:
               - AVAILABILITY_THRESHOLDS_WRITE
               - PICKUP_SERVICE_READ
               - PICKUP_SERVICE_WRITE
+              - PRODUCT_READ
+              - PRODUCT_WRITE
             type: string
           maxItems: 500
           type: array
@@ -79644,6 +80082,8 @@ components:
               - AVAILABILITY_THRESHOLDS_WRITE
               - PICKUP_SERVICE_READ
               - PICKUP_SERVICE_WRITE
+              - PRODUCT_READ
+              - PRODUCT_WRITE
             type: string
           maxItems: 500
           type: array
@@ -97615,6 +98055,8 @@ components:
               - AVAILABILITY_THRESHOLDS_WRITE
               - PICKUP_SERVICE_READ
               - PICKUP_SERVICE_WRITE
+              - PRODUCT_READ
+              - PRODUCT_WRITE
             type: string
           type: array
       required:
@@ -98869,6 +99311,8 @@ tags:
     name: Carriers
   - description: Endpoints to create, update, and read carriers configuration.
     name: Carriers configuration
+  - description: Endpoints to create, update, and read products.
+    name: Products
   - description: Endpoints to create, update, and read categories.
     name: Categories
   - description: Endpoints to configure and get channel availability.
