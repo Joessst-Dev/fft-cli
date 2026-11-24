@@ -12183,6 +12183,7 @@ func (e TimeTriggeredConfigContextType) Valid() bool {
 const (
 	ToolkitAllowedEntitiesCARRIERCONNECTION      ToolkitAllowedEntities = "CARRIERCONNECTION"
 	ToolkitAllowedEntitiesFACILITY               ToolkitAllowedEntities = "FACILITY"
+	ToolkitAllowedEntitiesFACILITYCONNECTION     ToolkitAllowedEntities = "FACILITY_CONNECTION"
 	ToolkitAllowedEntitiesLISTING                ToolkitAllowedEntities = "LISTING"
 	ToolkitAllowedEntitiesORDER                  ToolkitAllowedEntities = "ORDER"
 	ToolkitAllowedEntitiesORDERINGFACILITY       ToolkitAllowedEntities = "ORDERING_FACILITY"
@@ -12195,6 +12196,8 @@ func (e ToolkitAllowedEntities) Valid() bool {
 	case ToolkitAllowedEntitiesCARRIERCONNECTION:
 		return true
 	case ToolkitAllowedEntitiesFACILITY:
+		return true
+	case ToolkitAllowedEntitiesFACILITYCONNECTION:
 		return true
 	case ToolkitAllowedEntitiesLISTING:
 		return true
@@ -24921,8 +24924,9 @@ type RoutingStrategyToolkitFence struct {
 	// Entity1 The entities that can be compared by the toolkit fence or rating
 	//   * `ORDER`
 	//   * `FACILITY`
-	//   * `CARRIERCONNECTION`
+	//   * `CARRIERCONNECTION` - right side only, not supported when optimization routing is enabled
 	//   * `LISTING`
+	//   * `FACILITY_CONNECTION` - right side only, the facility connection used by the sourcing option; only supported when optimization routing is enabled
 	//   * `ORDERING_FACILITY` - left side only
 	//   * `ORDERING_FACILITY_GROUPS` - left side only
 	Entity1 *ToolkitAllowedEntities `json:"entity1,omitempty"`
@@ -24930,8 +24934,9 @@ type RoutingStrategyToolkitFence struct {
 	// Entity2 The entities that can be compared by the toolkit fence or rating
 	//   * `ORDER`
 	//   * `FACILITY`
-	//   * `CARRIERCONNECTION`
+	//   * `CARRIERCONNECTION` - right side only, not supported when optimization routing is enabled
 	//   * `LISTING`
+	//   * `FACILITY_CONNECTION` - right side only, the facility connection used by the sourcing option; only supported when optimization routing is enabled
 	//   * `ORDERING_FACILITY` - left side only
 	//   * `ORDERING_FACILITY_GROUPS` - left side only
 	Entity2 *ToolkitAllowedEntities `json:"entity2,omitempty"`
@@ -27887,8 +27892,9 @@ type TimeZoneForCreation struct {
 // ToolkitAllowedEntities The entities that can be compared by the toolkit fence or rating
 //   - `ORDER`
 //   - `FACILITY`
-//   - `CARRIERCONNECTION`
+//   - `CARRIERCONNECTION` - right side only, not supported when optimization routing is enabled
 //   - `LISTING`
+//   - `FACILITY_CONNECTION` - right side only, the facility connection used by the sourcing option; only supported when optimization routing is enabled
 //   - `ORDERING_FACILITY` - left side only
 //   - `ORDERING_FACILITY_GROUPS` - left side only
 type ToolkitAllowedEntities string
@@ -27901,8 +27907,9 @@ type ToolkitComparisonPredicate struct {
 	// LeftEntity The entities that can be compared by the toolkit fence or rating
 	//   * `ORDER`
 	//   * `FACILITY`
-	//   * `CARRIERCONNECTION`
+	//   * `CARRIERCONNECTION` - right side only, not supported when optimization routing is enabled
 	//   * `LISTING`
+	//   * `FACILITY_CONNECTION` - right side only, the facility connection used by the sourcing option; only supported when optimization routing is enabled
 	//   * `ORDERING_FACILITY` - left side only
 	//   * `ORDERING_FACILITY_GROUPS` - left side only
 	LeftEntity       ToolkitAllowedEntities `json:"leftEntity"`
@@ -27915,8 +27922,9 @@ type ToolkitComparisonPredicate struct {
 	// RightEntity The entities that can be compared by the toolkit fence or rating
 	//   * `ORDER`
 	//   * `FACILITY`
-	//   * `CARRIERCONNECTION`
+	//   * `CARRIERCONNECTION` - right side only, not supported when optimization routing is enabled
 	//   * `LISTING`
+	//   * `FACILITY_CONNECTION` - right side only, the facility connection used by the sourcing option; only supported when optimization routing is enabled
 	//   * `ORDERING_FACILITY` - left side only
 	//   * `ORDERING_FACILITY_GROUPS` - left side only
 	RightEntity       ToolkitAllowedEntities `json:"rightEntity"`
@@ -27973,8 +27981,9 @@ type ToolkitPredicate struct {
 	// Entity The entities that can be compared by the toolkit fence or rating
 	//   * `ORDER`
 	//   * `FACILITY`
-	//   * `CARRIERCONNECTION`
+	//   * `CARRIERCONNECTION` - right side only, not supported when optimization routing is enabled
 	//   * `LISTING`
+	//   * `FACILITY_CONNECTION` - right side only, the facility connection used by the sourcing option; only supported when optimization routing is enabled
 	//   * `ORDERING_FACILITY` - left side only
 	//   * `ORDERING_FACILITY_GROUPS` - left side only
 	Entity ToolkitAllowedEntities `json:"entity"`
