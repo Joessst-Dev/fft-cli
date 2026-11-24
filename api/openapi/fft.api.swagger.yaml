@@ -33816,16 +33816,23 @@ components:
             - color: red
               label: ALPHA
         maxGirth:
-          description: The maximum girth in millimeters of the packagingUnit.
+          description: >-
+            The maximum girth in millimeters of the packagingUnit. For
+            LONG_GOODS it applies to the goods lying on their load carrier.
           type: number
         maxItemQuantity:
           description: The maximum number of items that can fit in the packagingUnit.
           type: number
         maxLength:
-          description: The maximum length in millimeters of the packagingUnit.
+          description: >-
+            The maximum length in millimeters of the packagingUnit. For
+            LONG_GOODS it applies to the goods lying on their load carrier,
+            which must not be longer itself.
           type: number
         maxVolume:
-          description: The maximum volume in cubic millimeters of the packagingUnit.
+          description: >-
+            The maximum volume in cubic millimeters of the packagingUnit. For
+            LONG_GOODS it applies to the goods lying on their load carrier.
           type: number
         maxVolumetricWeight:
           description: >-
@@ -33839,7 +33846,9 @@ components:
             - color: red
               label: ALPHA
         maxWeight:
-          description: The maximum weight in grams that the packagingUnit can hold.
+          description: >-
+            The maximum weight in grams of the packed packagingUnit. For PALLET
+            and LONG_GOODS it includes loadCarrierWeight.
           type: number
         minItemQuantity:
           description: The minimum number of items that can fit in the packagingUnit.
@@ -43672,44 +43681,6 @@ components:
       type: object
       title: Fence
       description: Fence
-    FenceAnalysis:
-      properties:
-        fenceId:
-          description: The ID of the fence.
-          type: string
-        fenceName:
-          description: The name of the fence.
-          type: string
-        fenceType:
-          description: The type of fence.
-          enum:
-            - STANDARD
-            - TOOLKIT
-          type: string
-        layer:
-          description: The layer at which the fence was evaluated.
-          type: number
-        listingId:
-          description: The ID of the listing.
-          type: string
-        nodeId:
-          description: The ID of the node.
-          type: string
-        result:
-          description: The result of the fence evaluation.
-          enum:
-            - PASSED
-            - FAILED
-            - NOT_APPLICABLE
-          type: string
-      required:
-        - fenceType
-        - nodeId
-        - fenceId
-        - result
-      title: FenceAnalysis
-      type: object
-      description: FenceAnalysis
     FenceImplementation:
       description: >-
         <i>This part of the API is currently under development. That means that
@@ -43733,6 +43704,15 @@ components:
       xml:
         name: FenceImplementation
       title: FenceImplementation
+    FenceInputSource:
+      description: Where the data of the entity came from.
+      enum:
+        - BIG_QUERY
+        - SIMULATED
+        - LIVE
+        - UNAVAILABLE
+      title: FenceInputSource
+      type: string
     FenceMode:
       enum:
         - static
@@ -43740,6 +43720,15 @@ components:
       type: string
       title: FenceMode
       description: FenceMode
+    FenceResult:
+      description: The result of the fence evaluation.
+      enum:
+        - PASSED
+        - FAILED
+        - NOT_APPLICABLE
+        - SKIPPED
+      title: FenceResult
+      type: string
     FenceResultStatus:
       enum:
         - FAILED
@@ -43747,6 +43736,12 @@ components:
         - REACTIVE_PASSING_POSSIBLE
       title: FenceResultStatus
       description: FenceResultStatus
+    FenceSkipReason:
+      description: Why the fence was not evaluated. Set only when the result is SKIPPED.
+      enum:
+        - UNSUPPORTED_SCOPE
+      title: FenceSkipReason
+      type: string
     FenceStatistic:
       properties:
         durationMs:
@@ -51262,6 +51257,10 @@ components:
           maxItems: 100
           minItems: 0
           type: array
+        itemReturnStatusValues:
+          allOf:
+            - $ref: '#/components/schemas/ItemReturnStatusValues'
+          description: calculated values for included item returns
         lastModified:
           description: Last modification timestamp
           example: 2026-06-17T12:00:00.000Z
@@ -51677,6 +51676,10 @@ components:
           maxItems: 100
           minItems: 0
           type: array
+        itemReturnStatusValues:
+          allOf:
+            - $ref: '#/components/schemas/ItemReturnStatusValues'
+          description: calculated values for included item returns
         lastModified:
           description: Last modification timestamp
           example: 2026-06-17T12:00:00.000Z
@@ -52052,6 +52055,56 @@ components:
       title: ItemReturns
       type: object
       description: ItemReturns
+    ItemReturnStatusValues:
+      properties:
+        announced:
+          description: amount of item returns of this item return job in status announced.
+          example: 42
+          type: integer
+        canceled:
+          description: amount of item returns of this item return job in status canceled.
+          example: 42
+          type: integer
+        finished:
+          description: amount of item returns of this item return job in status finished.
+          example: 42
+          type: integer
+        inProgress:
+          description: >-
+            amount of item returns of this item return job in status in
+            progress.
+          example: 42
+          type: integer
+        obsolete:
+          description: amount of item returns of this item return job in status obsolete.
+          example: 42
+          type: integer
+        open:
+          description: amount of item returns of this item return job in status open.
+          example: 42
+          type: integer
+        paused:
+          description: amount of item returns of this item return job in status paused.
+          example: 42
+          type: integer
+        waitingForInput:
+          description: >-
+            amount of item returns of this item return job in status waiting for
+            input.
+          example: 42
+          type: integer
+      required:
+        - announced
+        - open
+        - inProgress
+        - paused
+        - finished
+        - waitingForInput
+        - canceled
+        - obsolete
+      title: ItemReturnStatusValues
+      type: object
+      description: ItemReturnStatusValues
     ItemReturnsWithSearchPaths:
       properties:
         created:
@@ -55152,34 +55205,42 @@ components:
         loadCarrierHeight:
           description: >-
             The height in millimeters of the empty load carrier (e.g. pallet or
-            skid) itself.
+            skid) itself. It counts toward the maximum height, girth and volume
+            and must leave room for goods.
           type: number
         loadCarrierLength:
           description: >-
             The length in millimeters of the empty load carrier (e.g. pallet or
-            skid) itself.
+            skid) itself. It must fit within the maximum length.
           type: number
         loadCarrierWeight:
           description: >-
             The tare weight in grams of the empty load carrier (e.g. pallet or
-            skid) itself.
+            skid) itself. It counts toward maxWeight and must be less than it.
           type: number
         loadCarrierWidth:
           description: >-
             The width in millimeters of the empty load carrier (e.g. pallet or
-            skid) itself.
+            skid) itself. It must fit within the maximum width.
           type: number
         maxGirth:
-          description: The maximum girth in millimeters of the packagingUnit.
+          description: >-
+            The maximum girth in millimeters of the packagingUnit. For
+            LONG_GOODS it applies to the goods lying on their load carrier.
           type: number
         maxItemQuantity:
           description: The maximum number of items that can fit in the packagingUnit.
           type: number
         maxLength:
-          description: The maximum length in millimeters of the packagingUnit.
+          description: >-
+            The maximum length in millimeters of the packagingUnit. For
+            LONG_GOODS it applies to the goods lying on their load carrier,
+            which must not be longer itself.
           type: number
         maxVolume:
-          description: The maximum volume in cubic millimeters of the packagingUnit.
+          description: >-
+            The maximum volume in cubic millimeters of the packagingUnit. For
+            LONG_GOODS it applies to the goods lying on their load carrier.
           type: number
         maxVolumetricWeight:
           description: >-
@@ -55193,7 +55254,9 @@ components:
             - color: red
               label: ALPHA
         maxWeight:
-          description: The maximum weight in grams that the packagingUnit can hold.
+          description: >-
+            The maximum weight in grams of the packed packagingUnit. For PALLET
+            and LONG_GOODS it includes loadCarrierWeight.
           type: number
         minItemQuantity:
           description: The minimum number of items that can fit in the packagingUnit.
@@ -63930,13 +63993,19 @@ components:
     PackagingUnitDetailDimensions:
       properties:
         maxHeight:
-          description: The max height of the packagingUnit in millimeters.
+          description: >-
+            The max height of the packagingUnit in millimeters. For PALLET it
+            includes loadCarrierHeight.
           type: number
         maxLength:
-          description: The max length of the packagingUnit in millimeters.
+          description: >-
+            The max length of the packagingUnit in millimeters. For PALLET a
+            longer load carrier defines the length, so it must fit within it.
           type: number
         maxWidth:
-          description: The max width of the packagingUnit in millimeters.
+          description: >-
+            The max width of the packagingUnit in millimeters. For PALLET a
+            wider load carrier defines the width, so it must fit within it.
           type: number
       required:
         - maxHeight
@@ -66306,7 +66375,8 @@ components:
             href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
             target="_blank">API release lifecycle documentation</a>.<br /><br
             />The height in millimeters of the empty load carrier (e.g. pallet
-            or skid) itself.
+            or skid) itself. It counts toward the maximum height, girth and
+            volume and must leave room for goods.
           type: number
           x-badges:
             - color: red
@@ -66317,7 +66387,7 @@ components:
             href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
             target="_blank">API release lifecycle documentation</a>.<br /><br
             />The length in millimeters of the empty load carrier (e.g. pallet
-            or skid) itself.
+            or skid) itself. It must fit within the maximum length.
           type: number
           x-badges:
             - color: red
@@ -66328,7 +66398,7 @@ components:
             href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
             target="_blank">API release lifecycle documentation</a>.<br /><br
             />The tare weight in grams of the empty load carrier (e.g. pallet or
-            skid) itself.
+            skid) itself. It counts toward maxWeight and must be less than it.
           type: number
           x-badges:
             - color: red
@@ -66339,7 +66409,7 @@ components:
             href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
             target="_blank">API release lifecycle documentation</a>.<br /><br
             />The width in millimeters of the empty load carrier (e.g. pallet or
-            skid) itself.
+            skid) itself. It must fit within the maximum width.
           type: number
           x-badges:
             - color: red
@@ -66359,7 +66429,9 @@ components:
             - color: red
               label: ALPHA
         maxWeight:
-          description: The maximum weight in grams that the packagingUnit can hold.
+          description: >-
+            The maximum weight in grams of the packed packagingUnit. For PALLET
+            and LONG_GOODS it includes loadCarrierWeight.
           type: number
         minItemQuantity:
           description: The minimum number of items that can fit in the packagingUnit.
@@ -66607,7 +66679,9 @@ components:
             - color: red
               label: ALPHA
         maxWeight:
-          description: The maximum weight in grams that the packagingUnit can hold.
+          description: >-
+            The maximum weight in grams of the packed packagingUnit. For PALLET
+            and LONG_GOODS it includes loadCarrierWeight.
           type: number
         minItemQuantity:
           description: The minimum number of items that can fit in the packagingUnit.
@@ -88374,11 +88448,6 @@ components:
           description: >-
             Analysis of connections. Null when the facility is inside the
             resulting graph.
-        fenceAnalysis:
-          description: List of fence analyses.
-          items:
-            $ref: '#/components/schemas/FenceAnalysis'
-          type: array
         layers:
           description: >-
             The search graph layers the facility is part of. Empty when it is
@@ -88397,11 +88466,22 @@ components:
         lookupFacilityId:
           description: The ID of the facility being looked up.
           type: string
+        standardFenceAnalysis:
+          description: Analyses of the standard fences.
+          items:
+            $ref: '#/components/schemas/StandardFenceAnalysis'
+          type: array
+        toolkitFenceAnalysis:
+          description: >-
+            Analyses of the toolkit fences, one entry per fence, layer and
+            evaluated scope instance.
+          items:
+            $ref: '#/components/schemas/ToolkitFenceAnalysis'
+          type: array
       required:
         - lookupFacilityId
         - layers
         - listingAvailability
-        - fenceAnalysis
       title: SourcingOptionAnalyzeActionFacilityResult
       type: object
       description: SourcingOptionAnalyzeActionFacilityResult
@@ -88979,6 +89059,28 @@ components:
       title: StackResponse
       type: object
       description: StackResponse
+    StandardFenceAnalysis:
+      properties:
+        fenceId:
+          description: The ID of the fence.
+          type: string
+        fenceName:
+          description: The name of the fence.
+          type: string
+        nodeId:
+          description: The ID of the node.
+          type: string
+        result:
+          allOf:
+            - $ref: '#/components/schemas/FenceResult'
+          description: The result of the fence evaluation.
+      required:
+        - nodeId
+        - fenceId
+        - result
+      title: StandardFenceAnalysis
+      type: object
+      description: StandardFenceAnalysis
     StartItemReturnActionParameter:
       properties:
         itemReturnJobVersion:
@@ -95141,8 +95243,9 @@ components:
         The entities that can be compared by the toolkit fence or rating
           * `ORDER`
           * `FACILITY`
-          * `CARRIERCONNECTION`
+          * `CARRIERCONNECTION` - right side only, not supported when optimization routing is enabled
           * `LISTING`
+          * `FACILITY_CONNECTION` - right side only, the facility connection used by the sourcing option; only supported when optimization routing is enabled
           * `ORDERING_FACILITY` - left side only
           * `ORDERING_FACILITY_GROUPS` - left side only
       enum:
@@ -95150,6 +95253,7 @@ components:
         - FACILITY
         - CARRIERCONNECTION
         - LISTING
+        - FACILITY_CONNECTION
         - ORDERING_FACILITY
         - ORDERING_FACILITY_GROUPS
       type: string
@@ -95360,6 +95464,54 @@ components:
         name: ToolkitFence
       title: ToolkitFence
       description: ToolkitFence
+    ToolkitFenceAnalysis:
+      properties:
+        evaluationScope:
+          description: The scope the fence rule is evaluated on.
+          enum:
+            - WHOLE_ENTITY
+            - LINE_ITEM
+            - ASSIGNED_TRANSFER
+          type: string
+        fenceId:
+          description: The ID of the fence.
+          type: string
+        fenceName:
+          description: The name of the fence.
+          type: string
+        inputs:
+          description: >-
+            The entities the fence rule read, with the source and IDs of their
+            data.
+          items:
+            $ref: '#/components/schemas/ToolkitFenceInput'
+          type: array
+        layer:
+          description: The layer at which the fence was evaluated.
+          type: number
+        nodeId:
+          description: The ID of the node.
+          type: string
+        result:
+          allOf:
+            - $ref: '#/components/schemas/FenceResult'
+          description: The result of the fence evaluation.
+        skipReason:
+          allOf:
+            - $ref: '#/components/schemas/FenceSkipReason'
+          description: >-
+            Why the fence was not evaluated. Set only when the result is
+            SKIPPED.
+      required:
+        - nodeId
+        - fenceId
+        - evaluationScope
+        - layer
+        - result
+        - inputs
+      title: ToolkitFenceAnalysis
+      type: object
+      description: ToolkitFenceAnalysis
     ToolkitFenceForCreation:
       properties:
         descriptionLocalized:
@@ -95426,6 +95578,42 @@ components:
         name: ToolkitFenceForModification
       title: ToolkitFenceForModification
       description: ToolkitFenceForModification
+    ToolkitFenceInput:
+      properties:
+        entity:
+          allOf:
+            - $ref: '#/components/schemas/ToolkitFenceInputEntity'
+          description: The entity the fence rule reads.
+        ids:
+          description: The IDs of the entity instances the fence was evaluated on.
+          items:
+            type: string
+          type: array
+        source:
+          allOf:
+            - $ref: '#/components/schemas/FenceInputSource'
+          description: Where the data of the entity came from.
+      required:
+        - entity
+        - source
+        - ids
+      title: ToolkitFenceInput
+      type: object
+      description: ToolkitFenceInput
+    ToolkitFenceInputEntity:
+      description: The entity the fence rule reads.
+      enum:
+        - ORDER
+        - ORDER_REDUCED_LINE_ITEMS
+        - ORDER_REDUCED_TRANSFER_ASSIGNMENTS
+        - ORDERING_FACILITY
+        - ORDERING_FACILITY_GROUPS
+        - FACILITY
+        - FACILITY_CONNECTION
+        - LISTING
+        - STRATEGY_CONTEXT
+      title: ToolkitFenceInputEntity
+      type: string
     ToolkitFencesTransporter:
       properties:
         fences:
@@ -96448,7 +96636,9 @@ components:
           description: The maximum number of items that can fit in the packagingUnit.
           type: number
         maxVolume:
-          description: The maximum volume in cubic millimeters of the packagingUnit.
+          description: >-
+            The maximum volume in cubic millimeters of the packagingUnit. For
+            LONG_GOODS it applies to the goods lying on their load carrier.
           type: number
         maxVolumetricWeight:
           description: >-
@@ -96462,7 +96652,9 @@ components:
             - color: red
               label: ALPHA
         maxWeight:
-          description: The maximum weight in grams that the packagingUnit can hold.
+          description: >-
+            The maximum weight in grams of the packed packagingUnit. For PALLET
+            and LONG_GOODS it includes loadCarrierWeight.
           type: number
         minItemQuantity:
           description: The minimum number of items that can fit in the packagingUnit.
