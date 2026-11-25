@@ -5178,6 +5178,8 @@ const (
 	PermissionKeyPROCESSREROUTE                        PermissionKey = "PROCESS_REROUTE"
 	PermissionKeyPROCESSWRITE                          PermissionKey = "PROCESS_WRITE"
 	PermissionKeyPRODUCTREAD                           PermissionKey = "PRODUCT_READ"
+	PermissionKeyPRODUCTRELATIONREAD                   PermissionKey = "PRODUCT_RELATION_READ"
+	PermissionKeyPRODUCTRELATIONWRITE                  PermissionKey = "PRODUCT_RELATION_WRITE"
 	PermissionKeyPRODUCTWRITE                          PermissionKey = "PRODUCT_WRITE"
 	PermissionKeyPROMISESCONFIGREAD                    PermissionKey = "PROMISES_CONFIG_READ"
 	PermissionKeyPROMISESCONFIGWRITE                   PermissionKey = "PROMISES_CONFIG_WRITE"
@@ -5467,6 +5469,10 @@ func (e PermissionKey) Valid() bool {
 		return true
 	case PermissionKeyPRODUCTREAD:
 		return true
+	case PermissionKeyPRODUCTRELATIONREAD:
+		return true
+	case PermissionKeyPRODUCTRELATIONWRITE:
+		return true
 	case PermissionKeyPRODUCTWRITE:
 		return true
 	case PermissionKeyPROMISESCONFIGREAD:
@@ -5714,6 +5720,7 @@ const (
 	PermissionSubGroupPROCESS                    PermissionSubGroup = "PROCESS"
 	PermissionSubGroupPROCESSLOGS                PermissionSubGroup = "PROCESS_LOGS"
 	PermissionSubGroupPRODUCT                    PermissionSubGroup = "PRODUCT"
+	PermissionSubGroupPRODUCTRELATION            PermissionSubGroup = "PRODUCT_RELATION"
 	PermissionSubGroupPROMISESCONFIG             PermissionSubGroup = "PROMISES_CONFIG"
 	PermissionSubGroupPURCHASEPRICE              PermissionSubGroup = "PURCHASE_PRICE"
 	PermissionSubGroupREMOTECONFIG               PermissionSubGroup = "REMOTE_CONFIG"
@@ -5872,6 +5879,8 @@ func (e PermissionSubGroup) Valid() bool {
 	case PermissionSubGroupPROCESSLOGS:
 		return true
 	case PermissionSubGroupPRODUCT:
+		return true
+	case PermissionSubGroupPRODUCTRELATION:
 		return true
 	case PermissionSubGroupPROMISESCONFIG:
 		return true
@@ -8031,6 +8040,8 @@ const (
 	RolePermissionsPROCESSREROUTE                        RolePermissions = "PROCESS_REROUTE"
 	RolePermissionsPROCESSWRITE                          RolePermissions = "PROCESS_WRITE"
 	RolePermissionsPRODUCTREAD                           RolePermissions = "PRODUCT_READ"
+	RolePermissionsPRODUCTRELATIONREAD                   RolePermissions = "PRODUCT_RELATION_READ"
+	RolePermissionsPRODUCTRELATIONWRITE                  RolePermissions = "PRODUCT_RELATION_WRITE"
 	RolePermissionsPRODUCTWRITE                          RolePermissions = "PRODUCT_WRITE"
 	RolePermissionsPROMISESCONFIGREAD                    RolePermissions = "PROMISES_CONFIG_READ"
 	RolePermissionsPROMISESCONFIGWRITE                   RolePermissions = "PROMISES_CONFIG_WRITE"
@@ -8320,6 +8331,10 @@ func (e RolePermissions) Valid() bool {
 		return true
 	case RolePermissionsPRODUCTREAD:
 		return true
+	case RolePermissionsPRODUCTRELATIONREAD:
+		return true
+	case RolePermissionsPRODUCTRELATIONWRITE:
+		return true
 	case RolePermissionsPRODUCTWRITE:
 		return true
 	case RolePermissionsPROMISESCONFIGREAD:
@@ -8547,6 +8562,8 @@ const (
 	RoleForCreationPermissionsPROCESSREROUTE                        RoleForCreationPermissions = "PROCESS_REROUTE"
 	RoleForCreationPermissionsPROCESSWRITE                          RoleForCreationPermissions = "PROCESS_WRITE"
 	RoleForCreationPermissionsPRODUCTREAD                           RoleForCreationPermissions = "PRODUCT_READ"
+	RoleForCreationPermissionsPRODUCTRELATIONREAD                   RoleForCreationPermissions = "PRODUCT_RELATION_READ"
+	RoleForCreationPermissionsPRODUCTRELATIONWRITE                  RoleForCreationPermissions = "PRODUCT_RELATION_WRITE"
 	RoleForCreationPermissionsPRODUCTWRITE                          RoleForCreationPermissions = "PRODUCT_WRITE"
 	RoleForCreationPermissionsPROMISESCONFIGREAD                    RoleForCreationPermissions = "PROMISES_CONFIG_READ"
 	RoleForCreationPermissionsPROMISESCONFIGWRITE                   RoleForCreationPermissions = "PROMISES_CONFIG_WRITE"
@@ -8836,6 +8853,10 @@ func (e RoleForCreationPermissions) Valid() bool {
 		return true
 	case RoleForCreationPermissionsPRODUCTREAD:
 		return true
+	case RoleForCreationPermissionsPRODUCTRELATIONREAD:
+		return true
+	case RoleForCreationPermissionsPRODUCTRELATIONWRITE:
+		return true
 	case RoleForCreationPermissionsPRODUCTWRITE:
 		return true
 	case RoleForCreationPermissionsPROMISESCONFIGREAD:
@@ -9063,6 +9084,8 @@ const (
 	RoleForPatchPermissionsPROCESSREROUTE                        RoleForPatchPermissions = "PROCESS_REROUTE"
 	RoleForPatchPermissionsPROCESSWRITE                          RoleForPatchPermissions = "PROCESS_WRITE"
 	RoleForPatchPermissionsPRODUCTREAD                           RoleForPatchPermissions = "PRODUCT_READ"
+	RoleForPatchPermissionsPRODUCTRELATIONREAD                   RoleForPatchPermissions = "PRODUCT_RELATION_READ"
+	RoleForPatchPermissionsPRODUCTRELATIONWRITE                  RoleForPatchPermissions = "PRODUCT_RELATION_WRITE"
 	RoleForPatchPermissionsPRODUCTWRITE                          RoleForPatchPermissions = "PRODUCT_WRITE"
 	RoleForPatchPermissionsPROMISESCONFIGREAD                    RoleForPatchPermissions = "PROMISES_CONFIG_READ"
 	RoleForPatchPermissionsPROMISESCONFIGWRITE                   RoleForPatchPermissions = "PROMISES_CONFIG_WRITE"
@@ -9352,6 +9375,10 @@ func (e RoleForPatchPermissions) Valid() bool {
 		return true
 	case RoleForPatchPermissionsPRODUCTREAD:
 		return true
+	case RoleForPatchPermissionsPRODUCTRELATIONREAD:
+		return true
+	case RoleForPatchPermissionsPRODUCTRELATIONWRITE:
+		return true
 	case RoleForPatchPermissionsPRODUCTWRITE:
 		return true
 	case RoleForPatchPermissionsPROMISESCONFIGREAD:
@@ -9579,6 +9606,8 @@ const (
 	RoleForUpdatePermissionsPROCESSREROUTE                        RoleForUpdatePermissions = "PROCESS_REROUTE"
 	RoleForUpdatePermissionsPROCESSWRITE                          RoleForUpdatePermissions = "PROCESS_WRITE"
 	RoleForUpdatePermissionsPRODUCTREAD                           RoleForUpdatePermissions = "PRODUCT_READ"
+	RoleForUpdatePermissionsPRODUCTRELATIONREAD                   RoleForUpdatePermissions = "PRODUCT_RELATION_READ"
+	RoleForUpdatePermissionsPRODUCTRELATIONWRITE                  RoleForUpdatePermissions = "PRODUCT_RELATION_WRITE"
 	RoleForUpdatePermissionsPRODUCTWRITE                          RoleForUpdatePermissions = "PRODUCT_WRITE"
 	RoleForUpdatePermissionsPROMISESCONFIGREAD                    RoleForUpdatePermissions = "PROMISES_CONFIG_READ"
 	RoleForUpdatePermissionsPROMISESCONFIGWRITE                   RoleForUpdatePermissions = "PROMISES_CONFIG_WRITE"
@@ -9867,6 +9896,10 @@ func (e RoleForUpdatePermissions) Valid() bool {
 	case RoleForUpdatePermissionsPROCESSWRITE:
 		return true
 	case RoleForUpdatePermissionsPRODUCTREAD:
+		return true
+	case RoleForUpdatePermissionsPRODUCTRELATIONREAD:
+		return true
+	case RoleForUpdatePermissionsPRODUCTRELATIONWRITE:
 		return true
 	case RoleForUpdatePermissionsPRODUCTWRITE:
 		return true
@@ -12906,6 +12939,8 @@ const (
 	UserRoleWithPermissionsPermissionsPROCESSREROUTE                        UserRoleWithPermissionsPermissions = "PROCESS_REROUTE"
 	UserRoleWithPermissionsPermissionsPROCESSWRITE                          UserRoleWithPermissionsPermissions = "PROCESS_WRITE"
 	UserRoleWithPermissionsPermissionsPRODUCTREAD                           UserRoleWithPermissionsPermissions = "PRODUCT_READ"
+	UserRoleWithPermissionsPermissionsPRODUCTRELATIONREAD                   UserRoleWithPermissionsPermissions = "PRODUCT_RELATION_READ"
+	UserRoleWithPermissionsPermissionsPRODUCTRELATIONWRITE                  UserRoleWithPermissionsPermissions = "PRODUCT_RELATION_WRITE"
 	UserRoleWithPermissionsPermissionsPRODUCTWRITE                          UserRoleWithPermissionsPermissions = "PRODUCT_WRITE"
 	UserRoleWithPermissionsPermissionsPROMISESCONFIGREAD                    UserRoleWithPermissionsPermissions = "PROMISES_CONFIG_READ"
 	UserRoleWithPermissionsPermissionsPROMISESCONFIGWRITE                   UserRoleWithPermissionsPermissions = "PROMISES_CONFIG_WRITE"
@@ -13194,6 +13229,10 @@ func (e UserRoleWithPermissionsPermissions) Valid() bool {
 	case UserRoleWithPermissionsPermissionsPROCESSWRITE:
 		return true
 	case UserRoleWithPermissionsPermissionsPRODUCTREAD:
+		return true
+	case UserRoleWithPermissionsPermissionsPRODUCTRELATIONREAD:
+		return true
+	case UserRoleWithPermissionsPermissionsPRODUCTRELATIONWRITE:
 		return true
 	case UserRoleWithPermissionsPermissionsPRODUCTWRITE:
 		return true
@@ -13626,6 +13665,8 @@ const (
 	GetPermissionsParamsKeyPROCESSREROUTE                        GetPermissionsParamsKey = "PROCESS_REROUTE"
 	GetPermissionsParamsKeyPROCESSWRITE                          GetPermissionsParamsKey = "PROCESS_WRITE"
 	GetPermissionsParamsKeyPRODUCTREAD                           GetPermissionsParamsKey = "PRODUCT_READ"
+	GetPermissionsParamsKeyPRODUCTRELATIONREAD                   GetPermissionsParamsKey = "PRODUCT_RELATION_READ"
+	GetPermissionsParamsKeyPRODUCTRELATIONWRITE                  GetPermissionsParamsKey = "PRODUCT_RELATION_WRITE"
 	GetPermissionsParamsKeyPRODUCTWRITE                          GetPermissionsParamsKey = "PRODUCT_WRITE"
 	GetPermissionsParamsKeyPROMISESCONFIGREAD                    GetPermissionsParamsKey = "PROMISES_CONFIG_READ"
 	GetPermissionsParamsKeyPROMISESCONFIGWRITE                   GetPermissionsParamsKey = "PROMISES_CONFIG_WRITE"
@@ -13914,6 +13955,10 @@ func (e GetPermissionsParamsKey) Valid() bool {
 	case GetPermissionsParamsKeyPROCESSWRITE:
 		return true
 	case GetPermissionsParamsKeyPRODUCTREAD:
+		return true
+	case GetPermissionsParamsKeyPRODUCTRELATIONREAD:
+		return true
+	case GetPermissionsParamsKeyPRODUCTRELATIONWRITE:
 		return true
 	case GetPermissionsParamsKeyPRODUCTWRITE:
 		return true
@@ -14904,7 +14949,7 @@ type CarrierCutoffTimesWeekDay struct {
 
 // CarrierPriorityCalculationRequest CarrierPriorityCalculationRequest
 type CarrierPriorityCalculationRequest struct {
-	// ProductValue ParcelProductValue
+	// ProductValue Product value information used to calculate carrier priority
 	ProductValue *ParcelProductValue `json:"productValue,omitempty"`
 }
 
@@ -21498,11 +21543,30 @@ type PageInfo struct {
 
 // ParcelDimensions ParcelDimensions
 type ParcelDimensions struct {
+	// CustomWeight Set this value if you want to overwrite the calculated weight of the parcel (in g).
+	//
+	// Example: 1700
 	CustomWeight *float32 `json:"customWeight,omitempty"`
-	Height       *float32 `json:"height,omitempty"`
-	Length       *float32 `json:"length,omitempty"`
-	Weight       *float32 `json:"weight,omitempty"`
-	Width        *float32 `json:"width,omitempty"`
+
+	// Height The height of the package (in cm)
+	//
+	// Example: 50
+	Height *float32 `json:"height,omitempty"`
+
+	// Length The length of the package (in cm)
+	//
+	// Example: 100
+	Length *float32 `json:"length,omitempty"`
+
+	// Weight The weight of the package (in g)
+	//
+	// Example: 1700
+	Weight *float32 `json:"weight,omitempty"`
+
+	// Width The width of the package (in cm)
+	//
+	// Example: 25
+	Width *float32 `json:"width,omitempty"`
 }
 
 // ParcelInformationParcelInformationLineItemsArticleFilter ParcelInformationParcelInformationLineItemsArticleFilter
@@ -21613,7 +21677,7 @@ type ParcelItemsListFilter struct {
 // ParcelLabelClassification ParcelLabelClassification
 type ParcelLabelClassification struct {
 	// Dimensions Dimensions for this parcel label classification
-	Dimensions *ParcelDimensions `json:"dimensions"`
+	Dimensions ParcelDimensions `json:"dimensions"`
 
 	// Name Name of the parcel label classification
 	//
@@ -21632,7 +21696,7 @@ type ParcelLabelClassification struct {
 // ParcelLabelClassificationForCreation ParcelLabelClassificationForCreation
 type ParcelLabelClassificationForCreation struct {
 	// Dimensions Dimensions for this parcel label classification
-	Dimensions *ParcelDimensions `json:"dimensions"`
+	Dimensions ParcelDimensions `json:"dimensions"`
 
 	// NameLocalized Localized name for parcel label classification
 	//
@@ -21652,9 +21716,7 @@ type ParcelLabelClassificationServices struct {
 // ParcelProductValue ParcelProductValue
 type ParcelProductValue struct {
 	// Currency The currency of the price as an ISO 4217 code.
-	//
-	// Example: EUR
-	Currency *CurrencyCode `json:"currency"`
+	Currency CurrencyCode `json:"currency"`
 
 	// DecimalPlaces Number of decimal places for the given currency
 	//
