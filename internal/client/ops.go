@@ -179,12 +179,15 @@ type RoutingDecisionLogsFilter struct {
 // json.RawMessage. Its envelope array is decisionLogs.
 //
 // The endpoint offers only exact-match id filters — closed over here the way
-// [FacilityConnections] closes over its target — and pages by startAfterId.
+// [FacilityConnections] closes over its target — and cannot be paged: see Unpageable.
 func RoutingDecisionLogs(filter RoutingDecisionLogsFilter) ListOp[json.RawMessage] {
 	return ListOp[json.RawMessage]{
 		Name:  "list the routing decision logs",
 		Items: "decisionLogs",
 		ID:    RawID,
+		// The API wants an ObjectId as startAfterId but every id it returns is a
+		// UUID, so there is no way past the first page.
+		Unpageable: true,
 		Do: func(ctx context.Context, raw api.ClientInterface, after string, size int) (*http.Response, error) {
 			params := &api.GetRoutingDecisionLogsParams{
 				OrderRef:           nonZero(filter.OrderRef),

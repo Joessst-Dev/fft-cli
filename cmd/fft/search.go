@@ -62,7 +62,7 @@ func (p *pageFlags) registerSized(f *pflag.FlagSet, noun, sizeDefault string) {
 	f.IntVar(&p.size, "size", 0,
 		fmt.Sprintf("%s per page, %d–%d%s",
 			strings.ToUpper(noun[:1])+noun[1:], client.MinSize, client.MaxSize, sizeDefault))
-	f.BoolVar(&p.all, "all", false, "Page to the end and return every match, not just the first page")
+	f.BoolVar(&p.all, "all", false, "Page to the end and return every match, not just the first page (--timeout bounds the whole walk; raise it for large lists)")
 	f.BoolVar(&p.total, "total", false, "Also count the matches, and report the total on stderr")
 	f.IntVar(&p.maxItems, "max-items", client.DefaultMaxItems,
 		fmt.Sprintf("With --all, stop after this many %s", noun))
@@ -216,6 +216,17 @@ func runList(cmd *cobra.Command, deps *Deps, build listOpFn, page pageFlags, vie
 	// The total is also how this model knows there is more: there is no hasNextPage to
 	// read, so "did I see all of them?" is a subtraction.
 	if result.Total > len(result.Items) && deps.Printer.Format() == output.Table {
+		if op.Unpageable {
+			// --all is still the remedy when everything fits in the one page it reads:
+			// it asks for MaxSize at once, where a plain run gets the API's default.
+			// Beyond that no flag helps, only a narrower query.
+			if result.Total <= client.MaxSize {
+				deps.Printer.Notef("There are more %s. Pass --all to read them in one page (the API cannot page past the first page).", view.Noun)
+			} else {
+				deps.Printer.Notef("There are more %s than one page of %d can hold, and the API cannot page past the first page. Narrow with a filter.", view.Noun, client.MaxSize)
+			}
+			return renderList(deps, view, result.Items)
+		}
 		deps.Printer.Notef("There are more %s. Pass --all to fetch them.", view.Noun)
 	}
 
@@ -247,8 +258,9 @@ func renderPage[Q, S any](ctx context.Context, deps *Deps, c *client.Client, op 
 // pages a cursor or startAfterId and is bounded by --max-items either way.
 func renderSeq(deps *Deps, seq iter.Seq2[json.RawMessage, error], page pageFlags, view listView) error {
 	var (
-		items     []json.RawMessage
-		truncated *client.TruncatedError
+		items      []json.RawMessage
+		truncated  *client.TruncatedError
+		unpageable *client.UnpageableError
 	)
 
 	for item, err := range seq {
@@ -257,14 +269,19 @@ func renderSeq(deps *Deps, seq iter.Seq2[json.RawMessage, error], page pageFlags
 		// ends the iteration and is reported — loudly, and on stderr — because a
 		// truncated list that does not say so is a wrong answer that looks right.
 		case errors.As(err, &truncated):
+		case errors.As(err, &unpageable):
 		case err != nil:
 			return err
 		default:
 			items = append(items, item)
 		}
-		if truncated != nil {
+		if truncated != nil || unpageable != nil {
 			break
 		}
+	}
+
+	if unpageable != nil {
+		deps.Printer.Warnf("%s. %s", unpageable, unpageable.Hint())
 	}
 
 	if truncated != nil {
@@ -274,8 +291,13 @@ func renderSeq(deps *Deps, seq iter.Seq2[json.RawMessage, error], page pageFlags
 	// --all read every match, so the count *is* the total — but only if it reached
 	// the end. A truncated run knows how many it fetched and nothing about how many
 	// it did not, and reporting the former as the latter would be a wrong number
-	// stated with confidence.
-	if page.total && truncated == nil {
+	// stated with confidence. An unpageable list is the exception: it did not count
+	// the rest either, but the API did, and the same envelope's total is what the
+	// single-page path reports, so --all agrees with it.
+	switch {
+	case page.total && unpageable != nil:
+		deps.Printer.Notef("Total: %d", unpageable.Total)
+	case page.total && truncated == nil:
 		deps.Printer.Notef("Total: %d", len(items))
 	}
 

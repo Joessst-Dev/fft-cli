@@ -32,7 +32,7 @@ fft connection list --facility <id> [flags]
 ## Flags
 
 ```
-      --all[=true|false]     Page to the end and return every match, not just the first page
+      --all[=true|false]     Page to the end and return every match, not just the first page (--timeout bounds the whole walk; raise it for large lists)
       --facility string      The facility the connection leaves, by tenantFacilityId or platform UUID (required)
       --max-items int        With --all, stop after this many connections (default 10000)
       --size int             Connections per page, 1–250 (default 25)

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -60,6 +61,41 @@ func unauthenticated(t *tenant) *client.Client {
 	GinkgoHelper()
 
 	c, err := client.New(t.URL, client.WithRetry((&noWait{}).retry()))
+	Expect(err).NotTo(HaveOccurred())
+	return c
+}
+
+// headerTimeout is what the transport's ResponseHeaderTimeout produces: it
+// matches context.DeadlineExceeded through errors.Is although no context expired.
+type headerTimeout struct{}
+
+func (headerTimeout) Error() string        { return "net/http: timeout awaiting response headers" }
+func (headerTimeout) Is(target error) bool { return target == context.DeadlineExceeded }
+func (headerTimeout) Timeout() bool        { return true }
+
+// stallAfterFirst answers the first request from the tenant and fails every later
+// one the way a stalled server does, while the caller's context stays live.
+type stallAfterFirst struct {
+	next http.RoundTripper
+	n    int
+}
+
+func (s *stallAfterFirst) RoundTrip(r *http.Request) (*http.Response, error) {
+	s.n++
+	if s.n > 1 {
+		return nil, headerTimeout{}
+	}
+	return s.next.RoundTrip(r)
+}
+
+// stalledClient is a client whose second request dies of a per-request header
+// timeout, with no --timeout anywhere near expiring.
+func stalledClient(t *tenant) *client.Client {
+	GinkgoHelper()
+
+	c, err := client.New(t.URL,
+		client.WithHTTPClient(&http.Client{Transport: &stallAfterFirst{next: http.DefaultTransport}}),
+		client.WithRetry((&noWait{}).retry()))
 	Expect(err).NotTo(HaveOccurred())
 	return c
 }
@@ -217,6 +253,44 @@ var _ = Describe("searching every page", func() {
 		Expect(t.hits()).To(Equal(3))
 		Expect(items).To(HaveLen(5))
 		Expect(items[4].TenantFacilityID).To(Equal("MUC-01"))
+	})
+
+	It("names --timeout and how far it got when the deadline cuts the walk short", func() {
+		t := newTenant(func(w http.ResponseWriter, r *http.Request, n int) {
+			if n == 1 {
+				fmt.Fprint(w, `{"facilities":[{"name":"A"}],"pageInfo":{"hasNextPage":true,"endCursor":"cursor-1"}}`)
+				return
+			}
+			<-r.Context().Done()
+		})
+		short, cancel := context.WithTimeout(ctx, 150*time.Millisecond)
+		DeferCleanup(cancel)
+
+		items, err := collect(client.SearchAll(short, unauthenticated(t), facilities(),
+			client.FacilitySearchPayload{}))
+
+		Expect(items).To(HaveLen(1))
+		var timedOut *client.WalkTimeoutError
+		Expect(errors.As(err, &timedOut)).To(BeTrue())
+		Expect(timedOut.Pages).To(Equal(1))
+		Expect(timedOut.Items).To(Equal(1))
+		Expect(errors.Is(err, context.DeadlineExceeded)).To(BeTrue())
+		Expect(err).To(MatchError(ContainSubstring("after 1 page (1 item)")))
+	})
+
+	// The transport's header timeout also matches DeadlineExceeded. Blaming --timeout
+	// for it would advise raising a flag that never expired and hide the real cause.
+	It("does not blame --timeout for a page that stalled while the walk's deadline was live", func() {
+		t := newTenant(func(w http.ResponseWriter, _ *http.Request, _ int) {
+			fmt.Fprint(w, `{"facilities":[{"name":"A"}],"pageInfo":{"hasNextPage":true,"endCursor":"cursor-1"}}`)
+		})
+
+		_, err := collect(client.SearchAll(ctx, stalledClient(t), facilities(),
+			client.FacilitySearchPayload{}))
+
+		var timedOut *client.WalkTimeoutError
+		Expect(errors.As(err, &timedOut)).To(BeFalse())
+		Expect(err).To(MatchError(ContainSubstring("timeout awaiting response headers")))
 	})
 
 	It("sends each page's endCursor as the next page's after", func() {

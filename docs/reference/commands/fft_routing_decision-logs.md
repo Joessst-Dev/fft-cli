@@ -20,8 +20,9 @@ searches:
   fft routing decision-logs --tenant-order-id R456728546
   fft routing decision-logs --routing-plan &lt;ref> -o json | jq '.[].routingStrategyEvaluationResult'
 
-The table is a summary; -o json carries each log in full. This endpoint pages by id,
-so --all fetches every match and stops at --max-items.
+The table is a summary; -o json carries each log in full. The API cannot page
+this endpoint past its first page (it rejects the ids it hands out), so --all reads
+one page of up to 250 logs and warns when there are more: narrow with a filter.
 
 ## Usage
 
@@ -32,7 +33,7 @@ fft routing decision-logs [flags]
 ## Flags
 
 ```
-      --all[=true|false]          Page to the end and return every match, not just the first page
+      --all[=true|false]          Page to the end and return every match, not just the first page (--timeout bounds the whole walk; raise it for large lists)
       --max-items int             With --all, stop after this many decision logs (default 10000)
       --order string              Only logs for this orderRef
       --process string            Only logs for this processRef

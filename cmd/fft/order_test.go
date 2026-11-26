@@ -182,6 +182,46 @@ var _ = Describe("fft order search", func() {
 		Expect(api.calls).To(BeEmpty())
 	})
 
+	When("the API answers 'Query too complex'", func() {
+		const tooComplex = `[{"summary":"Query too complex - please simplify your search criteria or reduce the result set size"}]`
+
+		BeforeEach(func() {
+			c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+				writeJSON(w, http.StatusBadRequest, tooComplex)
+			})
+		})
+
+		It("keeps the API's message and exit code, and says what does work instead", func() {
+			Expect(c.run("order", "search", "--since", "2026-11-24")).To(Equal(exitcode.General))
+
+			Expect(c.errOut()).To(ContainSubstring("Query too complex"))
+			Expect(c.errOut()).To(ContainSubstring("--tenant-order-id"))
+			Expect(c.errOut()).To(ContainSubstring("fft routing decision-logs"))
+			Expect(c.out()).To(BeEmpty())
+		})
+
+		It("also explains it for --sort and --all", func() {
+			Expect(c.run("order", "search", "--sort", "orderDate:desc", "--all")).To(Equal(exitcode.General))
+			Expect(c.errOut()).To(ContainSubstring("fft routing decision-logs"))
+		})
+	})
+
+	It("adds no hint to an unrelated 400", func() {
+		c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+			writeJSON(w, http.StatusBadRequest, `[{"summary":"orderDate is malformed"}]`)
+		})
+
+		Expect(c.run("order", "search", "--since", "2026-11-24")).To(Equal(exitcode.General))
+		Expect(c.errOut()).To(ContainSubstring("orderDate is malformed"))
+		Expect(c.errOut()).NotTo(ContainSubstring("decision-logs"))
+	})
+
+	It("documents the large-tenant limit and its way out on --help", func() {
+		Expect(c.run("order", "search", "--help")).To(Equal(exitcode.OK))
+		Expect(c.out()).To(ContainSubstring("Query too complex"))
+		Expect(c.out()).To(ContainSubstring("fft routing decision-logs"))
+	})
+
 	// The help prose names the permission by hand, and the spec moves it without
 	// notice — it was ADMIN_MODULES_READ until a sync quietly made it ORDER_READ. Pin
 	// the prose to the spec so the next move fails here instead of misleading a user.
