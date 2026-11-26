@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"maps"
 	"slices"
@@ -11,6 +13,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/Joessst-Dev/fft-cli/internal/api"
+	"github.com/Joessst-Dev/fft-cli/internal/client"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 )
 
@@ -288,6 +291,11 @@ func newGeneratedCmd(deps *Deps, op api.Operation, reserved map[string]bool) *co
 
 	flags := registerParamFlags(cmd, op, reserved)
 
+	var page pageFlags
+	if op.Paged {
+		registerGeneratedPaging(cmd, &page, flags)
+	}
+
 	if op.HasBody {
 		f := cmd.Flags()
 		f.StringVar(&file, "file", "", "JSON file holding the request body ('-' for stdin)")
@@ -361,10 +369,132 @@ func newGeneratedCmd(deps *Deps, op api.Operation, reserved map[string]bool) *co
 		if err != nil {
 			return err
 		}
+		if op.Paged {
+			if err := checkMaxItems(cmd, page); err != nil {
+				return err
+			}
+			if page.all {
+				return runGeneratedAll(cmd, deps, op, req, flags, page)
+			}
+		}
 		return runOperation(cmd, deps, op, req)
 	}
 
 	return cmd
+}
+
+// registerGeneratedPaging adds --all and --max-items to a paged list. They are only
+// added when nothing else owns the name — a parameter flag that took "all" first
+// keeps it, and the command then simply has no --all, which is the honest answer.
+func registerGeneratedPaging(cmd *cobra.Command, page *pageFlags, flags []*opFlag) {
+	fs := cmd.Flags()
+	for _, f := range flags {
+		if f.name == "all" || f.name == "max-items" {
+			return
+		}
+	}
+	if fs.Lookup("all") != nil || fs.Lookup("max-items") != nil {
+		return
+	}
+
+	fs.BoolVar(&page.all, "all", false, "Follow startAfterId to the end and return every item, not just one page")
+	fs.IntVar(&page.maxItems, "max-items", client.DefaultMaxItems, "With --all, stop after this many items")
+}
+
+// runGeneratedAll walks a paged list through [client.ListAll], so a generated
+// command keeps the guarantees the curated ones have: bounded by --max-items, and a
+// truncation said on stderr.
+//
+// What it prints is the array of entities — the same thing under -o json whether
+// the API wrapped them in an envelope or not, since the envelope's key and total
+// describe one page and there is no single page here.
+func runGeneratedAll(cmd *cobra.Command, deps *Deps, op api.Operation, req client.RawRequest, flags []*opFlag, page pageFlags) error {
+	var sizeParam api.Param
+	sizeFlagName := "size"
+	for _, f := range flags {
+		switch f.param.Name {
+		case "startAfterId":
+			if cmd.Flags().Changed(f.name) {
+				return exitcode.UsageError{Err: fmt.Errorf(
+					"--%s and --all cannot be combined: --all pages from the start", f.name)}
+			}
+		case "size":
+			sizeParam = f.param
+			sizeFlagName = f.name
+		}
+	}
+
+	// The page size is fft's to choose unless the user chose it, and the spec's
+	// maximum is a ceiling on that choice: --all's usual page of 100 would be a 400
+	// on an endpoint that stops at 25.
+	size := client.PageSize
+	if sizeParam.Max != 0 && sizeParam.Max < size {
+		size = sizeParam.Max
+	}
+	query := req.Query[:0:0]
+	for _, q := range req.Query {
+		switch q.Name {
+		case "size":
+			n, err := strconv.Atoi(q.Values[0])
+			if err != nil {
+				// A `type: number` size accepts 2.5 as a flag; a walk pages by whole
+				// items, and dropping the value would page at the default without a word.
+				return exitcode.UsageError{Err: fmt.Errorf(
+					"--%s with --all must be a whole number, not %s", sizeFlagName, q.Values[0])}
+			}
+			// The spec's maximum (checked with the flag, and shown in --help) can
+			// exceed fft's own page ceiling, which client.List enforces on every
+			// page --all fetches. Left to client.List, a size between the two would
+			// be refused with a range that contradicts --help and names no flag, so
+			// refuse it here, naming both.
+			if n < client.MinSize || n > client.MaxSize {
+				return exitcode.UsageError{Err: fmt.Errorf(
+					"--%s with --all must be between %d and %d, not %d: fft fetches at most %d items per request",
+					sizeFlagName, client.MinSize, client.MaxSize, n, client.MaxSize)}
+			}
+			size = n
+		case "startAfterId":
+		default:
+			query = append(query, q)
+		}
+	}
+	req.Query = query
+
+	c, err := tenantClient(deps)
+	if err != nil {
+		return err
+	}
+	ctx, cancel := deps.Context(cmd)
+	defer cancel()
+
+	list := client.RawListOp(c, operationName(op), op.ItemsKey, req)
+
+	var (
+		items     []json.RawMessage
+		truncated *client.TruncatedError
+	)
+	for item, err := range client.ListAll(ctx, c, list, size, client.MaxItems(page.maxItems)) {
+		if errors.As(err, &truncated) {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		items = append(items, item)
+	}
+
+	if truncated != nil {
+		deps.Printer.Warnf("%s. %s", truncated, truncated.Hint())
+	}
+	if len(items) == 0 {
+		return deps.Printer.Empty("items")
+	}
+
+	doc, err := json.Marshal(items)
+	if err != nil {
+		return fmt.Errorf("encode the items: %w", err)
+	}
+	return deps.Printer.RenderDocument(doc)
 }
 
 // shortOf is the one-line description in the parent's command list. A deprecated
@@ -499,6 +629,10 @@ func flagUsage(p api.Param) string {
 
 	if len(p.Enum) > 0 {
 		fmt.Fprintf(&b, " (one of %s)", strings.Join(p.Enum, ", "))
+	}
+
+	if p.Min != 0 || p.Max != 0 {
+		fmt.Fprintf(&b, " (%s)", boundsText(p))
 	}
 
 	if p.Type == api.TypeArray {

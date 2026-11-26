@@ -233,6 +233,10 @@ fft facility list --total
   count the rows, or pass `--size`.
 - Hitting that limit is **not an error**: fft warns on stderr and exits 0 with what it got,
   so the JSON alone cannot tell you the answer was cut short.
+- Generated list commands (`fft category get-categories`; `fft api` has no such flags)
+  that page with `startAfterId` take `--all` and `--max-items` too, with the same bound and the
+  same stderr warning. Under `--all` they print the **array of entities**, not the API's
+  envelope. `--size` is checked against the spec's maximum before anything is sent.
 - `--total` prints the count **to stderr**, never into the JSON. Only on a single page does
   it ask the API to count: under `--all` fft prints the number it actually fetched, and — if
   the run was truncated — prints nothing at all, because then it cannot know the total.

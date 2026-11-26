@@ -6,6 +6,7 @@ import (
 	"maps"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -201,6 +202,9 @@ func buildQuery(op api.Operation, values map[string][]string, warn func(string, 
 			if err != nil {
 				return nil, err
 			}
+			if err := checkBounds(p, value); err != nil {
+				return nil, err
+			}
 			checked = append(checked, value)
 		}
 
@@ -247,6 +251,37 @@ func checkEnum(p api.Param, value string) (string, error) {
 	}
 	return "", exitcode.UsageError{Err: fmt.Errorf(
 		"unknown %s %q: want one of %s", p.Name, value, strings.Join(p.Enum, ", "))}
+}
+
+// checkBounds refuses a number outside the range the spec declares for it. The API
+// would answer 400 ("request.query.size should be <= 100") for exactly the same
+// value; saying so here costs no request and names the flag. A value that is not a
+// number is left to the API, which is the authority on what it parses.
+func checkBounds(p api.Param, value string) error {
+	if p.Min == 0 && p.Max == 0 {
+		return nil
+	}
+	n, err := strconv.ParseFloat(strings.TrimSpace(value), 64)
+	if err != nil {
+		return nil
+	}
+
+	switch {
+	case p.Max != 0 && n > float64(p.Max), p.Min != 0 && n < float64(p.Min):
+		return exitcode.UsageError{Err: fmt.Errorf("%s must be %s, not %s", p.Name, boundsText(p), value)}
+	}
+	return nil
+}
+
+func boundsText(p api.Param) string {
+	switch {
+	case p.Min != 0 && p.Max != 0:
+		return fmt.Sprintf("between %d and %d", p.Min, p.Max)
+	case p.Max != 0:
+		return fmt.Sprintf("at most %d", p.Max)
+	default:
+		return fmt.Sprintf("at least %d", p.Min)
+	}
 }
 
 // splitList flattens comma-separated values into the list they stand for.

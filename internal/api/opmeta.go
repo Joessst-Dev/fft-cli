@@ -79,6 +79,13 @@ type Param struct {
 	// Enum lists the values the API accepts, or is empty when it accepts any.
 	Enum []string `json:"enum,omitempty" yaml:"enum,omitempty"`
 
+	// Min and Max are the schema's `minimum` and `maximum` for a numeric parameter;
+	// 0 means the spec declares no such bound. A bound of exactly 0 is therefore not
+	// carried, which loses nothing: the only bounded parameters in the spec are page
+	// sizes, whose floor is 1.
+	Min int `json:"min,omitempty" yaml:"min,omitempty"`
+	Max int `json:"max,omitempty" yaml:"max,omitempty"`
+
 	// Description is the parameter's prose, HTML stripped.
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
@@ -111,6 +118,17 @@ type Operation struct {
 	// Params are the operation's parameters, sorted: path first, then query, then
 	// header, alphabetically within each.
 	Params []Param
+
+	// Paged says the operation is a GET list fft can walk with startAfterId: it has
+	// the startAfterId and size query parameters, and answers either a bare array or
+	// an envelope with exactly one array and a `total`. A list whose answer fft
+	// cannot read the entities out of is not Paged, so --all is never offered for one
+	// it could only get wrong.
+	Paged bool
+
+	// ItemsKey is the envelope field holding the entities of a [Paged] operation,
+	// and "" when the response is the array itself.
+	ItemsKey string
 
 	// HasBody says the operation takes a request body.
 	HasBody bool

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"iter"
 	"net/http"
+	"strconv"
 
 	"github.com/Joessst-Dev/fft-cli/internal/api"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
@@ -41,6 +42,8 @@ type ListOp[T any] struct {
 	Name string
 
 	// Items is the response field holding the entities: "interFacilityConnections".
+	// Empty means the response *is* the array of entities, which is what a few
+	// endpoints answer — and then there is no envelope, so no total to cross-check.
 	Items string
 
 	// Do issues one page. Every parameter but the paging pair — the facility whose
@@ -89,6 +92,36 @@ func RawID(raw json.RawMessage) (string, error) {
 		return "", fmt.Errorf("the API returned an entity with no id, so the next page cannot be addressed")
 	}
 	return entity.ID, nil
+}
+
+// RawListOp is a [ListOp] for an operation known only from the spec: base is the
+// request without its paging pair, and every page re-adds `size` and, after the
+// first, `startAfterId`. It is what lets a generated (Tier-2) list command page
+// through [ListAll] with the guarantees the curated ones have.
+//
+// base.Query must not already carry either parameter; the caller strips them.
+func RawListOp(c *Client, name, items string, base RawRequest) ListOp[json.RawMessage] {
+	return ListOp[json.RawMessage]{
+		Name:  name,
+		Items: items,
+		ID:    RawID,
+		Do: func(ctx context.Context, _ api.ClientInterface, after string, size int) (*http.Response, error) {
+			req := base
+			req.Query = append([]QueryParam(nil), base.Query...)
+			if size != 0 {
+				req.Query = append(req.Query, QueryParam{Name: "size", Values: []string{strconv.Itoa(size)}})
+			}
+			if after != "" {
+				req.Query = append(req.Query, QueryParam{Name: "startAfterId", Values: []string{after}})
+			}
+
+			target, err := req.URL(c.baseURL)
+			if err != nil {
+				return nil, err
+			}
+			return c.rawDoer(target, req)(ctx)
+		},
+	}
 }
 
 // List fetches one page. after is the id to start after — empty for the first page.
@@ -233,6 +266,13 @@ func ListAll[T any](ctx context.Context, c *Client, op ListOp[T], size int, opts
 // tomorrow cannot quietly become "the entities".
 func decodeListPage[T any](op ListOp[T], body []byte) (ListPage[T], error) {
 	var page ListPage[T]
+
+	if op.Items == "" {
+		if err := json.Unmarshal(body, &page.Items); err != nil {
+			return page, fmt.Errorf("%s: decode the result as a list: %w", op.Name, err)
+		}
+		return page, nil
+	}
 
 	var fields map[string]json.RawMessage
 	if err := json.Unmarshal(body, &fields); err != nil {
