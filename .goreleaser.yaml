@@ -211,6 +211,10 @@ docker_signs:
       - "${artifact}@${digest}"
       - "--yes"
 
+# A release's notes are the version's CHANGELOG.md section, which release.yml hands
+# over with `--release-notes`, and that flag replaces this changelog. This block only
+# writes the notes of a snapshot and of a dispatched re-run for a tag that predates
+# CHANGELOG.md.
 changelog:
   # Conventional commits, grouped. `sort: asc` keeps each group in commit order.
   use: github

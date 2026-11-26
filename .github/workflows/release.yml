@@ -1,18 +1,171 @@
 name: Release
 
+# Changesets decides *when* to release; GoReleaser decides *what* a release is.
+#
+# Every push to main runs `version`. While unreleased changesets are pending it
+# opens (or refreshes) the "Version packages" pull request, which bumps the
+# version in package.json and moves the changesets into CHANGELOG.md. Merging that
+# pull request lands a commit with no changesets left, so the next run tags
+# vX.Y.Z instead, and `goreleaser` builds and publishes that tag.
+#
+# A hand-pushed `v*` tag no longer releases anything. To re-run GoReleaser on a
+# tag that already exists (it failed after the tag was pushed, and "Re-run failed
+# jobs" on the original run is no longer an option), dispatch this workflow with
+# that tag.
 on:
   push:
-    tags:
-      - "v*"
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to (re)build and publish, e.g. v0.11.0"
+        required: true
+        type: string
 
 permissions:
   contents: read
 
+# Concurrency is per job, not per workflow. A group is not a queue: GitHub keeps one
+# pending run per group and cancels the older pending one when a newer one arrives.
+# A workflow-wide group would stay held for the whole GoReleaser run, long enough
+# for a burst of merges to drop the run that should have tagged a Version PR merge.
+# So versioning holds its own short group, and GoReleaser holds another.
+
 jobs:
-  release:
+  version:
+    name: Version PR or tag
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # Two concurrent runs would race on the Version PR branch. The window in which
+    # a pending run can be replaced is this job's ~1 minute, and if one is replaced
+    # anyway, the "Current version is tagged" step below fails the next run loudly
+    # instead of letting the version go untagged.
+    concurrency:
+      group: release-version
+      cancel-in-progress: false
+
+    # This job runs on every push to main, so it holds only what versioning needs.
+    # The signing identity, the registry grant and the tap/bucket PATs belong to
+    # `goreleaser`, which runs only when a release actually happens.
+    permissions:
+      contents: write # the version commit on the PR branch, and the vX.Y.Z tag
+      pull-requests: write # the "Version packages" pull request
+
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
+      tag: ${{ steps.tag.outputs.tag }}
+
+    steps:
+      # The "Version packages" pull request needs CI, and a pull request opened or
+      # pushed with GITHUB_TOKEN starts no workflows. A GitHub App token does. Set
+      # the repository variable RELEASE_APP_CLIENT_ID and the secret
+      # RELEASE_APP_KEY to use one; without them this falls back to GITHUB_TOKEN,
+      # and CI on that pull request has to be started by hand. The fallback also
+      # needs "Allow GitHub Actions to create and approve pull requests" in the
+      # repository settings, or opening the pull request fails (CONTRIBUTING.md).
+      - name: GitHub App token
+        id: app-token
+        if: vars.RELEASE_APP_CLIENT_ID != ''
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # The only dependency is @changesets/cli. No install scripts: nothing it
+      # needs runs one, and this job can push to the repository.
+      - run: npm ci --ignore-scripts
+
+      # The root package is private, so `changeset publish` publishes nothing to
+      # npm: it only creates the vX.Y.Z tag (privatePackages.tag in
+      # .changeset/config.json), which the action then pushes. It is a no-op while
+      # the current version is already tagged.
+      - name: Version PR or tag
+        id: changesets
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          github-token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
+          version-script: npm run version-packages
+          publish-script: npm run release
+          pr-title: "chore(release): version packages"
+          commit-message: "chore(release): version packages"
+          # GoReleaser creates the GitHub release, with the binaries attached. A
+          # release created here first would make its upload collide.
+          create-github-releases: false
+
+      # The tag name is rebuilt from the published version rather than read from
+      # git, so it is exactly the tag `changeset publish` made for a single-package
+      # repo: `v` + version.
+      - name: Release tag
+        id: tag
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          PUBLISHED: ${{ steps.changesets.outputs.published-packages }}
+        run: |
+          tag="v$(jq -r '.[0].version' <<<"$PUBLISHED")"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Tagged $tag" >> "$GITHUB_STEP_SUMMARY"
+
+      # The version on main is always tagged by the run for the commit that set it.
+      # If that run never happened (a newer pending run replaced it), the next run
+      # finds changesets pending, opens a Version PR instead of publishing, and the
+      # version would never be released. Nothing else would notice, so fail here
+      # and say how to release it. The version is read from the pushed commit, not
+      # the workspace: the action leaves the Version PR branch checked out.
+      - name: Current version is tagged
+        if: steps.changesets.outputs.published != 'true'
+        run: |
+          tag="v$(git show "$GITHUB_SHA:package.json" | jq -r .version)"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+            exit 0
+          fi
+          # The commit that set this version: the last one to change the top-level
+          # "version" line. Not just the last to touch package.json, which a
+          # Dependabot bump of @changesets/cli also does.
+          commit="$(git log -1 --format=%H -G'^  "version": ' "$GITHUB_SHA" -- package.json)"
+          echo "::error::$tag is on main but was never tagged, so it was never released. Its run was probably replaced while pending. To release it: git tag $tag $commit && git push origin $tag && gh workflow run release.yml -f tag=$tag"
+          exit 1
+
+  goreleaser:
     name: GoReleaser
+    needs: version
+    # `!cancelled()` because on a dispatch `version` is skipped, and a skipped
+    # dependency would otherwise skip this job too.
+    if: >-
+      !cancelled() && (
+        github.event_name == 'workflow_dispatch' ||
+        needs.version.outputs.published == 'true'
+      )
     runs-on: ubuntu-latest
     timeout-minutes: 30
+
+    # One GoReleaser at a time, for any tag. A release moves shared pointers (the
+    # `latest` image, the cask, the Scoop manifest), so two overlapping releases
+    # could finish out of order and leave them on the older version. Never
+    # cancelled: a cancelled GoReleaser can leave a half-uploaded release behind.
+    # It is a separate group from `version`, so it never holds up versioning.
+    #
+    # A group still keeps only one pending run. If a third tag arrives while one
+    # release runs and another waits, the waiting one is cancelled: the newest tag
+    # still wins, and the skipped tag shows a cancelled job and no GitHub release.
+    # To publish it, dispatch it, then dispatch the newest tag again so the shared
+    # pointers end on the newest.
+    concurrency:
+      group: release-goreleaser
+      cancel-in-progress: false
 
     permissions:
       # Create the GitHub Release and upload its artifacts.
@@ -24,12 +177,45 @@ jobs:
       # *this* repo's package registry — unlike the Homebrew tap, no PAT is needed.
       packages: write
 
+    env:
+      TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || needs.version.outputs.tag }}
+
     steps:
+      # A dispatch input is free text. Refuse anything that is not a version tag
+      # before it reaches a checkout ref or a GoReleaser flag.
+      - name: Check tag
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::not a release tag: '$TAG'"
+            exit 1
+          fi
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          # GoReleaser builds the changelog from the commits since the previous tag,
-          # so it needs the whole history, not just the tagged commit.
+          ref: refs/tags/${{ env.TAG }}
+          # GoReleaser finds the previous tag for the release footer's compare
+          # link, so it needs the whole history, not just the tagged commit.
           fetch-depth: 0
+
+      # The release notes are the version's CHANGELOG.md section, the text the
+      # changesets' authors wrote, not GoReleaser's list of commit subjects. A tag
+      # changesets made always has a section, so a missing one fails the release.
+      # Only a dispatch for an older tag, cut before CHANGELOG.md existed, falls
+      # back to GoReleaser's own changelog.
+      - name: Release notes
+        id: notes
+        run: |
+          notes="$RUNNER_TEMP/release-notes.md"
+          awk -v heading="## ${TAG#v}" '$0 == heading { found = 1; next } found && /^## / { exit } found' CHANGELOG.md \
+            | sed '/./,$!d' > "$notes"
+          if [[ -s "$notes" ]]; then
+            echo "flag=--release-notes=$notes" >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "::warning::CHANGELOG.md has no section for $TAG; using GoReleaser's changelog"
+          else
+            echo "::error::CHANGELOG.md has no section for $TAG"
+            exit 1
+          fi
 
       - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7
         with:
@@ -70,15 +256,14 @@ jobs:
         uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
         with:
           version: "v2.17.1"
-          args: release --clean
+          args: release --clean ${{ steps.notes.outputs.flag }}
         env:
-          # The tag that triggered this run — not whatever `git describe` happens to
-          # resolve to. Without this, a commit carrying two tags (v0.1.0 and the
-          # v0.1.0-rc1 it was cut from, say) is ambiguous: GoReleaser picked the rc,
-          # rebuilt the rc's artifacts, and died uploading them over the ones the rc
-          # release already had. The triggering ref is the only thing that is never
-          # ambiguous.
-          GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
+          # The tag being released, named outright rather than left to `git
+          # describe`. A commit carrying two tags (v0.1.0 and the v0.1.0-rc1 it was
+          # cut from, say) is ambiguous: GoReleaser picked the rc, rebuilt the rc's
+          # artifacts, and died uploading them over the ones the rc release already
+          # had.
+          GORELEASER_CURRENT_TAG: ${{ env.TAG }}
           # Creates the release in *this* repo.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Pushes the cask to Joessst-Dev/homebrew-tap. GITHUB_TOKEN cannot do this:
