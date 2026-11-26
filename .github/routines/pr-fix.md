@@ -16,12 +16,14 @@ routine when the prompt changes.
 > looks the review up. This routine consumes the signal by removing the label when it is done.
 
 Companion routine: [`pr-review`](./pr-review.md) files the review this one acts on and adds the
-`auto-review-fix` label to hand off. After you push, you hand back by re-arming the
-**`auto-review-recheck`** label, whose `labeled` event re-fires `pr-review` and closes the loop.
+`auto-review-fix` label to hand off. Removing that label when you are done is also your hand-back:
+its `unlabeled` event re-fires `pr-review`, which re-reviews the commit you pushed, closing the loop.
 
-> **Why a label, and not the push.** A push this routine makes does not deliver a `synchronize`
-> webhook to `pr-review` — the platform starts no run for it (seen on #311) — whereas label changes
-> a routine makes do fire. So the push alone would leave the fix unreviewed forever.
+> **Why the label removal, and not the push.** On #311, neither a push this routine made
+> (`synchronize`) nor a label a routine *added* (`labeled`) started a `pr-review` run, while every
+> label a routine *removed* (`unlabeled`) did. So the removal is the only hand-back that has been
+> seen to arrive; `pr-review` treats an `unlabeled` `auto-review-fix` on an unreviewed commit as its
+> signal.
 
 Prerequisite: the Claude GitHub App must cover `Joessst-Dev/fft-cli` and deliver `pull_request`
 events (as it does for `pr-review`). If this routine never fires, add fft-cli to the app
@@ -42,7 +44,8 @@ start with zero context; everything you need is below.
 GOAL: take the findings from the companion [`pr-review`](./pr-review.md) review that armed the
 `auto-review-fix` label and turn them into fixing commits on the PR branch. This is one half of a
 bounded review→fix loop:
-you fix, push, and re-arm `auto-review-recheck`, which re-fires `pr-review`; it re-reviews and either finds it clean and
+you fix, push, and remove the `auto-review-fix` label, whose `unlabeled` event re-fires `pr-review`;
+it re-reviews and either finds it clean and
 leaves the label off (a human then merges) or re-arms the label with more findings. **Never merge,
 never push to `main`.**
 
@@ -120,7 +123,7 @@ PATCH` is the edit tool; a second block corrupts the state machine). `pr-review`
    (`gh pr edit <n> --repo Joessst-Dev/fft-cli --add-label auto-review-stalled`); **remove**
    `auto-review-fix` so no further round can re-arm the loop
    (`gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix`); post a comment
-   tagging the PR author; and **push nothing and go no further** — do not fall through to steps 5-9.
+   tagging the PR author; and **push nothing and go no further** — do not fall through to steps 5-8.
    A human decides, never this routine.
 
    Then `make fmt`, confirm `make generate` is a **no-op** (any
@@ -132,13 +135,16 @@ PATCH` is the edit tool; a second block corrupts the state machine). `pr-review`
    collect all such items under a **"Needs human follow-up"** list.
 7. **Commit + push:** conventional-commit message (e.g. `fix: address automated review findings`),
    **no attribution**, push to the PR branch. Your push does **not** wake `pr-review` (the
-   platform delivers no `synchronize` for it); step 9 does. Reply to each addressed inline review
-   comment stating what you changed. Then
+   platform delivers no `synchronize` for it); removing `auto-review-fix` below does, so that
+   removal must come **last** — after the push and after the control-comment rewrite, so the run
+   it starts sees your commit and your `last_fixed_review_id`. Reply to each addressed inline
+   review comment stating what you changed. Then
    **re-read the control comment** and compare its current `round`/`last_reviewed_sha` against
    `<gate_round>`/`<gate_sha>` from step 1:
    - **unchanged** — a newer round hasn't started; rewrite the block carrying `round` and
      `last_reviewed_sha` forward **unchanged** and updating only `last_fixed_review_id` to `<id>`,
-     and **remove the handoff label** so the next round's re-add can wake you again:
+     and **then remove the handoff label** — this both lets the next round's re-add wake you
+     again and hands back to `pr-review` for the commit you pushed:
      `gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix`.
    - **advanced** — a `pr-review` run (one that started independently while you were fixing,
      e.g. on a human's push) already re-armed the label with its own findings; rewrite
@@ -148,19 +154,10 @@ PATCH` is the edit tool; a second block corrupts the state machine). `pr-review`
 8. **Nothing to fix mechanically** — if every finding is a human-follow-up item, push NOTHING (no
    empty commit): post one comment with the "Needs human follow-up" list, then apply the same
    re-check as step 7 (current control comment vs. `<gate_round>`/`<gate_sha>`) to decide whether to
-   rewrite-and-remove or rewrite-and-leave the `auto-review-fix` label, then stop — **skip step 9**:
-   with nothing pushed there is nothing new to review, and the loop ends cleanly once the label
-   comes off — or, if a concurrent round already re-armed it, that round's own `pr-fix` wake
-   handles it.
-9. **Hand back to the reviewer — only after a push in step 7, and only as your very last action**,
-   after the control comment is rewritten (so `pr-review` reads your `last_fixed_review_id` and
-   preserves it rather than clobbering it). Create the label idempotently, then remove-then-add it,
-   since adding a label that is already present emits no event:
-   `gh label create auto-review-recheck --color C5DEF5 --description "pr-fix signals pr-review to re-review the fix it pushed" || true`,
-   `gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-recheck || true`, then
-   `gh pr edit <n> --repo Joessst-Dev/fft-cli --add-label auto-review-recheck`. Do this in both
-   step-7 branches: `pr-review` skips a commit it has already reviewed, so a redundant wake is
-   harmless, while a missing one leaves your fix unreviewed.
+   rewrite-and-remove or rewrite-and-leave the `auto-review-fix` label, then stop. The removal
+   still re-fires `pr-review`, but with nothing pushed the head is a commit it already reviewed,
+   so it exits at its gate and the loop ends cleanly — or, if a concurrent round already re-armed
+   the label, that round's own `pr-fix` wake handles it.
 
 **Guardrails:** act only on the companion reviewer's reviews (a `CHANGES_REQUESTED` or, on a
 self-authored PR, a `COMMENTED` one carrying findings), and only when its `auto-review-fix` label
@@ -172,8 +169,7 @@ run already re-armed the label with its own findings while you were fixing; remo
 clear that newer signal rather than the stale one you meant to clear, and nothing re-adds it
 afterward. Detect the actual state instead of racing the clock — do not rely on doing the removal
 "promptly". Never weaken a guard test. **Never merge, never push to `main`, never remove the
-`auto-review` label** (that is the opt-in; only `auto-review-fix` and `auto-review-recheck` are
-yours to remove). After every push, end by re-arming `auto-review-recheck` (step 9) — without it the
-loop never reaches its next round. Finish by
+`auto-review` label** (that is the opt-in; only `auto-review-fix` is yours to remove). After a
+push, removing `auto-review-fix` is what gets your commit reviewed — make it your last action. Finish by
 summarizing: the PR, the findings fixed vs. deferred to humans, and the SHA you pushed (or why you
 pushed nothing).

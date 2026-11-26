@@ -2,13 +2,14 @@
 
 Source of truth for the **PR reviewer** cloud routine (registered at
 https://claude.ai/code/routines). Trigger: **GitHub `pull_request` webhook** (no cron) via the
-Claude GitHub App. Actions: `opened`, `synchronize`, `reopened`, `ready_for_review`, `labeled`.
+Claude GitHub App. Actions: `opened`, `synchronize`, `reopened`, `ready_for_review`, `labeled`,
+`unlabeled`.
 Environment: Default. Edit this file and re-register the routine when the prompt changes.
 
 Companion routine: [`pr-fix`](./pr-fix.md) picks up the review this one files and pushes fixes, then
-re-fires this routine by re-arming the **`auto-review-recheck`** label, closing the loop. Its push
-alone would not: the platform delivers no `synchronize` run for a push a routine makes, while a
-label change a routine makes does fire (seen on #311). The handoff is a label: when you have findings you add
+re-fires this routine by **removing** the `auto-review-fix` label, closing the loop. On #311 neither
+a push a routine made (`synchronize`) nor a label a routine added (`labeled`) started a run of this
+routine, while every label a routine removed (`unlabeled`) did — so that removal is the hand-back. The handoff is a label: when you have findings you add
 **`auto-review-fix`**, whose `labeled` event is the only trigger the routines platform gives
 `pr-fix` (it exposes neither `pull_request_review` nor a usable `review_requested`). The label —
 not the review verdict — is the signal, so it works even when GitHub limits you to a `COMMENT`
@@ -33,7 +34,7 @@ control comment, and the `auto-review*` labels. Never commit, never push, never 
 push to `main`.**
 
 This is one half of a bounded review→fix loop. You review; the companion [`pr-fix`](./pr-fix.md)
-routine fixes the findings, pushes, and re-fires you by re-arming the `auto-review-recheck` label
+routine fixes the findings, pushes, and re-fires you by removing the `auto-review-fix` label
 (its push alone does not reach you). **The loop is driven by the
 `auto-review-fix` label, not by the review verdict** — you arm the label when you have findings and
 leave it off when you don't. That decoupling is deliberate: this routine authenticates as a GitHub
@@ -68,12 +69,12 @@ that one from now on and delete the rest
    that PR. These checks make the run idempotent — webhooks retry and re-fire on every push.
    Exit early (do nothing, report why) unless ALL hold:
    - the event action is one of `opened`, `synchronize`, `reopened`, `ready_for_review`,
-     `labeled` (ignore closed/edited/etc.);
+     `labeled`, or `unlabeled` (ignore closed/edited/etc.);
    - if the action is `labeled`, the label just added is **not** `auto-review-fix` — that label is
-     your handoff signal to `pr-fix`, not a trigger for yourself. This explicit check is what
-     actually prevents self-retriggering: `last_reviewed_sha` is only persisted in step 7, after
-     you arm the label in step 5, so a same-SHA `labeled` event from your own hand-off could reach
-     step 1 before that write lands and slip past the head-SHA check below;
+     your handoff signal to `pr-fix`, not a trigger for yourself;
+   - if the action is `unlabeled`, the label just removed **is** `auto-review-fix` — that removal is
+     `pr-fix` handing back after it fixed (its push does not reach you). Any other `unlabeled`
+     is not a signal. If `pr-fix` pushed nothing, the head-SHA check below makes this a no-op;
    - `gh pr view <n> --repo Joessst-Dev/fft-cli --json state,isDraft,labels,headRefOid,isCrossRepository` shows
      state **OPEN** and `isDraft` **false**;
    - `isCrossRepository` is **false** — the PR's head branch lives in this repo, not a
@@ -87,10 +88,8 @@ that one from now on and delete the rest
 2. Ensure the labels exist (idempotent):
    `gh label create auto-review --color 0E8A16 --description "Opt this PR into the automated review→fix loop" || true`,
    `gh label create auto-review-stalled --color B60205 --description "Automated review loop hit its round bound; needs a human" || true`,
-   the handoff label
-   `gh label create auto-review-fix --color FBCA04 --description "Reviewer signals pr-fix to address the changes-requested review" || true`,
-   and the hand-back label
-   `gh label create auto-review-recheck --color C5DEF5 --description "pr-fix signals pr-review to re-review the fix it pushed" || true`.
+   and the handoff label
+   `gh label create auto-review-fix --color FBCA04 --description "Reviewer signals pr-fix to address the changes-requested review" || true`.
 3. Read the change: `gh pr view <n> --json title,body,author,baseRefName,headRefOid`,
    `gh pr diff <n>`, and the current check status `gh pr checks <n>` (so your summary can note
    whether the required CI checks — test, no-drift, lint, govulncheck, CodeQL — are green).
@@ -125,18 +124,12 @@ that one from now on and delete the rest
    allowed on your own PR. Otherwise use `REQUEST_CHANGES`/`APPROVE`. The event is cosmetic; the
    **label** below is what actually drives the loop, so a `COMMENT` verdict costs the loop nothing.
    - **Findings present** → submit the review (event per above), the summary grouping findings by
-     severity and stating what must change. Then increment `round` in the control comment, and
-     **hand off to the fixer** by (re-)arming the label — this is the handoff, whatever the verdict
-     was. Adding a label that is already present emits no event, so remove then add, which always
-     produces the `labeled` event that wakes `pr-fix`:
-     `gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix || true` then
-     `gh pr edit <n> --repo Joessst-Dev/fft-cli --add-label auto-review-fix`. Without that event the
-     fixer never runs. (Your own `labeled` trigger re-fires on the add and exits at step 1.)
+     severity and stating what must change. Increment `round`; step 7 persists it and then hands
+     off to the fixer, whatever the verdict was.
    - **No findings** → submit the review (event per above; `COMMENT` or `APPROVE`). The summary says
      all automated findings are resolved and the PR is ready for a human to merge; note the CI check
-     status. **Remove** the handoff label so it is not armed
-     (`gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix || true`). **Do not
-     merge.** The label left off — not the verdict — is how the loop converges.
+     status. Step 7 takes the handoff label off. **Do not merge.** The label left off — not the
+     verdict — is how the loop converges.
 6. **Round-bound escalation.** If step 1 admitted the PR but you still have findings and arming the
    label would push `round` **past 6**, do NOT re-arm `auto-review-fix` (that would wake the fixer
    again and never terminate). Instead: post the review with its findings as usual (event per step 5
@@ -145,16 +138,23 @@ that one from now on and delete the rest
    label, remove the `auto-review-fix` handoff label so the fixer cannot re-arm
    (`gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix || true`), and stop. A
    human takes it from here.
-7. Update the sticky control comment: set `last_reviewed_sha` to the head SHA and persist the
-   current `round`. Then clear the hand-back label so it does not linger
-   (`gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-recheck || true`; its
-   `unlabeled` event re-fires you and exits at step 1). Leave your working tree clean; you made no
-   code changes.
+7. **Persist first, then move the label — in that order.** Removing `auto-review-fix` re-fires you
+   (`unlabeled`), and that run must find this commit already recorded, or it would review it again.
+   a. Update the sticky control comment: set `last_reviewed_sha` to the head SHA and persist the
+      current `round`.
+   b. Then the handoff label. **Findings present** → (re-)arm it. Adding a label that is already
+      present emits no event, so remove then add, which always produces the `labeled` event that
+      wakes `pr-fix`: `gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix || true`
+      then `gh pr edit <n> --repo Joessst-Dev/fft-cli --add-label auto-review-fix`. Without that
+      event the fixer never runs. **No findings** → remove it
+      (`gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix || true`).
+   Leave your working tree clean; you made no code changes.
 
 **Guardrails:** one review per head SHA (idempotent — skip if `last_reviewed_sha` already matches).
 One sticky control comment; preserve the fixer's `last_fixed_review_id` when you rewrite it. When
 you have findings, re-arm the `auto-review-fix` handoff label (remove-then-add) — that event, not
-the review verdict, is the only thing that wakes `pr-fix`; when you have none, remove it. Choose the
+the review verdict, is the only thing that wakes `pr-fix`; when you have none, remove it. Either
+way, persist the control comment **before** touching that label (step 7). Choose the
 review event defensively — `COMMENT` on a PR your own account authored, since GitHub rejects
 self-`APPROVE`/`REQUEST_CHANGES`. At most 6 rounds, then escalate via `auto-review-stalled`.
 **Never merge, never push, no writes to the repo's code of any kind.** Finish by summarizing: the
