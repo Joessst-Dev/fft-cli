@@ -64,6 +64,12 @@ func renderOperation(b *bytes.Buffer, op operation) {
 		fmt.Fprintf(b, "\t\t},\n")
 	}
 
+	if op.Paged {
+		fmt.Fprintf(b, "\t\tPaged: true,\n")
+		if op.ItemsKey != "" {
+			fmt.Fprintf(b, "\t\tItemsKey: %s,\n", quote(op.ItemsKey))
+		}
+	}
 	if op.HasBody {
 		fmt.Fprintf(b, "\t\tHasBody: true,\n")
 	}
@@ -97,6 +103,12 @@ func renderParam(b *bytes.Buffer, p param) {
 	// status=A&status=B and status=A,B, and it means nothing for a scalar.
 	if p.Type == "array" && p.Explode {
 		fmt.Fprintf(b, ", Explode: true")
+	}
+	if p.Min != 0 {
+		fmt.Fprintf(b, ", Min: %d", p.Min)
+	}
+	if p.Max != 0 {
+		fmt.Fprintf(b, ", Max: %d", p.Max)
 	}
 	if len(p.Enum) > 0 {
 		fmt.Fprintf(b, ", Enum: ")

@@ -34,6 +34,8 @@ type operation struct {
 	SampleBody     string
 	SampleResponse string
 	Deprecated     bool
+	Paged          bool
+	ItemsKey       string
 }
 
 type param struct {
@@ -44,6 +46,7 @@ type param struct {
 	Item        string
 	Explode     bool
 	Enum        []string
+	Min, Max    int
 	Description string
 }
 
@@ -99,6 +102,8 @@ func load(path string) ([]operation, error) {
 				return nil, fmt.Errorf("%s: synthesize the response body: %w", src.OperationID, err)
 			}
 
+			paged, itemsKey := pagedList(method, params, src.Responses)
+
 			ops = append(ops, operation{
 				ID:             src.OperationID,
 				Method:         method,
@@ -113,6 +118,8 @@ func load(path string) ([]operation, error) {
 				SampleBody:     sample,
 				SampleResponse: response,
 				Deprecated:     src.Deprecated,
+				Paged:          paged,
+				ItemsKey:       itemsKey,
 			})
 		}
 	}
@@ -175,6 +182,7 @@ func loadParams(refs openapi3.Parameters) ([]param, error) {
 		if s := src.Schema; s != nil && s.Value != nil {
 			p.Type = jsonType(s.Value)
 			p.Enum = enumStrings(s.Value.Enum)
+			p.Min, p.Max = bounds(s.Value)
 
 			if p.Type == "array" && s.Value.Items != nil && s.Value.Items.Value != nil {
 				p.Item = jsonType(s.Value.Items.Value)
@@ -303,4 +311,77 @@ func prose(s string) string {
 		"&amp;", "&", "&lt;", "<", "&gt;", ">", "&quot;", `"`, "&#39;", "'", "&nbsp;", " ",
 	).Replace(s)
 	return strings.TrimSpace(space.ReplaceAllString(s, " "))
+}
+
+// bounds reads a numeric schema's minimum and maximum as the whole numbers a flag
+// can be checked against. A bound that is not a whole number is dropped rather than
+// rounded: a check fft cannot state exactly would refuse a value the API accepts.
+func bounds(s *openapi3.Schema) (lo, hi int) {
+	whole := func(f *float64) int {
+		if f == nil || *f != float64(int(*f)) {
+			return 0
+		}
+		return int(*f)
+	}
+	return whole(s.Min), whole(s.Max)
+}
+
+// pagedList recognises the GET lists fft can page with startAfterId, and names the
+// field their entities are in.
+//
+// Two response shapes qualify: a bare array (GET /api/categories), and an object
+// with exactly one array property plus `total` ({"articles": [...], "total": n}).
+// The `total` is required for the envelope because the paginator cross-checks it —
+// without it a server that caps `size` would look like the end of the list. Anything
+// else (allOf responses, several arrays, no count) is left unpaged: offering --all
+// for a shape fft has to guess at is how a wrong answer looks like a right one.
+func pagedList(method string, params []param, responses *openapi3.Responses) (bool, string) {
+	if method != "GET" || responses == nil {
+		return false, ""
+	}
+
+	var after, size bool
+	for _, p := range params {
+		if p.In != openapi3.ParameterInQuery {
+			continue
+		}
+		switch {
+		case p.Name == "startAfterId" && p.Type == "string":
+			after = true
+		case p.Name == "size" && (p.Type == "integer" || p.Type == "number"):
+			size = true
+		}
+	}
+	if !after || !size {
+		return false, ""
+	}
+
+	ok := responses.Value("200")
+	if ok == nil || ok.Value == nil {
+		return false, ""
+	}
+	media := ok.Value.Content.Get(contentTypeJSON)
+	if media == nil || media.Schema == nil || media.Schema.Value == nil {
+		return false, ""
+	}
+	schema := media.Schema.Value
+
+	if schema.Type != nil && schema.Type.Is("array") {
+		return true, ""
+	}
+
+	var key string
+	for name, prop := range schema.Properties {
+		if prop.Value == nil || prop.Value.Type == nil || !prop.Value.Type.Is("array") {
+			continue
+		}
+		if key != "" {
+			return false, ""
+		}
+		key = name
+	}
+	if key == "" || schema.Properties["total"] == nil {
+		return false, ""
+	}
+	return true, key
 }

@@ -158,6 +158,61 @@ paths:
         '201':
           description: created
 
+  /api/widgets:
+    get:
+      operationId: getWidgets
+      summary: List widgets
+      tags: [Things (Core)]
+      parameters:
+        - {in: query, name: size, schema: {type: integer, minimum: 1, maximum: 100}}
+        - {in: query, name: startAfterId, schema: {type: string}}
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  widgets: {type: array, items: {type: object}}
+                  total: {type: integer}
+
+  /api/gadgets:
+    get:
+      operationId: getGadgets
+      summary: List gadgets
+      tags: [Things (Core)]
+      parameters:
+        - {in: query, name: size, schema: {type: integer}}
+        - {in: query, name: startAfterId, schema: {type: string}}
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {type: object}
+
+  /api/doodads:
+    get:
+      operationId: getDoodads
+      summary: List doodads, in two arrays and with no total
+      tags: [Things (Core)]
+      parameters:
+        - {in: query, name: size, schema: {type: integer}}
+        - {in: query, name: startAfterId, schema: {type: string}}
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  doodads: {type: array, items: {type: object}}
+                  extras: {type: array, items: {type: object}}
+
 components:
   schemas:
     Named:

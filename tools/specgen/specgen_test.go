@@ -21,6 +21,38 @@ var _ = Describe("specgen", func() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 
+	Describe("reading a paged list", func() {
+		It("carries the envelope key of an items-and-total response", func() {
+			op := find(ops, "getWidgets")
+
+			Expect(op.Paged).To(BeTrue())
+			Expect(op.ItemsKey).To(Equal("widgets"))
+		})
+
+		It("treats a bare array as paged with no envelope key", func() {
+			op := find(ops, "getGadgets")
+
+			Expect(op.Paged).To(BeTrue())
+			Expect(op.ItemsKey).To(BeEmpty())
+		})
+
+		It("does not offer paging for an envelope it would have to guess at", func() {
+			Expect(find(ops, "getDoodads").Paged).To(BeFalse())
+		})
+
+		It("does not offer paging for an operation without the startAfterId pair", func() {
+			Expect(find(ops, "queryThings").Paged).To(BeFalse())
+		})
+
+		It("carries a parameter's declared minimum and maximum", func() {
+			size := paramOf(find(ops, "getWidgets"), "query", "size")
+
+			Expect(size.Min).To(Equal(1))
+			Expect(size.Max).To(Equal(100))
+			Expect(paramOf(find(ops, "getGadgets"), "query", "size").Max).To(BeZero())
+		})
+	})
+
 	Describe("reading an operation", func() {
 		It("carries the method, the path template and the tags", func() {
 			op := find(ops, "getThing")
@@ -68,7 +100,7 @@ var _ = Describe("specgen", func() {
 			for _, op := range ops {
 				ids = append(ids, op.ID)
 			}
-			Expect(ids).To(Equal([]string{"addNode", "addShape", "addThing", "getThing", "queryThings"}))
+			Expect(ids).To(Equal([]string{"addNode", "addShape", "addThing", "getDoodads", "getGadgets", "getThing", "getWidgets", "queryThings"}))
 		})
 	})
 

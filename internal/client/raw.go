@@ -183,7 +183,12 @@ func (c *Client) DoRaw(ctx context.Context, op string, req RawRequest) (*Result,
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return c.Do(ctx, op, func(ctx context.Context) (*http.Response, error) {
+	return c.Do(ctx, op, c.rawDoer(target, req))
+}
+
+// rawDoer is the one attempt [Client.Do] may repeat: the request, built afresh.
+func (c *Client) rawDoer(target string, req RawRequest) Doer {
+	return func(ctx context.Context) (*http.Response, error) {
 		// A fresh body reader on every attempt. Do may call this twice, and a Reader
 		// the first attempt consumed would send the second one an empty body — which
 		// for a PUT is a request that erases the entity it meant to update.
@@ -206,5 +211,5 @@ func (c *Client) DoRaw(ctx context.Context, op string, req RawRequest) (*Result,
 		}
 
 		return c.hc.Do(r)
-	})
+	}
 }
