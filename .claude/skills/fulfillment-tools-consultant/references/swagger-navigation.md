@@ -1,7 +1,7 @@
 # Navigating `api/openapi/fft.api.swagger.yaml`
 
-The spec is vendored from upstream under a renamed file, regenerated without notice, and roughly
-99,000 lines long. `info.version` is `VERSIONLESS`, so nothing tells you which revision you hold
+The spec is vendored from upstream under a renamed file, regenerated without notice, and over
+100,000 lines long. `info.version` is `VERSIONLESS`, so nothing tells you which revision you hold
 except the bytes. Line numbers move on every re-vendor: grep, then `Read` with `offset`/`limit`.
 
 ## Recipes

@@ -18,7 +18,7 @@ mechanical after consulting it.
 ## Sources of truth — in priority order
 
 1. **`api/openapi/fft.api.swagger.yaml`** — the vendored, versionless OpenAPI spec for every
-   endpoint (~99,000 lines). **Never read it end to end.** Navigate it surgically; the recipes are in
+   endpoint (~100,000 lines, and growing with each sync). **Never read it end to end.** Navigate it surgically; the recipes are in
    [references/swagger-navigation.md](references/swagger-navigation.md):
    - `grep -n "^  /api/pickjobs" api/openapi/fft.api.swagger.yaml` to find a path block, then `Read`
      with `offset`/`limit` around the hit.
