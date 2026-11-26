@@ -120,7 +120,7 @@ PATCH` is the edit tool; a second block corrupts the state machine). `pr-review`
    (`gh pr edit <n> --repo Joessst-Dev/fft-cli --add-label auto-review-stalled`); **remove**
    `auto-review-fix` so no further round can re-arm the loop
    (`gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix`); post a comment
-   tagging the PR author; and **push nothing and go no further** — do not fall through to steps 5-8.
+   tagging the PR author; and **push nothing and go no further** — do not fall through to steps 5-9.
    A human decides, never this routine.
 
    Then `make fmt`, confirm `make generate` is a **no-op** (any
