@@ -15,7 +15,7 @@ and the wording is not.
 | 2 | bad flags or arguments | **your** mistake, not the API's. Re-read `--help`. Do not retry |
 | 3 | no active project, or the config is unusable | `fft project list`. Ask the user; do not invent a project |
 | 4 | authentication failed | the credentials are wrong or expired. Tell the user. Do not re-prompt for a password |
-| 5 | authenticated, but not permitted | the user's role lacks the permission. `fft api describe <op>` names it; `fft auth whoami` says what they have |
+| 5 | authenticated, but not permitted | usually the user's role lacks the permission: `fft api describe <op>` names it, `fft auth whoami` says what they have. **Unless** the message starts `a proxy or gateway between fft and the tenant refused the request` — then the tenant never saw it, and the fix is the proxy (`HTTPS_PROXY`/`NO_PROXY`), not the account |
 | 6 | not found | the id does not exist. Check it before assuming the endpoint is wrong |
 | 7 | version conflict (409) | the object changed under you. **Re-read it, re-apply, re-send.** Never retry the same body |
 | 8 | partial bulk write | some items landed. Read the per-item results; re-send only the `FAILED` ones, never the `UNKNOWN` ones |
@@ -87,7 +87,10 @@ fft project current
 - `fft ping` needs no credentials. It tells "the tenant is down" (exit 9) apart from "my
   token is wrong" (exit 4).
 - `fft auth whoami` prints the permissions the current credentials actually have. It is the
-  answer to any exit 5.
+  answer to an exit 5 about permissions — but not to an exit 5 (or a 401) whose message says a
+  proxy or gateway refused the request, nor to an exit 1 saying the proxy refused to connect:
+  the tenant never answered those, so the account's permissions are not the cause. Check
+  `HTTPS_PROXY`/`NO_PROXY` and ask whoever runs the proxy.
 - `--debug` on any command dumps the request and the response to stderr, secrets redacted.
 
 ## A 400 that says nothing useful
