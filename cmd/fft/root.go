@@ -35,8 +35,9 @@ permission it needs, and shows a sample request body.
 
 Configuration lives in ~/.config/fft/config.yaml (mode 0600); credentials live in
 your OS keychain. In CI, set FFT_BASE_URL, FFT_FIREBASE_API_KEY, FFT_EMAIL and
-FFT_PASSWORD (or FFT_ID_TOKEN): fft then runs entirely from the environment and
-touches neither the config file nor the keychain.
+FFT_PASSWORD — or, to use a token minted elsewhere, just FFT_BASE_URL and
+FFT_ID_TOKEN: fft then runs entirely from the environment and touches neither the
+config file nor the keychain.
 
 Every global flag can also be given as an environment variable: --output becomes
 FFT_OUTPUT, --project becomes FFT_PROJECT, and so on.`

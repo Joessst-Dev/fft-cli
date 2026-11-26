@@ -78,6 +78,69 @@ var _ = Describe("FromEnv", func() {
 		})
 	})
 
+	When("only the base URL and an id token are set", func() {
+		// A static token is never refreshed, so the Firebase key and the email are
+		// not part of what it takes to use one.
+		BeforeEach(func() {
+			env = map[string]string{
+				config.EnvBaseURL: "https://acme.api.fulfillmenttools.com",
+				config.EnvIDToken: "eyJhbGciOi...",
+			}
+		})
+
+		It("synthesizes an ephemeral project with no key and no email", func() {
+			p, ok := fromEnv()
+
+			Expect(ok).To(BeTrue())
+			Expect(p.Ephemeral).To(BeTrue())
+			Expect(p.BaseURL).To(Equal("https://acme.api.fulfillmenttools.com"))
+			Expect(p.FirebaseAPIKey).To(BeEmpty())
+			Expect(p.Email).To(BeEmpty())
+		})
+
+		It("still refuses a base URL that would send the token in the clear", func() {
+			env[config.EnvBaseURL] = "http://acme.api.fulfillmenttools.com"
+
+			_, _, err := config.FromEnv(lookup)
+
+			Expect(err).To(HaveOccurred())
+		})
+
+		It("is ignored without a base URL", func() {
+			delete(env, config.EnvBaseURL)
+
+			_, ok := fromEnv()
+
+			Expect(ok).To(BeFalse())
+		})
+	})
+
+	When("a password is set beside an id token", func() {
+		// The password path keeps its all-or-nothing rule: a token must not mask a
+		// sign-in that was half given.
+		BeforeEach(func() {
+			env = map[string]string{
+				config.EnvBaseURL:  "https://acme.api.fulfillmenttools.com",
+				config.EnvPassword: "s3cret",
+				config.EnvIDToken:  "eyJhbGciOi...",
+			}
+		})
+
+		It("is ignored while the API key and email are missing", func() {
+			_, ok := fromEnv()
+
+			Expect(ok).To(BeFalse())
+		})
+
+		It("is ignored while only the email is missing", func() {
+			env[config.EnvFirebaseAPIKey] = "AIzaSyExample"
+
+			_, ok := fromEnv()
+
+			Expect(ok).To(BeFalse())
+		})
+	})
+
 	DescribeTable("an incomplete set is ignored entirely, rather than half-honoured",
 		// Falling back to the config file when one variable is missing is how a CI
 		// job ends up running against the wrong tenant. Better to have no project
