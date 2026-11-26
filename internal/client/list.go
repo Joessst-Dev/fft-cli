@@ -138,7 +138,7 @@ func ListAll[T any](ctx context.Context, c *Client, op ListOp[T], size int, opts
 		for {
 			page, err := List(ctx, c, op, after, size)
 			if err != nil {
-				yield(zero, walkError(op.Name, err, pages, seen))
+				yield(zero, walkError(ctx, op.Name, err, pages, seen))
 				return
 			}
 			pages++

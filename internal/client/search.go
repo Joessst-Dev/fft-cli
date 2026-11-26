@@ -172,7 +172,7 @@ func SearchAll[Q, S, T any](ctx context.Context, c *Client, op Op[T], payload Se
 		for {
 			page, err := Search(ctx, c, op, payload)
 			if err != nil {
-				yield(zero, walkError(op.Name, err, pages, seen))
+				yield(zero, walkError(ctx, op.Name, err, pages, seen))
 				return
 			}
 			pages++
@@ -218,13 +218,26 @@ type WalkTimeoutError struct {
 	Op    string
 	Pages int
 	Items int
+	// Err is what the walk's request returned, kept so the cause is never thrown
+	// away. It is the walk context's own error, so it matches DeadlineExceeded.
+	Err error
 }
 
 func (e *WalkTimeoutError) Error() string {
-	return fmt.Sprintf("%s: --timeout expired after %d pages (%d items) of an --all walk", e.Op, e.Pages, e.Items)
+	return fmt.Sprintf("%s: --timeout expired after %s (%s) of an --all walk",
+		e.Op, count(e.Pages, "page"), count(e.Items, "item"))
 }
 
-func (e *WalkTimeoutError) Unwrap() error { return context.DeadlineExceeded }
+func (e *WalkTimeoutError) Unwrap() error { return e.Err }
+
+// count renders "1 page", "2 pages": the message is read by a person, and
+// "after 1 pages" is exactly the case a walk cut off on page two prints.
+func count(n int, noun string) string {
+	if n == 1 {
+		return fmt.Sprintf("1 %s", noun)
+	}
+	return fmt.Sprintf("%d %ss", n, noun)
+}
 
 // Hint tells the user how to finish the walk.
 func (e *WalkTimeoutError) Hint() string {
@@ -233,9 +246,14 @@ func (e *WalkTimeoutError) Hint() string {
 
 // walkError names a deadline that cut an --all walk short; any other error passes
 // through untouched, because only the deadline is the user's to fix with a flag.
-func walkError(op string, err error, pages, items int) error {
-	if errors.Is(err, context.DeadlineExceeded) {
-		return &WalkTimeoutError{Op: op, Pages: pages, Items: items}
+//
+// It asks the walk's own context, not the error: the transport's per-request
+// header timeout also matches [context.DeadlineExceeded] through errors.Is while
+// the walk's context is still live, and blaming --timeout for that — then
+// advising a larger one — would name the wrong cause and discard the real one.
+func walkError(ctx context.Context, op string, err error, pages, items int) error {
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		return &WalkTimeoutError{Op: op, Pages: pages, Items: items, Err: err}
 	}
 	return err
 }

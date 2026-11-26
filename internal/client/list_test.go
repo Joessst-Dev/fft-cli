@@ -245,6 +245,21 @@ var _ = Describe("listing by startAfterId", func() {
 			Expect(timedOut.Items).To(Equal(2))
 			Expect(timedOut.Hint()).To(ContainSubstring("--timeout"))
 			Expect(errors.Is(err, context.DeadlineExceeded)).To(BeTrue())
+			Expect(err).To(MatchError(ContainSubstring("after 1 page (2 items)")))
+		})
+
+		// The transport's header timeout also matches DeadlineExceeded. Blaming --timeout
+		// for it would advise raising a flag that never expired and hide the real cause.
+		It("does not blame --timeout for a page that stalled while the walk's deadline was live", func() {
+			t := newTenant(func(w http.ResponseWriter, _ *http.Request, _ int) {
+				fmt.Fprint(w, page([]string{"c1", "c2"}, 99))
+			})
+
+			_, err := collect(client.ListAll(ctx, stalledClient(t), connections("BER-01", ""), 2))
+
+			var timedOut *client.WalkTimeoutError
+			Expect(errors.As(err, &timedOut)).To(BeFalse())
+			Expect(err).To(MatchError(ContainSubstring("timeout awaiting response headers")))
 		})
 
 		// An id that does not advance would ask for the same page until the user gives
