@@ -22,10 +22,10 @@ Upstream publishes the canonical spec at
 **Run entirely in your throwaway checkout. Never commit, push, or open a PR. Your only side effect is
 creating or updating one GitHub issue.**
 
-This repo ships project agents (`.claude/agents/`) and skills (`.claude/skills/`) in your checkout — use them
-via the Task and Skill tools. In particular, when you suggest a read-vs-write classification for a new POST
-(step 7), consult the **`fulfillment-tools-consultant`** agent to check the endpoint's real semantics against
-the fulfillmenttools API reference instead of guessing from its name or shape.
+This repo ships project skills (`.claude/skills/`) in your checkout — load them with the Skill tool. In
+particular, when you suggest a read-vs-write classification for a new POST (step 7), load the
+**`fulfillment-tools-consultant`** skill to check the endpoint's real semantics against the fulfillmenttools API
+reference instead of guessing from its name or shape.
 
 1. Ensure you're on the latest `main`.
 2. Download upstream:
@@ -52,7 +52,7 @@ the fulfillmenttools API reference instead of guessing from its name or shape.
    - one-paragraph summary of what moved;
    - the added / removed / changed operation lists;
    - a **"New POSTs to classify"** section listing each new POST's operationId, with a *suggested*
-     read-vs-write call (informed by the `fulfillment-tools-consultant` agent, per above) and the rule:
+     read-vs-write call (informed by the `fulfillment-tools-consultant` skill, per above) and the rule:
      "a POST is a write unless it's a pure search / promise-calculator / simulate — classify, don't guess";
    - the census-count delta for the pinned total in `access_test.go`;
    - which `.gen.go` files changed and whether a typed tag was affected;

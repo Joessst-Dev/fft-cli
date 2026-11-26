@@ -50,9 +50,26 @@ A curated command **shadows** its generated twin: the twin is the operationId th
 
 **Exit codes are the API** (`internal/exitcode`): 0 ok, 2 usage, 3 config/no-project, 4 auth (401), 5 forbidden (403), 6 not-found (404), 7 conflict (409), 8 partial bulk write, 9 upstream unavailable, 10 read-only refusal (nothing was sent), 130 interrupted. Commands return a typed error; `exitcode.FromError` maps it.
 
+**The API contract is looked up, not guessed.** Before building or changing a command against an endpoint, classifying a POST, or chasing an unexpected 4xx, load the `fulfillment-tools-consultant` skill (`.claude/skills/`): it navigates the ~100k-line spec surgically and carries the semantics already dug out of it.
+
+## Security surfaces
+
+A change that weakens one of these is a finding, whatever else it fixes:
+
+- **No credential on stdout.** The output contract promises stdout is safe to pipe and log; a token there is a leak (a live `FFT_ID_TOKEN` once shipped to stdout in the `fft component init` scaffold). Request/response debug output goes through the redactor in `internal/httplog`.
+- **The component credential boundary** (`internal/component/env.go`): the `FFT_` namespace strip (case-insensitive, for Windows), `addSession`, and `apiKeyPlaceholder`, which exists so the long-lived Firebase API key never reaches a component. Read/write sessions hand over a live `FFT_ID_TOKEN`. Credentials at rest go through the keychain in `internal/secrets`.
+- **The read-only gate** — see the POST invariant above. Fail closed.
+- **Component install trust** (`internal/component/install.go`, `archive.go`, `manifest.go`): pinned to a release, `checksums.txt` verified, unsigned or mismatched archives refused; unpacking goes through an `os.Root` so no entry escapes the install dir; `validExec` rejects absolute or `..` executable paths; `maxArchive`/`maxFile`/`maxFiles` bound resource use. A component runs as the user.
+- **Scaffolded scripts** (`internal/component/scaffold_templates.go`): shell/`sed` injection, `FFT_ID_TOKEN`/`FFT_PASSWORD` masking, shebang trust.
+- **`pkg/transportproto`** reads untrusted newline-delimited JSON frames under a `MaxFrame` cap — check bounds and id correlation.
+
+The `security-reviewer` skill is generic, and these rules override it here. Scan with the Go tooling — `govulncheck ./...` (CI runs it), plus `gosec ./...` and `gitleaks detect --source=.` where installed — and say which tools were missing rather than skipping silently; the skill's semgrep/bandit/npm/trivy steps do not apply. A security review is static and report-only: no fixes applied, no active testing beyond a local read-only proof of concept, never against a live tenant. The skill's authorization and stakeholder-confirmation steps are satisfied by being asked for the review: do not stop to wait for them, which an unattended routine never could.
+
 ## Testing
 
 Ginkgo v2 + Gomega, one suite per package. In `cmd/fft`, the `cli` harness (`main_suite_test.go`) gives each spec a `fakeTenant` that records every request (method, path, query, body) — assert on what went over the wire, on exact stdout tables, and on the exit code. Cross-cutting guard specs you must keep green when adding a resource: `readonly_test.go` (every command annotated), `generated_test.go` (shadowing), `access_test.go` (POST read/write census), and `skill_drift_test.go`.
+
+Specs are BDD, never bare `testing.T` tables for new code: `Describe` the unit, `Context`/`When` the precondition, `It` the observable behaviour as a sentence (`It("exits 7 when the version is stale")`, not `It("tests the error path")`). Use `DescribeTable`/`Entry` for genuine input permutations, `DeferCleanup` over teardown-by-convention, `Eventually`/`Consistently` instead of `time.Sleep`, and no ordering dependencies between specs. Every bug fix ships a regression spec that fails before the fix and passes after.
 
 The **agent skill** (`internal/skill/assets/`) is documentation compiled into the binary that an AI reads before driving `fft`. `skill_drift_test.go` walks every `fft ...` invocation in the skill and fails the build if it does not resolve against the real command tree — but only skill→tree, so **new commands can go undocumented and stay green**. When adding a Tier-1 noun, update `SKILL.md` (including the frontmatter `description`, the one line an agent reads before opening the skill) and `references/commands.md`.
 
@@ -74,7 +91,7 @@ Tag `vX.Y.Z` and push — `.github/workflows/release.yml` runs GoReleaser (cross
 
 ## Conventions
 
-Go 1.26. Follow the `golang-*` skills. Comments in this codebase explain **why**, not what — match that bar (the existing files are the reference); a comment that restates the code is noise. Commit messages and PRs carry no Claude attribution.
+Go 1.26. Follow the `golang-*` skills (`.claude/skills/`), loading the ones the change touches: `golang-code-style`, `golang-naming` and `golang-safety` for any Go; `golang-cli` for commands, flags, exit codes and I/O; `golang-security` for anything handling tokens, user input, the filesystem or the network; `golang-troubleshooting` for bugs and races; `golang-continuous-integration` for workflows. Review with the `code-reviewer` and `security-reviewer` skills. Comments in this codebase explain **why**, not what — match that bar (the existing files are the reference); a comment that restates the code is noise. Commit messages and PRs carry no Claude attribution.
 
 **Nothing that identifies a live tenant leaves the machine.** Checking a change against
 a real tenant is encouraged — it is the bar for a hand-written `--example` body — but
