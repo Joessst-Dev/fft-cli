@@ -217,7 +217,14 @@ func runList(cmd *cobra.Command, deps *Deps, build listOpFn, page pageFlags, vie
 	// read, so "did I see all of them?" is a subtraction.
 	if result.Total > len(result.Items) && deps.Printer.Format() == output.Table {
 		if op.Unpageable {
-			deps.Printer.Notef("There are more %s, but the API cannot page past the first page. Narrow with a filter.", view.Noun)
+			// --all is still the remedy when everything fits in the one page it reads:
+			// it asks for MaxSize at once, where a plain run gets the API's default.
+			// Beyond that no flag helps, only a narrower query.
+			if result.Total <= client.MaxSize {
+				deps.Printer.Notef("There are more %s. Pass --all to read them in one page (the API cannot page past the first page).", view.Noun)
+			} else {
+				deps.Printer.Notef("There are more %s than one page of %d can hold, and the API cannot page past the first page. Narrow with a filter.", view.Noun, client.MaxSize)
+			}
 			return renderList(deps, view, result.Items)
 		}
 		deps.Printer.Notef("There are more %s. Pass --all to fetch them.", view.Noun)

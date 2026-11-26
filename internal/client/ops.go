@@ -179,7 +179,7 @@ type RoutingDecisionLogsFilter struct {
 // json.RawMessage. Its envelope array is decisionLogs.
 //
 // The endpoint offers only exact-match id filters — closed over here the way
-// [FacilityConnections] closes over its target — and pages by startAfterId.
+// [FacilityConnections] closes over its target — and cannot be paged: see Unpageable.
 func RoutingDecisionLogs(filter RoutingDecisionLogsFilter) ListOp[json.RawMessage] {
 	return ListOp[json.RawMessage]{
 		Name:  "list the routing decision logs",

@@ -108,16 +108,30 @@ var _ = Describe("fft routing decision-logs", func() {
 			Expect(c.errOut()).To(ContainSubstring("Total: 5"))
 		})
 
-		// Without --all the old advice ("Pass --all to fetch them") would send the
-		// user straight back to the failure, so the notice must not give it.
-		It("tells a plain run to narrow with a filter, not to pass --all", func() {
+		// A plain run reads the API's default page, but --all reads MaxSize at once, so
+		// when the total fits in that, --all is the one flag that gets everything.
+		It("tells a plain run to pass --all when everything would fit in one page", func() {
 			api := c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
-				writeJSON(w, http.StatusOK, decisionLogPage([]string{decisionLog("l1", "R456", "o-uuid")}, 5))
+				writeJSON(w, http.StatusOK, decisionLogPage([]string{decisionLog("l1", "R456", "o-uuid")}, 80))
 			})
 
 			Expect(c.run("routing", "decision-logs")).To(Equal(exitcode.OK))
 			Expect(api.only().Query.Get("startAfterId")).To(BeEmpty())
+			Expect(c.errOut()).To(ContainSubstring("--all"))
 			Expect(c.errOut()).To(ContainSubstring("cannot page past the first page"))
+			Expect(c.out()).To(ContainSubstring("l1"))
+		})
+
+		// Past that bound --all would return the same truncated page, so the notice
+		// must not send the user to it.
+		It("tells a plain run to narrow with a filter when the total exceeds one page", func() {
+			api := c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+				writeJSON(w, http.StatusOK, decisionLogPage([]string{decisionLog("l1", "R456", "o-uuid")}, 900))
+			})
+
+			Expect(c.run("routing", "decision-logs")).To(Equal(exitcode.OK))
+			Expect(api.only().Query.Get("startAfterId")).To(BeEmpty())
+			Expect(c.errOut()).To(ContainSubstring("Narrow with a filter"))
 			Expect(c.errOut()).NotTo(ContainSubstring("--all"))
 			Expect(c.out()).To(ContainSubstring("l1"))
 		})
