@@ -63,6 +63,8 @@ A change that weakens one of these is a finding, whatever else it fixes:
 - **Scaffolded scripts** (`internal/component/scaffold_templates.go`): shell/`sed` injection, `FFT_ID_TOKEN`/`FFT_PASSWORD` masking, shebang trust.
 - **`pkg/transportproto`** reads untrusted newline-delimited JSON frames under a `MaxFrame` cap — check bounds and id correlation.
 
+The `security-reviewer` skill is generic, and these rules override it here. Scan with the Go tooling — `govulncheck ./...` (CI runs it), plus `gosec ./...` and `gitleaks detect --source=.` where installed — and say which tools were missing rather than skipping silently; the skill's semgrep/bandit/npm/trivy steps do not apply. A security review is static and report-only: no fixes applied, no active testing beyond a local read-only proof of concept, never against a live tenant. The skill's authorization and stakeholder-confirmation steps are satisfied by being asked for the review: do not stop to wait for them, which an unattended routine never could.
+
 ## Testing
 
 Ginkgo v2 + Gomega, one suite per package. In `cmd/fft`, the `cli` harness (`main_suite_test.go`) gives each spec a `fakeTenant` that records every request (method, path, query, body) — assert on what went over the wire, on exact stdout tables, and on the exit code. Cross-cutting guard specs you must keep green when adding a resource: `readonly_test.go` (every command annotated), `generated_test.go` (shadowing), `access_test.go` (POST read/write census), and `skill_drift_test.go`.

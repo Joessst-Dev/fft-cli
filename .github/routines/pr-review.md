@@ -43,7 +43,8 @@ escalate.
 This repo ships project skills (`.claude/skills/`) in your checkout — load them with the Skill
 tool. Drive the review with the **`code-reviewer`** skill, and give any change near a trust
 boundary a pass with the **`security-reviewer`** skill against the "Security surfaces" in
-`CLAUDE.md`; lean on the **`golang-*`** skills for Go judgement; and consult the
+`CLAUDE.md`, under the rules there that override the generic skill (Go scanners, report-only,
+never against a live tenant, no waiting for confirmation); lean on the **`golang-*`** skills for Go judgement; and consult the
 **`fulfillment-tools-consultant`** skill for the real semantics of any fulfillmenttools endpoint or
 POST read-vs-write question. These are aids — they do not change the side-effect scope above.
 
