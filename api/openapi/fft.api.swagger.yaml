@@ -5269,12 +5269,14 @@ paths:
         - Packing configuration
   /api/configurations/tags/parcel:
     get:
+      deprecated: false
       description: >-
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />Returns the tag configuration for parcels
       operationId: getParcelTagConfiguration
+      parameters: []
       responses:
         '200':
           content:
@@ -5301,26 +5303,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
+          description: The requested entity was not found
       summary: Get parcel tag config
+      x-fft-permissions:
+        - CONFIG_READ
       tags:
         - Shipments configuration
       x-badges:
         - color: orange
           label: BETA
     put:
+      deprecated: false
       description: >-
         This part of the API is in Beta status. For details, see the <a
         href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
         target="_blank">API release lifecycle documentation</a>.<br /><br
         />Updates the tag configuration for parcels.
       operationId: putParcelTagConfiguration
+      parameters: []
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ParcelTagConfigurationForUpsert'
-        description: Desired Tag Configuration for Parcels
         required: true
       responses:
         '200':
@@ -5334,7 +5339,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Invalid input. See response for details
+          description: Invalid input. See response for details.
         '401':
           content:
             application/json:
@@ -5350,6 +5355,8 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Update parcel tag config
+      x-fft-permissions:
+        - CONFIG_WRITE
       tags:
         - Shipments configuration
       x-badges:
@@ -10704,10 +10711,7 @@ paths:
     get:
       deprecated: false
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br
-        />Returns the picking slots of the given facilities within the requested
+        Returns the picking slots of the given facilities within the requested
         period with configured, booked and remaining capacity. The result is
         paginated over the requested facilities in the order of the
         facilityRefs.
@@ -10802,9 +10806,6 @@ paths:
         - FACILITY_READ
       tags:
         - Facilities
-      x-badges:
-        - color: red
-          label: ALPHA
   /api/facilities/search:
     post:
       deprecated: false
@@ -13089,6 +13090,18 @@ paths:
         content:
           application/json:
             schema:
+              discriminator:
+                mapping:
+                  CHANGE_LINE_ITEMS_TO_NOT_RETURNABLE_IN_ITEM_RETURN_JOB: >-
+                    #/components/schemas/ChangeLineItemsToNotReturnableInItemReturnJobActionParameter
+                  CHANGE_LINE_ITEMS_TO_RETURNABLE_IN_ITEM_RETURN_JOB: >-
+                    #/components/schemas/ChangeLineItemsToReturnableInItemReturnJobActionParameter
+                  FinishItemReturnJob: '#/components/schemas/FinishItemReturnJobActionParameter'
+                  REPLACE_LINE_ITEMS_ON_ITEM_RETURN_JOB: >-
+                    #/components/schemas/ReplaceLineItemsOnItemReturnJobActionParameter
+                  RestartItemReturnJob: '#/components/schemas/RestartItemReturnJobActionParameter'
+                  StartItemReturnJob: '#/components/schemas/StartItemReturnJobActionParameter'
+                propertyName: name
               oneOf:
                 - $ref: '#/components/schemas/FinishItemReturnJobActionParameter'
                 - $ref: '#/components/schemas/StartItemReturnJobActionParameter'
@@ -19487,7 +19500,8 @@ paths:
           label: ALPHA
   /api/parcels:
     get:
-      description: ''
+      deprecated: false
+      description: Read all parcels by the given filter
       operationId: getAllParcels
       parameters:
         - description: all entities after given Id
@@ -19502,6 +19516,7 @@ paths:
           required: false
           schema:
             default: 25
+            example: 25
             type: integer
       responses:
         '200':
@@ -19524,12 +19539,21 @@ paths:
           description: >-
             Your user, although recognized, is not authorized to use this
             endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The requested entity was not found
       summary: List parcels
+      x-fft-permissions:
+        - PARCEL_READ
       tags:
         - Shipments
   /api/parcels/{parcelId}:
     get:
-      description: ''
+      deprecated: false
+      description: Read the persisted parcel by id
       operationId: getParcel
       parameters:
         - description: ID of the parcel you want to get
@@ -19566,15 +19590,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
-      summary: Get parcel
+          description: The requested entity was not found
+      summary: Get Parcel by id
+      x-fft-permissions:
+        - PARCEL_READ
       tags:
         - Shipments
     patch:
-      description: ''
+      deprecated: false
+      description: >-
+        Applies actions to a parcel. Check ParcelActionsParameter for available
+        actions.
       operationId: patchParcel
       parameters:
-        - description: ID of the parcel you want to get
+        - description: ID of the parcel you want to patch
           in: path
           name: parcelId
           required: true
@@ -19585,7 +19614,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ParcelPatchActions'
-        description: Patch set
         required: true
       responses:
         '200':
@@ -19613,12 +19641,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
+          description: The requested entity was not found
       summary: Update parcel
+      x-fft-permissions:
+        - PARCEL_WRITE
       tags:
         - Shipments
   /api/parcels/{parcelId}/actions:
     post:
+      deprecated: false
       description: >-
         Applies actions to a parcel. Check ParcelActionsParameter for available
         actions.
@@ -19634,7 +19665,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ParcelActionsParameter'
+              discriminator:
+                mapping:
+                  ADD_LABELS_TO_PARCEL: '#/components/schemas/AddLabelsToParcelActionParameter'
+                  REMOVE_PARCEL_FROM_TRACKING: '#/components/schemas/RemoveParcelFromTrackingActionParameter'
+                  SPLIT_LINES_PARCEL: '#/components/schemas/ParcelSplitItemsActionParameter'
+                  UPDATE_PARCEL_ITEM_RECORDABLE_ATTRIBUTES: >-
+                    #/components/schemas/UpdateParcelItemRecordableAttributesActionParameter
+                  UPDATE_TRACKING_DATA: '#/components/schemas/ParcelUpdateTrackingDataActionParameter'
+                propertyName: name
+              oneOf:
+                - $ref: '#/components/schemas/ParcelSplitItemsActionParameter'
+                - $ref: >-
+                    #/components/schemas/UpdateParcelItemRecordableAttributesActionParameter
+                - $ref: '#/components/schemas/AddLabelsToParcelActionParameter'
+                - $ref: '#/components/schemas/ParcelUpdateTrackingDataActionParameter'
+                - $ref: '#/components/schemas/RemoveParcelFromTrackingActionParameter'
+        required: true
       responses:
         '200':
           content:
@@ -19656,11 +19703,21 @@ paths:
           description: >-
             Your user, although recognized, is not authorized to use this
             endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The requested entity was not found
       summary: Call parcel action
+      x-fft-permissions:
+        - PARCEL_WRITE
       tags:
         - Shipments
   /api/parcels/{parcelId}/deliverynote:
     get:
+      deprecated: false
+      description: Get delivery note for given parcel
       operationId: getParcelDeliveryNote
       parameters:
         - description: ID of parcel you want to retrieve deliveryNote for
@@ -19670,28 +19727,31 @@ paths:
           schema:
             type: string
         - description: >-
-            Provide the localized values for the delivery note. If not provided
-            the default locale is used. For example de_DE.
+            Provide the localized values for the document. If not provided the
+            default locale is used. For example de_DE.
           in: query
           name: locale
+          required: false
           schema:
+            example: en-US
             type: string
       responses:
         '200':
           content:
             application/pdf:
               schema:
-                $ref: '#/components/schemas/DeliveryNote'
+                format: binary
+                type: string
           description: Get delivery note as pdf.
         '401':
           content:
-            application/pdf:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Your user is not allowed to operate against this API instance
         '403':
           content:
-            application/pdf:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: >-
@@ -19699,16 +19759,19 @@ paths:
             endpoint
         '404':
           content:
-            application/pdf:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Parcel not found
+          description: The requested entity was not found
       summary: Get parcel delivery note
+      x-fft-permissions:
+        - DELIVERYNOTE_WRITE
       tags:
         - Shipments
   /api/parcels/{parcelId}/labels/{labelDocument}:
     get:
-      description: ''
+      deprecated: false
+      description: Get label of parcel
       operationId: getLabelForParcel
       parameters:
         - description: ID of the parcel you want to get a label for
@@ -19729,19 +19792,22 @@ paths:
       responses:
         '200':
           content:
-            application/pdf: {}
+            application/pdf:
+              schema:
+                format: binary
+                type: string
           description: >-
             Parcel was found & you were allowed to access it. The label is in
             the body.
         '401':
           content:
-            application/pdf:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Your user is not allowed to operate against this API instance
         '403':
           content:
-            application/pdf:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: >-
@@ -19749,15 +19815,19 @@ paths:
             endpoint
         '404':
           content:
-            application/pdf:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
+          description: The requested entity was not found
       summary: Get parcel label
+      x-fft-permissions:
+        - PARCEL_READ
       tags:
         - Shipments
   /api/parcels/{parcelId}/returnnote:
     get:
+      deprecated: false
+      description: Get return note for given parcel
       operationId: getParcelReturnNote
       parameters:
         - description: ID of parcel you want to retrieve returnNote for
@@ -19767,28 +19837,31 @@ paths:
           schema:
             type: string
         - description: >-
-            Provide the localized values for the returnNote. If not provided the
+            Provide the localized values for the document. If not provided the
             default locale is used. For example de_DE.
           in: query
           name: locale
+          required: false
           schema:
+            example: en-US
             type: string
       responses:
         '200':
           content:
             application/pdf:
               schema:
-                $ref: '#/components/schemas/ReturnNote'
-          description: Get delivery note as pdf.
+                format: binary
+                type: string
+          description: The return note for the given parcel
         '401':
           content:
-            application/pdf:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Your user is not allowed to operate against this API instance
         '403':
           content:
-            application/pdf:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: >-
@@ -19796,16 +19869,19 @@ paths:
             endpoint
         '404':
           content:
-            application/pdf:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Parcel not found
+          description: The requested entity was not found
       summary: Get parcel return note
+      x-fft-permissions:
+        - DELIVERYNOTE_WRITE
       tags:
         - Shipments
   /api/parcels/{parcelId}/transferlabel:
     get:
-      description: ''
+      deprecated: false
+      description: Get transfer label for given parcel
       operationId: getParcelTransferLabel
       parameters:
         - description: ID of the parcel for which you want to get a transfer label
@@ -19814,10 +19890,22 @@ paths:
           required: true
           schema:
             type: string
+        - description: >-
+            Provide the localized values for the document. If not provided the
+            default locale is used. For example de_DE.
+          in: query
+          name: locale
+          required: false
+          schema:
+            example: en-US
+            type: string
       responses:
         '200':
           content:
-            application/pdf: {}
+            application/pdf:
+              schema:
+                format: binary
+                type: string
           description: The transfer label for the given parcel
         '401':
           content:
@@ -19838,8 +19926,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Entity not found
+          description: The requested entity was not found
       summary: Get parcel transfer label
+      x-fft-permissions:
+        - PARCEL_READ
       tags:
         - Shipments
   /api/parcels/search:
@@ -20064,6 +20154,8 @@ paths:
               - EXPORT_READ
               - EXPORT_WRITE
               - STOCK_AVAILABILITIES_READ
+              - PRODUCT_RELATION_READ
+              - PRODUCT_RELATION_WRITE
               - LISTING_READ
               - LISTING_WRITE
               - LISTING_DELETE
@@ -26920,7 +27012,8 @@ paths:
         - Shipments
   /api/shipments/{shipmentId}/parcels:
     post:
-      description: ''
+      deprecated: false
+      description: Create a new parcel for the given shipment
       operationId: addParcel
       parameters:
         - description: ID of shipment you want to create parcel for
@@ -26934,7 +27027,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ParcelForCreation'
-        description: Payload of the parcel you want to create
         required: false
       responses:
         '201':
@@ -26950,7 +27042,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
-          description: Invalid input. See response for details
+          description: Invalid input. See response for details.
         '401':
           content:
             application/json:
@@ -26965,6 +27057,12 @@ paths:
           description: >-
             Your user, although recognized, is not authorized to use this
             endpoint
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The requested entity was not found
         '422':
           content:
             application/json:
@@ -26972,20 +27070,23 @@ paths:
                 $ref: '#/components/schemas/ApiError'
           description: Parcel could not be processed due to failing conditions
       summary: Create shipment parcel
+      x-fft-permissions:
+        - PARCEL_WRITE
       tags:
         - Shipments
   /api/shipments/parcels:
     post:
+      deprecated: false
       description: >-
         This endpoints directly creates a parcel. If no ShipmentRef was
         provided, a shipment will be created and linked to this parcel
       operationId: directCreateParcel
+      parameters: []
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ParcelForDirectCreation'
-        description: Representation that describes the parcel you want to create
         required: true
       responses:
         '201':
@@ -27009,6 +27110,8 @@ paths:
             Your user, although recognized, is not authorized to use this
             endpoint
       summary: Create parcel
+      x-fft-permissions:
+        - PARCEL_WRITE
       tags:
         - Shipments
   /api/shipments/search:
@@ -28712,6 +28815,16 @@ paths:
         content:
           application/json:
             schema:
+              discriminator:
+                mapping:
+                  CANCEL_STOW_JOB: '#/components/schemas/CancelStowJobAction'
+                  CLOSE_STOW_JOB: '#/components/schemas/CloseStowJobAction'
+                  MODIFY_STOW_LINE_ITEMS: '#/components/schemas/ModifyStowLineItemsAction'
+                  OPEN_STOW_JOB: '#/components/schemas/ReopenStowJobAction'
+                  PAUSE_STOW_JOB: '#/components/schemas/PauseStowJobAction'
+                  REPLACE_ASSIGNED_USERS: '#/components/schemas/StowJobReplaceAssignedUsersAction'
+                  START_STOW_JOB: '#/components/schemas/StartStowJobAction'
+                propertyName: name
               oneOf:
                 - $ref: '#/components/schemas/StartStowJobAction'
                 - $ref: '#/components/schemas/PauseStowJobAction'
@@ -29627,6 +29740,13 @@ paths:
         content:
           application/json:
             schema:
+              discriminator:
+                mapping:
+                  ADD_TRACKING_EVENTS: >-
+                    #/components/schemas/TrackingInformationAddTrackingEventActionParameter
+                  REMOVE_TRACKING_EVENTS: >-
+                    #/components/schemas/TrackingInformationRemoveTrackingEventsParameter
+                propertyName: name
               oneOf:
                 - $ref: >-
                     #/components/schemas/TrackingInformationAddTrackingEventActionParameter
@@ -30787,15 +30907,14 @@ components:
       type: object
       description: AddChannelAction
     AddCustomsDocumentToParcelContent:
-      additionalProperties: false
-      description: File and Document for this Label
       properties:
         labelFile:
           $ref: '#/components/schemas/AddLabelsToParcelFile'
       required:
         - labelFile
-      type: object
       title: AddCustomsDocumentToParcelContent
+      type: object
+      description: AddCustomsDocumentToParcelContent
     AddFacilitiesToGroupActionParameter:
       properties:
         facilitiesToAdd:
@@ -31093,14 +31212,7 @@ components:
       title: AdditionalShippingAttribute
       type: object
       description: AdditionalShippingAttribute
-    AddLabelsToParcelActionEnum:
-      enum:
-        - ADD_LABELS_TO_PARCEL
-      type: string
-      title: AddLabelsToParcelActionEnum
-      description: AddLabelsToParcelActionEnum
     AddLabelsToParcelActionParameter:
-      additionalProperties: false
       properties:
         closeParcel:
           default: false
@@ -31113,14 +31225,16 @@ components:
           $ref: '#/components/schemas/AddCustomsDocumentToParcelContent'
         labels:
           items:
-            anyOf:
+            oneOf:
               - $ref: '#/components/schemas/AddLabelsToParcelContent'
               - $ref: '#/components/schemas/AddLabelsToParcelError'
           maxItems: 2
           minItems: 0
           type: array
         name:
-          $ref: '#/components/schemas/AddLabelsToParcelActionEnum'
+          enum:
+            - ADD_LABELS_TO_PARCEL
+          type: string
         tenantParcelId:
           description: Optional parameter to set or change the tenant parcel id
           example: MY-PARCEL-12345
@@ -31137,17 +31251,8 @@ components:
         - labels
       title: AddLabelsToParcelActionParameter
       type: object
-      description: >-
-        This part of the API is in Beta status. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br
-        />AddLabelsToParcelActionParameter
-      x-badges:
-        - color: orange
-          label: BETA
+      description: AddLabelsToParcelActionParameter
     AddLabelsToParcelContent:
-      additionalProperties: false
-      description: File and Document for this Label
       properties:
         labelFile:
           $ref: '#/components/schemas/AddLabelsToParcelFile'
@@ -31166,11 +31271,10 @@ components:
         - labelFile
         - trackingNumber
         - trackingUrl
-      type: object
       title: AddLabelsToParcelContent
+      type: object
+      description: AddLabelsToParcelContent
     AddLabelsToParcelError:
-      additionalProperties: false
-      description: Error values for a not successfull label request
       properties:
         errorCode:
           description: optional error code from the carrier
@@ -31185,11 +31289,10 @@ components:
       required:
         - labelType
         - errorDescription
-      type: object
       title: AddLabelsToParcelError
+      type: object
+      description: AddLabelsToParcelError
     AddLabelsToParcelFile:
-      additionalProperties: false
-      description: file for a given result
       properties:
         content:
           description: File content base64 encoded
@@ -31209,8 +31312,9 @@ components:
       required:
         - content
         - type
-      type: object
       title: AddLabelsToParcelFile
+      type: object
+      description: AddLabelsToParcelFile
     AddLineItemToPackingTargetContainer:
       additionalProperties: false
       description: Action to a line item to a packing target container.
@@ -31451,7 +31555,6 @@ components:
       type: object
       description: AddTargetTimeToOperativeProcessEntitiesActionParameter
     AlternativeReturnAddressConfiguration:
-      additionalProperties: false
       properties:
         alternativeReturnAddressPerTag:
           items:
@@ -31460,11 +31563,10 @@ components:
           type: array
       required:
         - alternativeReturnAddressPerTag
-      type: object
       title: AlternativeReturnAddressConfiguration
+      type: object
       description: AlternativeReturnAddressConfiguration
     AlternativeReturnAddressPerTag:
-      additionalProperties: false
       properties:
         alternativeReturnAddress:
           $ref: '#/components/schemas/FacilityAddress'
@@ -31475,13 +31577,14 @@ components:
           type: array
         tagRef:
           description: needs to be an existing tag id
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
       required:
         - tagRef
         - matchingValues
         - alternativeReturnAddress
-      type: object
       title: AlternativeReturnAddressPerTag
+      type: object
       description: AlternativeReturnAddressPerTag
     AnnounceItemReturnActionParameter:
       properties:
@@ -33816,16 +33919,23 @@ components:
             - color: red
               label: ALPHA
         maxGirth:
-          description: The maximum girth in millimeters of the packagingUnit.
+          description: >-
+            The maximum girth in millimeters of the packagingUnit. For
+            LONG_GOODS it applies to the goods lying on their load carrier.
           type: number
         maxItemQuantity:
           description: The maximum number of items that can fit in the packagingUnit.
           type: number
         maxLength:
-          description: The maximum length in millimeters of the packagingUnit.
+          description: >-
+            The maximum length in millimeters of the packagingUnit. For
+            LONG_GOODS it applies to the goods lying on their load carrier,
+            which must not be longer itself.
           type: number
         maxVolume:
-          description: The maximum volume in cubic millimeters of the packagingUnit.
+          description: >-
+            The maximum volume in cubic millimeters of the packagingUnit. For
+            LONG_GOODS it applies to the goods lying on their load carrier.
           type: number
         maxVolumetricWeight:
           description: >-
@@ -33839,7 +33949,9 @@ components:
             - color: red
               label: ALPHA
         maxWeight:
-          description: The maximum weight in grams that the packagingUnit can hold.
+          description: >-
+            The maximum weight in grams of the packed packagingUnit. For PALLET
+            and LONG_GOODS it includes loadCarrierWeight.
           type: number
         minItemQuantity:
           description: The minimum number of items that can fit in the packagingUnit.
@@ -34982,7 +35094,8 @@ components:
     CarrierPriorityCalculationRequest:
       properties:
         productValue:
-          $ref: '#/components/schemas/ParcelProductValue'
+          allOf:
+            - $ref: '#/components/schemas/ParcelProductValue'
           description: Product value information used to calculate carrier priority
       title: CarrierPriorityCalculationRequest
       type: object
@@ -35120,27 +35233,6 @@ components:
       title: CarrierTrackAndTraceThresholdConfiguration
       type: object
       description: CarrierTrackAndTraceThresholdConfiguration
-    CarrierTrackingStatus:
-      additionalProperties: false
-      description: Native trackingStatus provided by carrier
-      properties:
-        description:
-          description: Description of the status
-          example: Parcel has been delivered
-          type: string
-        status:
-          description: Status of the parcel as provided by carrier
-          example: DELIVERED
-          type: string
-        timestamp:
-          description: Timestamp this status was set by the carrier
-          example: 2020-02-03T08:45:51.525Z
-          format: date-time
-          type: string
-      required:
-        - status
-      type: object
-      title: CarrierTrackingStatus
     CarrierTransitTime:
       properties:
         maxTransitDays:
@@ -41933,6 +42025,7 @@ components:
         - FACILITY
         - FACILITY_GROUP
         - CATEGORY
+        - TAG_REFERENCE
       type: string
       title: FacilityDiscountContextTypes
     FacilityDiscountForCreation:
@@ -43672,44 +43765,6 @@ components:
       type: object
       title: Fence
       description: Fence
-    FenceAnalysis:
-      properties:
-        fenceId:
-          description: The ID of the fence.
-          type: string
-        fenceName:
-          description: The name of the fence.
-          type: string
-        fenceType:
-          description: The type of fence.
-          enum:
-            - STANDARD
-            - TOOLKIT
-          type: string
-        layer:
-          description: The layer at which the fence was evaluated.
-          type: number
-        listingId:
-          description: The ID of the listing.
-          type: string
-        nodeId:
-          description: The ID of the node.
-          type: string
-        result:
-          description: The result of the fence evaluation.
-          enum:
-            - PASSED
-            - FAILED
-            - NOT_APPLICABLE
-          type: string
-      required:
-        - fenceType
-        - nodeId
-        - fenceId
-        - result
-      title: FenceAnalysis
-      type: object
-      description: FenceAnalysis
     FenceImplementation:
       description: >-
         <i>This part of the API is currently under development. That means that
@@ -43733,6 +43788,15 @@ components:
       xml:
         name: FenceImplementation
       title: FenceImplementation
+    FenceInputSource:
+      description: Where the data of the entity came from.
+      enum:
+        - BIG_QUERY
+        - SIMULATED
+        - LIVE
+        - UNAVAILABLE
+      title: FenceInputSource
+      type: string
     FenceMode:
       enum:
         - static
@@ -43740,6 +43804,15 @@ components:
       type: string
       title: FenceMode
       description: FenceMode
+    FenceResult:
+      description: The result of the fence evaluation.
+      enum:
+        - PASSED
+        - FAILED
+        - NOT_APPLICABLE
+        - SKIPPED
+      title: FenceResult
+      type: string
     FenceResultStatus:
       enum:
         - FAILED
@@ -43747,6 +43820,12 @@ components:
         - REACTIVE_PASSING_POSSIBLE
       title: FenceResultStatus
       description: FenceResultStatus
+    FenceSkipReason:
+      description: Why the fence was not evaluated. Set only when the result is SKIPPED.
+      enum:
+        - UNSUPPORTED_SCOPE
+      title: FenceSkipReason
+      type: string
     FenceStatistic:
       properties:
         durationMs:
@@ -44492,6 +44571,8 @@ components:
             fulfillmenttools team.
           example: true
           type: boolean
+        releaseBeforeHandoverConfiguration:
+          $ref: '#/components/schemas/ReleaseBeforeHandoverConfiguration'
       type: object
       title: HandoverConfiguration
       description: HandoverConfiguration
@@ -44516,6 +44597,8 @@ components:
             in the future. Please only use in communication with the FFT team.
           example: true
           type: boolean
+        releaseBeforeHandoverConfiguration:
+          $ref: '#/components/schemas/ReleaseBeforeHandoverConfiguration'
         version:
           type: number
       required:
@@ -47799,6 +47882,66 @@ components:
       title: InboundRebalancingMoveReport
       type: object
       description: InboundRebalancingMoveReport
+    InboundRebalancingPotential:
+      properties:
+        expectedDate:
+          example: 2026-06-17T12:00:00.000Z
+          format: date-time
+          type: string
+        expectedStockRef:
+          type: string
+        moves:
+          description: Number of reservations that would be moved onto the expected stock.
+          type: number
+        quantity:
+          description: Reserved quantity that would be moved onto the expected stock.
+          type: number
+        tenantArticleId:
+          type: string
+      required:
+        - tenantArticleId
+        - expectedStockRef
+        - expectedDate
+        - moves
+        - quantity
+      title: InboundRebalancingPotential
+      type: object
+      description: InboundRebalancingPotential
+    InboundRebalancingPotentialRequest:
+      properties:
+        facilityRef:
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        minMoves:
+          default: 1
+          description: >-
+            Only expected stocks onto which at least this many reservations
+            would be moved are returned.
+          example: 1
+          minimum: 1
+          type: integer
+        tenantArticleIds:
+          items:
+            type: string
+          maxItems: 50
+          type: array
+      required:
+        - facilityRef
+        - tenantArticleIds
+      title: InboundRebalancingPotentialRequest
+      type: object
+      description: InboundRebalancingPotentialRequest
+    InboundRebalancingPotentialResult:
+      properties:
+        potentials:
+          items:
+            $ref: '#/components/schemas/InboundRebalancingPotential'
+          type: array
+      required:
+        - potentials
+      title: InboundRebalancingPotentialResult
+      type: object
+      description: InboundRebalancingPotentialResult
     InboundRebalancingRequest:
       properties:
         expectedStockRef:
@@ -51262,6 +51405,10 @@ components:
           maxItems: 100
           minItems: 0
           type: array
+        itemReturnStatusValues:
+          allOf:
+            - $ref: '#/components/schemas/ItemReturnStatusValues'
+          description: calculated values for included item returns
         lastModified:
           description: Last modification timestamp
           example: 2026-06-17T12:00:00.000Z
@@ -51677,6 +51824,10 @@ components:
           maxItems: 100
           minItems: 0
           type: array
+        itemReturnStatusValues:
+          allOf:
+            - $ref: '#/components/schemas/ItemReturnStatusValues'
+          description: calculated values for included item returns
         lastModified:
           description: Last modification timestamp
           example: 2026-06-17T12:00:00.000Z
@@ -52052,6 +52203,56 @@ components:
       title: ItemReturns
       type: object
       description: ItemReturns
+    ItemReturnStatusValues:
+      properties:
+        announced:
+          description: amount of item returns of this item return job in status announced.
+          example: 42
+          type: integer
+        canceled:
+          description: amount of item returns of this item return job in status canceled.
+          example: 42
+          type: integer
+        finished:
+          description: amount of item returns of this item return job in status finished.
+          example: 42
+          type: integer
+        inProgress:
+          description: >-
+            amount of item returns of this item return job in status in
+            progress.
+          example: 42
+          type: integer
+        obsolete:
+          description: amount of item returns of this item return job in status obsolete.
+          example: 42
+          type: integer
+        open:
+          description: amount of item returns of this item return job in status open.
+          example: 42
+          type: integer
+        paused:
+          description: amount of item returns of this item return job in status paused.
+          example: 42
+          type: integer
+        waitingForInput:
+          description: >-
+            amount of item returns of this item return job in status waiting for
+            input.
+          example: 42
+          type: integer
+      required:
+        - announced
+        - open
+        - inProgress
+        - paused
+        - finished
+        - waitingForInput
+        - canceled
+        - obsolete
+      title: ItemReturnStatusValues
+      type: object
+      description: ItemReturnStatusValues
     ItemReturnsWithSearchPaths:
       properties:
         created:
@@ -52819,6 +53020,43 @@ components:
       title: LineItemForCreation
       type: object
       description: LineItemForCreation
+    LineItemProductRelation:
+      properties:
+        quantity:
+          description: >-
+            Quantity of this line item that belongs to the product relation
+            (relationQuantity multiplied by quantityPerUnit)
+          example: 50
+          type: number
+        quantityPerUnit:
+          description: >-
+            Quantity of this line item needed for one unit of the product
+            relation
+          example: 50
+          type: number
+        relationQuantity:
+          description: Number of units of the product relation
+          example: 1
+          type: number
+        tenantArticleId:
+          description: The tenantArticleId of the product relation
+          example: tent-3x3
+          type: string
+        title:
+          description: The title of the product relation
+          example: Tent 3x3 m
+          type: string
+        type:
+          $ref: '#/components/schemas/ProductRelationType'
+      required:
+        - tenantArticleId
+        - type
+        - relationQuantity
+        - quantityPerUnit
+        - quantity
+      title: LineItemProductRelation
+      type: object
+      description: LineItemProductRelation
     LinkedConfiguration:
       properties:
         ref:
@@ -55152,34 +55390,42 @@ components:
         loadCarrierHeight:
           description: >-
             The height in millimeters of the empty load carrier (e.g. pallet or
-            skid) itself.
+            skid) itself. It counts toward the maximum height, girth and volume
+            and must leave room for goods.
           type: number
         loadCarrierLength:
           description: >-
             The length in millimeters of the empty load carrier (e.g. pallet or
-            skid) itself.
+            skid) itself. It must fit within the maximum length.
           type: number
         loadCarrierWeight:
           description: >-
             The tare weight in grams of the empty load carrier (e.g. pallet or
-            skid) itself.
+            skid) itself. It counts toward maxWeight and must be less than it.
           type: number
         loadCarrierWidth:
           description: >-
             The width in millimeters of the empty load carrier (e.g. pallet or
-            skid) itself.
+            skid) itself. It must fit within the maximum width.
           type: number
         maxGirth:
-          description: The maximum girth in millimeters of the packagingUnit.
+          description: >-
+            The maximum girth in millimeters of the packagingUnit. For
+            LONG_GOODS it applies to the goods lying on their load carrier.
           type: number
         maxItemQuantity:
           description: The maximum number of items that can fit in the packagingUnit.
           type: number
         maxLength:
-          description: The maximum length in millimeters of the packagingUnit.
+          description: >-
+            The maximum length in millimeters of the packagingUnit. For
+            LONG_GOODS it applies to the goods lying on their load carrier,
+            which must not be longer itself.
           type: number
         maxVolume:
-          description: The maximum volume in cubic millimeters of the packagingUnit.
+          description: >-
+            The maximum volume in cubic millimeters of the packagingUnit. For
+            LONG_GOODS it applies to the goods lying on their load carrier.
           type: number
         maxVolumetricWeight:
           description: >-
@@ -55193,7 +55439,9 @@ components:
             - color: red
               label: ALPHA
         maxWeight:
-          description: The maximum weight in grams that the packagingUnit can hold.
+          description: >-
+            The maximum weight in grams of the packed packagingUnit. For PALLET
+            and LONG_GOODS it includes loadCarrierWeight.
           type: number
         minItemQuantity:
           description: The minimum number of items that can fit in the packagingUnit.
@@ -57150,18 +57398,17 @@ components:
       xml:
         name: ModifyPackLineItem
     ModifyParcel:
-      additionalProperties: false
-      description: Modify Parcel Action.
       properties:
         action:
           description: Use value "ModifyParcel", because you want to modify a Parcel
           enum:
             - ModifyParcel
+          example: ModifyParcel
           type: string
         carrierInformation:
           $ref: '#/components/schemas/ParcelCarrierInformation'
         carrierProduct:
-          description: Only changable on status OPEN or FAILED of the existing Parcel
+          description: Only changeable on status OPEN or FAILED of the existing Parcel
           nullable: true
           type: string
         customAttributes:
@@ -57173,9 +57420,13 @@ components:
           example: 12.5
           type: number
         dimensions:
-          $ref: '#/components/schemas/ParcelDimensions'
+          anyOf:
+            - $ref: '#/components/schemas/ParcelDimensions'
+            - type: 'null'
         pickUpInformation:
-          $ref: '#/components/schemas/ParcelPickUpInformation'
+          anyOf:
+            - $ref: '#/components/schemas/ParcelPickUpInformation'
+            - type: 'null'
         productValue:
           description: >-
             Monetary value of all goods in this parcel. Needed for sending cross
@@ -57187,39 +57438,49 @@ components:
         result:
           $ref: '#/components/schemas/ParcelResult'
         services:
-          $ref: '#/components/schemas/ParcelServices'
+          anyOf:
+            - $ref: '#/components/schemas/ParcelServices'
+            - type: 'null'
         status:
-          $ref: '#/components/schemas/ParcelStatus'
+          enum:
+            - OPEN
+            - PROCESSING
+            - DONE
+            - FAILED
+            - CANCELED
+            - OBSOLETE
+            - WAITING_FOR_INPUT
+          type: string
         tenantParcelId:
           type: string
       required:
         - action
-      title: ModifyParcelAction
+      title: ModifyParcel
       type: object
-      xml:
-        name: ModifyParcel
+      description: ModifyParcel
     ModifyParcelLoadUnit:
-      additionalProperties: false
-      description: Modify Parcels of a LoadUnit.
       properties:
         action:
           description: >-
-            Use value "ModifyParcelLoadUnit", because you want to modify
-            loadunitRefs in Parcel
+            Use value "ModifyParcelLoadUnit", because you want to modify load
+            unit refs in Parcel
           enum:
             - ModifyParcelLoadUnit
+          example: ModifyParcelLoadUnit
           type: string
         loadUnitRefs:
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
           items:
             type: string
           type: array
       required:
         - action
         - loadUnitRefs
-      title: ModifyParcelLoadUnitsAction
+      title: ModifyParcelLoadUnit
       type: object
-      xml:
-        name: ModifyParcelLoadUnit
+      description: ModifyParcelLoadUnit
     ModifyPartialStock:
       allOf:
         - $ref: '#/components/schemas/AbstractModificationAction'
@@ -63930,13 +64191,19 @@ components:
     PackagingUnitDetailDimensions:
       properties:
         maxHeight:
-          description: The max height of the packagingUnit in millimeters.
+          description: >-
+            The max height of the packagingUnit in millimeters. For PALLET it
+            includes loadCarrierHeight.
           type: number
         maxLength:
-          description: The max length of the packagingUnit in millimeters.
+          description: >-
+            The max length of the packagingUnit in millimeters. For PALLET a
+            longer load carrier defines the length, so it must fit within it.
           type: number
         maxWidth:
-          description: The max width of the packagingUnit in millimeters.
+          description: >-
+            The max width of the packagingUnit in millimeters. For PALLET a
+            wider load carrier defines the width, so it must fit within it.
           type: number
       required:
         - maxHeight
@@ -64951,10 +65218,6 @@ components:
                 Reference to the packJob this packing source container is
                 related to.
               type: string
-            parcels:
-              items:
-                $ref: '#/components/schemas/Parcel'
-              type: array
             shortId:
               description: Short identifier for the container
               type: string
@@ -66306,7 +66569,8 @@ components:
             href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
             target="_blank">API release lifecycle documentation</a>.<br /><br
             />The height in millimeters of the empty load carrier (e.g. pallet
-            or skid) itself.
+            or skid) itself. It counts toward the maximum height, girth and
+            volume and must leave room for goods.
           type: number
           x-badges:
             - color: red
@@ -66317,7 +66581,7 @@ components:
             href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
             target="_blank">API release lifecycle documentation</a>.<br /><br
             />The length in millimeters of the empty load carrier (e.g. pallet
-            or skid) itself.
+            or skid) itself. It must fit within the maximum length.
           type: number
           x-badges:
             - color: red
@@ -66328,7 +66592,7 @@ components:
             href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
             target="_blank">API release lifecycle documentation</a>.<br /><br
             />The tare weight in grams of the empty load carrier (e.g. pallet or
-            skid) itself.
+            skid) itself. It counts toward maxWeight and must be less than it.
           type: number
           x-badges:
             - color: red
@@ -66339,7 +66603,7 @@ components:
             href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
             target="_blank">API release lifecycle documentation</a>.<br /><br
             />The width in millimeters of the empty load carrier (e.g. pallet or
-            skid) itself.
+            skid) itself. It must fit within the maximum width.
           type: number
           x-badges:
             - color: red
@@ -66359,7 +66623,9 @@ components:
             - color: red
               label: ALPHA
         maxWeight:
-          description: The maximum weight in grams that the packagingUnit can hold.
+          description: >-
+            The maximum weight in grams of the packed packagingUnit. For PALLET
+            and LONG_GOODS it includes loadCarrierWeight.
           type: number
         minItemQuantity:
           description: The minimum number of items that can fit in the packagingUnit.
@@ -66411,172 +66677,174 @@ components:
       type: object
       description: PalletDetails
     Parcel:
-      additionalProperties: false
-      allOf:
-        - $ref: '#/components/schemas/VersionedResource'
-        - $ref: '#/components/schemas/BaseOperationalContainer'
-        - properties:
-            anonymized:
-              description: Indicates if gdpr related data was anonymized
-              example: false
-              type: boolean
-            carrierInformation:
-              $ref: '#/components/schemas/ParcelCarrierInformation'
-            carrierProduct:
-              description: Desired product of given carrier to choose when ordering a label
-              example: EXPRESS
-              type: string
-            carrierRef:
-              description: Reference to the carrier this parcel should be send by
-              example: cf00e102-34f2-45c1-a846-6a21f384321e
-              type: string
-            customAttributes:
-              description: >-
-                Attributes that can be added to the parcel. These attributes
-                cannot be used within fulfillment processes, but it could be
-                useful to have the information carried here.
-              type: object
-            customProductValue:
-              description: >-
-                Set this value if you want to overwrite the calculated product
-                value of the parcel. This field uses the smallest denomination,
-                e.g. Euro Cents. So a value of 1250 represents 12,50€.
-              example: 12.5
-              type: number
-            dimensions:
-              $ref: '#/components/schemas/ParcelDimensions'
-            documentsRef:
-              description: Reference to the documents collection from this entity
-              type: string
-            facilityRef:
-              type: string
-            id:
-              description: >-
-                The id of this parcel. It is generated during creation
-                automatically and suits as the primary identifier of the
-                described entity.
-              example: 95EWrieX09OmeriXIUbb
-              type: string
-            invoice:
-              $ref: '#/components/schemas/ConsumerAddress'
-            items:
-              items:
-                $ref: '#/components/schemas/ParcelItem'
-              type: array
-            loadUnitRefs:
-              description: Reference to array of load unit Refs
-              items:
-                type: string
-              type: array
-            operativeProcessRef:
-              type: string
-            paymentInformation:
-              $ref: '#/components/schemas/PaymentInformation'
-            pickUpInformation:
-              $ref: '#/components/schemas/ParcelPickUpInformation'
-            postalCharges:
-              $ref: '#/components/schemas/ParcelPostalCharge'
-            processRef:
-              type: string
-            productValue:
-              description: >-
-                Monetary value of all goods in this parcel. Needed for sending
-                cross border packages (customs) To be interpreted as money in
-                the currency given under paymentInformation.currency. This field
-                uses the smallest denomination, e.g. Euro Cents. So a value of
-                1250 represents 12,50€.
-              example: 1250
-              type: number
-            productValueCurrency:
-              $ref: '#/components/schemas/ProductValueCurrency'
-            productValueType:
-              $ref: '#/components/schemas/ProductValueType'
-            recipient:
-              $ref: '#/components/schemas/ConsumerAddress'
-            result:
-              $ref: '#/components/schemas/ParcelResult'
-            returnAddress:
-              $ref: '#/components/schemas/FacilityAddress'
-            sender:
-              $ref: '#/components/schemas/FacilityAddress'
-            services:
-              $ref: '#/components/schemas/ParcelServices'
-            shipmentRef:
-              description: The id of this shipment this parcel has been created for.
-              example: 95EWrieX09OmeriXIUbb
-              type: string
-            shortId:
-              example: AA12-1
-              type: string
-            status:
-              $ref: '#/components/schemas/ParcelStatus'
-            tenantOrderId:
-              description: >-
-                Field can be used as a reference number in foreign systems, for
-                example as a reference to the source system's identifier for
-                this order.
-              example: R456728546
-              type: string
-            tenantParcelId:
-              description: >-
-                Tenant specific parcel id, needs to be unique for non obsolete
-                or canceled parcel
-              example: MY-PARCEL-12345
-              type: string
-            transfers:
-              items:
-                $ref: '#/components/schemas/OperativeTransfer'
-              minItems: 0
-              type: array
-            workflowInformation:
-              oneOf:
-                - $ref: '#/components/schemas/WorkflowInformation'
-                - $ref: '#/components/schemas/WorkflowUnavailable'
-          required:
-            - id
-            - status
-            - carrierRef
-            - processRef
-            - sender
-            - recipient
-            - loadUnitRefs
-            - workflowInformation
+      properties:
+        anonymized:
+          description: Indicates if gdpr related data was anonymized
+          example: false
+          type: boolean
+        carrierInformation:
+          $ref: '#/components/schemas/ParcelCarrierInformation'
+        carrierProduct:
+          description: Desired product of given carrier to choose when ordering a label
+          example: EXPRESS
+          type: string
+        carrierRef:
+          description: Reference to the carrier this parcel should be send by
+          example: cf00e102-34f2-45c1-a846-6a21f384321e
+          type: string
+        created:
+          description: >-
+            The date this entity was created by fulfillmenttools. This value is
+            generated by the service.
+          example: 2020-02-03T08:45:51.525Z
+          format: date-time
+          type: string
+        customAttributes:
+          description: >-
+            Attributes that can be added to the parcel. These attributes cannot
+            be used within fulfillment processes, but it could be useful to have
+            the information carried here.
           type: object
-      type: object
-      title: Parcel
-      description: Parcel
-    ParcelActionsParameter:
-      anyOf:
-        - $ref: '#/components/schemas/ParcelSplitItemsActionParameter'
-        - $ref: '#/components/schemas/ParcelUpdateTrackingDataActionParameter'
-        - $ref: >-
-            #/components/schemas/UpdateParcelItemRecordableAttributesActionParameter
-        - $ref: '#/components/schemas/RemoveParcelFromTrackingActionParameter'
-        - $ref: '#/components/schemas/AddLabelsToParcelActionParameter'
-      type: object
-      title: ParcelActionsParameter
-      description: ParcelActionsParameter
-    ParcelArticleAttributeItemForUpdate:
-      additionalProperties: false
-      allOf:
-        - $ref: '#/components/schemas/ArticleAttributeItem'
+        customProductValue:
+          description: >-
+            Set this value if you want to overwrite the calculated product value
+            of the parcel. This field uses the smallest denomination, e.g. Euro
+            Cents. So a value of 1250 represents 12,50€.
+          example: 12.5
+          type: number
+        dimensions:
+          allOf:
+            - $ref: '#/components/schemas/ParcelDimensions'
+          nullable: true
+          type: object
+        documentsRef:
+          description: Reference to the documents collection from this entity
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        facilityRef:
+          type: string
+        id:
+          description: >-
+            The id of this parcel. It is generated during creation automatically
+            and suits as the primary identifier of the described entity.
+          example: 95EWrieX09OmeriXIUbb
+          type: string
+        invoice:
+          $ref: '#/components/schemas/ConsumerAddress'
+        items:
+          items:
+            $ref: '#/components/schemas/ParcelItem'
+          type: array
+        lastModified:
+          description: >-
+            The date this entity was modified last. This value is generated by
+            the service.
+          example: 2020-02-03T09:45:51.525Z
+          format: date-time
+          type: string
+        loadUnitRefs:
+          description: Reference to array of load unit Refs
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+          items:
+            type: string
+          type: array
+        operativeProcessRef:
+          type: string
+        paymentInformation:
+          $ref: '#/components/schemas/PaymentInformation'
+        pickUpInformation:
+          $ref: '#/components/schemas/ParcelPickUpInformation'
+        postalCharges:
+          $ref: '#/components/schemas/ParcelPostalCharge'
+        processRef:
+          type: string
+        productValue:
+          description: >-
+            Monetary value of all goods in this parcel. Needed for sending cross
+            border packages (customs) To be interpreted as money in the currency
+            given under paymentInformation.currency. This field uses the
+            smallest denomination, e.g. Euro Cents. So a value of 1250
+            represents 12,50€.
+          example: 1250
+          type: number
+        productValueCurrency:
+          $ref: '#/components/schemas/ProductValueCurrency'
+        productValueType:
+          $ref: '#/components/schemas/ProductValueType'
+        recipient:
+          $ref: '#/components/schemas/ConsumerAddress'
+        result:
+          $ref: '#/components/schemas/ParcelResult'
+        returnAddress:
+          $ref: '#/components/schemas/FacilityAddress'
+        sender:
+          $ref: '#/components/schemas/FacilityAddress'
+        sequenceNumber:
+          example: 42
+          type: integer
+        services:
+          $ref: '#/components/schemas/ParcelServices'
+        shipmentRef:
+          description: The id of this shipment this parcel has been created for.
+          example: 95EWrieX09OmeriXIUbb
+          type: string
+        shortId:
+          example: AA12-1
+          type: string
+        status:
+          $ref: '#/components/schemas/ParcelStatus'
+        tenantOrderId:
+          description: >-
+            Field can be used as a reference number in foreign systems, for
+            example as a reference to the source system's identifier for this
+            order.
+          example: R456728546
+          type: string
+        tenantParcelId:
+          description: >-
+            Tenant specific parcel id, needs to be unique for non obsolete or
+            canceled parcel
+          example: MY-PARCEL-12345
+          type: string
+        transfers:
+          items:
+            $ref: '#/components/schemas/OperativeTransfer'
+          type: array
+        version:
+          description: >-
+            The version of the document to be used in optimistic locking
+            mechanisms.
+          example: 42
+          format: int64
+          type: integer
+        workflowInformation:
+          oneOf:
+            - $ref: '#/components/schemas/WorkflowInformation'
+            - $ref: '#/components/schemas/WorkflowUnavailable'
       required:
-        - key
-        - value
-        - category
+        - version
+        - carrierRef
+        - id
+        - loadUnitRefs
+        - processRef
+        - recipient
+        - sender
+        - status
+        - workflowInformation
+      title: Parcel
       type: object
-      title: ParcelArticleAttributeItemForUpdate
-      description: ParcelArticleAttributeItemForUpdate
+      description: Parcel
     ParcelCarrierInformation:
-      additionalProperties: false
-      description: Carrier specific information about the parcel for the label creation
       properties:
         shippingContainerNumber:
           description: Specific shipping container number for the parcel
           example: 123456-ABC
           type: string
-      type: object
       title: ParcelCarrierInformation
+      type: object
+      description: ParcelCarrierInformation
     ParcelDetails:
       properties:
         dimensions:
@@ -66607,7 +66875,9 @@ components:
             - color: red
               label: ALPHA
         maxWeight:
-          description: The maximum weight in grams that the packagingUnit can hold.
+          description: >-
+            The maximum weight in grams of the packed packagingUnit. For PALLET
+            and LONG_GOODS it includes loadCarrierWeight.
           type: number
         minItemQuantity:
           description: The minimum number of items that can fit in the packagingUnit.
@@ -66665,24 +66935,33 @@ components:
       type: object
       description: ParcelDetails
     ParcelDimensions:
-      additionalProperties: false
-      nullable: true
       properties:
         customWeight:
+          description: >-
+            Set this value if you want to overwrite the calculated weight of the
+            parcel (in g).
+          example: 1700
           type: number
         height:
+          description: The height of the package (in cm)
+          example: 50
           type: number
         length:
+          description: The length of the package (in cm)
+          example: 100
           type: number
         weight:
+          description: The weight of the package (in g)
+          example: 1700
           type: number
         width:
+          description: The width of the package (in cm)
+          example: 25
           type: number
-      type: object
       title: ParcelDimensions
+      type: object
       description: ParcelDimensions
     ParcelForCreation:
-      additionalProperties: false
       properties:
         carrierInformation:
           $ref: '#/components/schemas/ParcelCarrierInformation'
@@ -66691,9 +66970,8 @@ components:
           example: EXPRESS
           type: string
         carrierRef:
-          description: >-
-            references the carrier to be used for sending. Can not be set when
-            creating a parcel for an existing shipment.
+          description: Reference to the carrier this parcel should be send by
+          example: cf00e102-34f2-45c1-a846-6a21f384321e
           type: string
         customAttributes:
           description: >-
@@ -66704,11 +66982,15 @@ components:
         customProductValue:
           description: >-
             Set this value if you want to overwrite the calculated product value
-            of the parcel.
+            of the parcel. This field uses the smallest denomination, e.g. Euro
+            Cents. So a value of 1250 represents 12,50€.
           example: 12.5
           type: number
         dimensions:
-          $ref: '#/components/schemas/ParcelDimensions'
+          allOf:
+            - $ref: '#/components/schemas/ParcelDimensions'
+          nullable: true
+          type: object
         invoice:
           $ref: '#/components/schemas/ConsumerAddress'
         items:
@@ -66717,11 +66999,13 @@ components:
           type: array
         loadUnitRefs:
           description: Reference to array of load unit Refs
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
           items:
             type: string
           type: array
         parentRef:
-          description: Reference to the parent container of this parcel
           type: string
         paymentInformation:
           $ref: '#/components/schemas/PaymentInformation'
@@ -66731,9 +67015,10 @@ components:
           description: >-
             Monetary value of all goods in this parcel. Needed for sending cross
             border packages (customs) To be interpreted as money in the currency
-            given under paymentInformation.currency. This value is calculated
-            from the items in the parcel.
-          example: 12.5
+            given under paymentInformation.currency. This field uses the
+            smallest denomination, e.g. Euro Cents. So a value of 1250
+            represents 12,50€.
+          example: 1250
           type: number
         productValueCurrency:
           $ref: '#/components/schemas/ProductValueCurrency'
@@ -66770,13 +67055,11 @@ components:
         transfers:
           items:
             $ref: '#/components/schemas/OperativeTransfer'
-          minItems: 0
           type: array
-      type: object
       title: ParcelForCreation
+      type: object
       description: ParcelForCreation
     ParcelForDirectCreation:
-      additionalProperties: false
       properties:
         carrierProduct:
           description: Desired product of given carrier to choose when ordering a label
@@ -66786,6 +67069,7 @@ components:
           description: >-
             references the carrier to be used for sending. Can not be set when
             creating a parcel for an existing shipment.
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
           type: string
         customAttributes:
           description: >-
@@ -66800,7 +67084,10 @@ components:
           example: 12.5
           type: number
         dimensions:
-          $ref: '#/components/schemas/ParcelDimensions'
+          allOf:
+            - $ref: '#/components/schemas/ParcelDimensions'
+          nullable: true
+          type: object
         facilityRef:
           description: Reference to the facility this parcel is created for
           example: 95EWrieX09OmeriXIUbb
@@ -66813,6 +67100,9 @@ components:
           type: array
         loadUnitRefs:
           description: Reference to array of load unit Refs
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
           items:
             type: string
           type: array
@@ -66889,12 +67179,12 @@ components:
           example: MY-PARCEL-12345
           type: string
       required:
-        - facilityRef
         - carrierRef
         - recipient
         - sender
-      type: object
+        - facilityRef
       title: ParcelForDirectCreation
+      type: object
       description: ParcelForDirectCreation
     ParcelInformation:
       properties:
@@ -67459,89 +67749,6 @@ components:
       type: object
       description: ParcelInvoiceFilter
     ParcelItem:
-      allOf:
-        - $ref: '#/components/schemas/LineItem'
-        - $ref: '#/components/schemas/SubstitutedLineItem'
-        - $ref: '#/components/schemas/ServiceJobAlteredLineItem'
-        - properties:
-            article:
-              $ref: '#/components/schemas/ParcelItemArticle'
-            countryOfManufacture:
-              deprecated: true
-              description: Deprecated - use article.attribute.countryOfManufacture instead
-              type: string
-            description:
-              deprecated: true
-              description: >-
-                Description - article.title will be used instead - of the given
-                item/items
-              example: Item Description
-              type: string
-            hsCode:
-              deprecated: true
-              description: Deprecated - use article.attribute.hsCode instead
-              maxLength: 50
-              type: string
-            id:
-              description: The id of this parcelItem.
-              example: ae3ba67c-a42c-4816-96ac-16231e49640c
-              type: string
-            originId:
-              description: >-
-                The id of the line item this line item was originated from,
-                before any split has happened. This can be used to restore the
-                ‘pre-split’ status.
-              example: df671041-10dd-4600-a2ff-e9ffe2556bba
-              nullable: true
-              type: string
-            parcelItemValue:
-              allOf:
-                - $ref: '#/components/schemas/ParcelItemValue'
-              deprecated: true
-              description: >-
-                Deprecated - use article.attribute.pricePerUnit and
-                article.attribute.currency instead
-            quantity:
-              description: amount of the given items
-              example: 5
-              minimum: 1
-              type: integer
-            weightInGram:
-              deprecated: true
-              description: >-
-                Deprecated - use article.attribute.weightPerUnit instead -
-                Weight of a single item in gram
-              example: 10000
-              type: integer
-          required:
-            - id
-            - quantity
-          type: object
-      type: object
-      xml:
-        name: ParcelItem
-      title: ParcelItem
-      description: ParcelItem
-    ParcelItemArticle:
-      allOf:
-        - $ref: '#/components/schemas/AbstractArticle'
-        - properties:
-            attributes:
-              items:
-                $ref: '#/components/schemas/ArticleAttributeItem'
-              maxItems: 40
-              type: array
-          type: object
-      type: object
-      xml:
-        name: ParcelItemArticle
-      title: ParcelItemArticle
-      description: ParcelItemArticle
-    ParcelItemForCreation:
-      allOf:
-        - $ref: '#/components/schemas/LineItemForCreation'
-        - $ref: '#/components/schemas/SubstitutedLineItem'
-        - $ref: '#/components/schemas/ServiceJobAlteredLineItem'
       properties:
         article:
           $ref: '#/components/schemas/ParcelItemArticle'
@@ -67550,13 +67757,28 @@ components:
           description: Deprecated - use article.attribute.countryOfManufacture instead
           type: string
         description:
-          description: Description of the given item/items
+          deprecated: true
+          description: >-
+            Description - article.title will be used instead - of the given
+            item/items
           example: Item Description
           type: string
         hsCode:
           deprecated: true
           description: Deprecated - use article.attribute.hsCode instead
           maxLength: 50
+          type: string
+        id:
+          description: The id of this parcelItem.
+          example: ae3ba67c-a42c-4816-96ac-16231e49640c
+          type: string
+        originId:
+          description: >-
+            The id of the line item this line item was originated from, before
+            any split has happened. This can be used to restore the ‘pre-split’
+            status.
+          example: df671041-10dd-4600-a2ff-e9ffe2556bba
+          nullable: true
           type: string
         parcelItemValue:
           allOf:
@@ -67570,6 +67792,159 @@ components:
           example: 5
           minimum: 1
           type: integer
+        serviceJobRefs:
+          description: Reference to the service jobs that have altered this line item
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+          items:
+            type: string
+          maxItems: 100
+          minItems: 0
+          type: array
+        substituteForOrderedItem:
+          type: object
+        weightInGram:
+          deprecated: true
+          description: >-
+            Deprecated - use article.attribute.weightPerUnit instead - Weight of
+            a single item in gram
+          example: 10000
+          type: integer
+      required:
+        - id
+        - quantity
+      title: ParcelItem
+      type: object
+      description: ParcelItem
+    ParcelItemArticle:
+      properties:
+        titleLocalized:
+          allOf:
+            - $ref: '#/components/schemas/LocaleString'
+          description: The translations for the title of the product
+        attributes:
+          items:
+            $ref: '#/components/schemas/ArticleAttributeItem'
+          maxItems: 50
+          type: array
+        customAttributes:
+          deprecated: true
+          description: >-
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
+          type: object
+        imageUrl:
+          description: >-
+            A web link to a picture of this article. Ensure that no
+            authentication is needed to fetch the image.
+          example: https://example.com/resource
+          type: string
+        tenantArticleId:
+          description: This is a reference to an article number
+          example: '4711'
+          type: string
+        title:
+          description: The title of the product
+          example: Cologne Water
+          type: string
+        weight:
+          description: Weight value is in gram
+          minimum: 0
+          type: number
+      required:
+        - tenantArticleId
+        - title
+      title: ParcelItemArticle
+      type: object
+      description: ParcelItemArticle
+    ParcelItemForCreation:
+      properties:
+        article:
+          allOf:
+            - $ref: '#/components/schemas/ParcelItemArticle'
+          description: Information about the lineItem
+        countryOfManufacture:
+          deprecated: true
+          description: Deprecated - use article.attribute.countryOfManufacture instead
+          type: string
+        customAttributes:
+          description: >-
+            Attributes that can be added to the lineItem. These attributes
+            cannot be used within fulfillment processes, but it could be useful
+            to have the information carried here.
+          type: object
+        description:
+          description: Description of the given item/items
+          example: Item Description
+          type: string
+        globalLineItemId:
+          description: >-
+            This ID is used to identify if this line item is related to the line
+            item of other operational entities.
+          type: string
+        hsCode:
+          deprecated: true
+          description: Deprecated - use article.attribute.hsCode instead
+          maxLength: 50
+          type: string
+        measurementUnitKey:
+          description: Measurement unit key of the item, for example "pcs" or "kg"
+          example: pcs
+          minLength: 1
+          type: string
+        parcelItemValue:
+          allOf:
+            - $ref: '#/components/schemas/ParcelItemValue'
+          deprecated: true
+          description: >-
+            Deprecated - use article.attribute.pricePerUnit and
+            article.attribute.currency instead
+        quantity:
+          description: amount of the given items
+          example: 5
+          minimum: 1
+          type: integer
+        recordableAttributes:
+          description: >-
+            Customizable information about the lineItem that can be set during
+            the process.
+          items:
+            $ref: '#/components/schemas/RecordableAttributeForCreation'
+          type: array
+        scannableCodes:
+          description: Codes that can be used for scanning this lineItem
+          items:
+            type: string
+          type: array
+        secondaryMeasurementUnitKey:
+          description: >-
+            Identifier for items unit of measurement. E.g. measurementUnitKey is
+            pieces and secondaryMeasurementUnitKey is gram
+          example: g
+          minLength: 1
+          type: string
+        secondaryQuantity:
+          description: >-
+            secondary quantity of this item, e.g. quantity is the count and
+            secondaryQuantity is the weight
+          example: 42
+          minimum: 0
+          type: number
+        serviceJobRefs:
+          description: Reference to the service jobs that have altered this line item
+          example:
+            - 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+            - 0190d6e8-9a1b-7c2d-8e3f-5a7b9c1d3e5f
+          items:
+            type: string
+          maxItems: 100
+          minItems: 0
+          type: array
+        substituteForOrderedItem:
+          type: object
         weightInGram:
           deprecated: true
           description: >-
@@ -67579,43 +67954,9 @@ components:
           type: integer
       required:
         - quantity
-      type: object
-      xml:
-        name: ParcelItemForCreation
       title: ParcelItemForCreation
-      description: ParcelItemForCreation
-    ParcelItemForUpdate:
-      additionalProperties: false
-      properties:
-        id:
-          description: >-
-            The id of this parcelItem. It is generated during creation
-            automatically and suits as the primary identifier of the described
-            entity.
-          example: ae3ba67c-a42c-4816-96ac-16231e49640c
-          type: string
-        parcelItemArticleAttributes:
-          items:
-            $ref: '#/components/schemas/ArticleAttributeItem'
-          maxItems: 40
-          type: array
-        parcelItemValue:
-          anyOf:
-            - $ref: '#/components/schemas/ParcelItemValue'
-          deprecated: true
-          description: >-
-            Deprecated - use article.attribute.pricePerUnit and
-            article.attribute.currency instead
-        weightInGram:
-          description: Weight of a single item in gram
-          example: 10000
-          nullable: true
-          type: integer
-      required:
-        - id
       type: object
-      title: ParcelItemForUpdate
-      description: ParcelItemForUpdate
+      description: ParcelItemForCreation
     ParcelItemsArticleFilter:
       properties:
         tenantArticleId:
@@ -67654,10 +67995,6 @@ components:
       type: object
       description: ParcelItemsListFilter
     ParcelItemValue:
-      description: >-
-        deprecated, use
-        MandatoryShippingArticleAttribute.attributes.pricePerUnit instead
-      nullable: true
       properties:
         currency:
           description: Currency of the given value
@@ -67676,8 +68013,9 @@ components:
       required:
         - value
         - currency
-      type: object
       title: ParcelItemValue
+      type: object
+      description: ParcelItemValue
     ParcelLabelClassification:
       properties:
         nameLocalized:
@@ -67751,25 +68089,14 @@ components:
       title: ParcelLabelCreationFailedPayload
       description: ParcelLabelCreationFailedPayload
     ParcelLabelType:
-      description: Which kind of label you want to add to the parcel
+      description: The type of a parcel label
       enum:
         - SEND_LABEL
         - RETURN_LABEL
       type: string
+      xml:
+        name: ParcelLabelType
       title: ParcelLabelType
-    ParcelLabelTypeEnum:
-      description: The type of possible Parcel Labels
-      enum:
-        - return.pdf
-        - all.pdf
-        - send.pdf
-        - customs.pdf
-        - return.zpl
-        - all.zpl
-        - send.zpl
-        - customs.zpl
-      type: string
-      title: ParcelLabelTypeEnum
     ParcelPaginatedResult:
       properties:
         pageInfo:
@@ -67799,6 +68126,7 @@ components:
             anyOf:
               - $ref: '#/components/schemas/ModifyParcel'
               - $ref: '#/components/schemas/ModifyParcelLoadUnit'
+          maxItems: 10
           minItems: 1
           type: array
         version:
@@ -67809,32 +68137,28 @@ components:
           format: int64
           type: integer
       required:
-        - version
         - actions
-      type: object
-      xml:
-        name: ParcelPatchActions
+        - version
       title: ParcelPatchActions
+      type: object
       description: ParcelPatchActions
     ParcelPickUpInformation:
-      additionalProperties: false
-      nullable: true
       properties:
         endTime:
           description: needs to be after start time
+          example: 2026-06-17T12:00:00.000Z
           format: date-time
           type: string
         startTime:
           description: needs to be before end time
+          example: 2026-06-17T12:00:00.000Z
           format: date-time
           type: string
       required:
         - startTime
         - endTime
-      type: object
-      xml:
-        name: ParcelItemForCreation
       title: ParcelPickUpInformation
+      type: object
       description: ParcelPickUpInformation
     ParcelPostalCharge:
       properties:
@@ -67847,10 +68171,10 @@ components:
           example: 15.5
           type: number
       required:
-        - currency
         - value
-      type: object
+        - currency
       title: ParcelPostalCharge
+      type: object
       description: ParcelPostalCharge
     ParcelProductValue:
       properties:
@@ -67858,9 +68182,6 @@ components:
           allOf:
             - $ref: '#/components/schemas/CurrencyCode'
           description: The currency of the price as an ISO 4217 code.
-          example: EUR
-          nullable: true
-          type: string
         decimalPlaces:
           description: Number of decimal places for the given currency
           example: 2
@@ -67877,8 +68198,8 @@ components:
         - value
         - currency
         - decimalPlaces
-      type: object
       title: ParcelProductValue
+      type: object
       description: ParcelProductValue
     ParcelRecipientFilter:
       properties:
@@ -67903,9 +68224,6 @@ components:
       type: object
       description: ParcelRecipientFilter
     ParcelResult:
-      description: >-
-        Within this object you can find the result of the request after it has
-        been processed (status = DONE or FAILED)
       properties:
         carrierParcelRef:
           description: The reference number of the parcel by the carrier
@@ -67929,16 +68247,11 @@ components:
           example: someCepProvider.com/pathToReturnLabel.pdf
           type: string
         errors:
-          additionalProperties: false
+          allOf:
+            - $ref: '#/components/schemas/ParcelResultErrors'
           description: >-
             temporary field to show errors during parcel creation, will be
             removed in the future. used to create summary in error case
-          properties:
-            labelError:
-              type: string
-            returnLabelError:
-              type: string
-          type: object
         labelUrl:
           description: >-
             The URL where you can download the label relative to the path of
@@ -67999,8 +68312,18 @@ components:
           type: string
       required:
         - summary
-      type: object
       title: ParcelResult
+      type: object
+      description: ParcelResult
+    ParcelResultErrors:
+      properties:
+        labelError:
+          type: string
+        returnLabelError:
+          type: string
+      title: ParcelResultErrors
+      type: object
+      description: ParcelResultErrors
     ParcelResultFilter:
       properties:
         carrierTrackingNumber:
@@ -68146,8 +68469,6 @@ components:
       type: object
       description: ParcelSearchQuery
     ParcelServices:
-      additionalProperties: false
-      nullable: true
       properties:
         additionalTransportInsurance:
           description: Additional insurance for the parcel by the carrier
@@ -68183,8 +68504,8 @@ components:
         signature:
           description: Signature from anyone needed
           type: boolean
-      type: object
       title: ParcelServices
+      type: object
       description: ParcelServices
     ParcelSort:
       properties:
@@ -68201,20 +68522,16 @@ components:
       title: ParcelSort
       type: object
       description: ParcelSort
-    ParcelSplitItemsActionEnum:
-      enum:
-        - SPLIT_LINES_PARCEL
-      type: string
-      title: ParcelSplitItemsActionEnum
-      description: ParcelSplitItemsActionEnum
     ParcelSplitItemsActionParameter:
-      additionalProperties: false
       properties:
         name:
-          $ref: '#/components/schemas/ParcelSplitItemsActionEnum'
+          enum:
+            - SPLIT_LINES_PARCEL
+          type: string
         splitItemsInfo:
           items:
             $ref: '#/components/schemas/ParcelSplitItemsInfo'
+          maxItems: 50
           type: array
         version:
           description: >-
@@ -68230,7 +68547,6 @@ components:
       type: object
       description: ParcelSplitItemsActionParameter
     ParcelSplitItemsInfo:
-      additionalProperties: false
       properties:
         itemId:
           description: references the id of the item of a parcel
@@ -68243,10 +68559,11 @@ components:
       required:
         - itemId
         - quantity
-      type: object
       title: ParcelSplitItemsInfo
+      type: object
       description: ParcelSplitItemsInfo
     ParcelStatus:
+      description: The status of a parcel
       enum:
         - OPEN
         - PROCESSING
@@ -68256,8 +68573,9 @@ components:
         - OBSOLETE
         - WAITING_FOR_INPUT
       type: string
+      xml:
+        name: ParcelStatus
       title: ParcelStatus
-      description: ParcelStatus
     ParcelStatusEnumFilter:
       properties:
         eq:
@@ -68300,33 +68618,90 @@ components:
       type: object
       description: ParcelStatusEnumFilter
     ParcelTagConfiguration:
-      allOf:
-        - $ref: '#/components/schemas/VersionedResource'
-        - $ref: '#/components/schemas/TagConfiguration'
       properties:
         alternativeReturnAddressConfiguration:
           $ref: '#/components/schemas/AlternativeReturnAddressConfiguration'
+        created:
+          description: >-
+            The date this entity was created by fulfillmenttools. This value is
+            generated by the service.
+          example: 2020-02-03T08:45:51.525Z
+          format: date-time
+          type: string
+        lastModified:
+          description: >-
+            The date this entity was modified last. This value is generated by
+            the service.
+          example: 2020-02-03T09:45:51.525Z
+          format: date-time
+          type: string
+        offeredDocumentsByDefault:
+          description: >-
+            This configuration is a fallback and applies only if none of the
+            entries in offeredDocumentsPerTag can be applied
+          items:
+            $ref: '#/components/schemas/OfferedDocument'
+          maxItems: 500
+          type: array
+        offeredDocumentsPerTag:
+          description: >-
+            All entries with a match in their matchingValues will be combined
+            when determining what documents belong to an entity
+          items:
+            $ref: '#/components/schemas/OfferedDocumentPerTag'
+          maxItems: 500
+          type: array
+        version:
+          description: >-
+            The version of the document to be used in optimistic locking
+            mechanisms.
+          example: 42
+          format: int64
+          type: integer
       required:
+        - version
+        - offeredDocumentsPerTag
+        - offeredDocumentsByDefault
         - alternativeReturnAddressConfiguration
-      type: object
       title: ParcelTagConfiguration
+      type: object
       description: ParcelTagConfiguration
     ParcelTagConfigurationForUpsert:
-      allOf:
-        - $ref: '#/components/schemas/TagConfiguration'
       properties:
         alternativeReturnAddressConfiguration:
           $ref: '#/components/schemas/AlternativeReturnAddressConfiguration'
+        offeredDocumentsByDefault:
+          description: >-
+            This configuration is a fallback and applies only if none of the
+            entries in offeredDocumentsPerTag can be applied
+          items:
+            $ref: '#/components/schemas/OfferedDocument'
+          maxItems: 500
+          type: array
+        offeredDocumentsPerTag:
+          description: >-
+            All entries with a match in their matchingValues will be combined
+            when determining what documents belong to an entity
+          items:
+            $ref: '#/components/schemas/OfferedDocumentPerTag'
+          maxItems: 500
+          type: array
         version:
-          example: 0
-          type: number
+          description: >-
+            The version of the document to be used in optimistic locking
+            mechanisms.
+          example: 42
+          format: int64
+          type: integer
       required:
         - alternativeReturnAddressConfiguration
-      type: object
+        - offeredDocumentsByDefault
+        - offeredDocumentsPerTag
+        - version
       title: ParcelTagConfigurationForUpsert
+      type: object
       description: ParcelTagConfigurationForUpsert
     ParcelTrackingData:
-      additionalProperties: false
       properties:
         carrierStatus:
           description: Optional additional carrier tracker information
@@ -68336,7 +68711,7 @@ components:
           $ref: '#/components/schemas/ParcelTrackingDataStatusEnum'
         trackingNumber:
           description: '123456789'
-          example: 42
+          example: '42'
           type: string
         type:
           $ref: '#/components/schemas/ParcelTrackingDataType'
@@ -68348,34 +68723,32 @@ components:
       type: object
       description: ParcelTrackingData
     ParcelTrackingDataStatusEnum:
-      description: Status of the given enum to be mapped onto the found parcel
+      description: The status of parcel tracking data
       enum:
         - DELIVERED
         - PICKED_UP
       type: string
+      xml:
+        name: ParcelTrackingDataStatusEnum
       title: ParcelTrackingDataStatusEnum
     ParcelTrackingDataType:
-      description: Which kind of tracking data you want to add to the parcel label
+      description: The type of parcel tracking data
       enum:
         - SEND_LABEL
         - RETURN_LABEL
       type: string
+      xml:
+        name: ParcelTrackingDataType
       title: ParcelTrackingDataType
-    ParcelUpdateTrackingDataActionEnum:
-      enum:
-        - UPDATE_TRACKING_DATA
-      type: string
-      title: ParcelUpdateTrackingDataActionEnum
-      description: ParcelUpdateTrackingDataActionEnum
     ParcelUpdateTrackingDataActionParameter:
-      additionalProperties: false
       properties:
         name:
-          $ref: '#/components/schemas/ParcelUpdateTrackingDataActionEnum'
+          enum:
+            - UPDATE_TRACKING_DATA
+          type: string
         trackingData:
           items:
-            anyOf:
-              - $ref: '#/components/schemas/ParcelTrackingData'
+            $ref: '#/components/schemas/ParcelTrackingData'
           maxItems: 2
           minItems: 1
           type: array
@@ -68764,6 +69137,8 @@ components:
             - EXPORT_READ
             - EXPORT_WRITE
             - STOCK_AVAILABILITIES_READ
+            - PRODUCT_RELATION_READ
+            - PRODUCT_RELATION_WRITE
             - LISTING_READ
             - LISTING_WRITE
             - LISTING_DELETE
@@ -68893,6 +69268,7 @@ components:
             - PURCHASE_PRICE
             - ZONE
             - SAFETY_STOCK
+            - PRODUCT_RELATION
             - AVAILABILITY_THRESHOLDS
             - PICKUP_SERVICE
             - PRODUCT
@@ -75540,6 +75916,314 @@ components:
       title: ProductInformation
       type: object
       description: ProductInformation
+    ProductRelation:
+      properties:
+        titleLocalized:
+          $ref: '#/components/schemas/LocaleString'
+        created:
+          description: Creation date of this product relation
+          format: date-time
+          type: string
+        customAttributes:
+          description: >-
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
+          type: object
+        id:
+          description: Unique identifier of this product relation
+          example: 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
+          type: string
+        imageUrl:
+          description: >-
+            A web link to a picture of this product relation. Ensure that no
+            authentication is needed to fetch the image.
+          example: https://example.com/resource
+          type: string
+        lastModified:
+          description: Last modification date of this product relation
+          format: date-time
+          type: string
+        tenantArticleId:
+          description: Tenant article ID of the article this product relation belongs to
+          example: MY_ARTICLE_ID
+          type: string
+        title:
+          description: >-
+            The title of the product relation. Derived from titleLocalized
+            (tenant default locale, otherwise the first available locale)
+          type: string
+        type:
+          description: >-
+            Type of the product relation. BILL_OF_MATERIAL: the article is
+            assembled from the products of the matching variant
+          enum:
+            - BILL_OF_MATERIAL
+          type: string
+        variants:
+          description: >-
+            Variants of the product relation. If several variants match the
+            context, the one with the lowest priority value applies; a variant
+            without context is the default
+          items:
+            $ref: '#/components/schemas/ProductRelationVariant'
+          type: array
+        version:
+          description: Version number of this product relation
+          example: 1
+          type: number
+      required:
+        - id
+        - version
+        - created
+        - lastModified
+        - tenantArticleId
+        - type
+        - title
+        - titleLocalized
+        - variants
+      title: ProductRelation
+      type: object
+      description: ProductRelation
+    ProductRelationContext:
+      properties:
+        operator:
+          description: 'NOT inverts the condition: it matches if none of the values apply'
+          enum:
+            - NOT
+          type: string
+        type:
+          description: Type of the context condition
+          enum:
+            - FACILITY
+          type: string
+        values:
+          description: Facility IDs the condition refers to
+          items:
+            type: string
+          type: array
+      required:
+        - type
+        - values
+      title: ProductRelationContext
+      type: object
+      description: ProductRelationContext
+    ProductRelationContextForCreation:
+      properties:
+        operator:
+          description: 'NOT inverts the condition: it matches if none of the values apply'
+          enum:
+            - NOT
+          type: string
+        type:
+          description: Type of the context condition
+          enum:
+            - FACILITY
+          type: string
+        values:
+          description: Facility IDs the condition refers to
+          items:
+            type: string
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+        - type
+        - values
+      title: ProductRelationContextForCreation
+      type: object
+      description: ProductRelationContextForCreation
+    ProductRelationForCreation:
+      properties:
+        titleLocalized:
+          $ref: '#/components/schemas/LocaleString'
+        customAttributes:
+          description: >-
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
+          type: object
+        imageUrl:
+          description: >-
+            A web link to a picture of this product relation. Ensure that no
+            authentication is needed to fetch the image.
+          example: https://example.com/resource
+          type: string
+        tenantArticleId:
+          description: Tenant article ID of the article this product relation belongs to
+          example: MY_ARTICLE_ID
+          minLength: 1
+          type: string
+        type:
+          description: >-
+            Type of the product relation. BILL_OF_MATERIAL: the article is
+            assembled from the products of the matching variant
+          enum:
+            - BILL_OF_MATERIAL
+          type: string
+        variants:
+          description: >-
+            Variants of the product relation. If several variants match the
+            context, the one with the lowest priority value applies; a variant
+            without context is the default
+          items:
+            $ref: '#/components/schemas/ProductRelationVariantForCreation'
+          maxItems: 50
+          minItems: 1
+          type: array
+      required:
+        - titleLocalized
+        - variants
+        - tenantArticleId
+        - type
+      title: ProductRelationForCreation
+      type: object
+      description: ProductRelationForCreation
+    ProductRelationForUpdate:
+      properties:
+        titleLocalized:
+          $ref: '#/components/schemas/LocaleString'
+        customAttributes:
+          description: >-
+            Attributes that can be added to this entity. These attributes
+            **cannot** be used within fulfillment processes, but enable you to
+            attach custom data from your systems to fulfillmenttools entities.
+          nullable: true
+          type: object
+        imageUrl:
+          description: >-
+            A web link to a picture of this product relation. Ensure that no
+            authentication is needed to fetch the image.
+          example: https://example.com/resource
+          type: string
+        variants:
+          description: >-
+            Variants of the product relation. If several variants match the
+            context, the one with the lowest priority value applies; a variant
+            without context is the default
+          items:
+            $ref: '#/components/schemas/ProductRelationVariantForCreation'
+          maxItems: 50
+          minItems: 1
+          type: array
+        version:
+          description: Version number of this product relation
+          example: 1
+          type: integer
+      required:
+        - titleLocalized
+        - variants
+        - version
+      title: ProductRelationForUpdate
+      type: object
+      description: ProductRelationForUpdate
+    ProductRelationProduct:
+      properties:
+        quantity:
+          description: Quantity of the product needed for one unit of the article
+          example: 42
+          minimum: 1
+          type: integer
+        tenantArticleId:
+          description: Tenant article ID of the product
+          example: MY_ARTICLE_ID
+          minLength: 1
+          type: string
+      required:
+        - tenantArticleId
+        - quantity
+      title: ProductRelationProduct
+      type: object
+      description: ProductRelationProduct
+    ProductRelationProductForCreation:
+      properties:
+        quantity:
+          description: Quantity of the product needed for one unit of the article
+          example: 42
+          minimum: 1
+          type: integer
+        tenantArticleId:
+          description: Tenant article ID of the product
+          example: MY_ARTICLE_ID
+          minLength: 1
+          type: string
+      required:
+        - tenantArticleId
+        - quantity
+      title: ProductRelationProductForCreation
+      type: object
+      description: ProductRelationProductForCreation
+    ProductRelationType:
+      description: The type of the product relation
+      enum:
+        - BILL_OF_MATERIAL
+      title: ProductRelationType
+      type: string
+    ProductRelationVariant:
+      properties:
+        context:
+          description: >-
+            Conditions under which this variant applies. If omitted, it is the
+            default
+          items:
+            $ref: '#/components/schemas/ProductRelationContext'
+          type: array
+        priority:
+          description: >-
+            Priority of the variant. The lower the value, the earlier the
+            variant is applied if several match. Must be unique within the
+            product relation
+          example: 42
+          minimum: 0
+          type: integer
+        products:
+          description: >-
+            Products and quantities required for one unit of the article. Single
+            articles only
+          items:
+            $ref: '#/components/schemas/ProductRelationProduct'
+          type: array
+      required:
+        - priority
+        - products
+      title: ProductRelationVariant
+      type: object
+      description: ProductRelationVariant
+    ProductRelationVariantForCreation:
+      properties:
+        context:
+          description: >-
+            Conditions under which this variant applies. If omitted, it is the
+            default
+          items:
+            $ref: '#/components/schemas/ProductRelationContextForCreation'
+          maxItems: 100
+          type: array
+        priority:
+          description: >-
+            Priority of the variant. The lower the value, the earlier the
+            variant is applied if several match. Must be unique within the
+            product relation
+          example: 42
+          minimum: 0
+          type: integer
+        products:
+          description: >-
+            Products and quantities required for one unit of the article. Single
+            articles only
+          items:
+            $ref: '#/components/schemas/ProductRelationProductForCreation'
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+        - priority
+        - products
+      title: ProductRelationVariantForCreation
+      type: object
+      description: ProductRelationVariantForCreation
     Products:
       properties:
         products:
@@ -76848,6 +77532,23 @@ components:
         - percentage
         - calculationBaseAmount
       title: RelativeSurchargeCostDetail
+    ReleaseBeforeHandoverConfiguration:
+      additionalProperties: false
+      properties:
+        active:
+          default: false
+          description: >-
+            If activated, all handover jobs will be created with a status of
+            WAITING_FOR_INPUT and can't be handed over until they are released
+            using the RELEASE_HANDOVER_JOB action. This can be used for, for
+            example, to alter prices before the handover job can be set to
+            HANDED_OVER.
+          type: boolean
+      required:
+        - active
+      type: object
+      title: ReleaseBeforeHandoverConfiguration
+      description: ReleaseBeforeHandoverConfiguration
     RemoteConfiguration:
       properties:
         created:
@@ -77326,17 +78027,12 @@ components:
       type: object
       xml:
         name: RemoveLineItemFromPackingTargetContainer
-    RemoveParcelFromTrackingActionEnum:
-      enum:
-        - REMOVE_PARCEL_FROM_TRACKING
-      type: string
-      title: RemoveParcelFromTrackingActionEnum
-      description: RemoveParcelFromTrackingActionEnum
     RemoveParcelFromTrackingActionParameter:
-      additionalProperties: false
       properties:
         name:
-          $ref: '#/components/schemas/RemoveParcelFromTrackingActionEnum'
+          enum:
+            - REMOVE_PARCEL_FROM_TRACKING
+          type: string
         version:
           description: >-
             The version of the document to be used in optimistic locking
@@ -79362,6 +80058,8 @@ components:
               - EXPORT_READ
               - EXPORT_WRITE
               - STOCK_AVAILABILITIES_READ
+              - PRODUCT_RELATION_READ
+              - PRODUCT_RELATION_WRITE
               - LISTING_READ
               - LISTING_WRITE
               - LISTING_DELETE
@@ -79602,6 +80300,8 @@ components:
               - EXPORT_READ
               - EXPORT_WRITE
               - STOCK_AVAILABILITIES_READ
+              - PRODUCT_RELATION_READ
+              - PRODUCT_RELATION_WRITE
               - LISTING_READ
               - LISTING_WRITE
               - LISTING_DELETE
@@ -79833,6 +80533,8 @@ components:
               - EXPORT_READ
               - EXPORT_WRITE
               - STOCK_AVAILABILITIES_READ
+              - PRODUCT_RELATION_READ
+              - PRODUCT_RELATION_WRITE
               - LISTING_READ
               - LISTING_WRITE
               - LISTING_DELETE
@@ -80070,6 +80772,8 @@ components:
               - EXPORT_READ
               - EXPORT_WRITE
               - STOCK_AVAILABILITIES_READ
+              - PRODUCT_RELATION_READ
+              - PRODUCT_RELATION_WRITE
               - LISTING_READ
               - LISTING_WRITE
               - LISTING_DELETE
@@ -80332,6 +81036,20 @@ components:
       x-badges:
         - color: orange
           label: BETA
+    RoutingContext:
+      description: >-
+        Why the current routing run happens. With optimizer routing, strategy
+        conditions read it with the property path
+        `$.routingContext.routingType`.
+      properties:
+        routingType:
+          $ref: '#/components/schemas/RoutingType'
+      required:
+        - routingType
+      type: object
+      xml:
+        name: RoutingContext
+      title: RoutingContext
     RoutingDecisionContext:
       enum:
         - LISTING
@@ -81224,6 +81942,15 @@ components:
           description: '@deprecated This property has been deprecated and has no meaning.'
           items:
             $ref: '#/components/schemas/RoutingPlanLineItemPiece'
+          type: array
+        productRelations:
+          description: >-
+            Shares of the quantity that belong to product relations, e.g. bills
+            of material. The rest of the quantity is standalone demand. Read
+            only.
+          items:
+            $ref: '#/components/schemas/LineItemProductRelation'
+          readOnly: true
           type: array
       title: RoutingPlanLineItem
       description: RoutingPlanLineItem
@@ -82331,10 +83058,7 @@ components:
     RoutingStrategyLastMileTransferLimitConfig:
       additionalProperties: false
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />Only
-        evaluated by optimization routing. When active, a sourcing option
+        Only evaluated by optimization routing. When active, a sourcing option
         contains at most maxTransfersPerFacility last-mile transfers (target is
         the customer or the ordering facility) per source facility, regardless
         of carrier, target node or transfer group. Multiple packaging units
@@ -82351,9 +83075,6 @@ components:
         - maxTransfersPerFacility
       type: object
       title: RoutingStrategyLastMileTransferLimitConfig
-      x-badges:
-        - color: red
-          label: ALPHA
     RoutingStrategyNode:
       additionalProperties: false
       properties:
@@ -82419,13 +83140,6 @@ components:
                 StandardPriorityRating: '#/components/schemas/RoutingStrategyStandardPriorityRating'
                 ToolkitPriorityRating: '#/components/schemas/RoutingStrategyToolkitPriorityRating'
           type: array
-          description: >-
-            This part of the API is in Alpha status. For details, see the <a
-            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-            target="_blank">API release lifecycle documentation</a>.<br /><br />
-          x-badges:
-            - color: red
-              label: ALPHA
         ratings:
           items:
             anyOf:
@@ -82544,13 +83258,6 @@ components:
                 ToolkitPriorityRating: '#/components/schemas/RoutingStrategyToolkitPriorityRating'
           maxItems: 100
           type: array
-          description: >-
-            This part of the API is in Alpha status. For details, see the <a
-            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-            target="_blank">API release lifecycle documentation</a>.<br /><br />
-          x-badges:
-            - color: red
-              label: ALPHA
         ratings:
           items:
             anyOf:
@@ -83180,6 +83887,34 @@ components:
         name: RoutingStrategyTransporter
       title: RoutingStrategyTransporter
       description: RoutingStrategyTransporter
+    RoutingType:
+      description: |-
+        The situation that triggered the routing run:
+          * `INITIAL` - the first routing of an order
+          * `TIMETRIGGERED_REROUTE` - reroute of expired pick jobs
+          * `REROUTE_ON_SHORTPICK` - reroute after a short pick
+          * `ORDERSPLIT_ON_SHORTPICK` - order split after a short pick
+          * `TASK_REROUTE` - manual reroute of routing plans
+          * `REROUTE_ON_STOCKZEROED` - reroute of an open pick job whose stock was zeroed
+          * `REROUTE_ON_PICKJOB_REJECTED` - reroute of a rejected pick job
+          * `REROUTE_ON_PICKJOB_ABORTED` - reroute of an aborted pick job
+          * `PROCESS_REROUTE` - reroute of a whole process
+          * `REROUTE_ON_ORDER_MODIFIED` - reroute after the order was modified
+      enum:
+        - INITIAL
+        - TIMETRIGGERED_REROUTE
+        - REROUTE_ON_SHORTPICK
+        - ORDERSPLIT_ON_SHORTPICK
+        - TASK_REROUTE
+        - REROUTE_ON_STOCKZEROED
+        - REROUTE_ON_PICKJOB_REJECTED
+        - REROUTE_ON_PICKJOB_ABORTED
+        - PROCESS_REROUTE
+        - REROUTE_ON_ORDER_MODIFIED
+      type: string
+      xml:
+        name: RoutingType
+      title: RoutingType
     SafetyStock:
       properties:
         created:
@@ -88374,11 +89109,6 @@ components:
           description: >-
             Analysis of connections. Null when the facility is inside the
             resulting graph.
-        fenceAnalysis:
-          description: List of fence analyses.
-          items:
-            $ref: '#/components/schemas/FenceAnalysis'
-          type: array
         layers:
           description: >-
             The search graph layers the facility is part of. Empty when it is
@@ -88397,11 +89127,22 @@ components:
         lookupFacilityId:
           description: The ID of the facility being looked up.
           type: string
+        standardFenceAnalysis:
+          description: Analyses of the standard fences.
+          items:
+            $ref: '#/components/schemas/StandardFenceAnalysis'
+          type: array
+        toolkitFenceAnalysis:
+          description: >-
+            Analyses of the toolkit fences, one entry per fence, layer and
+            evaluated scope instance.
+          items:
+            $ref: '#/components/schemas/ToolkitFenceAnalysis'
+          type: array
       required:
         - lookupFacilityId
         - layers
         - listingAvailability
-        - fenceAnalysis
       title: SourcingOptionAnalyzeActionFacilityResult
       type: object
       description: SourcingOptionAnalyzeActionFacilityResult
@@ -88979,6 +89720,28 @@ components:
       title: StackResponse
       type: object
       description: StackResponse
+    StandardFenceAnalysis:
+      properties:
+        fenceId:
+          description: The ID of the fence.
+          type: string
+        fenceName:
+          description: The name of the fence.
+          type: string
+        nodeId:
+          description: The ID of the node.
+          type: string
+        result:
+          allOf:
+            - $ref: '#/components/schemas/FenceResult'
+          description: The result of the fence evaluation.
+      required:
+        - nodeId
+        - fenceId
+        - result
+      title: StandardFenceAnalysis
+      type: object
+      description: StandardFenceAnalysis
     StartItemReturnActionParameter:
       properties:
         itemReturnJobVersion:
@@ -93461,13 +94224,21 @@ components:
           example: 15EZrieW09OmeriXIUbc
           type: string
         status:
-          $ref: '#/components/schemas/ParcelStatus'
+          enum:
+            - OPEN
+            - PROCESSING
+            - DONE
+            - FAILED
+            - CANCELED
+            - OBSOLETE
+            - WAITING_FOR_INPUT
+          type: string
       required:
-        - parcelRef
         - carrierRef
+        - parcelRef
         - status
-      type: object
       title: StrippedParcel
+      type: object
       description: StrippedParcel
     StrippedParcels:
       properties:
@@ -93479,8 +94250,8 @@ components:
           description: Total number of found entities for this query
           example: 42
           type: integer
-      type: object
       title: StrippedParcels
+      type: object
       description: StrippedParcels
     StrippedPickJob:
       allOf:
@@ -95141,17 +95912,21 @@ components:
         The entities that can be compared by the toolkit fence or rating
           * `ORDER`
           * `FACILITY`
-          * `CARRIERCONNECTION`
+          * `CARRIERCONNECTION` - right side only, not supported when optimization routing is enabled
           * `LISTING`
+          * `FACILITY_CONNECTION` - right side only, the facility connection used by the sourcing option; only supported when optimization routing is enabled
           * `ORDERING_FACILITY` - left side only
           * `ORDERING_FACILITY_GROUPS` - left side only
+          * `ROUTING_CONTEXT` - routing strategy conditions only, with optimizer routing
       enum:
         - ORDER
         - FACILITY
         - CARRIERCONNECTION
         - LISTING
+        - FACILITY_CONNECTION
         - ORDERING_FACILITY
         - ORDERING_FACILITY_GROUPS
+        - ROUTING_CONTEXT
       type: string
       xml:
         name: ToolkitAllowedEntities
@@ -95360,6 +96135,54 @@ components:
         name: ToolkitFence
       title: ToolkitFence
       description: ToolkitFence
+    ToolkitFenceAnalysis:
+      properties:
+        evaluationScope:
+          description: The scope the fence rule is evaluated on.
+          enum:
+            - WHOLE_ENTITY
+            - LINE_ITEM
+            - ASSIGNED_TRANSFER
+          type: string
+        fenceId:
+          description: The ID of the fence.
+          type: string
+        fenceName:
+          description: The name of the fence.
+          type: string
+        inputs:
+          description: >-
+            The entities the fence rule read, with the source and IDs of their
+            data.
+          items:
+            $ref: '#/components/schemas/ToolkitFenceInput'
+          type: array
+        layer:
+          description: The layer at which the fence was evaluated.
+          type: number
+        nodeId:
+          description: The ID of the node.
+          type: string
+        result:
+          allOf:
+            - $ref: '#/components/schemas/FenceResult'
+          description: The result of the fence evaluation.
+        skipReason:
+          allOf:
+            - $ref: '#/components/schemas/FenceSkipReason'
+          description: >-
+            Why the fence was not evaluated. Set only when the result is
+            SKIPPED.
+      required:
+        - nodeId
+        - fenceId
+        - evaluationScope
+        - layer
+        - result
+        - inputs
+      title: ToolkitFenceAnalysis
+      type: object
+      description: ToolkitFenceAnalysis
     ToolkitFenceForCreation:
       properties:
         descriptionLocalized:
@@ -95426,6 +96249,42 @@ components:
         name: ToolkitFenceForModification
       title: ToolkitFenceForModification
       description: ToolkitFenceForModification
+    ToolkitFenceInput:
+      properties:
+        entity:
+          allOf:
+            - $ref: '#/components/schemas/ToolkitFenceInputEntity'
+          description: The entity the fence rule reads.
+        ids:
+          description: The IDs of the entity instances the fence was evaluated on.
+          items:
+            type: string
+          type: array
+        source:
+          allOf:
+            - $ref: '#/components/schemas/FenceInputSource'
+          description: Where the data of the entity came from.
+      required:
+        - entity
+        - source
+        - ids
+      title: ToolkitFenceInput
+      type: object
+      description: ToolkitFenceInput
+    ToolkitFenceInputEntity:
+      description: The entity the fence rule reads.
+      enum:
+        - ORDER
+        - ORDER_REDUCED_LINE_ITEMS
+        - ORDER_REDUCED_TRANSFER_ASSIGNMENTS
+        - ORDERING_FACILITY
+        - ORDERING_FACILITY_GROUPS
+        - FACILITY
+        - FACILITY_CONNECTION
+        - LISTING
+        - STRATEGY_CONTEXT
+      title: ToolkitFenceInputEntity
+      type: string
     ToolkitFencesTransporter:
       properties:
         fences:
@@ -96448,7 +97307,9 @@ components:
           description: The maximum number of items that can fit in the packagingUnit.
           type: number
         maxVolume:
-          description: The maximum volume in cubic millimeters of the packagingUnit.
+          description: >-
+            The maximum volume in cubic millimeters of the packagingUnit. For
+            LONG_GOODS it applies to the goods lying on their load carrier.
           type: number
         maxVolumetricWeight:
           description: >-
@@ -96462,7 +97323,9 @@ components:
             - color: red
               label: ALPHA
         maxWeight:
-          description: The maximum weight in grams that the packagingUnit can hold.
+          description: >-
+            The maximum weight in grams of the packed packagingUnit. For PALLET
+            and LONG_GOODS it includes loadCarrierWeight.
           type: number
         minItemQuantity:
           description: The minimum number of items that can fit in the packagingUnit.
@@ -97029,20 +97892,16 @@ components:
       title: UpdatePackLineItemRecordableAttributesActionParameter
       type: object
       description: UpdatePackLineItemRecordableAttributesActionParameter
-    UpdateParcelItemRecordableAttributesActionEnum:
-      enum:
-        - UPDATE_PARCEL_ITEM_RECORDABLE_ATTRIBUTES
-      type: string
-      title: UpdateParcelItemRecordableAttributesActionEnum
-      description: UpdateParcelItemRecordableAttributesActionEnum
     UpdateParcelItemRecordableAttributesActionParameter:
-      additionalProperties: false
       properties:
         name:
-          $ref: '#/components/schemas/UpdateParcelItemRecordableAttributesActionEnum'
+          enum:
+            - UPDATE_PARCEL_ITEM_RECORDABLE_ATTRIBUTES
+          type: string
         recordableAttributeUpdates:
           items:
             $ref: '#/components/schemas/RecordableAttributeForUpdate'
+          maxItems: 50
           type: array
         version:
           description: >-
@@ -98043,6 +98902,8 @@ components:
               - EXPORT_READ
               - EXPORT_WRITE
               - STOCK_AVAILABILITIES_READ
+              - PRODUCT_RELATION_READ
+              - PRODUCT_RELATION_WRITE
               - LISTING_READ
               - LISTING_WRITE
               - LISTING_DELETE
@@ -99311,6 +100172,10 @@ tags:
     name: Carriers
   - description: Endpoints to create, update, and read carriers configuration.
     name: Carriers configuration
+  - description: >-
+      Endpoints to create, update, and read product relations between articles,
+      e.g. bills of material.
+    name: Product relations
   - description: Endpoints to create, update, and read products.
     name: Products
   - description: Endpoints to create, update, and read categories.
