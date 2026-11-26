@@ -185,6 +185,9 @@ func RoutingDecisionLogs(filter RoutingDecisionLogsFilter) ListOp[json.RawMessag
 		Name:  "list the routing decision logs",
 		Items: "decisionLogs",
 		ID:    RawID,
+		// The API wants an ObjectId as startAfterId but every id it returns is a
+		// UUID, so there is no way past the first page.
+		Unpageable: true,
 		Do: func(ctx context.Context, raw api.ClientInterface, after string, size int) (*http.Response, error) {
 			params := &api.GetRoutingDecisionLogsParams{
 				OrderRef:           nonZero(filter.OrderRef),

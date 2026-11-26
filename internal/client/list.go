@@ -55,6 +55,12 @@ type ListOp[T any] struct {
 	// a failure worth naming rather than a loop worth entering. [RawID] is the
 	// implementation every caller wants.
 	ID func(T) (string, error)
+
+	// Unpageable is set for an endpoint that hands out ids it will not take back as
+	// startAfterId, so no second page can be addressed. [ListAll] then reads one page
+	// (as large as the API allows) and reports the rest as an [*UnpageableError]
+	// instead of asking for a page that can only fail.
+	Unpageable bool
 }
 
 // ListPage is one page of a GET list.
@@ -111,6 +117,25 @@ func List[T any](ctx context.Context, c *Client, op ListOp[T], after string, siz
 	return decodeListPage(op, res.Body)
 }
 
+// UnpageableError says that a list has more entries than one page, on an endpoint
+// that cannot be paged ([ListOp.Unpageable]). Like [TruncatedError] it is not a
+// failure of the request: everything yielded before it is real.
+type UnpageableError struct {
+	Op      string
+	Fetched int
+	Total   int
+}
+
+func (e *UnpageableError) Error() string {
+	return fmt.Sprintf("there are more results: %s can only be read one page at a time, and stopped after %d of %d",
+		e.Op, e.Fetched, e.Total)
+}
+
+// Hint tells the user how to see the rest.
+func (e *UnpageableError) Hint() string {
+	return "The API cannot page this list past its first page. Narrow it with a filter instead."
+}
+
 // ListAll yields every entity, walking the list one page at a time.
 //
 // It is [SearchAll] for the id-keyed endpoints, and it keeps the same two promises:
@@ -129,6 +154,9 @@ func ListAll[T any](ctx context.Context, c *Client, op ListOp[T], size int, opts
 
 		if size == 0 {
 			size = PageSize
+			if op.Unpageable {
+				size = MaxSize
+			}
 		}
 
 		seen := 0
@@ -150,6 +178,15 @@ func ListAll[T any](ctx context.Context, c *Client, op ListOp[T], size int, opts
 					return
 				}
 				seen++
+			}
+
+			// The first page is all there is to be had: asking for a second would
+			// send an id the API rejects, a 404 about a value the user never typed.
+			if op.Unpageable {
+				if page.Total > seen {
+					yield(zero, &UnpageableError{Op: op.Name, Fetched: seen, Total: page.Total})
+				}
+				return
 			}
 
 			// The end of the list. This envelope has no hasNextPage, so it has to be

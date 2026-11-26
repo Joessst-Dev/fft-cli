@@ -216,6 +216,10 @@ func runList(cmd *cobra.Command, deps *Deps, build listOpFn, page pageFlags, vie
 	// The total is also how this model knows there is more: there is no hasNextPage to
 	// read, so "did I see all of them?" is a subtraction.
 	if result.Total > len(result.Items) && deps.Printer.Format() == output.Table {
+		if op.Unpageable {
+			deps.Printer.Notef("There are more %s, but the API cannot page past the first page. Raise --size or narrow with a filter.", view.Noun)
+			return renderList(deps, view, result.Items)
+		}
 		deps.Printer.Notef("There are more %s. Pass --all to fetch them.", view.Noun)
 	}
 
@@ -247,8 +251,9 @@ func renderPage[Q, S any](ctx context.Context, deps *Deps, c *client.Client, op 
 // pages a cursor or startAfterId and is bounded by --max-items either way.
 func renderSeq(deps *Deps, seq iter.Seq2[json.RawMessage, error], page pageFlags, view listView) error {
 	var (
-		items     []json.RawMessage
-		truncated *client.TruncatedError
+		items      []json.RawMessage
+		truncated  *client.TruncatedError
+		unpageable *client.UnpageableError
 	)
 
 	for item, err := range seq {
@@ -257,14 +262,19 @@ func renderSeq(deps *Deps, seq iter.Seq2[json.RawMessage, error], page pageFlags
 		// ends the iteration and is reported — loudly, and on stderr — because a
 		// truncated list that does not say so is a wrong answer that looks right.
 		case errors.As(err, &truncated):
+		case errors.As(err, &unpageable):
 		case err != nil:
 			return err
 		default:
 			items = append(items, item)
 		}
-		if truncated != nil {
+		if truncated != nil || unpageable != nil {
 			break
 		}
+	}
+
+	if unpageable != nil {
+		deps.Printer.Warnf("%s. %s", unpageable, unpageable.Hint())
 	}
 
 	if truncated != nil {
@@ -275,7 +285,7 @@ func renderSeq(deps *Deps, seq iter.Seq2[json.RawMessage, error], page pageFlags
 	// the end. A truncated run knows how many it fetched and nothing about how many
 	// it did not, and reporting the former as the latter would be a wrong number
 	// stated with confidence.
-	if page.total && truncated == nil {
+	if page.total && truncated == nil && unpageable == nil {
 		deps.Printer.Notef("Total: %d", len(items))
 	}
 

@@ -76,4 +76,25 @@ var _ = Describe("fft routing decision-logs", func() {
 		Expect(c.out()).To(BeEmpty())
 		Expect(c.errOut()).To(ContainSubstring("No decision logs"))
 	})
+
+	Context("when there is more than one page", func() {
+		// The API answers a startAfterId taken from its own response with a 404, so
+		// the second page must never be requested.
+		It("reads one page, warns on stderr and never asks for page 2", func() {
+			api := c.fakeTenant(func(w http.ResponseWriter, r *http.Request, _ []byte) {
+				if r.URL.Query().Get("startAfterId") != "" {
+					writeJSON(w, http.StatusNotFound, `{"message":"Invalid ObjectId string: l1"}`)
+					return
+				}
+				writeJSON(w, http.StatusOK, decisionLogPage([]string{decisionLog("l1", "R456", "o-uuid")}, 5))
+			})
+
+			Expect(c.run("routing", "decision-logs", "--all", "-o", "json")).To(Equal(exitcode.OK))
+			Expect(api.only().Query.Get("startAfterId")).To(BeEmpty())
+			Expect(api.only().Query.Get("size")).To(Equal("250"))
+			Expect(c.out()).To(ContainSubstring("l1"))
+			Expect(c.errOut()).To(ContainSubstring("1 of 5"))
+			Expect(c.errOut()).To(ContainSubstring("filter"))
+		})
+	})
 })
