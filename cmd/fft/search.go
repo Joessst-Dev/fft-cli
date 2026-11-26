@@ -217,7 +217,7 @@ func runList(cmd *cobra.Command, deps *Deps, build listOpFn, page pageFlags, vie
 	// read, so "did I see all of them?" is a subtraction.
 	if result.Total > len(result.Items) && deps.Printer.Format() == output.Table {
 		if op.Unpageable {
-			deps.Printer.Notef("There are more %s, but the API cannot page past the first page. Raise --size or narrow with a filter.", view.Noun)
+			deps.Printer.Notef("There are more %s, but the API cannot page past the first page. Narrow with a filter.", view.Noun)
 			return renderList(deps, view, result.Items)
 		}
 		deps.Printer.Notef("There are more %s. Pass --all to fetch them.", view.Noun)
@@ -284,8 +284,13 @@ func renderSeq(deps *Deps, seq iter.Seq2[json.RawMessage, error], page pageFlags
 	// --all read every match, so the count *is* the total — but only if it reached
 	// the end. A truncated run knows how many it fetched and nothing about how many
 	// it did not, and reporting the former as the latter would be a wrong number
-	// stated with confidence.
-	if page.total && truncated == nil && unpageable == nil {
+	// stated with confidence. An unpageable list is the exception: it did not count
+	// the rest either, but the API did, and the same envelope's total is what the
+	// single-page path reports, so --all agrees with it.
+	switch {
+	case page.total && unpageable != nil:
+		deps.Printer.Notef("Total: %d", unpageable.Total)
+	case page.total && truncated == nil:
 		deps.Printer.Notef("Total: %d", len(items))
 	}
 

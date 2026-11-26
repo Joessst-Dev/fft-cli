@@ -58,8 +58,9 @@ type ListOp[T any] struct {
 
 	// Unpageable is set for an endpoint that hands out ids it will not take back as
 	// startAfterId, so no second page can be addressed. [ListAll] then reads one page
-	// (as large as the API allows) and reports the rest as an [*UnpageableError]
-	// instead of asking for a page that can only fail.
+	// (as large as fft allows: [MaxSize], the one --size bound every list command
+	// shares, which may be below what the endpoint's own schema declares) and reports
+	// the rest as an [*UnpageableError] instead of asking for a page that can only fail.
 	Unpageable bool
 }
 
@@ -127,13 +128,13 @@ type UnpageableError struct {
 }
 
 func (e *UnpageableError) Error() string {
-	return fmt.Sprintf("there are more results: %s can only be read one page at a time, and stopped after %d of %d",
+	return fmt.Sprintf("there are more results: the API cannot page past the first page to %s, so this is %d of %d",
 		e.Op, e.Fetched, e.Total)
 }
 
 // Hint tells the user how to see the rest.
 func (e *UnpageableError) Hint() string {
-	return "The API cannot page this list past its first page. Narrow it with a filter instead."
+	return "Narrow it with a filter."
 }
 
 // ListAll yields every entity, walking the list one page at a time.

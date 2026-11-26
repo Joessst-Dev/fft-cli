@@ -96,5 +96,30 @@ var _ = Describe("fft routing decision-logs", func() {
 			Expect(c.errOut()).To(ContainSubstring("1 of 5"))
 			Expect(c.errOut()).To(ContainSubstring("filter"))
 		})
+
+		// Same total as the single-page path prints: the API counted, so a script
+		// keyed on the "Total:" line must not break only under --all.
+		It("reports the API's own total under --all --total", func() {
+			c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+				writeJSON(w, http.StatusOK, decisionLogPage([]string{decisionLog("l1", "R456", "o-uuid")}, 5))
+			})
+
+			Expect(c.run("routing", "decision-logs", "--all", "--total")).To(Equal(exitcode.OK))
+			Expect(c.errOut()).To(ContainSubstring("Total: 5"))
+		})
+
+		// Without --all the old advice ("Pass --all to fetch them") would send the
+		// user straight back to the failure, so the notice must not give it.
+		It("tells a plain run to narrow with a filter, not to pass --all", func() {
+			api := c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+				writeJSON(w, http.StatusOK, decisionLogPage([]string{decisionLog("l1", "R456", "o-uuid")}, 5))
+			})
+
+			Expect(c.run("routing", "decision-logs")).To(Equal(exitcode.OK))
+			Expect(api.only().Query.Get("startAfterId")).To(BeEmpty())
+			Expect(c.errOut()).To(ContainSubstring("cannot page past the first page"))
+			Expect(c.errOut()).NotTo(ContainSubstring("--all"))
+			Expect(c.out()).To(ContainSubstring("l1"))
+		})
 	})
 })
