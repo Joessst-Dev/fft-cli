@@ -85,6 +85,17 @@ var _ = Describe("decoding a fulfillmenttools error", func() {
 			Expect(err.(interface{ Hint() string }).Hint()).To(ContainSubstring("fft auth whoami"))
 		})
 
+		It("still blames the tenant for an empty array, which is its envelope's shape too", func() {
+			err := client.Check(http.StatusForbidden, []byte("[]"))
+			Expect(err).To(MatchError("the API returned HTTP 403: []"))
+			Expect(err.(interface{ Hint() string }).Hint()).To(ContainSubstring("fft auth whoami"))
+		})
+
+		It("does not take a JSON null for the envelope", func() {
+			err := client.Check(http.StatusForbidden, []byte("null"))
+			Expect(err).To(MatchError(ContainSubstring("a proxy or gateway between fft and the tenant")))
+		})
+
 		It("does not blame a proxy for a bare 403", func() {
 			err := client.Check(http.StatusForbidden, nil)
 			Expect(err).To(MatchError("the API returned HTTP 403"))
@@ -310,5 +321,40 @@ var _ = Describe("building the API client", func() {
 			"https://t.example.com/x", "http://t.example.com/y", true),
 		Entry("a different non-default port is refused",
 			"https://t.example.com:8443/x", "https://t.example.com:9443/y", true),
+	)
+})
+
+var _ = Describe("a proxy that refuses to open the tunnel to the tenant", func() {
+	// net/http turns any non-200 CONNECT reply into a bare transport error, so this
+	// never arrives as a response for Check to classify. These specs go through a real
+	// proxy and the real transport for that reason.
+	DescribeTable("is named as the proxy's refusal, with a hint that is not about permissions",
+		func(status int) {
+			proxy := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				Expect(r.Method).To(Equal(http.MethodConnect))
+				w.WriteHeader(status)
+			}))
+			DeferCleanup(proxy.Close)
+			proxyURL, err := url.Parse(proxy.URL)
+			Expect(err).NotTo(HaveOccurred())
+			proxyURL.User = url.UserPassword("svc", "s3cret")
+
+			hc := &http.Client{Transport: client.TunnelTransport(proxyURL)}
+			_, err = hc.Get("https://tenant.example.test/api/facilities") //nolint:noctx // a spec against a stub proxy
+			Expect(err).To(HaveOccurred())
+
+			err = client.RequestError("list facilities", err)
+
+			var refused *client.ProxyRefusedError
+			Expect(errors.As(err, &refused)).To(BeTrue())
+			Expect(refused.Status).To(Equal(status))
+			Expect(err.Error()).To(ContainSubstring(http.StatusText(status)))
+			// The proxy's credentials ride in its URL; the message must carry the host only.
+			Expect(err.Error()).NotTo(ContainSubstring("s3cret"))
+			Expect(err.(interface{ Hint() string }).Hint()).To(ContainSubstring("HTTPS_PROXY"))
+			Expect(exitcode.FromError(err)).To(Equal(exitcode.General))
+		},
+		Entry("403", http.StatusForbidden),
+		Entry("407", http.StatusProxyAuthRequired),
 	)
 })

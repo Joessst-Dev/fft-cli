@@ -25,6 +25,8 @@
 package client
 
 import (
+	"bytes"
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
@@ -234,7 +236,43 @@ func transport() http.RoundTripper {
 	t := http.DefaultTransport.(*http.Transport).Clone()
 	t.TLSClientConfig = &tls.Config{MinVersion: tls.VersionTLS12}
 	t.ResponseHeaderTimeout = 60 * time.Second
+	t.OnProxyConnectResponse = refuseConnect
 	return t
+}
+
+// ProxyRefusedError is an explicit proxy (HTTPS_PROXY) declining to open the tunnel
+// to the tenant. net/http never hands such a refusal back as a response — it turns
+// any non-200 CONNECT reply into a bare transport error, `Get "…": Forbidden` — so
+// APIError.Check never sees it. This is the typed error that reaches the user
+// instead, with the same hint an in-tunnel intermediary gets.
+type ProxyRefusedError struct {
+	// Status is the CONNECT response's status code (403, 407, …).
+	Status int
+	// Proxy is the proxy's host, without credentials.
+	Proxy string
+}
+
+func (e *ProxyRefusedError) Error() string {
+	return fmt.Sprintf("the proxy %s refused to connect to the tenant (HTTP %d %s)", e.Proxy, e.Status, http.StatusText(e.Status))
+}
+
+// ExitCode is General, as it was before this error existed: the request never
+// reached the tenant, so neither 4 (auth) nor 5 (permission) is true of it.
+func (e *ProxyRefusedError) ExitCode() int { return exitcode.General }
+
+// Hint implements the same hint interface APIError does.
+func (e *ProxyRefusedError) Hint() string { return intermediaryHint }
+
+const intermediaryHint = "The request did not reach the tenant, so this account's permissions are not the cause. Check the proxy or firewall settings (HTTPS_PROXY / NO_PROXY) or ask whoever runs it."
+
+// refuseConnect is Transport.OnProxyConnectResponse: it is called for every CONNECT
+// reply, including the 200 that means success.
+func refuseConnect(_ context.Context, proxyURL *url.URL, _ *http.Request, res *http.Response) error {
+	if res.StatusCode == http.StatusOK {
+		return nil
+	}
+	// Host only: a proxy URL may carry user:password, which must not reach a terminal.
+	return &ProxyRefusedError{Status: res.StatusCode, Proxy: proxyURL.Host}
 }
 
 // APIError is a non-2xx answer from fulfillmenttools.
@@ -249,6 +287,10 @@ type APIError struct {
 	// Errors is the decoded envelope. It is empty when the body was not one — a
 	// proxy's HTML 502, say.
 	Errors []api.ErrorInner
+	// Envelope is whether the body was a JSON array at all — the tenant's shape —
+	// even an empty one, which leaves Errors empty. Intermediary keys on this and
+	// not on len(Errors), so that a tenant's `[]` is not blamed on a proxy.
+	Envelope bool
 	// Body is the raw response, kept only when it could not be decoded, so that
 	// the user is told *something* rather than "HTTP 502".
 	Body string
@@ -304,7 +346,7 @@ func (e *APIError) Conflict() (sent, current int64, ok bool) {
 // from the tenant: a corporate egress proxy, firewall or gateway answered instead.
 //
 // The tenant's errors always carry the JSON-array envelope, so a body that is not
-// one is the tell. An empty body is deliberately not counted — the tenant has been
+// a JSON array is the tell — an empty array still is one. An empty body is deliberately not counted — the tenant has been
 // seen to answer bare, and blaming a proxy for a real permission failure would send
 // the user off to the wrong team. 407 is the exception: only a proxy sends it.
 func (e *APIError) Intermediary() bool {
@@ -312,7 +354,7 @@ func (e *APIError) Intermediary() bool {
 	case http.StatusProxyAuthRequired:
 		return true
 	case http.StatusUnauthorized, http.StatusForbidden:
-		return len(e.Errors) == 0 && e.Body != ""
+		return !e.Envelope && e.Body != ""
 	default:
 		return false
 	}
@@ -344,7 +386,7 @@ func (e *APIError) Hint() string {
 	}
 
 	if e.Intermediary() {
-		return "The request did not reach the tenant, so this account's permissions are not the cause. Check the proxy or firewall settings (HTTPS_PROXY / NO_PROXY) or ask whoever runs it."
+		return intermediaryHint
 	}
 
 	switch e.Status {
@@ -391,7 +433,10 @@ func Check(status int, body []byte) error {
 	}
 
 	e := &APIError{Status: status}
-	if err := json.Unmarshal(body, &e.Errors); err != nil || len(e.Errors) == 0 {
+	// A JSON `null` also unmarshals into a slice without error, so the leading
+	// bracket is what says "array", not the absence of a decode error.
+	e.Envelope = bytes.HasPrefix(bytes.TrimSpace(body), []byte("[")) && json.Unmarshal(body, &e.Errors) == nil
+	if !e.Envelope || len(e.Errors) == 0 {
 		e.Errors = nil
 		e.Body = truncate(strings.TrimSpace(string(body)), maxBody)
 	}
