@@ -5,6 +5,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/Joessst-Dev/fft-cli/internal/config"
+	"github.com/Joessst-Dev/fft-cli/internal/secrets"
 )
 
 var _ = Describe("FromEnv", func() {
@@ -75,6 +76,88 @@ var _ = Describe("FromEnv", func() {
 
 			Expect(ok).To(BeTrue())
 			Expect(p.Ephemeral).To(BeTrue())
+		})
+	})
+
+	When("only the base URL and an id token are set", func() {
+		// A static token is never refreshed, so the Firebase key and the email are
+		// not part of what it takes to use one.
+		BeforeEach(func() {
+			env = map[string]string{
+				config.EnvBaseURL: "https://acme.api.fulfillmenttools.com",
+				config.EnvIDToken: "eyJhbGciOi...",
+			}
+		})
+
+		It("synthesizes an ephemeral project with no key and no email", func() {
+			p, ok := fromEnv()
+
+			Expect(ok).To(BeTrue())
+			Expect(p.Ephemeral).To(BeTrue())
+			Expect(p.BaseURL).To(Equal("https://acme.api.fulfillmenttools.com"))
+			Expect(p.FirebaseAPIKey).To(BeEmpty())
+			Expect(p.Email).To(BeEmpty())
+		})
+
+		It("still refuses a base URL that would send the token in the clear", func() {
+			env[config.EnvBaseURL] = "http://acme.api.fulfillmenttools.com"
+
+			_, _, err := config.FromEnv(lookup)
+
+			Expect(err).To(HaveOccurred())
+		})
+
+		It("is ignored without a base URL", func() {
+			delete(env, config.EnvBaseURL)
+
+			_, ok := fromEnv()
+
+			Expect(ok).To(BeFalse())
+		})
+	})
+
+	When("the password is whitespace-only beside a base URL and an id token", func() {
+		// The environment secret store reads the same variable, and it must agree that
+		// no password is set: otherwise this set is synthesized as token-only and then
+		// signed in with a blank password, failing on an empty Firebase key.
+		It("is token-only, and the secret store sees no password", func() {
+			env = map[string]string{
+				config.EnvBaseURL:  "https://acme.api.fulfillmenttools.com",
+				config.EnvPassword: "  ",
+				config.EnvIDToken:  "eyJhbGciOi...",
+			}
+
+			_, ok := fromEnv()
+			Expect(ok).To(BeTrue())
+
+			_, err := secrets.NewEnv(lookup).Get(secrets.Key("env", secrets.KindPassword))
+			Expect(err).To(MatchError(secrets.ErrNotFound))
+		})
+	})
+
+	When("a password is set beside an id token", func() {
+		// The password path keeps its all-or-nothing rule: a token must not mask a
+		// sign-in that was half given.
+		BeforeEach(func() {
+			env = map[string]string{
+				config.EnvBaseURL:  "https://acme.api.fulfillmenttools.com",
+				config.EnvPassword: "s3cret",
+				config.EnvIDToken:  "eyJhbGciOi...",
+			}
+		})
+
+		It("is ignored while the API key and email are missing", func() {
+			_, ok := fromEnv()
+
+			Expect(ok).To(BeFalse())
+		})
+
+		It("is ignored while only the email is missing", func() {
+			env[config.EnvFirebaseAPIKey] = "AIzaSyExample"
+
+			_, ok := fromEnv()
+
+			Expect(ok).To(BeFalse())
 		})
 	})
 

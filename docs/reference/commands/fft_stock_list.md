@@ -32,7 +32,7 @@ fft stock list [flags]
 ## Flags
 
 ```
-      --all[=true|false]            Page to the end and return every match, not just the first page
+      --all[=true|false]            Page to the end and return every match, not just the first page (--timeout bounds the whole walk; raise it for large lists)
       --facility string             Only the stocks of this facility, by tenantFacilityId or platform UUID
       --max-items int               With --all, stop after this many stocks (default 10000)
       --size int                    Stocks per page, 1–250 (default 20)

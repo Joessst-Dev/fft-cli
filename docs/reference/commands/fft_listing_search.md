@@ -39,7 +39,7 @@ fft listing search --file <file> [flags]
 ## Flags
 
 ```
-      --all[=true|false]       Page to the end and return every match, not just the first page
+      --all[=true|false]       Page to the end and return every match, not just the first page (--timeout bounds the whole walk; raise it for large lists)
       --example[=true|false]   Print a sample request body and exit
       --file string            JSON file holding the search payload ('-' for stdin)
       --max-items int          With --all, stop after this many listings (default 10000)

@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"iter"
 	"net/http"
@@ -165,14 +166,16 @@ func SearchAll[Q, S, T any](ctx context.Context, c *Client, op Op[T], payload Se
 		}
 
 		seen := 0
+		pages := 0
 		cursor := ""
 
 		for {
 			page, err := Search(ctx, c, op, payload)
 			if err != nil {
-				yield(zero, err)
+				yield(zero, walkError(ctx, op.Name, err, pages, seen))
 				return
 			}
+			pages++
 
 			for _, item := range page.Items {
 				if seen >= o.maxItems {
@@ -201,6 +204,58 @@ func SearchAll[Q, S, T any](ctx context.Context, c *Client, op Op[T], payload Se
 			payload.After = &cursor
 		}
 	}
+}
+
+// WalkTimeoutError says the whole-command --timeout expired part-way through an
+// --all walk. --timeout bounds the walk, not one request, so a large tenant can run
+// out of time long after every individual page was answering promptly — and a bare
+// "context deadline exceeded" names neither the flag nor how far it got.
+//
+// Nothing already fetched is lost to the caller of the iterator, but an --all
+// command does not print half a list as if it were the list, so the command fails.
+// It unwraps to [context.DeadlineExceeded], so the exit code is unchanged.
+type WalkTimeoutError struct {
+	Op    string
+	Pages int
+	Items int
+	// Err is what the walk's request returned, kept so the cause is never thrown
+	// away. It is the walk context's own error, so it matches DeadlineExceeded.
+	Err error
+}
+
+func (e *WalkTimeoutError) Error() string {
+	return fmt.Sprintf("%s: --timeout expired after %s (%s) of an --all walk",
+		e.Op, count(e.Pages, "page"), count(e.Items, "item"))
+}
+
+func (e *WalkTimeoutError) Unwrap() error { return e.Err }
+
+// count renders "1 page", "2 pages": the message is read by a person, and
+// "after 1 pages" is exactly the case a walk cut off on page two prints.
+func count(n int, noun string) string {
+	if n == 1 {
+		return fmt.Sprintf("1 %s", noun)
+	}
+	return fmt.Sprintf("%d %ss", n, noun)
+}
+
+// Hint tells the user how to finish the walk.
+func (e *WalkTimeoutError) Hint() string {
+	return "--timeout bounds the whole command, not one request: raise it (for example --timeout 10m) for a large list."
+}
+
+// walkError names a deadline that cut an --all walk short; any other error passes
+// through untouched, because only the deadline is the user's to fix with a flag.
+//
+// It asks the walk's own context, not the error: the transport's per-request
+// header timeout also matches [context.DeadlineExceeded] through errors.Is while
+// the walk's context is still live, and blaming --timeout for that — then
+// advising a larger one — would name the wrong cause and discard the real one.
+func walkError(ctx context.Context, op string, err error, pages, items int) error {
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		return &WalkTimeoutError{Op: op, Pages: pages, Items: items, Err: err}
+	}
+	return err
 }
 
 // AllOption configures [SearchAll].

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -220,6 +221,45 @@ var _ = Describe("listing by startAfterId", func() {
 			Expect(errors.As(err, &truncated)).To(BeTrue())
 			Expect(truncated.MaxItems).To(Equal(3))
 			Expect(truncated.Hint()).To(ContainSubstring("--max-items"))
+		})
+
+		// --timeout bounds the whole walk, so on a big tenant it expires between pages
+		// with every request healthy. The error has to say that, and how far it got.
+		It("names --timeout and how far it got when the deadline cuts the walk short", func() {
+			t := newTenant(func(w http.ResponseWriter, r *http.Request, n int) {
+				if n == 1 {
+					fmt.Fprint(w, page([]string{"c1", "c2"}, 99))
+					return
+				}
+				<-r.Context().Done()
+			})
+			short, cancel := context.WithTimeout(ctx, 150*time.Millisecond)
+			DeferCleanup(cancel)
+
+			got, err := collect(client.ListAll(short, unauthenticated(t), connections("BER-01", ""), 2))
+
+			Expect(got).To(Equal([]string{"c1", "c2"}))
+			var timedOut *client.WalkTimeoutError
+			Expect(errors.As(err, &timedOut)).To(BeTrue())
+			Expect(timedOut.Pages).To(Equal(1))
+			Expect(timedOut.Items).To(Equal(2))
+			Expect(timedOut.Hint()).To(ContainSubstring("--timeout"))
+			Expect(errors.Is(err, context.DeadlineExceeded)).To(BeTrue())
+			Expect(err).To(MatchError(ContainSubstring("after 1 page (2 items)")))
+		})
+
+		// The transport's header timeout also matches DeadlineExceeded. Blaming --timeout
+		// for it would advise raising a flag that never expired and hide the real cause.
+		It("does not blame --timeout for a page that stalled while the walk's deadline was live", func() {
+			t := newTenant(func(w http.ResponseWriter, _ *http.Request, _ int) {
+				fmt.Fprint(w, page([]string{"c1", "c2"}, 99))
+			})
+
+			_, err := collect(client.ListAll(ctx, stalledClient(t), connections("BER-01", ""), 2))
+
+			var timedOut *client.WalkTimeoutError
+			Expect(errors.As(err, &timedOut)).To(BeFalse())
+			Expect(err).To(MatchError(ContainSubstring("timeout awaiting response headers")))
 		})
 
 		// An id that does not advance would ask for the same page until the user gives

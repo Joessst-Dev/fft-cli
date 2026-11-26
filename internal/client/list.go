@@ -161,14 +161,16 @@ func ListAll[T any](ctx context.Context, c *Client, op ListOp[T], size int, opts
 		}
 
 		seen := 0
+		pages := 0
 		after := ""
 
 		for {
 			page, err := List(ctx, c, op, after, size)
 			if err != nil {
-				yield(zero, err)
+				yield(zero, walkError(ctx, op.Name, err, pages, seen))
 				return
 			}
+			pages++
 
 			for _, item := range page.Items {
 				if seen >= o.maxItems {

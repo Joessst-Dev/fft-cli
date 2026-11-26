@@ -110,11 +110,14 @@ func HistoryFromEnv(lookup func(string) (string, bool)) (enabled, set bool) {
 // a headless project therefore touches neither the keychain nor the config file
 // — everything it needs comes from the environment and dies with the process.
 //
-// A project is synthesized only when the base URL, the Firebase Web API key, an
-// email and *some* credential (a password to sign in with, or an id token to use
-// directly) are all present. A partial set is ignored rather than half-honoured:
-// silently falling back to the config file when one variable is missing is how a
-// CI job ends up running against the wrong tenant.
+// A project is synthesized only from a complete set: either the base URL, the
+// Firebase Web API key, an email and a password to sign in with, or — with no
+// password set — just the base URL and an id token to use directly (the key and
+// the email are never needed there, so they are optional and the email stays empty
+// unless given as FFT_EMAIL or derived from FFT_USERNAME, FFT_PROJECT_ID and
+// FFT_ENV). A partial set is ignored rather than half-honoured: silently
+// falling back to the config file when one variable is missing is how a CI job ends up
+// running against the wrong tenant.
 //
 // FFT_EMAIL may be left out when FFT_USERNAME, FFT_PROJECT_ID and
 // FFT_ENV/FFT_ENVIRONMENT are given: the synthetic address is then built from
@@ -166,8 +169,17 @@ func FromEnv(lookup func(string) (string, bool)) (Project, bool, error) {
 		p.Email = CandidateEmail(p.Username, p.ProjectID, p.Environment)
 	}
 
-	hasCredential := get(EnvPassword) != "" || get(EnvIDToken) != ""
-	if p.BaseURL == "" || p.FirebaseAPIKey == "" || p.Email == "" || !hasCredential {
+	// The password is signed in with the Firebase key and an address, so that path
+	// needs both. A token on its own is used as it is: it cannot be refreshed, so the
+	// key is never read, and the address is only a label. {base URL, id token} is a
+	// complete set — but only while no password is set, because a password beside a
+	// token still signs in and a half-given sign-in must not be quietly downgraded
+	// to the static token (or to the config file).
+	hasPassword := get(EnvPassword) != ""
+	tokenOnly := !hasPassword && get(EnvIDToken) != ""
+	complete := p.BaseURL != "" && (tokenOnly ||
+		(hasPassword && p.FirebaseAPIKey != "" && p.Email != ""))
+	if !complete {
 		return Project{}, false, nil
 	}
 

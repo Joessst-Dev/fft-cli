@@ -33,7 +33,7 @@ fft routing decision-logs [flags]
 ## Flags
 
 ```
-      --all[=true|false]          Page to the end and return every match, not just the first page
+      --all[=true|false]          Page to the end and return every match, not just the first page (--timeout bounds the whole walk; raise it for large lists)
       --max-items int             With --all, stop after this many decision logs (default 10000)
       --order string              Only logs for this orderRef
       --process string            Only logs for this processRef
