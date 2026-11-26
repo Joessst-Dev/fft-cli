@@ -20,13 +20,11 @@ const contentTypeJSON = "application/json"
 
 // entityDoc is an API entity as JSON, decoded but not modelled.
 //
-// Every mutating command works on this rather than on the generated models, for
-// two reasons. The generated models drop fields: the swagger repeatedly builds a
-// schema as an allOf with sibling properties, which oapi-codegen collapses — so
-// api.Facility has no `id` (though every response carries one) and
-// api.ManagedFacilityForCreation has no `address` (though it is required). And a
-// PUT that round-tripped through a lossy struct would silently *delete* the
-// fields the struct forgot: data loss wearing a type system.
+// Every mutating command works on this rather than on the generated models. The
+// spec is versionless and moves without notice, so a generated struct knows only
+// the fields of the last regeneration, and encoding/json drops every other field
+// on decode. A PUT that round-tripped an entity through such a struct would
+// silently *delete* whatever the API added since: data loss wearing a type system.
 //
 // So an entity is carried as the API sent it, and only the fields fft actually
 // changes are touched.

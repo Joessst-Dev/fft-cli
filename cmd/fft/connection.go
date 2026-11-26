@@ -248,11 +248,10 @@ func lookupConnection(ctx context.Context, c *client.Client, facility, id string
 // connectionView is the table's model of a connection: the handful of fields a human
 // scanning a list actually reads.
 //
-// It is hand-written because the generated model cannot be used at all. oapi-codegen
-// collapses this schema's allOf-with-siblings into `type InterFacilityConnection =
-// VersionedResource` — every field but created, lastModified and version is simply
-// gone — and it flattens the target union down to its discriminator, so the generated
-// target cannot even express the facility it points at. See the note on entityDoc.
+// It is hand-written, and decoded from the document rather than through the generated
+// model, so the table depends only on the fields it shows and not on whatever the last
+// spec sync did to the rest — and the target, a oneOf the generated model holds as raw
+// JSON, reads here as the plain facilityRef it is. See the note on entityDoc.
 //
 // What it leaves out is a decision, not an oversight. The table answers whether an
 // edge can be used and how long it takes; it does not price it. So fallbackCosts is

@@ -76,10 +76,9 @@ func getStrategyDoc(ctx context.Context, c *client.Client, id string) (entityDoc
 // routingStrategyView is the table's model of a strategy: the handful of fields a
 // human scanning the list reads.
 //
-// It is hand-written because the generated model cannot be used. RoutingStrategy is
-// an allOf-with-siblings (VersionedResource plus properties), which oapi-codegen
-// collapses down to the bare VersionedResource — every field but created,
-// lastModified and version is gone. See the note on entityDoc.
+// It is hand-written, like every view, so the table depends only on the fields it
+// shows rather than on the generated model a spec sync can reshape. See the note on
+// entityDoc.
 type routingStrategyView struct {
 	ID            string            `json:"id"`
 	Name          string            `json:"name"`
