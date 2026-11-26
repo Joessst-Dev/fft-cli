@@ -10711,10 +10711,7 @@ paths:
     get:
       deprecated: false
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br
-        />Returns the picking slots of the given facilities within the requested
+        Returns the picking slots of the given facilities within the requested
         period with configured, booked and remaining capacity. The result is
         paginated over the requested facilities in the order of the
         facilityRefs.
@@ -10809,9 +10806,6 @@ paths:
         - FACILITY_READ
       tags:
         - Facilities
-      x-badges:
-        - color: red
-          label: ALPHA
   /api/facilities/search:
     post:
       deprecated: false
@@ -42031,6 +42025,7 @@ components:
         - FACILITY
         - FACILITY_GROUP
         - CATEGORY
+        - TAG_REFERENCE
       type: string
       title: FacilityDiscountContextTypes
     FacilityDiscountForCreation:
@@ -44576,6 +44571,8 @@ components:
             fulfillmenttools team.
           example: true
           type: boolean
+        releaseBeforeHandoverConfiguration:
+          $ref: '#/components/schemas/ReleaseBeforeHandoverConfiguration'
       type: object
       title: HandoverConfiguration
       description: HandoverConfiguration
@@ -44600,6 +44597,8 @@ components:
             in the future. Please only use in communication with the FFT team.
           example: true
           type: boolean
+        releaseBeforeHandoverConfiguration:
+          $ref: '#/components/schemas/ReleaseBeforeHandoverConfiguration'
         version:
           type: number
       required:
@@ -53021,6 +53020,43 @@ components:
       title: LineItemForCreation
       type: object
       description: LineItemForCreation
+    LineItemProductRelation:
+      properties:
+        quantity:
+          description: >-
+            Quantity of this line item that belongs to the product relation
+            (relationQuantity multiplied by quantityPerUnit)
+          example: 50
+          type: number
+        quantityPerUnit:
+          description: >-
+            Quantity of this line item needed for one unit of the product
+            relation
+          example: 50
+          type: number
+        relationQuantity:
+          description: Number of units of the product relation
+          example: 1
+          type: number
+        tenantArticleId:
+          description: The tenantArticleId of the product relation
+          example: tent-3x3
+          type: string
+        title:
+          description: The title of the product relation
+          example: Tent 3x3 m
+          type: string
+        type:
+          $ref: '#/components/schemas/ProductRelationType'
+      required:
+        - tenantArticleId
+        - type
+        - relationQuantity
+        - quantityPerUnit
+        - quantity
+      title: LineItemProductRelation
+      type: object
+      description: LineItemProductRelation
     LinkedConfiguration:
       properties:
         ref:
@@ -76119,6 +76155,12 @@ components:
       title: ProductRelationProductForCreation
       type: object
       description: ProductRelationProductForCreation
+    ProductRelationType:
+      description: The type of the product relation
+      enum:
+        - BILL_OF_MATERIAL
+      title: ProductRelationType
+      type: string
     ProductRelationVariant:
       properties:
         context:
@@ -77490,6 +77532,23 @@ components:
         - percentage
         - calculationBaseAmount
       title: RelativeSurchargeCostDetail
+    ReleaseBeforeHandoverConfiguration:
+      additionalProperties: false
+      properties:
+        active:
+          default: false
+          description: >-
+            If activated, all handover jobs will be created with a status of
+            WAITING_FOR_INPUT and can't be handed over until they are released
+            using the RELEASE_HANDOVER_JOB action. This can be used for, for
+            example, to alter prices before the handover job can be set to
+            HANDED_OVER.
+          type: boolean
+      required:
+        - active
+      type: object
+      title: ReleaseBeforeHandoverConfiguration
+      description: ReleaseBeforeHandoverConfiguration
     RemoteConfiguration:
       properties:
         created:
@@ -80977,6 +81036,20 @@ components:
       x-badges:
         - color: orange
           label: BETA
+    RoutingContext:
+      description: >-
+        Why the current routing run happens. With optimizer routing, strategy
+        conditions read it with the property path
+        `$.routingContext.routingType`.
+      properties:
+        routingType:
+          $ref: '#/components/schemas/RoutingType'
+      required:
+        - routingType
+      type: object
+      xml:
+        name: RoutingContext
+      title: RoutingContext
     RoutingDecisionContext:
       enum:
         - LISTING
@@ -81869,6 +81942,15 @@ components:
           description: '@deprecated This property has been deprecated and has no meaning.'
           items:
             $ref: '#/components/schemas/RoutingPlanLineItemPiece'
+          type: array
+        productRelations:
+          description: >-
+            Shares of the quantity that belong to product relations, e.g. bills
+            of material. The rest of the quantity is standalone demand. Read
+            only.
+          items:
+            $ref: '#/components/schemas/LineItemProductRelation'
+          readOnly: true
           type: array
       title: RoutingPlanLineItem
       description: RoutingPlanLineItem
@@ -82976,10 +83058,7 @@ components:
     RoutingStrategyLastMileTransferLimitConfig:
       additionalProperties: false
       description: >-
-        This part of the API is in Alpha status. For details, see the <a
-        href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-        target="_blank">API release lifecycle documentation</a>.<br /><br />Only
-        evaluated by optimization routing. When active, a sourcing option
+        Only evaluated by optimization routing. When active, a sourcing option
         contains at most maxTransfersPerFacility last-mile transfers (target is
         the customer or the ordering facility) per source facility, regardless
         of carrier, target node or transfer group. Multiple packaging units
@@ -82996,9 +83075,6 @@ components:
         - maxTransfersPerFacility
       type: object
       title: RoutingStrategyLastMileTransferLimitConfig
-      x-badges:
-        - color: red
-          label: ALPHA
     RoutingStrategyNode:
       additionalProperties: false
       properties:
@@ -83064,13 +83140,6 @@ components:
                 StandardPriorityRating: '#/components/schemas/RoutingStrategyStandardPriorityRating'
                 ToolkitPriorityRating: '#/components/schemas/RoutingStrategyToolkitPriorityRating'
           type: array
-          description: >-
-            This part of the API is in Alpha status. For details, see the <a
-            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-            target="_blank">API release lifecycle documentation</a>.<br /><br />
-          x-badges:
-            - color: red
-              label: ALPHA
         ratings:
           items:
             anyOf:
@@ -83189,13 +83258,6 @@ components:
                 ToolkitPriorityRating: '#/components/schemas/RoutingStrategyToolkitPriorityRating'
           maxItems: 100
           type: array
-          description: >-
-            This part of the API is in Alpha status. For details, see the <a
-            href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview"
-            target="_blank">API release lifecycle documentation</a>.<br /><br />
-          x-badges:
-            - color: red
-              label: ALPHA
         ratings:
           items:
             anyOf:
@@ -83825,6 +83887,34 @@ components:
         name: RoutingStrategyTransporter
       title: RoutingStrategyTransporter
       description: RoutingStrategyTransporter
+    RoutingType:
+      description: |-
+        The situation that triggered the routing run:
+          * `INITIAL` - the first routing of an order
+          * `TIMETRIGGERED_REROUTE` - reroute of expired pick jobs
+          * `REROUTE_ON_SHORTPICK` - reroute after a short pick
+          * `ORDERSPLIT_ON_SHORTPICK` - order split after a short pick
+          * `TASK_REROUTE` - manual reroute of routing plans
+          * `REROUTE_ON_STOCKZEROED` - reroute of an open pick job whose stock was zeroed
+          * `REROUTE_ON_PICKJOB_REJECTED` - reroute of a rejected pick job
+          * `REROUTE_ON_PICKJOB_ABORTED` - reroute of an aborted pick job
+          * `PROCESS_REROUTE` - reroute of a whole process
+          * `REROUTE_ON_ORDER_MODIFIED` - reroute after the order was modified
+      enum:
+        - INITIAL
+        - TIMETRIGGERED_REROUTE
+        - REROUTE_ON_SHORTPICK
+        - ORDERSPLIT_ON_SHORTPICK
+        - TASK_REROUTE
+        - REROUTE_ON_STOCKZEROED
+        - REROUTE_ON_PICKJOB_REJECTED
+        - REROUTE_ON_PICKJOB_ABORTED
+        - PROCESS_REROUTE
+        - REROUTE_ON_ORDER_MODIFIED
+      type: string
+      xml:
+        name: RoutingType
+      title: RoutingType
     SafetyStock:
       properties:
         created:
@@ -95827,6 +95917,7 @@ components:
           * `FACILITY_CONNECTION` - right side only, the facility connection used by the sourcing option; only supported when optimization routing is enabled
           * `ORDERING_FACILITY` - left side only
           * `ORDERING_FACILITY_GROUPS` - left side only
+          * `ROUTING_CONTEXT` - routing strategy conditions only, with optimizer routing
       enum:
         - ORDER
         - FACILITY
@@ -95835,6 +95926,7 @@ components:
         - FACILITY_CONNECTION
         - ORDERING_FACILITY
         - ORDERING_FACILITY_GROUPS
+        - ROUTING_CONTEXT
       type: string
       xml:
         name: ToolkitAllowedEntities
