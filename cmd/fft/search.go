@@ -62,7 +62,7 @@ func (p *pageFlags) registerSized(f *pflag.FlagSet, noun, sizeDefault string) {
 	f.IntVar(&p.size, "size", 0,
 		fmt.Sprintf("%s per page, %d–%d%s",
 			strings.ToUpper(noun[:1])+noun[1:], client.MinSize, client.MaxSize, sizeDefault))
-	f.BoolVar(&p.all, "all", false, "Page to the end and return every match, not just the first page")
+	f.BoolVar(&p.all, "all", false, "Page to the end and return every match, not just the first page (--timeout bounds the whole walk; raise it for large lists)")
 	f.BoolVar(&p.total, "total", false, "Also count the matches, and report the total on stderr")
 	f.IntVar(&p.maxItems, "max-items", client.DefaultMaxItems,
 		fmt.Sprintf("With --all, stop after this many %s", noun))
