@@ -163,6 +163,39 @@ var _ = Describe("generated list commands", func() {
 		})
 	})
 
+	// GET /api/operationsvalidations answers an envelope and caps `size` at 500,
+	// which is above the 250 fft itself will fetch per request.
+	Describe("--all with a size between fft's ceiling and the spec's maximum", func() {
+		It("refuses it as a usage error naming --size and the effective range", func() {
+			api := c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+				writeJSON(w, http.StatusOK, `{"operationsValidations":[],"total":0}`)
+			})
+
+			Expect(c.run("operations-validation", "get-all-operations-validations", "--all", "--size", "300")).To(Equal(exitcode.Usage))
+
+			Expect(c.errOut()).To(ContainSubstring("--size with --all must be between 1 and 250, not 300"))
+			Expect(api.calls).To(BeEmpty())
+		})
+
+		It("still accepts that size for a single page", func() {
+			api := c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+				writeJSON(w, http.StatusOK, `{"operationsValidations":[],"total":0}`)
+			})
+
+			Expect(c.run("operations-validation", "get-all-operations-validations", "--size", "300")).To(Equal(exitcode.OK))
+			Expect(api.calls[0].Query.Get("size")).To(Equal("300"))
+		})
+
+		It("accepts the largest size fft fetches", func() {
+			api := c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+				writeJSON(w, http.StatusOK, `{"operationsValidations":[],"total":0}`)
+			})
+
+			Expect(c.run("operations-validation", "get-all-operations-validations", "--all", "--size", "250")).To(Equal(exitcode.OK))
+			Expect(api.calls[0].Query.Get("size")).To(Equal("250"))
+		})
+	})
+
 	It("offers no --all on a list whose answer fft cannot read entities from", func() {
 		// getAllUsers carries three arrays and no total.
 		Expect(c.run("user-management", "get-all-users", "--help")).To(Equal(exitcode.OK))

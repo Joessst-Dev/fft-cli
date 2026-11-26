@@ -410,6 +410,7 @@ func registerGeneratedPaging(cmd *cobra.Command, page *pageFlags, flags []*opFla
 // describe one page and there is no single page here.
 func runGeneratedAll(cmd *cobra.Command, deps *Deps, op api.Operation, req client.RawRequest, flags []*opFlag, page pageFlags) error {
 	var sizeParam api.Param
+	sizeFlagName := "size"
 	for _, f := range flags {
 		switch f.param.Name {
 		case "startAfterId":
@@ -419,6 +420,7 @@ func runGeneratedAll(cmd *cobra.Command, deps *Deps, op api.Operation, req clien
 			}
 		case "size":
 			sizeParam = f.param
+			sizeFlagName = f.name
 		}
 	}
 
@@ -434,6 +436,16 @@ func runGeneratedAll(cmd *cobra.Command, deps *Deps, op api.Operation, req clien
 		switch q.Name {
 		case "size":
 			if n, err := strconv.Atoi(q.Values[0]); err == nil {
+				// The spec's maximum (checked with the flag) can exceed fft's own page
+				// ceiling, which client.List enforces on every page --all fetches. A
+				// size between the two passes the help text and one-page use, then would
+				// fail deep in the walk naming neither the flag nor the range, so say it
+				// here, where the user can still act on it.
+				if n < client.MinSize || n > client.MaxSize {
+					return exitcode.UsageError{Err: fmt.Errorf(
+						"--%s with --all must be between %d and %d, not %d: fft fetches at most %d items per request",
+						sizeFlagName, client.MinSize, client.MaxSize, n, client.MaxSize)}
+				}
 				size = n
 			}
 		case "startAfterId":
