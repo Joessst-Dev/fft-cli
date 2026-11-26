@@ -17,7 +17,7 @@ Non-obvious behaviour of `/api/pickjobs*`. Locate the blocks with
      status, facility/order refs, carrier key, target time, search paths and version, **no line
      items**.
    - `POST /api/pickjobs/search` — cursor pagination (`after`/`before`/`size`/`last`, cursors from
-     `pageInfo`), `size` up to 500. It returns **full `PickJob`s**. `total` is filled only when
+     `pageInfo`), `size` up to 250. It returns **full `PickJob`s**. `total` is filled only when
      `options.withTotal: true`; `startAfterId` in the payload is deprecated in favour of `after`.
 4. **`status` vs `subStatus`.** The string `statusReason` is deprecated; the typed `subStatus`
    replaces it. A short pick shows as status `PICKED`/`CLOSED` with subStatus `SHORT_PICKED` or
