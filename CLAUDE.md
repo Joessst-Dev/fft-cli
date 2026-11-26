@@ -32,7 +32,7 @@ This is the central design idea, and most changes touch it. The API has 576 oper
 - **Tier 2 — generated** (`cmd/fft/generated.go`). A command per remaining operation, auto-registered from the spec at startup, with real flags and a `--file`/`--example`.
 - **Tier 3 — escape hatch** (`fft api <operationId>`, `cmd/fft/op.go`). Address any operation by id.
 
-A curated command **shadows** its generated twin: the twin is the operationId the curated command declares in its `Annotations`, and `addGeneratedCommands` skips any claimed operation. So promoting an endpoint from Tier 2 to Tier 1 is a pure upgrade, never a breaking rename. **Every command that reaches the tenant MUST carry `Annotations: {annotationOperationID: "..."}`** — the read-only tree-walk spec (`readonly_test.go`) fails the build otherwise; a command that makes no request is excused in `commandsWithoutOperation`.
+A curated command **shadows** its generated twin: the twin is the operationId the curated command declares in its `Annotations`, and `addGeneratedCommands` skips any claimed operation. So promoting an endpoint from Tier 2 to Tier 1 is a pure upgrade, never a breaking rename. **Every command that reaches the tenant MUST carry `Annotations: {annotationOperationID: "..."}`** — the read-only tree-walk spec (`readonly_test.go`) fails the build otherwise; a command that makes no request is excused in `commandsWithoutOperation`. The full procedure for adding or promoting a curated command (file set, reads/writes, pagination, ids, docs, gates) is the `fft-curated-command` skill.
 
 ## Load-bearing invariants
 
@@ -67,7 +67,7 @@ The `security-reviewer` skill is generic, and these rules override it here. Scan
 
 ## Testing
 
-Ginkgo v2 + Gomega, one suite per package. In `cmd/fft`, the `cli` harness (`main_suite_test.go`) gives each spec a `fakeTenant` that records every request (method, path, query, body) — assert on what went over the wire, on exact stdout tables, and on the exit code. Cross-cutting guard specs you must keep green when adding a resource: `readonly_test.go` (every command annotated), `generated_test.go` (shadowing), `access_test.go` (POST read/write census), and `skill_drift_test.go`.
+Ginkgo v2 + Gomega, one suite per package. In `cmd/fft`, the `cli` harness (`main_suite_test.go`) gives each spec a `fakeTenant` that records every request (method, path, query, body) — assert on what went over the wire, on exact stdout tables, and on the exit code. Cross-cutting guard specs you must keep green when adding a resource: `readonly_test.go` (every command annotated), `generated_test.go` (shadowing), `access_test.go` (POST read/write census), `skill_drift_test.go`, and `opcount_drift_test.go` (API counts quoted in prose). The `fft-specs` skill is the harness reference: every helper, what a command spec must prove, and what each guard catches.
 
 Specs are BDD, never bare `testing.T` tables for new code: `Describe` the unit, `Context`/`When` the precondition, `It` the observable behaviour as a sentence (`It("exits 7 when the version is stale")`, not `It("tests the error path")`). Use `DescribeTable`/`Entry` for genuine input permutations, `DeferCleanup` over teardown-by-convention, `Eventually`/`Consistently` instead of `time.Sleep`, and no ordering dependencies between specs. Every bug fix ships a regression spec that fails before the fix and passes after.
 
@@ -91,7 +91,7 @@ Tag `vX.Y.Z` and push — `.github/workflows/release.yml` runs GoReleaser (cross
 
 ## Conventions
 
-Go 1.26. Follow the `golang-*` skills (`.claude/skills/`), loading the ones the change touches: `golang-code-style`, `golang-naming` and `golang-safety` for any Go; `golang-cli` for commands, flags, exit codes and I/O; `golang-security` for anything handling tokens, user input, the filesystem or the network; `golang-troubleshooting` for bugs and races; `golang-continuous-integration` for workflows. Review with the `code-reviewer` and `security-reviewer` skills. Comments in this codebase explain **why**, not what — match that bar (the existing files are the reference); a comment that restates the code is noise. Commit messages and PRs carry no Claude attribution.
+Go 1.26. Follow the `golang-*` skills (`.claude/skills/`), loading the ones the change touches: `golang-code-style`, `golang-naming` and `golang-safety` for any Go; `golang-cli` for commands, flags, exit codes and I/O; `golang-security` for anything handling tokens, user input, the filesystem or the network; `golang-troubleshooting` for bugs and races; `golang-continuous-integration` for workflows; `golang-concurrency`/`golang-context` for goroutines, cancellation and the emulators; `golang-dependency-management` for go.mod changes; `golang-modernize` for Go version bumps. Review with the `code-reviewer` and `security-reviewer` skills. Comments in this codebase explain **why**, not what — match that bar (the existing files are the reference); a comment that restates the code is noise. Commit messages and PRs carry no Claude attribution.
 
 **Nothing that identifies a live tenant leaves the machine.** Checking a change against
 a real tenant is encouraged — it is the bar for a hand-written `--example` body — but
