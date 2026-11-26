@@ -16,6 +16,17 @@ permission — the same permission 'fft order list' needs.
 A narrow --since/--until is strongly recommended: the API pages far faster when
 the orderDate range is bounded.
 
+On a tenant with a very large order history the API can refuse a --since/--until
+range or a --sort with HTTP 400 "Query too complex", and a smaller --size does not
+help. The spec offers no other filter or endpoint for "the most recent orders":
+'fft order list' (GET /api/orders) filters only on tenantOrderId and consumerId,
+and an unsorted or --status-only search has in practice returned the oldest orders
+first (the API does not guarantee an order). What does work there is a narrow
+filter — --tenant-order-id — or, to see what the platform routed most recently,
+'fft routing decision-logs', which in practice lists the newest routings first
+(the API does not guarantee an order, and the endpoint is ALPHA). fft prints that
+hint when it sees this 400; the exit code stays 1.
+
   fft order search --status OPEN
   fft order search --status LOCKED --status PROMISED --sort orderDate:desc
   fft order search --since 2026-07-01 --until 2026-07-15 --all -o json | jq -r '.[].id'
