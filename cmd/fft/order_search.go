@@ -28,10 +28,12 @@ On a tenant with a very large order history the API can refuse a --since/--until
 range or a --sort with HTTP 400 "Query too complex", and a smaller --size does not
 help. The spec offers no other filter or endpoint for "the most recent orders":
 'fft order list' (GET /api/orders) filters only on tenantOrderId and consumerId,
-and an unsorted or --status-only search returns the oldest orders first. What does
-work there is a narrow filter — --tenant-order-id — or, to see what the platform
-routed most recently, 'fft routing decision-logs', which lists the newest routings
-first. fft prints that hint when it sees this 400; the exit code stays 1.
+and an unsorted or --status-only search has in practice returned the oldest orders
+first (the API does not guarantee an order). What does work there is a narrow
+filter — --tenant-order-id — or, to see what the platform routed most recently,
+'fft routing decision-logs', which in practice lists the newest routings first
+(the API does not guarantee an order, and the endpoint is ALPHA). fft prints that
+hint when it sees this 400; the exit code stays 1.
 
   fft order search --status OPEN
   fft order search --status LOCKED --status PROMISED --sort orderDate:desc
@@ -108,7 +110,7 @@ func (e *queryTooComplexError) Unwrap() error { return e.err }
 func (e *queryTooComplexError) Hint() string {
 	return "A smaller --size will not help: the API rejects --since/--until and --sort on a very large order history.\n" +
 		"Narrow the search instead: 'fft order search --tenant-order-id <id>', or 'fft order list --tenant-order-id <id>'.\n" +
-		"To see what was routed most recently, 'fft routing decision-logs' lists the newest routings first."
+		"To see what was routed most recently, 'fft routing decision-logs' in practice lists the newest routings first (the API does not guarantee an order)."
 }
 
 // explainQueryTooComplex attaches the hint to the API's "Query too complex" 400
