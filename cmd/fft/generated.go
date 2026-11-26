@@ -436,11 +436,11 @@ func runGeneratedAll(cmd *cobra.Command, deps *Deps, op api.Operation, req clien
 		switch q.Name {
 		case "size":
 			if n, err := strconv.Atoi(q.Values[0]); err == nil {
-				// The spec's maximum (checked with the flag) can exceed fft's own page
-				// ceiling, which client.List enforces on every page --all fetches. A
-				// size between the two passes the help text and one-page use, then would
-				// fail deep in the walk naming neither the flag nor the range, so say it
-				// here, where the user can still act on it.
+				// The spec's maximum (checked with the flag, and shown in --help) can
+				// exceed fft's own page ceiling, which client.List enforces on every
+				// page --all fetches. Left to client.List, a size between the two would
+				// be refused with a range that contradicts --help and names no flag, so
+				// refuse it here, naming both.
 				if n < client.MinSize || n > client.MaxSize {
 					return exitcode.UsageError{Err: fmt.Errorf(
 						"--%s with --all must be between %d and %d, not %d: fft fetches at most %d items per request",
