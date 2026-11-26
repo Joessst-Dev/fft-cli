@@ -29,7 +29,7 @@ permissions:
 # pending run per group and cancels the older pending one when a newer one arrives.
 # A workflow-wide group would stay held for the whole GoReleaser run, long enough
 # for a burst of merges to drop the run that should have tagged a Version PR merge.
-# So versioning holds its own short group, and GoReleaser holds one per tag.
+# So versioning holds its own short group, and GoReleaser holds another.
 
 jobs:
   version:
@@ -152,11 +152,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
-    # One GoReleaser per tag, so a dispatched re-run can't race the original. Never
+    # One GoReleaser at a time, for any tag. A release moves shared pointers (the
+    # `latest` image, the cask, the Scoop manifest), so two overlapping releases
+    # could finish out of order and leave them on the older version. Never
     # cancelled: a cancelled GoReleaser can leave a half-uploaded release behind.
-    # Keyed by tag, it never holds up versioning.
+    # It is a separate group from `version`, so it never holds up versioning.
+    #
+    # A group still keeps only one pending run. If a third tag arrives while one
+    # release runs and another waits, the waiting one is cancelled: the newest tag
+    # still wins, and the skipped tag shows a cancelled job and no GitHub release.
+    # To publish it, dispatch it, then dispatch the newest tag again so the shared
+    # pointers end on the newest.
     concurrency:
-      group: release-goreleaser-${{ github.event_name == 'workflow_dispatch' && inputs.tag || needs.version.outputs.tag }}
+      group: release-goreleaser
       cancel-in-progress: false
 
     permissions:
