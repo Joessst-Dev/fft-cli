@@ -57,6 +57,40 @@ var _ = Describe("decoding a fulfillmenttools error", func() {
 		})
 	})
 
+	Describe("an auth-class refusal from something between fft and the tenant", func() {
+		DescribeTable("is reported as the intermediary's, not the tenant's",
+			func(status int, body string) {
+				err := client.Check(status, []byte(body))
+				Expect(err).To(MatchError(ContainSubstring("a proxy or gateway between fft and the tenant refused the request")))
+				Expect(err).To(MatchError(ContainSubstring("Approval required")))
+
+				var coded interface{ Hint() string }
+				Expect(errors.As(err, &coded)).To(BeTrue())
+				Expect(coded.Hint()).NotTo(ContainSubstring("fft auth"))
+			},
+			Entry("403 with a plain-text body", http.StatusForbidden, "Approval required for example.test:443."),
+			Entry("403 with an HTML body", http.StatusForbidden, "<html>Approval required</html>"),
+			Entry("401 with a plain-text body", http.StatusUnauthorized, "Approval required"),
+			Entry("407 whatever the body", http.StatusProxyAuthRequired, "Approval required"),
+		)
+
+		It("keeps the exit code, since scripts key on it", func() {
+			Expect(exitcode.FromError(client.Check(http.StatusForbidden, []byte("Approval required")))).To(Equal(exitcode.Forbidden))
+			Expect(exitcode.FromError(client.Check(http.StatusUnauthorized, []byte("Approval required")))).To(Equal(exitcode.Auth))
+		})
+
+		It("still blames the tenant when its own envelope is present", func() {
+			err := client.Check(http.StatusForbidden, []byte(`[{"summary":"nope"}]`))
+			Expect(err).To(MatchError("the API returned HTTP 403: nope"))
+			Expect(err.(interface{ Hint() string }).Hint()).To(ContainSubstring("fft auth whoami"))
+		})
+
+		It("does not blame a proxy for a bare 403", func() {
+			err := client.Check(http.StatusForbidden, nil)
+			Expect(err).To(MatchError("the API returned HTTP 403"))
+		})
+	})
+
 	DescribeTable("classifying the failure for a script",
 		func(status int, want int) {
 			Expect(exitcode.FromError(client.Check(status, []byte(`[{"summary":"x"}]`)))).To(Equal(want))

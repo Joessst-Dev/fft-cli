@@ -259,6 +259,14 @@ func (e *APIError) Error() string {
 		return fmt.Sprintf("version conflict: you sent v%d, current is v%d", sent, current)
 	}
 
+	if e.Intermediary() {
+		msg := fmt.Sprintf("a proxy or gateway between fft and the tenant refused the request (HTTP %d)", e.Status)
+		if e.Body != "" {
+			msg += ": " + e.Body
+		}
+		return msg
+	}
+
 	if len(e.Errors) == 0 {
 		if e.Body == "" {
 			return fmt.Sprintf("the API returned HTTP %d", e.Status)
@@ -292,6 +300,24 @@ func (e *APIError) Conflict() (sent, current int64, ok bool) {
 	return 0, 0, false
 }
 
+// Intermediary reports an auth-class refusal (401, 403, 407) that did not come
+// from the tenant: a corporate egress proxy, firewall or gateway answered instead.
+//
+// The tenant's errors always carry the JSON-array envelope, so a body that is not
+// one is the tell. An empty body is deliberately not counted — the tenant has been
+// seen to answer bare, and blaming a proxy for a real permission failure would send
+// the user off to the wrong team. 407 is the exception: only a proxy sends it.
+func (e *APIError) Intermediary() bool {
+	switch e.Status {
+	case http.StatusProxyAuthRequired:
+		return true
+	case http.StatusUnauthorized, http.StatusForbidden:
+		return len(e.Errors) == 0 && e.Body != ""
+	default:
+		return false
+	}
+}
+
 // ExitCode implements the interface exitcode.FromError looks for, so a script can
 // tell "you are not permitted" from "it does not exist" without parsing text.
 func (e *APIError) ExitCode() int {
@@ -315,6 +341,10 @@ func (e *APIError) ExitCode() int {
 func (e *APIError) Hint() string {
 	if _, current, ok := e.Conflict(); ok {
 		return fmt.Sprintf("Re-run the command to read the current version, or pass --if-version %d.", current)
+	}
+
+	if e.Intermediary() {
+		return "The request did not reach the tenant, so this account's permissions are not the cause. Check the proxy or firewall settings (HTTPS_PROXY / NO_PROXY) or ask whoever runs it."
 	}
 
 	switch e.Status {
