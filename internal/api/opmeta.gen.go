@@ -2713,7 +2713,7 @@ var operations = []Operation{
 		Path:        "/api/facilities/capacities",
 		Tags:        []string{"Facilities"},
 		Summary:     "Get the capacity utilization of multiple facilities",
-		Description: "This part of the API is in Alpha status. For details, see the API release lifecycle documentation. Returns the picking slots of the given facilities within the requested period with configured, booked and remaining capacity. The result is paginated over the requested facilities in the order of the facilityRefs.",
+		Description: "Returns the picking slots of the given facilities within the requested period with configured, booked and remaining capacity. The result is paginated over the requested facilities in the order of the facilityRefs.",
 		Permissions: []string{"FACILITY_READ"},
 		Params: []Param{
 			{Name: "facilityRefs", In: InQuery, Type: TypeArray, Item: TypeString, Required: true, Explode: true, Description: "References of the facilities to return the capacity utilization for."},

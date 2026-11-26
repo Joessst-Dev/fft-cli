@@ -1630,6 +1630,7 @@ const (
 	FacilityDiscountContextTypesCATEGORY      FacilityDiscountContextTypes = "CATEGORY"
 	FacilityDiscountContextTypesFACILITY      FacilityDiscountContextTypes = "FACILITY"
 	FacilityDiscountContextTypesFACILITYGROUP FacilityDiscountContextTypes = "FACILITY_GROUP"
+	FacilityDiscountContextTypesTAGREFERENCE  FacilityDiscountContextTypes = "TAG_REFERENCE"
 )
 
 // Valid indicates whether the value is a known member of the FacilityDiscountContextTypes enum.
@@ -1640,6 +1641,8 @@ func (e FacilityDiscountContextTypes) Valid() bool {
 	case FacilityDiscountContextTypesFACILITY:
 		return true
 	case FacilityDiscountContextTypesFACILITYGROUP:
+		return true
+	case FacilityDiscountContextTypesTAGREFERENCE:
 		return true
 	default:
 		return false
@@ -12221,6 +12224,7 @@ const (
 	ToolkitAllowedEntitiesORDER                  ToolkitAllowedEntities = "ORDER"
 	ToolkitAllowedEntitiesORDERINGFACILITY       ToolkitAllowedEntities = "ORDERING_FACILITY"
 	ToolkitAllowedEntitiesORDERINGFACILITYGROUPS ToolkitAllowedEntities = "ORDERING_FACILITY_GROUPS"
+	ToolkitAllowedEntitiesROUTINGCONTEXT         ToolkitAllowedEntities = "ROUTING_CONTEXT"
 )
 
 // Valid indicates whether the value is a known member of the ToolkitAllowedEntities enum.
@@ -12239,6 +12243,8 @@ func (e ToolkitAllowedEntities) Valid() bool {
 	case ToolkitAllowedEntitiesORDERINGFACILITY:
 		return true
 	case ToolkitAllowedEntitiesORDERINGFACILITYGROUPS:
+		return true
+	case ToolkitAllowedEntitiesROUTINGCONTEXT:
 		return true
 	default:
 		return false
@@ -24498,7 +24504,7 @@ type RoutingStrategyGlobalRerouteTimeTriggeredConfig struct {
 	ShipFromStoreSamedayReroute RoutingStrategyGlobalRerouteConfiguration `json:"shipFromStoreSamedayReroute"`
 }
 
-// RoutingStrategyLastMileTransferLimitConfig This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Only evaluated by optimization routing. When active, a sourcing option contains at most maxTransfersPerFacility last-mile transfers (target is the customer or the ordering facility) per source facility, regardless of carrier, target node or transfer group. Multiple packaging units within one transfer are not affected.
+// RoutingStrategyLastMileTransferLimitConfig Only evaluated by optimization routing. When active, a sourcing option contains at most maxTransfersPerFacility last-mile transfers (target is the customer or the ordering facility) per source facility, regardless of carrier, target node or transfer group. Multiple packaging units within one transfer are not affected.
 type RoutingStrategyLastMileTransferLimitConfig struct {
 	Active bool `json:"active"`
 
@@ -24538,13 +24544,11 @@ type RoutingStrategyNodeConfig struct {
 	FallbackFacility *RoutingStrategyFallbackFacilityConfig  `json:"fallbackFacility,omitempty"`
 	Fences           []RoutingStrategyNodeConfig_Fences_Item `json:"fences"`
 
-	// LastMileTransferLimit This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Only evaluated by optimization routing. When active, a sourcing option contains at most maxTransfersPerFacility last-mile transfers (target is the customer or the ordering facility) per source facility, regardless of carrier, target node or transfer group. Multiple packaging units within one transfer are not affected.
+	// LastMileTransferLimit Only evaluated by optimization routing. When active, a sourcing option contains at most maxTransfersPerFacility last-mile transfers (target is the customer or the ordering facility) per source facility, regardless of carrier, target node or transfer group. Multiple packaging units within one transfer are not affected.
 	LastMileTransferLimit *RoutingStrategyLastMileTransferLimitConfig `json:"lastMileTransferLimit,omitempty"`
 
 	// OrderSplit RoutingStrategyOrderSplitConfig
-	OrderSplit *RoutingStrategyOrderSplitConfig `json:"orderSplit,omitempty"`
-
-	// PriorityRatings This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
+	OrderSplit      *RoutingStrategyOrderSplitConfig                  `json:"orderSplit,omitempty"`
 	PriorityRatings *[]RoutingStrategyNodeConfig_PriorityRatings_Item `json:"priorityRatings,omitempty"`
 	Ratings         []RoutingStrategyNodeConfig_Ratings_Item          `json:"ratings"`
 
@@ -24656,13 +24660,11 @@ type RoutingStrategyNodeConfigForUpsert struct {
 	FallbackFacility *RoutingStrategyFallbackFacilityConfig           `json:"fallbackFacility,omitempty"`
 	Fences           []RoutingStrategyNodeConfigForUpsert_Fences_Item `json:"fences"`
 
-	// LastMileTransferLimit This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Only evaluated by optimization routing. When active, a sourcing option contains at most maxTransfersPerFacility last-mile transfers (target is the customer or the ordering facility) per source facility, regardless of carrier, target node or transfer group. Multiple packaging units within one transfer are not affected.
+	// LastMileTransferLimit Only evaluated by optimization routing. When active, a sourcing option contains at most maxTransfersPerFacility last-mile transfers (target is the customer or the ordering facility) per source facility, regardless of carrier, target node or transfer group. Multiple packaging units within one transfer are not affected.
 	LastMileTransferLimit *RoutingStrategyLastMileTransferLimitConfig `json:"lastMileTransferLimit,omitempty"`
 
 	// OrderSplit RoutingStrategyOrderSplitConfig
-	OrderSplit *RoutingStrategyOrderSplitConfig `json:"orderSplit,omitempty"`
-
-	// PriorityRatings This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />
+	OrderSplit      *RoutingStrategyOrderSplitConfig                           `json:"orderSplit,omitempty"`
 	PriorityRatings *[]RoutingStrategyNodeConfigForUpsert_PriorityRatings_Item `json:"priorityRatings,omitempty"`
 	Ratings         []RoutingStrategyNodeConfigForUpsert_Ratings_Item          `json:"ratings"`
 
@@ -24991,6 +24993,7 @@ type RoutingStrategyToolkitFence struct {
 	//   * `FACILITY_CONNECTION` - right side only, the facility connection used by the sourcing option; only supported when optimization routing is enabled
 	//   * `ORDERING_FACILITY` - left side only
 	//   * `ORDERING_FACILITY_GROUPS` - left side only
+	//   * `ROUTING_CONTEXT` - routing strategy conditions only, with optimizer routing
 	Entity1 *ToolkitAllowedEntities `json:"entity1,omitempty"`
 
 	// Entity2 The entities that can be compared by the toolkit fence or rating
@@ -25001,6 +25004,7 @@ type RoutingStrategyToolkitFence struct {
 	//   * `FACILITY_CONNECTION` - right side only, the facility connection used by the sourcing option; only supported when optimization routing is enabled
 	//   * `ORDERING_FACILITY` - left side only
 	//   * `ORDERING_FACILITY_GROUPS` - left side only
+	//   * `ROUTING_CONTEXT` - routing strategy conditions only, with optimizer routing
 	Entity2 *ToolkitAllowedEntities `json:"entity2,omitempty"`
 
 	// Name The name of the fence.
@@ -27959,6 +27963,7 @@ type TimeZoneForCreation struct {
 //   - `FACILITY_CONNECTION` - right side only, the facility connection used by the sourcing option; only supported when optimization routing is enabled
 //   - `ORDERING_FACILITY` - left side only
 //   - `ORDERING_FACILITY_GROUPS` - left side only
+//   - `ROUTING_CONTEXT` - routing strategy conditions only, with optimizer routing
 type ToolkitAllowedEntities string
 
 // ToolkitComparisonPredicate The predicate for a Toolkit V2 Fence that defines how conditions are constructed
@@ -27974,6 +27979,7 @@ type ToolkitComparisonPredicate struct {
 	//   * `FACILITY_CONNECTION` - right side only, the facility connection used by the sourcing option; only supported when optimization routing is enabled
 	//   * `ORDERING_FACILITY` - left side only
 	//   * `ORDERING_FACILITY_GROUPS` - left side only
+	//   * `ROUTING_CONTEXT` - routing strategy conditions only, with optimizer routing
 	LeftEntity       ToolkitAllowedEntities `json:"leftEntity"`
 	LeftPropertyPath string                 `json:"leftPropertyPath"`
 
@@ -27989,6 +27995,7 @@ type ToolkitComparisonPredicate struct {
 	//   * `FACILITY_CONNECTION` - right side only, the facility connection used by the sourcing option; only supported when optimization routing is enabled
 	//   * `ORDERING_FACILITY` - left side only
 	//   * `ORDERING_FACILITY_GROUPS` - left side only
+	//   * `ROUTING_CONTEXT` - routing strategy conditions only, with optimizer routing
 	RightEntity       ToolkitAllowedEntities `json:"rightEntity"`
 	RightPropertyPath string                 `json:"rightPropertyPath"`
 
@@ -28048,6 +28055,7 @@ type ToolkitPredicate struct {
 	//   * `FACILITY_CONNECTION` - right side only, the facility connection used by the sourcing option; only supported when optimization routing is enabled
 	//   * `ORDERING_FACILITY` - left side only
 	//   * `ORDERING_FACILITY_GROUPS` - left side only
+	//   * `ROUTING_CONTEXT` - routing strategy conditions only, with optimizer routing
 	Entity ToolkitAllowedEntities `json:"entity"`
 
 	// EntityOperator The possible operator types that can be used on given entities
@@ -38465,7 +38473,7 @@ type ClientInterface interface {
 
 	// GetFacilitiesCapacity Get the capacity utilization of multiple facilities
 	//
-	// This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Returns the picking slots of the given facilities within the requested period with configured, booked and remaining capacity. The result is paginated over the requested facilities in the order of the facilityRefs.
+	// Returns the picking slots of the given facilities within the requested period with configured, booked and remaining capacity. The result is paginated over the requested facilities in the order of the facilityRefs.
 	//
 	// Corresponds with GET /api/facilities/capacities (the `GetFacilitiesCapacity` operationId).
 	GetFacilitiesCapacity(ctx context.Context, params *GetFacilitiesCapacityParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -39647,7 +39655,7 @@ func (c *Client) AddFacility(ctx context.Context, body AddFacilityJSONRequestBod
 
 // GetFacilitiesCapacity Get the capacity utilization of multiple facilities
 //
-// This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Returns the picking slots of the given facilities within the requested period with configured, booked and remaining capacity. The result is paginated over the requested facilities in the order of the facilityRefs.
+// Returns the picking slots of the given facilities within the requested period with configured, booked and remaining capacity. The result is paginated over the requested facilities in the order of the facilityRefs.
 //
 // Corresponds with GET /api/facilities/capacities (the `GetFacilitiesCapacity` operationId).
 func (c *Client) GetFacilitiesCapacity(ctx context.Context, params *GetFacilitiesCapacityParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -47256,7 +47264,7 @@ type ClientWithResponsesInterface interface {
 
 	// GetFacilitiesCapacityWithResponse Get the capacity utilization of multiple facilities
 	//
-	// This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Returns the picking slots of the given facilities within the requested period with configured, booked and remaining capacity. The result is paginated over the requested facilities in the order of the facilityRefs.
+	// Returns the picking slots of the given facilities within the requested period with configured, booked and remaining capacity. The result is paginated over the requested facilities in the order of the facilityRefs.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
@@ -54211,7 +54219,7 @@ func (c *ClientWithResponses) AddFacilityWithResponse(ctx context.Context, body 
 
 // GetFacilitiesCapacityWithResponse Get the capacity utilization of multiple facilities
 //
-// This part of the API is in Alpha status. For details, see the <a href="https://docs.fulfillmenttools.com/documentation/apis/api-versioning-and-lifecycle#lifecycle-overview" target="_blank">API release lifecycle documentation</a>.<br /><br />Returns the picking slots of the given facilities within the requested period with configured, booked and remaining capacity. The result is paginated over the requested facilities in the order of the facilityRefs.
+// Returns the picking slots of the given facilities within the requested period with configured, booked and remaining capacity. The result is paginated over the requested facilities in the order of the facilityRefs.
 //
 // Returns a wrapper object for the known response body format(s).
 //
