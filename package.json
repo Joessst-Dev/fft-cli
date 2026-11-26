@@ -1,0 +1,14 @@
+{
+  "name": "fft",
+  "version": "0.10.1",
+  "private": true,
+  "description": "Release bookkeeping for the fft CLI: the version and changelog changesets maintains. Nothing here is published to npm.",
+  "scripts": {
+    "changeset": "changeset",
+    "version-packages": "changeset version && npm install --package-lock-only",
+    "release": "changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^3.0.3"
+  }
+}

@@ -9,8 +9,9 @@ updates:
       time: "05:00"
     open-pull-requests-limit: 5
     commit-message:
-      # Conventional commits: the release changelog groups on these prefixes, and
-      # `chore:` is filtered out of it — dependency bumps are not release notes.
+      # Conventional commits, like every other PR title here. Release notes come
+      # from changesets, not from these prefixes, and Dependabot PRs carry none:
+      # dependency bumps are not release notes.
       prefix: chore
       include: scope
     groups:
@@ -72,5 +73,23 @@ updates:
       include: scope
     groups:
       npm-minor-and-patch:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  # @changesets/cli, the release tooling at the root (package.json). Like the docs
+  # toolchain it is not shipped, but the release workflow runs it with write access
+  # to the repository.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:00"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      release-npm-minor-and-patch:
         patterns: ["*"]
         update-types: [minor, patch]

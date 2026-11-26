@@ -1,0 +1,54 @@
+name: Changeset
+
+# Every pull request that changes what fft does carries a changeset: the
+# changelog entry and release note for it (see .changeset/README.md).
+#
+# This is its own workflow, not a ci.yml job, because adding or removing the
+# `no-changeset` label has to re-run it. The auto-review labels change on most
+# pull requests here, and putting `labeled` on ci.yml would re-run the whole test
+# matrix on every one of them.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: changeset-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  changeset:
+    name: changeset
+    # Exempt, all three: a docs/CI/tooling-only pull request, labelled
+    # `no-changeset`; Dependabot, whose bumps are not user-facing release notes;
+    # and the "Version packages" pull request, which consumes every changeset.
+    if: >-
+      github.head_ref != 'changeset-release/main' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      !contains(github.event.pull_request.labels.*.name, 'no-changeset')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # `--since` diffs against the base branch, so it needs the history back
+          # to where this branch forked.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci --ignore-scripts
+
+      - name: The pull request has a changeset
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if ! npx changeset status --since="origin/$BASE_REF"; then
+            echo "::error::No changeset. Run \`npx changeset\` and commit the file it writes, or label the pull request \`no-changeset\` if nothing a user of fft sees changed."
+            exit 1
+          fi

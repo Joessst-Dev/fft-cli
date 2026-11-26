@@ -79,6 +79,17 @@ CI's `docs no drift` job re-runs `make docs` and fails on any diff or uncommitte
 exactly as it does for `make generate`. The README is **not** a source for the site: keep
 it short and let it link out.
 
+## Changesets
+
+A pull request that changes what `fft` does carries a changeset: run `npx changeset` (after
+`npm ci` at the repo root), pick the bump, and describe the change for someone running the
+CLI. That text is the changelog entry and the release note, so write it for them, not as a
+commit summary. [`.changeset/README.md`](.changeset/README.md) says which bump fits which
+change.
+
+The `changeset` check fails a pull request without one. Docs-, CI- and tooling-only pull
+requests are labelled `no-changeset` instead; Dependabot's are exempt automatically.
+
 ## Conventions
 
 Go 1.26. Comments explain **why**, not what — a comment that restates the code is noise;
@@ -99,13 +110,22 @@ purge it. Getting it right the first time is the whole of the control.
 
 ## Releasing
 
-Tag it. `release.yml` does the rest.
+Merge the "Version packages" pull request. Nobody tags by hand.
 
-```sh
-git tag v0.1.0 && git push origin v0.1.0
-```
+On every push to `main`, `release.yml` collects the pending changesets into that pull
+request: it bumps `version` in `package.json` and moves the changeset texts into
+`CHANGELOG.md`. Merging it leaves no changesets pending, so the next run tags `vX.Y.Z`
+and GoReleaser builds and publishes that tag, with the version's `CHANGELOG.md` section as
+the release notes. A `v*` tag pushed by hand no longer starts a release.
 
-This requires four things to exist:
+If GoReleaser fails after the tag exists, use "Re-run failed jobs" on that run, or dispatch
+`release.yml` with the tag (`gh workflow run release.yml -f tag=v0.11.0`).
+
+For a prerelease, `npx changeset pre enter rc` on a branch and merge it: the Version pull
+request then produces `v0.11.0-rc.0` and so on, which GoReleaser marks as prereleases and
+keeps out of the tap and the bucket. `npx changeset pre exit` returns to normal releases.
+
+This requires these to exist:
 
 - The tap repository **`Joessst-Dev/homebrew-tap`** — a separate repo, created by hand.
 - A repository secret **`HOMEBREW_TAP_TOKEN`**: a fine-grained PAT with `contents: write`
@@ -116,3 +136,9 @@ This requires four things to exist:
 - A repository secret **`SCOOP_BUCKET_TOKEN`**: a PAT with `contents: write` on the
   bucket repo. The tap PAT with its repository access widened to the bucket can serve
   as both.
+- A GitHub App installed on this repository, with its client id in the repository
+  variable **`RELEASE_APP_CLIENT_ID`** and a private key in the secret
+  **`RELEASE_APP_KEY`** (the release App argus-table uses serves). A pull request opened
+  with `GITHUB_TOKEN` starts no workflows, so without the App the Version pull request
+  gets no CI until someone closes and reopens it. The workflow falls back to
+  `GITHUB_TOKEN` when the App isn't configured.

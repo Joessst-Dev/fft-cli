@@ -57,6 +57,17 @@ on your diff before opening the PR. These are aids — they do not widen the mec
    build should green without it. List every such item under **"Needs human follow-up"** in the PR body.
 
 5. **COMMIT + PR:**
+   - Add a changeset, because a spec sync changes the generated commands users run, and the
+     `changeset` check fails a PR without one. Write `.changeset/spec-sync-<UTC-date>.md`:
+     ```
+     ---
+     "fft": patch
+     ---
+
+     Sync the fulfillmenttools API spec: <one sentence on what a user of fft sees: new or removed
+     generated commands (name them), changed flags, or "no user-visible command changes">.
+     ```
+     Write it for someone running the CLI, not as a diff summary; it becomes the release note.
    - Conventional-commit message: `chore: sync fulfillmenttools OpenAPI spec`.
    - Push the branch and `gh pr create` against `main`. PR body summarizes: what changed, the POST
      classifications you made, the census-count update, and the "Needs human follow-up" items. If the operation
