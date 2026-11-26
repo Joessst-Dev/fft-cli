@@ -435,19 +435,24 @@ func runGeneratedAll(cmd *cobra.Command, deps *Deps, op api.Operation, req clien
 	for _, q := range req.Query {
 		switch q.Name {
 		case "size":
-			if n, err := strconv.Atoi(q.Values[0]); err == nil {
-				// The spec's maximum (checked with the flag, and shown in --help) can
-				// exceed fft's own page ceiling, which client.List enforces on every
-				// page --all fetches. Left to client.List, a size between the two would
-				// be refused with a range that contradicts --help and names no flag, so
-				// refuse it here, naming both.
-				if n < client.MinSize || n > client.MaxSize {
-					return exitcode.UsageError{Err: fmt.Errorf(
-						"--%s with --all must be between %d and %d, not %d: fft fetches at most %d items per request",
-						sizeFlagName, client.MinSize, client.MaxSize, n, client.MaxSize)}
-				}
-				size = n
+			n, err := strconv.Atoi(q.Values[0])
+			if err != nil {
+				// A `type: number` size accepts 2.5 as a flag; a walk pages by whole
+				// items, and dropping the value would page at the default without a word.
+				return exitcode.UsageError{Err: fmt.Errorf(
+					"--%s with --all must be a whole number, not %s", sizeFlagName, q.Values[0])}
 			}
+			// The spec's maximum (checked with the flag, and shown in --help) can
+			// exceed fft's own page ceiling, which client.List enforces on every
+			// page --all fetches. Left to client.List, a size between the two would
+			// be refused with a range that contradicts --help and names no flag, so
+			// refuse it here, naming both.
+			if n < client.MinSize || n > client.MaxSize {
+				return exitcode.UsageError{Err: fmt.Errorf(
+					"--%s with --all must be between %d and %d, not %d: fft fetches at most %d items per request",
+					sizeFlagName, client.MinSize, client.MaxSize, n, client.MaxSize)}
+			}
+			size = n
 		case "startAfterId":
 		default:
 			query = append(query, q)

@@ -186,6 +186,20 @@ var _ = Describe("generated list commands", func() {
 			Expect(api.calls[0].Query.Get("size")).To(Equal("300"))
 		})
 
+		// getCategories declares `size` as `type: number`, so the flag takes 2.5 and
+		// the bounds check passes it. fft pages by whole items: silently falling back
+		// to the default page would do something other than what was asked.
+		It("refuses a fractional size as a usage error naming --size", func() {
+			api := c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
+				writeJSON(w, http.StatusOK, `{"categories":[],"total":0}`)
+			})
+
+			Expect(c.run("category", "get-categories", "--all", "--size", "2.5")).To(Equal(exitcode.Usage))
+
+			Expect(c.errOut()).To(ContainSubstring("--size with --all must be a whole number, not 2.5"))
+			Expect(api.calls).To(BeEmpty())
+		})
+
 		It("accepts the largest size fft fetches", func() {
 			api := c.fakeTenant(func(w http.ResponseWriter, _ *http.Request, _ []byte) {
 				writeJSON(w, http.StatusOK, `{"operationsValidations":[],"total":0}`)
