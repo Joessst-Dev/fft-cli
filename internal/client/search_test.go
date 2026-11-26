@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -217,6 +218,28 @@ var _ = Describe("searching every page", func() {
 		Expect(t.hits()).To(Equal(3))
 		Expect(items).To(HaveLen(5))
 		Expect(items[4].TenantFacilityID).To(Equal("MUC-01"))
+	})
+
+	It("names --timeout and how far it got when the deadline cuts the walk short", func() {
+		t := newTenant(func(w http.ResponseWriter, r *http.Request, n int) {
+			if n == 1 {
+				fmt.Fprint(w, `{"facilities":[{"name":"A"}],"pageInfo":{"hasNextPage":true,"endCursor":"cursor-1"}}`)
+				return
+			}
+			<-r.Context().Done()
+		})
+		short, cancel := context.WithTimeout(ctx, 150*time.Millisecond)
+		DeferCleanup(cancel)
+
+		items, err := collect(client.SearchAll(short, unauthenticated(t), facilities(),
+			client.FacilitySearchPayload{}))
+
+		Expect(items).To(HaveLen(1))
+		var timedOut *client.WalkTimeoutError
+		Expect(errors.As(err, &timedOut)).To(BeTrue())
+		Expect(timedOut.Pages).To(Equal(1))
+		Expect(timedOut.Items).To(Equal(1))
+		Expect(errors.Is(err, context.DeadlineExceeded)).To(BeTrue())
 	})
 
 	It("sends each page's endCursor as the next page's after", func() {

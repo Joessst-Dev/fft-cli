@@ -32,7 +32,7 @@ fft facility list [flags]
 ## Flags
 
 ```
-      --all[=true|false]            Page to the end and return every match, not just the first page
+      --all[=true|false]            Page to the end and return every match, not just the first page (--timeout bounds the whole walk; raise it for large lists)
       --max-items int               With --all, stop after this many facilities (default 10000)
       --size int                    Facilities per page, 1–250 (default 20)
       --sort string                 Sort by one field, as field:asc or field:desc (id, name, status, type, tenantFacilityId, locationType, lastModified)

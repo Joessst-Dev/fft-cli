@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"iter"
 	"net/http"
@@ -165,14 +166,16 @@ func SearchAll[Q, S, T any](ctx context.Context, c *Client, op Op[T], payload Se
 		}
 
 		seen := 0
+		pages := 0
 		cursor := ""
 
 		for {
 			page, err := Search(ctx, c, op, payload)
 			if err != nil {
-				yield(zero, err)
+				yield(zero, walkError(op.Name, err, pages, seen))
 				return
 			}
+			pages++
 
 			for _, item := range page.Items {
 				if seen >= o.maxItems {
@@ -201,6 +204,40 @@ func SearchAll[Q, S, T any](ctx context.Context, c *Client, op Op[T], payload Se
 			payload.After = &cursor
 		}
 	}
+}
+
+// WalkTimeoutError says the whole-command --timeout expired part-way through an
+// --all walk. --timeout bounds the walk, not one request, so a large tenant can run
+// out of time long after every individual page was answering promptly — and a bare
+// "context deadline exceeded" names neither the flag nor how far it got.
+//
+// Nothing already fetched is lost to the caller of the iterator, but an --all
+// command does not print half a list as if it were the list, so the command fails.
+// It unwraps to [context.DeadlineExceeded], so the exit code is unchanged.
+type WalkTimeoutError struct {
+	Op    string
+	Pages int
+	Items int
+}
+
+func (e *WalkTimeoutError) Error() string {
+	return fmt.Sprintf("%s: --timeout expired after %d pages (%d items) of an --all walk", e.Op, e.Pages, e.Items)
+}
+
+func (e *WalkTimeoutError) Unwrap() error { return context.DeadlineExceeded }
+
+// Hint tells the user how to finish the walk.
+func (e *WalkTimeoutError) Hint() string {
+	return "--timeout bounds the whole command, not one request: raise it (for example --timeout 10m) for a large list."
+}
+
+// walkError names a deadline that cut an --all walk short; any other error passes
+// through untouched, because only the deadline is the user's to fix with a flag.
+func walkError(op string, err error, pages, items int) error {
+	if errors.Is(err, context.DeadlineExceeded) {
+		return &WalkTimeoutError{Op: op, Pages: pages, Items: items}
+	}
+	return err
 }
 
 // AllOption configures [SearchAll].
