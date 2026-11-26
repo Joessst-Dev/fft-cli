@@ -141,4 +141,7 @@ This requires these to exist:
   **`RELEASE_APP_KEY`** (the release App argus-table uses serves). A pull request opened
   with `GITHUB_TOKEN` starts no workflows, so without the App the Version pull request
   gets no CI until someone closes and reopens it. The workflow falls back to
-  `GITHUB_TOKEN` when the App isn't configured.
+  `GITHUB_TOKEN` when the App isn't configured, but that fallback also needs **Settings →
+  Actions → General → "Allow GitHub Actions to create and approve pull requests"** turned
+  on, which it is not here. Without it the `version` job fails when it opens the Version
+  pull request, so a missing App is a red run, not a quiet one.

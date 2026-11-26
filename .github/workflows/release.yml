@@ -25,12 +25,11 @@ on:
 permissions:
   contents: read
 
-# Two runs racing would both try to tag, or both run GoReleaser on one tag. Queue
-# them; never cancel one, since a cancelled GoReleaser can leave a half-uploaded
-# release behind.
-concurrency:
-  group: release
-  cancel-in-progress: false
+# Concurrency is per job, not per workflow. A group is not a queue: GitHub keeps one
+# pending run per group and cancels the older pending one when a newer one arrives.
+# A workflow-wide group would stay held for the whole GoReleaser run, long enough
+# for a burst of merges to drop the run that should have tagged a Version PR merge.
+# So versioning holds its own short group, and GoReleaser holds one per tag.
 
 jobs:
   version:
@@ -38,6 +37,14 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+
+    # Two concurrent runs would race on the Version PR branch. The window in which
+    # a pending run can be replaced is this job's ~1 minute, and if one is replaced
+    # anyway, the "Current version is tagged" step below fails the next run loudly
+    # instead of letting the version go untagged.
+    concurrency:
+      group: release-version
+      cancel-in-progress: false
 
     # This job runs on every push to main, so it holds only what versioning needs.
     # The signing identity, the registry grant and the tap/bucket PATs belong to
@@ -54,8 +61,10 @@ jobs:
       # The "Version packages" pull request needs CI, and a pull request opened or
       # pushed with GITHUB_TOKEN starts no workflows. A GitHub App token does. Set
       # the repository variable RELEASE_APP_CLIENT_ID and the secret
-      # RELEASE_APP_KEY to use one; without them this falls back to GITHUB_TOKEN
-      # and CI on that pull request has to be started by hand.
+      # RELEASE_APP_KEY to use one; without them this falls back to GITHUB_TOKEN,
+      # and CI on that pull request has to be started by hand. The fallback also
+      # needs "Allow GitHub Actions to create and approve pull requests" in the
+      # repository settings, or opening the pull request fails (CONTRIBUTING.md).
       - name: GitHub App token
         id: app-token
         if: vars.RELEASE_APP_CLIENT_ID != ''
@@ -110,6 +119,26 @@ jobs:
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "Tagged $tag" >> "$GITHUB_STEP_SUMMARY"
 
+      # The version on main is always tagged by the run for the commit that set it.
+      # If that run never happened (a newer pending run replaced it), the next run
+      # finds changesets pending, opens a Version PR instead of publishing, and the
+      # version would never be released. Nothing else would notice, so fail here
+      # and say how to release it. The version is read from the pushed commit, not
+      # the workspace: the action leaves the Version PR branch checked out.
+      - name: Current version is tagged
+        if: steps.changesets.outputs.published != 'true'
+        run: |
+          tag="v$(git show "$GITHUB_SHA:package.json" | jq -r .version)"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+            exit 0
+          fi
+          # The commit that set this version: the last one to change the top-level
+          # "version" line. Not just the last to touch package.json, which a
+          # Dependabot bump of @changesets/cli also does.
+          commit="$(git log -1 --format=%H -G'^  "version": ' "$GITHUB_SHA" -- package.json)"
+          echo "::error::$tag is on main but was never tagged, so it was never released. Its run was probably replaced while pending. To release it: git tag $tag $commit && git push origin $tag && gh workflow run release.yml -f tag=$tag"
+          exit 1
+
   goreleaser:
     name: GoReleaser
     needs: version
@@ -122,6 +151,13 @@ jobs:
       )
     runs-on: ubuntu-latest
     timeout-minutes: 30
+
+    # One GoReleaser per tag, so a dispatched re-run can't race the original. Never
+    # cancelled: a cancelled GoReleaser can leave a half-uploaded release behind.
+    # Keyed by tag, it never holds up versioning.
+    concurrency:
+      group: release-goreleaser-${{ github.event_name == 'workflow_dispatch' && inputs.tag || needs.version.outputs.tag }}
+      cancel-in-progress: false
 
     permissions:
       # Create the GitHub Release and upload its artifacts.
