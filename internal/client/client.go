@@ -346,9 +346,10 @@ func (e *APIError) Conflict() (sent, current int64, ok bool) {
 // from the tenant: a corporate egress proxy, firewall or gateway answered instead.
 //
 // The tenant's errors always carry the JSON-array envelope, so a body that is not
-// a JSON array is the tell — an empty array still is one. An empty body is deliberately not counted — the tenant has been
-// seen to answer bare, and blaming a proxy for a real permission failure would send
-// the user off to the wrong team. 407 is the exception: only a proxy sends it.
+// a JSON array is the tell — an empty array still is one. An empty body is
+// deliberately not counted — the tenant has been seen to answer bare, and blaming a
+// proxy for a real permission failure would send the user off to the wrong team.
+// 407 is the exception: only a proxy sends it.
 func (e *APIError) Intermediary() bool {
 	switch e.Status {
 	case http.StatusProxyAuthRequired:
