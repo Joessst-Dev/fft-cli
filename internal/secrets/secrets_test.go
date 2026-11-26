@@ -234,6 +234,16 @@ var _ = Describe("the environment store", func() {
 		Expect(err).To(MatchError(secrets.ErrNotFound))
 	})
 
+	It("counts a whitespace-only value as unset, as config.FromEnv does", func() {
+		// FromEnv decides "no password, so token-only" from the trimmed value; if the
+		// store disagreed, a token-only project would be signed in with a blank password.
+		env["FFT_PASSWORD"] = "  \t"
+
+		_, err := store().Get(secrets.Key("env", secrets.KindPassword))
+
+		Expect(err).To(MatchError(secrets.ErrNotFound))
+	})
+
 	It("says which secrets the environment holds without handing them over", func() {
 		checker, ok := store().(secrets.Checker)
 		Expect(ok).To(BeTrue())

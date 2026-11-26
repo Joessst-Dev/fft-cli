@@ -1,6 +1,9 @@
 package secrets
 
-import "os"
+import (
+	"os"
+	"strings"
+)
 
 // envVars maps a secret kind to the environment variable that carries it in
 // headless mode. The project part of the key is ignored: a CI job has exactly
@@ -40,7 +43,10 @@ func (s envStore) Get(key string) (string, error) {
 		return "", ErrNotFound
 	}
 	val, ok := s.lookup(name)
-	if !ok || val == "" {
+	// A whitespace-only value is absent, as config.FromEnv already reads it: the two
+	// must agree on whether a password is set, or a {base URL, token} set synthesized
+	// as token-only would still be signed in with a password nobody meant to give.
+	if !ok || strings.TrimSpace(val) == "" {
 		return "", ErrNotFound
 	}
 	return val, nil

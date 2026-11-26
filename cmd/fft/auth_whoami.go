@@ -78,7 +78,12 @@ func runAuthWhoami(cmd *cobra.Command, deps *Deps) error {
 
 	// The identity goes to stderr, so that `-o json | jq` receives the permissions
 	// and nothing else — while a human still sees who they are.
-	deps.Printer.Notef("Signed in as %s (user %s) on %s.", view.Email, view.UserID, project.BaseURL)
+	if view.Email == "" {
+		// A headless FFT_ID_TOKEN run has no address to show: it was never given one.
+		deps.Printer.Notef("Signed in as user %s on %s.", view.UserID, project.BaseURL)
+	} else {
+		deps.Printer.Notef("Signed in as %s (user %s) on %s.", view.Email, view.UserID, project.BaseURL)
+	}
 
 	return deps.Printer.Render(whoamiRows(view), view)
 }
