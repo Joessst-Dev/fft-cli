@@ -5,8 +5,10 @@ https://claude.ai/code/routines). Trigger: **GitHub `pull_request` webhook** (no
 Claude GitHub App. Actions: `opened`, `synchronize`, `reopened`, `ready_for_review`, `labeled`.
 Environment: Default. Edit this file and re-register the routine when the prompt changes.
 
-Companion routine: [`pr-fix`](./pr-fix.md) picks up the review this one files and pushes fixes; its
-push re-fires this routine, closing the loop. The handoff is a label: when you have findings you add
+Companion routine: [`pr-fix`](./pr-fix.md) picks up the review this one files and pushes fixes, then
+re-fires this routine by re-arming the **`auto-review-recheck`** label, closing the loop. Its push
+alone would not: the platform delivers no `synchronize` run for a push a routine makes, while a
+label change a routine makes does fire (seen on #311). The handoff is a label: when you have findings you add
 **`auto-review-fix`**, whose `labeled` event is the only trigger the routines platform gives
 `pr-fix` (it exposes neither `pull_request_review` nor a usable `review_requested`). The label —
 not the review verdict — is the signal, so it works even when GitHub limits you to a `COMMENT`
@@ -31,7 +33,8 @@ control comment, and the `auto-review*` labels. Never commit, never push, never 
 push to `main`.**
 
 This is one half of a bounded review→fix loop. You review; the companion [`pr-fix`](./pr-fix.md)
-routine fixes the findings and pushes; the push re-fires you. **The loop is driven by the
+routine fixes the findings, pushes, and re-fires you by re-arming the `auto-review-recheck` label
+(its push alone does not reach you). **The loop is driven by the
 `auto-review-fix` label, not by the review verdict** — you arm the label when you have findings and
 leave it off when you don't. That decoupling is deliberate: this routine authenticates as a GitHub
 account that is often the PR's own author, and GitHub forbids a formal `APPROVE`/`REQUEST_CHANGES`
@@ -84,8 +87,10 @@ that one from now on and delete the rest
 2. Ensure the labels exist (idempotent):
    `gh label create auto-review --color 0E8A16 --description "Opt this PR into the automated review→fix loop" || true`,
    `gh label create auto-review-stalled --color B60205 --description "Automated review loop hit its round bound; needs a human" || true`,
-   and the handoff label
-   `gh label create auto-review-fix --color FBCA04 --description "Reviewer signals pr-fix to address the changes-requested review" || true`.
+   the handoff label
+   `gh label create auto-review-fix --color FBCA04 --description "Reviewer signals pr-fix to address the changes-requested review" || true`,
+   and the hand-back label
+   `gh label create auto-review-recheck --color C5DEF5 --description "pr-fix signals pr-review to re-review the fix it pushed" || true`.
 3. Read the change: `gh pr view <n> --json title,body,author,baseRefName,headRefOid`,
    `gh pr diff <n>`, and the current check status `gh pr checks <n>` (so your summary can note
    whether the required CI checks — test, no-drift, lint, govulncheck, CodeQL — are green).
@@ -141,7 +146,10 @@ that one from now on and delete the rest
    (`gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-fix || true`), and stop. A
    human takes it from here.
 7. Update the sticky control comment: set `last_reviewed_sha` to the head SHA and persist the
-   current `round`. Leave your working tree clean; you made no code changes.
+   current `round`. Then clear the hand-back label so it does not linger
+   (`gh pr edit <n> --repo Joessst-Dev/fft-cli --remove-label auto-review-recheck || true`; its
+   `unlabeled` event re-fires you and exits at step 1). Leave your working tree clean; you made no
+   code changes.
 
 **Guardrails:** one review per head SHA (idempotent — skip if `last_reviewed_sha` already matches).
 One sticky control comment; preserve the fixer's `last_fixed_review_id` when you rewrite it. When
