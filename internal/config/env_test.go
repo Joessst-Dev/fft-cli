@@ -5,6 +5,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/Joessst-Dev/fft-cli/internal/config"
+	"github.com/Joessst-Dev/fft-cli/internal/secrets"
 )
 
 var _ = Describe("FromEnv", func() {
@@ -112,6 +113,25 @@ var _ = Describe("FromEnv", func() {
 			_, ok := fromEnv()
 
 			Expect(ok).To(BeFalse())
+		})
+	})
+
+	When("the password is whitespace-only beside a base URL and an id token", func() {
+		// The environment secret store reads the same variable, and it must agree that
+		// no password is set: otherwise this set is synthesized as token-only and then
+		// signed in with a blank password, failing on an empty Firebase key.
+		It("is token-only, and the secret store sees no password", func() {
+			env = map[string]string{
+				config.EnvBaseURL:  "https://acme.api.fulfillmenttools.com",
+				config.EnvPassword: "  ",
+				config.EnvIDToken:  "eyJhbGciOi...",
+			}
+
+			_, ok := fromEnv()
+			Expect(ok).To(BeTrue())
+
+			_, err := secrets.NewEnv(lookup).Get(secrets.Key("env", secrets.KindPassword))
+			Expect(err).To(MatchError(secrets.ErrNotFound))
 		})
 	})
 

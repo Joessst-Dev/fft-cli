@@ -114,9 +114,10 @@ func HistoryFromEnv(lookup func(string) (string, bool)) (enabled, set bool) {
 // Firebase Web API key, an email and a password to sign in with, or — with no
 // password set — just the base URL and an id token to use directly (the key and
 // the email are never needed there, so they are optional and the email stays empty
-// unless given). A partial set is ignored rather than half-honoured: silently
-// falling back to the config file when one variable is missing is how a CI job
-// ends up running against the wrong tenant.
+// unless given as FFT_EMAIL or derived from FFT_USERNAME, FFT_PROJECT_ID and
+// FFT_ENV). A partial set is ignored rather than half-honoured: silently
+// falling back to the config file when one variable is missing is how a CI job ends up
+// running against the wrong tenant.
 //
 // FFT_EMAIL may be left out when FFT_USERNAME, FFT_PROJECT_ID and
 // FFT_ENV/FFT_ENVIRONMENT are given: the synthetic address is then built from
