@@ -29,7 +29,7 @@ names to find them; do not trust remembered line numbers.
 ## Pagination
 
 - GET lists: `startAfterId` + `size`. Listings: default 25, **no declared maximum**. Stocks: default
-  25, maximum 1000. Stock **summaries** paginate by the article's `tenantArticleId`, not by an id.
+  25, maximum 100. Stock **summaries** paginate by the article's `tenantArticleId`, not by an id.
 - `POST …/search`: cursor `after`/`before`/`last` with `pageInfo.endCursor`; `size` defaults to 20,
   maximum 250; `total` only with `options.withTotal: true`. `startAfterId` on search payloads is
   deprecated.
