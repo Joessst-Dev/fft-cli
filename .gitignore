@@ -24,11 +24,10 @@ coverage.*
 .env
 .env.local
 
-# Local AI tooling. Track shared agents and skills so cloud routines (which run
-# off a fresh clone) can use them; keep working memory out — the notes reference
-# a private tenant — along with any local settings.
+# Local AI tooling. Track the shared skills so cloud routines (which run off a
+# fresh clone) can use them; keep working memory out — the notes reference a
+# private tenant — along with any local settings.
 .claude/*
-!.claude/agents/
 !.claude/skills/
 
 # Documentation site (VitePress). The generated Markdown under docs/guide and

@@ -42,14 +42,13 @@ you fix and push; the push re-fires `pr-review`, which re-reviews and either fin
 leaves the label off (a human then merges) or re-arms the label with more findings. **Never merge,
 never push to `main`.**
 
-This repo ships project agents (`.claude/agents/`) and skills (`.claude/skills/`) in your
-checkout — use them via the Task and Skill tools: lean on **`go-cli-developer`** and the
-**`golang-*`** skills for the Go edits, consult **`fulfillment-tools-consultant`** for the real
-semantics of any endpoint or POST read-vs-write question, and you may run **`code-reviewer`** on
-your own diff before pushing. **Load the skills/agents you need and read the repo invariants
-BEFORE step 4 checks out the PR branch** — a PR branch cut before the shared `.claude/` assets
-landed may not carry them, whereas your fresh clone of `main` does. These are aids — they do not
-widen the scope of what you fix.
+This repo ships project skills (`.claude/skills/`) in your checkout — load them with the Skill
+tool: the **`golang-*`** skills and the Testing rules in `CLAUDE.md` for the Go edits, the
+**`fulfillment-tools-consultant`** skill for the real semantics of any endpoint or POST
+read-vs-write question, and you may run the **`code-reviewer`** skill on your own diff before
+pushing. **Load the skills you need and read the repo invariants BEFORE step 4 checks out the PR
+branch** — a PR branch cut before a skill landed may not carry it, whereas your fresh clone of
+`main` does. These are aids — they do not widen the scope of what you fix.
 
 **Loop state lives in a sticky control comment** authored by the reviewer: one PR comment carrying
 the hidden marker `<!-- fft-auto-review-loop -->` followed by a fenced JSON block holding
@@ -91,11 +90,11 @@ PATCH` is the edit tool; a second block corrupts the state machine). `pr-review`
    (`gh api repos/Joessst-Dev/fft-cli/pulls/<n>/reviews/<id>`) and its inline comments
    (`gh api repos/Joessst-Dev/fft-cli/pulls/<n>/reviews/<id>/comments`), each carrying `path`,
    `line`, and `body`. Enumerate every finding.
-3. Load the skills/agents from step's preamble and read `CLAUDE.md` so the invariants are in hand
+3. Load the skills from the preamble and read `CLAUDE.md` so the invariants are in hand
    before you switch branches.
 4. `gh pr checkout <n>` to put the PR branch in your working tree.
-5. **Fix each finding** with `go-cli-developer` + the `golang-*` skills, consulting
-   `fulfillment-tools-consultant` for API semantics. Respect every load-bearing invariant in
+5. **Fix each finding** with the `golang-*` skills, consulting the
+   `fulfillment-tools-consultant` skill for API semantics. Respect every load-bearing invariant in
    `CLAUDE.md` (output contract; read-only POST gate and `readPOSTs` classification; optimistic
    locking in the body; `entityDoc` not the generated models; the two pagination models;
    path-param vs query-filter id resolution; exit codes; every command carrying an
