@@ -20,7 +20,7 @@ contexts (DOMS / Operations / Inventory / Core) to endpoint groups — orient th
 
 ## Global facts
 
-- **Server:** `https://{tenant}.api.fulfillmenttools.com`.
+- **Server:** `https://{tenant}.api.fulfillmenttools.io`.
 - **Auth:** a single security scheme, `BearerToken` — HTTP bearer, JWT.
 - **`ApiError` is an array** of `ErrorInner`, not an object. Error rendering must unmarshal a JSON
   array.
