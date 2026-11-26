@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"net/http"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -81,6 +82,49 @@ var _ = Describe("running headless from the environment", func() {
 		Expect(c.run("project", "current")).To(Equal(exitcode.OK))
 
 		Expect(c.out()).To(ContainSubstring(config.EphemeralName))
+	})
+
+	When("only the base URL and an id token are set", func() {
+		// The recipe for handing fft a credential that expires within the hour and
+		// cannot mint more: a static token is never refreshed, so the Firebase key and
+		// the email were never read and must not be demanded.
+		const token = "eyJhbGciOiJub25lIn0.e30.static-token"
+		var requests *[]*http.Request
+
+		BeforeEach(func() {
+			requests = c.fakeAPI(func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				_, err := w.Write([]byte(permissionsBody))
+				Expect(err).NotTo(HaveOccurred())
+			})
+			c.setenv(config.EnvPassword, "")
+			c.setenv(config.EnvFirebaseAPIKey, "")
+			c.setenv(config.EnvEmail, "")
+			c.setenv(config.EnvIDToken, token)
+		})
+
+		It("reaches the tenant without the key or the email", func() {
+			// The harness's token source stands in for the real one, so this proves the
+			// project is synthesized and used — not which token is sent.
+			Expect(c.run("auth", "whoami")).To(Equal(exitcode.OK))
+
+			Expect(*requests).To(HaveLen(1))
+		})
+
+		It("never prints the token on stdout", func() {
+			Expect(c.run("auth", "whoami", "-o", "json")).To(Equal(exitcode.OK))
+			Expect(c.run("auth", "status", "-o", "json")).To(Equal(exitcode.OK))
+			Expect(c.run("project", "list", "-o", "json")).To(Equal(exitcode.OK))
+
+			Expect(c.out()).NotTo(ContainSubstring(token))
+		})
+
+		It("is not headless once a password is set without its key and email", func() {
+			c.setenv(config.EnvPassword, "ci-secret")
+
+			Expect(c.run("project", "current")).To(Equal(exitcode.Config))
+			Expect(c.errOut()).To(ContainSubstring("no active project"))
+		})
 	})
 
 	DescribeTable("refusing to manage the config file while the environment is in charge",

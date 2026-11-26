@@ -18,6 +18,27 @@ file nor the keychain**:
 | `FFT_READ_ONLY` | optional; refuse every request that would change the tenant — see [Read-only projects](./read-only.md) |
 | `FFT_HISTORY` | optional; the request history is off in headless mode, and `on` records it — see [Request history](./configuration.md#request-history) |
 
+## Using an id token instead of a password
+
+If the job authenticated elsewhere, hand `fft` the token and nothing else:
+
+```sh
+FFT_BASE_URL=https://<tenant>.api.fulfillmenttools.com \
+FFT_ID_TOKEN=… \
+fft facility list
+```
+
+With `FFT_ID_TOKEN` set and no `FFT_PASSWORD`, only `FFT_BASE_URL` and the token are
+required. The Firebase key and the email are never used: a static token cannot be
+refreshed, so it is used as it is until it expires (`fft auth refresh` refuses). This is
+the least-privilege way to give a CI job or sandbox access — a credential that expires
+within the hour and cannot mint more. `fft auth status` shows an empty email unless you
+set `FFT_EMAIL`.
+
+The password path stays all-or-nothing: once `FFT_PASSWORD` is set, the key and an email
+are required too, and a partial set is ignored rather than falling back to the config
+file.
+
 `FFT_BASE_URL` is held to the same rule as `fft project add`: it must be `https`, or
 `http` only to a loopback address (`localhost`/`127.0.0.1`). Plain `http` to any other
 host — including a container service name like `http://emulator:8080` on a compose
