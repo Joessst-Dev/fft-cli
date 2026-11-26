@@ -66,8 +66,8 @@ func getCategoryDoc(ctx context.Context, c *client.Client, id string) (entityDoc
 	return decodeVersioned(raw, "routing category")
 }
 
-// routingCategoryView is the table's model of a category. Like the strategy, the
-// category is an allOf that oapi-codegen collapses lossily, so this is hand-written.
+// routingCategoryView is the table's model of a category. Like the strategy view it
+// is hand-written, so the table depends only on the fields it shows.
 type routingCategoryView struct {
 	ID            string            `json:"id"`
 	Name          string            `json:"name"`

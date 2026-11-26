@@ -10,9 +10,9 @@ import (
 )
 
 // entityDoc is one entity, carried as a decoded document rather than a generated
-// model — the same choice the rest of fft makes, and for the same reason: the spec's
-// allOf-with-siblings schemas do not survive a round trip through the typed structs,
-// so writes that went through them would silently drop fields.
+// model — the same choice the rest of fft makes, and for the same reason: a typed
+// struct knows only the fields of the last spec sync, so a write that went through one
+// would silently drop every field it did not know.
 type entityDoc = map[string]any
 
 // conflictError is a version mismatch on an update: the caller sent requestVersion,

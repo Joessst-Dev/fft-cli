@@ -82,12 +82,8 @@ before sending, because the API's complaint about a swapped pair is not obvious.
 				return err
 			}
 
-			// The generated api.UpdateFacilityCoordinatesActionParameter has no
-			// coordinates field: the swagger declares the schema as an allOf with
-			// sibling properties, and oapi-codegen collapses that to a bare alias of
-			// the abstract parent. So the body is built here, from the schema at
-			// swagger:84033, rather than from a model that would silently drop the one
-			// field the action is about.
+			// Built as a document, like every write here (see entityDoc), to the
+			// shape of UpdateFacilityCoordinatesActionParameter in the spec.
 			body := entityDoc{
 				"name":        actionUpdateCoordinates,
 				"coordinates": map[string]float64{"lat": lat, "lon": lon},
