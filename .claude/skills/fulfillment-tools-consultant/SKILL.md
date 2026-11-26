@@ -49,6 +49,8 @@ spec is re-vendored, so they carry grep recipes, not anchors — re-grep before 
   PATCH, version locking, status vs subStatus.
 - [references/listings-stocks-semantics.md](references/listings-stocks-semantics.md) — the ×25 bulk
   budget, no partial success, bare-array responses, versionless vs versioned writes.
+- [references/connections-semantics.md](references/connections-semantics.md) — interfacility
+  connections: the undeclared top-level `type` in list responses (a copy of `target.type`).
 
 ## How to answer a consultation
 
