@@ -247,6 +247,22 @@ var _ = Describe("crawling a network", func() {
 		}))
 	})
 
+	It("says how far it has got while it pages through the facilities", func() {
+		var progress strings.Builder
+		clock := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+
+		_, err := crawl(func(o *network.CrawlOptions) {
+			o.Progress = &progress
+			o.Now = func() time.Time {
+				clock = clock.Add(11 * time.Second)
+				return clock
+			}
+		})
+
+		Expect(err).NotTo(HaveOccurred())
+		Expect(progress.String()).To(ContainSubstring("facilities: 1 so far"))
+	})
+
 	It("walks offline facilities too, since connections may point at them", func() {
 		_, err := crawl()
 		Expect(err).NotTo(HaveOccurred())

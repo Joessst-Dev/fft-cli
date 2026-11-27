@@ -309,10 +309,22 @@ func (cr *crawler) facilities(ctx context.Context) ([]Facility, error) {
 	cr.notef("reading the facilities")
 	var raws []json.RawMessage
 	err := cr.patient(ctx, "facilities", func() error {
-		var err error
-		raws, err = drain(client.SearchAll(ctx, cr.c, client.FacilitySearch[json.RawMessage](),
-			client.FacilitySearchPayload{}, client.MaxItems(maxEntities)))
-		return err
+		raws = raws[:0]
+		last := cr.o.Now()
+		for raw, err := range client.SearchAll(ctx, cr.c, client.FacilitySearch[json.RawMessage](),
+			client.FacilitySearchPayload{}, client.MaxItems(maxEntities)) {
+			if err != nil {
+				return err
+			}
+			raws = append(raws, raw)
+			// A large tenant's facility list takes minutes to page through, and a
+			// crawl that says nothing for minutes looks hung.
+			if now := cr.o.Now(); now.Sub(last) >= 10*time.Second {
+				last = now
+				cr.notef("facilities: %d so far", len(raws))
+			}
+		}
+		return nil
 	})
 	if err != nil {
 		return nil, err
