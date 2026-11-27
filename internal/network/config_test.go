@@ -513,6 +513,30 @@ var _ = Describe("inferring a config file", func() {
 		Entry("PS", "\u2029"),
 	)
 
+	DescribeTable("writes a file its own validate accepts, whatever control character tenant data carries",
+		func(control string) {
+			w := newWorld().stores("BER", "DE", 3).
+				edge("a", "BER-01", network.Target{Type: network.TypeManaged, FacilityRef: id("BER-02")})
+			w.s.Source.Project = "demo" + control + "shop"
+			n := network.New(&w.s)
+
+			text := string(n.InferFile(today))
+
+			// yaml.v3 rejects the whole document over one C0/C1 control or DEL, even in a comment.
+			_, err := parse(text)
+			Expect(err).NotTo(HaveOccurred(), "%q", text)
+			Expect(text).NotTo(ContainSubstring(control))
+			Expect(text).To(ContainSubstring("demo"))
+		},
+		Entry("ESC", "\x1b"),
+		Entry("NUL", "\x00"),
+		Entry("DEL", "\x7f"),
+		Entry("C0 DLE", "\x10"),
+		Entry("C1 CSI", "\u009b"),
+		Entry("BOM", "\ufeff"),
+		Entry("invalid UTF-8", "\xff"),
+	)
+
 	It("pins the hubs it found, with the reason as a comment", func() {
 		text := string(network.New(&germany().s).InferFile(today))
 
