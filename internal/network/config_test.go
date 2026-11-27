@@ -132,7 +132,7 @@ var _ = Describe("the config file", func() {
 		Entry("no version at all, named at the top of the file", "rules: [no-source]\n", 1, "version",
 			"must be 1, the format this fft reads; got 0"),
 		Entry("an unknown rule", "version: 1\nrules:\n  - no-source\n  - no-sources\n", 4, "rules[1]",
-			`unknown rule "no-sources": want one of no-source, peer-coverage, expect, dangling-ref, offline-ref, duplicate-edge, config-drift`),
+			`unknown rule "no-sources": want one of `+strings.Join(network.RuleIDs(), ", ")),
 		Entry("hubs both pinned and chosen by reach",
 			"version: 1\nroles:\n  hub:\n    outDegree: relative\n    facilities: [HUB-01]\n", 3, "roles.hub",
 			"pin the facilities or choose them by reach, not both"),

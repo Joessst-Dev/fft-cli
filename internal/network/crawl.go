@@ -22,8 +22,8 @@ import (
 
 // CrawlOperations are the operationIds a crawl sends, and the only ones. A spec
 // holds every one of them to the read-only classification: `fft network
-// snapshot` is a single command that sends seven kinds of request, and the
-// read-only gate, which reads one annotation per command, cannot see six of
+// snapshot` is a single command that sends eight kinds of request, and the
+// read-only gate, which reads one annotation per command, cannot see seven of
 // them.
 var CrawlOperations = []string{
 	"searchFacility",
@@ -31,6 +31,7 @@ var CrawlOperations = []string{
 	"searchFacilityGroup",
 	"getTags",
 	"getRoutingStrategies",
+	"getRoutingStrategyNodeConfigCategories",
 	"getRoutingDecisionLogs",
 	"getOrder",
 }
@@ -201,6 +202,7 @@ func Crawl(ctx context.Context, c *client.Client, o CrawlOptions) (*Snapshot, er
 		{"facility groups", cr.groups},
 		{"tags", cr.tags},
 		{"routing strategies", cr.strategies},
+		{"routing node config categories", cr.categories},
 	}
 	if o.DecisionLogs > 0 {
 		steps = append(steps, struct {
@@ -446,6 +448,20 @@ func (cr *crawler) strategies(ctx context.Context, s *Snapshot) error {
 			client.PageSize, client.MaxItems(maxEntities)))
 		return err
 	})
+}
+
+func (cr *crawler) categories(ctx context.Context, s *Snapshot) error {
+	var raws []json.RawMessage
+	err := cr.patient(ctx, "routing node config categories", func() error {
+		var err error
+		raws, err = drain(client.ListAll(ctx, cr.c, client.RoutingCategories(), client.PageSize, client.MaxItems(maxEntities)))
+		return err
+	})
+	if err != nil {
+		return err
+	}
+	s.CategoriesRead = true
+	return decodeAll(raws, &s.Categories, "routing node config category")
 }
 
 // decisionLogs reads one page of the most recent decision logs and, with

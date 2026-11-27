@@ -40,6 +40,7 @@ var commandsWithoutOperation = map[string]string{
 	// reached the tenant, and it is gated on every operation it sent.
 	"fft network check":           "analyses a local snapshot file; no network",
 	"fft network infer":           "writes a config file from a local snapshot; no network",
+	"fft network reach":           "explains connections from a local snapshot; no network",
 	"fft network config schema":   "prints the config file's JSON Schema; no network",
 	"fft network config validate": "checks a local config file against a local snapshot; no network",
 

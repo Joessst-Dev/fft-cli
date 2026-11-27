@@ -419,3 +419,37 @@ var _ = Describe("checking a network", func() {
 		Expect(germany().check().Findings).To(BeEmpty())
 	})
 })
+
+var _ = Describe("reaching one facility", func() {
+	It("lists every connection that could lead to it, applying ones first, with the reason for each", func() {
+		w := germany().
+			edge("x", "HUB-01", network.Target{Type: network.TypeManaged}, not(network.ContextTag, "bulky")).
+			edge("y", "SUP-01", network.Target{Type: network.TypeManaged}, in(network.ContextCategory, "dangerous-goods")).
+			edge("z", "HUB-02", network.Target{Type: network.TypeManaged, FacilityRef: id("BER-01")})
+		n := network.New(&w.s)
+		cfg := network.DefaultConfig()
+		i, ok := n.Locate("BER-11")
+		Expect(ok).To(BeTrue())
+
+		rows := n.ReachTo(i, profile("bulky"), n.InferRoles(cfg))
+
+		got := []string{}
+		for _, r := range rows {
+			got = append(got, r.Connection+" "+r.Result)
+		}
+		Expect(got).To(Equal([]string{"h1 applies", "s1 applies", "y conditional", "x excluded", "h2 excluded"}))
+		Expect(rows[3].Reason).To(Equal("context[0] TAG_REFERENCE NOT: the order carries bulky"))
+		Expect(rows[3].Entry).To(Equal(0))
+		Expect(rows[4].Reason).To(Equal("the target's excludedFacilityRefs lists it"))
+	})
+
+	It("finds a facility by tenant id, platform id or URN", func() {
+		n := network.New(&germany().s)
+
+		for _, ref := range []string{"BER-01", id("BER-01"), "urn:fft:facility:tenantFacilityId:BER-01"} {
+			i, ok := n.Locate(ref)
+			Expect(ok).To(BeTrue(), ref)
+			Expect(n.Facility(i).Label()).To(Equal("BER-01"))
+		}
+	})
+})

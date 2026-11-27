@@ -26,6 +26,21 @@ The rules:
   offline-ref     an offline facility that connections still lead to
   duplicate-edge  connections of one source that are the same connection
 
+With fft-network.yaml, also:
+
+  expect          a facility fewer sources reach than the file declares
+  config-drift    the network has moved away from what the file pins
+
+And on the routing strategy in use:
+
+  strategy-in-use       no strategy in use, or more than one
+  strategy-category     a node's categoryRef names no node config category
+  strategy-inactive     an inactive condition or node with nodes below it
+  strategy-expired      a node or condition whose time frames have all ended
+  strategy-fallback     a fallback facility that is missing or offline
+  strategy-no-rating    a path whose merged config has no active rating
+  toolkit-hardcoded-id  a facility id in a toolkit rule that names nothing
+
 A kind of order is the tags it carries, as far as any connection reads them,
 taken from the orders the snapshot's decision logs routed. Hubs are the facilities
 whose connections reach far more facilities than anybody else's. What the check
@@ -47,7 +62,7 @@ fft network check [flags]
 
 ```
       --config string      The config file; when it is the default and does not exist, the check infers everything (default "fft-network.yaml")
-      --rule stringArray   Run only this rule (repeatable): no-source, peer-coverage, expect, dangling-ref, offline-ref, duplicate-edge, config-drift
+      --rule stringArray   Run only this rule (repeatable): no-source, peer-coverage, expect, dangling-ref, offline-ref, duplicate-edge, strategy-in-use, strategy-category, strategy-inactive, strategy-expired, strategy-fallback, strategy-no-rating, toolkit-hardcoded-id, config-drift
       --snapshot string    Read this snapshot instead of the project's file in the cache directory
 ```
 

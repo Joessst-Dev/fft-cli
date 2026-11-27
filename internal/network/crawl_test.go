@@ -129,6 +129,8 @@ func newFakeTenant() *fakeTenant {
 			answer(map[string]any{"tags": []any{map[string]any{"id": "orderType", "allowedValues": []any{"bulky", "express"}}}, "total": 1})
 		case r.Method == http.MethodGet && path == "/api/routing/strategies":
 			answer(map[string]any{"routingStrategies": []any{map[string]any{"id": "s1", "inUse": true, "rootNode": map[string]any{}}}, "total": 1})
+		case r.Method == http.MethodGet && path == "/api/routing/nodeconfigcategories":
+			answer(map[string]any{"routingStrategyNodeConfigCategories": []any{map[string]any{"id": "cat-1"}}, "total": 1})
 		case r.Method == http.MethodGet && path == "/api/routing/decisionlogs":
 			log := func(id, order string) map[string]any {
 				return map[string]any{
@@ -216,6 +218,8 @@ var _ = Describe("crawling a network", func() {
 		Expect(loaded.Groups[0].Members).To(ConsistOf(ber1ID, ber2ID))
 		Expect(loaded.Tags).To(HaveLen(1))
 		Expect(loaded.Strategies).To(HaveLen(1))
+		Expect(loaded.CategoriesRead).To(BeTrue())
+		Expect(loaded.Categories).To(Equal([]network.Category{{ID: "cat-1"}}))
 		Expect(loaded.DecisionLogs).To(HaveLen(4))
 		Expect(loaded.DecisionLogs[0].OrderRef).To(Equal("o1"))
 		Expect(loaded.DecisionLogs[0].Connections).To(Equal([]string{"c1", "c3"}))

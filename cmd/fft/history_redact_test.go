@@ -17,6 +17,9 @@ var pairFlagsKept = map[string]string{
 	// Filter values — a status, a date, an id — are what reopening the request
 	// needs. A pair whose name is credential- or person-shaped is still withheld.
 	"query": "filter values are kept, as the history help says",
+	// An order's tags (`fft network reach --tag orderType=express`): routing
+	// attributes the tenant defines, never a credential or a person.
+	"tag": "order tag values are routing attributes, not secrets",
 }
 
 // pairUsage finds a flag whose usage shows a name=value pair: "as name=value",
