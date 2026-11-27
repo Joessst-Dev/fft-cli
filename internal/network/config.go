@@ -487,16 +487,13 @@ func (lf *LoadedFile) Unmatched(n *Network) []Problem {
 }
 
 // isProfile reports whether subject is an order profile a config-drift finding
-// can be about: one the snapshot's decision logs routed, or one the file
-// declares. A drift finding about a profile has the profile as its subject.
+// can be about. drift reports only a profile that was routed and that
+// profiles.declared does not list, so the subject is always one the snapshot's
+// decision logs routed; a profile the file declares, or one a tag implies that
+// no order carried, can never be a subject.
 func (lf *LoadedFile) isProfile(n *Network, subject string) bool {
-	for _, tags := range lf.declaredProfiles() {
-		if NewProfile(tags).String() == subject {
-			return true
-		}
-	}
 	for _, pc := range n.InferProfiles(Config{}) {
-		if pc.Profile.String() == subject {
+		if pc.Orders > 0 && pc.Profile.String() == subject {
 			return true
 		}
 	}
