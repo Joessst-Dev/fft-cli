@@ -348,11 +348,11 @@ var _ = Describe("fft connection update", func() {
 
 	BeforeEach(func() { c = newCLI() })
 
-	// The round trip is the whole point of curating this command. The connection the
-	// API *returns* carries its type only inside the target; the body it *accepts*
-	// requires one at the top level too. So `get -o json | update --file -` would send
-	// a body with no discriminator and collect a 400 that names no field — unless fft
-	// fills it in, which is what this pins.
+	// The round trip is the whole point of curating this command. A connection the
+	// API *returns* is only guaranteed to carry its type inside the target; the body
+	// it *accepts* requires one at the top level too. So `get -o json | update --file -`
+	// could send a body with no discriminator and collect a 400 that names no field —
+	// unless fft fills it in, which is what this pins.
 	It("completes a body that came straight out of `connection get`, which has no top-level type", func() {
 		api := c.fakeTenant(func(w http.ResponseWriter, r *http.Request, _ []byte) {
 			writeJSON(w, http.StatusOK, connection("c2", typeSupplier, "sup-uuid", "UPS", 4))

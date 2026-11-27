@@ -25,11 +25,11 @@ Consequences:
   (`cmd/fft/connection.go`) fills it in from `target.type` when a body taken from a read lacks
   it, and refuses a body where the two disagree; do not "simplify" it away on the strength of
   this note.
-- **Reconciling with the code comments.** `connection_update.go`'s help text and the comment in
-  `cmd/fft/connection.go` say the read model carries `type` only inside `target`. The list
-  response above partly contradicts that, but the fill-in is still needed whenever a read
-  lacks the field (a `SUPPLIER` target, or a single-connection GET where it has not been
-  observed).
+- **How the code comments describe it.** `connection_update.go`'s help text and the comments in
+  `cmd/fft/connection.go` say the spec's read model declares `type` only inside `target`, and
+  that the list endpoint has been observed to add an undeclared top-level copy (#324). The
+  fill-in is still needed whenever a read lacks the field (a `SUPPLIER` target, or a
+  single-connection GET where it has not been observed), so those comments stay.
 
 Tracked in https://github.com/Joessst-Dev/fft-cli/issues/324 (label `spec-drift`). When the field
 appears in the upstream spec, `make generate` will show it and this note can go.

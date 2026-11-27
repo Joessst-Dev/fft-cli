@@ -76,7 +76,8 @@ fft connection delete 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10 --facility berlin-war
 - **`update` is a PUT and there is no `patch`.** The connection becomes what the file says
   and loses anything the file omits — so unlike a facility, you cannot reach for the safer
   verb. Read the whole thing, edit it, send it back. fft supplies the `version`.
-- The connection the API *returns* carries its type only inside `target`; the body it
+- A connection the API *returns* is only guaranteed to carry its type inside `target` (the
+  list endpoint also adds a top-level copy, which the spec does not declare); the body it
   *accepts* wants one at the top level too. fft fills that in, so `fft connection get … -o
   json` piped back into `--file` works. Do not hand-edit it in.
 - `--example` prints a body per type: `--type SUPPLIER`, `MANAGED_FACILITY` or `CUSTOMER`.
