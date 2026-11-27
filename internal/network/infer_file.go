@@ -93,6 +93,11 @@ func (n *Network) InferFile(now time.Time) []byte {
 
 	var expects []Coverage
 	for _, c := range r.Coverage {
+		// A group of stores with no value for the peer field cannot be selected by
+		// it: a where on the placeholder would match no facility.
+		if c.Group == noValue {
+			continue
+		}
 		if c.Kind == KindHub && c.Size >= cfg.PeerMinSize && float64(c.Have)/float64(c.Size) >= cfg.PeerShare {
 			expects = append(expects, c)
 		}
