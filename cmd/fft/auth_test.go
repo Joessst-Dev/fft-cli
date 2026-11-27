@@ -159,7 +159,92 @@ var _ = Describe("fft auth token", func() {
 
 		Expect(c.out()).To(Equal(testIDToken + "\n"))
 	})
+
+	When("the token source can renew", func() {
+		var (
+			expiry  time.Time
+			renewer *fakeRenewer
+		)
+
+		BeforeEach(func() {
+			expiry = time.Date(2026, 7, 12, 13, 0, 0, 0, time.UTC)
+			c.deps.Clock = func() time.Time { return expiry.Add(-34 * time.Minute) }
+			renewer = &fakeRenewer{
+				cached: "cached-id-token",
+				token:  auth.Token{ID: "fresh-id-token", ExpiresAt: expiry},
+			}
+			c.deps.NewTokenSource = func(config.Project, secrets.Store, func() time.Time, io.Writer) (auth.TokenSource, error) {
+				return renewer, nil
+			}
+		})
+
+		It("serves the cached token without minting one when --refresh is absent", func() {
+			// The default stays what it was: $(fft auth token) run straight away must
+			// not cost a sign-in.
+			Expect(c.run("auth", "token")).To(Equal(exitcode.OK))
+
+			Expect(c.out()).To(Equal("cached-id-token\n"))
+			Expect(renewer.renewals).To(BeZero())
+			Expect(c.errOut()).To(BeEmpty())
+		})
+
+		It("mints a new token and prints exactly that one with --refresh", func() {
+			Expect(c.run("auth", "token", "--refresh")).To(Equal(exitcode.OK))
+
+			Expect(c.out()).To(Equal("fresh-id-token\n"))
+			Expect(renewer.renewals).To(Equal(1))
+		})
+
+		It("reports the new token's lifetime on stderr, never on stdout", func() {
+			Expect(c.run("auth", "token", "--refresh")).To(Equal(exitcode.OK))
+
+			Expect(c.errOut()).To(Equal("token valid for 34m\n"))
+			Expect(c.out()).NotTo(ContainSubstring("valid for"))
+		})
+
+		It("keeps the token off stderr", func() {
+			Expect(c.run("auth", "token", "--refresh")).To(Equal(exitcode.OK))
+
+			Expect(c.errOut()).NotTo(ContainSubstring("fresh-id-token"))
+		})
+
+		It("prints nothing and exits 4 when the renewal fails", func() {
+			renewer.renewErr = &auth.ReauthError{Project: "staging", Err: auth.ErrReauthRequired}
+
+			Expect(c.run("auth", "token", "--refresh")).To(Equal(exitcode.Auth))
+
+			Expect(c.out()).To(BeEmpty())
+			Expect(renewer.renewals).To(Equal(1))
+		})
+	})
+
+	When("the project authenticates with a fixed id token", func() {
+		It("exits 2 with --refresh and prints nothing: there is nothing to renew from", func() {
+			Expect(c.run("auth", "token", "--refresh")).To(Equal(exitcode.Usage))
+
+			Expect(c.out()).To(BeEmpty())
+			Expect(c.errOut()).To(ContainSubstring("cannot be refreshed"))
+		})
+
+		It("still prints the token without it", func() {
+			Expect(c.run("auth", "token")).To(Equal(exitcode.OK))
+
+			Expect(c.out()).To(Equal(testIDToken + "\n"))
+		})
+	})
 })
+
+var _ = DescribeTable("the remaining-lifetime notice rounds to what a consumer can plan with",
+	func(left time.Duration, want string) {
+		Expect(lifetime(left)).To(Equal(want))
+	},
+	Entry("under a minute", 40*time.Second, "under a minute"),
+	Entry("whole minutes", 34*time.Minute, "34m"),
+	Entry("the nearest minute", 34*time.Minute+40*time.Second, "35m"),
+	Entry("an exact hour", time.Hour, "1h"),
+	Entry("a token a few seconds short of an hour", 59*time.Minute+50*time.Second, "1h"),
+	Entry("hours and minutes", time.Hour+5*time.Minute, "1h5m"),
+)
 
 var _ = Describe("fft auth refresh", func() {
 	var c *cli
@@ -225,11 +310,30 @@ var _ = Describe("fft auth refresh", func() {
 // internal/auth.
 type fakeRenewer struct {
 	token auth.Token
+	// cached is what Token serves, standing in for the id token already in the
+	// keychain. Empty means the same token Renew mints.
+	cached string
+	// renewErr, when set, is what Renew fails with.
+	renewErr error
+	// renewals counts the mints: the observable difference between a command that
+	// refreshed and one that served the cache.
+	renewals int
 }
 
-func (r *fakeRenewer) Token(context.Context) (string, error) { return r.token.ID, nil }
+func (r *fakeRenewer) Token(context.Context) (string, error) {
+	if r.cached != "" {
+		return r.cached, nil
+	}
+	return r.token.ID, nil
+}
 
-func (r *fakeRenewer) Renew(context.Context) (auth.Token, error) { return r.token, nil }
+func (r *fakeRenewer) Renew(context.Context) (auth.Token, error) {
+	r.renewals++
+	if r.renewErr != nil {
+		return auth.Token{}, r.renewErr
+	}
+	return r.token, nil
+}
 
 var _ = Describe("fft auth status", func() {
 	const (

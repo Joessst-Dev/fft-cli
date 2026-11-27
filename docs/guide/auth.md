@@ -14,6 +14,10 @@ endpoint at all, which is why this is worth spelling out:
 3. When the token nears expiry it refreshes against `securetoken.googleapis.com`,
    transparently. You will not notice.
 
+To hand a token to something else, `fft auth token` prints the cached one, which may have
+as little as five minutes left; `fft auth token --refresh` mints a new one first. See
+[CI and headless use](./ci.md#handing-a-token-to-another-job).
+
 **The API key confers no authorization.** It is the Firebase *Web API key*: it identifies
 the Firebase project and grants nothing on its own. It is sent only as `?key=` on those two
 Google URLs and is **never sent to fulfillmenttools** — the token source owns a separate

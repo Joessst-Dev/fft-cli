@@ -16,7 +16,8 @@ happen: after rotating a password, or when diagnosing a 401.
 The refresh token is used if it still works, and your stored password if it does
 not. If neither does, the command exits 4 and tells you to sign in again.
 
-The token itself is never printed. Use 'fft auth token --raw' for that.
+The token itself is never printed. Use 'fft auth token --raw' for that, or
+'fft auth token --refresh' to mint a new one and print it in a single step.
 
 ## Usage
 
