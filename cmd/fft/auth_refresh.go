@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/Joessst-Dev/fft-cli/internal/auth"
+	"github.com/Joessst-Dev/fft-cli/internal/config"
 	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/output"
 )
@@ -20,7 +21,8 @@ happen: after rotating a password, or when diagnosing a 401.
 The refresh token is used if it still works, and your stored password if it does
 not. If neither does, the command exits 4 and tells you to sign in again.
 
-The token itself is never printed. Use 'fft auth token --raw' for that.`
+The token itself is never printed. Use 'fft auth token --raw' for that, or
+'fft auth token --refresh' to mint a new one and print it in a single step.`
 
 // tokenView is what `fft auth refresh` renders: everything about the new token
 // except the token.
@@ -44,16 +46,31 @@ func newAuthRefreshCmd(deps *Deps) *cobra.Command {
 }
 
 func runAuthRefresh(cmd *cobra.Command, deps *Deps) error {
-	project, src, err := deps.tokenSource()
+	project, token, err := renewToken(cmd, deps)
 	if err != nil {
 		return err
+	}
+
+	view := newTokenView(project.Name, token, deps.Clock())
+
+	return deps.Printer.Render(tokenRows(view), view)
+}
+
+// renewToken mints a new id token for the active project, which also stores it:
+// the token source persists every mint, so the next fft process uses this token
+// rather than the one it replaced. It is shared by `fft auth refresh` and
+// `fft auth token --refresh`, which must not drift apart on what "refresh" means.
+func renewToken(cmd *cobra.Command, deps *Deps) (config.Project, auth.Token, error) {
+	project, src, err := deps.tokenSource()
+	if err != nil {
+		return config.Project{}, auth.Token{}, err
 	}
 
 	renewer, ok := src.(auth.Renewer)
 	if !ok {
 		// The only source that cannot renew is the static one: FFT_ID_TOKEN is a
 		// fixed string with no password and no refresh token behind it.
-		return exitcode.UsageError{Err: fmt.Errorf(
+		return config.Project{}, auth.Token{}, exitcode.UsageError{Err: fmt.Errorf(
 			"project %q authenticates with a fixed id token (%s), which cannot be refreshed",
 			project.Name, "FFT_ID_TOKEN")}
 	}
@@ -63,12 +80,9 @@ func runAuthRefresh(cmd *cobra.Command, deps *Deps) error {
 
 	token, err := renewer.Renew(ctx)
 	if err != nil {
-		return err
+		return config.Project{}, auth.Token{}, err
 	}
-
-	view := newTokenView(project.Name, token, deps.Clock())
-
-	return deps.Printer.Render(tokenRows(view), view)
+	return project, token, nil
 }
 
 func newTokenView(project string, token auth.Token, now time.Time) tokenView {

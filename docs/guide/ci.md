@@ -35,6 +35,22 @@ the clear. Reach a sidecar over its published port on `localhost`, or over `http
     FFT_ENV: ${{ vars.FFT_ENV }}
 ```
 
+## Handing a token to another job
+
+`fft auth token` prints the id token it has cached and only mints a new one when under five
+minutes remain, so a consumer that runs for a while (a later CI job, a sandbox, a long
+crawl) can be handed a token that is about to die. Add `--refresh` to mint a new one first,
+with its full lifetime, and print that:
+
+```sh
+(umask 077; fft auth token --refresh > token-file)
+```
+
+The remaining lifetime is reported on stderr (`token valid for 1h`); stdout stays the bare
+token. It exits 4 when neither the refresh token nor the password works, and 2 under a
+fixed `FFT_ID_TOKEN`, which has nothing to renew from. Like plain `fft auth token`, it
+refuses to print to a terminal unless you pass `--raw`.
+
 ## Using an id token instead of a password
 
 If the job authenticated elsewhere, hand `fft` the token and nothing else:

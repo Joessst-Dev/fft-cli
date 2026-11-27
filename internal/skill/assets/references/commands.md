@@ -251,6 +251,7 @@ fft project use staging
 fft project read-only prod
 fft auth whoami
 fft auth status -o json
+fft auth refresh
 fft ping
 fft version
 fft skill status -o json
@@ -274,6 +275,11 @@ fft history clear
   configured. It sends nothing and mints nothing, so it is the cheap check before a long
   run; `expired: true` is not an error, the next command renews the token. It never prints a
   credential.
+- `fft auth refresh` mints a new id token now and reports when it expires, without printing it.
+  `fft auth token --refresh` does the same and prints the new token, for handing to
+  something that runs for a while. Plain `fft auth token` prints the cached token, which
+  may have as little as five minutes left. Both need a token source that can renew: a fixed
+  `FFT_ID_TOKEN` exits 2.
 - `fft ping` needs no credentials at all. It is the way to tell "the tenant is down" apart
   from "my token is wrong".
 - `fft project read-only prod` marks a project read-only for good, in the config file. It is

@@ -19,6 +19,19 @@ expires. fft therefore refuses to print it to a terminal unless you ask for it
 with --raw — a token in your scrollback is a token in every screenshot and every
 pasted log from then on. Piping it, as above, needs no flag.
 
+Without --refresh the token is whatever is cached, and fft only replaces it when
+under five minutes remain — so it may be close to expiry. That is right for a
+command run straight away, as above, but not for something that runs for a
+while and cannot renew it: a CI step, a sandbox, a long crawl. For those, pass
+--refresh to mint a new token first, with the full hour ahead of it, and print
+that one. The remaining lifetime is reported on stderr.
+
+  (umask 077; fft auth token --refresh > token-file)
+
+--refresh fails like 'fft auth refresh' does: exit 4 when neither the refresh
+token nor the stored password works, exit 2 for a fixed FFT_ID_TOKEN, which
+cannot be renewed.
+
 ## Usage
 
 ```
@@ -28,7 +41,8 @@ fft auth token [flags]
 ## Flags
 
 ```
-      --raw[=true|false]   Print the token even when stdout is a terminal
+      --raw[=true|false]       Print the token even when stdout is a terminal
+      --refresh[=true|false]   Mint a new token first, so it has its full lifetime
 ```
 
 ## See also
