@@ -125,7 +125,7 @@ Validate enum flags locally with `enumValue` and add `registerEnumCompletion`, b
 stdout is data and nothing else. Notices (`deps.Printer.Notef`), warnings (`Warnf`), totals,
 prompts and truncation all go to stderr. An empty stdout means no results. Errors are typed
 (`exitcode.UsageError{...}`, the client's HTTP errors), and `exitcode.FromError` maps them: 2 usage,
-4 auth, 5 forbidden, 6 not found, 7 conflict, 8 partial bulk, 9 upstream, 10 read-only refusal.
+4 auth, 5 forbidden, 6 not found, 7 conflict, 8 partial bulk, 9 upstream, 10 read-only refusal, 11 a check that found problems.
 A destructive command confirms through `deps.Prompt`, naming the entity in a way a human can check
 (see `facilityIdentity`).
 

@@ -160,6 +160,12 @@ connections into a local snapshot, and works on that offline.
 fft network snapshot
 fft network snapshot --resume
 fft network snapshot --out network.json.gz --concurrency 2 -o json
+fft network check
+fft network check --rule peer-coverage -o json
+fft network check --snapshot network.json.gz
+fft network infer
+fft network config validate
+fft network config schema
 ```
 
 - **A snapshot is a long crawl of reads**: one paged request per facility, so an hour or
@@ -175,6 +181,42 @@ fft network snapshot --out network.json.gz --concurrency 2 -o json
 - `--decision-logs 0` skips the recent routing decision logs, and with them the orders
   whose tags define the kinds of order a check compares. `--no-orders` keeps the logs but
   skips the orders.
+- **`check` sends no request.** It reads the snapshot and reports findings by rule id:
+  `no-source`, `peer-coverage`, `dangling-ref`, `offline-ref`, `duplicate-edge`. **Exit
+  11 means it ran and found problems**, not that it failed. `-o json` gives each finding's
+  `evidence` and `next` step. Start there, not from the table.
+- What `check` assumed goes to stderr: which facilities it took for hubs, the peer groups
+  (stores by country), the order profiles, and the share of each country's stores a hub
+  reaches. **Read the coverage lines too.** A gap most of a country shares is no outlier,
+  so no finding reports it.
+- **Report findings; do not fix them.** Changing connections to make a check pass changes
+  where real orders go, and that is the network owner's decision.
+- **`fft-network.yaml` turns the check's guesses into decisions.** `infer` writes one, with
+  the reason for each value as a comment. It pins the hubs, the peer grouping, where order
+  profiles come from, and one `expect` per country a hub already covers. `check` reads
+  `./fft-network.yaml` when it exists (or `--config`), and reports `config-drift` when the
+  network moves away from what is pinned. A file named with `--config` must exist.
+- **`config validate` before you propose a change to the file**: it gives each problem with
+  its line, including expired suppressions and names that match nothing in the snapshot.
+  `config schema` prints the JSON Schema.
+- **Never add a `suppress` entry to turn a check green.** Propose it to the user with a reason
+  and an `until` date; a person decides. An expired suppression suppresses nothing.
+
+```yaml
+version: 1
+roles:
+  hub:
+    facilities: [HUB-01, HUB-02]
+expect:
+  - name: hub-coverage-de
+    for: {role: store, where: {address.country: DE}}
+    reachableFrom: {role: hub, atLeast: 2, maxTransitDays: 2}
+suppress:
+  - rule: hub-coverage-de
+    facility: BER-11
+    reason: opens 2027-01, hub connections are added at go-live
+    until: 2027-01-15
+```
 
 ## Listings
 

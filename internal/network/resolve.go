@@ -18,6 +18,7 @@ type Network struct {
 	refs   map[string]int
 	byType map[string]Bitset
 	groups map[string]Bitset
+	online Bitset
 
 	facilitySets map[int]Bitset
 	groupSets    map[int]Bitset
@@ -41,6 +42,12 @@ func New(s *Snapshot) *Network {
 		n.refs[f.ID] = i
 		if f.TenantFacilityID != "" {
 			n.refs[client.FacilityRef(f.TenantFacilityID)] = i
+		}
+		if n.online == nil {
+			n.online = n.empty()
+		}
+		if f.Online() {
+			n.online.Set(i)
 		}
 		set, ok := n.byType[f.Type]
 		if !ok {
@@ -177,10 +184,18 @@ type Reach struct {
 // FACILITY_GROUP match the receiving facility; NOT means none of the values may
 // match; a tag the order lacks passes NOT and fails a positive entry.
 func (n *Network) Reach(e *Edge, p Profile) Reach {
-	r := Reach{Verdict: Applies, Entry: -1}
+	verdict, entry := n.Applies(e, p)
+	if verdict == Excluded {
+		return Reach{Verdict: Excluded, Entry: entry}
+	}
+	return Reach{Targets: n.StaticTargets(e), Verdict: verdict, Entry: entry}
+}
 
-	// The entries that depend on the order alone go first: they can rule the
-	// whole connection out without building a set.
+// Applies is the half of [Network.Reach] that depends on the order: whether e
+// applies to p at all, and if not, or only conditionally, because of which
+// context entry (-1 for none).
+func (n *Network) Applies(e *Edge, p Profile) (Verdict, int) {
+	r := Reach{Verdict: Applies, Entry: -1}
 	for i, c := range e.Context {
 		switch {
 		case !knownOperator(c.Operator):
@@ -188,7 +203,7 @@ func (n *Network) Reach(e *Edge, p Profile) Reach {
 		case c.Type == ContextTag:
 			_, hit := p.matches(n.Values(c))
 			if hit == (c.Operator == OperatorNot) {
-				return Reach{Verdict: Excluded, Entry: i}
+				return Excluded, i
 			}
 		case c.Type == ContextFacility, c.Type == ContextFacilityGroup:
 		default:
@@ -197,11 +212,17 @@ func (n *Network) Reach(e *Edge, p Profile) Reach {
 			r.conditional(i)
 		}
 	}
+	return r.Verdict, r.Entry
+}
 
+// StaticTargets is the half of [Network.Reach] that does not depend on the
+// order: the facilities e leads to whenever it applies. It is nil for a
+// CUSTOMER target. A check resolves it once per connection and reuses it for
+// every order profile.
+func (n *Network) StaticTargets(e *Edge) Bitset {
 	if e.Target.Type == TypeCustomer {
-		return r
+		return nil
 	}
-
 	targets := n.targets(e)
 	for _, c := range e.Context {
 		if !knownOperator(c.Operator) {
@@ -222,8 +243,7 @@ func (n *Network) Reach(e *Edge, p Profile) Reach {
 			targets.And(set)
 		}
 	}
-	r.Targets = targets
-	return r
+	return targets
 }
 
 func (r *Reach) conditional(entry int) {

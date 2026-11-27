@@ -30,6 +30,12 @@ const (
 	// not retry this one.
 	ReadOnly = 10
 
+	// ProblemsFound is a check that ran to the end and found what it looks for:
+	// `fft network check` reporting gaps. The command worked; its answer is "no".
+	// A CI job gates on it, and must be able to tell it from a check that could not
+	// run at all, which exits with that failure's own code.
+	ProblemsFound = 11
+
 	Interrupted = 130
 )
 
@@ -74,18 +80,19 @@ func FromError(err error) int {
 // each code. Every constant above must have one; a spec reads the const block to
 // hold that.
 var meanings = map[int]string{
-	OK:          "success",
-	General:     "unclassified failure",
-	Usage:       "bad flags or arguments",
-	Config:      "no active project, or the config is unusable",
-	Auth:        "authentication failed",
-	Forbidden:   "authenticated, but not permitted",
-	NotFound:    "not found",
-	Conflict:    "version conflict",
-	Partial:     "partial bulk write",
-	Unavailable: "upstream unreachable or erroring",
-	ReadOnly:    "read-only: fft refused a write, nothing was sent",
-	Interrupted: "interrupted",
+	OK:            "success",
+	General:       "unclassified failure",
+	Usage:         "bad flags or arguments",
+	Config:        "no active project, or the config is unusable",
+	Auth:          "authentication failed",
+	Forbidden:     "authenticated, but not permitted",
+	NotFound:      "not found",
+	Conflict:      "version conflict",
+	Partial:       "partial bulk write",
+	Unavailable:   "upstream unreachable or erroring",
+	ReadOnly:      "read-only: fft refused a write, nothing was sent",
+	ProblemsFound: "a check ran and found problems",
+	Interrupted:   "interrupted",
 }
 
 // Meaning describes code in a few words, for a person reading a result rather than
