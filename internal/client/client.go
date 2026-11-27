@@ -256,9 +256,17 @@ func (e *ProxyRefusedError) Error() string {
 	return fmt.Sprintf("the proxy %s refused to connect to the tenant (HTTP %d %s)", e.Proxy, e.Status, http.StatusText(e.Status))
 }
 
-// ExitCode is General, as it was before this error existed: the request never
-// reached the tenant, so neither 4 (auth) nor 5 (permission) is true of it.
-func (e *ProxyRefusedError) ExitCode() int { return exitcode.General }
+// ExitCode says whether trying again can help. The request never reached the tenant,
+// so neither 4 (auth) nor 5 (permission) is true of it. A 5xx is the proxy being down
+// or overloaded, which passes, so a script should back off (9). Anything else — 403,
+// 407 — is the proxy's policy or its credentials for us, which a retry will not
+// change, so it stays a plain failure.
+func (e *ProxyRefusedError) ExitCode() int {
+	if e.Status >= http.StatusInternalServerError {
+		return exitcode.Unavailable
+	}
+	return exitcode.General
+}
 
 // Hint implements the same hint interface APIError does.
 func (e *ProxyRefusedError) Hint() string { return intermediaryHint }
@@ -402,25 +410,51 @@ func (e *APIError) Hint() string {
 	}
 }
 
+// TransportError is a request that never got an answer: the connection was refused
+// or reset, the name did not resolve, the TLS handshake failed, a proxy would not
+// open the tunnel. The upstream is unreachable, which a script should treat as
+// transient and retry later, so it exits 9 rather than the 1 of an unclassified
+// failure.
+//
+// A cancellation is the exception: it is the user pressing ^C, not the network, and
+// [exitcode.FromError] checks for it before it asks the error, so it still exits 130.
+type TransportError struct {
+	// Op names the operation in a sentence ("list the facilities").
+	Op string
+	// Err is what the HTTP client returned. It is a *url.Error, so the message keeps
+	// the URL, which is the point of a network failure.
+	Err error
+}
+
+func (e *TransportError) Error() string { return fmt.Sprintf("%s: %v", e.Op, e.Err) }
+func (e *TransportError) Unwrap() error { return e.Err }
+
+// ExitCode is Unavailable: upstream did not answer.
+func (e *TransportError) ExitCode() int { return exitcode.Unavailable }
+
 // RequestError reports a request that never got an answer.
 //
 // http.Client wraps every transport failure in a *url.Error, which prints as
 // `Get "https://…/api/…": <cause>`. When the cause is fft's own — a token it could
-// not mint — that prefix buries the one sentence the user needs ("sign in again")
-// behind a URL they did not type. So an error that already knows its exit code is
-// returned as it is, with its hint intact; a genuine network failure keeps the
-// URL, because there the URL is the point.
+// not mint, a proxy's refusal — that prefix buries the one sentence the user needs
+// ("sign in again") behind a URL they did not type. So an error that already knows
+// its exit code is returned as it is, with its hint intact; a genuine network
+// failure keeps the URL, because there the URL is the point, and is a
+// [TransportError]. Anything that is not a *url.Error never left the machine as a
+// request, so it is wrapped without claiming the upstream was at fault.
 func RequestError(op string, err error) error {
 	var urlErr *url.Error
-	if errors.As(err, &urlErr) {
-		var coded interface{ ExitCode() int }
-		if errors.As(urlErr.Err, &coded) {
-			if cause, ok := coded.(error); ok {
-				return cause
-			}
+	if !errors.As(err, &urlErr) {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	var coded interface{ ExitCode() int }
+	if errors.As(urlErr.Err, &coded) {
+		if cause, ok := coded.(error); ok {
+			return cause
 		}
 	}
-	return fmt.Errorf("%s: %w", op, err)
+	return &TransportError{Op: op, Err: err}
 }
 
 // maxBody caps how much of an error body is quoted back at the user. A proxy that

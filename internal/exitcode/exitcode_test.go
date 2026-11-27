@@ -1,6 +1,9 @@
 package exitcode_test
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -77,5 +80,31 @@ var _ = Describe("Meaning", func() {
 
 	It("says so for a code fft never exits with", func() {
 		Expect(exitcode.Meaning(42)).To(Equal("unknown exit code"))
+	})
+})
+
+type selfCoded struct{ code int }
+
+func (e selfCoded) Error() string { return "coded" }
+func (e selfCoded) ExitCode() int { return e.code }
+
+var _ = Describe("FromError", func() {
+	It("exits 130 for a cancellation, however deeply it is wrapped", func() {
+		Expect(exitcode.FromError(fmt.Errorf("list: %w", context.Canceled))).To(Equal(exitcode.Interrupted))
+	})
+
+	// --timeout expiring is the upstream not answering in time, which is what 9 is for.
+	It("exits 9 for a deadline, which a retry may get past", func() {
+		Expect(exitcode.FromError(fmt.Errorf("list: %w", context.DeadlineExceeded))).To(Equal(exitcode.Unavailable))
+	})
+
+	It("lets an error that names its own code win over the deadline inside it", func() {
+		err := fmt.Errorf("sign in: %w", errors.Join(selfCoded{exitcode.Auth}, context.DeadlineExceeded))
+
+		Expect(exitcode.FromError(err)).To(Equal(exitcode.Auth))
+	})
+
+	It("exits 1 for an error nobody classified", func() {
+		Expect(exitcode.FromError(errors.New("boom"))).To(Equal(exitcode.General))
 	})
 })

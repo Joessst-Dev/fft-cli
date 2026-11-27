@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -443,5 +444,106 @@ var _ = Describe("sending a request", func() {
 			Expect(err).To(MatchError(ContainSubstring("502 Bad Gateway")))
 			Expect(err).NotTo(MatchError(ContainSubstring("invalid character")))
 		})
+	})
+})
+
+// refusing is a transport that fails every round trip, the way a dead network or a
+// proxy that will not open the tunnel does: http.Client wraps what it returns in a
+// *url.Error, exactly as it does for the real one.
+type refusing struct {
+	err   error
+	calls atomic.Int64
+}
+
+func (r *refusing) RoundTrip(*http.Request) (*http.Response, error) {
+	r.calls.Add(1)
+	return nil, r.err
+}
+
+// brokenIdP is a token source that cannot mint a token.
+type brokenIdP struct{ err error }
+
+func (b brokenIdP) Token(context.Context) (string, error) { return "", b.err }
+
+var _ = Describe("a request that never gets an answer", func() {
+	var (
+		ctx    context.Context
+		policy *noWait
+	)
+
+	BeforeEach(func() {
+		ctx = context.Background()
+		policy = &noWait{}
+	})
+
+	newClient := func(rt http.RoundTripper, src auth.TokenSource) *client.Client {
+		c, err := client.New("https://acme.api.fulfillmenttools.com",
+			client.WithTokenSource(src),
+			client.WithHTTPClient(&http.Client{Transport: rt}),
+			client.WithRetry(policy.retry()))
+		Expect(err).NotTo(HaveOccurred())
+		return c
+	}
+
+	// A script backs off on 9 and gives up on 1, so a refused connection, a DNS
+	// failure or a proxy that is down must not look like a hard failure.
+	DescribeTable("exits 9, so a script knows to retry later, and still names the URL",
+		func(cause error) {
+			rt := &refusing{err: cause}
+			c := newClient(rt, &idp{})
+
+			_, err := c.Do(ctx, "list the facilities", get(c))
+
+			Expect(exitcode.FromError(err)).To(Equal(exitcode.Unavailable))
+			Expect(err).To(MatchError(ContainSubstring("list the facilities")))
+			Expect(err).To(MatchError(ContainSubstring("https://acme.api.fulfillmenttools.com/api/status")))
+			Expect(err).To(MatchError(ContainSubstring(cause.Error())))
+		},
+		Entry("connection refused", errors.New("dial tcp 10.0.0.1:443: connect: connection refused")),
+		Entry("DNS failure", &net.DNSError{Err: "no such host", Name: "acme.api.fulfillmenttools.com", IsNotFound: true}),
+		Entry("TLS handshake failure", errors.New("tls: handshake failure")),
+		Entry("a proxy refusing the tunnel with a bare status", errors.New("Bad Gateway")),
+	)
+
+	It("does not retry a failure it has no reason to think is transient", func() {
+		rt := &refusing{err: errors.New("dial tcp: connection refused")}
+		c := newClient(rt, &idp{})
+
+		_, err := c.Do(ctx, "list the facilities", get(c))
+
+		Expect(err).To(HaveOccurred())
+		Expect(rt.calls.Load()).To(BeEquivalentTo(1))
+	})
+
+	It("keeps exit 4 and drops the URL when the cause is a token fft could not mint", func() {
+		reauth := &auth.ReauthError{Project: "staging", Err: errors.New("the refresh token is dead")}
+		c := newClient(&refusing{err: errors.New("unreachable")}, brokenIdP{err: reauth})
+
+		_, err := c.Do(ctx, "list the facilities", get(c))
+
+		Expect(exitcode.FromError(err)).To(Equal(exitcode.Auth))
+		Expect(err.Error()).NotTo(ContainSubstring("https://"))
+	})
+
+	It("exits 130 when the user pressed ^C, not 9", func() {
+		ctx, cancel := context.WithCancel(ctx)
+		cancel()
+		c := newClient(&refusing{err: context.Canceled}, &idp{})
+
+		_, err := c.Do(ctx, "list the facilities", get(c))
+
+		Expect(exitcode.FromError(err)).To(Equal(exitcode.Interrupted))
+	})
+
+	It("exits 9 when --timeout ran out, because the answer may simply have been slow", func() {
+		ctx, cancel := context.WithTimeout(ctx, time.Nanosecond)
+		DeferCleanup(cancel)
+		<-ctx.Done()
+		c := newClient(&refusing{err: context.DeadlineExceeded}, &idp{})
+
+		_, err := c.Do(ctx, "list the facilities", get(c))
+
+		Expect(errors.Is(err, context.DeadlineExceeded)).To(BeTrue())
+		Expect(exitcode.FromError(err)).To(Equal(exitcode.Unavailable))
 	})
 })
