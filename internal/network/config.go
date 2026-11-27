@@ -477,8 +477,10 @@ func (lf *LoadedFile) Unmatched(n *Network) []Problem {
 		}
 	}
 	for i, s := range lf.Suppress {
-		if _, ok := n.lookupAny(s.Facility); !ok && !n.mentions(s.Facility) &&
-			!(s.Rule == RuleConfigDrift && lf.isProfile(n, s.Facility)) {
+		_, isFacility := n.lookupAny(s.Facility)
+		known := isFacility || n.mentions(s.Facility) ||
+			(s.Rule == RuleConfigDrift && lf.isProfile(n, s.Facility))
+		if !known {
 			miss(fmt.Sprintf("suppress[%d].facility", i), "%s is neither a facility nor a reference in the snapshot", s.Facility)
 		}
 	}
