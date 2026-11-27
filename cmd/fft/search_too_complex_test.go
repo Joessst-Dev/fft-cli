@@ -164,7 +164,7 @@ var _ = Describe("the API's 'Query too complex' 400 on a search", func() {
 				Expect(c.run(args...)).To(Equal(exitcode.General))
 
 				Expect(c.errOut()).To(ContainSubstring("status must be one of OPEN, CLOSED"))
-				Expect(c.errOut()).NotTo(ContainSubstring("--size will not help"))
+				Expect(c.errOut()).NotTo(ContainSubstring("will not help:"))
 				Expect(c.errOut()).NotTo(ContainSubstring(genericSentence))
 			},
 			Entry("stock search", "stock", "search", "--file", "BODY"),
@@ -182,7 +182,8 @@ var _ = Describe("the API's 'Query too complex' 400 on a search", func() {
 		Expect(c.run("api", "getPickJob", "--param", "pickJobId=abc")).To(Equal(exitcode.General))
 
 		Expect(c.errOut()).To(ContainSubstring("Query too complex"))
-		Expect(c.errOut()).NotTo(ContainSubstring("--size will not help"))
+		Expect(c.errOut()).NotTo(ContainSubstring("will not help:"))
+		Expect(c.errOut()).NotTo(ContainSubstring(genericSentence))
 	})
 
 	It("lets the order hint replace the generic one rather than add to it", func() {
