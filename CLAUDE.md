@@ -48,7 +48,7 @@ A curated command **shadows** its generated twin: the twin is the operationId th
 
 **Path params vs query filters resolve ids differently.** A facility path parameter accepts the `urn:fft:facility:tenantFacilityId:<id>` form (`client.FacilityRef`, no lookup). A *query filter* does not — the API answers a URN it cannot resolve with a cheerful empty 200 — so a filter value must be resolved to a platform UUID first (`resolveFacilityID`, one GET). See `fft connection list`'s `--facility` (path) vs `--target` (filter).
 
-**Exit codes are the API** (`internal/exitcode`): 0 ok, 2 usage, 3 config/no-project, 4 auth (401), 5 forbidden (403), 6 not-found (404), 7 conflict (409), 8 partial bulk write, 9 upstream unavailable, 10 read-only refusal (nothing was sent), 130 interrupted. Commands return a typed error; `exitcode.FromError` maps it.
+**Exit codes are the API** (`internal/exitcode`): 0 ok, 2 usage, 3 config/no-project, 4 auth (401), 5 forbidden (403), 6 not-found (404), 7 conflict (409), 8 partial bulk write, 9 upstream unavailable, 10 read-only refusal (nothing was sent), 11 a check found problems (`fft network check`), 130 interrupted. Commands return a typed error; `exitcode.FromError` maps it.
 
 **The API contract is looked up, not guessed.** Before building or changing a command against an endpoint, classifying a POST, or chasing an unexpected 4xx, load the `fulfillment-tools-consultant` skill (`.claude/skills/`): it navigates the ~100k-line spec surgically and carries the semantics already dug out of it.
 

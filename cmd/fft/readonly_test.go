@@ -36,6 +36,10 @@ import (
 var commandsWithoutOperation = map[string]string{
 	"fft version": "prints the build info; no network",
 
+	// Analyses a snapshot on disk. The crawl that wrote it is the command that
+	// reached the tenant, and it is gated on every operation it sent.
+	"fft network check": "analyses a local snapshot file; no network",
+
 	// The one command that reaches the tenant and cannot be annotated: its operation
 	// is an argument, not a compile-time fact. It calls guardOperation itself, and the
 	// specs below pin that it does — for a write, for a read, and for the read-alike

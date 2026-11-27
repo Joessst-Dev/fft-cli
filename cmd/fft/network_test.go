@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -272,5 +273,150 @@ var _ = Describe("the read-only gate on a command that sends several operations"
 		err := c.deps.guard(gated("searchFacility,noSuchOperation"), nil)
 
 		Expect(err).To(MatchError(ContainSubstring(`"noSuchOperation"`)))
+	})
+})
+
+// gappySnapshot is a hub supplying eleven Berlin stores but BER-11, a supplier
+// supplying all of them, and a connection to a facility that is offline.
+func gappySnapshot() *network.Snapshot {
+	s := &network.Snapshot{SchemaVersion: network.SchemaVersion, CreatedAt: time.Now().Add(-time.Hour)}
+	add := func(label, typ, status string) {
+		s.Facilities = append(s.Facilities, network.Facility{ID: "id-" + label, TenantFacilityID: label,
+			Type: typ, Status: status, Country: "DE"})
+	}
+	add("HUB-01", network.TypeManaged, network.StatusOnline)
+	add("SUP-01", network.TypeSupplier, network.StatusOnline)
+	add("OLD-01", network.TypeManaged, "OFFLINE")
+	for i := 1; i <= 11; i++ {
+		add(fmt.Sprintf("BER-%02d", i), network.TypeManaged, network.StatusOnline)
+	}
+	s.Edges = []network.Edge{
+		{ID: "h1", Source: "id-HUB-01", Target: network.Target{Type: network.TypeManaged, ExcludedFacilities: []string{"id-BER-11"}}},
+		{ID: "s1", Source: "id-SUP-01", Target: network.Target{Type: network.TypeManaged}},
+		{ID: "o1", Source: "id-HUB-01", Target: network.Target{Type: network.TypeManaged, FacilityRef: "id-OLD-01"}},
+	}
+	return s
+}
+
+func cleanSnapshot() *network.Snapshot {
+	s := gappySnapshot()
+	s.Edges = s.Edges[1:2]
+	s.Edges = append(s.Edges, network.Edge{ID: "h1", Source: "id-HUB-01", Target: network.Target{Type: network.TypeManaged}})
+	return s
+}
+
+var _ = Describe("fft network check", func() {
+	var (
+		c    *cli
+		path string
+	)
+
+	BeforeEach(func() {
+		c = newCLI()
+		path = filepath.Join(GinkgoT().TempDir(), "s.json.gz")
+	})
+
+	save := func(s *network.Snapshot) {
+		GinkgoHelper()
+		Expect(network.Save(path, s)).To(Succeed())
+	}
+
+	It("prints the findings on stdout and exits 11", func() {
+		save(gappySnapshot())
+
+		Expect(c.run("network", "check", "--snapshot", path)).To(Equal(exitcode.ProblemsFound))
+
+		lines := strings.Split(strings.TrimSpace(c.out()), "\n")
+		Expect(strings.Fields(lines[0])).To(Equal([]string{"RULE", "SUBJECT", "PROFILES", "DETAIL"}))
+		Expect(lines).To(HaveLen(3))
+		Expect(lines[1]).To(MatchRegexp(`^peer-coverage\s+BER-11\s+\(no tags\)\s+no hub reaches it, though one reaches 90% of its peers in DE$`))
+		Expect(lines[2]).To(MatchRegexp(`^offline-ref\s+OLD-01\s+-\s+it is offline, and 1 connection still leads? to it$`))
+		Expect(c.errOut()).To(ContainSubstring("Error: the check found 2 problems"))
+	})
+
+	It("says on stderr what it assumed about the network", func() {
+		save(gappySnapshot())
+
+		c.run("network", "check", "--snapshot", path)
+
+		Expect(c.errOut()).To(ContainSubstring("14 facilities, 3 connections"))
+		Expect(c.errOut()).To(ContainSubstring("Hubs: 1, the facilities reaching 10 or more others"))
+		Expect(c.errOut()).To(ContainSubstring("Peer groups, by country: DE 11"))
+		Expect(c.errOut()).To(ContainSubstring("Coverage: a hub reaches 10 of 11 stores in DE (90%"))
+	})
+
+	It("gives each finding's evidence and next step under -o json", func() {
+		save(gappySnapshot())
+
+		Expect(c.run("network", "check", "--snapshot", path, "-o", "json")).To(Equal(exitcode.ProblemsFound))
+
+		var findings []map[string]any
+		Expect(json.Unmarshal([]byte(c.out()), &findings)).To(Succeed())
+		Expect(findings).To(HaveLen(2))
+		Expect(findings[0]).To(HaveKeyWithValue("rule", "peer-coverage"))
+		Expect(findings[0]).To(HaveKeyWithValue("subject", "BER-11"))
+		Expect(findings[0]).To(HaveKey("evidence"))
+		Expect(findings[0]).To(HaveKeyWithValue("next", ContainSubstring("Compare it with a peer")))
+	})
+
+	It("exits 0 with nothing on stdout when the network is clean", func() {
+		save(cleanSnapshot())
+
+		Expect(c.run("network", "check", "--snapshot", path)).To(Equal(exitcode.OK))
+
+		Expect(c.out()).To(BeEmpty())
+		Expect(c.errOut()).To(ContainSubstring("No problems found."))
+	})
+
+	It("prints an empty array for a clean network under -o json", func() {
+		save(cleanSnapshot())
+
+		Expect(c.run("network", "check", "--snapshot", path, "-o", "json")).To(Equal(exitcode.OK))
+
+		Expect(strings.TrimSpace(c.out())).To(Equal("[]"))
+	})
+
+	It("runs only the rules named with --rule", func() {
+		save(gappySnapshot())
+
+		Expect(c.run("network", "check", "--snapshot", path, "--rule", "offline-ref")).To(Equal(exitcode.ProblemsFound))
+
+		Expect(c.out()).NotTo(ContainSubstring("peer-coverage"))
+		Expect(c.out()).To(ContainSubstring("offline-ref"))
+	})
+
+	It("refuses a rule it does not have, naming the ones it does", func() {
+		save(gappySnapshot())
+
+		Expect(c.run("network", "check", "--snapshot", path, "--rule", "no-sources")).To(Equal(exitcode.Usage))
+
+		Expect(c.errOut()).To(ContainSubstring(`unknown --rule "no-sources"`))
+		Expect(c.errOut()).To(ContainSubstring("no-source, peer-coverage"))
+	})
+
+	It("reads the snapshot fft network snapshot wrote for the project when --snapshot is not given", func() {
+		c.fakeTenant(networkTenant)
+		Expect(c.run("network", "snapshot", "-o", "json")).To(Equal(exitcode.OK))
+		var sum map[string]any
+		Expect(json.Unmarshal([]byte(c.out()), &sum)).To(Succeed())
+
+		Expect(c.run("network", "check")).To(BeElementOf(exitcode.OK, exitcode.ProblemsFound))
+
+		Expect(c.errOut()).To(ContainSubstring("Snapshot " + sum["path"].(string)))
+	})
+
+	It("exits 3 and says how to take one when there is no snapshot", func() {
+		Expect(c.run("network", "check", "--snapshot", path)).To(Equal(exitcode.Config))
+
+		Expect(c.errOut()).To(ContainSubstring("fft network snapshot"))
+	})
+
+	It("sends no request", func() {
+		save(gappySnapshot())
+		api := c.fakeTenant(networkTenant)
+
+		c.run("network", "check", "--snapshot", path)
+
+		Expect(api.recorded()).To(BeEmpty())
 	})
 })
