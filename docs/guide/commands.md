@@ -157,82 +157,27 @@ fft routing strategy evaluate 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10 --file order.
 ## Network
 
 `fft network` works on the **whole** fulfillment graph at once, to find the gaps that make
-orders route somewhere surprising: a store no hub reaches, a connection to an offline
-facility. There is no tenant-wide connection list, so it first reads every facility's
-connections into a local snapshot, and works on that offline.
+orders route somewhere surprising. There is no tenant-wide connection list, so it first
+reads every facility's connections into a local snapshot, and then works on that offline.
 
 ```sh
 fft network snapshot
 fft network snapshot --resume
-fft network snapshot --out network.json.gz --concurrency 2 -o json
 fft network check
 fft network check --rule peer-coverage -o json
-fft network check --snapshot network.json.gz
+fft network reach --to BER-01 --tag orderType=express
 fft network infer
 fft network config validate
-fft network config schema
-fft network reach --to BER-01 --tag orderType=express
 ```
 
-- **A snapshot is a long crawl of reads**: one paged request per facility, so an hour or
-  more on a large network. It runs under `--read-only`. It allows itself 4h unless you set
-  `--timeout`, backs off when a gateway throttles, and records each facility as it
-  finishes.
-- **If it stops** (an expired session, a gateway that will not recover, Ctrl-C), run it
-  again with `--resume`. It skips what it already read, and refuses a journal from
-  another project or base URL.
-- The snapshot goes to the cache directory, one file per project, readable by its owner
-  only. stdout carries a summary (with `-o json`, including the file's `path`).
-  **Do not commit a snapshot**: it is the tenant's whole network.
-- `--decision-logs 0` skips the recent routing decision logs, and with them the orders
-  whose tags define the kinds of order a check compares. `--no-orders` keeps the logs but
-  skips the orders.
-- **`check` sends no request.** It reads the snapshot and reports findings by rule id:
-  `no-source`, `peer-coverage`, `dangling-ref`, `offline-ref`, `duplicate-edge`. **Exit
-  11 means it ran and found problems**, not that it failed. `-o json` gives each finding's
-  `evidence` and `next` step. Start there, not from the table.
-- What `check` assumed goes to stderr: which facilities it took for hubs, the peer groups
-  (stores by country), the order profiles, and the share of each country's stores a hub
-  reaches. **Read the coverage lines too.** A gap most of a country shares is no outlier,
-  so no finding reports it.
-- **Report findings; do not fix them.** Changing connections to make a check pass changes
-  where real orders go, and that is the network owner's decision.
-- **`reach` answers "why does nothing reach this store?"** It lists every connection whose
-  target could be the facility, applying ones first, with `RESULT` (`applies`,
-  `conditional`, `excluded`) and the `REASON`: the first exclusion or context entry that
-  rules it out. stderr names the reason that excludes the most connections, and on a real
-  network that line is usually the answer. `--tag id=value` gives the order's tags.
-- `check` also judges the routing strategy in use: no strategy (or two) in use, a
-  `categoryRef` that names nothing, an inactive branch, expired time frames, a missing or
-  offline fallback facility, a path whose merged config has no active rating
-  (`strategy-*`), and facility ids hard-coded in toolkit rules that name nothing
-  (`toolkit-hardcoded-id`).
-- **`fft-network.yaml` turns the check's guesses into decisions.** `infer` writes one, with
-  the reason for each value as a comment. It pins the hubs, the peer grouping, where order
-  profiles come from, and one `expect` per country a hub already covers. `check` reads
-  `./fft-network.yaml` when it exists (or `--config`), and reports `config-drift` when the
-  network moves away from what is pinned. A file named with `--config` must exist.
-- **`config validate` before you propose a change to the file**: it gives each problem with
-  its line, including expired suppressions and names that match nothing in the snapshot.
-  `config schema` prints the JSON Schema.
-- **Never add a `suppress` entry to turn a check green.** Propose it to the user with a reason
-  and an `until` date; a person decides. An expired suppression suppresses nothing.
-
-```yaml
-version: 1
-roles:
-  hub:
-    facilities: [HUB-01, HUB-02]
-expect:
-  - name: hub-coverage-de
-    for: {role: store, where: {address.country: DE}}
-    reachableFrom: {role: hub, atLeast: 2, maxTransitDays: 2}
-suppress:
-  - rule: hub-coverage-de
-    facility: BER-11
-    reason: opens 2027-01, hub connections are added at go-live
-    until: 2027-01-15
-```
+- **`snapshot` is a long crawl of reads**, an hour or more on a large network, and runs
+  under `--read-only`. If it stops, `--resume` continues it. **Never commit a snapshot.**
+- **`check` sends no request.** Exit 11 means it ran and found problems, not that it
+  failed. Read what it assumed on stderr, then `-o json` for each finding's evidence and
+  next step.
+- **Report findings; do not fix them, and never add a `suppress` entry to go green.**
+- The whole workflow, every rule, `fft-network.yaml` and CI usage are in
+  [network](./network.md).
 
 ## Listings
 
