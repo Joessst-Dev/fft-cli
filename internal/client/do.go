@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Joessst-Dev/fft-cli/internal/api"
 	"github.com/Joessst-Dev/fft-cli/internal/auth"
 )
 
@@ -50,6 +51,12 @@ type Result struct {
 // answered 500 may still have created the facility, and re-sending it would create
 // a second one. There is no way to tell from the outside, so fft does not guess:
 // it surfaces the error and lets the user look.
+//
+// The exception is a POST the spec says changes nothing — a cursor search, which
+// posts its query because a query string cannot hold one. Re-sending a search
+// creates nothing, so [Search] retries it as it would a GET. That is decided by
+// operationId through [api.Operation.Mutates], never by the method or the path, so
+// a POST nobody has classified stays unretried.
 type Retry struct {
 	// MaxAttempts is how many requests may be sent in total, the first included.
 	MaxAttempts int
@@ -105,6 +112,13 @@ func (r Retry) withDefaults() Retry {
 // op names the operation in errors ("list the facilities"), so that a failure
 // reads as a sentence rather than as a URL.
 func (c *Client) Do(ctx context.Context, op string, do Doer) (*Result, error) {
+	return c.do(ctx, op, do, false)
+}
+
+// do is [Client.Do] with one more fact: readOnly says the request is known to change
+// nothing, whatever its method, so a 5xx or a dropped connection may be retried.
+// Only a caller that has looked the operation up may say so — see [readOperation].
+func (c *Client) do(ctx context.Context, op string, do Doer, readOnly bool) (*Result, error) {
 	if do == nil {
 		return nil, fmt.Errorf("%s: no request to send", op)
 	}
@@ -127,7 +141,7 @@ func (c *Client) Do(ctx context.Context, op string, do Doer) (*Result, error) {
 			if ctx.Err() != nil {
 				return nil, ctx.Err()
 			}
-			if sent < policy.MaxAttempts && retryable(err) && idempotent(methodOf(err)) {
+			if sent < policy.MaxAttempts && retryable(err) && (readOnly || idempotent(methodOf(err))) {
 				if err := policy.Sleep(ctx, policy.backoff(sent)); err != nil {
 					return nil, err
 				}
@@ -162,7 +176,7 @@ func (c *Client) Do(ctx context.Context, op string, do Doer) (*Result, error) {
 
 		case result.Status >= http.StatusInternalServerError &&
 			sent < policy.MaxAttempts &&
-			idempotent(res.Request.Method):
+			(readOnly || idempotent(res.Request.Method)):
 			if err := policy.Sleep(ctx, policy.backoff(sent)); err != nil {
 				return nil, err
 			}
@@ -235,6 +249,14 @@ func idempotent(method string) bool {
 	default:
 		return false
 	}
+}
+
+// readOperation reports whether the operationId names an operation the spec says
+// changes nothing. An id it does not know — an empty one included — is not a read:
+// the retry decision fails closed exactly as the read-only gate does.
+func readOperation(id string) bool {
+	o, ok := api.LookupOperation(id)
+	return ok && !o.Mutates()
 }
 
 // methodOf recovers the request's method from a transport failure, where there is

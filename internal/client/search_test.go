@@ -131,6 +131,54 @@ var _ = Describe("searching by cursor", func() {
 		})
 	})
 
+	Describe("a page the gateway failed to answer", func() {
+		// A search is a POST, and a POST is never retried on a 5xx because it may have
+		// created something. A search creates nothing, and a crawl of every facility
+		// meets the odd 502 from a throttling gateway: failing it outright would end a
+		// walk of thousands of pages on one hiccup.
+		flaky := func() *tenant {
+			return newTenant(func(w http.ResponseWriter, _ *http.Request, n int) {
+				if n == 1 {
+					w.WriteHeader(http.StatusBadGateway)
+					return
+				}
+				fmt.Fprint(w, fixture("facilities_page3.json"))
+			})
+		}
+
+		It("retries it, because the spec classifies the search as a read", func() {
+			t := flaky()
+
+			page, err := client.Search(ctx, unauthenticated(t), facilities(), client.FacilitySearchPayload{})
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(page.Items).NotTo(BeEmpty())
+			Expect(t.seen()).To(Equal([]string{http.MethodPost, http.MethodPost}))
+		})
+
+		It("sends it once when the operation is not known to be a read", func() {
+			t := flaky()
+			op := facilities()
+			op.ID = ""
+
+			_, err := client.Search(ctx, unauthenticated(t), op, client.FacilitySearchPayload{})
+
+			Expect(err).To(MatchError(ContainSubstring("502")))
+			Expect(t.hits()).To(Equal(1))
+		})
+
+		It("sends it once when the operationId names a write", func() {
+			t := flaky()
+			op := facilities()
+			op.ID = "addFacility"
+
+			_, err := client.Search(ctx, unauthenticated(t), op, client.FacilitySearchPayload{})
+
+			Expect(err).To(HaveOccurred())
+			Expect(t.hits()).To(Equal(1))
+		})
+	})
+
 	Describe("the total", func() {
 		// `total` is absent unless the search asked for it. A command that renders 0
 		// for "the API did not count" is telling the user something false.
