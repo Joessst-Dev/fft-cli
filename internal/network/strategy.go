@@ -265,13 +265,16 @@ func (s *Strategy) Paths(fn func(path []*StrategyNode)) {
 }
 
 // expired reports whether every time frame has ended by now, so that the
-// element can never apply again. A recurring frame never ends.
+// element can never apply again. Only a one-off frame ends: the API writes
+// recurrence as YEARLY or NONRECURRING, and a frame repeating every year never
+// does. A missing value reads as one-off (older snapshots), but any other value,
+// one the API adds later included, stays "never ends" so the rule fails quiet.
 func expired(frames []TimeFrame, now time.Time) bool {
 	if len(frames) == 0 {
 		return false
 	}
 	for _, f := range frames {
-		if f.Recurrence != "" && f.Recurrence != "NONE" {
+		if f.Recurrence != "" && f.Recurrence != "NONRECURRING" {
 			return false
 		}
 		until, err := time.Parse(time.RFC3339, f.Until)
@@ -293,31 +296,49 @@ const (
 	RuleToolkitHardcodeID = "toolkit-hardcoded-id"
 )
 
-func (n *Network) strategies() ([]*Strategy, []Finding) {
-	var out []*Strategy
-	var bad []Finding
-	for _, raw := range n.snap.Strategies {
-		s, err := ParseStrategy(raw)
-		if err != nil {
-			bad = append(bad, Finding{Rule: RuleStrategyInUse, Subject: "(strategies)", Detail: err.Error(),
-				Next: "The snapshot holds a strategy fft cannot read; take a new snapshot, and report it if it persists."})
-			continue
-		}
-		out = append(out, s)
-	}
-	return out, bad
+// strategyRead is one strategy of the snapshot. Which one is in use is read from
+// the document on its own, so a strategy whose tree fft cannot decode still
+// counts as live and is never swapped for the drafts.
+type strategyRead struct {
+	ID    string
+	Name  string
+	InUse bool
+	// S is nil when the tree could not be decoded, and Err says why.
+	S   *Strategy
+	Err error
 }
+
+func (n *Network) strategies() []strategyRead {
+	var out []strategyRead
+	for _, raw := range n.snap.Strategies {
+		var head struct {
+			rawNamed
+			InUse bool `json:"inUse"`
+		}
+		// A document that is not even an object has no id or flag to keep; it
+		// is read as a draft that fails to decode.
+		_ = json.Unmarshal(raw, &head)
+		r := strategyRead{ID: head.ID, Name: head.name(), InUse: head.InUse}
+		if r.Name == "" {
+			r.Name = "(unreadable strategy)"
+		}
+		r.S, r.Err = ParseStrategy(raw)
+		out = append(out, r)
+	}
+	return out
+}
+
+// strategyTreeRules are the rules that walk a strategy's tree, and so need it
+// decoded.
+var strategyTreeRules = []string{RuleStrategyCategory, RuleStrategyInactive, RuleStrategyExpired,
+	RuleStrategyFallback, RuleStrategyNoRating, RuleToolkitHardcodeID}
 
 // checked is the strategies the strategy rules judge: the one in use, or every
 // strategy when none is — a network with no live strategy still has a draft
-// someone means to switch on.
-func checked(all []*Strategy) []*Strategy {
-	var live []*Strategy
-	for _, s := range all {
-		if s.InUse {
-			live = append(live, s)
-		}
-	}
+// someone means to switch on. An unreadable strategy is judged like any other,
+// so an unreadable live one keeps the drafts out.
+func checked(all []strategyRead) []strategyRead {
+	live := slices.DeleteFunc(slices.Clone(all), func(s strategyRead) bool { return !s.InUse })
 	if len(live) == 0 {
 		return all
 	}
@@ -326,7 +347,8 @@ func checked(all []*Strategy) []*Strategy {
 
 // strategyRules runs the strategy-* rules.
 func (n *Network) strategyRules(run func(string) bool) []Finding {
-	all, out := n.strategies()
+	all := n.strategies()
+	var out []Finding
 	now := n.snap.CreatedAt
 
 	if run(RuleStrategyInUse) {
@@ -352,7 +374,28 @@ func (n *Network) strategyRules(run func(string) bool) []Finding {
 		categories[c.ID] = true
 	}
 
-	for _, s := range checked(all) {
+	// An unreadable strategy is reported under the first tree rule the user
+	// selected, and not at all when none was: the finding stands for the checks
+	// that could not run.
+	treeRule := ""
+	for _, r := range strategyTreeRules {
+		if run(r) {
+			treeRule = r
+			break
+		}
+	}
+
+	for _, read := range checked(all) {
+		if read.S == nil {
+			if treeRule != "" {
+				out = append(out, Finding{Rule: treeRule, Subject: read.Name,
+					Detail:   "fft cannot read this routing strategy's tree, so its tree rules did not run: " + read.Err.Error(),
+					Evidence: map[string]any{"strategy": read.ID},
+					Next:     "Take a new snapshot, and report it if it persists."})
+			}
+			continue
+		}
+		s := read.S
 		if s.Root == nil {
 			continue
 		}

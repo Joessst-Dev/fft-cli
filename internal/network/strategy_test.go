@@ -31,7 +31,7 @@ const strategyJSON = `{
                                {"type": "ToolkitRating", "referenceId": "r-prio", "name": "Priority", "active": false}]},
         "nextCondition": {
           "id": "c-weekend", "name": "Weekend", "active": true,
-          "activationTimeFrames": [{"activeFrom": "2020-01-01T00:00:00Z", "activeUntil": "2020-02-01T00:00:00Z"}],
+          "activationTimeFrames": [{"activeFrom": "2020-01-01T00:00:00Z", "activeUntil": "2020-02-01T00:00:00Z", "recurrence": "NONRECURRING"}],
           "nextNode": {"id": "n-weekend", "name": "Weekend node", "active": true}
         }
       },
@@ -182,4 +182,48 @@ var _ = Describe("the strategy rules", func() {
 		Entry("one", 1, ""),
 		Entry("two", 2, "2 routing strategies are in use at once: SA, SB"),
 	)
+	// The API writes recurrence as YEARLY or NONRECURRING and never omits it; a
+	// fixture that left it out once hid that NONRECURRING was read as recurring.
+	DescribeTable("strategy-expired judges a frame that ended in the past by its recurrence",
+		func(recurrence string, reported bool) {
+			doc := `{"id":"s1","name":"S","inUse":true,"rootNode":{"id":"r","name":"R",
+				"nextCondition":{"id":"c","name":"C","activationTimeFrames":[{"activeFrom":"2020-01-01T00:00:00Z",
+				"activeUntil":"2020-02-01T00:00:00Z","recurrence":"` + recurrence + `"}],
+				"nextNode":{"id":"n","name":"N"}}}}`
+
+			r := check(strategyWorld(doc), network.RuleStrategyExpired)
+
+			if reported {
+				Expect(subjects(r, network.RuleStrategyExpired)).To(Equal([]string{"S › C"}))
+			} else {
+				Expect(r.Findings).To(BeEmpty())
+			}
+		},
+		Entry("a one-off frame has ended", "NONRECURRING", true),
+		Entry("a yearly frame comes round again", "YEARLY", false),
+		Entry("a value the API adds later is not assumed to end", "SOMETIMES", false),
+	)
+
+	When("the strategy in use cannot be decoded", func() {
+		// A fence's active flag that is not a bool stands for any shape change in
+		// the versionless spec.
+		const unreadable = `{"id":"live","name":"Live","inUse":true,"rootNode":{"id":"r","name":"R",
+			"config":{"fences":[{"type":"StandardFence","active":"yes"}]}}}`
+		const draft = `{"id":"d","name":"Draft","inUse":false,"rootNode":{"id":"r","name":"R",
+			"nextCondition":{"id":"c","name":"C","active":false,"nextNode":{"id":"n","name":"N"}}}}`
+
+		It("does not report that no routing strategy is in use", func() {
+			r := check(strategyWorld(unreadable, draft), network.RuleStrategyInUse)
+
+			Expect(r.Findings).To(BeEmpty())
+		})
+
+		It("does not judge the drafts in its place, and says it could not read the live one", func() {
+			r := check(strategyWorld(unreadable, draft), network.RuleStrategyInactive)
+
+			Expect(r.Findings).To(HaveLen(1))
+			Expect(r.Findings[0].Subject).To(Equal("Live"))
+			Expect(r.Findings[0].Detail).To(ContainSubstring("cannot read this routing strategy's tree"))
+		})
+	})
 })
