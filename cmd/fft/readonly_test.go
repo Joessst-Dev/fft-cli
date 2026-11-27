@@ -38,7 +38,10 @@ var commandsWithoutOperation = map[string]string{
 
 	// Analyses a snapshot on disk. The crawl that wrote it is the command that
 	// reached the tenant, and it is gated on every operation it sent.
-	"fft network check": "analyses a local snapshot file; no network",
+	"fft network check":           "analyses a local snapshot file; no network",
+	"fft network infer":           "writes a config file from a local snapshot; no network",
+	"fft network config schema":   "prints the config file's JSON Schema; no network",
+	"fft network config validate": "checks a local config file against a local snapshot; no network",
 
 	// The one command that reaches the tenant and cannot be annotated: its operation
 	// is an argument, not a compile-time fact. It calls guardOperation itself, and the

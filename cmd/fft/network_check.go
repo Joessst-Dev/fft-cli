@@ -46,8 +46,9 @@ some. Fixing a gap is a change to the network, and that is its owner's decision.
 
 func newNetworkCheckCmd(deps *Deps) *cobra.Command {
 	var (
-		snapshot string
-		rules    []string
+		snapshot   string
+		configPath string
+		rules      []string
 	)
 
 	cmd := &cobra.Command{
@@ -56,7 +57,7 @@ func newNetworkCheckCmd(deps *Deps) *cobra.Command {
 		Long:  networkCheckLong,
 		Args:  usageArgs(cobra.NoArgs),
 
-		RunE: func(_ *cobra.Command, _ []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			for _, r := range rules {
 				if !slices.Contains(network.RuleIDs(), r) {
 					return exitcode.UsageError{Err: fmt.Errorf("unknown --rule %q: want one of %s",
@@ -72,19 +73,31 @@ func newNetworkCheckCmd(deps *Deps) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			n := network.New(s)
 
 			cfg := network.DefaultConfig()
-			cfg.Rules = rules
-			n := network.New(s)
+			lf, err := loadNetworkConfig(configPath, cmd.Flags().Changed("config"))
+			if err != nil {
+				return err
+			}
+			if lf != nil {
+				cfg = lf.Settings(time.Now())
+				describeConfig(deps, lf, n)
+			}
+			if len(rules) > 0 {
+				cfg.Rules = rules
+			}
 			report := n.Check(cfg)
 
-			describeCheck(deps, path, n, report)
+			describeCheck(deps, path, n, cfg, report)
 			return renderFindings(deps, report)
 		},
 	}
 
 	f := cmd.Flags()
 	f.StringVar(&snapshot, "snapshot", "", "Read this snapshot instead of the project's file in the cache directory")
+	f.StringVar(&configPath, "config", network.DefaultConfigFile,
+		"The config file; when it is the default and does not exist, the check infers everything")
 	f.StringArrayVar(&rules, "rule", nil, "Run only this rule (repeatable): "+strings.Join(network.RuleIDs(), ", "))
 	registerEnumCompletion(cmd, "rule", network.RuleIDs())
 
@@ -104,20 +117,63 @@ func snapshotPath(deps *Deps, flag string) (string, error) {
 	return defaultSnapshotPath(deps, network.Source{Project: project.Name, BaseURL: project.BaseURL})
 }
 
+// loadNetworkConfig reads the config file. The default file is optional — a
+// check without one infers everything — but one named with --config must exist:
+// a CI job that points at a file which is not there is misconfigured, and
+// quietly checking without it would pass gaps the file exists to catch.
+func loadNetworkConfig(path string, named bool) (*network.LoadedFile, error) {
+	lf, err := network.ReadConfig(path)
+	switch {
+	case err == nil:
+		return lf, nil
+	case network.IsNotExist(err) && !named:
+		return nil, nil
+	case network.IsNotExist(err):
+		return nil, &network.ConfigError{Path: path, Problems: []network.Problem{{
+			Message: "there is no config file there; write one with fft network infer"}}}
+	default:
+		return nil, err
+	}
+}
+
+// describeConfig says on stderr what the config file changes, and warns about
+// what in it has stopped doing anything.
+func describeConfig(deps *Deps, lf *network.LoadedFile, n *network.Network) {
+	inForce := len(lf.Settings(time.Now()).Suppress)
+	deps.Printer.Notef("Config %s: %s, %s in force.", lf.Path,
+		countOf(len(lf.Expect), "expectation"), countOf(inForce, "suppression"))
+	for _, p := range lf.Expired(time.Now()) {
+		deps.Printer.Warnf("%s: %s", lf.Path, p)
+	}
+	for _, p := range lf.Unmatched(n) {
+		deps.Printer.Warnf("%s: %s", lf.Path, p)
+	}
+}
+
+func countOf(n int, noun string) string {
+	if n == 1 {
+		return "1 " + noun
+	}
+	return strconv.Itoa(n) + " " + noun + "s"
+}
+
 // describeCheck tells the person on stderr what the check assumed. A finding is
 // only as good as the roles and kinds of order behind it, and those were guessed.
-func describeCheck(deps *Deps, path string, n *network.Network, r network.Report) {
+func describeCheck(deps *Deps, path string, n *network.Network, cfg network.Config, r network.Report) {
 	s := n.Snapshot()
 	note := deps.Printer.Notef
 
 	note("Snapshot %s, taken %s (%s ago): %d facilities, %d connections.", path,
 		s.CreatedAt.Format(time.DateTime), time.Since(s.CreatedAt).Round(time.Minute), len(s.Facilities), len(s.Edges))
 
-	if hubs := r.Roles.Hubs.Count(); hubs > 0 {
+	switch hubs := r.Roles.Hubs.Count(); {
+	case r.Roles.HubCut == 0 && hubs > 0:
+		note("Hubs: %d, as the config pins them.", hubs)
+	case hubs > 0:
 		note("Hubs: %d, the facilities reaching %d or more others, %.1f× the next one down.",
 			hubs, r.Roles.HubCut, r.Roles.HubJump)
-	} else {
-		note("Hubs: none. No facility's connections reach 5× more facilities than the next one's.")
+	default:
+		note("Hubs: none. No facility's connections reach %g× more facilities than the next one's.", cfg.HubRatio)
 	}
 	note("Stores: %d. Suppliers: %d.", r.Roles.Stores.Count(), r.Roles.Suppliers.Count())
 
@@ -125,16 +181,22 @@ func describeCheck(deps *Deps, path string, n *network.Network, r network.Report
 	for _, g := range r.Peers {
 		groups = append(groups, fmt.Sprintf("%s %d", g.Key, g.Size))
 	}
-	note("Peer groups, by country: %s (fewer than %d stores: not compared).",
-		strings.Join(groups, ", "), network.DefaultConfig().PeerMinSize)
+	by := "by country"
+	if cfg.PeerBy != network.DefaultConfig().PeerBy {
+		by = "by " + cfg.PeerBy
+	}
+	note("Peer groups, %s: %s (fewer than %d stores: not compared).", by, strings.Join(groups, ", "), cfg.PeerMinSize)
 
 	orders := 0
 	for _, p := range r.Profiles {
 		orders += p.Orders
 	}
-	if orders > 0 {
+	switch {
+	case len(cfg.Declared) > 0:
+		note("Order profiles: %d, as the config declares them.", len(r.Profiles))
+	case orders > 0:
 		note("Order profiles: %d, from %d routed orders.", len(r.Profiles), orders)
-	} else {
+	default:
 		note("Order profiles: %d, one per tag value a connection asks for (the snapshot has no routed orders).",
 			len(r.Profiles))
 	}
@@ -142,6 +204,9 @@ func describeCheck(deps *Deps, path string, n *network.Network, r network.Report
 	for _, c := range r.Coverage {
 		note("Coverage: a %s reaches %d of %d stores in %s (%s, for %s).",
 			c.Kind, c.Have, c.Size, c.Group, pct(c.Have, c.Size), c.Profile)
+	}
+	if len(r.Suppressed) > 0 {
+		note("Suppressed by the config: %s.", countOf(len(r.Suppressed), "finding"))
 	}
 }
 
