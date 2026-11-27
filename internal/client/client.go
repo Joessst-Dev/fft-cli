@@ -440,8 +440,14 @@ func (e *TransportError) ExitCode() int { return exitcode.Unavailable }
 // ("sign in again") behind a URL they did not type. So an error that already knows
 // its exit code is returned as it is, with its hint intact; a genuine network
 // failure keeps the URL, because there the URL is the point, and is a
-// [TransportError]. Anything that is not a *url.Error never left the machine as a
-// request, so it is wrapped without claiming the upstream was at fault.
+// [TransportError].
+//
+// The token source runs inside the round trip, so its failures arrive as a
+// *url.Error too. One that is not itself a network failure — a locked keychain, a
+// failed cache write — never left the machine, so it is wrapped without the URL and
+// without claiming the upstream was at fault: a script retrying on 9 would loop on
+// something a retry cannot fix. One that is (Google's token endpoint unreachable)
+// is still a transport failure.
 func RequestError(op string, err error) error {
 	var urlErr *url.Error
 	if !errors.As(err, &urlErr) {
@@ -452,6 +458,14 @@ func RequestError(op string, err error) error {
 	if errors.As(urlErr.Err, &coded) {
 		if cause, ok := coded.(error); ok {
 			return cause
+		}
+	}
+
+	var tokenErr *auth.TokenError
+	if errors.As(urlErr.Err, &tokenErr) {
+		var inner *url.Error
+		if !errors.As(tokenErr.Err, &inner) {
+			return fmt.Errorf("%s: %w", op, tokenErr.Err)
 		}
 	}
 	return &TransportError{Op: op, Err: err}

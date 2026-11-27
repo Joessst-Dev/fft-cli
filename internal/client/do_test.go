@@ -460,10 +460,10 @@ func (r *refusing) RoundTrip(*http.Request) (*http.Response, error) {
 	return nil, r.err
 }
 
-// brokenIdP is a token source that cannot mint a token.
-type brokenIdP struct{ err error }
+// brokenIDP is a token source that cannot mint a token.
+type brokenIDP struct{ err error }
 
-func (b brokenIdP) Token(context.Context) (string, error) { return "", b.err }
+func (b brokenIDP) Token(context.Context) (string, error) { return "", b.err }
 
 var _ = Describe("a request that never gets an answer", func() {
 	var (
@@ -517,12 +517,34 @@ var _ = Describe("a request that never gets an answer", func() {
 
 	It("keeps exit 4 and drops the URL when the cause is a token fft could not mint", func() {
 		reauth := &auth.ReauthError{Project: "staging", Err: errors.New("the refresh token is dead")}
-		c := newClient(&refusing{err: errors.New("unreachable")}, brokenIdP{err: reauth})
+		c := newClient(&refusing{err: errors.New("unreachable")}, brokenIDP{err: reauth})
 
 		_, err := c.Do(ctx, "list the facilities", get(c))
 
 		Expect(exitcode.FromError(err)).To(Equal(exitcode.Auth))
 		Expect(err.Error()).NotTo(ContainSubstring("https://"))
+	})
+
+	// The token source runs inside the round trip, so http.Client wraps its failures
+	// in a *url.Error like a network error. A retry cannot unlock a keychain.
+	It("exits 1, not 9, when the token source fails locally without reaching the network", func() {
+		rt := &refusing{err: errors.New("unreachable")}
+		c := newClient(rt, brokenIDP{err: errors.New(`read the stored password for "staging": keychain is locked`)})
+
+		_, err := c.Do(ctx, "list the facilities", get(c))
+
+		Expect(exitcode.FromError(err)).To(Equal(exitcode.General))
+		Expect(err).To(MatchError(ContainSubstring("keychain is locked")))
+		Expect(rt.calls.Load()).To(BeZero())
+	})
+
+	It("still exits 9 when the token source fails because the identity provider is unreachable", func() {
+		netErr := &url.Error{Op: "Post", URL: "https://identitytoolkit.googleapis.com/v1/token", Err: errors.New("dial tcp: connection refused")}
+		c := newClient(&refusing{err: errors.New("unreachable")}, brokenIDP{err: fmt.Errorf("refresh the id token: %w", netErr)})
+
+		_, err := c.Do(ctx, "list the facilities", get(c))
+
+		Expect(exitcode.FromError(err)).To(Equal(exitcode.Unavailable))
 	})
 
 	It("exits 130 when the user pressed ^C, not 9", func() {
