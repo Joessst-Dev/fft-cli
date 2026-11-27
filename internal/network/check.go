@@ -24,7 +24,8 @@ const (
 // RuleIDs are the rules a check runs, in the order it reports them.
 func RuleIDs() []string {
 	return []string{RuleNoSource, RulePeerCoverage, RuleExpect, RuleDanglingRef, RuleOfflineRef,
-		RuleDuplicateEdge, RuleConfigDrift}
+		RuleDuplicateEdge, RuleStrategyInUse, RuleStrategyCategory, RuleStrategyInactive, RuleStrategyExpired,
+		RuleStrategyFallback, RuleStrategyNoRating, RuleToolkitHardcodeID, RuleConfigDrift}
 }
 
 // Finding is one problem a check found.
@@ -101,6 +102,10 @@ func (n *Network) Check(cfg Config) Report {
 	}
 	if run(RuleExpect) {
 		r.Findings = append(r.Findings, n.expectations(cfg, r)...)
+	}
+	if slices.ContainsFunc(RuleIDs(), func(id string) bool { return strings.HasPrefix(id, "strategy-") && run(id) }) ||
+		run(RuleToolkitHardcodeID) {
+		r.Findings = append(r.Findings, n.strategyRules(run)...)
 	}
 	if run(RuleConfigDrift) && cfg.FromFile {
 		r.Findings = append(r.Findings, n.drift(cfg, r)...)

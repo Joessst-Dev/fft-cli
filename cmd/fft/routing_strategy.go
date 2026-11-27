@@ -40,6 +40,7 @@ func newRoutingStrategyCmd(deps *Deps) *cobra.Command {
 	cmd.AddCommand(
 		newRoutingStrategyListCmd(deps),
 		newRoutingStrategyGetCmd(deps),
+		newRoutingStrategyTreeCmd(deps),
 		newRoutingStrategyCreateCmd(deps),
 		newRoutingStrategyUpdateCmd(deps),
 		newRoutingStrategyActivateCmd(deps),

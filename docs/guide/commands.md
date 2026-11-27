@@ -144,6 +144,11 @@ fft routing strategy evaluate 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10 --file order.
   whole tree.
 - **`update` is a PUT, there is no `patch`.** Read the whole strategy, edit it, send it
   back; fft supplies the `version`. There is no `delete` — the API does not offer one.
+- **`fft routing strategy tree`** draws the strategy in use (or `<id>`) as the tree the
+  router walks: first matching condition wins, and each node's fences and ratings are
+  inherited below it. Inactive branches fold; `--all` unfolds them. **`--order <id>`
+  marks the branch the router took** for that order, from its latest decision log (▶
+  taken, ✗ evaluated false). A `sourcing simulate` run leaves no log to mark from.
 - `fft routing decision-logs` is the audit trail of real routing runs. Filter by exact id:
   `--order`, `--routing-plan`, `--process`, `--tenant-order-id`, `--sourcing-option(s)`.
 - `fft routing category` manages the node config category labels (a name and a colour) that
@@ -166,6 +171,7 @@ fft network check --snapshot network.json.gz
 fft network infer
 fft network config validate
 fft network config schema
+fft network reach --to BER-01 --tag orderType=express
 ```
 
 - **A snapshot is a long crawl of reads**: one paged request per facility, so an hour or
@@ -191,6 +197,16 @@ fft network config schema
   so no finding reports it.
 - **Report findings; do not fix them.** Changing connections to make a check pass changes
   where real orders go, and that is the network owner's decision.
+- **`reach` answers "why does nothing reach this store?"** It lists every connection whose
+  target could be the facility, applying ones first, with `RESULT` (`applies`,
+  `conditional`, `excluded`) and the `REASON`: the first exclusion or context entry that
+  rules it out. stderr names the reason that excludes the most connections, and on a real
+  network that line is usually the answer. `--tag id=value` gives the order's tags.
+- `check` also judges the routing strategy in use: no strategy (or two) in use, a
+  `categoryRef` that names nothing, an inactive branch, expired time frames, a missing or
+  offline fallback facility, a path whose merged config has no active rating
+  (`strategy-*`), and facility ids hard-coded in toolkit rules that name nothing
+  (`toolkit-hardcoded-id`).
 - **`fft-network.yaml` turns the check's guesses into decisions.** `infer` writes one, with
   the reason for each value as a comment. It pins the hubs, the peer grouping, where order
   profiles come from, and one `expect` per country a hub already covers. `check` reads

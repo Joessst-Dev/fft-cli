@@ -41,6 +41,8 @@ func networkTenant(w http.ResponseWriter, r *http.Request, _ []byte) {
 		writeJSON(w, http.StatusOK, `{"tags":[{"id":"orderType","allowedValues":["express"]}],"total":1}`)
 	case path == "/api/routing/strategies":
 		writeJSON(w, http.StatusOK, `{"routingStrategies":[{"id":"s1","inUse":true}],"total":1}`)
+	case path == "/api/routing/nodeconfigcategories":
+		writeJSON(w, http.StatusOK, `{"routingStrategyNodeConfigCategories":[],"total":0}`)
 	case path == "/api/routing/decisionlogs":
 		writeJSON(w, http.StatusOK, `{"decisionLogs":[{"id":"l1","relatedRefs":{"orderRef":"o1"}}],"total":1}`)
 	case path == "/api/orders/o1":
@@ -551,4 +553,48 @@ var _ = Describe("fft network infer and config", func() {
 		Expect(json.Unmarshal([]byte(c.out()), &schema)).To(Succeed())
 		Expect(schema).To(HaveKeyWithValue("title", "fft-network.yaml"))
 	})
+})
+
+var _ = Describe("fft network reach", func() {
+	var (
+		c    *cli
+		path string
+	)
+
+	BeforeEach(func() {
+		c = newCLI()
+		path = filepath.Join(GinkgoT().TempDir(), "s.json.gz")
+		Expect(network.Save(path, gappySnapshot())).To(Succeed())
+	})
+
+	It("lists the connections that could lead to a facility, and why each does not", func() {
+		Expect(c.run("network", "reach", "--snapshot", path, "--to", "BER-11")).To(Equal(exitcode.OK))
+
+		lines := strings.Split(strings.TrimSpace(c.out()), "\n")
+		Expect(strings.Fields(lines[0])).To(Equal([]string{"CONNECTION", "SOURCE", "KIND", "RESULT", "TRANSIT", "REASON"}))
+		Expect(lines[1]).To(MatchRegexp(`^s1\s+SUP-01\s+supplier\s+applies\s+-\s+every context entry passes$`))
+		Expect(lines[2]).To(MatchRegexp(`^h1\s+HUB-01\s+hub\s+excluded\s+-\s+the target's excludedFacilityRefs lists it$`))
+		Expect(c.errOut()).To(ContainSubstring("BER-11 (online, MANAGED_FACILITY), for an order with (no tags): 2 connections could lead there; 1 apply, 0 conditionally, 1 excluded."))
+		Expect(c.errOut()).To(ContainSubstring("1 excluded: the target's excludedFacilityRefs lists it"))
+	})
+
+	It("keeps only the connections with the --result asked for", func() {
+		Expect(c.run("network", "reach", "--snapshot", path, "--to", "BER-11", "--result", "excluded", "-o", "json")).
+			To(Equal(exitcode.OK))
+
+		var rows []map[string]any
+		Expect(json.Unmarshal([]byte(c.out()), &rows)).To(Succeed())
+		Expect(rows).To(HaveLen(1))
+		Expect(rows[0]).To(HaveKeyWithValue("connection", "h1"))
+	})
+
+	DescribeTable("refuses what it cannot use",
+		func(args ...string) {
+			Expect(c.run(append([]string{"network", "reach", "--snapshot", path}, args...)...)).To(Equal(exitcode.Usage))
+		},
+		Entry("no facility", "--tag", "a=b"),
+		Entry("a facility the snapshot does not have", "--to", "GONE-01"),
+		Entry("a tag that is not id=value", "--to", "BER-11", "--tag", "express"),
+		Entry("an unknown result", "--to", "BER-11", "--result", "maybe"),
+	)
 })

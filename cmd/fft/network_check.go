@@ -33,6 +33,21 @@ The rules:
   offline-ref     an offline facility that connections still lead to
   duplicate-edge  connections of one source that are the same connection
 
+With fft-network.yaml, also:
+
+  expect          a facility fewer sources reach than the file declares
+  config-drift    the network has moved away from what the file pins
+
+And on the routing strategy in use:
+
+  strategy-in-use       no strategy in use, or more than one
+  strategy-category     a node's categoryRef names no node config category
+  strategy-inactive     an inactive condition or node with nodes below it
+  strategy-expired      a node or condition whose time frames have all ended
+  strategy-fallback     a fallback facility that is missing or offline
+  strategy-no-rating    a path whose merged config has no active rating
+  toolkit-hardcoded-id  a facility id in a toolkit rule that names nothing
+
 A kind of order is the tags it carries, as far as any connection reads them,
 taken from the orders the snapshot's decision logs routed. Hubs are the facilities
 whose connections reach far more facilities than anybody else's. What the check

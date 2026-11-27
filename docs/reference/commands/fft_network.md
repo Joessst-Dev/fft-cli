@@ -16,6 +16,7 @@ reads the whole network once into a local snapshot, and works on that:
 
   fft network snapshot      read every facility and connection into a local file
   fft network check         find the routing gaps in it, offline (exit 11 if any)
+  fft network reach         which connections lead to one facility, and why not
   fft network infer         write a starter fft-network.yaml from what check infers
   fft network config        validate that file, or print its JSON Schema
 
@@ -33,6 +34,7 @@ fft network
 - [fft network check](./fft_network_check.md) — Find the routing gaps in a network snapshot
 - [fft network config](./fft_network_config.md) — Check and describe the fft-network.yaml format
 - [fft network infer](./fft_network_infer.md) — Write a starter fft-network.yaml from a network snapshot
+- [fft network reach](./fft_network_reach.md) — Show which connections lead to a facility, and why the others do not
 - [fft network snapshot](./fft_network_snapshot.md) — Read every facility and connection into a local snapshot
 
 ## See also

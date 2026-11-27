@@ -96,7 +96,7 @@
     }
   },
   "$defs": {
-    "rule": {"enum": ["no-source", "peer-coverage", "expect", "dangling-ref", "offline-ref", "duplicate-edge", "config-drift"]},
+    "rule": {"enum": ["no-source", "peer-coverage", "expect", "dangling-ref", "offline-ref", "duplicate-edge", "strategy-in-use", "strategy-category", "strategy-inactive", "strategy-expired", "strategy-fallback", "strategy-no-rating", "toolkit-hardcoded-id", "config-drift"]},
     "role": {"enum": ["hub", "store", "supplier"]},
     "where": {
       "description": "Facility fields to match, all of them: address.country, address.postalCode, group (a facility group id), customAttributes.<key>.",
