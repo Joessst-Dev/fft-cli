@@ -34,7 +34,7 @@ var _ = Describe("the API's 'Query too complex' 400 on a search", func() {
 
 		Expect(code).To(Equal(exitcode.General))
 		Expect(c.errOut()).To(ContainSubstring("Query too complex"))
-		Expect(c.errOut()).To(ContainSubstring("A smaller --size will not help"))
+		Expect(c.errOut()).To(ContainSubstring("will not help: the API's cost is in the"))
 		Expect(c.out()).To(BeEmpty())
 	}
 
@@ -83,6 +83,8 @@ var _ = Describe("the API's 'Query too complex' 400 on a search", func() {
 
 			Expect(api.only().Path).To(Equal("/api/pickjobs/search"))
 			Expect(c.errOut()).To(ContainSubstring(genericSentence))
+			// Tier 2 has no --size flag: the hint must name the body's "size" too.
+			Expect(c.errOut()).To(ContainSubstring(`the body's "size"`))
 		})
 	})
 
@@ -93,6 +95,7 @@ var _ = Describe("the API's 'Query too complex' 400 on a search", func() {
 			expectExplained(c.run("api", "searchListing", "--file", tempFile(`{"query":{}}`)))
 
 			Expect(c.errOut()).To(ContainSubstring(genericSentence))
+			Expect(c.errOut()).To(ContainSubstring(`the body's "size"`))
 		})
 	})
 

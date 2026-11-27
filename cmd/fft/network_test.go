@@ -195,7 +195,7 @@ var _ = Describe("fft network snapshot", func() {
 			Expect(c.run("network", "snapshot")).To(Equal(exitcode.General))
 
 			Expect(c.errOut()).To(ContainSubstring("Query too complex"))
-			Expect(c.errOut()).To(ContainSubstring("A smaller --size will not help"))
+			Expect(c.errOut()).To(ContainSubstring(`A smaller page size (--size, or the body's "size") will not help`))
 			Expect(c.errOut()).NotTo(ContainSubstring("pausing"))
 			Expect(c.out()).To(BeEmpty())
 			Expect(defaultPath() + network.JournalSuffix).To(BeAnExistingFile())

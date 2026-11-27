@@ -37,7 +37,7 @@ var _ = Describe("the API's 'Query too complex' 400", func() {
 			Expect(errors.As(err, &tooComplex)).To(BeTrue())
 			Expect(tooComplex.Walk).To(BeFalse())
 			Expect(err).To(MatchError(ContainSubstring("the API returned HTTP 400: Query too complex")))
-			Expect(tooComplex.Hint()).To(ContainSubstring("A smaller --size will not help"))
+			Expect(tooComplex.Hint()).To(ContainSubstring(`A smaller page size (--size, or the body's "size") will not help`))
 
 			var apiErr *client.APIError
 			Expect(errors.As(err, &apiErr)).To(BeTrue(), "the API's own error stays reachable")

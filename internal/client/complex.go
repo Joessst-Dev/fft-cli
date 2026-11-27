@@ -46,7 +46,7 @@ func (e *QueryTooComplexError) Unwrap() error { return e.Err }
 // Hint is true for every entity. A command with a better narrow filter than "an id"
 // replaces it with its own.
 func (e *QueryTooComplexError) Hint() string {
-	return "A smaller --size will not help: the API's cost is in the filter or sort over the whole collection, not in the page.\n" +
+	return "A smaller page size (--size, or the body's \"size\") will not help: the API's cost is in the filter or sort over the whole collection, not in the page.\n" +
 		"Narrow the query instead: filter on an exact match (an id or a tenant id), and drop any date range and the sort."
 }
 
