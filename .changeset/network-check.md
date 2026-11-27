@@ -1,5 +1,0 @@
----
-"fft": minor
----
-
-New `fft network check` finds routing gaps in a snapshot taken with `fft network snapshot`, offline and without sending a request. It reports five rules: `no-source` (a store no online source reaches for some kind of order), `peer-coverage` (a store no hub or supplier reaches although one reaches at least 90% of the stores in its country), `dangling-ref` (a target, exclusion or context value that names nothing), `offline-ref` (an offline facility that connections still lead to) and `duplicate-edge`. The kinds of order are the tag combinations of recently routed orders, and the hubs are the facilities whose connections reach far more facilities than anyone else's. Both are printed on stderr, along with each country's hub and supplier coverage. Findings go to stdout, as a table or with `-o json` including each one's evidence and next step. `--rule` runs a subset and `--snapshot` names a file. The new exit code 11 means the check ran and found problems; a check that could not run exits with that failure's own code.

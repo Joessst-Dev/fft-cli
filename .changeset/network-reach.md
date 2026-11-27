@@ -1,5 +1,0 @@
----
-"fft": minor
----
-
-New `fft network reach --to <facility> [--tag id=value]` shows, from a snapshot, every connection that could lead to a facility for a kind of order, whether it applies, and the first exclusion or context entry that rules it out. stderr names the reason that excludes the most connections. New `fft routing strategy tree [<id>]` draws a routing strategy (the one in use by default) as the tree the router walks, with each node's fences and ratings, inactive branches folded (`--all` unfolds them). `--order <id>` marks the branch the router took for that order from its latest decision log. `fft network check` gains rules for the strategy in use: `strategy-in-use`, `strategy-category`, `strategy-inactive`, `strategy-expired`, `strategy-fallback`, `strategy-no-rating` (a path whose merged config has no active rating) and `toolkit-hardcoded-id` (a facility id in a toolkit rule, compared or inside a JSONPath filter, that names no facility). `fft network snapshot` now also reads the routing node config categories.
