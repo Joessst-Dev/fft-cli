@@ -55,7 +55,10 @@ var _ = Describe("fft network snapshot", func() {
 	BeforeEach(func() { c = newCLI() })
 
 	defaultPath := func() string {
-		return filepath.Join(os.Getenv("XDG_CACHE_HOME"), "fft", "network", config.EphemeralName+".snapshot.json.gz")
+		path, err := defaultSnapshotPath(&Deps{}, network.Source{
+			Project: config.EphemeralName, BaseURL: os.Getenv(config.EnvBaseURL)})
+		Expect(err).NotTo(HaveOccurred())
+		return path
 	}
 
 	It("writes the network to the project's file in the cache directory, readable by its owner only", func() {
@@ -69,6 +72,38 @@ var _ = Describe("fft network snapshot", func() {
 		Expect(s.Edges).To(HaveLen(1))
 		Expect(s.OrderProfiles).To(HaveLen(1))
 		testsupport.ExpectOwnerOnlyFile(defaultPath())
+	})
+
+	DescribeTable("naming the default file after the tenant",
+		func(a, b network.Source) {
+			pa, err := defaultSnapshotPath(&Deps{}, a)
+			Expect(err).NotTo(HaveOccurred())
+			pb, err := defaultSnapshotPath(&Deps{}, b)
+			Expect(err).NotTo(HaveOccurred())
+
+			// One file for two tenants means the second crawl truncates the
+			// first's journal and overwrites its snapshot.
+			Expect(pa).NotTo(Equal(pb))
+		},
+		Entry("projects whose names sanitise to the same slug",
+			network.Source{Project: "acme prod", BaseURL: "https://a.example"},
+			network.Source{Project: "acme/prod", BaseURL: "https://a.example"}),
+		Entry("headless runs, which are all called env, against different tenants",
+			network.Source{Project: config.EphemeralName, BaseURL: "https://a.example"},
+			network.Source{Project: config.EphemeralName, BaseURL: "https://b.example"}),
+		Entry("one project name on two base URLs",
+			network.Source{Project: "acme", BaseURL: "https://a.example"},
+			network.Source{Project: "acme", BaseURL: "https://b.example"}),
+	)
+
+	It("keeps the same default file for the same tenant, so --resume finds its journal", func() {
+		src := network.Source{Project: "acme", BaseURL: "https://a.example"}
+		first, err := defaultSnapshotPath(&Deps{}, src)
+		Expect(err).NotTo(HaveOccurred())
+		second, err := defaultSnapshotPath(&Deps{}, src)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(second).To(Equal(first))
 	})
 
 	It("prints a summary on stdout and its progress on stderr", func() {

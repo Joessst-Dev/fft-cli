@@ -113,8 +113,9 @@ func runNetworkSnapshot(cmd *cobra.Command, deps *Deps, o network.CrawlOptions) 
 		return err
 	}
 
+	o.Source = network.Source{Project: project.Name, BaseURL: project.BaseURL}
 	if o.Out == "" {
-		if o.Out, err = defaultSnapshotPath(deps, project.Name); err != nil {
+		if o.Out, err = defaultSnapshotPath(deps, o.Source); err != nil {
 			return err
 		}
 	}
@@ -126,7 +127,6 @@ func runNetworkSnapshot(cmd *cobra.Command, deps *Deps, o network.CrawlOptions) 
 	ctx, cancel := snapshotContext(cmd, deps)
 	defer cancel()
 
-	o.Source = network.Source{Project: project.Name, BaseURL: project.BaseURL}
 	o.FFTVersion = buildinfo.Version
 	o.Progress = cmd.ErrOrStderr()
 	// The client's back-off seam doubles as the crawl's, so a spec that proves a

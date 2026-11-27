@@ -48,8 +48,10 @@ const (
 	// throttle recover in about a minute; a few seconds would only be throttled
 	// again.
 	DefaultPause = time.Minute
-	// DefaultMaxPauses is how often one request may be paused for before the
-	// crawl gives up on it and keeps the journal for --resume.
+	// DefaultMaxPauses is how often one walk may be paused for before the crawl
+	// gives up on it and keeps the journal for --resume. A walk, not a request:
+	// a throttled page starts its walk again from the first page, and every
+	// pause of that walk draws on this one budget.
 	DefaultMaxPauses = 5
 	// maxEntities bounds every walk: far above any real network, far below a
 	// cursor that loops forever.
@@ -250,7 +252,8 @@ func (cr *crawler) notef(format string, args ...any) {
 
 // patient runs fn, and while it fails because the API is throttling or a
 // gateway is struggling, waits and runs it again — longer each time, and at
-// most MaxPauses times. Anything else is returned at once: a 401 that survived
+// most MaxPauses times. fn is a whole walk, so it re-reads its pages from the
+// first one, and the budget is the walk's, not each page's. Anything else is returned at once: a 401 that survived
 // the client's refresh, a 403, a 404 will not get better by waiting.
 func (cr *crawler) patient(ctx context.Context, what string, fn func() error) error {
 	wait := cr.o.Pause
@@ -348,6 +351,14 @@ func (cr *crawler) connections(ctx context.Context, facilities []Facility) error
 					client.PageSize, client.MaxItems(maxEntities)))
 				return err
 			})
+			var apiErr *client.APIError
+			if errors.As(err, &apiErr) && apiErr.Status == http.StatusNotFound {
+				// Deleted since the facility search, which was read once at the
+				// start and may be an hour old. It has no connections to read, and
+				// present() drops the edges whose source is gone, so recording it
+				// as finished keeps the snapshot consistent and --resume quiet.
+				return cr.keep(id, nil, len(todo))
+			}
 			if err != nil {
 				return err
 			}

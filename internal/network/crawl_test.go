@@ -322,6 +322,25 @@ var _ = Describe("crawling a network", func() {
 		})
 	})
 
+	When("a facility is deleted after the facility search", func() {
+		It("finishes without it: a 404 on its connections is a facility with none", func() {
+			tenant.fail = func(r *http.Request) (int, bool) {
+				return http.StatusNotFound, r.URL.Path == "/api/facilities/"+ber2ID+"/connections"
+			}
+
+			s, err := crawl()
+
+			// The walk used to stop here with exit 6, though --resume would have
+			// recovered it: a routine deletion should not need a re-run.
+			Expect(err).NotTo(HaveOccurred())
+			Expect(s.Edges).NotTo(BeEmpty())
+			Expect(tenant.connectionsOf(hubID)).To(Equal(1))
+			Expect(tenant.connectionsOf(ber1ID)).To(Equal(1))
+			Expect(slept).To(BeEmpty())
+			Expect(out + network.JournalSuffix).NotTo(BeAnExistingFile())
+		})
+	})
+
 	When("the session is refused", func() {
 		It("stops at once with the auth exit code, without pausing", func() {
 			tenant.fail = func(r *http.Request) (int, bool) {
