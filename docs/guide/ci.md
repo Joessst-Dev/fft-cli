@@ -74,3 +74,35 @@ file.
 
 Every global flag has an environment variable too: `--output` is `FFT_OUTPUT`,
 `--project` is `FFT_PROJECT`, and so on.
+
+## Gating on the network
+
+`fft network check` exits 11 when it finds routing gaps, and 0 when it finds none, so it
+can gate a job. Commit `fft-network.yaml` (start one with `fft network infer`) so the check
+follows the team's decisions instead of its own guesses:
+
+```yaml
+- run: |
+    fft network snapshot --out network.json.gz
+    fft network check --snapshot network.json.gz --config fft-network.yaml
+  env:
+    FFT_BASE_URL: ${{ secrets.FFT_BASE_URL }}
+    FFT_FIREBASE_API_KEY: ${{ secrets.FFT_FIREBASE_API_KEY }}
+    FFT_USERNAME: ${{ secrets.FFT_USERNAME }}
+    FFT_PASSWORD: ${{ secrets.FFT_PASSWORD }}
+    FFT_PROJECT_ID: ${{ vars.FFT_PROJECT_ID }}
+    FFT_ENV: ${{ vars.FFT_ENV }}
+    FFT_READ_ONLY: "1"
+```
+
+- **Use a password, not `FFT_ID_TOKEN`.** A crawl of a large network can outlast a token's
+  hour, and a fixed token cannot be renewed. `--resume` continues a stopped crawl only
+  within the same job (its journal sits next to `--out`); a re-run of the job starts over.
+- **`FFT_READ_ONLY`** makes the guarantee explicit: every request the crawl sends is a read.
+- **Keep the snapshot out of the job's artifacts and caches.** It is the tenant's whole
+  network.
+- Any exit code other than 0 and 11 is the job failing, not the network: 3 for an unusable
+  config, 4 for credentials, 9 for an API that did not answer.
+
+The workflow and every rule are in [Routing gaps](./network.md).
+

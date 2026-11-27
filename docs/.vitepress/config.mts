@@ -118,6 +118,7 @@ export default defineConfig({
             { text: 'Concepts', link: '/guide/concepts' },
             { text: 'Recipes', link: '/guide/recipes' },
             { text: 'Templates', link: '/guide/templates' },
+            { text: 'Routing gaps', link: '/guide/network' },
             { text: 'Read-only projects', link: '/guide/read-only' },
             { text: 'Emulator', link: '/guide/emulator' },
             { text: 'Components', link: '/guide/components' },
