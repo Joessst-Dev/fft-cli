@@ -115,7 +115,7 @@ func getConnectionDoc(ctx context.Context, c *client.Client, facility, id string
 //	fft connection get 3f9c... --facility BER-01 -o json > c.json
 //	fft connection update 3f9c... --facility BER-01 --file c.json
 //
-// produces a body with no discriminator and gets a 400 that does not say which field
+// can produce a body with no discriminator and get a 400 that does not say which field
 // was missing. Filling the top-level type in from target.type is not a guess: the
 // target already carries it, the two are required to be equal, and there is no third
 // value they could take. It is the round trip working the way the user already

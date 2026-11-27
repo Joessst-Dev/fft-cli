@@ -359,7 +359,7 @@ var _ = Describe("fft connection update", func() {
 			_ = r
 		})
 
-		// Exactly what the API returns: no "type" at the top level.
+		// A read that lacks the top-level "type", which the spec's read model does not declare.
 		asRead := connection("c2", typeSupplier, "sup-uuid", "UPS", 4)
 		Expect(asRead).NotTo(ContainSubstring(`"type":"SUPPLIER","target"`))
 
