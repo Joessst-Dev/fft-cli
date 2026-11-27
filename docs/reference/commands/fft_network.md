@@ -15,6 +15,7 @@ a facility that has gone offline. Nothing in the API reports those. This group
 reads the whole network once into a local snapshot, and works on that:
 
   fft network snapshot      read every facility and connection into a local file
+  fft network check         find the routing gaps in it, offline (exit 11 if any)
 
 Everything here only reads from the tenant. Fixing a gap is a change to the
 network, and that is its owner's decision, not a linter's.
@@ -27,6 +28,7 @@ fft network
 
 ## Subcommands
 
+- [fft network check](./fft_network_check.md) — Find the routing gaps in a network snapshot
 - [fft network snapshot](./fft_network_snapshot.md) — Read every facility and connection into a local snapshot
 
 ## See also

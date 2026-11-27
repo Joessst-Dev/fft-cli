@@ -155,6 +155,9 @@ connections into a local snapshot, and works on that offline.
 fft network snapshot
 fft network snapshot --resume
 fft network snapshot --out network.json.gz --concurrency 2 -o json
+fft network check
+fft network check --rule peer-coverage -o json
+fft network check --snapshot network.json.gz
 ```
 
 - **A snapshot is a long crawl of reads**: one paged request per facility, so an hour or
@@ -170,6 +173,16 @@ fft network snapshot --out network.json.gz --concurrency 2 -o json
 - `--decision-logs 0` skips the recent routing decision logs, and with them the orders
   whose tags define the kinds of order a check compares. `--no-orders` keeps the logs but
   skips the orders.
+- **`check` sends no request.** It reads the snapshot and reports findings by rule id:
+  `no-source`, `peer-coverage`, `dangling-ref`, `offline-ref`, `duplicate-edge`. **Exit
+  11 means it ran and found problems**, not that it failed. `-o json` gives each finding's
+  `evidence` and `next` step. Start there, not from the table.
+- What `check` assumed goes to stderr: which facilities it took for hubs, the peer groups
+  (stores by country), the order profiles, and the share of each country's stores a hub
+  reaches. **Read the coverage lines too.** A gap most of a country shares is no outlier,
+  so no finding reports it.
+- **Report findings; do not fix them.** Changing connections to make a check pass changes
+  where real orders go, and that is the network owner's decision.
 
 ## Listings
 

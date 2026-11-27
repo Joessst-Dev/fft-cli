@@ -16,6 +16,7 @@ and the wording is not.
 | 8 | partial bulk write | some items landed. Read the per-item results; re-send only the `FAILED` ones, never the `UNKNOWN` ones |
 | 9 | upstream unreachable or erroring | a 5xx, a transport failure (connection refused or reset, DNS, TLS, a proxy that is down and refuses the `CONNECT` with a 5xx) or a timeout (`--timeout`). fft retried it **only if it was safe to repeat** — see below. Back off, and tell the user |
 | 10 | read-only: fft refused a write | **nothing was sent.** Not an auth problem, and not routable around. Ask the user |
+| 11 | a check ran and found problems | `fft network check` worked, and its answer is the findings on stdout. Read them (`-o json` for the rule ids); fixing the network is its owner's decision, so report them rather than change connections |
 | 130 | interrupted | — |
 
 ## Exit 9 on a create: it may have landed anyway
