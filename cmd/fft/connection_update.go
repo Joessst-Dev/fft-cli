@@ -26,10 +26,10 @@ fft supplies the version. The API locks optimistically and carries the version
 in the body rather than in an If-Match header, so fft reads the connection first
 to learn the current one and retries once if somebody wrote in between.
 
-The connection the API returns has no top-level "type" — it lives inside
-"target" — while the body the API accepts requires both. fft fills the missing
-one in from the target rather than making you do it, so the round trip above
-works as written.
+A connection read from the API is only guaranteed to carry its "type" inside
+"target" — a top-level copy may or may not be there — while the body the API
+accepts requires both. fft fills the missing one in from the target rather than
+making you do it, so the round trip above works as written.
 
 --if-version skips the read: fft sends the version you name and the API rejects
 it if it is stale. That is one request instead of two, and a clean failure
