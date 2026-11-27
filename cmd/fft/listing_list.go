@@ -30,6 +30,11 @@ Remember what a listing is: the catalog entry, not the quantity. For quantities,
 // these two, and the search accepts exactly one.
 var listingSortFields = []string{"tenantArticleId", "lastModified"}
 
+// listingQueryTooComplexHint: --facility is required already, so the article is the
+// filter that is left to narrow by.
+const listingQueryTooComplexHint = "A smaller --size will not help: the API's cost is in the --sort or the filter over the whole collection, not in the page.\n" +
+	"Narrow the search instead: 'fft listing list --facility <id> --tenant-article-id <id>', and drop --sort."
+
 func newListingListCmd(deps *Deps) *cobra.Command {
 	var (
 		facility string
@@ -75,7 +80,8 @@ func newListingListCmd(deps *Deps) *cobra.Command {
 				return client.ListingSearchPayload{Query: query, Sort: sort}, nil
 			}
 
-			return runSearch(cmd, deps, client.ListingSearch[json.RawMessage](), build, page, listingList())
+			err = runSearch(cmd, deps, client.ListingSearch[json.RawMessage](), build, page, listingList())
+			return refineQueryTooComplex(err, listingQueryTooComplexHint)
 		},
 	}
 

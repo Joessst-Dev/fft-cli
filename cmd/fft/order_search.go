@@ -2,9 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"net/http"
 	"strings"
 	"time"
 
@@ -77,7 +75,7 @@ func newOrderSearchCmd(deps *Deps) *cobra.Command {
 			}
 
 			err = runSearch(cmd, deps, client.OrderSearch[json.RawMessage](), staticQuery(payload), page, orderList())
-			return explainQueryTooComplex(err)
+			return refineQueryTooComplex(err, orderQueryTooComplexHint)
 		},
 	}
 
@@ -96,36 +94,12 @@ func newOrderSearchCmd(deps *Deps) *cobra.Command {
 	return cmd
 }
 
-// queryTooComplexError is the API's "Query too complex" 400 plus the way out. It
-// wraps rather than replaces the API error, so the message is the API's own words
-// and the exit code is still the one the status maps to.
-type queryTooComplexError struct{ err *client.APIError }
-
-func (e *queryTooComplexError) Error() string { return e.err.Error() }
-func (e *queryTooComplexError) Unwrap() error { return e.err }
-
-// Hint corrects the API's advice: shrinking --size is what the message suggests
-// and what does not work, because the cost is in the date range or sort over the
-// whole history, not in the page.
-func (e *queryTooComplexError) Hint() string {
-	return "A smaller --size will not help: the API rejects --since/--until and --sort on a very large order history.\n" +
-		"Narrow the search instead: 'fft order search --tenant-order-id <id>', or 'fft order list --tenant-order-id <id>'.\n" +
-		"To see what was routed most recently, 'fft routing decision-logs' in practice lists the newest routings first (the API does not guarantee an order)."
-}
-
-// explainQueryTooComplex attaches the hint to the API's "Query too complex" 400
-// and passes every other error through untouched. It matches the message, because
-// the status alone is the same 400 an unknown enum value gets.
-func explainQueryTooComplex(err error) error {
-	var apiErr *client.APIError
-	if !errors.As(err, &apiErr) || apiErr.Status != http.StatusBadRequest {
-		return err
-	}
-	if !strings.Contains(strings.ToLower(apiErr.Error()), "query too complex") {
-		return err
-	}
-	return &queryTooComplexError{err: apiErr}
-}
+// orderQueryTooComplexHint corrects the API's advice: shrinking --size is what the
+// message suggests and what does not work, because the cost is in the date range or
+// sort over the whole history, not in the page.
+const orderQueryTooComplexHint = "A smaller --size will not help: the API rejects --since/--until and --sort on a very large order history.\n" +
+	"Narrow the search instead: 'fft order search --tenant-order-id <id>', or 'fft order list --tenant-order-id <id>'.\n" +
+	"To see what was routed most recently, 'fft routing decision-logs' in practice lists the newest routings first (the API does not guarantee an order)."
 
 // orderQuery turns the filter flags into the API's query. Every value is checked
 // here, because the API's own answer to an unknown status or an unparseable date

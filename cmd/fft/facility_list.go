@@ -30,6 +30,10 @@ and every other remark go to stderr, so a pipe into jq is never contaminated.`
 // exactly one — not zero of them, and not two.
 var facilitySortFields = []string{"id", "name", "status", "type", "tenantFacilityId", "locationType", "lastModified"}
 
+// facilityQueryTooComplexHint names the exact-match filter a facility search has.
+const facilityQueryTooComplexHint = "A smaller --size will not help: the API's cost is in the --sort or the filter over the whole collection, not in the page.\n" +
+	"Narrow the search instead: 'fft facility list --tenant-facility-id <id>', and drop --sort."
+
 func newFacilityListCmd(deps *Deps) *cobra.Command {
 	var (
 		status   []string
@@ -58,7 +62,8 @@ func newFacilityListCmd(deps *Deps) *cobra.Command {
 				return err
 			}
 
-			return runSearch(cmd, deps, client.FacilitySearch[json.RawMessage](), staticQuery(payload), page, facilityList())
+			err = runSearch(cmd, deps, client.FacilitySearch[json.RawMessage](), staticQuery(payload), page, facilityList())
+			return refineQueryTooComplex(err, facilityQueryTooComplexHint)
 		},
 	}
 

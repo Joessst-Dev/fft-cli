@@ -16,6 +16,30 @@ import (
 	"github.com/Joessst-Dev/fft-cli/internal/output"
 )
 
+// refinedError is an error whose hint a command has replaced with a sharper one.
+// writeError prints the hint of the outermost error that has one, so wrapping is
+// all it takes for the command's line to win over the client's generic one.
+type refinedError struct {
+	err  error
+	hint string
+}
+
+func (e *refinedError) Error() string { return e.err.Error() }
+func (e *refinedError) Unwrap() error { return e.err }
+func (e *refinedError) Hint() string  { return e.hint }
+
+// refineQueryTooComplex swaps the client's generic "Query too complex" hint for one
+// that names this entity's own narrow filter. Every other error passes through
+// untouched, and the wrapped error stays reachable, so the message, the walk's
+// progress and the exit code are the client's.
+func refineQueryTooComplex(err error, hint string) error {
+	var tooComplex *client.QueryTooComplexError
+	if !errors.As(err, &tooComplex) {
+		return err
+	}
+	return &refinedError{err: err, hint: hint}
+}
+
 // listView is how one entity's list command renders a page.
 //
 // Every POST /{entity}/search in the API has the same envelope, so the paging,
