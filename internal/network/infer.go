@@ -12,8 +12,10 @@ import (
 // file it writes) is how a team pins them instead.
 type Config struct {
 	// HubRatio is how far a hub must stand out: the facilities above the largest
-	// jump in reach between consecutive facilities are hubs, if that jump is at
-	// least this factor. A fixed count would not survive the move from a
+	// jump in reach between consecutive facilities that both reach somebody are
+	// hubs, if that jump is at least this factor. (The drop to facilities that
+	// reach nobody counts only when no such jump does, as for a lone hub over
+	// stores that supply nothing.) A fixed count would not survive the move from a
 	// pre-production network of a few dozen stores to a production one of
 	// thousands.
 	HubRatio float64
@@ -70,8 +72,9 @@ func (r Roles) kind(i int) (Kind, bool) {
 //
 // A hub is a managed facility whose connections reach far more managed
 // facilities than anybody else's. "Far more" is relative: the facilities are
-// sorted by reach, and the cut goes at the largest jump between neighbours,
-// provided it is at least cfg.HubRatio. Reach counts facilities, not
+// sorted by reach, and the cut goes at the largest jump between neighbours that
+// both reach somebody, provided it is at least cfg.HubRatio. The drop to the
+// facilities that reach nobody counts only when no such jump does. Reach counts facilities, not
 // connections, because a wildcard target is one connection that reaches
 // thousands.
 func (n *Network) InferRoles(cfg Config) Roles {

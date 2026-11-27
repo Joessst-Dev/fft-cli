@@ -171,12 +171,16 @@ func (n *Network) coverage(cfg Config, r Report) (noSource, peer []Finding, cove
 		p := pc.Profile
 		reach := map[Kind]Bitset{KindHub: n.empty(), KindStore: n.empty(), KindSupplier: n.empty()}
 		conditional := n.empty()
+		// Per kind as well, for peer-coverage: a hub that reaches a store only for
+		// some items has not left it out, and the finding must not say it did.
+		conditionalBy := map[Kind]Bitset{KindHub: n.empty(), KindStore: n.empty(), KindSupplier: n.empty()}
 		for _, g := range groups {
 			switch v, _ := n.Applies(&g.rep, p); v {
 			case Applies:
 				reach[g.kind].Or(g.mask)
 			case Conditional:
 				conditional.Or(g.mask)
+				conditionalBy[g.kind].Or(g.mask)
 			}
 		}
 
@@ -226,6 +230,7 @@ func (n *Network) coverage(cfg Config, r Report) (noSource, peer []Finding, cove
 						lacking[kind][i] = g
 					}
 					g.profiles = append(g.profiles, p.String())
+					g.conditional = g.conditional || conditionalBy[kind].Has(i)
 				})
 			}
 		}
@@ -254,15 +259,19 @@ func (n *Network) coverage(cfg Config, r Report) (noSource, peer []Finding, cove
 		for _, i := range sortedKeys(lacking[kind]) {
 			g := lacking[kind][i]
 			f := n.Facility(i)
+			detail := fmt.Sprintf("no %s reaches it, though one reaches %s of its peers in %s",
+				kind, g.share, g.group)
+			if g.conditional {
+				detail += ", except connections that depend on an item's category or the recipient"
+			}
 			peer = append(peer, Finding{
 				Rule:       RulePeerCoverage,
 				Subject:    f.Label(),
 				Facilities: []string{f.Label()},
 				Profiles:   g.profiles,
-				Detail: fmt.Sprintf("no %s reaches it, though one reaches %s of its peers in %s",
-					kind, g.share, g.group),
+				Detail:     detail,
 				Evidence: map[string]any{"kind": string(kind), "peerGroup": g.group, "peerShare": g.share,
-					"profiles": len(g.profiles), "of": all},
+					"profiles": len(g.profiles), "of": all, "conditional": g.conditional},
 				Next: fmt.Sprintf("Compare it with a peer in %s that a %s does reach: the difference is in "+
 					"the %s's connections — a context entry, an exclusion, or a group it is missing from.",
 					g.group, kind, kind),
