@@ -1,6 +1,6 @@
 ---
 name: fft
-description: Drive the fft CLI against a fulfillmenttools tenant - read and change orders, facilities, interfacility connections, listings, stock, pick jobs, pack jobs and handovers, manage and activate routing strategies, simulate how an order would be routed, and reach any of the API's 576 operations. Use whenever the user mentions fulfillmenttools, fft, an order, a pickjob or packjob, a handover, a listing, stock levels, a routing strategy, or a facility or warehouse in that system - and whenever they ask why an order was routed or sourced the way it was, where an order would be fulfilled from, or how a fulfillmenttools concept works (a handover or pick job lifecycle, routing fences and ratings).
+description: Drive the fft CLI against a fulfillmenttools tenant - read and change orders, facilities, interfacility connections, listings, stock, pick jobs, pack jobs and handovers, manage and activate routing strategies, simulate how an order would be routed, snapshot a whole fulfillment network for offline analysis, and reach any of the API's 576 operations. Use whenever the user mentions fulfillmenttools, fft, an order, a pickjob or packjob, a handover, a listing, stock levels, a routing strategy, or a facility or warehouse in that system - and whenever they ask why an order was routed or sourced the way it was, where an order would be fulfilled from, or how a fulfillmenttools concept works (a handover or pick job lifecycle, routing fences and ratings).
 ---
 
 # Driving fft
@@ -71,7 +71,7 @@ fft api list --search handover -o json
 What this user normally runs is on record: `fft history top -o json` lists the operations
 used most in the current project, with the `command` behind each.
 
-1. **Curated** — `fft order`, `fft facility`, `fft connection`, `fft listing`, `fft stock`, `fft sourcing`, `fft routing`.
+1. **Curated** — `fft order`, `fft facility`, `fft connection`, `fft listing`, `fft stock`, `fft sourcing`, `fft routing`, `fft network`.
    Typed flags, real tables. Use these when they fit; see [commands](references/commands.md).
 2. **Generated** — every other operation, as `fft <group> <operation>`, e.g.
    `fft picking get-pick-job`.

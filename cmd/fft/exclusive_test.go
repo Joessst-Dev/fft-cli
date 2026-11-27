@@ -41,7 +41,7 @@ var configSavers = map[string]string{
 // otherWriters are the commands that rewrite the template directory or the request
 // history. They are listed by hand: the stores' Write, Remove and Clear are names
 // too common to find reliably in the source, and each has only these writers.
-var otherWriters = []string{"fft template save", "fft template remove", "fft history clear"}
+var otherWriters = []string{"fft template save", "fft template remove", "fft history clear", "fft network snapshot"}
 
 // configSaveCallers returns the name of every function in this package, outside
 // the specs, that saves the config file.

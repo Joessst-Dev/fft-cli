@@ -144,6 +144,33 @@ fft routing strategy evaluate 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10 --file order.
 - `fft routing category` manages the node config category labels (a name and a colour) that
   a strategy's nodes are grouped under. Full CRUD, including `delete`.
 
+## Network
+
+`fft network` works on the **whole** fulfillment graph at once, to find the gaps that make
+orders route somewhere surprising: a store no hub reaches, a connection to an offline
+facility. There is no tenant-wide connection list, so it first reads every facility's
+connections into a local snapshot, and works on that offline.
+
+```sh
+fft network snapshot
+fft network snapshot --resume
+fft network snapshot --out network.json.gz --concurrency 2 -o json
+```
+
+- **A snapshot is a long crawl of reads**: one paged request per facility, so an hour or
+  more on a large network. It runs under `--read-only`. It allows itself 4h unless you set
+  `--timeout`, backs off when a gateway throttles, and records each facility as it
+  finishes.
+- **If it stops** (an expired session, a gateway that will not recover, Ctrl-C), run it
+  again with `--resume`. It skips what it already read, and refuses a journal from
+  another project or base URL.
+- The snapshot goes to the cache directory, one file per project, readable by its owner
+  only. stdout carries a summary (with `-o json`, including the file's `path`).
+  **Do not commit a snapshot**: it is the tenant's whole network.
+- `--decision-logs 0` skips the recent routing decision logs, and with them the orders
+  whose tags define the kinds of order a check compares. `--no-orders` keeps the logs but
+  skips the orders.
+
 ## Listings
 
 **A listing has no id of its own.** It is addressed by the facility it is in *and* the

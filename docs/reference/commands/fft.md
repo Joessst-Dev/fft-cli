@@ -53,6 +53,7 @@ fft [flags]
 - [fft facility](./fft_facility.md) — Manage facilities
 - [fft history](./fft_history.md) — Show the requests fft has sent
 - [fft listing](./fft_listing.md) — Manage listings (the article-at-facility catalog entry)
+- [fft network](./fft_network.md) — Snapshot a fulfillment network and find its routing gaps
 - [fft order](./fft_order.md) — Manage orders
 - [fft ping](./fft_ping.md) — Check that the tenant is reachable
 - [fft project](./fft_project.md) — Manage projects

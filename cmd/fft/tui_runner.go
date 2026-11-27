@@ -118,6 +118,11 @@ const (
 	// recorded and deleted uncounted, or recorded into the history after the clear
 	// although it ran before it.
 	exclusiveHistory = "history"
+
+	// exclusiveSnapshot is a network snapshot and the journal of the crawl writing
+	// it. Two crawls side by side would append to one journal, and the snapshot the
+	// second one wrote would replace the first's.
+	exclusiveSnapshot = "snapshot"
 )
 
 // cliRunner is the TUI's [tui.Runner]: it executes each invocation through

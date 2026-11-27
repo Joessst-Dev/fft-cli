@@ -118,6 +118,13 @@ linters:
         linters:
           - gosec
         text: G304
+      # G304 flags opening a variable path. The path is a network snapshot, or its
+      # crawl journal: the file the user named with --out or --snapshot, or the
+      # project's own file under fft's cache directory. Reading it is the job.
+      - path: ^internal/network/(snapshot|journal)\.go$
+        linters:
+          - gosec
+        text: G304
       # G304 flags opening a variable path. The path is the history file's own name
       # with ".lock" appended — fft's state directory or the test seam, never input.
       - path: ^internal/history/lock_(unix|windows)\.go$

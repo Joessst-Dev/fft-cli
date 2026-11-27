@@ -94,12 +94,41 @@ type Op[T any] struct {
 	// Name names the operation in errors ("search the facilities").
 	Name string
 
+	// ID is the spec's operationId ("searchFacility"). It is what lets [Search] retry
+	// a page that hit a 502: a POST is retried only when this id names an operation
+	// the spec classifies as a read. Empty means "not known to be a read", and the
+	// page is then sent once, like any other POST.
+	ID string
+
 	// Items is the response field holding the entities: "facilities", "stocks",
 	// "listings". It is the one part of the response shape that is not uniform.
 	Items string
 
 	// Do issues one page.
 	Do func(ctx context.Context, raw api.ClientInterface, body []byte) (*http.Response, error)
+}
+
+// RawSearchOp is an [Op] for a cursor search known only from the spec: one whose
+// tag has no generated client, so there is no typed method to call. path is the
+// search's path, with no placeholders.
+//
+// id must be the spec's operationId, exactly as for [Op.ID]: it is what lets a
+// page that hit a 502 be retried, and an id the spec does not classify as a read
+// gets no retry.
+func RawSearchOp(c *Client, id, name, items, path string) Op[json.RawMessage] {
+	return Op[json.RawMessage]{
+		Name:  name,
+		ID:    id,
+		Items: items,
+		Do: func(ctx context.Context, _ api.ClientInterface, body []byte) (*http.Response, error) {
+			req := RawRequest{Method: http.MethodPost, Path: path, Body: body}
+			target, err := req.URL(c.baseURL)
+			if err != nil {
+				return nil, err
+			}
+			return c.rawDoer(target, req)(ctx)
+		},
+	}
 }
 
 // Page is one page of search results.
@@ -133,9 +162,9 @@ func Search[Q, S, T any](ctx context.Context, c *Client, op Op[T], payload Searc
 		return page, fmt.Errorf("%s: encode the search: %w", op.Name, err)
 	}
 
-	res, err := c.Do(ctx, op.Name, func(ctx context.Context) (*http.Response, error) {
+	res, err := c.do(ctx, op.Name, func(ctx context.Context) (*http.Response, error) {
 		return op.Do(ctx, c.api, body)
-	})
+	}, readOperation(op.ID))
 	if err != nil {
 		return page, err
 	}

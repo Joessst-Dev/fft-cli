@@ -33,6 +33,7 @@ type OrderSearchPayload = SearchPayload[api.OrderSearchQuery, api.OrderSort]
 func FacilitySearch[T any]() Op[T] {
 	return Op[T]{
 		Name:  "search the facilities",
+		ID:    "searchFacility",
 		Items: "facilities",
 		Do: func(ctx context.Context, raw api.ClientInterface, body []byte) (*http.Response, error) {
 			return raw.SearchFacilityWithBody(ctx, contentTypeJSON, bytes.NewReader(body))
@@ -44,6 +45,7 @@ func FacilitySearch[T any]() Op[T] {
 func ListingSearch[T any]() Op[T] {
 	return Op[T]{
 		Name:  "search the listings",
+		ID:    "searchListing",
 		Items: "listings",
 		Do: func(ctx context.Context, raw api.ClientInterface, body []byte) (*http.Response, error) {
 			return raw.SearchListingWithBody(ctx, contentTypeJSON, bytes.NewReader(body))
@@ -55,6 +57,7 @@ func ListingSearch[T any]() Op[T] {
 func StockSearch[T any]() Op[T] {
 	return Op[T]{
 		Name:  "search the stocks",
+		ID:    "searchStock",
 		Items: "stocks",
 		Do: func(ctx context.Context, raw api.ClientInterface, body []byte) (*http.Response, error) {
 			return raw.SearchStockWithBody(ctx, contentTypeJSON, bytes.NewReader(body))
@@ -66,6 +69,7 @@ func StockSearch[T any]() Op[T] {
 func OrderSearch[T any]() Op[T] {
 	return Op[T]{
 		Name:  "search the orders",
+		ID:    "searchOrder",
 		Items: "orders",
 		Do: func(ctx context.Context, raw api.ClientInterface, body []byte) (*http.Response, error) {
 			return raw.SearchOrderWithBody(ctx, contentTypeJSON, bytes.NewReader(body))
