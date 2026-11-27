@@ -636,6 +636,7 @@ func newRootCmd(deps *Deps) *cobra.Command {
 		newSourcingCmd(deps),
 		newOrderCmd(deps),
 		newRoutingCmd(deps),
+		newNetworkCmd(deps),
 	} {
 		c.GroupID = groupResource
 		cmd.AddCommand(c)

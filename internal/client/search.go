@@ -108,6 +108,29 @@ type Op[T any] struct {
 	Do func(ctx context.Context, raw api.ClientInterface, body []byte) (*http.Response, error)
 }
 
+// RawSearchOp is an [Op] for a cursor search known only from the spec: one whose
+// tag has no generated client, so there is no typed method to call. path is the
+// search's path, with no placeholders.
+//
+// id must be the spec's operationId, exactly as for [Op.ID]: it is what lets a
+// page that hit a 502 be retried, and an id the spec does not classify as a read
+// gets no retry.
+func RawSearchOp(c *Client, id, name, items, path string) Op[json.RawMessage] {
+	return Op[json.RawMessage]{
+		Name:  name,
+		ID:    id,
+		Items: items,
+		Do: func(ctx context.Context, _ api.ClientInterface, body []byte) (*http.Response, error) {
+			req := RawRequest{Method: http.MethodPost, Path: path, Body: body}
+			target, err := req.URL(c.baseURL)
+			if err != nil {
+				return nil, err
+			}
+			return c.rawDoer(target, req)(ctx)
+		},
+	}
+}
+
 // Page is one page of search results.
 type Page[T any] struct {
 	// Items are the entities on this page.

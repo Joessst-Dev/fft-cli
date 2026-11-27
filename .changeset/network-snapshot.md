@@ -1,0 +1,5 @@
+---
+"fft": minor
+---
+
+New `fft network snapshot` reads a whole fulfillment network into a local file: every facility, every facility's connections, the facility groups, tags and routing strategies, and the most recent routing decision logs with the tags of the orders they routed. It is the first piece of `fft network`, the offline toolkit for finding routing gaps (#336). Every request is a read, so it runs under `--read-only`. A large network takes an hour or more, so the crawl allows itself 4h unless you set `--timeout`, reads `--concurrency` facilities at a time, backs off when a gateway throttles, and when it stops (an expired session, Ctrl-C) `--resume` continues where it left off. The snapshot goes to the cache directory, readable by you only; stdout carries a summary, and progress goes to stderr. Cursor searches (`fft facility list --all` and the other list and search commands) now retry a page that hit a 502 or a dropped connection, as GETs always have: a search changes nothing, so sending it again is safe.
