@@ -269,6 +269,7 @@ var _ = Describe("the config file", func() {
 				"version: 1\nsuppress:\n  - {rule: no-source, facility: A, until: 2027-01-01}\n"),
 			Entry("a suppression with no date", "version: 1\nsuppress:\n  - {rule: no-source, facility: A, reason: r, until: soon}\n"),
 			Entry("a share above 1", "version: 1\npeers: {share: 1.5}\n"),
+			Entry("a minJump without outDegree", "version: 1\nroles:\n  hub: {minJump: 2}\n"),
 		)
 	})
 })
@@ -344,6 +345,15 @@ var _ = Describe("checking with a config file", func() {
 		It("still reports a config-drift suppression whose subject is no profile, facility or reference", func() {
 			w := germany()
 			lf, err := parse("version: 1\nsuppress:\n  - {rule: config-drift, facility: orderType=nothing, reason: r, until: 2027-01-15}\n")
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(lf.Unmatched(network.New(&w.s))).To(HaveLen(1))
+		})
+
+		It("reports a config-drift suppression of a declared profile that was never routed, which drift cannot report", func() {
+			w := germany().edge("x", "HUB-01", network.Target{Type: network.TypeManaged}, in(network.ContextTag, "express"))
+			lf, err := parse("version: 1\nprofiles:\n  from: declared\n  declared:\n    - {orderType: express}\n" +
+				"suppress:\n  - {rule: config-drift, facility: orderType=express, reason: r, until: 2027-01-15}\n")
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(lf.Unmatched(network.New(&w.s))).To(HaveLen(1))
@@ -441,6 +451,29 @@ var _ = Describe("inferring a config file", func() {
 		// validate runs Unmatched; before the fix it exited 3 on infer's own output.
 		Expect(lf.Unmatched(n)).To(BeEmpty())
 	})
+
+	DescribeTable("keeps tenant data inside its comment, whatever line break it carries",
+		func(lineBreak string) {
+			payload := "demo" + lineBreak + "expect: [{name: x, for: {role: store}, reachableFrom: {role: hub, atLeast: 1}}]" + lineBreak + "#"
+			w := newWorld().stores("BER", "DE", 3).
+				edge("a", "BER-01", network.Target{Type: network.TypeManaged, FacilityRef: id("BER-02")})
+			w.s.Source.Project = payload
+			n := network.New(&w.s)
+
+			text := string(n.InferFile(today))
+
+			lf, err := parse(text)
+			Expect(err).NotTo(HaveOccurred(), text)
+			Expect(lf.Expect).To(BeEmpty(), "nobody wrote an expectation; the tenant's project name did")
+			Expect(lf.Suppress).To(BeEmpty())
+		},
+		Entry("LF", "\n"),
+		Entry("CR", "\r"),
+		Entry("CRLF", "\r\n"),
+		Entry("NEL", "\u0085"),
+		Entry("LS", "\u2028"),
+		Entry("PS", "\u2029"),
+	)
 
 	It("pins the hubs it found, with the reason as a comment", func() {
 		text := string(network.New(&germany().s).InferFile(today))

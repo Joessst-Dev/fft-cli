@@ -27,7 +27,7 @@ func (n *Network) InferFile(now time.Time) []byte {
 		b.WriteString(strings.Repeat("  ", indent) + fmt.Sprintf(format, args...) + "\n")
 	}
 	comment := func(indent int, format string, args ...any) {
-		for l := range strings.SplitSeq(fmt.Sprintf(format, args...), "\n") {
+		for l := range strings.SplitSeq(yamlBreak.Replace(fmt.Sprintf(format, args...)), "\n") {
 			line(indent, "# %s", l)
 		}
 	}
@@ -127,6 +127,13 @@ func (n *Network) InferFile(now time.Time) []byte {
 	line(0, "suppress: []")
 	return []byte(b.String())
 }
+
+// yamlBreak turns every line break YAML recognises into "\n". A comment ends
+// at the first of them, and encoding/yaml's scanner breaks lines at CR, NEL,
+// LS and PS as well as LF, so a tenant-supplied value (project name, country,
+// profile) carrying one would otherwise continue as live YAML in a file meant
+// to be reviewed and committed.
+var yamlBreak = strings.NewReplacer("\r\n", "\n", "\r", "\n", "\u0085", "\n", "\u2028", "\n", "\u2029", "\n")
 
 var notSlug = regexp.MustCompile(`[^a-z0-9]+`)
 

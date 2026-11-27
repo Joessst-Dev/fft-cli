@@ -123,7 +123,8 @@
         "outDegree": {"const": "relative", "description": "Choose hubs by reach, as the heuristics do."},
         "minJump": {"type": "number", "minimum": 1, "description": "With outDegree: relative, how many times more facilities a hub must reach than the next one."}
       },
-      "not": {"required": ["outDegree", "facilities"]}
+      "not": {"required": ["outDegree", "facilities"]},
+      "dependentRequired": {"minJump": ["outDegree"]}
     }
   }
 }
