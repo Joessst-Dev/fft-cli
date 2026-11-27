@@ -166,7 +166,9 @@ func Search[Q, S, T any](ctx context.Context, c *Client, op Op[T], payload Searc
 		return op.Do(ctx, c.api, body)
 	}, readOperation(op.ID))
 	if err != nil {
-		return page, err
+		// Here, not in each command: every curated page, every page of an --all walk
+		// and the network crawl send their searches through this function.
+		return page, ExplainQueryTooComplex(op.Name, err)
 	}
 	return decodePage[T](op, res.Body)
 }
@@ -274,8 +276,9 @@ func (e *WalkTimeoutError) Hint() string {
 	return "--timeout bounds the whole command, not one request: raise it (for example --timeout 10m) for a large list."
 }
 
-// walkError names a deadline that cut an --all walk short; any other error passes
-// through untouched, because only the deadline is the user's to fix with a flag.
+// walkError names what cut an --all walk short: a deadline, or the API refusing a
+// page as too complex. Any other error passes through untouched, because only
+// those two are worth saying how far the walk got.
 //
 // It asks the walk's own context, not the error: the transport's per-request
 // header timeout also matches [context.DeadlineExceeded] through errors.Is while
@@ -284,6 +287,15 @@ func (e *WalkTimeoutError) Hint() string {
 func walkError(ctx context.Context, op string, err error, pages, items int) error {
 	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 		return &WalkTimeoutError{Op: op, Pages: pages, Items: items, Err: err}
+	}
+
+	// After the deadline rule, so a timeout is still a timeout. A refusal of the very
+	// first page is not part-way through anything: it stays the plain error.
+	var tooComplex *QueryTooComplexError
+	if pages > 0 && errors.As(err, &tooComplex) {
+		walked := *tooComplex
+		walked.Walk, walked.Pages, walked.Items = true, pages, items
+		return &walked
 	}
 	return err
 }

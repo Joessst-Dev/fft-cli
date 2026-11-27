@@ -32,6 +32,8 @@ type fakeTenant struct {
 	mu   sync.Mutex
 	sent []string
 	fail func(r *http.Request) (int, bool)
+	// failBody is the body a failure carries; empty means a generic refusal.
+	failBody string
 }
 
 func (t *fakeTenant) requests() []string {
@@ -89,13 +91,16 @@ func newFakeTenant() *fakeTenant {
 	t.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.mu.Lock()
 		t.sent = append(t.sent, r.Method+" "+r.URL.Path)
-		fail := t.fail
+		fail, failBody := t.fail, t.failBody
 		t.mu.Unlock()
 
 		if fail != nil {
 			if status, ok := fail(r); ok {
 				w.WriteHeader(status)
-				fmt.Fprint(w, `[{"summary":"refused"}]`)
+				if failBody == "" {
+					failBody = `[{"summary":"refused"}]`
+				}
+				fmt.Fprint(w, failBody)
 				return
 			}
 		}
@@ -354,6 +359,51 @@ var _ = Describe("crawling a network", func() {
 			Expect(tenant.connectionsOf(ber1ID)).To(Equal(1))
 			Expect(slept).To(BeEmpty())
 			Expect(out + network.JournalSuffix).NotTo(BeAnExistingFile())
+		})
+	})
+
+	When("the API refuses a search as 'Query too complex'", func() {
+		BeforeEach(func() {
+			tenant.failBody = `[{"summary":"Query too complex - please simplify your search criteria or reduce the result set size"}]`
+		})
+
+		// It is a refusal of the query, not throttling: waiting a minute and asking the
+		// same question again cannot change the answer.
+		expectRefused := func(err error) {
+			GinkgoHelper()
+
+			var tooComplex *client.QueryTooComplexError
+			Expect(errors.As(err, &tooComplex)).To(BeTrue())
+			Expect(exitcode.FromError(err)).To(Equal(exitcode.General))
+			Expect(slept).To(BeEmpty())
+			Expect(out).NotTo(BeAnExistingFile())
+			Expect(out + network.JournalSuffix).To(BeAnExistingFile())
+		}
+
+		It("stops at once on the facility search, without pausing, and keeps the journal", func() {
+			tenant.fail = func(r *http.Request) (int, bool) {
+				return http.StatusBadRequest, r.URL.Path == "/api/facilities/search"
+			}
+			var notes strings.Builder
+
+			_, err := crawl(func(o *network.CrawlOptions) { o.Progress = &notes })
+
+			expectRefused(err)
+			Expect(notes.String()).NotTo(ContainSubstring("pausing"))
+			Expect(tenant.requests()).To(HaveLen(1))
+		})
+
+		It("stops at once on the facility group search, and the resume hint still names the journal", func() {
+			tenant.fail = func(r *http.Request) (int, bool) {
+				return http.StatusBadRequest, r.URL.Path == "/api/facilitygroups/search"
+			}
+
+			_, err := crawl()
+
+			expectRefused(err)
+			var crawlErr *network.CrawlError
+			Expect(errors.As(err, &crawlErr)).To(BeTrue())
+			Expect(crawlErr.Hint()).To(ContainSubstring("--resume"))
 		})
 	})
 
