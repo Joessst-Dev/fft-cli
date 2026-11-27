@@ -169,7 +169,7 @@ var _ = Describe("checking a network", func() {
 				{Tags: []network.TagValue{{ID: "channel", Value: "web"}}, Orders: 4},
 			}
 
-			ps := network.New(&w.s).InferProfiles()
+			ps := network.New(&w.s).InferProfiles(network.DefaultConfig())
 
 			Expect(ps).To(HaveLen(2))
 			Expect(ps[0].Profile.String()).To(Equal("orderType=express"))
@@ -184,7 +184,7 @@ var _ = Describe("checking a network", func() {
 				edge("y", "HUB-02", network.Target{Type: network.TypeManaged}, not(network.ContextTag, "bulky"))
 			w.s.Tags = []network.Tag{{ID: "orderType", AllowedValues: []string{"express", "sameday", "bulky"}}}
 
-			ps := network.New(&w.s).InferProfiles()
+			ps := network.New(&w.s).InferProfiles(network.DefaultConfig())
 
 			names := []string{}
 			for _, p := range ps {
@@ -197,7 +197,7 @@ var _ = Describe("checking a network", func() {
 			// Crawl order is not meaningful: the same network must give the same profiles.
 			names := func(w *world) []string {
 				out := []string{}
-				for _, p := range network.New(&w.s).InferProfiles() {
+				for _, p := range network.New(&w.s).InferProfiles(network.DefaultConfig()) {
 					out = append(out, p.Profile.String())
 				}
 				return out

@@ -7,9 +7,9 @@ import (
 	"strings"
 )
 
-// Config is what a check assumes about the network's shape. Every field has a
-// default that worked on real networks; `fft network infer` (and the config
-// file it writes) is how a team pins them instead.
+// Config is what a check assumes about the network's shape, and what the team
+// has declared about it. Every field has a default that worked on real
+// networks; a config file ([LoadedFile.Settings]) is how a team pins them.
 type Config struct {
 	// HubRatio is how far a hub must stand out: the facilities above the largest
 	// jump in reach between consecutive facilities are hubs, if that jump is at
@@ -17,6 +17,8 @@ type Config struct {
 	// pre-production network of a few dozen stores to a production one of
 	// thousands.
 	HubRatio float64
+	// PeerBy is the facility field stores are grouped by.
+	PeerBy string
 	// PeerMinSize is the smallest peer group a store is compared with. Below it,
 	// "most of its peers" is one or two facilities, and an outlier is noise.
 	PeerMinSize int
@@ -25,11 +27,30 @@ type Config struct {
 	PeerShare float64
 	// Rules selects the rules to run; empty runs all of them.
 	Rules []string
+
+	// FromFile says the settings came from a config file, which is what makes
+	// config-drift worth checking: without one there is nothing pinned to drift
+	// from.
+	FromFile bool
+	// Hub, Store and Supplier pick the roles; nil is the default for each.
+	Hub, Store, Supplier *Selector
+	// Declared replaces the inferred order profiles, when set.
+	Declared [][]TagValue
+	Expect   []Expectation
+	// Suppress are the suppressions still in force.
+	Suppress []Suppression
 }
 
 // DefaultConfig is what a check assumes when nobody has said otherwise.
 func DefaultConfig() Config {
-	return Config{HubRatio: 5, PeerMinSize: 10, PeerShare: 0.9}
+	return Config{HubRatio: 5, PeerBy: "address.country", PeerMinSize: 10, PeerShare: 0.9}
+}
+
+// pinnedHubs reports whether the hub selector names the hubs rather than
+// asking for them to be found by reach.
+func (c Config) pinnedHubs() bool {
+	h := c.Hub
+	return h != nil && h.OutDegree == "" && (len(h.Facilities) > 0 || len(h.Where) > 0 || h.Type != "")
 }
 
 // Kind is the role a facility plays as a source.
@@ -68,23 +89,52 @@ func (r Roles) kind(i int) (Kind, bool) {
 
 // InferRoles decides which online facilities are hubs, stores and suppliers.
 //
-// A hub is a managed facility whose connections reach far more managed
-// facilities than anybody else's. "Far more" is relative: the facilities are
-// sorted by reach, and the cut goes at the largest jump between neighbours,
-// provided it is at least cfg.HubRatio. Reach counts facilities, not
-// connections, because a wildcard target is one connection that reaches
+// Unless the config pins them, a hub is a managed facility whose connections
+// reach far more facilities than anybody else's. "Far more" is relative: the
+// facilities are sorted by reach, and the cut goes at the largest jump between
+// neighbours, provided it is at least cfg.HubRatio. Reach counts facilities,
+// not connections, because a wildcard target is one connection that reaches
 // thousands.
 func (n *Network) InferRoles(cfg Config) Roles {
-	r := Roles{Hubs: n.empty(), Stores: n.empty(), Suppliers: n.empty()}
+	r := Roles{Stores: n.empty(), Suppliers: n.empty()}
+
+	if cfg.pinnedHubs() {
+		r.Hubs = n.Select(cfg.Hub)
+		r.Hubs.And(n.online)
+	} else {
+		candidates := n.Select(&Selector{Type: TypeManaged})
+		if h := cfg.Hub; h != nil {
+			candidates.And(n.Select(&Selector{Type: h.Type, Where: h.Where}))
+		}
+		candidates.And(n.online)
+		r.Hubs, r.HubCut, r.HubJump = n.relativeHubs(candidates, cfg.HubRatio)
+	}
+
+	stores := n.Select(cmp.Or(cfg.Store, &Selector{Type: TypeManaged}))
+	suppliers := n.Select(cmp.Or(cfg.Supplier, &Selector{Type: TypeSupplier}))
+	for i := range n.snap.Facilities {
+		switch {
+		case !n.online.Has(i) || r.Hubs.Has(i):
+		case stores.Has(i):
+			r.Stores.Set(i)
+		case suppliers.Has(i):
+			r.Suppliers.Set(i)
+		}
+	}
+	return r
+}
+
+// relativeHubs picks, among candidates, the facilities whose reach stands
+// ratio times above the next one's.
+func (n *Network) relativeHubs(candidates Bitset, ratio float64) (Bitset, int, float64) {
+	hubs := n.empty()
 
 	// One source at a time, through one buffer: a set per source would cost
 	// hundreds of megabytes on a network of tens of thousands of stores.
 	order := make([]int, 0, len(n.snap.Edges))
 	for i, e := range n.snap.Edges {
-		if src, ok := n.refs[e.Source]; ok && e.Target.Type == TypeManaged {
-			if f := n.Facility(src); f.Type == TypeManaged && f.Online() {
-				order = append(order, i)
-			}
+		if src, ok := n.refs[e.Source]; ok && e.Target.Type == TypeManaged && candidates.Has(src) {
+			order = append(order, i)
 		}
 	}
 	slices.SortStableFunc(order, func(a, b int) int {
@@ -104,18 +154,18 @@ func (n *Network) InferRoles(cfg Config) Roles {
 			clear(buf)
 		}
 	}
-	// The managed facilities that reach nobody rank too, at the bottom: a network
-	// where one facility supplies every store and the stores supply nothing has a
-	// hub, and there would be no neighbour to measure it against without them.
+	// The candidates that reach nobody rank too, at the bottom: a network where
+	// one facility supplies every store and the stores supply nothing has a hub,
+	// and there would be no neighbour to measure it against without them.
 	seen := map[int]bool{}
 	for _, rk := range ranks {
 		seen[rk.index] = true
 	}
-	for i, f := range n.snap.Facilities {
-		if f.Type == TypeManaged && f.Online() && !seen[i] {
+	candidates.Each(func(i int) {
+		if !seen[i] {
 			ranks = append(ranks, ranked{i, 0})
 		}
-	}
+	})
 	slices.SortFunc(ranks, func(a, b ranked) int {
 		return cmp.Or(cmp.Compare(b.reach, a.reach), cmp.Compare(a.index, b.index))
 	})
@@ -135,43 +185,49 @@ func (n *Network) InferRoles(cfg Config) Roles {
 			}
 		}
 	}
-	if best < cfg.HubRatio && last >= 0 && last+1 < len(ranks) {
+	if best < ratio && last >= 0 && last+1 < len(ranks) {
 		best, at = float64(ranks[last].reach), last
 	}
-	if at >= 0 && best >= cfg.HubRatio {
-		r.HubCut, r.HubJump = ranks[at].reach, best
-		for _, rk := range ranks[:at+1] {
-			r.Hubs.Set(rk.index)
-		}
+	if at < 0 || best < ratio {
+		return hubs, 0, 0
 	}
-
-	for i, f := range n.snap.Facilities {
-		switch {
-		case !f.Online() || r.Hubs.Has(i):
-		case f.Type == TypeManaged:
-			r.Stores.Set(i)
-		case f.Type == TypeSupplier:
-			r.Suppliers.Set(i)
-		}
+	for _, rk := range ranks[:at+1] {
+		hubs.Set(rk.index)
 	}
-	return r
+	return hubs, ranks[at].reach, best
 }
 
-// PeerGroup is stores compared with one another: those in one country.
+// reachOf counts the online facilities the connections of the facility at i
+// reach, for config-drift to say why a pinned hub no longer looks like one.
+func (n *Network) reachOf(i int) int {
+	buf := n.empty()
+	for k := range n.snap.Edges {
+		e := &n.snap.Edges[k]
+		if j, ok := n.refs[e.Source]; ok && j == i && e.Target.Type == TypeManaged {
+			buf.Or(n.StaticTargets(e))
+		}
+	}
+	buf.And(n.online)
+	return buf.Count()
+}
+
+// PeerGroup is stores compared with one another: those with one value of the
+// peer field, by default the country.
 type PeerGroup struct {
 	Key     string `json:"key"`
 	Size    int    `json:"size"`
 	members Bitset
 }
 
-// noCountry keys the stores whose address names no country.
-const noCountry = "(no country)"
+// noValue keys the stores that have no value for the peer field.
+const noValue = "(none)"
 
-// InferPeers groups the stores by their address's country, largest first.
-func (n *Network) InferPeers(roles Roles) []PeerGroup {
+// InferPeers groups the stores by cfg.PeerBy, largest group first.
+func (n *Network) InferPeers(cfg Config, roles Roles) []PeerGroup {
+	by := cmp.Or(cfg.PeerBy, DefaultConfig().PeerBy)
 	byKey := map[string]Bitset{}
 	roles.Stores.Each(func(i int) {
-		key := cmp.Or(n.Facility(i).Country, noCountry)
+		key := cmp.Or(n.field(i, by), noValue)
 		set, ok := byKey[key]
 		if !ok {
 			set = n.empty()
@@ -202,7 +258,15 @@ type ProfileCount struct {
 // cannot change where an order may go, and keeping it would split one kind of
 // order into many. A snapshot without routed orders falls back to one profile
 // per tag value a positive context entry asks for.
-func (n *Network) InferProfiles() []ProfileCount {
+func (n *Network) InferProfiles(cfg Config) []ProfileCount {
+	if len(cfg.Declared) > 0 {
+		out := make([]ProfileCount, len(cfg.Declared))
+		for i, tags := range cfg.Declared {
+			out[i] = ProfileCount{Profile: NewProfile(tags)}
+		}
+		return out
+	}
+
 	used := map[string]bool{}
 	var positive []string
 	for _, e := range n.snap.Edges {

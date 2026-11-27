@@ -15,11 +15,16 @@ const (
 	RuleDanglingRef   = "dangling-ref"
 	RuleOfflineRef    = "offline-ref"
 	RuleDuplicateEdge = "duplicate-edge"
+	// RuleExpect reports a declared expectation a facility does not meet.
+	RuleExpect = "expect"
+	// RuleConfigDrift reports a config file the network has moved away from.
+	RuleConfigDrift = "config-drift"
 )
 
 // RuleIDs are the rules a check runs, in the order it reports them.
 func RuleIDs() []string {
-	return []string{RuleNoSource, RulePeerCoverage, RuleDanglingRef, RuleOfflineRef, RuleDuplicateEdge}
+	return []string{RuleNoSource, RulePeerCoverage, RuleExpect, RuleDanglingRef, RuleOfflineRef,
+		RuleDuplicateEdge, RuleConfigDrift}
 }
 
 // Finding is one problem a check found.
@@ -62,13 +67,16 @@ type Report struct {
 	// person to judge.
 	Coverage []Coverage
 	Findings []Finding
+	// Suppressed are the findings a suppression in force accepted. They are
+	// counted on stderr, so a suppression can never hide that it is hiding.
+	Suppressed []Finding
 }
 
 // Check runs the rules cfg selects over the network.
 func (n *Network) Check(cfg Config) Report {
 	r := Report{Roles: n.InferRoles(cfg)}
-	r.Peers = n.InferPeers(r.Roles)
-	r.Profiles = n.InferProfiles()
+	r.Peers = n.InferPeers(cfg, r.Roles)
+	r.Profiles = n.InferProfiles(cfg)
 
 	run := func(rule string) bool { return len(cfg.Rules) == 0 || slices.Contains(cfg.Rules, rule) }
 
@@ -91,6 +99,22 @@ func (n *Network) Check(cfg Config) Report {
 	if run(RuleDuplicateEdge) {
 		r.Findings = append(r.Findings, n.duplicateEdges()...)
 	}
+	if run(RuleExpect) {
+		r.Findings = append(r.Findings, n.expectations(cfg, r)...)
+	}
+	if run(RuleConfigDrift) && cfg.FromFile {
+		r.Findings = append(r.Findings, n.drift(cfg, r)...)
+	}
+
+	kept := r.Findings[:0]
+	for _, f := range r.Findings {
+		if n.suppressed(cfg, f) {
+			r.Suppressed = append(r.Suppressed, f)
+		} else {
+			kept = append(kept, f)
+		}
+	}
+	r.Findings = kept
 
 	// By rule, then by subject: the same snapshot gives the same report, line for
 	// line, so two runs can be diffed.
@@ -496,6 +520,13 @@ func capped(ids []string) []string {
 	return ids[:maxEvidence]
 }
 
+func verb(n int, one, many string) string {
+	if n == 1 {
+		return one
+	}
+	return many
+}
+
 func plural(n int, noun string) string {
 	if n == 1 {
 		return "1 " + noun
@@ -519,4 +550,216 @@ func sortedStrings[V any](m map[string]V) []string {
 	}
 	slices.Sort(keys)
 	return keys
+}
+
+// suppressed reports whether a suppression in force accepts f: same rule (or
+// expectation name), same subject.
+func (n *Network) suppressed(cfg Config, f Finding) bool {
+	for _, s := range cfg.Suppress {
+		rule := s.Rule == f.Rule || (f.Rule == RuleExpect && f.Evidence["expectation"] == s.Rule)
+		if !rule {
+			continue
+		}
+		if s.Facility == f.Subject {
+			return true
+		}
+		if i, ok := n.lookupAny(s.Facility); ok && n.Facility(i).Label() == f.Subject {
+			return true
+		}
+	}
+	return false
+}
+
+// roleSet is the facilities a check decided play role.
+func (r Report) roleSet(role string) Bitset {
+	switch Kind(role) {
+	case KindHub:
+		return r.Roles.Hubs
+	case KindSupplier:
+		return r.Roles.Suppliers
+	default:
+		return r.Roles.Stores
+	}
+}
+
+// expectations checks each declared expectation: every facility it is about
+// is reached by at least AtLeast distinct sources of its role, for every
+// order profile.
+func (n *Network) expectations(cfg Config, r Report) []Finding {
+	var out []Finding
+	for _, exp := range cfg.Expect {
+		targets := r.roleSet(exp.For.Role).Clone()
+		targets.And(n.Select(&Selector{Where: exp.For.Where}))
+		sources := r.roleSet(exp.ReachableFrom.Role)
+		counts := n.sourceCounts(sources, targets, r.Profiles, exp.ReachableFrom.MaxTransitDays)
+
+		type short struct {
+			profiles []string
+			least    int
+		}
+		shorts := map[int]*short{}
+		for p, pc := range r.Profiles {
+			targets.Each(func(i int) {
+				have := counts[p][i]
+				if have >= exp.ReachableFrom.AtLeast {
+					return
+				}
+				s, ok := shorts[i]
+				if !ok {
+					s = &short{least: have}
+					shorts[i] = s
+				}
+				s.profiles = append(s.profiles, pc.Profile.String())
+				s.least = min(s.least, have)
+			})
+		}
+
+		within := ""
+		if d := exp.ReachableFrom.MaxTransitDays; d != nil {
+			within = fmt.Sprintf(" within %g days", *d)
+		}
+		for _, i := range sortedKeys(shorts) {
+			s := shorts[i]
+			f := n.Facility(i)
+			out = append(out, Finding{
+				Rule:       RuleExpect,
+				Subject:    f.Label(),
+				Facilities: []string{f.Label()},
+				Profiles:   s.profiles,
+				Detail: fmt.Sprintf("%s: %s %s it%s, and at least %d should",
+					exp.Name, plural(s.least, exp.ReachableFrom.Role), verb(s.least, "reaches", "reach"),
+					within, exp.ReachableFrom.AtLeast),
+				Evidence: map[string]any{"expectation": exp.Name, "have": s.least,
+					"want": exp.ReachableFrom.AtLeast, "profiles": len(s.profiles), "of": len(r.Profiles)},
+				Next: fmt.Sprintf("Find the %ss whose connections should reach it and the context entry or "+
+					"exclusion that leaves it out — or, if the expectation is wrong for it, narrow its 'for'.",
+					exp.ReachableFrom.Role),
+			})
+		}
+	}
+	return out
+}
+
+// sourceCounts is, per profile and per target, how many distinct sources reach
+// it through connections that apply to the profile (and, with maxDays, arrive
+// in time). It works source by source, so the memory it needs is one set per
+// distinct context signature of one source, whatever the network's size.
+func (n *Network) sourceCounts(sources, targets Bitset, profiles []ProfileCount, maxDays *float64) [][]int {
+	counts := make([][]int, len(profiles))
+	for p := range counts {
+		counts[p] = make([]int, n.Len())
+	}
+
+	bySource := map[int][]int{}
+	for k := range n.snap.Edges {
+		e := &n.snap.Edges[k]
+		src, ok := n.refs[e.Source]
+		if !ok || !sources.Has(src) || e.Target.Type == TypeCustomer {
+			continue
+		}
+		if maxDays != nil && (e.Transit == nil || e.Transit.Max > *maxDays) {
+			continue
+		}
+		bySource[src] = append(bySource[src], k)
+	}
+
+	buf := n.empty()
+	for _, src := range sortedKeys(bySource) {
+		type sig struct {
+			rep  Edge
+			mask Bitset
+		}
+		sigs := map[string]*sig{}
+		for _, k := range bySource[src] {
+			e := &n.snap.Edges[k]
+			var key strings.Builder
+			var dependent []ContextEntry
+			for _, c := range e.Context {
+				if knownOperator(c.Operator) && (c.Type == ContextFacility || c.Type == ContextFacilityGroup) {
+					continue
+				}
+				dependent = append(dependent, c)
+				fmt.Fprintf(&key, "|%s %s %d", c.Type, c.Operator, c.Values)
+			}
+			g, ok := sigs[key.String()]
+			if !ok {
+				g = &sig{rep: Edge{Context: dependent}, mask: n.empty()}
+				sigs[key.String()] = g
+			}
+			g.mask.Or(n.StaticTargets(e))
+		}
+		for p, pc := range profiles {
+			clear(buf)
+			for _, g := range sigs {
+				if v, _ := n.Applies(&g.rep, pc.Profile); v == Applies {
+					buf.Or(g.mask)
+				}
+			}
+			buf.And(targets)
+			buf.Each(func(i int) { counts[p][i]++ })
+		}
+	}
+	return counts
+}
+
+// drift compares what the config pins with what the heuristics see now. Each
+// difference is a question for the team — has the network changed, or was the
+// pin wrong? — and the config file is where the answer is written down.
+func (n *Network) drift(cfg Config, r Report) []Finding {
+	var out []Finding
+	add := func(subject, detail, next string, evidence map[string]any) {
+		out = append(out, Finding{Rule: RuleConfigDrift, Subject: subject, Detail: detail, Next: next, Evidence: evidence})
+	}
+
+	if cfg.pinnedHubs() {
+		candidates := n.Select(&Selector{Type: TypeManaged})
+		candidates.And(n.online)
+		inferred, cut, _ := n.relativeHubs(candidates, DefaultConfig().HubRatio)
+
+		for _, ref := range cfg.Hub.Facilities {
+			i, ok := n.lookupAny(ref)
+			switch {
+			case !ok:
+				add(ref, "pinned as a hub, and not a facility in the snapshot",
+					"Remove it from roles.hub, or correct the id.", map[string]any{"pinned": ref})
+			case !n.Facility(i).Online():
+				add(n.Facility(i).Label(), fmt.Sprintf("pinned as a hub, and %s", strings.ToLower(n.Facility(i).Status)),
+					"Remove it from roles.hub if it is gone for good.", map[string]any{"status": n.Facility(i).Status})
+			}
+		}
+		r.Roles.Hubs.Each(func(i int) {
+			if !inferred.Has(i) {
+				reach := n.reachOf(i)
+				add(n.Facility(i).Label(),
+					fmt.Sprintf("pinned as a hub, but its connections reach %s, which the heuristics would not call a hub", plural(reach, "facility")),
+					"If it stopped being a hub, take it out of roles.hub; its stores are then judged without it.",
+					map[string]any{"reach": reach, "heuristicCut": cut})
+			}
+		})
+		inferred.Each(func(i int) {
+			if !r.Roles.Hubs.Has(i) {
+				reach := n.reachOf(i)
+				add(n.Facility(i).Label(),
+					fmt.Sprintf("its connections reach %s, as a hub's do, but roles.hub does not pin it", plural(reach, "facility")),
+					"If it has become a hub, add it to roles.hub; until then its stores are not counted as hub-supplied by it.",
+					map[string]any{"reach": reach})
+			}
+		})
+	}
+
+	if len(cfg.Declared) > 0 {
+		declared := map[string]bool{}
+		for _, pc := range r.Profiles {
+			declared[pc.Profile.String()] = true
+		}
+		for _, pc := range n.InferProfiles(Config{}) {
+			if pc.Orders > 0 && !declared[pc.Profile.String()] {
+				add(pc.Profile.String(),
+					fmt.Sprintf("%s routed recently carried this profile, which profiles.declared does not list", plural(pc.Orders, "order")),
+					"Declare it, so the check covers the orders that actually arrive.",
+					map[string]any{"orders": pc.Orders})
+			}
+		}
+	}
+	return out
 }

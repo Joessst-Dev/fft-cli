@@ -1,0 +1,5 @@
+---
+"fft": minor
+---
+
+`fft network check` now follows a committed `fft-network.yaml`. `fft network infer` writes a starter one from a snapshot, every value with the reason it was chosen. It pins the hubs, the peer grouping and where the kinds of order come from, and adds one expectation per country a hub already covers. With a config, `check` adds three rules. `expect` reports a store fewer hubs, stores or suppliers reach than the file asks, optionally within `maxTransitDays`. `config-drift` reports a pinned hub the network no longer treats as one, a hub it does not pin, or a routed kind of order the declared ones miss. `suppress` entries accept a finding until a date, with a reason: suppressed findings are counted on stderr, and an expired suppression suppresses nothing and is warned about. `check` reads `./fft-network.yaml` when it exists, and exits 3 for a file it cannot use or one named with `--config` that is not there. `fft network config validate` lists every problem in the file with its line, including expired suppressions and anything it names that the snapshot does not have. `fft network config schema` prints the file's JSON Schema.
