@@ -19,6 +19,7 @@ a facility that has gone offline. Nothing in the API reports those. This group
 reads the whole network once into a local snapshot, and works on that:
 
   fft network snapshot      read every facility and connection into a local file
+  fft network check         find the routing gaps in it, offline (exit 11 if any)
 
 Everything here only reads from the tenant. Fixing a gap is a change to the
 network, and that is its owner's decision, not a linter's.`
@@ -35,6 +36,7 @@ func newNetworkCmd(deps *Deps) *cobra.Command {
 
 	cmd.AddCommand(
 		newNetworkSnapshotCmd(deps),
+		newNetworkCheckCmd(deps),
 	)
 
 	return cmd
