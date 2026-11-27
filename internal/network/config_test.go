@@ -476,6 +476,43 @@ var _ = Describe("inferring a config file", func() {
 		Entry("PS", "\u2029"),
 	)
 
+	DescribeTable("keeps tenant data inside its value, whatever line break it carries",
+		func(lineBreak string) {
+			// yaml.Marshal writes a string with a break as a "|-" block indented from
+			// column 0, which ends empty under a deeper prefix and frees the rest.
+			hubID := "HUB-01" + lineBreak + "maxTransitDays: 1"
+			country := "# x" + lineBreak + "maxTransitDays: 1"
+			w := germany()
+			for i := range w.s.Facilities {
+				switch f := &w.s.Facilities[i]; {
+				case f.TenantFacilityID == "HUB-01":
+					f.TenantFacilityID = hubID
+				case strings.HasPrefix(f.TenantFacilityID, "BER-"):
+					f.Country = country
+				}
+			}
+			n := network.New(&w.s)
+
+			text := string(n.InferFile(today))
+
+			lf, err := parse(text)
+			Expect(err).NotTo(HaveOccurred(), text)
+			Expect(schemaValidates(text)).To(Succeed())
+			Expect(lf.Roles.Hub.Facilities).To(ContainElement(hubID))
+			Expect(lf.Expect).To(HaveLen(1))
+			Expect(lf.Expect[0].For.Where).To(Equal(map[string]string{"address.country": country}))
+			Expect(lf.Expect[0].ReachableFrom.MaxTransitDays).To(BeZero(), "nobody wrote a delivery promise; the tenant's country did")
+			Expect(lf.Suppress).To(BeEmpty())
+			Expect(lf.Unmatched(n)).To(BeEmpty())
+		},
+		Entry("LF", "\n"),
+		Entry("CR", "\r"),
+		Entry("CRLF", "\r\n"),
+		Entry("NEL", "\u0085"),
+		Entry("LS", "\u2028"),
+		Entry("PS", "\u2029"),
+	)
+
 	It("pins the hubs it found, with the reason as a comment", func() {
 		text := string(network.New(&germany().s).InferFile(today))
 

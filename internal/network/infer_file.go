@@ -129,10 +129,11 @@ func (n *Network) InferFile(now time.Time) []byte {
 }
 
 // yamlBreak turns every line break YAML recognises into "\n". A comment ends
-// at the first of them, and encoding/yaml's scanner breaks lines at CR, NEL,
-// LS and PS as well as LF, so a tenant-supplied value (project name, country,
-// profile) carrying one would otherwise continue as live YAML in a file meant
-// to be reviewed and committed.
+// at the first of them, and gopkg.in/yaml.v3's scanner (YAML 1.1 rules, where
+// YAML 1.2 knows only CR and LF) breaks lines at CR, NEL, LS and PS as well as
+// LF, so a tenant-supplied value (project name, country, profile) carrying one
+// would otherwise continue as live YAML in a file meant to be reviewed and
+// committed.
 var yamlBreak = strings.NewReplacer("\r\n", "\n", "\r", "\n", "\u0085", "\n", "\u2028", "\n", "\u2029", "\n")
 
 var notSlug = regexp.MustCompile(`[^a-z0-9]+`)
@@ -142,8 +143,19 @@ func slug(s string) string {
 }
 
 // quote writes s as a YAML scalar, quoted only when it has to be.
+//
+// A string with a line break is always double-quoted. yaml.Marshal would write
+// it as a "|-" block whose body is indented from column 0; pasted after a
+// deeper prefix such as "      - " the block body sits less indented than its
+// parent, the scalar ends empty, and the rest of the tenant-supplied value is
+// parsed as live YAML one level up. A double-quoted scalar escapes the break
+// and stays on one line, whatever prefix it follows.
 func quote(s string) string {
-	out, err := yaml.Marshal(s)
+	var v any = s
+	if strings.ContainsAny(s, "\n\r\u0085\u2028\u2029") {
+		v = &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: s, Style: yaml.DoubleQuotedStyle}
+	}
+	out, err := yaml.Marshal(v)
 	if err != nil {
 		return fmt.Sprintf("%q", s)
 	}
