@@ -137,6 +137,7 @@ fft routing strategy list
 fft routing strategy get 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10 -o json
 fft routing strategy activate 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10
 fft routing strategy evaluate 3f9c1e77-2b4a-4f0e-9d61-8a2c5b7e4d10 --file order.json
+fft routing strategy tree --order 0190d6e8-8c3a-7f1b-9d2e-4a6b8c0d1e2f
 ```
 
 `activate` makes one strategy live, taking over from whichever was in use. It is versioned
@@ -149,6 +150,24 @@ strategy references.
 
 For the neighbouring "where would this order actually be fulfilled from" question, use
 `fft sourcing simulate`.
+
+`tree` draws the strategy as the tree the router walks; with `--order` it marks the branch
+the router actually took for that order.
+
+## Finding routing gaps
+
+When the question is about the network rather than one order ("which stores does no hub
+supply?", "why does nothing reach BER-01?"), take a snapshot and check it offline:
+
+```sh
+fft network snapshot
+fft network check -o json
+fft network reach --to BER-01
+```
+
+Exit 11 from `check` means it found problems. Report them; **fixing one is a change to
+where real orders go, and that is the network owner's decision.** Read
+[network](./network.md) before you go further.
 
 ## Exploring safely
 
@@ -214,6 +233,8 @@ Node) that installs and runs straight away. See
 - Print, echo, paste or log an ID token. `fft auth token` exists for scripts, not for chat.
 - Ask for a password on a command line. There is no `--password` flag; there is
   `--password-stdin`, and that is deliberate.
+- Add a `suppress` entry to `fft-network.yaml`, or loosen an `expect`, to make a check
+  pass. Propose it with a reason and an expiry date; a person decides.
 - Re-encode an id. They are strings that look like numbers and are up to 64 bits wide; a
   tool that parses them as floats will corrupt them silently. fft passes the API's own bytes
   through untouched — keep it that way.
@@ -237,3 +258,5 @@ Node) that installs and runs straight away. See
   yours.
 - [references/templates.md](./templates.md) — saving a request body and sending it
   again with the parts that change filled in.
+- [references/network.md](./network.md) — finding routing gaps across the whole
+  network: the snapshot, every check rule, explaining a finding, `fft-network.yaml`, and CI.

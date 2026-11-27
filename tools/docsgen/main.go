@@ -56,6 +56,7 @@ var skillPages = []skillPage{
 	{"references/emulator.md", "emulator.md", "Emulator"},
 	{"references/components.md", "components.md", "Components"},
 	{"references/templates.md", "templates.md", "Templates"},
+	{"references/network.md", "network.md", "Network"},
 }
 
 // skillLinks maps a skill file's basename to the guide slug it becomes, so an
