@@ -284,6 +284,28 @@ var _ = Describe("checking a network", func() {
 			Expect(f.Evidence).To(HaveKeyWithValue("kind", "hub"))
 		})
 
+		It("does not call a store unreached when a hub reaches it only for some items, and says so", func() {
+			w := germany().
+				edge("c1", "HUB-01", network.Target{Type: network.TypeManaged, FacilityRef: id("BER-11")},
+					in(network.ContextCategory, "dangerous-goods"))
+			w.s.Edges[0].Target = except(network.TypeManaged, "BER-11")
+
+			f := finding(w.check(network.RulePeerCoverage), network.RulePeerCoverage, "BER-11")
+
+			Expect(f.Detail).To(ContainSubstring("except connections that depend on an item's category"))
+			Expect(f.Evidence).To(HaveKeyWithValue("conditional", true))
+		})
+
+		It("says nothing of conditional reach when no connection of that kind reaches the store", func() {
+			w := germany()
+			w.s.Edges[0].Target = except(network.TypeManaged, "BER-11")
+
+			f := finding(w.check(network.RulePeerCoverage), network.RulePeerCoverage, "BER-11")
+
+			Expect(f.Detail).To(Equal("no hub reaches it, though one reaches 90% of its peers in DE"))
+			Expect(f.Evidence).To(HaveKeyWithValue("conditional", false))
+		})
+
 		It("compares no store with a peer group below the minimum size, but still reports its coverage", func() {
 			w := newWorld().hub("HUB-01").stores("VIE", "AT", 6).
 				edge("h1", "HUB-01", except(network.TypeManaged, "VIE-06"))
