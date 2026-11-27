@@ -2,6 +2,7 @@ package network
 
 import (
 	"bytes"
+	"cmp"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -80,9 +81,12 @@ const OutDegreeRelative = "relative"
 type PeerSettings struct {
 	// By is a facility field: address.country (the default), address.postalCode
 	// or customAttributes.<key>.
-	By      string  `yaml:"by,omitempty" json:"by,omitempty"`
-	MinSize int     `yaml:"minSize,omitempty" json:"minSize,omitempty"`
-	Share   float64 `yaml:"share,omitempty" json:"share,omitempty"`
+	By string `yaml:"by,omitempty" json:"by,omitempty"`
+	// MinSize and Share are pointers so that an explicit 0 can be told from
+	// "not set": a 0 silently replaced by the default would answer a question
+	// the writer did not ask.
+	MinSize *int     `yaml:"minSize,omitempty" json:"minSize,omitempty"`
+	Share   *float64 `yaml:"share,omitempty" json:"share,omitempty"`
 }
 
 // ProfileSource says where the kinds of order come from.
@@ -129,8 +133,9 @@ type ExpectFrom struct {
 type Suppression struct {
 	// Rule is a rule id, or the name of an expectation.
 	Rule string `yaml:"rule" json:"rule"`
-	// Facility is the finding's subject: a facility's tenant id, or the
-	// reference a dangling-ref finding names.
+	// Facility is the finding's subject: a facility's tenant id, the reference
+	// a dangling-ref finding names, or, for config-drift, an order profile
+	// such as orderType=express.
 	Facility string `yaml:"facility" json:"facility"`
 	Reason   string `yaml:"reason" json:"reason"`
 	Until    Date   `yaml:"until" json:"until"`
@@ -147,6 +152,16 @@ func (d *Date) UnmarshalYAML(n *yaml.Node) error {
 	}
 	d.Time = t
 	return nil
+}
+
+// Passed reports whether the day after d has begun on now's calendar, in now's
+// own location. d is parsed as UTC midnight, so comparing it with the instant
+// now would end a suppression at 16:00 on its last day west of UTC and an hour
+// into the next day east of it; "through that day" is a calendar statement, and
+// the caller's calendar is the one that counts.
+func (d Date) Passed(now time.Time) bool {
+	y, m, day := now.Date()
+	return !time.Date(y, m, day, 0, 0, 0, 0, time.UTC).Before(d.AddDate(0, 0, 1))
 }
 
 // MarshalYAML writes the date as YYYY-MM-DD.
@@ -273,6 +288,27 @@ func yamlProblems(err error) []Problem {
 	return out
 }
 
+// roleSelectors lists the role selectors in a fixed order. Ranging over a map
+// of them would make the order of the problems, and so of the message `check`
+// prints, change from run to run.
+func (lf *LoadedFile) roleSelectors() []struct {
+	name string
+	sel  *Selector
+} {
+	return []struct {
+		name string
+		sel  *Selector
+	}{{"hub", lf.Roles.Hub}, {"store", lf.Roles.Store}, {"supplier", lf.Roles.Supplier}}
+}
+
+// sortProblems orders problems by line, then path, so the same file always
+// gives the same report: two runs can be diffed.
+func sortProblems(ps []Problem) {
+	slices.SortStableFunc(ps, func(a, b Problem) int {
+		return cmp.Or(a.Line-b.Line, strings.Compare(a.Path, b.Path))
+	})
+}
+
 // Validate reports what is wrong with the file on its own, without a
 // snapshot: values out of range, names that clash, a suppression with no
 // reason. Expired suppressions are not among them — see [LoadedFile.Expired].
@@ -292,7 +328,8 @@ func (lf *LoadedFile) Validate() []Problem {
 		}
 	}
 
-	for name, sel := range map[string]*Selector{"hub": f.Roles.Hub, "store": f.Roles.Store, "supplier": f.Roles.Supplier} {
+	for _, r := range lf.roleSelectors() {
+		name, sel := r.name, r.sel
 		if sel == nil {
 			continue
 		}
@@ -323,11 +360,11 @@ func (lf *LoadedFile) Validate() []Problem {
 		if p.By != "" && (!validField(p.By) || p.By == "group") {
 			bad("peers.by", "must be address.country, address.postalCode or customAttributes.<key>, not %q", p.By)
 		}
-		if p.MinSize < 0 {
+		if p.MinSize != nil && *p.MinSize < 1 {
 			bad("peers.minSize", "must be at least 1")
 		}
-		if p.Share < 0 || p.Share > 1 {
-			bad("peers.share", "must be a fraction between 0 and 1, such as 0.9")
+		if p.Share != nil && (*p.Share <= 0 || *p.Share > 1) {
+			bad("peers.share", "must be a fraction above 0 and at most 1, such as 0.9")
 		}
 	}
 
@@ -392,6 +429,7 @@ func (lf *LoadedFile) Validate() []Problem {
 			bad(path+".until", "give the date it stops applying, as YYYY-MM-DD")
 		}
 	}
+	sortProblems(out)
 	return out
 }
 
@@ -400,7 +438,7 @@ func (lf *LoadedFile) Validate() []Problem {
 func (lf *LoadedFile) Expired(now time.Time) []Problem {
 	var out []Problem
 	for i, s := range lf.Suppress {
-		if !s.Until.IsZero() && !now.Before(s.Until.AddDate(0, 0, 1)) {
+		if !s.Until.IsZero() && s.Until.Passed(now) {
 			path := fmt.Sprintf("suppress[%d].until", i)
 			out = append(out, Problem{Line: lf.line(path), Path: path,
 				Message: fmt.Sprintf("expired on %s: renew it with a reason that still holds, or remove it", s.Until.Format(time.DateOnly))})
@@ -416,7 +454,8 @@ func (lf *LoadedFile) Unmatched(n *Network) []Problem {
 	miss := func(path, format string, args ...any) {
 		out = append(out, Problem{Line: lf.line(path), Path: path, Message: fmt.Sprintf(format, args...)})
 	}
-	for name, sel := range map[string]*Selector{"hub": lf.Roles.Hub, "store": lf.Roles.Store, "supplier": lf.Roles.Supplier} {
+	for _, r := range lf.roleSelectors() {
+		name, sel := r.name, r.sel
 		if sel == nil {
 			continue
 		}
@@ -438,11 +477,46 @@ func (lf *LoadedFile) Unmatched(n *Network) []Problem {
 		}
 	}
 	for i, s := range lf.Suppress {
-		if _, ok := n.lookupAny(s.Facility); !ok && !n.mentions(s.Facility) {
+		if _, ok := n.lookupAny(s.Facility); !ok && !n.mentions(s.Facility) &&
+			!(s.Rule == RuleConfigDrift && lf.isProfile(n, s.Facility)) {
 			miss(fmt.Sprintf("suppress[%d].facility", i), "%s is neither a facility nor a reference in the snapshot", s.Facility)
 		}
 	}
-	slices.SortFunc(out, func(a, b Problem) int { return a.Line - b.Line })
+	sortProblems(out)
+	return out
+}
+
+// isProfile reports whether subject is an order profile a config-drift finding
+// can be about: one the snapshot's decision logs routed, or one the file
+// declares. A drift finding about a profile has the profile as its subject.
+func (lf *LoadedFile) isProfile(n *Network, subject string) bool {
+	for _, tags := range lf.declaredProfiles() {
+		if NewProfile(tags).String() == subject {
+			return true
+		}
+	}
+	for _, pc := range n.InferProfiles(Config{}) {
+		if pc.Profile.String() == subject {
+			return true
+		}
+	}
+	return false
+}
+
+// declaredProfiles are the profiles profiles.declared lists, as tags.
+func (lf *LoadedFile) declaredProfiles() [][]TagValue {
+	p := lf.Profiles
+	if p == nil || p.From != ProfilesDeclared {
+		return nil
+	}
+	out := make([][]TagValue, 0, len(p.Declared))
+	for _, d := range p.Declared {
+		tags := make([]TagValue, 0, len(d))
+		for _, id := range sortedStrings(d) {
+			tags = append(tags, TagValue{ID: id, Value: d[id]})
+		}
+		out = append(out, tags)
+	}
 	return out
 }
 
@@ -526,25 +600,17 @@ func (lf *LoadedFile) Settings(now time.Time) Config {
 		if p.By != "" {
 			cfg.PeerBy = p.By
 		}
-		if p.MinSize > 0 {
-			cfg.PeerMinSize = p.MinSize
+		if p.MinSize != nil {
+			cfg.PeerMinSize = *p.MinSize
 		}
-		if p.Share > 0 {
-			cfg.PeerShare = p.Share
-		}
-	}
-	if p := lf.Profiles; p != nil && p.From == ProfilesDeclared {
-		for _, d := range p.Declared {
-			tags := make([]TagValue, 0, len(d))
-			for _, id := range sortedStrings(d) {
-				tags = append(tags, TagValue{ID: id, Value: d[id]})
-			}
-			cfg.Declared = append(cfg.Declared, tags)
+		if p.Share != nil {
+			cfg.PeerShare = *p.Share
 		}
 	}
+	cfg.Declared = append(cfg.Declared, lf.declaredProfiles()...)
 	cfg.Expect = lf.Expect
 	for _, s := range lf.Suppress {
-		if now.Before(s.Until.AddDate(0, 0, 1)) {
+		if !s.Until.Passed(now) {
 			cfg.Suppress = append(cfg.Suppress, s)
 		}
 	}

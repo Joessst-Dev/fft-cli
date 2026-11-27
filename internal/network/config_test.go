@@ -143,7 +143,12 @@ var _ = Describe("the config file", func() {
 			"version: 1\nroles:\n  store:\n    where:\n      address.city: Berlin\n", 5, "roles.store.where.address.city",
 			"unknown field: want address.country, address.postalCode, group or customAttributes.<key>"),
 		Entry("a share above 1", "version: 1\npeers:\n  share: 1.5\n", 3, "peers.share",
-			"must be a fraction between 0 and 1, such as 0.9"),
+			"must be a fraction above 0 and at most 1, such as 0.9"),
+		// An explicit 0 used to be read as "not set" and replaced by the default.
+		Entry("a share of 0", "version: 1\npeers:\n  share: 0\n", 3, "peers.share",
+			"must be a fraction above 0 and at most 1, such as 0.9"),
+		Entry("a minSize of 0", "version: 1\npeers:\n  minSize: 0\n", 3, "peers.minSize",
+			"must be at least 1"),
 		Entry("declared profiles with none declared", "version: 1\nprofiles:\n  from: declared\n", 2, "profiles.declared",
 			"from: declared needs at least one profile"),
 		Entry("an expectation named like a rule",
@@ -182,6 +187,46 @@ var _ = Describe("the config file", func() {
 
 		Expect(lf.Expired(today)).To(BeEmpty())
 		Expect(lf.Settings(today).Suppress).To(HaveLen(1))
+	})
+
+	It("keeps a suppression in force through its last day for a caller west of UTC", func() {
+		// until is a calendar day, parsed as UTC midnight. At 17:00 PST on the day
+		// it names, the instant is already past 2027-01-16T00:00Z, yet the caller's
+		// calendar still says the 15th.
+		pst := time.FixedZone("PST", -8*3600)
+		evening := time.Date(2027, 1, 15, 17, 0, 0, 0, pst)
+		lf, err := parse(exampleConfig)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(lf.Expired(evening)).To(BeEmpty())
+		Expect(lf.Settings(evening).Suppress).To(HaveLen(1))
+	})
+
+	It("ends a suppression with its last day for a caller east of UTC", func() {
+		// 01:00 on the 16th in Berlin is still 2027-01-15T23:00Z, but the day is over.
+		cet := time.FixedZone("CET", 3600)
+		morning := time.Date(2027, 1, 16, 1, 0, 0, 0, cet)
+		lf, err := parse(exampleConfig)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(lf.Expired(morning)).To(HaveLen(1))
+		Expect(lf.Settings(morning).Suppress).To(BeEmpty())
+	})
+
+	It("reports the problems in the same order every time, by line", func() {
+		text := "version: 1\nroles:\n  supplier:\n    type: NOPE\n  store:\n    type: NOPE\n  hub:\n    type: NOPE\n"
+		var first string
+		for range 20 {
+			_, err := parse(text)
+			Expect(err).To(HaveOccurred())
+			if first == "" {
+				first = err.Error()
+			}
+			Expect(err.Error()).To(Equal(first))
+		}
+		Expect(first).To(Equal("fft-network.yaml: line 4: roles.supplier.type: must be MANAGED_FACILITY or SUPPLIER, not \"NOPE\"; " +
+			"line 6: roles.store.type: must be MANAGED_FACILITY or SUPPLIER, not \"NOPE\"; " +
+			"line 8: roles.hub.type: must be MANAGED_FACILITY or SUPPLIER, not \"NOPE\""))
 	})
 
 	It("reports what names nothing in the snapshot", func() {
@@ -280,6 +325,30 @@ var _ = Describe("checking with a config file", func() {
 				"3 orders routed recently carried this profile, which profiles.declared does not list"))
 		})
 
+		It("lets a drift finding about a profile be suppressed, and validate accept the suppression", func() {
+			w := germany().edge("x", "HUB-01", network.Target{Type: network.TypeManaged}, in(network.ContextTag, "express"))
+			w.s.OrderProfiles = []network.OrderProfile{{Tags: []network.TagValue{{ID: "orderType", Value: "express"}}, Orders: 3}}
+			text := "version: 1\nprofiles:\n  from: declared\n  declared:\n    - {orderType: standard}\n" +
+				"suppress:\n  - {rule: config-drift, facility: orderType=express, reason: express is being retired, until: 2027-01-15}\n"
+
+			lf, err := parse(text)
+			Expect(err).NotTo(HaveOccurred())
+			r := network.New(&w.s).Check(lf.Settings(today))
+
+			Expect(subjects(r, network.RuleConfigDrift)).NotTo(ContainElement("orderType=express"))
+			Expect(r.Suppressed).To(HaveLen(1))
+			Expect(lf.Unmatched(network.New(&w.s))).To(BeEmpty(),
+				"a profile is a subject a config-drift suppression may name")
+		})
+
+		It("still reports a config-drift suppression whose subject is no profile, facility or reference", func() {
+			w := germany()
+			lf, err := parse("version: 1\nsuppress:\n  - {rule: config-drift, facility: orderType=nothing, reason: r, until: 2027-01-15}\n")
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(lf.Unmatched(network.New(&w.s))).To(HaveLen(1))
+		})
+
 		It("is not checked without a config file, which pins nothing to drift from", func() {
 			r := germany().stores("STO", "DE", 1).check()
 
@@ -356,6 +425,20 @@ var _ = Describe("inferring a config file", func() {
 		lf, err := parse(text)
 		Expect(err).NotTo(HaveOccurred(), text)
 		Expect(schemaValidates(text)).To(Succeed())
+		Expect(lf.Unmatched(n)).To(BeEmpty())
+	})
+
+	It("writes no expectation for stores that have no country, which no where could select", func() {
+		w := germany().stores("NOC", "", 11)
+		n := network.New(&w.s)
+
+		text := string(n.InferFile(today))
+
+		lf, err := parse(text)
+		Expect(err).NotTo(HaveOccurred(), text)
+		Expect(text).NotTo(ContainSubstring("hub-coverage-none"))
+		Expect(text).NotTo(ContainSubstring(`address.country: "(none)"`))
+		// validate runs Unmatched; before the fix it exited 3 on infer's own output.
 		Expect(lf.Unmatched(n)).To(BeEmpty())
 	})
 
