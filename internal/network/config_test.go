@@ -303,7 +303,8 @@ var _ = Describe("checking with a config file", func() {
 			Expect(subjects(r, network.RuleConfigDrift)).To(ConsistOf("STO-01", "HUB-02"))
 			Expect(finding(r, network.RuleConfigDrift, "STO-01").Detail).To(Equal(
 				"pinned as a hub, but its connections reach 1 facility, which the heuristics would not call a hub"))
-			Expect(finding(r, network.RuleConfigDrift, "HUB-02").Detail).To(ContainSubstring("roles.hub does not pin it"))
+			Expect(finding(r, network.RuleConfigDrift, "HUB-02").Detail).To(Equal(
+				"its connections reach 12 facilities, as a hub's do, but roles.hub does not pin it"))
 		})
 
 		It("reports a pinned hub that has gone offline, or is gone", func() {

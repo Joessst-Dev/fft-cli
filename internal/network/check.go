@@ -540,6 +540,10 @@ func plural(n int, noun string) string {
 	if n == 1 {
 		return "1 " + noun
 	}
+	// facility → facilities; the nouns here are all regular otherwise.
+	if stem, ok := strings.CutSuffix(noun, "y"); ok && !strings.ContainsAny(stem[len(stem)-1:], "aeiou") {
+		return fmt.Sprintf("%d %sies", n, stem)
+	}
 	return fmt.Sprintf("%d %ss", n, noun)
 }
 
