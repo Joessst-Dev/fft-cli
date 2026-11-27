@@ -3,8 +3,10 @@ package network
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"gopkg.in/yaml.v3"
 )
@@ -27,7 +29,7 @@ func (n *Network) InferFile(now time.Time) []byte {
 		b.WriteString(strings.Repeat("  ", indent) + fmt.Sprintf(format, args...) + "\n")
 	}
 	comment := func(indent int, format string, args ...any) {
-		for l := range strings.SplitSeq(yamlBreak.Replace(fmt.Sprintf(format, args...)), "\n") {
+		for l := range strings.SplitSeq(commentSafe(fmt.Sprintf(format, args...)), "\n") {
 			line(indent, "# %s", l)
 		}
 	}
@@ -128,11 +130,35 @@ func (n *Network) InferFile(now time.Time) []byte {
 	return []byte(b.String())
 }
 
-// yamlBreak turns every line break YAML recognises into "\n". A comment ends
-// at the first of them, and encoding/yaml's scanner breaks lines at CR, NEL,
-// LS and PS as well as LF, so a tenant-supplied value (project name, country,
-// profile) carrying one would otherwise continue as live YAML in a file meant
-// to be reviewed and committed.
+// commentSafe makes tenant-supplied text (project name, country, profile)
+// safe to put in a '#' comment of a file meant to be reviewed and committed.
+//
+// Two things go wrong otherwise. A comment ends at the first line break YAML
+// recognises, which is more than LF (CR, NEL, LS and PS too), so a value
+// carrying one would continue as live YAML. And gopkg.in/yaml.v3's reader
+// rejects the whole document over one control character or invalid UTF-8 even
+// inside a comment, so 'infer' would write a file its own 'validate' and
+// 'check' refuse. Line breaks become "\n" and every other rune YAML will not
+// take is written as a visible escape, so the reviewer still sees it.
+func commentSafe(s string) string {
+	s = yamlBreak.Replace(strings.ToValidUTF8(s, "\uFFFD"))
+	if !strings.ContainsFunc(s, unprintable) {
+		return s
+	}
+	var b strings.Builder
+	for _, r := range s {
+		if unprintable(r) {
+			q := strconv.QuoteToASCII(string(r))
+			b.WriteString(q[1 : len(q)-1])
+			continue
+		}
+		b.WriteRune(r)
+	}
+	return b.String()
+}
+
+func unprintable(r rune) bool { return r != '\t' && r != '\n' && !unicode.IsPrint(r) }
+
 var yamlBreak = strings.NewReplacer("\r\n", "\n", "\r", "\n", "\u0085", "\n", "\u2028", "\n", "\u2029", "\n")
 
 var notSlug = regexp.MustCompile(`[^a-z0-9]+`)
