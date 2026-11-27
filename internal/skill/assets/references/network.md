@@ -25,7 +25,7 @@ fft network config validate
 1. **`snapshot`** crawls every facility and every facility's connections, plus the facility
    groups, tags, routing strategies, node config categories, and one page of recent routing
    decision logs with the tags of the orders they routed.
-   - It is one paged request per facility, so expect tens of minutes on a large network.
+   - It is one paged request per facility, so a large network takes an hour or more.
    - It allows itself 4h unless `--timeout` is set, reads `--concurrency` facilities at a
      time (3 by default), and backs off when a gateway throttles.
    - If it stops (an expired session, a gateway that will not recover, Ctrl-C), run the

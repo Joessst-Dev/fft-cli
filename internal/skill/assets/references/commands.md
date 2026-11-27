@@ -165,7 +165,7 @@ fft network infer
 fft network config validate
 ```
 
-- **`snapshot` is a long crawl of reads**, tens of minutes on a large network, and runs
+- **`snapshot` is a long crawl of reads**, an hour or more on a large network, and runs
   under `--read-only`. If it stops, `--resume` continues it. **Never commit a snapshot.**
 - **`check` sends no request.** Exit 11 means it ran and found problems, not that it
   failed. Read what it assumed on stderr, then `-o json` for each finding's evidence and

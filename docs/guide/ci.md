@@ -96,8 +96,8 @@ follows the team's decisions instead of its own guesses:
 ```
 
 - **Use a password, not `FFT_ID_TOKEN`.** A crawl of a large network can outlast a token's
-  hour, and a fixed token cannot be renewed. If it does stop, a re-run with `--resume`
-  continues where it stopped.
+  hour, and a fixed token cannot be renewed. `--resume` continues a stopped crawl only
+  within the same job (its journal sits next to `--out`); a re-run of the job starts over.
 - **`FFT_READ_ONLY`** makes the guarantee explicit: every request the crawl sends is a read.
 - **Keep the snapshot out of the job's artifacts and caches.** It is the tenant's whole
   network.
