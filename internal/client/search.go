@@ -213,7 +213,8 @@ func SearchAll[Q, S, T any](ctx context.Context, c *Client, op Op[T], payload Se
 //
 // Nothing already fetched is lost to the caller of the iterator, but an --all
 // command does not print half a list as if it were the list, so the command fails.
-// It unwraps to [context.DeadlineExceeded], so the exit code is unchanged.
+// It unwraps to [context.DeadlineExceeded], so it exits 9 like any other timeout: the
+// hint is for the person, the code for the script.
 type WalkTimeoutError struct {
 	Op    string
 	Pages int

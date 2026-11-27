@@ -150,6 +150,21 @@ var _ = Describe("reporting a request that never got an answer", func() {
 
 		Expect(err).To(MatchError(ContainSubstring("reach the tenant")))
 		Expect(err).To(MatchError(ContainSubstring("no such host")))
+		Expect(exitcode.FromError(err)).To(Equal(exitcode.Unavailable))
+	})
+
+	It("still reads as the interrupt it is when the cancellation sits inside a transport failure", func() {
+		wrapped := &url.Error{Op: "Get", URL: "https://acme.api.fulfillmenttools.com/api/status", Err: context.Canceled}
+
+		err := client.RequestError("reach the tenant", wrapped)
+
+		Expect(exitcode.FromError(err)).To(Equal(exitcode.Interrupted))
+	})
+
+	It("lets an error that is not a transport failure keep the code it has", func() {
+		err := client.RequestError("reach the tenant", errors.New("marshal the body"))
+
+		Expect(exitcode.FromError(err)).To(Equal(exitcode.General))
 	})
 })
 
@@ -356,5 +371,18 @@ var _ = Describe("a proxy that refuses to open the tunnel to the tenant", func()
 		},
 		Entry("403", http.StatusForbidden),
 		Entry("407", http.StatusProxyAuthRequired),
+	)
+
+	// A 5xx from the proxy is the proxy being down, which passes; a 403 or 407 is its
+	// policy or its credentials, which retrying does not change. Only the first is 9.
+	DescribeTable("exits with the code that says whether to try again",
+		func(status int, want int) {
+			Expect(exitcode.FromError(&client.ProxyRefusedError{Status: status, Proxy: "proxy.example.test:3128"})).To(Equal(want))
+		},
+		Entry("502 Bad Gateway", http.StatusBadGateway, exitcode.Unavailable),
+		Entry("503 Service Unavailable", http.StatusServiceUnavailable, exitcode.Unavailable),
+		Entry("504 Gateway Timeout", http.StatusGatewayTimeout, exitcode.Unavailable),
+		Entry("403 Forbidden", http.StatusForbidden, exitcode.General),
+		Entry("407 Proxy Authentication Required", http.StatusProxyAuthRequired, exitcode.General),
 	)
 })
