@@ -30,6 +30,11 @@ and AVAILABLE is what is left to sell.`
 // exactly one.
 var stockSortFields = []string{"tenantArticleId", "value", "locationName", "lastModified"}
 
+// stockQueryTooComplexHint names the filters that narrow a stock search: the
+// collection is large per facility and per article, not in total.
+const stockQueryTooComplexHint = "A smaller --size will not help: the API's cost is in the --sort or the unfiltered collection, not in the page.\n" +
+	"Narrow the search instead: 'fft stock list --facility <id> --tenant-article-id <id>', and drop --sort."
+
 func newStockListCmd(deps *Deps) *cobra.Command {
 	var (
 		facility string
@@ -54,7 +59,8 @@ func newStockListCmd(deps *Deps) *cobra.Command {
 				return err
 			}
 
-			return runSearch(cmd, deps, client.StockSearch[json.RawMessage](), staticQuery(payload), page, stockList())
+			err = runSearch(cmd, deps, client.StockSearch[json.RawMessage](), staticQuery(payload), page, stockList())
+			return refineQueryTooComplex(err, stockQueryTooComplexHint)
 		},
 	}
 

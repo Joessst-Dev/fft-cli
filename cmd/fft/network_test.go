@@ -185,6 +185,26 @@ var _ = Describe("fft network snapshot", func() {
 		Expect(c.errOut()).To(ContainSubstring("pausing 1m0s"))
 	})
 
+	When("the API refuses the facility search as 'Query too complex'", func() {
+		It("stops at once with the explanation and the 400's exit code, without pausing", func() {
+			c.fakeTenant(func(w http.ResponseWriter, r *http.Request, body []byte) {
+				if r.URL.Path == "/api/facilities/search" {
+					writeJSON(w, http.StatusBadRequest, queryTooComplex)
+					return
+				}
+				networkTenant(w, r, body)
+			})
+
+			Expect(c.run("network", "snapshot")).To(Equal(exitcode.General))
+
+			Expect(c.errOut()).To(ContainSubstring("Query too complex"))
+			Expect(c.errOut()).To(ContainSubstring(`A smaller page size (--size, or the body's "size") will not help`))
+			Expect(c.errOut()).NotTo(ContainSubstring("pausing"))
+			Expect(c.out()).To(BeEmpty())
+			Expect(defaultPath() + network.JournalSuffix).To(BeAnExistingFile())
+		})
+	})
+
 	When("the crawl stops part-way", func() {
 		refuseFRA := func(w http.ResponseWriter, r *http.Request, body []byte) {
 			if r.URL.Path == "/api/facilities/fra-uuid/connections" {

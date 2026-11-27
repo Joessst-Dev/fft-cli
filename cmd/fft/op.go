@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
+	"net/http"
 	"slices"
 	"sort"
 	"strconv"
@@ -342,9 +343,20 @@ func runOperation(cmd *cobra.Command, deps *Deps, op api.Operation, req client.R
 
 	res, err := c.DoRaw(ctx, operationName(op), req)
 	if err != nil {
-		return err
+		return explainSearchError(op, err)
 	}
 	return renderResult(deps, res)
+}
+
+// explainSearchError gives the cursor searches' "Query too complex" 400 the same
+// explanation the curated commands get. DoRaw does not know the operationId, so the
+// decision is made here, where both uncurated tiers pass: a POST search that the
+// read-only gate classifies as a read. Any other operation's 400 is untouched.
+func explainSearchError(op api.Operation, err error) error {
+	if op.Method != http.MethodPost || !strings.HasPrefix(op.ID, "search") || op.Mutates() {
+		return err
+	}
+	return client.ExplainQueryTooComplex(operationName(op), err)
 }
 
 // operationName is how an operation is named in an error: its summary if it has
