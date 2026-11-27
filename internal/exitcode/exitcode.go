@@ -45,8 +45,13 @@ func (e UsageError) Error() string { return e.Err.Error() }
 func (e UsageError) Unwrap() error { return e.Err }
 func (e UsageError) ExitCode() int { return Usage }
 
-// FromError classifies an error into an exit code. Errors that implement
-// ExitCode() decide for themselves; everything else is a general failure.
+// FromError classifies an error into an exit code. A cancellation is an interrupt
+// whatever wraps it; errors that implement ExitCode() decide for themselves; an
+// expired deadline is the upstream not answering in time; everything else is a
+// general failure.
+//
+// The deadline comes after the explicit code so that an error that names its own
+// (a sign-in that timed out is still a 4) is never overruled by the cause inside it.
 func FromError(err error) int {
 	switch {
 	case err == nil:
@@ -58,6 +63,9 @@ func FromError(err error) int {
 	var c coded
 	if errors.As(err, &c) {
 		return c.ExitCode()
+	}
+	if errors.Is(err, context.DeadlineExceeded) {
+		return Unavailable
 	}
 	return General
 }

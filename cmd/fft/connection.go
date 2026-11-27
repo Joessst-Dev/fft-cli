@@ -102,18 +102,20 @@ func getConnectionDoc(ctx context.Context, c *client.Client, facility, id string
 // connectionBody reads a connection request body and makes it something the API can
 // answer, rather than something it will reject for a reason it does not name.
 //
-// It also repairs the one asymmetry in this resource's schema. The connection the
-// API *returns* has no top-level `type` — the type lives only in target.type. The
-// body the API *accepts* requires both, at the top level and inside the target, and
-// they must agree, because the top-level one is the discriminator it matches the
-// body against.
+// It also repairs the one asymmetry in this resource's schema. The spec's read model
+// declares `type` only inside target. (The list endpoint has been observed to return
+// an undeclared top-level copy too, see #324; that is not contractual, and not
+// confirmed for SUPPLIER targets or single-connection GETs, so a read cannot be
+// relied on to carry it.) The body the API *accepts* requires both, at the top level
+// and inside the target, and they must agree, because the top-level one is the
+// discriminator it matches the body against.
 //
 // So the obvious workflow — read it, edit it, send it back —
 //
 //	fft connection get 3f9c... --facility BER-01 -o json > c.json
 //	fft connection update 3f9c... --facility BER-01 --file c.json
 //
-// produces a body with no discriminator and gets a 400 that does not say which field
+// can produce a body with no discriminator and get a 400 that does not say which field
 // was missing. Filling the top-level type in from target.type is not a guess: the
 // target already carries it, the two are required to be equal, and there is no third
 // value they could take. It is the round trip working the way the user already
@@ -146,8 +148,9 @@ func normaliseConnectionType(doc entityDoc) error {
 		return fmt.Errorf("the body has no %q: a connection goes to a %s, and the API needs to be told which",
 			"type", strings.Join(connectionTypes(), ", a "))
 
-	// The read model carries the type only inside the target, so this is what a body
-	// that came straight out of `fft connection get` looks like. Complete it.
+	// The spec's read model declares the type only inside the target, and a read is
+	// not guaranteed to carry the top-level copy (see #324), so this is what a body
+	// that came straight out of `fft connection get` can look like. Complete it.
 	case top == "":
 		top = inner
 		doc["type"] = inner
@@ -265,9 +268,9 @@ type connectionView struct {
 	CarrierKey        string `json:"carrierKey"`
 	Version           int64  `json:"version"`
 
-	// Target is where the edge goes. The *type* of the connection lives here and
-	// nowhere else on a connection the API returned — the top-level `type` exists only
-	// on the bodies fft sends. See connectionBody.
+	// Target is where the edge goes. The spec declares the *type* of the connection
+	// here and only here on a read; a top-level copy is undeclared and not reliably
+	// present (#324), so the table reads the type from the target. See connectionBody.
 	Target struct {
 		Type        string `json:"type"`
 		FacilityRef string `json:"facilityRef"`

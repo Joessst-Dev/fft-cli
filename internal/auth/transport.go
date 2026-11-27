@@ -30,15 +30,28 @@ type Transport struct {
 
 var _ http.RoundTripper = (*Transport)(nil)
 
+// TokenError is a failure to obtain the bearer token, before any request was built.
+//
+// http.Client wraps every RoundTrip error in a *url.Error, so a token the source
+// could not mint reaches the caller looking exactly like a network failure. This
+// marker is how the caller tells the two apart: the request never left the machine,
+// so a locked keychain is not "upstream unavailable". It adds nothing to the message
+// and unwraps, so an error that carries its own exit code ([ReauthError]) still
+// answers errors.As.
+type TokenError struct{ Err error }
+
+func (e *TokenError) Error() string { return e.Err.Error() }
+func (e *TokenError) Unwrap() error { return e.Err }
+
 // RoundTrip implements http.RoundTripper.
 func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if t.Source == nil {
-		return nil, fmt.Errorf("auth: the transport has no token source")
+		return nil, &TokenError{Err: fmt.Errorf("auth: the transport has no token source")}
 	}
 
 	token, err := t.Source.Token(req.Context())
 	if err != nil {
-		return nil, err
+		return nil, &TokenError{Err: err}
 	}
 
 	// A RoundTripper must not modify the request it is given: the caller may still

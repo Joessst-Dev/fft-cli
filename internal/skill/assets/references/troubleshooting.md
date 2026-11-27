@@ -14,7 +14,7 @@ and the wording is not.
 | 6 | not found | the id does not exist. Check it before assuming the endpoint is wrong |
 | 7 | version conflict (409) | the object changed under you. **Re-read it, re-apply, re-send.** Never retry the same body |
 | 8 | partial bulk write | some items landed. Read the per-item results; re-send only the `FAILED` ones, never the `UNKNOWN` ones |
-| 9 | upstream unreachable or erroring | fft retried it **only if it was safe to repeat** — see below. Back off, and tell the user |
+| 9 | upstream unreachable or erroring | a 5xx, a transport failure (connection refused or reset, DNS, TLS, a proxy that is down and refuses the `CONNECT` with a 5xx) or a timeout (`--timeout`). fft retried it **only if it was safe to repeat** — see below. Back off, and tell the user |
 | 10 | read-only: fft refused a write | **nothing was sent.** Not an auth problem, and not routable around. Ask the user |
 | 130 | interrupted | — |
 
@@ -24,7 +24,7 @@ fft retries only what is safe to send twice — GET, PUT, DELETE. A **POST or a 
 once**, because a 500 on `POST /api/facilities` does not mean the facility was not created;
 it means nobody told you whether it was.
 
-So a create that exits 9 is not a create that failed. It is a create with an **unknown**
+So a create that exits 9 — including one that timed out — is not a create that failed. It is a create with an **unknown**
 outcome, and re-running it is how you end up with two of something:
 
 ```sh

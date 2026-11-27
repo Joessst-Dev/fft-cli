@@ -50,7 +50,11 @@ spec is re-vendored, so they carry grep recipes, not anchors — re-grep before 
 - [references/listings-stocks-semantics.md](references/listings-stocks-semantics.md) — the ×25 bulk
   budget, no partial success, bare-array responses, versionless vs versioned writes.
 - [references/connections-semantics.md](references/connections-semantics.md) — interfacility
-  connections: the undeclared top-level `type` in list responses (a copy of `target.type`).
+  connections: per-facility listing, wildcard targets, how `context` evaluates, and the undeclared
+  top-level `type` in list responses (a copy of `target.type`).
+- [references/routing-strategy-semantics.md](references/routing-strategy-semantics.md) — strategy
+  trees (first match, inheritance along the path), what decision logs and `sourcing simulate` can
+  and cannot show, and limits on large tenants.
 
 ## How to answer a consultation
 
