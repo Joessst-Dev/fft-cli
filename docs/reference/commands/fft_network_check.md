@@ -46,7 +46,8 @@ fft network check [flags]
 ## Flags
 
 ```
-      --rule stringArray   Run only this rule (repeatable): no-source, peer-coverage, dangling-ref, offline-ref, duplicate-edge
+      --config string      The config file; when it is the default and does not exist, the check infers everything (default "fft-network.yaml")
+      --rule stringArray   Run only this rule (repeatable): no-source, peer-coverage, expect, dangling-ref, offline-ref, duplicate-edge, config-drift
       --snapshot string    Read this snapshot instead of the project's file in the cache directory
 ```
 

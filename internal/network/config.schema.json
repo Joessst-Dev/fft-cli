@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "fft-network.yaml",
+  "description": "What a team pins about its fulfillment network, what it expects of it, and which findings of 'fft network check' it accepts for now. Every field but version is optional: what the file leaves out, the check infers.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version"],
+  "properties": {
+    "version": {"const": 1, "description": "The format version."},
+    "rules": {
+      "description": "Run only these rules. Omit to run all of them.",
+      "type": "array",
+      "items": {"$ref": "#/$defs/rule"}
+    },
+    "roles": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hub": {"$ref": "#/$defs/hubSelector"},
+        "store": {"$ref": "#/$defs/selector"},
+        "supplier": {"$ref": "#/$defs/selector"}
+      }
+    },
+    "peers": {
+      "description": "Which stores are compared with each other.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "by": {
+          "description": "The facility field stores are grouped by.",
+          "anyOf": [
+            {"enum": ["address.country", "address.postalCode"]},
+            {"type": "string", "pattern": "^customAttributes\\..+$"}
+          ]
+        },
+        "minSize": {"type": "integer", "minimum": 1, "description": "Smaller groups are not compared."},
+        "share": {"type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "How many of a group must have a kind of source before one without it is reported."}
+      }
+    },
+    "profiles": {
+      "description": "Where the kinds of order come from.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "from": {"enum": ["decision-logs", "declared"]},
+        "declared": {
+          "description": "With from: declared, the profiles: each a map of tag id to value.",
+          "type": "array",
+          "items": {"type": "object", "additionalProperties": {"type": "string"}}
+        }
+      }
+    },
+    "expect": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "for", "reachableFrom"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1, "description": "Used by its findings and by suppressions. Must not be a rule id."},
+          "for": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["role"],
+            "properties": {
+              "role": {"$ref": "#/$defs/role"},
+              "where": {"$ref": "#/$defs/where"}
+            }
+          },
+          "reachableFrom": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["role", "atLeast"],
+            "properties": {
+              "role": {"$ref": "#/$defs/role"},
+              "atLeast": {"type": "integer", "minimum": 1},
+              "maxTransitDays": {"type": "number", "minimum": 0, "description": "Count only connections whose fallback transit time is at most this many days."}
+            }
+          }
+        }
+      }
+    },
+    "suppress": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["rule", "facility", "reason", "until"],
+        "properties": {
+          "rule": {"type": "string", "minLength": 1, "description": "A rule id, or the name of an expectation."},
+          "facility": {"type": "string", "minLength": 1, "description": "The finding's subject: a facility's tenant id, the reference a dangling-ref finding names, or, for config-drift, an order profile such as orderType=express."},
+          "reason": {"type": "string", "minLength": 1},
+          "until": {"type": "string", "format": "date", "description": "YYYY-MM-DD. An expired suppression suppresses nothing."}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "rule": {"enum": ["no-source", "peer-coverage", "expect", "dangling-ref", "offline-ref", "duplicate-edge", "config-drift"]},
+    "role": {"enum": ["hub", "store", "supplier"]},
+    "where": {
+      "description": "Facility fields to match, all of them: address.country, address.postalCode, group (a facility group id), customAttributes.<key>.",
+      "type": "object",
+      "propertyNames": {"pattern": "^(address\\.country|address\\.postalCode|group|customAttributes\\..+)$"},
+      "additionalProperties": {"type": "string"}
+    },
+    "selector": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {"enum": ["MANAGED_FACILITY", "SUPPLIER"]},
+        "facilities": {"type": "array", "items": {"type": "string", "minLength": 1}, "description": "Tenant ids or platform ids."},
+        "where": {"$ref": "#/$defs/where"}
+      }
+    },
+    "hubSelector": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {"enum": ["MANAGED_FACILITY", "SUPPLIER"]},
+        "facilities": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "where": {"$ref": "#/$defs/where"},
+        "outDegree": {"const": "relative", "description": "Choose hubs by reach, as the heuristics do."},
+        "minJump": {"type": "number", "minimum": 1, "description": "With outDegree: relative, how many times more facilities a hub must reach than the next one."}
+      },
+      "not": {"required": ["outDegree", "facilities"]},
+      "dependentRequired": {"minJump": ["outDegree"]}
+    }
+  }
+}
