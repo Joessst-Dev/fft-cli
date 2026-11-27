@@ -46,7 +46,7 @@ with its full lifetime, and print that:
 (umask 077; fft auth token --refresh > token-file)
 ```
 
-The remaining lifetime is reported on stderr (`token valid for 59m`); stdout stays the bare
+The remaining lifetime is reported on stderr (`token valid for 1h`); stdout stays the bare
 token. It exits 4 when neither the refresh token nor the password works, and 2 under a
 fixed `FFT_ID_TOKEN`, which has nothing to renew from. Like plain `fft auth token`, it
 refuses to print to a terminal unless you pass `--raw`.
