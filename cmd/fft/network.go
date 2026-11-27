@@ -20,6 +20,7 @@ reads the whole network once into a local snapshot, and works on that:
 
   fft network snapshot      read every facility and connection into a local file
   fft network check         find the routing gaps in it, offline (exit 11 if any)
+  fft network reach         which connections lead to one facility, and why not
   fft network infer         write a starter fft-network.yaml from what check infers
   fft network config        validate that file, or print its JSON Schema
 
@@ -39,6 +40,7 @@ func newNetworkCmd(deps *Deps) *cobra.Command {
 	cmd.AddCommand(
 		newNetworkSnapshotCmd(deps),
 		newNetworkCheckCmd(deps),
+		newNetworkReachCmd(deps),
 		newNetworkInferCmd(deps),
 		newNetworkConfigCmd(deps),
 	)

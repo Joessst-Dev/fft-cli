@@ -36,6 +36,7 @@ fft routing strategy
 - [fft routing strategy evaluate-node](./fft_routing_strategy_evaluate-node.md) — Dry-run one node of a strategy
 - [fft routing strategy get](./fft_routing_strategy_get.md) — Show one routing strategy
 - [fft routing strategy list](./fft_routing_strategy_list.md) — List the routing strategies
+- [fft routing strategy tree](./fft_routing_strategy_tree.md) — Show a routing strategy as the tree the router walks
 - [fft routing strategy update](./fft_routing_strategy_update.md) — Replace a routing strategy (PUT)
 
 ## See also

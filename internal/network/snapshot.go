@@ -55,6 +55,12 @@ type Snapshot struct {
 	// yet, and a projection would have to guess which fields those need.
 	Strategies []json.RawMessage `json:"strategies"`
 
+	// Categories are the routing node config categories a strategy's nodes may
+	// reference. CategoriesRead says the crawl read them, so that an empty list
+	// is told apart from a snapshot taken before fft read them at all.
+	Categories     []Category `json:"categories,omitempty"`
+	CategoriesRead bool       `json:"categoriesRead,omitempty"`
+
 	DecisionLogs  []DecisionLog  `json:"decisionLogs"`
 	OrderProfiles []OrderProfile `json:"orderProfiles"`
 }
@@ -171,6 +177,11 @@ type Group struct {
 type Tag struct {
 	ID            string   `json:"id"`
 	AllowedValues []string `json:"allowedValues,omitempty"`
+}
+
+// Category is a routing node config category.
+type Category struct {
+	ID string `json:"id"`
 }
 
 // TagValue is one tag an order carries.
