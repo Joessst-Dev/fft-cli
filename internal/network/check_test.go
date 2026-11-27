@@ -127,6 +127,29 @@ var _ = Describe("checking a network", func() {
 			Expect(r.Roles.Stores.Count()).To(Equal(3))
 		})
 
+		It("does not take ship-from-store stores for hubs because they stand above stores that reach nobody", func() {
+			// A real hub tier (reach 41) above four stores that each ship to 8 neighbours
+			// above stores that reach nobody. Measured against the zero-reach tier, the
+			// stores' own drop (8/1) would beat the hubs' (41/8).
+			w := newWorld().hub("HUB-01").hub("HUB-02").stores("BER", "DE", 40).
+				edge("h1", "HUB-01", network.Target{Type: network.TypeManaged}).
+				edge("h2", "HUB-02", network.Target{Type: network.TypeManaged})
+			for s := 1; s <= 4; s++ {
+				for k := 0; k < 8; k++ {
+					w.edge(fmt.Sprintf("s%d-%d", s, k), fmt.Sprintf("BER-%02d", s),
+						network.Target{Type: network.TypeManaged, FacilityRef: id(fmt.Sprintf("BER-%02d", 10+s*8+k))})
+				}
+			}
+
+			r := w.check()
+
+			n := network.New(&w.s)
+			hubs := []string{}
+			r.Roles.Hubs.Each(func(i int) { hubs = append(hubs, n.Facility(i).Label()) })
+			Expect(hubs).To(Equal([]string{"HUB-01", "HUB-02"}))
+			Expect(r.Roles.Stores.Count()).To(Equal(40))
+		})
+
 		It("groups the stores by country, largest group first", func() {
 			r := germany().stores("VIE", "AT", 2).check()
 
@@ -168,6 +191,28 @@ var _ = Describe("checking a network", func() {
 				names = append(names, p.Profile.String())
 			}
 			Expect(names).To(Equal([]string{"orderType=express", "orderType=sameday"}))
+		})
+
+		It("does not let a NOT entry met first hide the positive entry for the same value", func() {
+			// Crawl order is not meaningful: the same network must give the same profiles.
+			names := func(w *world) []string {
+				out := []string{}
+				for _, p := range network.New(&w.s).InferProfiles() {
+					out = append(out, p.Profile.String())
+				}
+				return out
+			}
+			notFirst := germany().
+				edge("a", "HUB-01", network.Target{Type: network.TypeManaged}, not(network.ContextTag, "express")).
+				edge("b", "HUB-02", network.Target{Type: network.TypeManaged}, in(network.ContextTag, "express"))
+			positiveFirst := germany().
+				edge("b", "HUB-02", network.Target{Type: network.TypeManaged}, in(network.ContextTag, "express")).
+				edge("a", "HUB-01", network.Target{Type: network.TypeManaged}, not(network.ContextTag, "express"))
+			notFirst.s.Tags = []network.Tag{{ID: "orderType", AllowedValues: []string{"express"}}}
+			positiveFirst.s.Tags = notFirst.s.Tags
+
+			Expect(names(notFirst)).To(Equal([]string{"orderType=express"}))
+			Expect(names(positiveFirst)).To(Equal(names(notFirst)))
 		})
 	})
 
@@ -320,6 +365,20 @@ var _ = Describe("checking a network", func() {
 
 			Expect(subjects(r, network.RuleDuplicateEdge)).To(Equal([]string{"HUB-01"}))
 			Expect(finding(r, network.RuleDuplicateEdge, "HUB-01").Evidence).To(HaveKeyWithValue("connections", []string{"a", "b"}))
+		})
+
+		It("says so when the duplicates differ in their transit time, so the user keeps the right one", func() {
+			w := germany().
+				edge("a", "HUB-01", network.Target{Type: network.TypeManaged}, in(network.ContextTag, "express")).
+				edge("b", "HUB-01", network.Target{Type: network.TypeManaged}, in(network.ContextTag, "express"))
+			w.s.Edges[len(w.s.Edges)-2].Transit = &network.Transit{Min: 1, Max: 2}
+			w.s.Edges[len(w.s.Edges)-1].Transit = &network.Transit{Min: 3, Max: 4}
+
+			f := finding(w.check(network.RuleDuplicateEdge), network.RuleDuplicateEdge, "HUB-01")
+
+			Expect(f.Detail).To(ContainSubstring("transit"))
+			Expect(f.Evidence).To(HaveKey("transit"))
+			Expect(f.Next).NotTo(HavePrefix("Keep one."))
 		})
 	})
 

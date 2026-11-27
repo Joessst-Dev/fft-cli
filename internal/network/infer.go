@@ -120,11 +120,23 @@ func (n *Network) InferRoles(cfg Config) Roles {
 		return cmp.Or(cmp.Compare(b.reach, a.reach), cmp.Compare(a.index, b.index))
 	})
 
+	// The cut goes at the largest jump between neighbours that reach somebody. The
+	// drop to the facilities that reach nobody is a candidate only when no other
+	// jump stands out: measured against a denominator of 1 it equals the last
+	// tier's own reach, which would beat a real hub tier above a small
+	// ship-from-store tier whenever that reach exceeds the hubs' jump over it.
 	best, at := 0.0, -1
-	for k := 0; k+1 < len(ranks) && ranks[k].reach > 0; k++ {
-		if jump := float64(ranks[k].reach) / float64(max(ranks[k+1].reach, 1)); jump > best {
-			best, at = jump, k
+	last := -1
+	for k := 0; k < len(ranks) && ranks[k].reach > 0; k++ {
+		last = k
+		if k+1 < len(ranks) && ranks[k+1].reach > 0 {
+			if jump := float64(ranks[k].reach) / float64(ranks[k+1].reach); jump > best {
+				best, at = jump, k
+			}
 		}
+	}
+	if best < cfg.HubRatio && last >= 0 && last+1 < len(ranks) {
+		best, at = float64(ranks[last].reach), last
 	}
 	if at >= 0 && best >= cfg.HubRatio {
 		r.HubCut, r.HubJump = ranks[at].reach, best
@@ -199,10 +211,13 @@ func (n *Network) InferProfiles() []ProfileCount {
 				continue
 			}
 			for _, v := range n.Values(c) {
-				if !used[v] && c.Operator == "" {
+				// Independent of used: a NOT entry met first must not hide a
+				// positive entry for the same value, or the profiles would follow
+				// the crawl order. The sort and Compact below deduplicate.
+				used[v] = true
+				if c.Operator == "" {
 					positive = append(positive, v)
 				}
-				used[v] = true
 			}
 		}
 	}
