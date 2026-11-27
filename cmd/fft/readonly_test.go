@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -175,6 +176,12 @@ var _ = Describe("the read-only gate's coverage of the command tree", func() {
 				continue
 			}
 
+			// A command that sends several operations names them all instead; the
+			// spec below holds each to the spec.
+			if _, several := cmd.Annotations[annotationOperations]; several {
+				continue
+			}
+
 			Expect(cmd.Annotations).To(HaveKey(annotationOperationID),
 				"%s has no operationId annotation, so the read-only gate cannot tell whether it writes. "+
 					"Annotate it, or — if it makes no request to the tenant — add it to commandsWithoutOperation "+
@@ -198,13 +205,26 @@ var _ = Describe("the read-only gate's coverage of the command tree", func() {
 
 	It("annotates every command with an operation the spec actually has", func() {
 		for _, cmd := range addressableCommands(root) {
-			id, ok := cmd.Annotations[annotationOperationID]
-			if !ok {
+			ids := cmd.Annotations[annotationOperations]
+			if id, ok := cmd.Annotations[annotationOperationID]; ok {
+				ids = id
+			}
+			if ids == "" {
 				continue
 			}
 
-			_, found := api.LookupOperation(id)
-			Expect(found).To(BeTrue(), "%s is annotated with %q, which the API spec does not have", cmd.CommandPath(), id)
+			for id := range strings.SplitSeq(ids, ",") {
+				_, found := api.LookupOperation(id)
+				Expect(found).To(BeTrue(), "%s is annotated with %q, which the API spec does not have", cmd.CommandPath(), id)
+			}
+		}
+	})
+
+	It("never gives a command both annotations, which would leave one of them unread", func() {
+		for _, cmd := range addressableCommands(root) {
+			_, one := cmd.Annotations[annotationOperationID]
+			_, several := cmd.Annotations[annotationOperations]
+			Expect(one && several).To(BeFalse(), cmd.CommandPath())
 		}
 	})
 })

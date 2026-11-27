@@ -22,6 +22,17 @@ import (
 // endpoint from Tier 2 to Tier 1 is a pure upgrade rather than a rename.
 const annotationOperationID = "operationId"
 
+// annotationOperations lists, comma-separated, every operation a command sends
+// when it sends several kinds of request and none of them is the one it stands
+// for: `fft network snapshot` crawls facilities, connections, groups, tags,
+// strategies, decision logs and orders.
+//
+// It does one job of annotationOperationID's and deliberately not the others.
+// The read-only gate checks every operation listed. Nothing is shadowed, --help
+// names no single endpoint, and the TUI's request form does not offer the
+// command for any of them: a crawl is not a way of sending one request.
+const annotationOperations = "operations"
+
 // annotationGenerated marks a command as one auto-registered from the spec, so a
 // spec can tell a curated command from its generated sibling without guessing from
 // the name.

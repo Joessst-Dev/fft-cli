@@ -52,6 +52,10 @@ func (d *Deps) guard(cmd *cobra.Command, args []string) error {
 		return d.guardComponent(cmd, name, args)
 	}
 
+	if ids, ok := cmd.Annotations[annotationOperations]; ok {
+		return d.guardOperations(cmd, ids)
+	}
+
 	id, ok := cmd.Annotations[annotationOperationID]
 	if !ok {
 		return nil
@@ -66,6 +70,22 @@ func (d *Deps) guard(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("%s is annotated with the operation %q, which the API spec does not have", cmd.CommandPath(), id)
 	}
 	return d.guardOperation(cmd, op)
+}
+
+// guardOperations gates a command that sends several operations: it is refused
+// if any one of them would be. An empty or unknown id refuses it outright, for the
+// reason [Deps.guard] gives for one.
+func (d *Deps) guardOperations(cmd *cobra.Command, ids string) error {
+	for id := range strings.SplitSeq(ids, ",") {
+		op, ok := api.LookupOperation(strings.TrimSpace(id))
+		if !ok {
+			return fmt.Errorf("%s is annotated with the operation %q, which the API spec does not have", cmd.CommandPath(), id)
+		}
+		if err := d.guardOperation(cmd, op); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // guardComponent refuses a component command that would change a read-only project.
