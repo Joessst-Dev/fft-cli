@@ -104,6 +104,19 @@ fft api addPickJob --example
 
 The sample body carries every required field, and `describe` lists every parameter.
 
+## "Query too complex"
+
+Exit 1: `the API returned HTTP 400: Query too complex - please simplify your search criteria or
+reduce the result set size`. Any search can hit it on a tenant with a very large collection, and
+the API's own advice is the part that does not work: a smaller `--size` fails the same way,
+because the cost is in the filter or sort over the whole collection, not in the page.
+
+Narrow the query instead: filter on an exact match (an id or a tenant id), and drop any date
+range and the `sort`. In an `--all` walk the message says how many pages and items were read
+before the refusal; nothing is printed, because half a list is not the list. For orders the
+exact-match filter is `fft order search --tenant-order-id <id>`, and `fft routing decision-logs`
+in practice lists the newest routings first (the API does not guarantee an order).
+
 ## "there is no operation X"
 
 Exit 2, with a suggestion. The operationId is wrong — find the right one:

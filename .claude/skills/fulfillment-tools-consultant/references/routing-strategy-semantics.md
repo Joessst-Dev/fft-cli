@@ -51,5 +51,7 @@ Connection-side semantics (`context`, wildcard targets) are in
 - `POST /api/orders/search` with a date filter or a sort answers 400 "Query too complex" on a large
   order history, and unfiltered it returns the oldest orders first; fft explains the 400 (#327).
   Recent routings are easier to reach through decision logs.
+- The limit applies to every `POST /api/<entity>/search`, not only orders; fft explains the 400
+  on every search path, curated, generated and `fft api`, and in an `--all` walk (#345).
 - `GET /api/categories` caps `size` at 100. fft's generated list commands now enforce the spec's
   `size` bounds and offer `--all` (#330).
