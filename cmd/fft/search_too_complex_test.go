@@ -27,14 +27,16 @@ var _ = Describe("the API's 'Query too complex' 400 on a search", func() {
 		})
 	}
 
-	// Each tier must say that a smaller --size is not the way out, keep the API's
+	// Each tier must say that a smaller page is not the way out, keep the API's
 	// words and exit code, and leave stdout to the data (which there is none of).
+	// It matches only what every hint shares: the generic, stock, listing, facility
+	// and order hints each go on to explain the cost in their own words.
 	expectExplained := func(code int) {
 		GinkgoHelper()
 
 		Expect(code).To(Equal(exitcode.General))
 		Expect(c.errOut()).To(ContainSubstring("Query too complex"))
-		Expect(c.errOut()).To(ContainSubstring("will not help: the API's cost is in the"))
+		Expect(c.errOut()).To(ContainSubstring("will not help:"))
 		Expect(c.out()).To(BeEmpty())
 	}
 
