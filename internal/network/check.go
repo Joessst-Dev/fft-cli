@@ -403,9 +403,12 @@ func (n *Network) offlineRefs() []Finding {
 // whatever order.
 func (n *Network) duplicateEdges() []Finding {
 	byKey := map[string][]string{}
+	edges := map[string][]*Edge{}
 	for i := range n.snap.Edges {
 		e := &n.snap.Edges[i]
-		byKey[n.edgeKey(e)] = append(byKey[n.edgeKey(e)], e.ID)
+		key := n.edgeKey(e)
+		byKey[key] = append(byKey[key], e.ID)
+		edges[key] = append(edges[key], e)
 	}
 	var out []Finding
 	for _, key := range sortedStrings(byKey) {
@@ -414,14 +417,39 @@ func (n *Network) duplicateEdges() []Finding {
 			continue
 		}
 		source := n.label(key[:strings.IndexByte(key, 0)])
-		out = append(out, Finding{
+		f := Finding{
 			Rule:       RuleDuplicateEdge,
 			Subject:    source,
 			Facilities: []string{source},
 			Detail:     fmt.Sprintf("%d connections of %s are the same connection: %s", len(ids), source, strings.Join(capped(ids), ", ")),
 			Evidence:   map[string]any{"connections": capped(ids)},
 			Next:       "Keep one. Which one the router uses is not defined, so a later edit to one of them may not take effect.",
-		})
+		}
+		// The transit time is not part of the key — the router cannot tell the
+		// connections apart either way — but "keep one" would silently drop one of
+		// two transit configurations, so say that they differ.
+		if transits := distinctTransits(edges[key]); len(transits) > 1 {
+			f.Detail += fmt.Sprintf(", with different transit times (%s)", strings.Join(transits, "; "))
+			f.Evidence["transit"] = transits
+			f.Next = "Keep one, the one with the right transit time. Which one the router uses is not defined, so a later edit to one of them may not take effect."
+		}
+		out = append(out, f)
+	}
+	return out
+}
+
+// distinctTransits lists the different transit times of edges, as "1-2 days"
+// in the order the edges come, "none" for a connection without one.
+func distinctTransits(edges []*Edge) []string {
+	var out []string
+	for _, e := range edges {
+		t := "none"
+		if e.Transit != nil {
+			t = fmt.Sprintf("%g-%g days", e.Transit.Min, e.Transit.Max)
+		}
+		if !slices.Contains(out, t) {
+			out = append(out, t)
+		}
 	}
 	return out
 }
