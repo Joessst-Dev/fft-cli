@@ -46,6 +46,22 @@ type View struct {
 
 	// Facilities describes every facility the view names, by label.
 	Facilities map[string]ViewFacility `json:"facilities"`
+
+	// Neighbourhoods explains, for the facilities a reader is likely to ask
+	// about, which connections lead there and why the others do not: the
+	// --facility ones, every finding's subject, then the stores the coverage
+	// cells name. Omitted counts the ones MaxFacilities left out; 'fft network
+	// reach' explains any of them.
+	Neighbourhoods map[string]Neighbourhood `json:"neighbourhoods"`
+	Omitted        int                      `json:"omitted,omitempty"`
+}
+
+// Neighbourhood is every connection that could lead to one facility, counted
+// into bundles: Profiles[k] for the kind of order View.Profiles[k].
+type Neighbourhood struct {
+	// Role is the facility's own role as a source, empty when it is none.
+	Role     Kind       `json:"role,omitempty"`
+	Profiles [][]Bundle `json:"profiles"`
 }
 
 // ViewCounts is the size of the network, and of each role in it.
@@ -132,10 +148,20 @@ type ViewFacility struct {
 	Unportable bool   `json:"unportable,omitempty"`
 }
 
+// DefaultMaxFacilities is how many neighbourhoods a view explains unless told
+// otherwise. Each is a few kilobytes, and a report is one file a browser loads.
+const DefaultMaxFacilities = 500
+
 // ViewOptions is what a view needs that the network does not hold.
 type ViewOptions struct {
 	// FFTVersion is the version of fft that draws the report.
 	FFTVersion string
+	// Facilities are explained first, whatever the check found: the ones the
+	// reader asked for, by index.
+	Facilities []int
+	// MaxFacilities caps the neighbourhoods; zero or less is
+	// DefaultMaxFacilities.
+	MaxFacilities int
 }
 
 // View runs the check and works out everything a report draws.
@@ -161,12 +187,13 @@ func (n *Network) View(cfg Config, opts ViewOptions) View {
 			PeerBy:   cmp.Or(cfg.PeerBy, DefaultConfig().PeerBy),
 			FromFile: cfg.FromFile,
 		},
-		Peers:      make([]ViewPeer, len(r.Peers)),
-		Profiles:   make([]ViewProfile, len(r.Profiles)),
-		Coverage:   []CoverageMatrix{},
-		Findings:   map[string]int{},
-		Suppressed: len(r.Suppressed),
-		Facilities: map[string]ViewFacility{},
+		Peers:          make([]ViewPeer, len(r.Peers)),
+		Profiles:       make([]ViewProfile, len(r.Profiles)),
+		Coverage:       []CoverageMatrix{},
+		Findings:       map[string]int{},
+		Suppressed:     len(r.Suppressed),
+		Facilities:     map[string]ViewFacility{},
+		Neighbourhoods: map[string]Neighbourhood{},
 	}
 	for i := range s.Facilities {
 		if s.Facilities[i].Online() {
@@ -275,6 +302,8 @@ func (n *Network) View(cfg Config, opts ViewOptions) View {
 		}
 	}
 
+	n.explain(&v, r, opts)
+
 	// The findings come sorted by rule, so each facility's rules do too.
 	for _, f := range r.Findings {
 		vf, ok := v.Facilities[f.Subject]
@@ -298,4 +327,70 @@ func reachFlags(tags []TagValue) (flags string, portable bool) {
 		portable = portable && ok
 	}
 	return b.String(), portable
+}
+
+// facilityRules are the rules whose subject is a facility a reader will want
+// explained: one that is not reached, or one connections lead to in vain.
+var facilityRules = []string{RuleNoSource, RulePeerCoverage, RuleExpect, RuleOfflineRef}
+
+// explain fills the view's neighbourhoods: the facilities asked for, then the
+// findings' subjects, then the stores the coverage cells name, up to the cap.
+func (n *Network) explain(v *View, r Report, opts ViewOptions) {
+	limit := opts.MaxFacilities
+	if limit <= 0 {
+		limit = DefaultMaxFacilities
+	}
+	seen := map[int]bool{}
+	var chosen []int
+	choose := func(i int) {
+		if seen[i] {
+			return
+		}
+		seen[i] = true
+		if len(chosen) < limit {
+			chosen = append(chosen, i)
+		} else {
+			v.Omitted++
+		}
+	}
+	for _, i := range opts.Facilities {
+		choose(i)
+	}
+	for _, f := range r.Findings {
+		if !slices.Contains(facilityRules, f.Rule) {
+			continue
+		}
+		if i, ok := n.Locate(f.Subject); ok {
+			choose(i)
+		}
+	}
+	for _, m := range v.Coverage {
+		for _, row := range m.Cells {
+			for _, c := range row {
+				for _, label := range c.Missing {
+					if i, ok := n.Locate(label); ok {
+						choose(i)
+					}
+				}
+			}
+		}
+	}
+
+	classes := n.edgeClasses()
+	for _, i := range chosen {
+		f := n.Facility(i)
+		role, _ := r.Roles.kind(i)
+		nb := Neighbourhood{Role: role, Profiles: make([][]Bundle, len(r.Profiles))}
+		for k, pc := range r.Profiles {
+			nb.Profiles[k] = n.bundlesTo(classes, i, pc.Profile, r.Roles)
+		}
+		v.Neighbourhoods[f.Label()] = nb
+		if _, ok := v.Facilities[f.Label()]; !ok {
+			arg, portable := shellquote.Quote(f.Label())
+			v.Facilities[f.Label()] = ViewFacility{
+				Name: f.Name, Type: f.Type, Status: f.Status, Country: f.Country,
+				ReachArg: arg, Unportable: !portable,
+			}
+		}
+	}
 }

@@ -13,6 +13,8 @@
   --accent: #257de0;
   --warning: #fbb315;
   --warning-ink: #0b0b0b;
+  --r-applies: #257de0;
+  --r-cond: #f47230;
   --g1: #e8f1fc; --g1-ink: #191919;
   --g2: #b6d5f8; --g2-ink: #191919;
   --g3: #84b9f3; --g3-ink: #191919;
@@ -31,6 +33,8 @@
     --axis: #474747;
     --ring: rgba(255, 255, 255, 0.10);
     --accent: #338ced;
+    --r-applies: #338ced;
+    --r-cond: #e76624;
     --g1: #1c2836; --g1-ink: #efefef;
     --g2: #0e3d7e; --g2-ink: #efefef;
     --g3: #1757ac; --g3-ink: #ffffff;
@@ -141,3 +145,23 @@ table.list { border-collapse: collapse; width: 100%; }
 table.list th, table.list td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--grid); }
 table.list th { color: var(--text-secondary); font-weight: 500; }
 table.list td.rules-cell span { margin-right: 6px; }
+
+.controls input, .controls select {
+  font: inherit; color: var(--text-primary); background: var(--surface-1);
+  border: 1px solid var(--axis); border-radius: 6px; padding: 4px 8px;
+}
+.nb-graph { overflow-x: auto; margin: 8px 0 16px; }
+.nb-graph svg { min-width: 760px; font-family: inherit; }
+.nb-graph text.head { font-size: 13px; fill: var(--text-primary); }
+.nb-graph text.reason { font-size: 11.5px; fill: var(--text-secondary); }
+.nb-graph .link { stroke: var(--axis); stroke-linecap: round; }
+.nb-graph .dot { fill: var(--axis); }
+.nb-graph .r-applies .link { stroke: var(--r-applies); }
+.nb-graph .r-applies .dot { fill: var(--r-applies); }
+.nb-graph .r-conditional .link { stroke: var(--r-cond); stroke-dasharray: 8 4; }
+.nb-graph .r-conditional .dot { fill: var(--r-cond); }
+.nb-graph .r-excluded .link { stroke-dasharray: 3 4; opacity: 0.8; }
+.nb-graph .bundle:hover .link { opacity: 1; stroke-width: 6; }
+.nb-graph .target { fill: var(--text-primary); }
+table.list td.num { text-align: right; font-variant-numeric: tabular-nums; }
+a { color: var(--accent); }

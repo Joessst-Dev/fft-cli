@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"html"
 	"regexp"
 	"strings"
@@ -193,13 +194,100 @@ var _ = Describe("the command a report offers to paste", func() {
 	})
 })
 
+var _ = Describe("a view's neighbourhoods", func() {
+	It("explains the facilities the findings name and the stores the cells list", func() {
+		v := europe().view()
+
+		Expect(v.Neighbourhoods).To(HaveLen(1))
+		Expect(v.Neighbourhoods).To(HaveKey("BER-11"))
+		Expect(v.Omitted).To(BeZero())
+	})
+
+	It("counts, for each kind of order, the connections into a facility by kind of source, result and reason", func() {
+		nb := europe().view().Neighbourhoods["BER-11"]
+
+		Expect(nb.Role).To(Equal(network.KindStore))
+		bulky := nb.Profiles[1]
+		Expect(bulky).To(HaveLen(3))
+		Expect(bulky[0]).To(Equal(network.Bundle{Kind: network.KindSupplier, Result: network.ResultApplies,
+			Reason: "every context entry passes", Count: 1, Sources: []string{"SUP-01"}, SourceCount: 1,
+			Connections: []string{"s1"}}))
+		Expect([]string{bulky[1].Reason, bulky[2].Reason}).To(ConsistOf(
+			"TAG_REFERENCE NOT: the order carries bulky", "the target's excludedFacilityRefs lists it"))
+		Expect(bulky[1].Kind).To(Equal(network.KindHub))
+		Expect(bulky[1].Result).To(Equal(network.ResultExcluded))
+	})
+
+	It("adds up to what reach lists, row for row, for every facility and kind of order", func() {
+		w := europe()
+		n := network.New(&w.s)
+		cfg := network.DefaultConfig()
+		r := n.Check(cfg)
+		all := []int{}
+		for i := range n.Len() {
+			all = append(all, i)
+		}
+		v := n.View(cfg, network.ViewOptions{Facilities: all, MaxFacilities: n.Len()})
+
+		Expect(v.Neighbourhoods).To(HaveLen(n.Len()))
+		type key struct {
+			kind           network.Kind
+			result, reason string
+		}
+		for i := range n.Len() {
+			label := n.Facility(i).Label()
+			for k, pc := range r.Profiles {
+				want := map[key]int{}
+				for _, row := range n.ReachTo(i, pc.Profile, r.Roles) {
+					want[key{row.Kind, row.Result, network.BundleReason(row.Reason)}]++
+				}
+				got := map[key]int{}
+				for _, b := range v.Neighbourhoods[label].Profiles[k] {
+					got[key{b.Kind, b.Result, b.Reason}] += b.Count
+				}
+				Expect(got).To(Equal(want), "%s for %s", label, pc.Profile)
+			}
+		}
+	})
+
+	It("explains the facilities asked for first, and counts the ones the cap leaves out", func() {
+		w := europe()
+		n := network.New(&w.s)
+		vie, _ := n.Locate("VIE-01")
+		v := n.View(network.DefaultConfig(), network.ViewOptions{Facilities: []int{vie}, MaxFacilities: 1})
+
+		Expect(v.Neighbourhoods).To(HaveLen(1))
+		Expect(v.Neighbourhoods).To(HaveKey("VIE-01"))
+		Expect(v.Omitted).To(Equal(1))
+		Expect(v.Facilities).To(HaveKey("VIE-01"))
+	})
+
+	It("names at most MaxBundleSources sources in a bundle and counts them all", func() {
+		w := newWorld().hub("HUB-01").stores("BER", "DE", network.MaxBundleSources+5)
+		for i := 1; i <= network.MaxBundleSources+5; i++ {
+			w.edge(fmt.Sprintf("e%02d", i), fmt.Sprintf("BER-%02d", i), network.Target{Type: network.TypeManaged},
+				in(network.ContextFacility, id("BER-01")))
+		}
+		n := network.New(&w.s)
+		target, _ := n.Locate("BER-02")
+		v := n.View(network.DefaultConfig(), network.ViewOptions{Facilities: []int{target}})
+
+		b := v.Neighbourhoods["BER-02"].Profiles[0][0]
+		Expect(b.Reason).To(Equal("FACILITY does not list it"))
+		Expect(b.Count).To(Equal(network.MaxBundleSources + 4))
+		Expect(b.SourceCount).To(Equal(network.MaxBundleSources + 4))
+		Expect(b.Sources).To(HaveLen(network.MaxBundleSources))
+	})
+})
+
 var _ = Describe("a rendered report", func() {
 	It("is the same, byte for byte, for the same snapshot", func() {
 		Expect(render(europe().view())).To(Equal(render(europe().view())))
 	})
 
 	It("loads nothing from anywhere", func() {
-		page := render(europe().view())
+		// The SVG namespace is a name, not an address: nothing is fetched from it.
+		page := strings.ReplaceAll(render(europe().view()), `"http://www.w3.org/2000/svg"`, "")
 
 		Expect(page).NotTo(ContainSubstring("http://"))
 		Expect(page).NotTo(ContainSubstring("https://"))
