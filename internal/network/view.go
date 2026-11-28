@@ -3,7 +3,10 @@ package network
 import (
 	"cmp"
 	"slices"
+	"strings"
 	"time"
+
+	"github.com/Joessst-Dev/fft-cli/internal/shellquote"
 )
 
 // KindAny is a coverage matrix's column for every kind of source at once: the
@@ -81,6 +84,12 @@ type ViewProfile struct {
 	Name   string     `json:"name"`
 	Tags   []TagValue `json:"tags"`
 	Orders int        `json:"orders"`
+	// ReachFlags is the --tag flags that put this kind of order to 'fft network
+	// reach', shell-quoted: a tag value is tenant text, and the page shows this
+	// line for a user to paste. Unportable is set when no quoting keeps a value
+	// intact in every shell.
+	ReachFlags string `json:"reachFlags"`
+	Unportable bool   `json:"unportable,omitempty"`
 }
 
 // CoverageMatrix is how many of each peer group's stores one kind of source
@@ -116,6 +125,11 @@ type ViewFacility struct {
 	Country string `json:"country,omitempty"`
 	// Rules are the rules with a finding about it, in the check's rule order.
 	Rules []string `json:"rules,omitempty"`
+	// ReachArg is the label as 'fft network reach --to' takes it, shell-quoted
+	// for the line the page offers to paste: a facility id is tenant text.
+	// Unportable is set when no quoting keeps it intact in every shell.
+	ReachArg   string `json:"reachArg"`
+	Unportable bool   `json:"unportable,omitempty"`
 }
 
 // ViewOptions is what a view needs that the network does not hold.
@@ -162,7 +176,11 @@ func (n *Network) View(cfg Config, opts ViewOptions) View {
 	name := func(i int) string {
 		f := n.Facility(i)
 		if _, ok := v.Facilities[f.Label()]; !ok {
-			v.Facilities[f.Label()] = ViewFacility{Name: f.Name, Type: f.Type, Status: f.Status, Country: f.Country}
+			arg, portable := shellquote.Quote(f.Label())
+			v.Facilities[f.Label()] = ViewFacility{
+				Name: f.Name, Type: f.Type, Status: f.Status, Country: f.Country,
+				ReachArg: arg, Unportable: !portable,
+			}
 		}
 		return f.Label()
 	}
@@ -179,7 +197,8 @@ func (n *Network) View(cfg Config, opts ViewOptions) View {
 		if tags == nil {
 			tags = []TagValue{}
 		}
-		v.Profiles[i] = ViewProfile{Name: pc.Profile.String(), Tags: tags, Orders: pc.Orders}
+		flags, portable := reachFlags(tags)
+		v.Profiles[i] = ViewProfile{Name: pc.Profile.String(), Tags: tags, Orders: pc.Orders, ReachFlags: flags, Unportable: !portable}
 	}
 
 	// flagged answers "did the check report this store, for this kind of
@@ -266,4 +285,17 @@ func (n *Network) View(cfg Config, opts ViewOptions) View {
 		v.Facilities[f.Subject] = vf
 	}
 	return v
+}
+
+// reachFlags spells tags as the --tag flags of 'fft network reach', each
+// quoted, with a leading space apiece so the string appends to a command line.
+func reachFlags(tags []TagValue) (flags string, portable bool) {
+	var b strings.Builder
+	portable = true
+	for _, t := range tags {
+		arg, ok := shellquote.Quote(t.ID + "=" + t.Value)
+		b.WriteString(" --tag " + arg)
+		portable = portable && ok
+	}
+	return b.String(), portable
 }

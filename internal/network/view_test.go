@@ -77,7 +77,7 @@ var _ = Describe("a network's view", func() {
 		Expect(hub.Cells[1][1]).To(Equal(network.Cell{Have: 10}))
 		Expect(v.Facilities).To(HaveKeyWithValue("BER-11", network.ViewFacility{
 			Type: network.TypeManaged, Status: network.StatusOnline, Country: "DE",
-			Rules: []string{network.RulePeerCoverage}}))
+			Rules: []string{network.RulePeerCoverage}, ReachArg: "BER-11"}))
 	})
 
 	It("has a column for any source at all, which the supplier fills here", func() {
@@ -127,6 +127,69 @@ var _ = Describe("a network's view", func() {
 
 		Expect(v.Findings).To(Equal(map[string]int{network.RulePeerCoverage: 1}))
 		Expect(v.Suppressed).To(BeZero())
+	})
+})
+
+var _ = Describe("the command a report offers to paste", func() {
+	// The page shows 'fft network reach ...' for every store a cell misses, for a
+	// user to paste into a shell. A tenant id and a tag value are text a stranger
+	// may have chosen, so Go quotes them and the page only joins what it is given.
+	const (
+		hostileID  = "BER-11;$(id)"
+		hostileTag = "same day"
+	)
+
+	// flagsOf is the columns of w's view when the config declares these kinds of
+	// order, by the column's name. BER-11 stays the store a bulky order misses.
+	flagsOf := func(w *world, values ...string) map[string]network.ViewProfile {
+		cfg := network.DefaultConfig()
+		cfg.Declared = [][]network.TagValue{{{ID: "orderType", Value: "bulky"}}}
+		for _, v := range values {
+			cfg.Declared = append(cfg.Declared, []network.TagValue{{ID: "orderType", Value: v}})
+		}
+		byName := map[string]network.ViewProfile{}
+		for _, p := range network.New(&w.s).View(cfg, network.ViewOptions{}).Profiles {
+			byName[p.Name] = p
+		}
+		return byName
+	}
+
+	hostileWorld := func() *world {
+		w := europe()
+		for i := range w.s.Facilities {
+			if w.s.Facilities[i].TenantFacilityID == "BER-11" {
+				w.s.Facilities[i].TenantFacilityID = hostileID
+			}
+		}
+		return w
+	}
+
+	It("carries a tenant id quoted, so a shell reads it as one argument", func() {
+		v := hostileWorld().view()
+
+		Expect(v.Facilities).To(HaveKeyWithValue(hostileID, HaveField("ReachArg", "'BER-11;$(id)'")))
+		Expect(v.Facilities["HUB-01"].ReachArg).To(Equal("HUB-01"))
+	})
+
+	It("carries a tag value with a space quoted, as one --tag argument", func() {
+		profiles := flagsOf(europe(), hostileTag)
+
+		Expect(profiles["orderType=same day"].ReachFlags).To(Equal(" --tag 'orderType=same day'"))
+		Expect(profiles["orderType=bulky"].ReachFlags).To(Equal(" --tag orderType=bulky"))
+	})
+
+	It("marks a value no quoting keeps intact in every shell", func() {
+		profiles := flagsOf(europe(), "it's")
+
+		Expect(profiles["orderType=it's"].Unportable).To(BeTrue())
+		Expect(profiles["orderType=bulky"].Unportable).To(BeFalse())
+	})
+
+	It("is joined by the page from the quoted pieces, never from the raw text", func() {
+		page := render(hostileWorld().view())
+
+		Expect(page).NotTo(MatchRegexp(`"--tag " \+ t\.`))
+		Expect(page).To(ContainSubstring("facility.reachArg + profile.reachFlags"))
 	})
 })
 

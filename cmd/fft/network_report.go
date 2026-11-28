@@ -14,6 +14,7 @@ import (
 
 	"github.com/Joessst-Dev/fft-cli/internal/atomicfile"
 	"github.com/Joessst-Dev/fft-cli/internal/buildinfo"
+	"github.com/Joessst-Dev/fft-cli/internal/exitcode"
 	"github.com/Joessst-Dev/fft-cli/internal/network"
 	"github.com/Joessst-Dev/fft-cli/internal/output"
 )
@@ -38,7 +39,8 @@ server, works offline, and its Content-Security-Policy forbids it any request.
 The report holds the tenant's network, as the snapshot does. It is written
 next to the snapshot, in the cache directory, readable by its owner only; keep
 it out of a repository. stdout carries its path, or with -o json the data the
-page draws. It sends no request, and exits 0 whatever it shows: 'fft network
+page draws (--out - prints the page instead, so it cannot be
+combined with -o json). It sends no request, and exits 0 whatever it shows: 'fft network
 check' is the gate.`
 
 func newNetworkReportCmd(deps *Deps) *cobra.Command {
@@ -55,6 +57,13 @@ func newNetworkReportCmd(deps *Deps) *cobra.Command {
 		Args:  usageArgs(cobra.NoArgs),
 
 		RunE: func(cmd *cobra.Command, _ []string) error {
+			// Both want stdout, for different things: the page, or the data the
+			// page draws. Silently picking one hands an agent markup where it
+			// asked for JSON.
+			if out == "-" && deps.Printer.Format() != output.Table {
+				return exitcode.UsageError{Err: fmt.Errorf(
+					"--out - prints the page on stdout; it cannot be combined with -o %s", deps.Printer.Format())}
+			}
 			path, err := snapshotPath(deps, snapshot)
 			if err != nil {
 				return err
@@ -97,8 +106,10 @@ func newNetworkReportCmd(deps *Deps) *cobra.Command {
 				return fmt.Errorf("write %s: %w", out, err)
 			}
 
+			// Said in every format: under -o json stdout is the data, and this is
+			// the only place the page's path is told.
+			deps.Printer.Notef("Report written to %s; open it in a browser.", out)
 			if deps.Printer.Format() == output.Table {
-				deps.Printer.Notef("Report written to %s; open it in a browser.", out)
 				_, err := fmt.Fprintln(deps.Printer.Out(), out)
 				return err
 			}

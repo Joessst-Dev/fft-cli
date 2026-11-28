@@ -662,6 +662,22 @@ var _ = Describe("fft network report", func() {
 		Expect(filepath.Join(dir, "s.report.html")).To(BeAnExistingFile())
 	})
 
+	It("says where the page went on stderr under -o json, so an agent can hand it over", func() {
+		Expect(c.run("network", "report", "--snapshot", path, "-o", "json")).To(Equal(exitcode.OK))
+
+		Expect(c.errOut()).To(ContainSubstring("Report written to " + filepath.Join(dir, "s.report.html")))
+		// stdout stays the data and nothing else.
+		Expect(json.Valid([]byte(c.out()))).To(BeTrue())
+	})
+
+	It("refuses --out - with -o json, which ask for different things on one stdout, and writes nothing", func() {
+		Expect(c.run("network", "report", "--snapshot", path, "--out", "-", "-o", "json")).To(Equal(exitcode.Usage))
+
+		Expect(c.out()).To(BeEmpty())
+		Expect(c.errOut()).To(ContainSubstring("--out -"))
+		Expect(filepath.Join(dir, "s.report.html")).NotTo(BeAnExistingFile())
+	})
+
 	It("prints the page itself with --out -, and writes no file", func() {
 		Expect(c.run("network", "report", "--snapshot", path, "--out", "-")).To(Equal(exitcode.OK))
 

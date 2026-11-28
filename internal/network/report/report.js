@@ -210,7 +210,7 @@
       var rulesCell = el("td", { class: "rules-cell" });
       (f.rules || []).forEach(function (r) { rulesCell.appendChild(el("code", { text: r })); rulesCell.appendChild(document.createTextNode(" ")); });
       rows.appendChild(el("tr", null, [el("td", null, [el("code", { text: label })]), el("td", { text: f.name || "" }), rulesCell,
-        el("td", null, [el("code", { text: "fft network reach --to " + label + profileFlags(profile) })])]));
+        el("td", null, [el("code", { text: reachCommand(f, profile) })])]));
     });
     detail.appendChild(el("table", { class: "list" }, [
       el("thead", null, [el("tr", null, [el("th", { text: "Store" }), el("th", { text: "Name" }), el("th", { text: "Findings" }),
@@ -222,8 +222,11 @@
     }
   }
 
-  function profileFlags(profile) {
-    return profile.tags.map(function (t) { return " --tag " + t.id + "=" + t.value; }).join("");
+  // Go quoted every argument (a facility id and a tag value are tenant text, and
+  // this line is one a user pastes into a shell); the page only joins them.
+  function reachCommand(facility, profile) {
+    return "fft network reach --to " + facility.reachArg + profile.reachFlags +
+      (facility.unportable || profile.unportable ? "  (cannot be copied safely)" : "");
   }
 
   drawHeat();

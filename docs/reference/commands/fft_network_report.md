@@ -27,7 +27,8 @@ server, works offline, and its Content-Security-Policy forbids it any request.
 The report holds the tenant's network, as the snapshot does. It is written
 next to the snapshot, in the cache directory, readable by its owner only; keep
 it out of a repository. stdout carries its path, or with -o json the data the
-page draws. It sends no request, and exits 0 whatever it shows: 'fft network
+page draws (--out - prints the page instead, so it cannot be
+combined with -o json). It sends no request, and exits 0 whatever it shows: 'fft network
 check' is the gate.
 
 ## Usage
