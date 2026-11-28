@@ -163,9 +163,11 @@ supply?", "why does nothing reach BER-01?"), take a snapshot and check it offlin
 fft network snapshot
 fft network check -o json
 fft network reach --to BER-01
+fft network report
 ```
 
-Exit 11 from `check` means it found problems. Report them; **fixing one is a change to
+When the user wants to see the coverage rather than read findings, `fft network report`
+writes a page they open in a browser. Exit 11 from `check` means it found problems. Report them; **fixing one is a change to
 where real orders go, and that is the network owner's decision.** Read
 [network](./network.md) before you go further.
 
@@ -259,4 +261,5 @@ Node) that installs and runs straight away. See
 - [references/templates.md](./templates.md) — saving a request body and sending it
   again with the parts that change filled in.
 - [references/network.md](./network.md) — finding routing gaps across the whole
-  network: the snapshot, every check rule, explaining a finding, `fft-network.yaml`, and CI.
+  network: the snapshot, every check rule, explaining a finding, the HTML report,
+  `fft-network.yaml`, and CI.

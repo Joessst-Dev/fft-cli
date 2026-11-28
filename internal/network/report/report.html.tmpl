@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="{{.CSP}}">
+<meta name="referrer" content="no-referrer">
+<title>Routing coverage — {{.Title}}</title>
+<style>{{.CSS}}</style>
+</head>
+<body>
+<main class="viz-root">
+<noscript><p>This report draws its views with JavaScript. 'fft network report -o json' prints the same data.</p></noscript>
+<div id="app"></div>
+</main>
+<script type="application/json" id="view">{{.View}}</script>
+<script>{{.JS}}</script>
+</body>
+</html>

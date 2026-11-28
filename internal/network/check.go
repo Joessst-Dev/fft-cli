@@ -177,6 +177,48 @@ func (n *Network) coverGroups(roles Roles) []*coverGroup {
 	return groups
 }
 
+// profileReach is what each kind of source reaches for one order profile.
+type profileReach struct {
+	// reach is what a kind's connections lead to whatever the order's items and
+	// recipient.
+	reach map[Kind]Bitset
+	// conditional is what some connection leads to only for some items or
+	// recipients, from any kind; conditionalBy splits it by kind, because a hub
+	// that reaches a store only for some items has not left it out, and a
+	// peer-coverage finding must not say it did.
+	conditional   Bitset
+	conditionalBy map[Kind]Bitset
+}
+
+// any is what some source reaches, of whatever kind.
+func (pr profileReach) any() Bitset {
+	out := pr.reach[KindHub].Clone()
+	out.Or(pr.reach[KindStore])
+	out.Or(pr.reach[KindSupplier])
+	return out
+}
+
+// reachFor resolves every cover group for one profile. The rules and the
+// report's coverage matrix both read it, so a picture of the network cannot
+// disagree with the check.
+func (n *Network) reachFor(groups []*coverGroup, p Profile) profileReach {
+	pr := profileReach{
+		reach:         map[Kind]Bitset{KindHub: n.empty(), KindStore: n.empty(), KindSupplier: n.empty()},
+		conditional:   n.empty(),
+		conditionalBy: map[Kind]Bitset{KindHub: n.empty(), KindStore: n.empty(), KindSupplier: n.empty()},
+	}
+	for _, g := range groups {
+		switch v, _ := n.Applies(&g.rep, p); v {
+		case Applies:
+			pr.reach[g.kind].Or(g.mask)
+		case Conditional:
+			pr.conditional.Or(g.mask)
+			pr.conditionalBy[g.kind].Or(g.mask)
+		}
+	}
+	return pr
+}
+
 // gap is one store's coverage problem, collected across profiles.
 type gap struct {
 	profiles    []string
@@ -198,24 +240,10 @@ func (n *Network) coverage(cfg Config, r Report) (noSource, peer []Finding, cove
 
 	for _, pc := range r.Profiles {
 		p := pc.Profile
-		reach := map[Kind]Bitset{KindHub: n.empty(), KindStore: n.empty(), KindSupplier: n.empty()}
-		conditional := n.empty()
-		// Per kind as well, for peer-coverage: a hub that reaches a store only for
-		// some items has not left it out, and the finding must not say it did.
-		conditionalBy := map[Kind]Bitset{KindHub: n.empty(), KindStore: n.empty(), KindSupplier: n.empty()}
-		for _, g := range groups {
-			switch v, _ := n.Applies(&g.rep, p); v {
-			case Applies:
-				reach[g.kind].Or(g.mask)
-			case Conditional:
-				conditional.Or(g.mask)
-				conditionalBy[g.kind].Or(g.mask)
-			}
-		}
+		pr := n.reachFor(groups, p)
+		reach, conditional, conditionalBy := pr.reach, pr.conditional, pr.conditionalBy
 
-		reached := reach[KindHub].Clone()
-		reached.Or(reach[KindStore])
-		reached.Or(reach[KindSupplier])
+		reached := pr.any()
 		r.Roles.Stores.Each(func(i int) {
 			if reached.Has(i) {
 				return

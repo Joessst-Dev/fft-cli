@@ -166,6 +166,7 @@ fft network snapshot --resume
 fft network check
 fft network check --rule peer-coverage -o json
 fft network reach --to BER-01 --tag orderType=express
+fft network report
 fft network infer
 fft network config validate
 ```
@@ -175,6 +176,8 @@ fft network config validate
 - **`check` sends no request.** Exit 11 means it ran and found problems, not that it
   failed. Read what it assumed on stderr, then `-o json` for each finding's evidence and
   next step.
+- **`report` draws the coverage as an HTML page** for a person to open; `-o json` is the
+  same data for you. Like the snapshot, it stays on the user's machine.
 - **Report findings; do not fix them, and never add a `suppress` entry to go green.**
 - The whole workflow, every rule, `fft-network.yaml` and CI usage are in
   [network](./network.md).

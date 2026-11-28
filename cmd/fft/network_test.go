@@ -618,3 +618,95 @@ var _ = Describe("fft network reach", func() {
 		Entry("an unknown result", "--to", "BER-11", "--result", "maybe"),
 	)
 })
+
+var _ = Describe("fft network report", func() {
+	var (
+		c    *cli
+		dir  string
+		path string
+	)
+
+	BeforeEach(func() {
+		c = newCLI()
+		dir = GinkgoT().TempDir()
+		path = filepath.Join(dir, "s.json.gz")
+		Expect(network.Save(path, gappySnapshot())).To(Succeed())
+	})
+
+	It("writes the page beside the snapshot, readable by its owner only, and prints its path", func() {
+		Expect(c.run("network", "report", "--snapshot", path)).To(Equal(exitcode.OK))
+
+		report := filepath.Join(dir, "s.report.html")
+		Expect(c.out()).To(Equal(report + "\n"))
+		testsupport.ExpectOwnerOnlyFile(report)
+		page, err := os.ReadFile(report)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(string(page)).To(HavePrefix("<!DOCTYPE html>"))
+		Expect(string(page)).To(ContainSubstring("BER-11"))
+	})
+
+	It("exits 0 although the check finds problems, and points at the check", func() {
+		Expect(c.run("network", "report", "--snapshot", path)).To(Equal(exitcode.OK))
+
+		Expect(c.errOut()).To(ContainSubstring("11 stores in 1 peer group, 1 kind of order; 2 findings (fft network check lists them)."))
+	})
+
+	It("prints the data the page draws under -o json", func() {
+		Expect(c.run("network", "report", "--snapshot", path, "-o", "json")).To(Equal(exitcode.OK))
+
+		var v network.View
+		Expect(json.Unmarshal([]byte(c.out()), &v)).To(Succeed())
+		Expect(v.Peers).To(Equal([]network.ViewPeer{{Key: "DE", Size: 11}}))
+		Expect(v.Coverage[0].Kind).To(Equal(network.KindHub))
+		Expect(v.Coverage[0].Cells[0][0].Missing).To(Equal([]string{"BER-11"}))
+		Expect(filepath.Join(dir, "s.report.html")).To(BeAnExistingFile())
+	})
+
+	It("says where the page went on stderr under -o json, so an agent can hand it over", func() {
+		Expect(c.run("network", "report", "--snapshot", path, "-o", "json")).To(Equal(exitcode.OK))
+
+		Expect(c.errOut()).To(ContainSubstring("Report written to " + filepath.Join(dir, "s.report.html")))
+		// stdout stays the data and nothing else.
+		Expect(json.Valid([]byte(c.out()))).To(BeTrue())
+	})
+
+	It("refuses --out - with -o json, which ask for different things on one stdout, and writes nothing", func() {
+		Expect(c.run("network", "report", "--snapshot", path, "--out", "-", "-o", "json")).To(Equal(exitcode.Usage))
+
+		Expect(c.out()).To(BeEmpty())
+		Expect(c.errOut()).To(ContainSubstring("--out -"))
+		Expect(filepath.Join(dir, "s.report.html")).NotTo(BeAnExistingFile())
+	})
+
+	It("prints the page itself with --out -, and writes no file", func() {
+		Expect(c.run("network", "report", "--snapshot", path, "--out", "-")).To(Equal(exitcode.OK))
+
+		Expect(c.out()).To(HavePrefix("<!DOCTYPE html>"))
+		Expect(filepath.Join(dir, "s.report.html")).NotTo(BeAnExistingFile())
+	})
+
+	It("warns when it writes into a git working tree", func() {
+		repo := filepath.Join(dir, "repo")
+		Expect(os.MkdirAll(filepath.Join(repo, ".git"), 0o700)).To(Succeed())
+		out := filepath.Join(repo, "docs", "gaps.html")
+
+		Expect(c.run("network", "report", "--snapshot", path, "--out", out)).To(Equal(exitcode.OK))
+
+		Expect(c.errOut()).To(ContainSubstring("inside the repository at " + repo))
+		Expect(out).To(BeAnExistingFile())
+	})
+
+	It("exits 3 and says how to take one when there is no snapshot", func() {
+		Expect(c.run("network", "report", "--snapshot", filepath.Join(dir, "none.json.gz"))).To(Equal(exitcode.Config))
+
+		Expect(c.errOut()).To(ContainSubstring("fft network snapshot"))
+	})
+
+	It("sends no request", func() {
+		api := c.fakeTenant(networkTenant)
+
+		c.run("network", "report", "--snapshot", path)
+
+		Expect(api.recorded()).To(BeEmpty())
+	})
+})
