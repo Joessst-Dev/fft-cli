@@ -308,7 +308,7 @@
     var f = view.facilities[at.label] || {};
     var n = view.neighbourhoods[at.label];
     var profile = view.profiles[at.profile];
-    var bundles = n.profiles[at.profile] || [];
+    var bundles = n.sets[n.profiles[at.profile]] || [];
     var count = { applies: 0, conditional: 0, excluded: 0 };
     bundles.forEach(function (b) { count[b.result] += b.count; });
 

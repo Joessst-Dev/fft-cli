@@ -2,6 +2,7 @@ package network
 
 import (
 	"cmp"
+	"reflect"
 	"slices"
 	"strings"
 	"time"
@@ -57,12 +58,21 @@ type View struct {
 }
 
 // Neighbourhood is every connection that could lead to one facility, counted
-// into bundles: Profiles[k] for the kind of order View.Profiles[k].
+// into bundles: Sets[Profiles[k]] for the kind of order View.Profiles[k].
+//
+// Kinds of order differ in tags only some connections read, so most of a
+// facility's kinds of order get the same bundles; each distinct list is carried
+// once. On a real network that was three quarters of them, and a report's size
+// is what a browser has to load.
 type Neighbourhood struct {
 	// Role is the facility's own role as a source, empty when it is none.
 	Role     Kind       `json:"role,omitempty"`
-	Profiles [][]Bundle `json:"profiles"`
+	Sets     [][]Bundle `json:"sets"`
+	Profiles []int      `json:"profiles"`
 }
+
+// Bundles is the bundles for the kind of order View.Profiles[k].
+func (nb Neighbourhood) Bundles(k int) []Bundle { return nb.Sets[nb.Profiles[k]] }
 
 // ViewCounts is the size of the network, and of each role in it.
 type ViewCounts struct {
@@ -380,9 +390,15 @@ func (n *Network) explain(v *View, r Report, opts ViewOptions) {
 	for _, i := range chosen {
 		f := n.Facility(i)
 		role, _ := r.Roles.kind(i)
-		nb := Neighbourhood{Role: role, Profiles: make([][]Bundle, len(r.Profiles))}
+		nb := Neighbourhood{Role: role, Sets: [][]Bundle{}, Profiles: make([]int, len(r.Profiles))}
 		for k, pc := range r.Profiles {
-			nb.Profiles[k] = n.bundlesTo(classes, i, pc.Profile, r.Roles)
+			bundles := n.bundlesTo(classes, i, pc.Profile)
+			set := slices.IndexFunc(nb.Sets, func(b []Bundle) bool { return reflect.DeepEqual(b, bundles) })
+			if set < 0 {
+				set = len(nb.Sets)
+				nb.Sets = append(nb.Sets, bundles)
+			}
+			nb.Profiles[k] = set
 		}
 		v.Neighbourhoods[f.Label()] = nb
 		if _, ok := v.Facilities[f.Label()]; !ok {

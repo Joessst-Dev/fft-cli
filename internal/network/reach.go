@@ -224,7 +224,7 @@ func BundleReason(why string) string { return entryPosition.ReplaceAllString(why
 // It merges each matching class's aggregate instead of walking its members, so
 // the work is classes, not connections: a report explains hundreds of
 // facilities for several kinds of order.
-func (n *Network) bundlesTo(classes []*edgeClass, i int, p Profile, roles Roles) []Bundle {
+func (n *Network) bundlesTo(classes []*edgeClass, i int, p Profile) []Bundle {
 	f := n.Facility(i)
 	type key struct {
 		kind           Kind

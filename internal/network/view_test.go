@@ -208,7 +208,7 @@ var _ = Describe("a view's neighbourhoods", func() {
 		nb := europe().view().Neighbourhoods["BER-11"]
 
 		Expect(nb.Role).To(Equal(network.KindStore))
-		bulky := nb.Profiles[1]
+		bulky := nb.Bundles(1)
 		Expect(bulky).To(HaveLen(3))
 		Expect(bulky[0]).To(Equal(network.Bundle{Kind: network.KindSupplier, Result: network.ResultApplies,
 			Reason: "every context entry passes", Count: 1, Sources: []string{"SUP-01"}, SourceCount: 1}))
@@ -242,7 +242,7 @@ var _ = Describe("a view's neighbourhoods", func() {
 					want[key{row.Kind, row.Result, network.BundleReason(row.Reason)}]++
 				}
 				got := map[key]int{}
-				for _, b := range v.Neighbourhoods[label].Profiles[k] {
+				for _, b := range v.Neighbourhoods[label].Bundles(k) {
 					got[key{b.Kind, b.Result, b.Reason}] += b.Count
 				}
 				Expect(got).To(Equal(want), "%s for %s", label, pc.Profile)
@@ -306,7 +306,7 @@ var _ = Describe("a view's neighbourhoods", func() {
 						wanted[bk].transit.Max = max(wanted[bk].transit.Max, t.Max)
 					}
 				}
-				bundles := v.Neighbourhoods[label].Profiles[k]
+				bundles := v.Neighbourhoods[label].Bundles(k)
 				Expect(bundles).To(HaveLen(len(wanted)), "%s for %s", label, pc.Profile)
 				for _, b := range bundles {
 					w := wanted[key{b.Kind, b.Result, b.Reason}]
@@ -322,6 +322,25 @@ var _ = Describe("a view's neighbourhoods", func() {
 				}
 			}
 		}
+	})
+
+	It("carries a list of bundles once, however many kinds of order share it", func() {
+		// An express order reaches BER-01 one more way, and nothing else changes
+		// for it: Vienna's bundles for it are those of an order without tags.
+		w := europe().edge("x1", "HUB-02", network.Target{Type: network.TypeManaged, FacilityRef: id("BER-01")},
+			in(network.ContextTag, "express"))
+		w.s.OrderProfiles = append(w.s.OrderProfiles,
+			network.OrderProfile{Tags: []network.TagValue{{ID: "orderType", Value: "express"}}, Orders: 1})
+		n := network.New(&w.s)
+		vie, _ := n.Locate("VIE-01")
+
+		v := n.View(network.DefaultConfig(), network.ViewOptions{Facilities: []int{vie}})
+		nb := v.Neighbourhoods["VIE-01"]
+
+		Expect(v.Profiles).To(HaveLen(3))
+		Expect(nb.Sets).To(HaveLen(2))
+		Expect(nb.Bundles(0)).To(Equal(nb.Bundles(2)))
+		Expect(nb.Bundles(1)).NotTo(Equal(nb.Bundles(0)))
 	})
 
 	It("explains the facilities asked for first, and counts the ones the cap leaves out", func() {
@@ -346,7 +365,7 @@ var _ = Describe("a view's neighbourhoods", func() {
 		target, _ := n.Locate("BER-02")
 		v := n.View(network.DefaultConfig(), network.ViewOptions{Facilities: []int{target}})
 
-		b := v.Neighbourhoods["BER-02"].Profiles[0][0]
+		b := v.Neighbourhoods["BER-02"].Bundles(0)[0]
 		Expect(b.Reason).To(Equal("FACILITY does not list it"))
 		Expect(b.Count).To(Equal(network.MaxBundleSources + 4))
 		Expect(b.SourceCount).To(Equal(network.MaxBundleSources + 4))
