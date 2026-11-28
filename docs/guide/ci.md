@@ -100,7 +100,8 @@ follows the team's decisions instead of its own guesses:
   within the same job (its journal sits next to `--out`); a re-run of the job starts over.
 - **`FFT_READ_ONLY`** makes the guarantee explicit: every request the crawl sends is a read.
 - **Keep the snapshot out of the job's artifacts and caches.** It is the tenant's whole
-  network.
+  network. The same goes for `fft network report`'s page, which draws it: open the report
+  on your own machine, from your own snapshot.
 - Any exit code other than 0 and 11 is the job failing, not the network: 3 for an unusable
   config, 4 for credentials, 9 for an API that did not answer.
 

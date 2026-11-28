@@ -41,6 +41,7 @@ var commandsWithoutOperation = map[string]string{
 	"fft network check":           "analyses a local snapshot file; no network",
 	"fft network infer":           "writes a config file from a local snapshot; no network",
 	"fft network reach":           "explains connections from a local snapshot; no network",
+	"fft network report":          "draws a local snapshot into a local HTML file; no network",
 	"fft network config schema":   "prints the config file's JSON Schema; no network",
 	"fft network config validate": "checks a local config file against a local snapshot; no network",
 

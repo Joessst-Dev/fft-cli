@@ -110,6 +110,26 @@ The `context` rules `reach` applies are the router's:
 - `NOT` means none of its values may match;
 - a tag the order lacks fails a positive entry and passes a `NOT`.
 
+## Seeing it
+
+```sh
+fft network report
+fft network report -o json
+```
+
+`report` draws the check's own numbers as one HTML page beside the snapshot (the cache
+directory, mode 0600): what the check assumed, and a heatmap with one row per peer group,
+one column per kind of order, each cell the share of the group's stores a hub, a supplier
+or any source reaches. A gap a whole country shares, which `peer-coverage` does not report
+because it is no outlier, is a dark row there.
+
+- **You read `-o json`**, the data the page draws: `coverage[].cells[peer][profile]` with
+  `have`, `missing` (at most 200 labels, `more` counts the rest) and `flagged`, the missing
+  stores the check reported. Give the user the page's path to open.
+- It sends no request and exits 0 whatever it shows; `check` is the gate.
+- The page is the tenant's network, like the snapshot: never put it in a repository or
+  share it outside the user's own machine.
+
 ## fft-network.yaml
 
 ```sh
@@ -168,7 +188,8 @@ fft network check --snapshot network.json.gz --config fft-network.yaml
 Exit 11 fails the job with the findings on stdout. Anything else non-zero is the job
 itself failing, not the network. Give the job a password-based session (see
 [recipes](recipes.md)), not a fixed `FFT_ID_TOKEN`: a fixed token cannot be renewed, and a
-large crawl can outlast it. Keep the snapshot out of the job's artifacts.
+large crawl can outlast it. Keep the snapshot out of the job's artifacts, and the report
+too: it is the same network, drawn.
 
 ## What you must not do
 
