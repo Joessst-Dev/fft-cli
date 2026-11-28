@@ -84,7 +84,8 @@ func (n *Network) Locate(ref string) (int, bool) { return n.lookupAny(ref) }
 // hundreds of them.
 type edgeClass struct {
 	// rep is the class's connection with no source, so explaining it never
-	// meets the "own source" case; that is decided member by member.
+	// meets the "own source" case; bundlesTo leaves each facility's own
+	// connections out of the class's aggregate instead.
 	rep Edge
 	// byKind aggregates the class's members by the kind of their source. A
 	// member's source is the only thing that differs between members, so
@@ -224,7 +225,7 @@ func BundleReason(why string) string { return entryPosition.ReplaceAllString(why
 // It merges each matching class's aggregate instead of walking its members, so
 // the work is classes, not connections: a report explains hundreds of
 // facilities for several kinds of order.
-func (n *Network) bundlesTo(classes []*edgeClass, i int, p Profile, roles Roles) []Bundle {
+func (n *Network) bundlesTo(classes []*edgeClass, i int, p Profile) []Bundle {
 	f := n.Facility(i)
 	type key struct {
 		kind           Kind

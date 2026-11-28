@@ -382,7 +382,7 @@ func (n *Network) explain(v *View, r Report, opts ViewOptions) {
 		role, _ := r.Roles.kind(i)
 		nb := Neighbourhood{Role: role, Profiles: make([][]Bundle, len(r.Profiles))}
 		for k, pc := range r.Profiles {
-			nb.Profiles[k] = n.bundlesTo(classes, i, pc.Profile, r.Roles)
+			nb.Profiles[k] = n.bundlesTo(classes, i, pc.Profile)
 		}
 		v.Neighbourhoods[f.Label()] = nb
 		if _, ok := v.Facilities[f.Label()]; !ok {
