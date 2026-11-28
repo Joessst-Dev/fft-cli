@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"html"
 	"regexp"
+	"slices"
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -210,8 +211,7 @@ var _ = Describe("a view's neighbourhoods", func() {
 		bulky := nb.Profiles[1]
 		Expect(bulky).To(HaveLen(3))
 		Expect(bulky[0]).To(Equal(network.Bundle{Kind: network.KindSupplier, Result: network.ResultApplies,
-			Reason: "every context entry passes", Count: 1, Sources: []string{"SUP-01"}, SourceCount: 1,
-			Connections: []string{"s1"}}))
+			Reason: "every context entry passes", Count: 1, Sources: []string{"SUP-01"}, SourceCount: 1}))
 		Expect([]string{bulky[1].Reason, bulky[2].Reason}).To(ConsistOf(
 			"TAG_REFERENCE NOT: the order carries bulky", "the target's excludedFacilityRefs lists it"))
 		Expect(bulky[1].Kind).To(Equal(network.KindHub))
@@ -246,6 +246,80 @@ var _ = Describe("a view's neighbourhoods", func() {
 					got[key{b.Kind, b.Result, b.Reason}] += b.Count
 				}
 				Expect(got).To(Equal(want), "%s for %s", label, pc.Profile)
+			}
+		}
+	})
+
+	It("names the sources and the transit the way reach does, leaving a facility's own connections out", func() {
+		// Every store sources a wildcard connection into every store, in two classes
+		// that differ only in the excluded facility, so each store is a member of
+		// both and the bundles must merge them without counting a source twice.
+		w := newWorld().hub("HUB-01").stores("BER", "DE", network.MaxBundleSources+5)
+		for i := 1; i <= network.MaxBundleSources+5; i++ {
+			src := fmt.Sprintf("BER-%02d", i)
+			w.edge("a-"+src, src, network.Target{Type: network.TypeManaged})
+			w.edge("b-"+src, src, except(network.TypeManaged, "BER-03"))
+			w.edge("h-"+src, "HUB-01", network.Target{Type: network.TypeManaged})
+		}
+		for k := range w.s.Edges {
+			d := float64(k%7 + 2)
+			w.s.Edges[k].Transit = &network.Transit{Min: d, Max: d + 3}
+		}
+		// The first store alone is both the fastest and the slowest, so leaving it
+		// out must move both ends of the transit range.
+		w.s.Edges[0].Transit = &network.Transit{Min: 1, Max: 40}
+
+		n := network.New(&w.s)
+		cfg := network.DefaultConfig()
+		r := n.Check(cfg)
+		all := []int{}
+		for i := range n.Len() {
+			all = append(all, i)
+		}
+		v := n.View(cfg, network.ViewOptions{Facilities: all, MaxFacilities: n.Len()})
+
+		type key struct {
+			kind           network.Kind
+			result, reason string
+		}
+		type want struct {
+			count   int
+			sources map[string]bool
+			transit *network.Transit
+		}
+		for i := range n.Len() {
+			label := n.Facility(i).Label()
+			for k, pc := range r.Profiles {
+				wanted := map[key]*want{}
+				for _, row := range n.ReachTo(i, pc.Profile, r.Roles) {
+					bk := key{row.Kind, row.Result, network.BundleReason(row.Reason)}
+					if wanted[bk] == nil {
+						wanted[bk] = &want{sources: map[string]bool{}}
+					}
+					wanted[bk].count++
+					wanted[bk].sources[row.Source] = true
+					if t := row.Transit; t != nil {
+						if wanted[bk].transit == nil {
+							wanted[bk].transit = &network.Transit{Min: t.Min, Max: t.Max}
+						}
+						wanted[bk].transit.Min = min(wanted[bk].transit.Min, t.Min)
+						wanted[bk].transit.Max = max(wanted[bk].transit.Max, t.Max)
+					}
+				}
+				bundles := v.Neighbourhoods[label].Profiles[k]
+				Expect(bundles).To(HaveLen(len(wanted)), "%s for %s", label, pc.Profile)
+				for _, b := range bundles {
+					w := wanted[key{b.Kind, b.Result, b.Reason}]
+					Expect(w).NotTo(BeNil(), "%s %+v", label, b)
+					Expect(b.Count).To(Equal(w.count), "%s %s", label, b.Reason)
+					Expect(b.SourceCount).To(Equal(len(w.sources)), "%s %s", label, b.Reason)
+					Expect(b.Sources).To(HaveLen(min(len(w.sources), network.MaxBundleSources)))
+					Expect(slices.IsSorted(b.Sources)).To(BeTrue(), "%s %s", label, b.Reason)
+					for _, s := range b.Sources {
+						Expect(w.sources).To(HaveKey(s), "%s %s", label, b.Reason)
+					}
+					Expect(b.Transit).To(Equal(w.transit), "%s %s", label, b.Reason)
+				}
 			}
 		}
 	})
@@ -293,6 +367,17 @@ var _ = Describe("a rendered report", func() {
 		Expect(page).NotTo(ContainSubstring("https://"))
 		Expect(page).To(ContainSubstring(`http-equiv="Content-Security-Policy"`))
 		Expect(network.ReportCSP()).To(HavePrefix("default-src 'none';"))
+	})
+
+	It("looks a facility up as an own property of the neighbourhoods, never as a plain lookup", func() {
+		// #facility=constructor would otherwise pass for an explained facility and
+		// break the card. The script has no harness, so this holds its shape: the
+		// one plain index into the neighbourhoods is the one behind that check.
+		script := regexp.MustCompile(`(?s)<script>(.*?)</script>`).FindStringSubmatch(render(europe().view()))[1]
+
+		Expect(script).To(ContainSubstring("hasOwnProperty"))
+		Expect(strings.Count(script, "view.neighbourhoods[")).To(Equal(1))
+		Expect(script).To(ContainSubstring("view.neighbourhoods[at.label]"))
 	})
 
 	It("allows exactly the script and the styles it carries", func() {

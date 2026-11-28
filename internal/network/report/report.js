@@ -248,12 +248,19 @@
   var kindPlural = { hub: "hub", supplier: "supplier", store: "store" };
   var neighbourhoods = Object.keys(view.neighbourhoods || {}).sort();
 
+  // explained is own-property, never a plain lookup: the label comes from the URL
+  // and the search box, and 'constructor' or '__proto__' would otherwise pass for
+  // a facility the page explains.
+  var hasOwn = Object.prototype.hasOwnProperty;
+  function explained(label) {
+    return label != null && hasOwn.call(view.neighbourhoods || {}, label);
+  }
   function hashFor(label, profile) {
     return "#facility=" + encodeURIComponent(label) + "&profile=" + profile;
   }
   function facilityLink(label, profile) {
     var code = el("code", { text: label });
-    if (!view.neighbourhoods[label]) return code;
+    if (!explained(label)) return code;
     return el("a", { href: hashFor(label, profile), title: "Show the connections that could lead to " + label }, [code]);
   }
   function parseHash() {
@@ -261,7 +268,7 @@
     var label = params.get("facility");
     var profile = parseInt(params.get("profile") || "0", 10);
     if (!(profile >= 0 && profile < view.profiles.length)) profile = 0;
-    return { label: label && view.neighbourhoods[label] ? label : null, profile: profile };
+    return { label: explained(label) ? label : null, profile: profile };
   }
 
   function drawNeighbourhood() {
@@ -278,7 +285,7 @@
     var options = el("datalist", { id: "nb-facilities" });
     neighbourhoods.forEach(function (l) { options.appendChild(el("option", { value: l })); });
     search.addEventListener("change", function () {
-      if (view.neighbourhoods[search.value]) location.hash = hashFor(search.value, at.profile);
+      if (explained(search.value)) location.hash = hashFor(search.value, at.profile);
     });
     var select = el("select", { "aria-label": "Kind of order" });
     view.profiles.forEach(function (p, k) {

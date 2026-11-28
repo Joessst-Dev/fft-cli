@@ -376,7 +376,7 @@ func (n *Network) explain(v *View, r Report, opts ViewOptions) {
 		}
 	}
 
-	classes := n.edgeClasses()
+	classes := n.edgeClasses(r.Roles)
 	for _, i := range chosen {
 		f := n.Facility(i)
 		role, _ := r.Roles.kind(i)

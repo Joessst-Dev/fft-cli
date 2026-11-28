@@ -85,11 +85,68 @@ func (n *Network) Locate(ref string) (int, bool) { return n.lookupAny(ref) }
 type edgeClass struct {
 	// rep is the class's connection with no source, so explaining it never
 	// meets the "own source" case; that is decided member by member.
-	rep     Edge
-	members []int
+	rep Edge
+	// byKind aggregates the class's members by the kind of their source. A
+	// member's source is the only thing that differs between members, so
+	// everything a facility's bundle needs from the class is folded in once
+	// here, and a facility only has to leave out the connections it sources
+	// itself, which ReachTo skips too.
+	byKind map[Kind]*classKind
 }
 
-func (n *Network) edgeClasses() []*edgeClass {
+// classKind is the members of one class whose source has one kind.
+type classKind struct {
+	count   int
+	sources Bitset
+	// perSource is how many members each source has, so a facility can subtract
+	// its own.
+	perSource map[int]int
+	// minTransit and maxTransit are the shortest and longest fallback transit
+	// time, each kept so that one source can be left out.
+	minTransit, maxTransit extreme
+}
+
+// extreme is the best value of a set and the best among the sources other than
+// the one holding it: what a minimum or a maximum becomes when that source is
+// left out, which a plain minimum cannot say.
+type extreme struct {
+	src        int
+	val, other float64
+	n          int // 0: empty, 1: val only, 2: both
+}
+
+func (x *extreme) add(v float64, src int, better func(a, b float64) bool) {
+	switch {
+	case x.n == 0:
+		*x = extreme{src: src, val: v, n: 1}
+	case src == x.src:
+		if better(v, x.val) {
+			x.val = v
+		}
+	case better(v, x.val):
+		x.other, x.val, x.src, x.n = x.val, v, src, 2
+	case x.n == 1 || better(v, x.other):
+		x.other, x.n = v, 2
+	}
+}
+
+// without is the best value among the sources other than src.
+func (x extreme) without(src int) (float64, bool) {
+	switch {
+	case x.n == 0:
+		return 0, false
+	case x.src != src:
+		return x.val, true
+	case x.n == 2:
+		return x.other, true
+	}
+	return 0, false
+}
+
+func lower(a, b float64) bool  { return a < b }
+func higher(a, b float64) bool { return a > b }
+
+func (n *Network) edgeClasses(roles Roles) []*edgeClass {
 	byKey := map[string]*edgeClass{}
 	var out []*edgeClass
 	for k := range n.snap.Edges {
@@ -103,16 +160,36 @@ func (n *Network) edgeClasses() []*edgeClass {
 		}
 		c, ok := byKey[key.String()]
 		if !ok {
-			c = &edgeClass{rep: Edge{Target: e.Target, Context: e.Context}}
+			c = &edgeClass{rep: Edge{Target: e.Target, Context: e.Context}, byKind: map[Kind]*classKind{}}
 			byKey[key.String()] = c
 			out = append(out, c)
 		}
-		c.members = append(c.members, k)
+
+		src, ok := n.refs[e.Source]
+		if !ok {
+			continue
+		}
+		kind, ok := roles.kind(src)
+		if !ok {
+			continue
+		}
+		g := c.byKind[kind]
+		if g == nil {
+			g = &classKind{sources: NewBitset(len(n.snap.Facilities)), perSource: map[int]int{}}
+			c.byKind[kind] = g
+		}
+		g.count++
+		g.sources.Set(src)
+		g.perSource[src]++
+		if t := e.Transit; t != nil {
+			g.minTransit.add(t.Min, src, lower)
+			g.maxTransit.add(t.Max, src, higher)
+		}
 	}
 	return out
 }
 
-// MaxBundleSources is how many sources and connections a bundle names.
+// MaxBundleSources is how many sources a bundle names.
 const MaxBundleSources = 20
 
 // Bundle is the connections from one kind of source that do the same thing for
@@ -127,10 +204,9 @@ type Bundle struct {
 	Reason string `json:"reason"`
 	Count  int    `json:"count"`
 	// Sources names up to MaxBundleSources of the sources, SourceCount counts
-	// them all; Connections names up to MaxBundleSources of the connections.
+	// them all. The connections themselves stay with [Network.ReachTo].
 	Sources     []string `json:"sources"`
 	SourceCount int      `json:"sourceCount"`
-	Connections []string `json:"connections"`
 	// Transit is the shortest and longest fallback transit time among the
 	// connections that have one.
 	Transit *Transit `json:"transit,omitempty"`
@@ -144,15 +220,22 @@ func BundleReason(why string) string { return entryPosition.ReplaceAllString(why
 // bundlesTo is ReachTo for the facility at i and p, counted into bundles, in
 // ReachTo's order: what applies first, hubs before suppliers before stores,
 // then the largest bundle.
+//
+// It merges each matching class's aggregate instead of walking its members, so
+// the work is classes, not connections: a report explains hundreds of
+// facilities for several kinds of order.
 func (n *Network) bundlesTo(classes []*edgeClass, i int, p Profile, roles Roles) []Bundle {
 	f := n.Facility(i)
 	type key struct {
 		kind           Kind
 		result, reason string
 	}
-	byKey := map[key]*Bundle{}
-	sources := map[key]map[string]bool{}
-	var out []*Bundle
+	type acc struct {
+		bundle  Bundle
+		sources Bitset
+	}
+	byKey := map[key]*acc{}
+	var out []*acc
 	for _, c := range classes {
 		t := c.rep.Target
 		if t.Type == TypeCustomer {
@@ -175,41 +258,32 @@ func (n *Network) bundlesTo(classes []*edgeClass, i int, p Profile, roles Roles)
 		}
 		reason := BundleReason(why.Why)
 
-		for _, k := range c.members {
-			e := &n.snap.Edges[k]
-			src, ok := n.refs[e.Source]
-			if !ok || src == i {
+		for _, kind := range []Kind{KindHub, KindSupplier, KindStore} {
+			g := c.byKind[kind]
+			if g == nil {
 				continue
 			}
-			kind, ok := roles.kind(src)
-			if !ok {
+			count := g.count - g.perSource[i]
+			if count == 0 {
 				continue
 			}
 			bk := key{kind, result, reason}
-			b, ok := byKey[bk]
+			a, ok := byKey[bk]
 			if !ok {
-				b = &Bundle{Kind: kind, Result: result, Reason: reason, Sources: []string{}, Connections: []string{}}
-				byKey[bk] = b
-				sources[bk] = map[string]bool{}
-				out = append(out, b)
+				a = &acc{bundle: Bundle{Kind: kind, Result: result, Reason: reason},
+					sources: NewBitset(len(n.snap.Facilities))}
+				byKey[bk] = a
+				out = append(out, a)
 			}
-			b.Count++
-			if len(b.Connections) < MaxBundleSources {
-				b.Connections = append(b.Connections, e.ID)
-			}
-			if label := n.Facility(src).Label(); !sources[bk][label] {
-				sources[bk][label] = true
-				b.SourceCount++
-				if len(b.Sources) < MaxBundleSources {
-					b.Sources = append(b.Sources, label)
-				}
-			}
-			if t := e.Transit; t != nil {
-				if b.Transit == nil {
-					b.Transit = &Transit{Min: t.Min, Max: t.Max}
+			a.bundle.Count += count
+			a.sources.Or(g.sources)
+			if lo, ok := g.minTransit.without(i); ok {
+				hi, _ := g.maxTransit.without(i)
+				if a.bundle.Transit == nil {
+					a.bundle.Transit = &Transit{Min: lo, Max: hi}
 				} else {
-					b.Transit.Min = min(b.Transit.Min, t.Min)
-					b.Transit.Max = max(b.Transit.Max, t.Max)
+					a.bundle.Transit.Min = min(a.bundle.Transit.Min, lo)
+					a.bundle.Transit.Max = max(a.bundle.Transit.Max, hi)
 				}
 			}
 		}
@@ -217,15 +291,27 @@ func (n *Network) bundlesTo(classes []*edgeClass, i int, p Profile, roles Roles)
 
 	rank := map[string]int{ResultApplies: 0, ResultConditional: 1, ResultExcluded: 2}
 	kinds := map[Kind]int{KindHub: 0, KindSupplier: 1, KindStore: 2}
-	slices.SortFunc(out, func(a, b *Bundle) int {
-		return cmp.Or(cmp.Compare(rank[a.Result], rank[b.Result]), cmp.Compare(kinds[a.Kind], kinds[b.Kind]),
-			cmp.Compare(b.Count, a.Count), strings.Compare(a.Reason, b.Reason))
+	slices.SortFunc(out, func(a, b *acc) int {
+		return cmp.Or(cmp.Compare(rank[a.bundle.Result], rank[b.bundle.Result]),
+			cmp.Compare(kinds[a.bundle.Kind], kinds[b.bundle.Kind]),
+			cmp.Compare(b.bundle.Count, a.bundle.Count), strings.Compare(a.bundle.Reason, b.bundle.Reason))
 	})
 	bundles := make([]Bundle, len(out))
-	for k, b := range out {
+	for k, a := range out {
+		// The facility sources none of its own connections into itself.
+		if a.sources.Has(i) {
+			a.sources[i/64] &^= 1 << (uint(i) % 64)
+		}
+		b := a.bundle
+		b.SourceCount = a.sources.Count()
+		b.Sources = make([]string, 0, min(b.SourceCount, MaxBundleSources))
+		a.sources.Each(func(src int) {
+			if len(b.Sources) < MaxBundleSources {
+				b.Sources = append(b.Sources, n.Facility(src).Label())
+			}
+		})
 		slices.Sort(b.Sources)
-		slices.Sort(b.Connections)
-		bundles[k] = *b
+		bundles[k] = b
 	}
 	return bundles
 }
