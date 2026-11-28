@@ -135,8 +135,9 @@ facility a finding names and the stores the cells list, up to `--max-facilities`
 
 - **You read `-o json`**, the data the page draws: `coverage[].cells[peer][profile]` with
   `have`, `missing` (at most 200 labels, `more` counts the rest) and `flagged`, the missing
-  stores the check reported; and `neighbourhoods[label].profiles[k]`, the bundles for
-  `profiles[k]`, each with `kind`, `result`, `reason`, `count` and up to 20 `sources`.
+  stores the check reported; and `neighbourhoods[label]`, whose `sets[profiles[k]]` are
+  the bundles for `profiles[k]`, each with `kind`, `result`, `reason`, `count` and up to
+  20 `sources`.
   Give the user the page's path to open.
 - It sends no request and exits 0 whatever it shows; `check` is the gate.
 - The page is the tenant's network, like the snapshot: never put it in a repository or
