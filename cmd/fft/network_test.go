@@ -702,6 +702,32 @@ var _ = Describe("fft network report", func() {
 		Expect(c.errOut()).To(ContainSubstring("fft network snapshot"))
 	})
 
+	It("explains the connections of the facilities the findings name, and of those asked for", func() {
+		Expect(c.run("network", "report", "--snapshot", path, "--facility", "BER-03", "-o", "json")).To(Equal(exitcode.OK))
+
+		var v network.View
+		Expect(json.Unmarshal([]byte(c.out()), &v)).To(Succeed())
+		Expect(v.Neighbourhoods).To(HaveKey("BER-11"))
+		Expect(v.Neighbourhoods).To(HaveKey("OLD-01"))
+		Expect(v.Neighbourhoods).To(HaveKey("BER-03"))
+	})
+
+	It("says on stderr how many facilities --max-facilities left out", func() {
+		Expect(c.run("network", "report", "--snapshot", path, "--max-facilities", "1")).To(Equal(exitcode.OK))
+
+		Expect(c.errOut()).To(ContainSubstring("1 more are left out (--max-facilities)"))
+	})
+
+	DescribeTable("refuses what it cannot use, before writing anything",
+		func(args ...string) {
+			Expect(c.run(append([]string{"network", "report", "--snapshot", path}, args...)...)).To(Equal(exitcode.Usage))
+
+			Expect(filepath.Join(dir, "s.report.html")).NotTo(BeAnExistingFile())
+		},
+		Entry("a facility the snapshot does not have", "--facility", "NOPE-01"),
+		Entry("no facilities to explain", "--max-facilities", "0"),
+	)
+
 	It("sends no request", func() {
 		api := c.fakeTenant(networkTenant)
 

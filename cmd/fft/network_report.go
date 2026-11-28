@@ -28,8 +28,14 @@ supplier, or any source) reaches. A gap most of a country shares, which no
 outlier rule reports, is the dark row. Choose a cell to list the stores it
 misses.
 
+Choose a store to see its neighbourhood: every connection that could lead to
+it, as 'fft network reach' lists them, drawn in bundles of the same kind of
+source, result and reason. Where one context entry shuts out two thousand
+connections, that is one line. It explains every facility a finding names and
+the stores the cells list, up to --max-facilities; --facility adds others.
+
   fft network report
-  fft network report --out gaps.html
+  fft network report --facility BER-01 --out gaps.html
   fft network report -o json | jq '.coverage[] | select(.kind == "hub")'
 
 Every number is the check's own, from the same snapshot and fft-network.yaml;
@@ -45,9 +51,11 @@ check' is the gate.`
 
 func newNetworkReportCmd(deps *Deps) *cobra.Command {
 	var (
-		snapshot   string
-		configPath string
-		out        string
+		snapshot      string
+		configPath    string
+		out           string
+		facilities    []string
+		maxFacilities int
 	)
 
 	cmd := &cobra.Command{
@@ -63,6 +71,9 @@ func newNetworkReportCmd(deps *Deps) *cobra.Command {
 			if out == "-" && deps.Printer.Format() != output.Table {
 				return exitcode.UsageError{Err: fmt.Errorf(
 					"--out - prints the page on stdout; it cannot be combined with -o %s", deps.Printer.Format())}
+			}
+			if maxFacilities < 1 {
+				return exitcode.UsageError{Err: fmt.Errorf("--max-facilities must be at least 1, not %d", maxFacilities)}
 			}
 			path, err := snapshotPath(deps, snapshot)
 			if err != nil {
@@ -83,7 +94,16 @@ func newNetworkReportCmd(deps *Deps) *cobra.Command {
 				cfg = lf.Settings(time.Now())
 			}
 
-			v := n.View(cfg, network.ViewOptions{FFTVersion: buildinfo.Version})
+			opts := network.ViewOptions{FFTVersion: buildinfo.Version, MaxFacilities: maxFacilities}
+			for _, ref := range facilities {
+				i, ok := n.Locate(ref)
+				if !ok {
+					return exitcode.UsageError{Err: fmt.Errorf("%s is not a facility in the snapshot %s", ref, path)}
+				}
+				opts.Facilities = append(opts.Facilities, i)
+			}
+
+			v := n.View(cfg, opts)
 			page, err := network.RenderReport(v)
 			if err != nil {
 				return err
@@ -123,6 +143,10 @@ func newNetworkReportCmd(deps *Deps) *cobra.Command {
 
 	f := cmd.Flags()
 	f.StringVar(&out, "out", "", "Write the page here instead of next to the snapshot; '-' prints it on stdout")
+	f.StringArrayVar(&facilities, "facility", nil,
+		"Explain this facility's connections too, by tenant id or platform id (repeatable)")
+	f.IntVar(&maxFacilities, "max-facilities", network.DefaultMaxFacilities,
+		"Explain at most this many facilities' connections")
 	f.StringVar(&snapshot, "snapshot", "", "Read this snapshot instead of the project's file in the cache directory")
 	f.StringVar(&configPath, "config", network.DefaultConfigFile, "The config file to follow, when it exists")
 
@@ -173,4 +197,9 @@ func describeReport(deps *Deps, v network.View) {
 	deps.Printer.Notef("%s in %s, %s of order; %s (fft network check lists them).",
 		countOf(v.Counts.Stores, "store"), countOf(len(v.Peers), "peer group"),
 		countOf(len(v.Profiles), "kind"), countOf(findings, "finding"))
+	if v.Omitted > 0 {
+		deps.Printer.Notef("It explains the connections of %d facilities; %d more are left out "+
+			"(--max-facilities), and fft network reach --to <facility> explains any of them.",
+			len(v.Neighbourhoods), v.Omitted)
+	}
 }

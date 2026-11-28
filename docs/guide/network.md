@@ -128,9 +128,17 @@ one column per kind of order, each cell the share of the group's stores a hub, a
 or any source reaches. A gap a whole country shares, which `peer-coverage` does not report
 because it is no outlier, is a dark row there.
 
+Choosing a store opens its neighbourhood: what `reach` lists, counted into bundles of one
+kind of source, result and reason, and drawn as lines into the store. It explains every
+facility a finding names and the stores the cells list, up to `--max-facilities` (500);
+`--facility BER-01` adds one.
+
 - **You read `-o json`**, the data the page draws: `coverage[].cells[peer][profile]` with
   `have`, `missing` (at most 200 labels, `more` counts the rest) and `flagged`, the missing
-  stores the check reported. Give the user the page's path to open.
+  stores the check reported; and `neighbourhoods[label]`, whose `sets[profiles[k]]` are
+  the bundles for `profiles[k]`, each with `kind`, `result`, `reason`, `count` and up to
+  20 `sources`.
+  Give the user the page's path to open.
 - It sends no request and exits 0 whatever it shows; `check` is the gate.
 - The page is the tenant's network, like the snapshot: never put it in a repository or
   share it outside the user's own machine.

@@ -4,8 +4,10 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"html"
 	"regexp"
+	"slices"
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -193,18 +195,208 @@ var _ = Describe("the command a report offers to paste", func() {
 	})
 })
 
+var _ = Describe("a view's neighbourhoods", func() {
+	It("explains the facilities the findings name and the stores the cells list", func() {
+		v := europe().view()
+
+		Expect(v.Neighbourhoods).To(HaveLen(1))
+		Expect(v.Neighbourhoods).To(HaveKey("BER-11"))
+		Expect(v.Omitted).To(BeZero())
+	})
+
+	It("counts, for each kind of order, the connections into a facility by kind of source, result and reason", func() {
+		nb := europe().view().Neighbourhoods["BER-11"]
+
+		Expect(nb.Role).To(Equal(network.KindStore))
+		bulky := nb.Bundles(1)
+		Expect(bulky).To(HaveLen(3))
+		Expect(bulky[0]).To(Equal(network.Bundle{Kind: network.KindSupplier, Result: network.ResultApplies,
+			Reason: "every context entry passes", Count: 1, Sources: []string{"SUP-01"}, SourceCount: 1}))
+		Expect([]string{bulky[1].Reason, bulky[2].Reason}).To(ConsistOf(
+			"TAG_REFERENCE NOT: the order carries bulky", "the target's excludedFacilityRefs lists it"))
+		Expect(bulky[1].Kind).To(Equal(network.KindHub))
+		Expect(bulky[1].Result).To(Equal(network.ResultExcluded))
+	})
+
+	It("adds up to what reach lists, row for row, for every facility and kind of order", func() {
+		w := europe()
+		n := network.New(&w.s)
+		cfg := network.DefaultConfig()
+		r := n.Check(cfg)
+		all := []int{}
+		for i := range n.Len() {
+			all = append(all, i)
+		}
+		v := n.View(cfg, network.ViewOptions{Facilities: all, MaxFacilities: n.Len()})
+
+		Expect(v.Neighbourhoods).To(HaveLen(n.Len()))
+		type key struct {
+			kind           network.Kind
+			result, reason string
+		}
+		for i := range n.Len() {
+			label := n.Facility(i).Label()
+			for k, pc := range r.Profiles {
+				want := map[key]int{}
+				for _, row := range n.ReachTo(i, pc.Profile, r.Roles) {
+					want[key{row.Kind, row.Result, network.BundleReason(row.Reason)}]++
+				}
+				got := map[key]int{}
+				for _, b := range v.Neighbourhoods[label].Bundles(k) {
+					got[key{b.Kind, b.Result, b.Reason}] += b.Count
+				}
+				Expect(got).To(Equal(want), "%s for %s", label, pc.Profile)
+			}
+		}
+	})
+
+	It("names the sources and the transit the way reach does, leaving a facility's own connections out", func() {
+		// Every store sources a wildcard connection into every store, in two classes
+		// that differ only in the excluded facility, so each store is a member of
+		// both and the bundles must merge them without counting a source twice.
+		w := newWorld().hub("HUB-01").stores("BER", "DE", network.MaxBundleSources+5)
+		for i := 1; i <= network.MaxBundleSources+5; i++ {
+			src := fmt.Sprintf("BER-%02d", i)
+			w.edge("a-"+src, src, network.Target{Type: network.TypeManaged})
+			w.edge("b-"+src, src, except(network.TypeManaged, "BER-03"))
+			w.edge("h-"+src, "HUB-01", network.Target{Type: network.TypeManaged})
+		}
+		for k := range w.s.Edges {
+			d := float64(k%7 + 2)
+			w.s.Edges[k].Transit = &network.Transit{Min: d, Max: d + 3}
+		}
+		// The first store alone is both the fastest and the slowest, so leaving it
+		// out must move both ends of the transit range.
+		w.s.Edges[0].Transit = &network.Transit{Min: 1, Max: 40}
+
+		n := network.New(&w.s)
+		cfg := network.DefaultConfig()
+		r := n.Check(cfg)
+		all := []int{}
+		for i := range n.Len() {
+			all = append(all, i)
+		}
+		v := n.View(cfg, network.ViewOptions{Facilities: all, MaxFacilities: n.Len()})
+
+		type key struct {
+			kind           network.Kind
+			result, reason string
+		}
+		type want struct {
+			count   int
+			sources map[string]bool
+			transit *network.Transit
+		}
+		for i := range n.Len() {
+			label := n.Facility(i).Label()
+			for k, pc := range r.Profiles {
+				wanted := map[key]*want{}
+				for _, row := range n.ReachTo(i, pc.Profile, r.Roles) {
+					bk := key{row.Kind, row.Result, network.BundleReason(row.Reason)}
+					if wanted[bk] == nil {
+						wanted[bk] = &want{sources: map[string]bool{}}
+					}
+					wanted[bk].count++
+					wanted[bk].sources[row.Source] = true
+					if t := row.Transit; t != nil {
+						if wanted[bk].transit == nil {
+							wanted[bk].transit = &network.Transit{Min: t.Min, Max: t.Max}
+						}
+						wanted[bk].transit.Min = min(wanted[bk].transit.Min, t.Min)
+						wanted[bk].transit.Max = max(wanted[bk].transit.Max, t.Max)
+					}
+				}
+				bundles := v.Neighbourhoods[label].Bundles(k)
+				Expect(bundles).To(HaveLen(len(wanted)), "%s for %s", label, pc.Profile)
+				for _, b := range bundles {
+					w := wanted[key{b.Kind, b.Result, b.Reason}]
+					Expect(w).NotTo(BeNil(), "%s %+v", label, b)
+					Expect(b.Count).To(Equal(w.count), "%s %s", label, b.Reason)
+					Expect(b.SourceCount).To(Equal(len(w.sources)), "%s %s", label, b.Reason)
+					Expect(b.Sources).To(HaveLen(min(len(w.sources), network.MaxBundleSources)))
+					Expect(slices.IsSorted(b.Sources)).To(BeTrue(), "%s %s", label, b.Reason)
+					for _, s := range b.Sources {
+						Expect(w.sources).To(HaveKey(s), "%s %s", label, b.Reason)
+					}
+					Expect(b.Transit).To(Equal(w.transit), "%s %s", label, b.Reason)
+				}
+			}
+		}
+	})
+
+	It("carries a list of bundles once, however many kinds of order share it", func() {
+		// An express order reaches BER-01 one more way, and nothing else changes
+		// for it: Vienna's bundles for it are those of an order without tags.
+		w := europe().edge("x1", "HUB-02", network.Target{Type: network.TypeManaged, FacilityRef: id("BER-01")},
+			in(network.ContextTag, "express"))
+		w.s.OrderProfiles = append(w.s.OrderProfiles,
+			network.OrderProfile{Tags: []network.TagValue{{ID: "orderType", Value: "express"}}, Orders: 1})
+		n := network.New(&w.s)
+		vie, _ := n.Locate("VIE-01")
+
+		v := n.View(network.DefaultConfig(), network.ViewOptions{Facilities: []int{vie}})
+		nb := v.Neighbourhoods["VIE-01"]
+
+		Expect(v.Profiles).To(HaveLen(3))
+		Expect(nb.Sets).To(HaveLen(2))
+		Expect(nb.Bundles(0)).To(Equal(nb.Bundles(2)))
+		Expect(nb.Bundles(1)).NotTo(Equal(nb.Bundles(0)))
+	})
+
+	It("explains the facilities asked for first, and counts the ones the cap leaves out", func() {
+		w := europe()
+		n := network.New(&w.s)
+		vie, _ := n.Locate("VIE-01")
+		v := n.View(network.DefaultConfig(), network.ViewOptions{Facilities: []int{vie}, MaxFacilities: 1})
+
+		Expect(v.Neighbourhoods).To(HaveLen(1))
+		Expect(v.Neighbourhoods).To(HaveKey("VIE-01"))
+		Expect(v.Omitted).To(Equal(1))
+		Expect(v.Facilities).To(HaveKey("VIE-01"))
+	})
+
+	It("names at most MaxBundleSources sources in a bundle and counts them all", func() {
+		w := newWorld().hub("HUB-01").stores("BER", "DE", network.MaxBundleSources+5)
+		for i := 1; i <= network.MaxBundleSources+5; i++ {
+			w.edge(fmt.Sprintf("e%02d", i), fmt.Sprintf("BER-%02d", i), network.Target{Type: network.TypeManaged},
+				in(network.ContextFacility, id("BER-01")))
+		}
+		n := network.New(&w.s)
+		target, _ := n.Locate("BER-02")
+		v := n.View(network.DefaultConfig(), network.ViewOptions{Facilities: []int{target}})
+
+		b := v.Neighbourhoods["BER-02"].Bundles(0)[0]
+		Expect(b.Reason).To(Equal("FACILITY does not list it"))
+		Expect(b.Count).To(Equal(network.MaxBundleSources + 4))
+		Expect(b.SourceCount).To(Equal(network.MaxBundleSources + 4))
+		Expect(b.Sources).To(HaveLen(network.MaxBundleSources))
+	})
+})
+
 var _ = Describe("a rendered report", func() {
 	It("is the same, byte for byte, for the same snapshot", func() {
 		Expect(render(europe().view())).To(Equal(render(europe().view())))
 	})
 
 	It("loads nothing from anywhere", func() {
-		page := render(europe().view())
+		// The SVG namespace is a name, not an address: nothing is fetched from it.
+		page := strings.ReplaceAll(render(europe().view()), `"http://www.w3.org/2000/svg"`, "")
 
 		Expect(page).NotTo(ContainSubstring("http://"))
 		Expect(page).NotTo(ContainSubstring("https://"))
 		Expect(page).To(ContainSubstring(`http-equiv="Content-Security-Policy"`))
 		Expect(network.ReportCSP()).To(HavePrefix("default-src 'none';"))
+	})
+
+	It("looks a facility up as an own property of the neighbourhoods, never as a plain lookup", func() {
+		// #facility=constructor would otherwise pass for an explained facility and
+		// break the card. The script has no harness, so this holds its shape: the
+		// one plain index into the neighbourhoods is the one behind that check.
+		script := regexp.MustCompile(`(?s)<script>(.*?)</script>`).FindStringSubmatch(render(europe().view()))[1]
+
+		Expect(script).To(ContainSubstring("hasOwnProperty"))
+		Expect(strings.Count(script, "view.neighbourhoods[")).To(Equal(1))
+		Expect(script).To(ContainSubstring("view.neighbourhoods[at.label]"))
 	})
 
 	It("allows exactly the script and the styles it carries", func() {
